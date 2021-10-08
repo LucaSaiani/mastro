@@ -6,9 +6,6 @@ from functools import reduce
 import operator
 from operator import itemgetter
 
-offsets = [.2, .5]
-radiuses = [.2, .5]
-
 usedVerticesList = []
 streetVerticesList = []
 streetCornersList = []
@@ -20,7 +17,7 @@ bFaces = [] # faces for blender
 vertices = [[1,1], [4,3], [5,6], [3,8], [2,10], [1,9], [5,10], [6,8], [8,8], [8,6], [6,4], [2,8], [4,6], [6,0], [10,4], [7,8], [5,11], [9,5]]
 lines = [[1,0], [1,2], [2,3], [3,4], [3,5], [2,6], [2,7], [7,15], [8,9], [9,10], [10,2], [9,17], [17,14], [15,8], [6,16]]
 # lines = [[0,1], [1,2], [2,3], [4,3]  ]
-lines = [([0,1],"A"), ([1,2],"B"), ([3,2],"B"), ([3,4],"A")]
+lines = [([0,1],"A"), ([1,2],"B"), ([3,2],"B"), ([3,4],"B")]
 # lines = [[3,5], [2,3] ]
 # lines = [[1,2], [0,1], [2,7], [7,15], [15,8]]
 # lines = [[15,8],[8,9]]
@@ -149,12 +146,13 @@ def findFilletCenter(center, vertList):
 		tmpAO = [center, el]
 		tmpLine = [indexO, indexVert]
 		tmpLine.sort()
-		# print(tmpLine, subLines)
 		indexTmpLine = findElementIndex(tmpLine, subLines)
 		type = lines[indexTmpLine][1]
-		# print("index", indexTmpLine, "type", type)
-		offset = getStreetProperty("width", type)
-		parallelList.append(parallelLine(tmpAO, offset*2))
+		properties = ["width", "radius"]
+		result = getStreetProperty(properties, type)
+		offset = result[0]
+		radius = result[1]
+		parallelList.append(parallelLine(tmpAO, (offset + radius)))
 
 	firstSet = parallelList[0]
 	secondSet = parallelList[1]
@@ -195,7 +193,7 @@ def findFilletCenter(center, vertList):
 					# if not(pointIsLeft(center, B, intersection)):
 					# 	slope = getLineSlope(center, intersection)
 						# intersection = pointFromCenter(intersection, slope, "up", -2 * offset)
-					# plt.plot(intersection[0], intersection[1], marker=".", markersize=10, color="red")
+					plt.plot(intersection[0], intersection[1], marker=".", markersize=10, color="red")
 					return(intersection)
 			else: # lines are parallels
 				int = pointPerpendicularToLine(center, lineB, offset*2)
@@ -298,6 +296,7 @@ def pointPerpendicularToLine(point, lineAB, distance):
 
 #a function to determine the vertices of the 2 parallel lines
 def parallelLine(verts, distance):
+	print(verts, distance)
 	vertA = verts[0]
 	vertB = verts[1]
 
@@ -465,13 +464,20 @@ def sortLineVertices(list):
 	return(tmpList)
 
 # a function to get the offset of that street
-def getStreetProperty(property, lineIndex):
-	if property == "width":
-		value = offsets[lineIndex]
-	elif property == "radius":
-		value = radiuses[lineIndex]
-	return(value)
-
+def getStreetProperty(properties, type):
+	results = []
+	toHalf = ["width"]
+	for street in root.iter("street"):
+		streetType = street.get("type")
+		if type == streetType:
+			for segment in street.iter("segment"):
+				id = float(segment.get("id"))
+				for property in properties:
+					value = float(segment.find(property).text)
+					if (id == 0 and property in toHalf):
+						value = value / 2
+					results.append(value)
+				return(results)
 
 #function to get the angle between two lines, based on the carnot theorem
 def carnot(center, list):
@@ -494,7 +500,7 @@ def carnot(center, list):
 
 #read the road property file
 tree = ET.parse("description.xml")
-
+root = tree.getroot()
 
 # the internal vertices of a line are sorted [3,1] becomes [1,3]
 # this is because it is necessary to have the vertices and lines
@@ -537,27 +543,30 @@ for el in usedVerticesList:
 	if len(tmpLines) == 1: # the line is a start or a end of a line
 		# print(center, "starting or ending point of line", tmpLines)
 		line = lines[tmpLines[0]]
+		streetType = line[1]
+		offset = getStreetProperty(["width"], streetType)[0]
 		verts = line[0]
 		vertA = vertices[verts[0]]
 		vertB = vertices[verts[1]]
 		m = getLineSlope(vertA, vertB)
 		direction = "none"
 		points = []
-		# if (m and m != 0):
-		# 	points.append(pointFromCenter(center, (-1*(1/m)), direction, offset))
-		# 	points.append(pointFromCenter(center, (-1*(1/m)), direction, -1 * offset))
-		# elif (m == 0):
-		# 	points.append([center[0], center[1] + offset])
-		# 	points.append([center[0], center[1] - offset])
-		# else:
-		# 	points.append([center[0] + offset, center[1]])
-		# 	points.append([center[0] - offset, center[1]])
-		# for point in points:
-		# 	# plt.plot(point[0], point[1], marker=".", markersize=10, color="orange")
-		# 	# plt.text(point[0], point[1], tmpLines, fontsize = "large", color="blue")
-		#
-		# 	# add the vertex to the point defining the linear streets
-		# 	streetVerticesList[tmpLines[0]].append(point)
+
+		if (m and m != 0):
+			points.append(pointFromCenter(center, (-1*(1/m)), direction, offset))
+			points.append(pointFromCenter(center, (-1*(1/m)), direction, -1 * offset))
+		elif (m == 0):
+			points.append([center[0], center[1] + offset])
+			points.append([center[0], center[1] - offset])
+		else:
+			points.append([center[0] + offset, center[1]])
+			points.append([center[0] - offset, center[1]])
+		for point in points:
+			plt.plot(point[0], point[1], marker=".", markersize=10, color="orange")
+			# plt.text(point[0], point[1], tmpLines, fontsize = "large", color="blue")
+
+			# add the vertex to the point defining the linear streets
+			streetVerticesList[tmpLines[0]].append(point)
 
 	else: # the vertex is a corner (len==2) or a node of more than two lines
 		if (len(tmpLines) == 2):
@@ -605,6 +614,8 @@ for el in usedVerticesList:
 				tempVert = [None, None]
 				extraVert = [None, None]
 
+
+
 				#at verts A and B correspond two lines, and their perpendiculars
 				for i, el in enumerate(verts):
 
@@ -614,34 +625,31 @@ for el in usedVerticesList:
 					# which is defined as [4,2]
 					# an this is why the next if is comparing the indices of the center and of the vert
 					elIndex = findElementIndex(el, vertices)
-					toFindTmp = [centerIndex, elIndex]
+					toFind = [centerIndex, elIndex]
 					toFind.sort()
+					lineIndex = findElementIndex(toFind, subLines)
+					# finds the street type
+					streetType = lines[lineIndex][1]
+					properties = ["width", "radius"]
+					result = getStreetProperty(properties, streetType)
+					width = result[0]
+					radius = result[1]
+					dim = offset + radius
 
-					if (centerIndex > elIndex):
-						toFind = ([elIndex, centerIndex], streetType)
-					else:
-						toFind = ([centerIndex, elIndex], streetType)
-
-					lineIndex = findElementIndex(toFind, lines)
-
-					print(toFind)
-					print(lines)
-
-					print("lineIndex", lineIndex, "streetType", streetType)
 
 					# finds a point perpendicular to a parallel of the line, starting
 					# from the center of the fillet, at the given distance
 					# but some nodes (with angle > 180) require to draw the external, not
 					# the internal curve so the offset has to be changed
-					dist = offset
+					# dist = offset
 					if type == "node":
 						# print(center, vertA, vertB, radiusCenter)
 						# print(pointIsLeft(center, vertA, radiusCenter))
 						if (pointIsLeft(center, vertA, filletCenter)):
 						 	# print(pointIsLeft(center, vertA, radiusCenter))
-						 	dist = offset * 3
+						 	dist = offset * 2
 
-					point = pointPerpendicularToLine(filletCenter, [center, el], dist)
+					point = pointPerpendicularToLine(filletCenter, [center, el], radius)
 					if (point):
 						# plt.plot(point[0], point[1], marker=".", markersize=10, color="orange")
 						# plt.text(point[0], point[1], lineIndex, fontsize = "large", color="blue")
@@ -654,9 +662,9 @@ for el in usedVerticesList:
 
 
 						if type == "corner": # if it is a corner, "the other side" of the corner is to be found
-							point = pointPerpendicularToLine(filletCenter, [center, el], dist * 3)
+							point = pointPerpendicularToLine(filletCenter, [center, el], radius + width*2)
 							if (point):
-								# plt.plot(point[0], point[1], marker=".", markersize=10, color="orange")
+								plt.plot(point[0], point[1], marker=".", markersize=10, color="orange")
 								# plt.text(point[0], point[1], lineIndex, fontsize = "large", color="blue")
 
 								# add the vertex to the point defining the linear streets
@@ -667,7 +675,7 @@ for el in usedVerticesList:
 
 				#corners are tricky and they need a lot of values
 				# they are drawn in the next for loop
-				tmpValue = [filletCenter, tempVert[0], tempVert[1], centerIndex, vertA, vertB, type, extraVert[0], extraVert[1]]
+				tmpValue = [filletCenter, tempVert[0], tempVert[1], centerIndex, vertA, vertB, type, extraVert[0], extraVert[1], width, radius]
 				streetCornersList.append(tmpValue)
 
 
@@ -687,6 +695,8 @@ for i, el in enumerate(streetCornersList):
 	type = el[6] # if it is a corner or a node
 	tmpExtraA = el[7] # when it is a corner, two extra vertices are required
 	tmpExtraB = el[8] # when it is a corner, two extra vertices are required
+	width = el[9]
+	radius = el[10] #radius + offset
 
 	#vertices A and B need to be in the correct order
 	if (pointIsLeft(radiusCenter, tmpA, tmpB)):
@@ -724,7 +734,7 @@ for i, el in enumerate(streetCornersList):
 
 	# some nodes (with angle > 180) require to draw the external, not
 	# the internal curve
-	dist = offset
+	rad = radius
 	if type == "node":
             center = vertices[centerIndex]
             # print(center, vertA, vertB, radiusCenter)
@@ -732,7 +742,7 @@ for i, el in enumerate(streetCornersList):
             if (pointIsLeft(center, vertA, radiusCenter)):
                 # print(pointIsLeft(center, vertA, radiusCenter))
                 revertVertices = True
-                dist = offset * 3
+                rad = radius * 2
 
 
 	# all the vertices defining the curve between A and B are found
@@ -741,15 +751,15 @@ for i, el in enumerate(streetCornersList):
 		newAngle = partialAngle * ind
 
 		newSlope = math.tan(slopeAngle - newAngle)
-		newPointA = pointFromCenter(radiusCenter, newSlope, "up", dist)
+		newPointA = pointFromCenter(radiusCenter, newSlope, "up", rad)
 		# newPointB is necessary only in the corner situations
 		if type == "corner":
-			newPointB = pointFromCenter(radiusCenter, newSlope, "up", dist*3)
+			newPointB = pointFromCenter(radiusCenter, newSlope, "up", rad + width *2)
 
 		if not(pointInsideCorner(newPointA, radiusCenter, [A, B])):
-			newPointA = pointFromCenter(radiusCenter, newSlope, "up", -1 * dist)
+			newPointA = pointFromCenter(radiusCenter, newSlope, "up", -1 * rad)
 			if type == "corner":
-				newPointB = pointFromCenter(radiusCenter, newSlope, "up", -1 * dist*3)
+				newPointB = pointFromCenter(radiusCenter, newSlope, "up", -1 * (rad + width*2))
 		# plt.plot([radiusCenter[0], newPointA[0]], [radiusCenter[1], newPointA[1]], marker=".", markersize=10, color="red")
 		# plt.plot([radiusCenter[0], newPointB[0]], [radiusCenter[1], newPointB[1]], marker=".", markersize=10, color="red")
 
@@ -788,8 +798,8 @@ streetVerticesList = sortList(streetVerticesList)
 # finalData = blenderize(streetCornerVertices, data[0], data[1])
 
 drawGraph()
-# drawStreets(streetVerticesList)
-# drawStreets(streetCornerVertices)
+drawStreets(streetVerticesList)
+drawStreets(streetCornerVertices)
 #
 #
 #
