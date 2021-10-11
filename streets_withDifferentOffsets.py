@@ -15,9 +15,9 @@ bVerts = [] # vertices for blender
 bFaces = [] # faces for blender
 
 vertices = [[1,1], [4,3], [5,6], [3,8], [2,10], [1,9], [5,10], [6,8], [8,8], [8,6], [6,4], [2,8], [4,6], [6,0], [10,4], [7,8], [5,11], [9,5]]
-lines = [[1,0], [1,2], [2,3], [3,4], [3,5], [2,6], [2,7], [7,15], [8,9], [9,10], [10,2], [9,17], [17,14], [15,8], [6,16]]
+lines = [([1,0],"A"), ([1,2],"B"), ([2,3],"B"), ([3,4],"B"), ([3,5],"A"), ([2,6],"A"), ([2,7],"B"), ([7,15],"A"), ([8,9],"B"), ([9,10],"A"), ([10,2],"A"), ([9,17],"B"), ([17,14],"B"), ([15,8],"A"), ([6,16],"B")]
 # lines = [[0,1], [1,2], [2,3], [4,3]  ]
-lines = [([0,1],"A"), ([1,2],"B"), ([3,2],"B"), ([3,4],"B")]
+# lines = [([0,1],"A"), ([1,2],"B"), ([3,2],"B"), ([3,4],"B")]
 # lines = [[3,5], [2,3] ]
 # lines = [[1,2], [0,1], [2,7], [7,15], [15,8]]
 # lines = [[15,8],[8,9]]
@@ -675,121 +675,229 @@ for el in usedVerticesList:
 
 				#corners are tricky and they need a lot of values
 				# they are drawn in the next for loop
-				tmpValue = [filletCenter, tempVert[0], tempVert[1], centerIndex, vertA, vertB, type, extraVert[0], extraVert[1], width, radius]
-				streetCornersList.append(tmpValue)
+				# tmpValue = [filletCenter, tempVert[0], tempVert[1], centerIndex, vertA, vertB, type, extraVert[0], extraVert[1], width, radius]
+				# streetCornersList.append(tmpValue)
+
+				revertVertices = False
+				tmpVertices = []
+				tmpExtraVertices = []
+				radiusCenter = filletCenter # the center of the fillet
+				tmpA = tempVert[0] # point A definig one side of the triangle
+				tmpB = tempVert[1] # point B definig one side of the triangle
+				# centerIndex = el[3] # the index of the corner
+				# vertA = el[4] # vertex A
+				# vertB = el[5] # vertex B
+				# type = el[6] # if it is a corner or a node
+				tmpExtraA = extraVert[0] # when it is a corner, two extra vertices are required
+				tmpExtraB = extraVert[1] # when it is a corner, two extra vertices are required
+				# width = el[9]
+				# radius = el[10] #radius + offset
+
+				#vertices A and B need to be in the correct order
+				if (pointIsLeft(radiusCenter, tmpA, tmpB)):
+					A = tmpB
+					B = tmpA
+					extraA = tmpExtraB
+					extraB = tmpExtraA
+				else:
+					A = tmpA
+					B = tmpB
+					extraA = tmpExtraA
+					extraB = tmpExtraB
+
+
+
+				# the angle between A, B and the corner
+				angle = carnot(radiusCenter, [A, B])
+
+				# the slope of line OA
+				slopeOA = getLineSlope(radiusCenter, A)
+
+				if (slopeOA == None): # line is vertical
+					slopeAngle = math.pi/2
+				else: # all other cases
+					slopeAngle = math.atan(slopeOA)
+
+				ind = 1
+				#how many times to divide the corner AOB
+				divisions = math.ceil(math.degrees(angle) / minAngle)
+				if (divisions <= 0):
+					divisions = 1
+
+				# the resulting angle
+				partialAngle = angle / divisions
+
+				# some nodes (with angle > 180) require to draw the external, not
+				# the internal curve
+				rad = radius
+				if type == "node":
+			            center = vertices[centerIndex]
+			            # print(center, vertA, vertB, radiusCenter)
+			            # print(pointIsLeft(center, vertA, radiusCenter))
+			            if (pointIsLeft(center, vertA, radiusCenter)):
+			                # print(pointIsLeft(center, vertA, radiusCenter))
+			                revertVertices = True
+			                rad = radius * 2
+
+
+				# all the vertices defining the curve between A and B are found
+				while (ind < divisions):
+					# the increased angle
+					newAngle = partialAngle * ind
+
+					newSlope = math.tan(slopeAngle - newAngle)
+					newPointA = pointFromCenter(radiusCenter, newSlope, "up", rad)
+					# newPointB is necessary only in the corner situations
+					if type == "corner":
+						newPointB = pointFromCenter(radiusCenter, newSlope, "up", rad + width *2)
+
+					if not(pointInsideCorner(newPointA, radiusCenter, [A, B])):
+						newPointA = pointFromCenter(radiusCenter, newSlope, "up", -1 * rad)
+						if type == "corner":
+							newPointB = pointFromCenter(radiusCenter, newSlope, "up", -1 * (rad + width*2))
+					# plt.plot([radiusCenter[0], newPointA[0]], [radiusCenter[1], newPointA[1]], marker=".", markersize=10, color="red")
+					# plt.plot([radiusCenter[0], newPointB[0]], [radiusCenter[1], newPointB[1]], marker=".", markersize=10, color="red")
+
+					# vertices are added to the list
+					tmpVertices.append(newPointA)
+					if type == "corner":
+						tmpExtraVertices.append(newPointB)
+					ind = ind + 1
+
+				# in case the node has an angle > 180
+				if revertVertices:
+					tmpVertices = tmpVertices[::-1]
+					tmpVertices.insert(0, (B))
+					tmpVertices.append(A)
+				else:
+					tmpVertices.insert(0, A)
+					tmpVertices.append(B)
+
+				# the vertices need to be sorted to
+				# avoid intersections
+				if type == "corner":
+					tmpVertices.append(extraB)
+					tmpExtraVertices = tmpExtraVertices[::-1]
+					tmpVertices.extend(tmpExtraVertices)
+					tmpVertices.append(extraA)
+
+				tmpVertices = tmpVertices[::-1]
+
+				# the data of that specific vertes is extended
+				streetCornerVertices[centerIndex].extend(tmpVertices)
 
 
 
 
-# the round corners are found
-for i, el in enumerate(streetCornersList):
-	revertVertices = False
-	tmpVertices = []
-	tmpExtraVertices = []
-	radiusCenter = el[0] # the center of the fillet
-	tmpA = el[1] # point A definig one side of the triangle
-	tmpB = el[2] # point B definig one side of the triangle
-	centerIndex = el[3] # the index of the corner
-	vertA = el[4] # vertex A
-	vertB = el[5] # vertex B
-	type = el[6] # if it is a corner or a node
-	tmpExtraA = el[7] # when it is a corner, two extra vertices are required
-	tmpExtraB = el[8] # when it is a corner, two extra vertices are required
-	width = el[9]
-	radius = el[10] #radius + offset
-
-	#vertices A and B need to be in the correct order
-	if (pointIsLeft(radiusCenter, tmpA, tmpB)):
-		A = tmpB
-		B = tmpA
-		extraA = tmpExtraB
-		extraB = tmpExtraA
-	else:
-		A = tmpA
-		B = tmpB
-		extraA = tmpExtraA
-		extraB = tmpExtraB
-
-
-
-	# the angle between A, B and the corner
-	angle = carnot(radiusCenter, [A, B])
-
-	# the slope of line OA
-	slopeOA = getLineSlope(radiusCenter, A)
-
-	if (slopeOA == None): # line is vertical
-		slopeAngle = math.pi/2
-	else: # all other cases
-		slopeAngle = math.atan(slopeOA)
-
-	ind = 1
-	#how many times to divide the corner AOB
-	divisions = math.ceil(math.degrees(angle) / minAngle)
-	if (divisions <= 0):
-		divisions = 1
-
-	# the resulting angle
-	partialAngle = angle / divisions
-
-	# some nodes (with angle > 180) require to draw the external, not
-	# the internal curve
-	rad = radius
-	if type == "node":
-            center = vertices[centerIndex]
-            # print(center, vertA, vertB, radiusCenter)
-            # print(pointIsLeft(center, vertA, radiusCenter))
-            if (pointIsLeft(center, vertA, radiusCenter)):
-                # print(pointIsLeft(center, vertA, radiusCenter))
-                revertVertices = True
-                rad = radius * 2
-
-
-	# all the vertices defining the curve between A and B are found
-	while (ind < divisions):
-		# the increased angle
-		newAngle = partialAngle * ind
-
-		newSlope = math.tan(slopeAngle - newAngle)
-		newPointA = pointFromCenter(radiusCenter, newSlope, "up", rad)
-		# newPointB is necessary only in the corner situations
-		if type == "corner":
-			newPointB = pointFromCenter(radiusCenter, newSlope, "up", rad + width *2)
-
-		if not(pointInsideCorner(newPointA, radiusCenter, [A, B])):
-			newPointA = pointFromCenter(radiusCenter, newSlope, "up", -1 * rad)
-			if type == "corner":
-				newPointB = pointFromCenter(radiusCenter, newSlope, "up", -1 * (rad + width*2))
-		# plt.plot([radiusCenter[0], newPointA[0]], [radiusCenter[1], newPointA[1]], marker=".", markersize=10, color="red")
-		# plt.plot([radiusCenter[0], newPointB[0]], [radiusCenter[1], newPointB[1]], marker=".", markersize=10, color="red")
-
-		# vertices are added to the list
-		tmpVertices.append(newPointA)
-		if type == "corner":
-			tmpExtraVertices.append(newPointB)
-		ind = ind + 1
-
-	# in case the node has an angle > 180
-	if revertVertices:
-		tmpVertices = tmpVertices[::-1]
-		tmpVertices.insert(0, (B))
-		tmpVertices.append(A)
-	else:
-		tmpVertices.insert(0, A)
-		tmpVertices.append(B)
-
-	# the vertices need to be sorted to
-	# avoid intersections
-	if type == "corner":
-		tmpVertices.append(extraB)
-		tmpExtraVertices = tmpExtraVertices[::-1]
-		tmpVertices.extend(tmpExtraVertices)
-		tmpVertices.append(extraA)
-
-	tmpVertices = tmpVertices[::-1]
-
-	# the data of that specific vertes is extended
-	streetCornerVertices[centerIndex].extend(tmpVertices)
+# # the round corners are found
+# for i, el in enumerate(streetCornersList):
+# 	revertVertices = False
+# 	tmpVertices = []
+# 	tmpExtraVertices = []
+# 	radiusCenter = el[0] # the center of the fillet
+# 	tmpA = el[1] # point A definig one side of the triangle
+# 	tmpB = el[2] # point B definig one side of the triangle
+# 	centerIndex = el[3] # the index of the corner
+# 	vertA = el[4] # vertex A
+# 	vertB = el[5] # vertex B
+# 	type = el[6] # if it is a corner or a node
+# 	tmpExtraA = el[7] # when it is a corner, two extra vertices are required
+# 	tmpExtraB = el[8] # when it is a corner, two extra vertices are required
+# 	width = el[9]
+# 	radius = el[10] #radius + offset
+#
+# 	#vertices A and B need to be in the correct order
+# 	if (pointIsLeft(radiusCenter, tmpA, tmpB)):
+# 		A = tmpB
+# 		B = tmpA
+# 		extraA = tmpExtraB
+# 		extraB = tmpExtraA
+# 	else:
+# 		A = tmpA
+# 		B = tmpB
+# 		extraA = tmpExtraA
+# 		extraB = tmpExtraB
+#
+#
+#
+# 	# the angle between A, B and the corner
+# 	angle = carnot(radiusCenter, [A, B])
+#
+# 	# the slope of line OA
+# 	slopeOA = getLineSlope(radiusCenter, A)
+#
+# 	if (slopeOA == None): # line is vertical
+# 		slopeAngle = math.pi/2
+# 	else: # all other cases
+# 		slopeAngle = math.atan(slopeOA)
+#
+# 	ind = 1
+# 	#how many times to divide the corner AOB
+# 	divisions = math.ceil(math.degrees(angle) / minAngle)
+# 	if (divisions <= 0):
+# 		divisions = 1
+#
+# 	# the resulting angle
+# 	partialAngle = angle / divisions
+#
+# 	# some nodes (with angle > 180) require to draw the external, not
+# 	# the internal curve
+# 	rad = radius
+# 	if type == "node":
+#             center = vertices[centerIndex]
+#             # print(center, vertA, vertB, radiusCenter)
+#             # print(pointIsLeft(center, vertA, radiusCenter))
+#             if (pointIsLeft(center, vertA, radiusCenter)):
+#                 # print(pointIsLeft(center, vertA, radiusCenter))
+#                 revertVertices = True
+#                 rad = radius * 2
+#
+#
+# 	# all the vertices defining the curve between A and B are found
+# 	while (ind < divisions):
+# 		# the increased angle
+# 		newAngle = partialAngle * ind
+#
+# 		newSlope = math.tan(slopeAngle - newAngle)
+# 		newPointA = pointFromCenter(radiusCenter, newSlope, "up", rad)
+# 		# newPointB is necessary only in the corner situations
+# 		if type == "corner":
+# 			newPointB = pointFromCenter(radiusCenter, newSlope, "up", rad + width *2)
+#
+# 		if not(pointInsideCorner(newPointA, radiusCenter, [A, B])):
+# 			newPointA = pointFromCenter(radiusCenter, newSlope, "up", -1 * rad)
+# 			if type == "corner":
+# 				newPointB = pointFromCenter(radiusCenter, newSlope, "up", -1 * (rad + width*2))
+# 		# plt.plot([radiusCenter[0], newPointA[0]], [radiusCenter[1], newPointA[1]], marker=".", markersize=10, color="red")
+# 		# plt.plot([radiusCenter[0], newPointB[0]], [radiusCenter[1], newPointB[1]], marker=".", markersize=10, color="red")
+#
+# 		# vertices are added to the list
+# 		tmpVertices.append(newPointA)
+# 		if type == "corner":
+# 			tmpExtraVertices.append(newPointB)
+# 		ind = ind + 1
+#
+# 	# in case the node has an angle > 180
+# 	if revertVertices:
+# 		tmpVertices = tmpVertices[::-1]
+# 		tmpVertices.insert(0, (B))
+# 		tmpVertices.append(A)
+# 	else:
+# 		tmpVertices.insert(0, A)
+# 		tmpVertices.append(B)
+#
+# 	# the vertices need to be sorted to
+# 	# avoid intersections
+# 	if type == "corner":
+# 		tmpVertices.append(extraB)
+# 		tmpExtraVertices = tmpExtraVertices[::-1]
+# 		tmpVertices.extend(tmpExtraVertices)
+# 		tmpVertices.append(extraA)
+#
+# 	tmpVertices = tmpVertices[::-1]
+#
+# 	# the data of that specific vertes is extended
+# 	streetCornerVertices[centerIndex].extend(tmpVertices)
 
 
 streetVerticesList = sortList(streetVerticesList)
