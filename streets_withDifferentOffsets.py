@@ -196,7 +196,7 @@ def findFilletCenter(center, vertList):
 					plt.plot(intersection[0], intersection[1], marker=".", markersize=10, color="red")
 					return(intersection)
 			else: # lines are parallels
-				int = pointPerpendicularToLine(center, lineB, offset*2)
+				int = pointPerpendicularToLine(center, lineB, offset+radius)
 				return(int)
 				break
 
