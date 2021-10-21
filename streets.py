@@ -6,14 +6,6 @@ from functools import reduce
 import operator
 from operator import itemgetter
 
-# usedVerticesList = []
-
-
-
-# subLines= []
-bVerts = [] # vertices for blender
-bFaces = [] # faces for blender
-
 vertices = 	[[1,1], [4,3], [5,6], [3,8], [2,10], [1,9], [5,10], [6,8], [8,8], [8,6],
  			[6,4], [2,8], [4,6], [6,0], [10,4], [7,8], [5,11], [9.5,4.5], [2,3], [4,4],
 			[6,5], [4.5,4.5], [10.5, 5.5], [9,9], [14,14], [10,10], [14,6], [12,8], [14,10], [0,10],
@@ -270,7 +262,7 @@ def usedVertices(lineList):
 	#collect all the lines starting from each vertex
 	for vert in usedVerts:
 		# finds all the lines which have that vert
-		line = [index for index, lines in enumerate(lines) if vert in lines[0]]
+		line = [index for index, lineList in enumerate(lineList) if vert in lineList[0]]
 		# a collection of vertices where for each vertex are listed the lines starting from that specific vertex
 		vertCollection.append([vert, line])
 	return(vertCollection)
