@@ -14,10 +14,12 @@ streetCornerVertices = []
 bVerts = [] # vertices for blender
 bFaces = [] # faces for blender
 
-vertices = [[1,1], [4,3], [5,6], [3,8], [2,10], [1,9], [5,10], [6,8], [8,8], [8,6], [6,4], [2,8], [4,6], [6,0], [10,4], [7,8], [5,11], [9,5]]
-lines = [([1,0],"A"), ([1,2],"B"), ([2,3],"B"), ([3,4],"B"), ([3,5],"A"), ([2,6],"A"), ([2,7],"B"), ([7,15],"A"), ([8,9],"A"), ([9,10],"A"), ([10,2],"A"), ([9,17],"B"), ([17,14],"B"), ([15,8],"B"), ([6,16],"B")]
+vertices = [[1,1], [4,3], [5,6], [3,8], [2,10], [1,9], [5,10], [6,8], [8,8], [8,6], [6,4], [2,8], [4,6], [6,0], [10,4], [7,8], [5,11], [9,5], [2,3], [4,4], [6,5]]
+# lines = [([1,0],"A"), ([1,2],"B"), ([2,3],"B"), ([3,4],"B"), ([3,5],"A"), ([2,6],"A"), ([2,7],"B"), ([7,15],"A"), ([8,9],"A"), ([9,10],"A"), ([10,2],"A"), ([9,17],"B"), ([17,14],"A"), ([15,8],"B"), ([6,16],"B")]
 # lines = [([0,1],"A"), ([1,2],"B"), ([3,2],"B"), ([3,4],"A")]
 # lines = [([0,1],"A"), ([1,2],"B")]
+lines = [([0,18],"A"), ([18,19],"B"), ([19,20],"A"), ([20,8],"B")]
+# lines = [([0,18],"A"), ([18,19],"B")]
 
 # lines = [[3,5], [2,3] ]
 # lines = [[1,2], [0,1], [2,7], [7,15], [15,8]]
@@ -138,6 +140,24 @@ def intersectionPoint(lineAB, lineCD):
 		if dupes:
 			return(dupes[0])
 
+# a function to establish if lines are parallel
+def linesAreParallel(lineA, lineB):
+	result = False
+
+	A = lineA[0]
+	B = lineA[1]
+
+	C = lineB[0]
+	D = lineB[1]
+
+	slopeA = getLineSlope(A, B)
+	slopeB = getLineSlope(C, D)
+
+	if (slopeA == slopeB):
+		result = True
+
+	return(result)
+
 # a function to collect the used vertices
 def usedVertices(lineList):
 	usedVerts = []
@@ -211,12 +231,16 @@ def getMinimumProperty(verts, property):
 		result = propB
 	return(result)
 
-#function to find the center of the fillet
-def findFilletCenter(center, vertList):
+# function to find the center of the fillet
+# radius and width are specified to get the fillets when lines are parallel
+def findFilletCenter(center, vertList, givenWidth = None, givenRadius = None):
 	indexO = findVertIndex(center, vertices)
 
 	#it is necessary to select the minimun radius between the two lines
-	radius = getMinimumProperty(vertList, "radius")
+	if givenRadius == None:
+		radius = getMinimumProperty(vertList, "radius")
+	else:
+		radius = givenRadius
 
 	#first finds all the parallel lines which are around the center
 	parallelList = []
@@ -233,7 +257,10 @@ def findFilletCenter(center, vertList):
 		# type = lines[indexTmpLine][1]
 		# properties = ["width", "radius"]
 		# result = getStreetProperty(properties, type)
-		width = el[1][0]
+		if givenWidth == None:
+			width = el[1][0]
+		else:
+			width = givenWidth
 		# print("W/R", vert, width, radius)
 		parallelList.append(parallelLine(tmpAO, (width + radius)))
 
@@ -684,6 +711,7 @@ for el in usedVerticesList:
 
 		# every vertex is parced
 		for vertIndex, el in enumerate(sortedListOfVerts):
+
 			newFilletCenter = None
 			# to avoid to duplicate points when we are in a corner situation
 			# this is run only once (if it is a corner)
@@ -698,163 +726,301 @@ for el in usedVerticesList:
 					vertB = sortedListOfVerts[0]
 				verts = [vertA, vertB]
 
-				# print("verts", verts)
-				# look for the center of the fillet
-				filletCenter = findFilletCenter(center, verts)
-				# plt.text(filletCenter[0], filletCenter[1], "FilletCenter", fontsize = "large", color="Black")
-				# filletCenter = filletCenters[0]
-				# if len(filletCenters) > 1:
-				# 	print("uno extra")
-				# else:
-				# 	print("nope")
 
+				#check if lines are parallel
+				A = verts[0][0]
+				B = verts[1][0]
 
-				tempVert = [None, None]
-				extraVert = [None, None]
+				if linesAreParallel([A,center], [B,center]):
 
-
-				# if radiuses are different, the smallest one is chosen
-				radius = getMinimumProperty(verts, "radius")
-				width = getMinimumProperty(verts, "width")
-
-				#at verts A and B correspond two lines, and their perpendiculars
-				for i, el in enumerate(verts):
-					vert = el[0]
-					# width = el[1][0]
-					# radius = el[1][1]
-					dim = width + radius
-
-					# finds the line index of the line related to that vertex and the center
-					# the vertices could be stores either as [vert, center] or [center, vert]
-					# but the vertices have been already sorted, so there is no line
-					# which is defined as [4,2]
-					# an this is why the next if is comparing the indices of the center and of the vert
-					elIndex = findVertIndex(vert, vertices)
+					elIndex = findVertIndex(A, vertices)
 					toFind = [centerIndex, elIndex]
 					toFind.sort()
-					lineIndex = findVertIndex(toFind, lines, 0)
-					# # finds the street type
-					# streetType = lines[lineIndex][1]
-					# properties = ["width", "radius"]
-					# result = getStreetProperty(properties, streetType)
+					lineIndexA = findVertIndex(toFind, lines, 0)
+
+					elIndex = findVertIndex(B, vertices)
+					toFind = [centerIndex, elIndex]
+					toFind.sort()
+					lineIndexB = findVertIndex(toFind, lines, 0)
 
 
 
-					# finds a point perpendicular to a parallel of the line, starting
-					# from the center of the fillet, at the given distance
-					# but some nodes (with angle > 180) require to draw the external, not
-					# the internal curve so the offset has to be changed
-					# dist = offset
-					if type == "node":
-						# print(center, vertA, vertB, radiusCenter)
-						# print(pointIsLeft(center, vertA, radiusCenter))
-						if (pointIsLeft(center, vertA[0], filletCenter)):
-						 	# print(pointIsLeft(center, vertA, radiusCenter))
-						 	dist = width * 2
 
-					point = pointPerpendicularToLine(filletCenter, [center, vert], radius)
-					mainSlope = getLineSlope(filletCenter, point)
-					if mainSlope != None:
-						mainDirection = getLineDirection(point, filletCenter, mainSlope)
+					print("lines are parallel")
+					propA = verts[0][1]
+					propB = verts[1][1]
+
+					widthA = propA[0]
+					radiusA = propA[1]
+
+					widthB = propB[0]
+					radiusB = propB[1]
+
+					# check if lines are aligned
+					if widthA == widthB:
+						print("lines are aligned")
+					else:
+						widthDiff = abs(widthA-widthB) * 2
+
+						# first two points
+						slopeA = getLineSlope(A, center)
+						directionA = getLineDirection(A, center, slopeA)
+						tmpPoint = pointFromCenter(center, slopeA, directionA, widthDiff)
+						perpSlopeA = -1/slopeA
+						parallelLine([A, center], widthA)
+						A1 = pointFromCenter(tmpPoint, perpSlopeA, directionA, widthA)
+						A2 = pointFromCenter(tmpPoint, perpSlopeA, directionA, -1 * widthA)
+						A3 = pointFromCenter(A, perpSlopeA, directionA, widthA )
+						A4 = pointFromCenter(A, perpSlopeA, directionA, -1 * widthA )
+
+						#second two points
+						slopeB = getLineSlope(B, center)
+						directionB = getLineDirection(B, center, slopeB)
+						tmpPoint = pointFromCenter(center, slopeB, directionB, widthDiff)
+						perpSlopeB = -1/slopeB
+						parallelLine([B, center], widthB)
+						B1 = pointFromCenter(tmpPoint, perpSlopeB, directionB, -1 * widthB)
+						B2 = pointFromCenter(tmpPoint, perpSlopeB, directionB, widthB)
+						B3 = pointFromCenter(B, perpSlopeB, directionB, -1 * widthB )
+						B4 = pointFromCenter(B, perpSlopeB, directionB,  widthB )
 
 
 
-					if (point):
+
+
+						plt.plot(A1[0], A1[1], marker=".", markersize=10, color="orange")
+						plt.plot(A2[0], A2[1], marker=".", markersize=10, color="orange")
+
+
+
+						plt.plot([A1[0], B1[0]], [A1[1], B1[1]], color = "orange")
+						plt.plot([A2[0], B2[0]], [A2[1], B2[1]], color = "orange")
+
+						plt.plot(A3[0], A3[1], marker=".", markersize=10, color="orange")
+						plt.plot(A4[0], A4[1], marker=".", markersize=10, color="orange")
+						plt.plot([A3[0], A1[0]], [A3[1], A1[1]], color = "orange")
+						plt.plot([A4[0], A2[0]], [A4[1], A2[1]], color = "orange")
+
+						plt.plot(B1[0], B1[1], marker=".", markersize=10, color="orange")
+						plt.plot(B2[0], B2[1], marker=".", markersize=10, color="orange")
+
+						plt.plot(B3[0], B3[1], marker=".", markersize=10, color="orange")
+						plt.plot(B4[0], B4[1], marker=".", markersize=10, color="orange")
+						plt.plot([B3[0], B1[0]], [B3[1], B1[1]], color = "orange")
+						plt.plot([B4[0], B2[0]], [B4[1], B2[1]], color = "orange")
+
+						dist = 0
+						if radiusA >= radiusB:
+							rad = radiusA
+						else:
+							rad = radiusB
+
+
+						filletCenterA1 = findFilletCenter(A1, [(A3,[dist, rad]), (B1,[dist, rad])], dist, rad)
+						point = pointPerpendicularToLine(filletCenterA1, [A1, A3], rad)
 						plt.plot(point[0], point[1], marker=".", markersize=10, color="orange")
-						# plt.text(point[0], point[1], "p" + str(i), fontsize = "large", color="Black")
-						plt.plot([filletCenter[0], point[0]], [filletCenter[1], point[1]], color="green")
+						plt.plot([filletCenterA1[0], point[0]], [filletCenterA1[1], point[1]], color="green")
+						streetVerticesList[lineIndexA].extend([point])
 
-						# add the vertex to the point defining the linear streets
-						streetVerticesList[lineIndex].extend([point])
+						point = pointPerpendicularToLine(filletCenterA1, [A1, B1], rad)
+						plt.plot(point[0], point[1], marker=".", markersize=10, color="orange")
+						plt.plot([filletCenterA1[0], point[0]], [filletCenterA1[1], point[1]], color="green")
+						# streetVerticesList[lineIndex].extend([point])
 
-						#these are the points of the corners
-						tempVert[i] = point
+						filletCenterA2 = findFilletCenter(A2, [(A4,[dist, rad]), (B2,[dist, rad])], dist, rad)
+						point = pointPerpendicularToLine(filletCenterA2, [A2, A4], rad)
+						plt.plot(point[0], point[1], marker=".", markersize=10, color="orange")
+						plt.plot([filletCenterA2[0], point[0]], [filletCenterA2[1], point[1]], color="green")
+						streetVerticesList[lineIndexA].extend([point])
 
-						# if it is a corner, "the other side" of the corner is to be found
-						if type == "corner":
-							if testEqualProperty(verts, "width"): # when the 2 widths are the same
-								otherSidePoint = pointPerpendicularToLine(filletCenter, [center, vert], radius + width*2)
-								if (otherSidePoint):
-									plt.plot(otherSidePoint[0], otherSidePoint[1], marker=".", markersize=10, color="blue")
-									# plt.text(otherSidePoint[0], otherSidePoint[1], "otherSidePoint", fontsize = "large", color="blue")
+						point = pointPerpendicularToLine(filletCenterA2, [A2, B2], rad)
+						plt.plot(point[0], point[1], marker=".", markersize=10, color="orange")
+						plt.plot([filletCenterA2[0], point[0]], [filletCenterA2[1], point[1]], color="green")
+						# streetVerticesList[lineIndex].extend([point])
 
+						filletCenterB1 = findFilletCenter(B1, [(B3,[dist, rad]), (A1,[dist, rad])], dist, rad)
+						point = pointPerpendicularToLine(filletCenterB1, [B1, B3], rad)
+						plt.plot(point[0], point[1], marker=".", markersize=10, color="orange")
+						plt.plot([filletCenterB1[0], point[0]], [filletCenterB1[1], point[1]], color="green")
+						streetVerticesList[lineIndexB].extend([point])
 
-							else: # when street sizes are different
-								# it is necessary to find this point only once for each couple of points
-								if i == 0:
-									A = verts[0][0]
-									B = verts[1][0]
+						point = pointPerpendicularToLine(filletCenterB1, [B1, A1], rad)
+						plt.plot(point[0], point[1], marker=".", markersize=10, color="orange")
+						plt.plot([filletCenterB1[0], point[0]], [filletCenterB1[1], point[1]], color="green")
 
-									halfAngle = (carnot(center, [A, B])) /2 # half size of the bisec
-									angle = math.pi/2 - halfAngle # we need the opposite angle
-									dist = getDistance(filletCenter, point)
-									hypotenuse = dist / math.cos(angle) # length of the hypotenuse
-									slopeOA = getLineSlope(filletCenter, point)
+						filletCenterB2 = findFilletCenter(B2, [(B4,[dist, rad]), (A2,[dist, rad])], dist, rad)
+						point = pointPerpendicularToLine(filletCenterB2, [B2, B4], rad)
+						plt.plot(point[0], point[1], marker=".", markersize=10, color="orange")
+						plt.plot([filletCenterB2[0], point[0]], [filletCenterB2[1], point[1]], color="green")
+						streetVerticesList[lineIndexB].extend([point])
 
-									# print(dist, hypotenuse, slopeOA)
-
-									if (slopeOA == None): # line is vertical
-										slopeAngle = math.pi/2
-										# print("vertical at", centerIndex)
-									else: # all other cases
-										slopeAngle = math.atan(slopeOA)
-
-									newSlope = math.tan(slopeAngle + angle) # the slope of the hypotenuse
-									# print("NewSlope", math.degrees(newSlope), math.degrees(slopeAngle), math.degrees(angle))
-									# lineSlope=getLineSlope(A, center)
-									# print("lineSlope", A, center, lineSlope)
-									# lineSlope=getLineSlope(B, center)
-									# print("lineSlope", B, center, lineSlope)
-
-									if (pointIsLeft(center, A, B)):
-										newSlope = math.tan(slopeAngle - angle) # the slope of the hypotenuse
-										newPoint = pointFromCenter(filletCenter, newSlope, "down", hypotenuse)
-									else:
-										newSlope = math.tan(slopeAngle + angle)
-
-										newPoint = pointFromCenter(filletCenter, newSlope, "up", hypotenuse) # is the intersection of the two lines we are applying the fillet
-									if not(pointIsLeft(filletCenter, point, newPoint)):
-										newPoint = pointFromCenter(filletCenter, newSlope, "down", hypotenuse)
-										# print("pippo")
+						point = pointPerpendicularToLine(filletCenterB2, [B2, A2], rad)
+						plt.plot(point[0], point[1], marker=".", markersize=10, color="orange")
+						plt.plot([filletCenterB2[0], point[0]], [filletCenterB2[1], point[1]], color="green")
 
 
-									plt.plot(newPoint[0], newPoint[1], marker=".", markersize=10, color="blue")
-									# plt.text(newPoint[0], newPoint[1], "NP" + str(lineIndex), fontsize = "large", color="blue")
+				else:
 
-									slope = getLineSlope(newPoint, center) #the slope between the filletCenter and the corner
-									dist = getDistance(newPoint, center) #the distance between the filletCenter and the corner
-									if slope != None:
-										direction = getLineDirection(center, newPoint, slope)
-										newFilletCenter = pointFromCenter(filletCenter, slope, direction, 2 * dist) 	# the newFilleCenter has twice distance between the filletCenter and the corner
-																													# and the same slope. It starts from the intersection of the two lines
-																													# we are applying the fillet
-									else:
-										newFilletCenter = [filletCenter[0], filletCenter[1] + 2 * dist]
-
+					# print("verts", verts)
+					# look for the center of the fillet
+					filletCenter = findFilletCenter(center, verts)
+					# plt.text(filletCenter[0], filletCenter[1], "FilletCenter", fontsize = "large", color="Black")
+					# filletCenter = filletCenters[0]
+					# if len(filletCenters) > 1:
+					# 	print("uno extra")
+					# else:
+					# 	print("nope")
 
 
+					tempVert = [None, None]
+					extraVert = [None, None]
 
-									plt.plot(newFilletCenter[0], newFilletCenter[1], marker=".", markersize=10, color="blue")
-									plt.plot([filletCenter[0], newFilletCenter[0]], [filletCenter[1], newFilletCenter[1]], color="black")
-									# plt.plot([newPoint[0], newFilletCenter[0]], [newPoint[1], newFilletCenter[1]], color="black")
 
-								# then the new perpendicular points, starting from the new Fillet center are calculated
-								if mainSlope != None:
-									if mainSlope == 0:
-										otherSidePoint = [newFilletCenter[0] + radius, newFilletCenter[1]]
-									else:
-										otherSidePoint = pointFromCenter(newFilletCenter, mainSlope, mainDirection, radius)
-								else:
-									otherSidePoint = [newFilletCenter[0], newFilletCenter[1] + radius]
-								plt.plot(otherSidePoint[0], otherSidePoint[1], marker=".", markersize=10, color="orange")
-								plt.plot([newFilletCenter[0], otherSidePoint[0]], [newFilletCenter[1], otherSidePoint[1]], color="green")
-								# plt.text(otherSidePoint[0], otherSidePoint[1], "otherSidePoint" + str(i), fontsize = "large", color="blue")
+					# if radiuses are different, the smallest one is chosen
+					radius = getMinimumProperty(verts, "radius")
+					width = getMinimumProperty(verts, "width")
+
+					#at verts A and B correspond two lines, and their perpendiculars
+					for i, el in enumerate(verts):
+						vert = el[0]
+						# width = el[1][0]
+						# radius = el[1][1]
+						dim = width + radius
+
+						# finds the line index of the line related to that vertex and the center
+						# the vertices could be stores either as [vert, center] or [center, vert]
+						# but the vertices have been already sorted, so there is no line
+						# which is defined as [4,2]
+						# an this is why the next "if" is comparing the indices of the center and of the vert
+						elIndex = findVertIndex(vert, vertices)
+						toFind = [centerIndex, elIndex]
+						toFind.sort()
+						lineIndex = findVertIndex(toFind, lines, 0)
+						# # finds the street type
+						# streetType = lines[lineIndex][1]
+						# properties = ["width", "radius"]
+						# result = getStreetProperty(properties, streetType)
+
+
+
+						# finds a point perpendicular to a parallel of the line, starting
+						# from the center of the fillet, at the given distance
+						# but some nodes (with angle > 180) require to draw the external, not
+						# the internal curve so the offset has to be changed
+						# dist = offset
+						if type == "node":
+							# print(center, vertA, vertB, radiusCenter)
+							# print(pointIsLeft(center, vertA, radiusCenter))
+							if (pointIsLeft(center, vertA[0], filletCenter)):
+							 	# print(pointIsLeft(center, vertA, radiusCenter))
+							 	dist = width * 2
+
+
+
+
+
+						point = pointPerpendicularToLine(filletCenter, [center, vert], radius)
+						mainSlope = getLineSlope(filletCenter, point)
+						if mainSlope != None:
+							mainDirection = getLineDirection(point, filletCenter, mainSlope)
+
+
+
+						if (point):
+							plt.plot(point[0], point[1], marker=".", markersize=10, color="orange")
+							# plt.text(point[0], point[1], "p" + str(i), fontsize = "large", color="Black")
+							plt.plot([filletCenter[0], point[0]], [filletCenter[1], point[1]], color="green")
 
 							# add the vertex to the point defining the linear streets
-							streetVerticesList[lineIndex].extend([otherSidePoint])
+							streetVerticesList[lineIndex].extend([point])
 
 							#these are the points of the corners
-							extraVert[i] = otherSidePoint
+							tempVert[i] = point
+
+							# if it is a corner, "the other side" of the corner is to be found
+							if type == "corner":
+								if testEqualProperty(verts, "width"): # when the 2 widths are the same
+									otherSidePoint = pointPerpendicularToLine(filletCenter, [center, vert], radius + width*2)
+									if (otherSidePoint):
+										plt.plot(otherSidePoint[0], otherSidePoint[1], marker=".", markersize=10, color="blue")
+										# plt.text(otherSidePoint[0], otherSidePoint[1], "otherSidePoint", fontsize = "large", color="blue")
+
+
+								else: # when street sizes are different
+									# it is necessary to find this point only once for each couple of points
+									if i == 0:
+
+
+										halfAngle = (carnot(center, [A, B])) /2 # half size of the bisec
+										angle = math.pi/2 - halfAngle # we need the opposite angle
+										dist = getDistance(filletCenter, point)
+										hypotenuse = dist / math.cos(angle) # length of the hypotenuse
+										slopeOA = getLineSlope(filletCenter, point)
+
+										# print(dist, hypotenuse, slopeOA)
+
+										if (slopeOA == None): # line is vertical
+											slopeAngle = math.pi/2
+											# print("vertical at", centerIndex)
+										else: # all other cases
+											slopeAngle = math.atan(slopeOA)
+
+										newSlope = math.tan(slopeAngle + angle) # the slope of the hypotenuse
+										# print("NewSlope", math.degrees(newSlope), math.degrees(slopeAngle), math.degrees(angle))
+										# lineSlope=getLineSlope(A, center)
+										# print("lineSlope", A, center, lineSlope)
+										# lineSlope=getLineSlope(B, center)
+										# print("lineSlope", B, center, lineSlope)
+
+										if (pointIsLeft(center, A, B)):
+											newSlope = math.tan(slopeAngle - angle) # the slope of the hypotenuse
+											newPoint = pointFromCenter(filletCenter, newSlope, "down", hypotenuse)
+										else:
+											newSlope = math.tan(slopeAngle + angle)
+
+											newPoint = pointFromCenter(filletCenter, newSlope, "up", hypotenuse) # is the intersection of the two lines we are applying the fillet
+										if not(pointIsLeft(filletCenter, point, newPoint)):
+											newPoint = pointFromCenter(filletCenter, newSlope, "down", hypotenuse)
+											# print("pippo")
+
+
+										plt.plot(newPoint[0], newPoint[1], marker=".", markersize=10, color="blue")
+										# plt.text(newPoint[0], newPoint[1], "NP" + str(lineIndex), fontsize = "large", color="blue")
+
+										slope = getLineSlope(newPoint, center) #the slope between the filletCenter and the corner
+										dist = getDistance(newPoint, center) #the distance between the filletCenter and the corner
+										if slope != None:
+											direction = getLineDirection(center, newPoint, slope)
+											newFilletCenter = pointFromCenter(filletCenter, slope, direction, 2 * dist) 	# the newFilleCenter has twice distance between the filletCenter and the corner
+																														# and the same slope. It starts from the intersection of the two lines
+																														# we are applying the fillet
+										else:
+											newFilletCenter = [filletCenter[0], filletCenter[1] + 2 * dist]
+
+
+
+
+										plt.plot(newFilletCenter[0], newFilletCenter[1], marker=".", markersize=10, color="blue")
+										plt.plot([filletCenter[0], newFilletCenter[0]], [filletCenter[1], newFilletCenter[1]], color="black")
+										# plt.plot([newPoint[0], newFilletCenter[0]], [newPoint[1], newFilletCenter[1]], color="black")
+
+									# then the new perpendicular points, starting from the new Fillet center are calculated
+									if mainSlope != None:
+										if mainSlope == 0:
+											otherSidePoint = [newFilletCenter[0] + radius, newFilletCenter[1]]
+										else:
+											otherSidePoint = pointFromCenter(newFilletCenter, mainSlope, mainDirection, radius)
+									else:
+										otherSidePoint = [newFilletCenter[0], newFilletCenter[1] + radius]
+									plt.plot(otherSidePoint[0], otherSidePoint[1], marker=".", markersize=10, color="orange")
+									plt.plot([newFilletCenter[0], otherSidePoint[0]], [newFilletCenter[1], otherSidePoint[1]], color="green")
+									# plt.text(otherSidePoint[0], otherSidePoint[1], "otherSidePoint" + str(i), fontsize = "large", color="blue")
+
+								# add the vertex to the point defining the linear streets
+								streetVerticesList[lineIndex].extend([otherSidePoint])
+
+								#these are the points of the corners
+								extraVert[i] = otherSidePoint
 
 
 				#corners are tricky and they need a lot of values

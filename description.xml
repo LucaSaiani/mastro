@@ -3,13 +3,13 @@
     <streets>
         <street type="A">
             <segment id="0">
-                <width>.5</width>
-                <radius>.5</radius>
+                <width>.4</width>
+                <radius>.3</radius>
             </segment>
         </street>
         <street type="B">
             <segment id="0">
-                <width>.1</width>
+                <width>.2</width>
                 <radius>.1</radius>
             </segment>
         </street>
