@@ -23,8 +23,8 @@ lines = [([1,0],"A"), ([1,2],"B"), ([2,3],"B"), ([3,4],"B"), ([3,5],"A"), ([2,6]
 # lines = [([23,25],"A"), ([24,25],"A") , ([25,27],"A"), ([26,27], "A"),  ([27,28], "A"), ([29,30], "A"), ([30,31], "A"), ([30,32], "A")]
 lines = [([23,25],"B"), ([24,25],"A") , ([25,27],"A"), ([26,27], "B"),  ([27,28], "B"), ([29,30], "B"), ([30,31], "A"), ([30,32], "B"), ([0,18],"A"), ([18,19],"B"), ([19,21],"A"), ([21,2],"B"), ([2,3],"B"), ([3,4],"B"), ([3,5],"A"), ([2,6],"A"), ([2,7],"B"), ([7,15],"A"), ([8,9],"A"), ([9,10],"B"), ([10,2],"B"), ([9,17],"B"), ([17,14],"A"), ([15,8],"B"), ([6,16],"B"), ([22,17], "B")]
 
-# vertices = [[-10.718745231628418, -10.718745231628418], [10.718745231628418, -10.718745231628418], [-10.718745231628418, 10.718745231628418], [10.718745231628418, 10.718745231628418]]
-# lines = [([2, 0], 'A'), ([0, 1], 'B'), ([3, 2], 'B'), ([3,1], 'A')]
+vertices = [[-10.718745231628418, -10.718745231628418], [10.718745231628418, -10.718745231628418], [-10.718745231628418, 10.718745231628418], [10.718745231628418, 10.718745231628418]]
+lines = [([2, 0], 'B'), ([0, 1], 'A'), ([3, 2], 'A'), ([3,1], 'B')]
 
 minAngle = 5
 
@@ -1142,38 +1142,41 @@ def populateVertices(lines, vertices):
                                             # plt.plot([newPoint[0], oppositeFilletCenter[0]], [newPoint[1], oppositeFilletCenter[1]], color="black")
 
                                         # then the new perpendicular points, starting from the new Fillet center are calculated
-                                        if mainSlope != None:
-                                            if mainSlope == 0:
-                                                oppositePoint = [oppositeFilletCenter[0] + radius, oppositeFilletCenter[1]]
-                                                if (oppositeFilletCenter[0] > filletCenter[0]):
-                                                    centerLocation = "left"
-                                                else:
-                                                    centerLocation = "right"
-
-                                                if (oppositeFilletCenter[0] > oppositePoint[0]):
-                                                    pointLocation = "left"
-                                                else:
-                                                    pointLocation = "right"
-
-                                                if centerLocation == pointLocation:
-                                                    oppositePoint = [oppositeFilletCenter[0] - radius, oppositeFilletCenter[1]]
-
-                                            else:
-                                                oppositePoint = pointFromCenter(oppositeFilletCenter, mainSlope, mainDirection, radius)
-                                        else:
-                                            oppositePoint = [oppositeFilletCenter[0], oppositeFilletCenter[1] + radius]
-                                            if (oppositeFilletCenter[1] > filletCenter[1]):
-                                                centerLocation = "down"
-                                            else:
-                                                centerLocation = "up"
-
-                                            if (oppositeFilletCenter[1] > oppositePoint[1]):
-                                                pointLocation = "down"
-                                            else:
-                                                pointLocation = "up"
-
-                                            if centerLocation == pointLocation:
-                                                oppositePoint = [oppositeFilletCenter[0], oppositeFilletCenter[1] - radius]
+                                        # because it is a rigid translation, the new points are given by the location of the new
+                                        # filleCenter plus the distance between the internal fillet center and the perpendicular point
+                                        oppositePoint = [oppositeFilletCenter[0] + (point[0] - filletCenter[0]), oppositeFilletCenter[1] + (point[1] - filletCenter[1])]
+                                        # if mainSlope != None:
+                                        #     if mainSlope == 0:
+                                        #         oppositePoint = [oppositeFilletCenter[0] + radius, oppositeFilletCenter[1]]
+                                        #         if (oppositeFilletCenter[0] > filletCenter[0]):
+                                        #             centerLocation = "left"
+                                        #         else:
+                                        #             centerLocation = "right"
+                                        #
+                                        #         if (oppositeFilletCenter[0] > oppositePoint[0]):
+                                        #             pointLocation = "left"
+                                        #         else:
+                                        #             pointLocation = "right"
+                                        #
+                                        #         if centerLocation == pointLocation:
+                                        #             oppositePoint = [oppositeFilletCenter[0] - radius, oppositeFilletCenter[1]]
+                                        #
+                                        #     else:
+                                        #         oppositePoint = pointFromCenter(oppositeFilletCenter, mainSlope, mainDirection, radius)
+                                        # else:
+                                        #     oppositePoint = [oppositeFilletCenter[0], oppositeFilletCenter[1] + radius]
+                                        #     if (oppositeFilletCenter[1] > filletCenter[1]):
+                                        #         centerLocation = "down"
+                                        #     else:
+                                        #         centerLocation = "up"
+                                        #
+                                        #     if (oppositeFilletCenter[1] > oppositePoint[1]):
+                                        #         pointLocation = "down"
+                                        #     else:
+                                        #         pointLocation = "up"
+                                        #
+                                        #     if centerLocation == pointLocation:
+                                        #         oppositePoint = [oppositeFilletCenter[0], oppositeFilletCenter[1] - radius]
 
                                         plt.plot(oppositePoint[0], oppositePoint[1], marker=".", markersize=10, color="orange")
                                         plt.plot([oppositeFilletCenter[0], oppositePoint[0]], [oppositeFilletCenter[1], oppositePoint[1]], color="green")
