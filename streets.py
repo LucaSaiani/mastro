@@ -6,13 +6,14 @@ from functools import reduce
 import operator
 from operator import itemgetter
 
+import random
+
 vertices = 	[[1,1], [4,3], [5,6], [3,8], [2,10], [1,9], [5,10], [6,8], [8,8], [8,6],
 			[6,4], [2,8], [4,6], [6,0], [10,4], [7,8], [5,11], [9.5,4.5], [2,3], [4,4],
 			[6,5], [4.5,4.5], [10.5, 5.5], [9,9], [14,14], [10,10], [14,6], [12,8], [14,10], [0,10],
 			[4,12], [8,14], [2,14]
 			]
-
-# lines = [([1,0],"A"), ([1,2],"B"), ([2,3],"B"), ([3,4],"B"), ([3,5],"A"), ([2,6],"A"), ([2,7],"B"), ([7,15],"A"), ([8,9],"A"), ([9,10],"A"), ([10,2],"A"), ([9,17],"B"), ([17,14],"A"), ([15,8],"B"), ([6,16],"B")]
+lines = [([1,0],"A"), ([1,2],"B"), ([2,3],"B"), ([3,4],"B"), ([3,5],"A"), ([2,6],"A"), ([2,7],"B"), ([7,15],"A"), ([8,9],"A"), ([9,10],"A"), ([10,2],"A"), ([9,17],"B"), ([17,14],"A"), ([15,8],"B"), ([6,16],"B")]
 # lines = [([0,1],"A"), ([1,2],"B"), ([3,2],"B"), ([3,4],"A")]
 # lines = [([0,1],"A"), ([1,2],"B")]
 # lines = [([0,18],"A"), ([18,19],"B"), ([19,20],"A"), ([20,8],"B")]
@@ -23,15 +24,18 @@ vertices = 	[[1,1], [4,3], [5,6], [3,8], [2,10], [1,9], [5,10], [6,8], [8,8], [8
 # lines = [([23,25],"A"), ([24,25],"A") , ([25,27],"A"), ([26,27], "A"),  ([27,28], "A"), ([29,30], "A"), ([30,31], "A"), ([30,32], "A")]
 # lines = [([23,25],"B"), ([24,25],"A") , ([25,27],"A"), ([26,27], "B"),  ([27,28], "B"), ([29,30], "B"), ([30,31], "A"), ([30,32], "B"), ([0,18],"A"), ([18,19],"B"), ([19,21],"A"), ([21,2],"B"), ([2,3],"B"), ([3,4],"B"), ([3,5],"A"), ([2,6],"A"), ([2,7],"B"), ([7,15],"A"), ([8,9],"A"), ([9,10],"B"), ([10,2],"B"), ([9,17],"B"), ([17,14],"A"), ([15,8],"B"), ([6,16],"B"), ([22,17], "B")]
 
-vertices = [[-10.718745231628418, -10.718745231628418], [10.718745231628418, -10.718745231628418], [-10.718745231628418, 10.718745231628418], [10.718745231628418, 10.718745231628418]]
-lines = [([2, 0], 'B'), ([0, 1], 'A'), ([3, 2], 'A'), ([3,1], 'B')]
+# vertices = [[-10.718745231628418, -10.718745231628418], [10.718745231628418, -10.718745231628418], [-10.718745231628418, 10.718745231628418], [10.718745231628418, 10.718745231628418]]
+# lines = [([2, 0], 'B'), ([0, 1], 'A'), ([3, 2], 'A'), ([3,1], 'B')]
 
 # vertices = [[-1.4187122587827616e-07, 11.571640014648438], [-5.785820007324219, 10.021334648132324], [-10.021334648132324, 5.785819053649902], [-11.571640014648438, -4.492888479035173e-07], [-10.021334648132324, -5.785820960998535], [-5.785820484161377, -10.021334648132324], [8.697535349710961e-07, -11.571640014648438], [5.7858195304870605, -10.021334648132324], [10.021334648132324, -5.785819053649902], [11.571640014648438, 1.9451397292868933e-07], [10.021334648132324, 5.785819053649902], [5.785821914672852, 10.021333694458008], [4.394995301026938e-08, 3.283268690109253], [-2.5706377029418945, 4.452475547790527], [-2.8433938026428223, 1.6416343450546265], [-5.141277313232422, -2.3208869492918893e-07], [-2.8433938026428223, -1.6416345834732056], [-2.570638656616211, -4.452476501464844], [3.3098245921792113e-07, -3.283269166946411], [2.5706381797790527, -4.452476501464844], [2.8433947563171387, -1.6416341066360474], [5.141275882720947, 5.3952732059769914e-08], [2.8433947563171387, 1.641634225845337], [2.5706393718719482, 4.452475547790527]]
-
 # lines = [([0, 1], 'A'), ([1, 2], 'B'), ([2, 3], 'A'), ([3, 4], 'B'), ([4, 5], 'B'), ([5, 6], 'B'), ([6, 7], 'A'), ([7, 8], 'B'), ([8, 9], 'B'), ([9, 10], 'A'), ([10, 11], 'B'), ([0, 11], 'A'), ([12, 13], 'B'), ([13, 14], 'A'), ([14, 15], 'A'), ([15, 16], 'A'), ([16, 17], 'A'), ([17, 18], 'B'), ([18, 19], 'A'), ([19, 20], 'A'), ([20, 21], 'A'), ([21, 22], 'B'), ([22, 23], 'B'), ([12, 23], 'A'), ([0,12], 'A'), ([1, 13], 'A'), ([7, 19], 'A'), ([8, 20], 'B'), ([4, 16], 'A'), ([5, 17], 'A'), ([11, 23], 'B'), ([2, 14], 'A'), ([9, 21], 'A'), ([6, 18], 'B'), ([3, 15], 'A'), ([10, 22], 'A')]
+
+# vertices = 	[[1,1], [2,3], [6,4], [8,8], [8,2]]
+# lines = [([0,1],'A'), ([1,2],'B'), ([2,3], 'A'), ([2,4], 'B')]
 
 minAngle = 5
 
+debugMain = False
 # a function to sort vertices around a center, clockwise
 # if center is not passed, it is calculated
 # index is necessary when the verList contains other information
@@ -371,7 +375,7 @@ def findFilletCenter(center, vertList, givenWidth = None, givenRadius = None):
 		xB = B[0]
 		yB = B[1]
 
-		plt.plot([xA, xB], [yA, yB], color="blue")
+		if debugMain: plt.plot([xA, xB], [yA, yB], color="blue")
 	for line in secondSet:
 		A = line[0]
 		B = line[1]
@@ -381,7 +385,7 @@ def findFilletCenter(center, vertList, givenWidth = None, givenRadius = None):
 		xB = B[0]
 		yB = B[1]
 
-		plt.plot([xA, xB], [yA, yB], color="green")
+		if debugMain: plt.plot([xA, xB], [yA, yB], color="green")
 
 	# look for the intersections between the 2 sets of 4 lines
 	# intersections are always 4, but only the one inside the
@@ -395,7 +399,7 @@ def findFilletCenter(center, vertList, givenWidth = None, givenRadius = None):
 				# lines = [lineA, lineB]
 				test = pointInsideCorner(intersection, center, verts)
 				if (test):
-					plt.plot(intersection[0], intersection[1], marker=".", markersize=10, color="red")
+					if debugMain: plt.plot(intersection[0], intersection[1], marker=".", markersize=10, color="red")
 					return(intersection)
 			else: # lines are parallels
 				int = pointPerpendicularToLine(center, lineB, width+radius)
@@ -620,6 +624,8 @@ def drawStreets(list):
 		if el:# if el[1]:
 			for i, vert in enumerate(el):
 				pointA = vert
+				# plt.scatter(pointA[0], pointA[1],  color="red")
+				# plt.text(pointA[0], pointA[1], i, fontsize = "large", color="red")
 				xList.append(pointA[0])
 				yList.append(pointA[1])
 				if (i < (len(el) -1)):
@@ -629,7 +635,7 @@ def drawStreets(list):
 				xList.append(pointB[0])
 				yList.append(pointB[1])
 
-			plt.fill(xList, yList, color="red")
+			if debugMain:plt.fill(xList, yList, color="red")
 			xList = []
 			yList = []
 
@@ -728,7 +734,6 @@ def populateVertices(lines, vertices):
 
 
 	for el in usedVerticesList:
-		# print(el)
 		sortedListOfVerts = []
 		centerIndex = el[0]
 		center = vertices[centerIndex]
@@ -760,7 +765,7 @@ def populateVertices(lines, vertices):
 				points.append([center[0] + width, center[1]])
 				points.append([center[0] - width, center[1]])
 			for point in points:
-				plt.plot(point[0], point[1], marker=".", markersize=10, color="blue")
+				if debugMain: plt.plot(point[0], point[1], marker=".", markersize=10, color="blue")
 				# plt.text(point[0], point[1], tmpLines, fontsize = "large", color="blue")
 
 				# add the vertex to the point defining the linear streets
@@ -836,6 +841,7 @@ def populateVertices(lines, vertices):
 
 						widthB = propB[0]
 						radiusB = propB[1]
+
 						# check if lines are aligned
 						if widthA == widthB:
 							slope = getLineSlope(A, center)
@@ -859,13 +865,14 @@ def populateVertices(lines, vertices):
 
 							streetVerticesList[lineIndexA].extend([tmpPointA])
 							streetVerticesList[lineIndexA].extend([tmpPointB])
+
 							streetVerticesList[lineIndexB].extend([tmpPointA])
 							streetVerticesList[lineIndexB].extend([tmpPointB])
 
-							if type == "corner":
-								tmpPoint = pointFromCenter(center, perpSlopeA, oppositeDirection(direction), widthA)
-								streetVerticesList[lineIndexA].extend([tmpPoint])
-								streetVerticesList[lineIndexB].extend([tmpPoint])
+							# if type == "corner":
+							# 	tmpPoint = pointFromCenter(center, perpSlopeA, oppositeDirection(direction), widthA)
+							# 	streetVerticesList[lineIndexA].extend([tmpPoint])
+							# 	streetVerticesList[lineIndexB].extend([tmpPoint])
 
 						# else lines are not aligned
 						else:
@@ -873,23 +880,24 @@ def populateVertices(lines, vertices):
 
 							# points relative to vert A
 							slope = getLineSlope(A, center)
-							if slope == None:
+							if slope == None: #lines are vertical
 								if A[1] < B[1]:
 									factor = -1
 								else:
 									factor = 1
+
 								perpSlope = 0
 								directionA = "up"
 								tmpPointA = [center[0], center[1] + factor * widthDiff]
 								tmpPointB = [center[0], center[1] - factor * widthDiff]
 
 							else:
-								if slope != 0:
+								if slope != 0: #generic lines
 									directionA = getLineDirection(A, center, slope)
 									tmpPointA = pointFromCenter(center, slope, directionA, widthDiff)
 									tmpPointB = pointFromCenter(center, slope, directionA, -1 * widthDiff)
 									perpSlope = -1/slope
-								else:
+								else: # lines are horizontal
 									if A[0] < B[0]:
 										factor = -1
 									else:
@@ -918,7 +926,7 @@ def populateVertices(lines, vertices):
 
 									B1 = pointFromCenter(tmpPointB, perpSlope, directionA, widthB * factor)
 									ausiliaryB1 = pointFromCenter(B, perpSlope, directionA, widthB * factor)
-								else:
+								else: #perpendicular is horizontal
 									if A[1] < B[1]:
 										factor = -1
 									else:
@@ -964,18 +972,18 @@ def populateVertices(lines, vertices):
 
 							if widthA > widthB:
 								if (pointIsLeft(center, A1, B1)):
-									invert1 = False
-									invert2 = True
-								else:
 									invert1 = True
 									invert2 = False
+								else:
+									invert1 = False
+									invert2 = True
 							else:
 								if (pointIsLeft(center, A1, B1)):
-									invert1 = True
-									invert2 = False
-								else:
 									invert1 = False
 									invert2 = True
+								else:
+									invert1 = True
+									invert2 = False
 
 
 
@@ -985,14 +993,14 @@ def populateVertices(lines, vertices):
 
 							pointA = pointPerpendicularToLine(filletCenterA1, [A1, ausiliaryA1], rad)
 							streetVerticesList[lineIndexA].extend([pointA])
-							plt.plot(pointA[0], pointA[1], marker=".", markersize=10, color="orange")
+							if debugMain: plt.plot(pointA[0], pointA[1], marker=".", markersize=10, color="orange")
 							# plt.text(pointA[0], pointA[1], "AofA1")
-							plt.plot([filletCenterA1[0], pointA[0]], [filletCenterA1[1], pointA[1]], color="green")
+							if debugMain: plt.plot([filletCenterA1[0], pointA[0]], [filletCenterA1[1], pointA[1]], color="green")
 
 							pointB = pointPerpendicularToLine(filletCenterA1, [A1, B1], rad)
-							plt.plot(pointB[0], pointB[1], marker=".", markersize=10, color="orange")
+							if debugMain: plt.plot(pointB[0], pointB[1], marker=".", markersize=10, color="orange")
 							# plt.text(pointB[0], pointB[1], "BofA1")
-							plt.plot([filletCenterA1[0], pointB[0]], [filletCenterA1[1], pointB[1]], color="green")
+							if debugMain: plt.plot([filletCenterA1[0], pointB[0]], [filletCenterA1[1], pointB[1]], color="green")
 
 							arcVertices = getArcVertices(centerIndex, filletCenterA1, pointA, pointB, minAngle, type, rad, invert1)
 							streetCornerVertices[centerIndex].extend(arcVertices)
@@ -1001,35 +1009,42 @@ def populateVertices(lines, vertices):
 
 							pointA = pointPerpendicularToLine(filletCenterB1, [B1, ausiliaryB1], rad)
 							streetVerticesList[lineIndexB].extend([pointA])
-							plt.plot(pointA[0], pointA[1], marker=".", markersize=10, color="orange")
-							plt.plot([filletCenterB1[0], pointA[0]], [filletCenterB1[1], pointA[1]], color="green")
+							if debugMain: plt.plot(pointA[0], pointA[1], marker=".", markersize=10, color="orange")
+							if debugMain: plt.plot([filletCenterB1[0], pointA[0]], [filletCenterB1[1], pointA[1]], color="green")
 							# plt.text(pointA[0], pointA[1], "AofB1")
 
 							pointB = pointPerpendicularToLine(filletCenterB1, [B1, A1], rad)
-							plt.plot(pointB[0], pointB[1], marker=".", markersize=10, color="orange")
-							plt.plot([filletCenterB1[0], pointB[0]], [filletCenterB1[1], pointB[1]], color="green")
+							if debugMain: plt.plot(pointB[0], pointB[1], marker=".", markersize=10, color="orange")
+							if debugMain: plt.plot([filletCenterB1[0], pointB[0]], [filletCenterB1[1], pointB[1]], color="green")
 							# plt.text(pointB[0], pointB[1], "BofB1")
 
 							arcVertices = getArcVertices(centerIndex, filletCenterB1, pointA, pointB, minAngle, type, rad, invert2)
 							streetCornerVertices[centerIndex].extend(arcVertices)
 
 
-							plt.plot(A1[0], A1[1], marker=".", markersize=10, color="orange")
-							plt.plot(ausiliaryA1[0], ausiliaryA1[1], marker=".", markersize=10, color="orange")
-							plt.plot(B1[0], B1[1], marker=".", markersize=10, color="orange")
-							plt.plot(ausiliaryB1[0], ausiliaryB1[1], marker=".", markersize=10, color="orange")
-							plt.plot([A1[0], B1[0]], [A1[1], B1[1]], color = "orange")
-							plt.plot([ausiliaryA1[0], A1[0]], [ausiliaryA1[1], A1[1]], color = "orange")
-							plt.plot([ausiliaryB1[0], B1[0]], [ausiliaryB1[1], B1[1]], color = "orange")
+							if debugMain: plt.plot(A1[0], A1[1], marker=".", markersize=10, color="orange")
+							if debugMain: plt.plot(ausiliaryA1[0], ausiliaryA1[1], marker=".", markersize=10, color="orange")
+							if debugMain: plt.plot(B1[0], B1[1], marker=".", markersize=10, color="orange")
+							if debugMain: plt.plot(ausiliaryB1[0], ausiliaryB1[1], marker=".", markersize=10, color="orange")
+							if debugMain: plt.plot([A1[0], B1[0]], [A1[1], B1[1]], color = "orange")
+							if debugMain: plt.plot([ausiliaryA1[0], A1[0]], [ausiliaryA1[1], A1[1]], color = "orange")
+							if debugMain: plt.plot([ausiliaryB1[0], B1[0]], [ausiliaryB1[1], B1[1]], color = "orange")
 
 							if type == "corner": # it is necessary to find also the opposite corners
 								# vertices are calculated from B to A to have them sorted properly
 								if perpSlope != None:
-									B2 = pointFromCenter(tmpPointB, perpSlope, directionA, -1 * widthB * factor)
-									ausiliaryB2 = pointFromCenter(B, perpSlope, directionA,  -1 * widthB * factor)
+									if perpSlope == 0:
+										B2 = pointFromCenter(tmpPointB, perpSlope, directionA, widthB * factor)
+										ausiliaryB2 = pointFromCenter(B, perpSlope, directionA, widthB * factor)
 
-									A2 = pointFromCenter(tmpPointA, perpSlope, directionA, -1 * widthA * factor)
-									ausiliaryA2 = pointFromCenter(A, perpSlope, directionA, -1 * widthA * factor)
+										A2 = pointFromCenter(tmpPointA, perpSlope, directionA, widthA * factor)
+										ausiliaryA2 = pointFromCenter(A, perpSlope, directionA, widthA * factor)
+									else:
+										B2 = pointFromCenter(tmpPointB, perpSlope, directionA, -1 * widthB * factor)
+										ausiliaryB2 = pointFromCenter(B, perpSlope, directionA,  -1 * widthB * factor)
+
+										A2 = pointFromCenter(tmpPointA, perpSlope, directionA, -1 * widthA * factor)
+										ausiliaryA2 = pointFromCenter(A, perpSlope, directionA, -1 * widthA * factor)
 								else:
 									B2 = [tmpPointB[0], tmpPointB[1] - widthB * factor]
 									ausiliaryB2 = [B[0], B[1] - widthB * factor]
@@ -1042,12 +1057,12 @@ def populateVertices(lines, vertices):
 
 								pointA = pointPerpendicularToLine(filletCenterB2, [B2, ausiliaryB2], rad)
 								streetVerticesList[lineIndexB].extend([pointA])
-								plt.plot(pointA[0], pointA[1], marker=".", markersize=10, color="orange")
-								plt.plot([filletCenterB2[0], pointA[0]], [filletCenterB2[1], pointA[1]], color="green")
+								if debugMain: plt.plot(pointA[0], pointA[1], marker=".", markersize=10, color="orange")
+								if debugMain: plt.plot([filletCenterB2[0], pointA[0]], [filletCenterB2[1], pointA[1]], color="green")
 
 								pointB = pointPerpendicularToLine(filletCenterB2, [B2, A2], rad)
-								plt.plot(pointB[0], pointB[1], marker=".", markersize=10, color="orange")
-								plt.plot([filletCenterB2[0], pointB[0]], [filletCenterB2[1], pointB[1]], color="green")
+								if debugMain: plt.plot(pointB[0], pointB[1], marker=".", markersize=10, color="orange")
+								if debugMain: plt.plot([filletCenterB2[0], pointB[0]], [filletCenterB2[1], pointB[1]], color="green")
 
 								arcVertices = getArcVertices(centerIndex, filletCenterB2, pointA, pointB, minAngle, type, rad, invert2)
 								streetCornerVertices[centerIndex].extend(arcVertices)
@@ -1056,23 +1071,23 @@ def populateVertices(lines, vertices):
 
 								pointA = pointPerpendicularToLine(filletCenterA2, [A2, ausiliaryA2], rad)
 								streetVerticesList[lineIndexA].extend([pointA])
-								plt.plot(pointA[0], pointA[1], marker=".", markersize=10, color="orange")
-								plt.plot([filletCenterA2[0], pointA[0]], [filletCenterA2[1], pointA[1]], color="green")
+								if debugMain: plt.plot(pointA[0], pointA[1], marker=".", markersize=10, color="orange")
+								if debugMain: plt.plot([filletCenterA2[0], pointA[0]], [filletCenterA2[1], pointA[1]], color="green")
 
 								pointB = pointPerpendicularToLine(filletCenterA2, [A2, B2], rad)
-								plt.plot(pointB[0], pointB[1], marker=".", markersize=10, color="orange")
-								plt.plot([filletCenterA2[0], pointB[0]], [filletCenterA2[1], pointB[1]], color="green")
+								if debugMain: plt.plot(pointB[0], pointB[1], marker=".", markersize=10, color="orange")
+								if debugMain: plt.plot([filletCenterA2[0], pointB[0]], [filletCenterA2[1], pointB[1]], color="green")
 
 								arcVertices = getArcVertices(centerIndex, filletCenterA2, pointA, pointB, minAngle, type, rad, invert1)
 								streetCornerVertices[centerIndex].extend(arcVertices)
 
-								plt.plot(A2[0], A2[1], marker=".", markersize=10, color="orange")
-								plt.plot([A2[0], B2[0]], [A2[1], B2[1]], color = "orange")
-								plt.plot(ausiliaryA2[0], ausiliaryA2[1], marker=".", markersize=10, color="orange")
-								plt.plot([ausiliaryA2[0], A2[0]], [ausiliaryA2[1], A2[1]], color = "orange")
-								plt.plot(B2[0], B2[1], marker=".", markersize=10, color="orange")
-								plt.plot(ausiliaryB2[0], ausiliaryB2[1], marker=".", markersize=10, color="orange")
-								plt.plot([ausiliaryB2[0], B2[0]], [ausiliaryB2[1], B2[1]], color = "orange")
+								if debugMain: plt.plot(A2[0], A2[1], marker=".", markersize=10, color="orange")
+								if debugMain: plt.plot([A2[0], B2[0]], [A2[1], B2[1]], color = "orange")
+								if debugMain: plt.plot(ausiliaryA2[0], ausiliaryA2[1], marker=".", markersize=10, color="orange")
+								if debugMain: plt.plot([ausiliaryA2[0], A2[0]], [ausiliaryA2[1], A2[1]], color = "orange")
+								if debugMain: plt.plot(B2[0], B2[1], marker=".", markersize=10, color="orange")
+								if debugMain: plt.plot(ausiliaryB2[0], ausiliaryB2[1], marker=".", markersize=10, color="orange")
+								if debugMain: plt.plot([ausiliaryB2[0], B2[0]], [ausiliaryB2[1], B2[1]], color = "orange")
 
 
 
@@ -1127,8 +1142,8 @@ def populateVertices(lines, vertices):
 								if mainSlope != None:
 									mainDirection = getLineDirection(point, filletCenter, mainSlope)
 
-								plt.plot(point[0], point[1], marker=".", markersize=10, color="orange")
-								plt.plot([filletCenter[0], point[0]], [filletCenter[1], point[1]], color="green")
+								if debugMain: plt.plot(point[0], point[1], marker=".", markersize=10, color="orange")
+								if debugMain: plt.plot([filletCenter[0], point[0]], [filletCenter[1], point[1]], color="green")
 
 								# if it is a corner, "the other side" of the corner is to be found
 								if type == "corner":
@@ -1137,7 +1152,7 @@ def populateVertices(lines, vertices):
 										oppositePoint = pointPerpendicularToLine(filletCenter, [center, vert], radius + minWidth*2)
 										if (oppositePoint):
 											oppositeFilletCenter = filletCenter
-											plt.plot(oppositePoint[0], oppositePoint[1], marker=".", markersize=10, color="red")
+											if debugMain: plt.plot(oppositePoint[0], oppositePoint[1], marker=".", markersize=10, color="red")
 
 									# in case street widths are different
 									else:
@@ -1167,7 +1182,7 @@ def populateVertices(lines, vertices):
 												newPoint = pointFromCenter(filletCenter, newSlope, "down", hypotenuse)
 
 
-											plt.plot(newPoint[0], newPoint[1], marker=".", markersize=20, color="green")
+											if debugMain: plt.plot(newPoint[0], newPoint[1], marker=".", markersize=20, color="green")
 
 											slope = getLineSlope(newPoint, center) 	#the slope between the filletCenter and the corner
 											dist = getDistance(newPoint, center) 	#the distance between the filletCenter and the corner
@@ -1182,8 +1197,8 @@ def populateVertices(lines, vertices):
 											else:
 												oppositeFilletCenter = [filletCenter[0], filletCenter[1] + 2 * dist]
 
-											plt.plot(oppositeFilletCenter[0], oppositeFilletCenter[1], marker=".", markersize=10, color="blue")
-											plt.plot([filletCenter[0], oppositeFilletCenter[0]], [filletCenter[1], oppositeFilletCenter[1]], color="black")
+											if debugMain: plt.plot(oppositeFilletCenter[0], oppositeFilletCenter[1], marker=".", markersize=10, color="blue")
+											if debugMain: plt.plot([filletCenter[0], oppositeFilletCenter[0]], [filletCenter[1], oppositeFilletCenter[1]], color="black")
 											# plt.plot([newPoint[0], oppositeFilletCenter[0]], [newPoint[1], oppositeFilletCenter[1]], color="black")
 
 										# then the new perpendicular points, starting from the new Fillet center are calculated
@@ -1223,8 +1238,8 @@ def populateVertices(lines, vertices):
 										#     if centerLocation == pointLocation:
 										#         oppositePoint = [oppositeFilletCenter[0], oppositeFilletCenter[1] - radius]
 
-										plt.plot(oppositePoint[0], oppositePoint[1], marker=".", markersize=10, color="orange")
-										plt.plot([oppositeFilletCenter[0], oppositePoint[0]], [oppositeFilletCenter[1], oppositePoint[1]], color="green")
+										if debugMain: plt.plot(oppositePoint[0], oppositePoint[1], marker=".", markersize=10, color="orange")
+										if debugMain: plt.plot([oppositeFilletCenter[0], oppositePoint[0]], [oppositeFilletCenter[1], oppositePoint[1]], color="green")
 										# plt.text(oppositePoint[0], oppositePoint[1], "oppositePoint" + str(i), fontsize = "large", color="blue")
 
 									# add the vertex to the point defining the linear streets
@@ -1279,7 +1294,8 @@ lines = sortLineVertices(lines)
 mainData = populateVertices(lines, vertices)
 
 # plt.figure(figsize=(20,20))
-plt.axis([-20,20,-20,20])
+# plt.axis([-20,20,-20,20])
+plt.axis([0,15,0,15])
 
 plt.grid(True)
 plt.gca().set_aspect('equal') # to set the aspect ratio to 1
@@ -1289,8 +1305,102 @@ drawGraph()
 # for el in mainData:
 	# drawStreets(el)
 
+for el in mainData[0]:
+	print(el)
+
 drawStreets(mainData[0])
 drawStreets(mainData[1])
+
+
+linesDict = {}
+# find the common point between the segment and the junctions
+for id, segment in enumerate(mainData[0]):
+	try: #try it is needed because it is used to block all the for loop when the first common vertex is found
+		for junction in mainData[1]:
+			if len(junction) > 0:
+				segment_as_set = set(tuple(i) for i in segment)
+				junction_as_set = set(tuple(i) for i in junction)
+				# finds the points in common
+				intersection = segment_as_set.intersection(junction_as_set)
+				#every segment can have only 2 points in common with a junction
+				if len(intersection) == 2:
+					#convert the set to a list
+					intersection = list(intersection)
+					# compares the first vertex in the list with the ones from the segment
+					# in order to find its index
+					vert = intersection[0]
+					nextVert = intersection[1]
+					for idEl, el in enumerate(segment):
+						equal = map(lambda x,y: x == y, vert, el)
+						result = reduce(lambda x, y: x and y, equal)
+						# because every segment is drawn by 4 points, it
+						# is enough to find the first common vert between segment and
+						# junction to determine the vertices we want to keep
+						if result:
+							#check if the next common point is the one before or after the one found
+							if idEl == len(segment) - 1:
+								nextInd = 0
+							else:
+								nextInd = idEl + 1
+							equal = map(lambda x,y: x == y, nextVert, segment[nextInd])
+							result = reduce(lambda x, y: x and y, equal)
+
+
+							r = random.random()
+							b = random.random()
+							g = random.random()
+							color = (r, g, b)
+
+							if result: #in case the other common vertex is the next
+								endingA = idEl - 1
+								endingB = nextInd +1
+								if endingA < 0:
+									endingA = len(segment) -1
+								if endingB > len(segment) -1:
+								 	endingB = 0
+
+							else: #when it is the vertex before
+								endingA = idEl + 1
+								endingB = idEl - 2
+								if endingA > len(segment) -1:
+									endingA = 0
+								if endingB < 0:
+									endingB = len(segment) + endingB
+
+							endingVertA = segment[endingA]
+							endingVertB = segment[endingB]
+
+							plt.plot([vert[0], endingVertA[0]], [vert[1], endingVertA[1]], color=color)
+							plt.plot([nextVert[0], endingVertB[0]], [nextVert[1], endingVertB[1]], color=color)
+
+							streetType = lines[id][1]
+							tmpA = {
+									"vertA" : vert,
+									"vertB" : endingVertA,
+									"streetType" : streetType
+							}
+
+							tmpB = {
+									"vertA" : nextVert,
+									"vertB" : endingVertB,
+									"streetType" : streetType
+							}
+							tmp = (tmpA, tmpB)
+							linesDict[id] = tmp
+
+							raise StopIteration # the loop can be blocked
+
+	except StopIteration:
+		pass
+
+
+
+print(linesDict[0])
+for i, el in enumerate(linesDict):
+	print("vertA", linesDict[i][0]["vertA"])
+	print("vertB", linesDict[i][0]["vertB"])
+	print("streetType", linesDict[i][0]["streetType"])
+
 
 
 plt.show()
