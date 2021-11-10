@@ -34,8 +34,14 @@ lines = [([1,0],"A"), ([1,2],"B"), ([2,3],"B"), ([3,4],"B"), ([3,5],"A"), ([2,6]
 # lines = [([0,1],'A'), ([1,2],'B'), ([2,3], 'A'), ([2,4], 'B')]
 
 minAngle = 5
+defaults = {"street" : {
+				"type" : "A",
+				"width" : ".2",
+				"radius" : ".3"
+			}
+}
 
-debugMain = False
+debugMain = True
 # a function to sort vertices around a center, clockwise
 # if center is not passed, it is calculated
 # index is necessary when the verList contains other information
@@ -686,13 +692,32 @@ def getStreetProperty(properties, type):
 		streetType = street.get("type")
 		if type == streetType:
 			for segment in street.iter("segment"):
-				id = float(segment.get("id"))
-				for property in properties:
-					value = float(segment.find(property).text)
-					if (id == 0 and property in toHalf):
-						value = value / 2
-					results.append(value)
-				return(results)
+				if segment:
+					try:
+						id = float(segment.get("id"))
+					except:
+						id = 0
+					for property in properties:
+						try:
+							value = float(segment.find(property).text)
+						except:
+							value = float(defaults["street"][property])
+							# print("default value", value)
+						if (id == 0 and property in toHalf):
+							value = value / 2
+						results.append(value)
+
+	# if the type is not found, it is necessary to use the defaults
+	if len(results) == 0:
+		# print("using all defaults")
+		type = defaults["street"]["type"]
+		for property in properties:
+			value = float(defaults["street"][property])
+			if property in toHalf:
+				value = value / 2
+			results.append(value)
+	return(results)
+
 
 #function to get the angle between two lines, based on the carnot theorem
 def carnot(center, list):
@@ -1304,102 +1329,98 @@ drawGraph()
 
 # for el in mainData:
 	# drawStreets(el)
-
-for el in mainData[0]:
-	print(el)
-
 drawStreets(mainData[0])
 drawStreets(mainData[1])
 
 
-linesDict = {}
-# find the common point between the segment and the junctions
-for id, segment in enumerate(mainData[0]):
-	try: #try it is needed because it is used to block all the for loop when the first common vertex is found
-		for junction in mainData[1]:
-			if len(junction) > 0:
-				segment_as_set = set(tuple(i) for i in segment)
-				junction_as_set = set(tuple(i) for i in junction)
-				# finds the points in common
-				intersection = segment_as_set.intersection(junction_as_set)
-				#every segment can have only 2 points in common with a junction
-				if len(intersection) == 2:
-					#convert the set to a list
-					intersection = list(intersection)
-					# compares the first vertex in the list with the ones from the segment
-					# in order to find its index
-					vert = intersection[0]
-					nextVert = intersection[1]
-					for idEl, el in enumerate(segment):
-						equal = map(lambda x,y: x == y, vert, el)
-						result = reduce(lambda x, y: x and y, equal)
-						# because every segment is drawn by 4 points, it
-						# is enough to find the first common vert between segment and
-						# junction to determine the vertices we want to keep
-						if result:
-							#check if the next common point is the one before or after the one found
-							if idEl == len(segment) - 1:
-								nextInd = 0
-							else:
-								nextInd = idEl + 1
-							equal = map(lambda x,y: x == y, nextVert, segment[nextInd])
-							result = reduce(lambda x, y: x and y, equal)
+# linesDict = {}
+# # find the common point between the segment and the junctions
+# for id, segment in enumerate(mainData[0]):
+# 	try: #try it is needed because it is used to block all the for loop when the first common vertex is found
+# 		for junction in mainData[1]:
+# 			if len(junction) > 0:
+# 				segment_as_set = set(tuple(i) for i in segment)
+# 				junction_as_set = set(tuple(i) for i in junction)
+# 				# finds the points in common
+# 				intersection = segment_as_set.intersection(junction_as_set)
+# 				#every segment can have only 2 points in common with a junction
+# 				if len(intersection) == 2:
+# 					#convert the set to a list
+# 					intersection = list(intersection)
+# 					# compares the first vertex in the list with the ones from the segment
+# 					# in order to find its index
+# 					vert = intersection[0]
+# 					nextVert = intersection[1]
+# 					for idEl, el in enumerate(segment):
+# 						equal = map(lambda x,y: x == y, vert, el)
+# 						result = reduce(lambda x, y: x and y, equal)
+# 						# because every segment is drawn by 4 points, it
+# 						# is enough to find the first common vert between segment and
+# 						# junction to determine the vertices we want to keep
+# 						if result:
+# 							#check if the next common point is the one before or after the one found
+# 							if idEl == len(segment) - 1:
+# 								nextInd = 0
+# 							else:
+# 								nextInd = idEl + 1
+# 							equal = map(lambda x,y: x == y, nextVert, segment[nextInd])
+# 							result = reduce(lambda x, y: x and y, equal)
+#
+#
+# 							r = random.random()
+# 							b = random.random()
+# 							g = random.random()
+# 							color = (r, g, b)
+#
+# 							if result: #in case the other common vertex is the next
+# 								endingA = idEl - 1
+# 								endingB = nextInd +1
+# 								if endingA < 0:
+# 									endingA = len(segment) -1
+# 								if endingB > len(segment) -1:
+# 								 	endingB = 0
+#
+# 							else: #when it is the vertex before
+# 								endingA = idEl + 1
+# 								endingB = idEl - 2
+# 								if endingA > len(segment) -1:
+# 									endingA = 0
+# 								if endingB < 0:
+# 									endingB = len(segment) + endingB
+#
+# 							endingVertA = segment[endingA]
+# 							endingVertB = segment[endingB]
+#
+# 							plt.plot([vert[0], endingVertA[0]], [vert[1], endingVertA[1]], color=color)
+# 							plt.plot([nextVert[0], endingVertB[0]], [nextVert[1], endingVertB[1]], color=color)
+#
+# 							streetType = lines[id][1]
+# 							tmpA = {
+# 									"vertA" : vert,
+# 									"vertB" : endingVertA,
+# 									"streetType" : streetType
+# 							}
+#
+# 							tmpB = {
+# 									"vertA" : nextVert,
+# 									"vertB" : endingVertB,
+# 									"streetType" : streetType
+# 							}
+# 							tmp = (tmpA, tmpB)
+# 							linesDict[id] = tmp
+#
+# 							raise StopIteration # the loop can be blocked
+#
+# 	except StopIteration:
+# 		pass
 
 
-							r = random.random()
-							b = random.random()
-							g = random.random()
-							color = (r, g, b)
 
-							if result: #in case the other common vertex is the next
-								endingA = idEl - 1
-								endingB = nextInd +1
-								if endingA < 0:
-									endingA = len(segment) -1
-								if endingB > len(segment) -1:
-								 	endingB = 0
-
-							else: #when it is the vertex before
-								endingA = idEl + 1
-								endingB = idEl - 2
-								if endingA > len(segment) -1:
-									endingA = 0
-								if endingB < 0:
-									endingB = len(segment) + endingB
-
-							endingVertA = segment[endingA]
-							endingVertB = segment[endingB]
-
-							plt.plot([vert[0], endingVertA[0]], [vert[1], endingVertA[1]], color=color)
-							plt.plot([nextVert[0], endingVertB[0]], [nextVert[1], endingVertB[1]], color=color)
-
-							streetType = lines[id][1]
-							tmpA = {
-									"vertA" : vert,
-									"vertB" : endingVertA,
-									"streetType" : streetType
-							}
-
-							tmpB = {
-									"vertA" : nextVert,
-									"vertB" : endingVertB,
-									"streetType" : streetType
-							}
-							tmp = (tmpA, tmpB)
-							linesDict[id] = tmp
-
-							raise StopIteration # the loop can be blocked
-
-	except StopIteration:
-		pass
-
-
-
-print(linesDict[0])
-for i, el in enumerate(linesDict):
-	print("vertA", linesDict[i][0]["vertA"])
-	print("vertB", linesDict[i][0]["vertB"])
-	print("streetType", linesDict[i][0]["streetType"])
+# print(linesDict[0])
+# for i, el in enumerate(linesDict):
+# 	print("vertA", linesDict[i][0]["vertA"])
+# 	print("vertB", linesDict[i][0]["vertB"])
+# 	print("streetType", linesDict[i][0]["streetType"])
 
 
 
