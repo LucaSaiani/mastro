@@ -8,6 +8,8 @@ from operator import itemgetter
 
 import random
 
+debugMain = False
+
 vertices = 	[[1,1], [4,3], [5,6], [3,8], [2,10], [1,9], [5,10], [6,8], [8,8], [8,6],
 			[6,4], [2,8], [4,6], [6,0], [10,4], [7,8], [5,11], [9.5,4.5], [2,3], [4,4],
 			[6,5], [4.5,4.5], [10.5, 5.5], [9,9], [14,14], [10,10], [14,6], [12,8], [14,10], [0,10],
@@ -32,6 +34,11 @@ lines = [([1,0],"A"), ([1,2],"B"), ([2,3],"B"), ([3,4],"B"), ([3,5],"A"), ([2,6]
 
 # vertices = 	[[1,1], [2,3], [6,4], [8,8], [8,2]]
 # lines = [([0,1],'A'), ([1,2],'B'), ([2,3], 'A'), ([2,4], 'B')]
+# lines = [([0,1],'A'), ([1,2],'B'), ([1,3], 'A')]
+
+usedVerticesList = []
+arcsDict = []
+linesDict = []
 
 minAngle = 5
 defaults = {"street" : {
@@ -41,7 +48,11 @@ defaults = {"street" : {
 			}
 }
 
-debugMain = True
+
+
+
+
+
 # a function to sort vertices around a center, clockwise
 # if center is not passed, it is calculated
 # index is necessary when the verList contains other information
@@ -345,7 +356,8 @@ def getMinimumProperty(verts, property):
 # function to find the center of the fillet
 # radius and width are specified to get the fillets when lines are parallel
 def findFilletCenter(center, vertList, givenWidth = None, givenRadius = None):
-	indexO = findElementIndex(center, vertices)
+	# indexO = findElementIndex(center, vertices)
+	# print(center, indexO)
 
 	#it is necessary to select the minimun radius between the two lines
 	if givenRadius == None:
@@ -360,7 +372,7 @@ def findFilletCenter(center, vertList, givenWidth = None, givenRadius = None):
 	for i, el in enumerate(vertList):
 		vert = el[0]
 		verts.append(vert)
-		indexVert = findElementIndex(vert, vertices)
+		# indexVert = findElementIndex(vert, vertices)
 		tmpAO = [center, vert]
 		if givenWidth == None:
 			width = el[1][0]
@@ -372,26 +384,29 @@ def findFilletCenter(center, vertList, givenWidth = None, givenRadius = None):
 	firstSet = parallelList[0]
 	secondSet = parallelList[1]
 
-	for line in firstSet:
-		A = line[0]
-		B = line[1]
-		xA = A[0]
-		yA = A[1]
 
-		xB = B[0]
-		yB = B[1]
+	if debugMain:
+		for line in firstSet:
+			A = line[0]
+			B = line[1]
+			xA = A[0]
+			yA = A[1]
 
-		if debugMain: plt.plot([xA, xB], [yA, yB], color="blue")
-	for line in secondSet:
-		A = line[0]
-		B = line[1]
-		xA = A[0]
-		yA = A[1]
+			xB = B[0]
+			yB = B[1]
 
-		xB = B[0]
-		yB = B[1]
+			plt.plot([xA, xB], [yA, yB], color="blue")
 
-		if debugMain: plt.plot([xA, xB], [yA, yB], color="green")
+		for line in secondSet:
+			A = line[0]
+			B = line[1]
+			xA = A[0]
+			yA = A[1]
+
+			xB = B[0]
+			yB = B[1]
+
+			plt.plot([xA, xB], [yA, yB], color="green")
 
 	# look for the intersections between the 2 sets of 4 lines
 	# intersections are always 4, but only the one inside the
@@ -745,6 +760,7 @@ def populateVertices(lines, vertices):
 
 	#get the list of the vertices used in drawing the streets
 	#format of usedVerticesList is [vert, [line A, line B, line C]]
+	global usedVerticesList
 	usedVerticesList = usedVertices(lines)
 
 	#prepare an empty list for the streetVerticesList
@@ -1230,38 +1246,6 @@ def populateVertices(lines, vertices):
 										# because it is a rigid translation, the new points are given by the location of the new
 										# filleCenter plus the distance between the internal fillet center and the perpendicular point
 										oppositePoint = [oppositeFilletCenter[0] + (point[0] - filletCenter[0]), oppositeFilletCenter[1] + (point[1] - filletCenter[1])]
-										# if mainSlope != None:
-										#     if mainSlope == 0:
-										#         oppositePoint = [oppositeFilletCenter[0] + radius, oppositeFilletCenter[1]]
-										#         if (oppositeFilletCenter[0] > filletCenter[0]):
-										#             centerLocation = "left"
-										#         else:
-										#             centerLocation = "right"
-										#
-										#         if (oppositeFilletCenter[0] > oppositePoint[0]):
-										#             pointLocation = "left"
-										#         else:
-										#             pointLocation = "right"
-										#
-										#         if centerLocation == pointLocation:
-										#             oppositePoint = [oppositeFilletCenter[0] - radius, oppositeFilletCenter[1]]
-										#
-										#     else:
-										#         oppositePoint = pointFromCenter(oppositeFilletCenter, mainSlope, mainDirection, radius)
-										# else:
-										#     oppositePoint = [oppositeFilletCenter[0], oppositeFilletCenter[1] + radius]
-										#     if (oppositeFilletCenter[1] > filletCenter[1]):
-										#         centerLocation = "down"
-										#     else:
-										#         centerLocation = "up"
-										#
-										#     if (oppositeFilletCenter[1] > oppositePoint[1]):
-										#         pointLocation = "down"
-										#     else:
-										#         pointLocation = "up"
-										#
-										#     if centerLocation == pointLocation:
-										#         oppositePoint = [oppositeFilletCenter[0], oppositeFilletCenter[1] - radius]
 
 										if debugMain: plt.plot(oppositePoint[0], oppositePoint[1], marker=".", markersize=10, color="orange")
 										if debugMain: plt.plot([oppositeFilletCenter[0], oppositePoint[0]], [oppositeFilletCenter[1], oppositePoint[1]], color="green")
@@ -1312,10 +1296,6 @@ lines = sortLineVertices(lines)
 #sublines it the list of the only vertices, without the street description
 # subLines = [item[0] for item in lines]
 
-
-# for i,el in enumerate(lines):
-# 	print(i, el)
-
 mainData = populateVertices(lines, vertices)
 
 # plt.figure(figsize=(20,20))
@@ -1333,94 +1313,307 @@ drawStreets(mainData[0])
 drawStreets(mainData[1])
 
 
-# linesDict = {}
-# # find the common point between the segment and the junctions
-# for id, segment in enumerate(mainData[0]):
-# 	try: #try it is needed because it is used to block all the for loop when the first common vertex is found
-# 		for junction in mainData[1]:
-# 			if len(junction) > 0:
-# 				segment_as_set = set(tuple(i) for i in segment)
-# 				junction_as_set = set(tuple(i) for i in junction)
-# 				# finds the points in common
-# 				intersection = segment_as_set.intersection(junction_as_set)
-# 				#every segment can have only 2 points in common with a junction
-# 				if len(intersection) == 2:
-# 					#convert the set to a list
-# 					intersection = list(intersection)
-# 					# compares the first vertex in the list with the ones from the segment
-# 					# in order to find its index
-# 					vert = intersection[0]
-# 					nextVert = intersection[1]
-# 					for idEl, el in enumerate(segment):
-# 						equal = map(lambda x,y: x == y, vert, el)
-# 						result = reduce(lambda x, y: x and y, equal)
-# 						# because every segment is drawn by 4 points, it
-# 						# is enough to find the first common vert between segment and
-# 						# junction to determine the vertices we want to keep
-# 						if result:
-# 							#check if the next common point is the one before or after the one found
-# 							if idEl == len(segment) - 1:
-# 								nextInd = 0
-# 							else:
-# 								nextInd = idEl + 1
-# 							equal = map(lambda x,y: x == y, nextVert, segment[nextInd])
-# 							result = reduce(lambda x, y: x and y, equal)
+# find the common point between the segment and the junctions, them extract
+# the lines defining the straight segment of the streets. All data is collected
+# in linesDict
+for id, segment in enumerate(mainData[0]):
+	try: #try it is needed because it is used to block all the for loop when the first common vertex is found
+		for junction in mainData[1]:
+			if len(junction) > 0:
+				segment_as_set = set(tuple(i) for i in segment)
+				junction_as_set = set(tuple(i) for i in junction)
+				# finds the points in common
+				intersection = segment_as_set.intersection(junction_as_set)
+				#every segment can have only 2 points in common with a junction
+				if len(intersection) == 2:
+					#convert the set to a list
+					intersection = list(intersection)
+					# compares the first vertex in the list with the ones from the segment
+					# in order to find its index
+					vert = intersection[0]
+					nextVert = intersection[1]
+					for idEl, el in enumerate(segment):
+						equal = map(lambda x,y: x == y, vert, el)
+						result = reduce(lambda x, y: x and y, equal)
+						# because every segment is drawn by 4 points, it
+						# is enough to find the first common vert between segment and
+						# junction to determine the vertices we want to keep
+						if result:
+							#check if the next common point is the one before or after the one found
+							if idEl == len(segment) - 1:
+								nextInd = 0
+							else:
+								nextInd = idEl + 1
+							equal = map(lambda x,y: x == y, nextVert, segment[nextInd])
+							result = reduce(lambda x, y: x and y, equal)
+
+
+							# r = random.random()
+							# b = random.random()
+							# g = random.random()
+							# color = (r, g, b)
+
+							if result: #in case the other common vertex is the next
+								endingA = idEl - 1
+								endingB = nextInd +1
+								if endingA < 0:
+									endingA = len(segment) -1
+								if endingB > len(segment) -1:
+								 	endingB = 0
+
+							else: #when it is the vertex before
+								endingA = idEl + 1
+								endingB = idEl - 2
+								if endingA > len(segment) -1:
+									endingA = 0
+								if endingB < 0:
+									endingB = len(segment) + endingB
+
+							endingVertA = segment[endingA]
+							endingVertB = segment[endingB]
+							streetType = lines[id][1]
+
+							# plt.plot([vert[0], endingVertA[0]], [vert[1], endingVertA[1]], color=color)
+							# plt.plot([nextVert[0], endingVertB[0]], [nextVert[1], endingVertB[1]], color=color)
+							# plt.text(vert[0], vert[1], (id, streetType), color=color)
+							# plt.text(nextVert[0], nextVert[1], (lines[id][0][0], lines[id][0][1]), color=color)
+
+
+							tmp = {
+									"vertA" : list(vert),
+									"vertB" : list(endingVertA),
+									"streetType" : streetType,
+									"sourceLine" : id,
+									"relatedVertA" : lines[id][0][0],
+									"relatedVertB" : lines[id][0][1]
+							}
+							linesDict.append(tmp)
+							tmp = {
+									"vertA" : list(nextVert),
+									"vertB" : list(endingVertB),
+									"streetType" : streetType,
+									"sourceLine" : id,
+									"relatedVertA" : lines[id][0][0],
+									"relatedVertB" : lines[id][0][1]
+							}
+							linesDict.append(tmp)
+
+							raise StopIteration # the loop can be blocked
+
+	except StopIteration:
+		pass
+
+# for el in linesDict:
+# 	print(el)
+
+#collect all the arc which are defining the corners. Arcs are collected in arcsDict
+for idVert, arc in enumerate(mainData[1]):
+	if len(arc) > 0: # when the vertex is unused or a start/end of the line, there is no corresponding arc
+		# look for the lines related to that vertex
+		found = [x for x, y in enumerate(usedVerticesList) if y[0] == idVert][0]
+		foundIds = []
+		for idLine, line in enumerate(usedVerticesList[found][1]):
+
+			# tmpLines = []
+			vertToTest = []
+			counter = 0
+			# finds in linesDict the lines which have "line" as "sourceLine"
+			for el in linesDict:
+				sourceLine = el["sourceLine"]
+				if sourceLine == line:
+					counter += 1
+					# tmpLines.append(el)
+					vertToTest.append(el["vertA"])
+					vertToTest.append(el["vertB"])
+					# there can't be more than 2 lines
+					if (counter == 2):
+						break
+
+			#look for the indices of the common points between arc and lines
+			for elToTest in vertToTest:
+				found = [x for x, y in enumerate(arc) if y == elToTest]
+				if len(found) > 0:
+					foundIds.append(found[0])
+		foundIds.sort()
+		numberOfArcs = len(foundIds)/2
+		# print("numberOfArcs", numberOfArcs)
+		i = 0
+		splitIndex = 0
+		if foundIds[0] == 0 and foundIds[1] != 1:  # split is between the last entry and the first
+			splitIndex = 1
+
+		#split the junctions in their relative arcs
+		while i < numberOfArcs:
+			if i == 0:
+				splitFrom = foundIds[splitIndex + i * 2] + 1
+				tmp = {"relatedVert" :idVert,
+						"arc" : arc[:splitFrom]
+						}
+				# splitArcs.append(arc[:splitFrom])
+				# print("splitting", splitFrom)
+			elif i < numberOfArcs-1:
+				if splitIndex + i * 2 + 1 > len(foundIds) -1:
+					splitFrom = foundIds[splitIndex + i * 2 -1]
+					splitTo = foundIds[len(foundIds) -1]
+				else:
+					splitFrom = foundIds[splitIndex + i * 2 -1]
+					splitTo = foundIds[splitIndex + i * 2 + 1]
+				# print("splitting", splitFrom,splitTo)
+				tmp = {"relatedVert" :idVert,
+						"arc" : arc[splitFrom:splitTo]
+						}
+				# splitArcs.append(arc[splitFrom:splitTo])
+			else:
+				if splitIndex + i * 2 + 1 > len(foundIds) -1:
+					splitFrom = foundIds[splitIndex + i * 2 -1]
+					# splitTo = foundIds[len(foundIds) -1]
+				else:
+					splitFrom = foundIds[splitIndex + i * 2]
+					# splitTo = foundIds[splitIndex + i * 2 + 1]
+				# print("splitting", splitFrom)
+				tmp = {"relatedVert" :idVert,
+						"arc" : arc[splitFrom:]
+						}
+				# splitArcs.append(arc[splitFrom:])
+			arcsDict.append(tmp)
+			i += 1
+
+# for i, el in enumerate(arcsDict):
+# 	arc = el["arc"]
+# 	r = random.random()
+# 	b = random.random()
+# 	g = random.random()
+# 	color = (r, g, b)
+# 	# print(arc)
+# 	for vert in arc:
+# 		plt.plot(vert[0], vert[1], marker=".", markersize=10, color=color)
+
+# for el in linesDict:
+# 	print(el)
 #
-#
-# 							r = random.random()
-# 							b = random.random()
-# 							g = random.random()
-# 							color = (r, g, b)
-#
-# 							if result: #in case the other common vertex is the next
-# 								endingA = idEl - 1
-# 								endingB = nextInd +1
-# 								if endingA < 0:
-# 									endingA = len(segment) -1
-# 								if endingB > len(segment) -1:
-# 								 	endingB = 0
-#
-# 							else: #when it is the vertex before
-# 								endingA = idEl + 1
-# 								endingB = idEl - 2
-# 								if endingA > len(segment) -1:
-# 									endingA = 0
-# 								if endingB < 0:
-# 									endingB = len(segment) + endingB
-#
-# 							endingVertA = segment[endingA]
-# 							endingVertB = segment[endingB]
-#
-# 							plt.plot([vert[0], endingVertA[0]], [vert[1], endingVertA[1]], color=color)
-# 							plt.plot([nextVert[0], endingVertB[0]], [nextVert[1], endingVertB[1]], color=color)
-#
-# 							streetType = lines[id][1]
-# 							tmpA = {
-# 									"vertA" : vert,
-# 									"vertB" : endingVertA,
-# 									"streetType" : streetType
-# 							}
-#
-# 							tmpB = {
-# 									"vertA" : nextVert,
-# 									"vertB" : endingVertB,
-# 									"streetType" : streetType
-# 							}
-# 							tmp = (tmpA, tmpB)
-# 							linesDict[id] = tmp
-#
-# 							raise StopIteration # the loop can be blocked
-#
-# 	except StopIteration:
-# 		pass
+# for el in arcsDict:
+# 	print(el)
 
 
 
-# print(linesDict[0])
-# for i, el in enumerate(linesDict):
-# 	print("vertA", linesDict[i][0]["vertA"])
-# 	print("vertB", linesDict[i][0]["vertB"])
-# 	print("streetType", linesDict[i][0]["streetType"])
+
+# A function to find the common vertex between the line and the corresponding arc
+# foundLineIndex is the index of the line we are creating with this function
+# line is the line we are testing, sourceVert is the starting vert of that line,
+# missingVert is the vertex that has not be tested: this happen when the routine starts
+# because every line is defined by two vertices and the routing goes in one direction.
+# In this way, when the routine finds the end of the line, it goes backwards to cover
+# the missing part of the segment
+def findNextArc(foundLineIndex, line, sourceVert="", missingVert=""):
+	if len(newLines) == foundLineIndex:
+		tmp = []
+		newLines.append(tmp)
+	color="red"
+	verts = []
+	relatedVerts = []
+
+	vertA = line["vertA"]
+	vertB = line["vertB"]
+	relatedVerts.append(line["relatedVertA"])
+	relatedVerts.append(line["relatedVertB"])
+
+ 	# verts are the vertices to test
+	# if the one vert of the line has been tested, it is not added
+	if vertA != sourceVert:
+		verts.append(vertA)
+
+	if vertB != sourceVert:
+		verts.append(vertB)
+
+	plt.plot([vertA[0], vertB[0]],[vertA[1], vertB[1]], color=color)
+
+	# if missingVert is defined and it is not part of the current line, the current
+	# line is removed from the list of the lines to parse in the next iteration
+	if missingVert != "" and missingVert not in verts:
+		linesToTest.remove(line)
+
+	# vertices to test to find the common point with the arc
+	for vertId in relatedVerts:
+		# look for the vertices which are not either a start or a end
+		for el in usedVerticesList:
+			id = el[0]
+			if vertId == id:
+				tmpVerticesList = el[1]
+				break #once it is found, there is no point to continue the loop
+		if len(tmpVerticesList) > 1:
+			# look for the arc related to that vertId
+			for idArc, arc in enumerate(arcsDict):
+				relatedVertInArc = arc["relatedVert"]
+				if relatedVertInArc == vertId:
+					# check if arc and line have a vertex in common
+					# it can be either the first or the last of the list
+					arcVertices = arc["arc"]
+					vertToTest = []
+					vertToTest.append(arcVertices[0])
+					vertToTest.append(arcVertices[-1])
+					#verts and relatedVerts are not corresponding (A doesn't correspond to relatedA) because
+					# the way the vertices are extrapolated, it is necessary to check both
+					for i, testingVert in enumerate(verts):
+						foundId = [x for x, y in enumerate(vertToTest) if y == testingVert]
+						if len(foundId) > 0:
+							vertFound = vertToTest[foundId[0]]
+							if vertFound == vertToTest[0]:
+								nextVertex = vertToTest[1]
+							else:
+								nextVertex = vertToTest[0]
+
+
+							for vert in arcVertices:
+								plt.plot(vert[0], vert[1], marker=".", markersize=10, color=color)
+
+							#lines and arcs are added to the newLines library
+							newLines[foundLineIndex].extend([line])
+							newLines[foundLineIndex].extend([arc])
+
+							# the found arc can be removed from the arcsDict
+							arcsDict.remove(arc)
+
+							# once the common verts is found, it is necessary to find the line attached to that arc
+							# the current line can be removed
+							try:
+								linesToTest.remove(line)
+							except:
+								pass
+							for lineToFind in linesToTest:
+								tmpVerts = []
+								vertA = lineToFind["vertA"]
+								vertB = lineToFind["vertB"]
+								tmpVerts.append(vertA)
+								tmpVerts.append(vertB)
+								# if the vert correspond in that line, the line and other data is passed recursively to the function
+								for vert in tmpVerts:
+									if vert == nextVertex:
+										# if verts has 2 vertices, which means that the loop is starting with that line
+										# and if i == 0, which means that we found the vertex, but the other has been not tested
+										# it is necessary, in this case, to save the missing vertex and then test it afterwards
+										# in case the value was already set, it is not changed
+										if missingVert == "":
+											if len(verts) == 2:
+												if i == 0: missingVert = verts[1]
+												else: missingVert = verts[0]
+										findNextArc(foundLineIndex, lineToFind, nextVertex, missingVert)
+							if missingVert != "":
+								findNextArc(foundLineIndex, line, missingVert)
+							else:
+								return()
+
+
+linesToTest = linesDict
+newLines = []
+foundLineIndex = 0
+while len(linesToTest) > 0:
+	findNextArc(foundLineIndex, linesToTest[0])
+	foundLineIndex += 1
+	# print("lines to go ", len(linesToTest))
+
+# for segment in newLines:
+# 	for i, el in enumerate(segment):
+# 		print(i, el)
 
 
 
