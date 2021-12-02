@@ -13,7 +13,22 @@ from operator import itemgetter
 import random
 from datetime import datetime
 
+usedVerticesList = []
+arcsDict = []
+linesDict = []
+
 minAngle = 5
+defaults = {"street" : {
+				"type" : "A",
+				"width" : ".2",
+				"radius" : ".3"
+			}
+}
+
+
+
+
+
 
 # a function to sort vertices around a center, clockwise
 # if center is not passed, it is calculated
@@ -314,7 +329,7 @@ def getMinimumProperty(verts, property):
 # function to find the center of the fillet
 # radius and width are specified to get the fillets when lines are parallel
 def findFilletCenter(center, vertList, givenWidth = None, givenRadius = None):
-	indexO = findElementIndex(center, vertices)
+	# indexO = findElementIndex(center, vertices)
 
 	#it is necessary to select the minimun radius between the two lines
 	if givenRadius == None:
@@ -328,7 +343,7 @@ def findFilletCenter(center, vertList, givenWidth = None, givenRadius = None):
 	for i, el in enumerate(vertList):
 		vert = el[0]
 		verts.append(vert)
-		indexVert = findElementIndex(vert, vertices)
+		# indexVert = findElementIndex(vert, vertices)
 		tmpAO = [center, vert]
 		if givenWidth == None:
 			width = el[1][0]
@@ -338,24 +353,6 @@ def findFilletCenter(center, vertList, givenWidth = None, givenRadius = None):
 
 	firstSet = parallelList[0]
 	secondSet = parallelList[1]
-
-	for line in firstSet:
-		A = line[0]
-		B = line[1]
-		xA = A[0]
-		yA = A[1]
-
-		xB = B[0]
-		yB = B[1]
-
-	for line in secondSet:
-		A = line[0]
-		B = line[1]
-		xA = A[0]
-		yA = A[1]
-
-		xB = B[0]
-		yB = B[1]
 
 
 	# look for the intersections between the 2 sets of 4 lines
@@ -643,13 +640,30 @@ def getStreetProperty(properties, type):
 		streetType = street.get("type")
 		if type == streetType:
 			for segment in street.iter("segment"):
-				id = float(segment.get("id"))
-				for property in properties:
-					value = float(segment.find(property).text)
-					if (id == 0 and property in toHalf):
-						value = value / 2
-					results.append(value)
-				return(results)
+				if segment:
+					try:
+						id = float(segment.get("id"))
+					except:
+						id = 0
+					for property in properties:
+						try:
+							value = float(segment.find(property).text)
+						except:
+							value = float(defaults["street"][property])
+						if (id == 0 and property in toHalf):
+							value = value / 2
+						results.append(value)
+
+	# if the type is not found, it is necessary to use the defaults
+	if len(results) == 0:
+		type = defaults["street"]["type"]
+		for property in properties:
+			value = float(defaults["street"][property])
+			if property in toHalf:
+				value = value / 2
+			results.append(value)
+	return(results)
+
 
 #function to get the angle between two lines, based on the carnot theorem
 def carnot(center, list):
@@ -677,6 +691,7 @@ def populateVertices(lines, vertices):
 
 	#get the list of the vertices used in drawing the streets
 	#format of usedVerticesList is [vert, [line A, line B, line C]]
+	global usedVerticesList
 	usedVerticesList = usedVertices(lines)
 
 	#prepare an empty list for the streetVerticesList
@@ -791,6 +806,7 @@ def populateVertices(lines, vertices):
 
 						widthB = propB[0]
 						radiusB = propB[1]
+
 						# check if lines are aligned
 						if widthA == widthB:
 							slope = getLineSlope(A, center)
@@ -814,13 +830,14 @@ def populateVertices(lines, vertices):
 
 							streetVerticesList[lineIndexA].extend([tmpPointA])
 							streetVerticesList[lineIndexA].extend([tmpPointB])
+
 							streetVerticesList[lineIndexB].extend([tmpPointA])
 							streetVerticesList[lineIndexB].extend([tmpPointB])
 
-							if type == "corner":
-								tmpPoint = pointFromCenter(center, perpSlopeA, oppositeDirection(direction), widthA)
-								streetVerticesList[lineIndexA].extend([tmpPoint])
-								streetVerticesList[lineIndexB].extend([tmpPoint])
+							# if type == "corner":
+							# 	tmpPoint = pointFromCenter(center, perpSlopeA, oppositeDirection(direction), widthA)
+							# 	streetVerticesList[lineIndexA].extend([tmpPoint])
+							# 	streetVerticesList[lineIndexB].extend([tmpPoint])
 
 						# else lines are not aligned
 						else:
@@ -828,23 +845,24 @@ def populateVertices(lines, vertices):
 
 							# points relative to vert A
 							slope = getLineSlope(A, center)
-							if slope == None:
+							if slope == None: #lines are vertical
 								if A[1] < B[1]:
 									factor = -1
 								else:
 									factor = 1
+
 								perpSlope = 0
 								directionA = "up"
 								tmpPointA = [center[0], center[1] + factor * widthDiff]
 								tmpPointB = [center[0], center[1] - factor * widthDiff]
 
 							else:
-								if slope != 0:
+								if slope != 0: #generic lines
 									directionA = getLineDirection(A, center, slope)
 									tmpPointA = pointFromCenter(center, slope, directionA, widthDiff)
 									tmpPointB = pointFromCenter(center, slope, directionA, -1 * widthDiff)
 									perpSlope = -1/slope
-								else:
+								else: # lines are horizontal
 									if A[0] < B[0]:
 										factor = -1
 									else:
@@ -871,7 +889,7 @@ def populateVertices(lines, vertices):
 
 									B1 = pointFromCenter(tmpPointB, perpSlope, directionA, widthB * factor)
 									ausiliaryB1 = pointFromCenter(B, perpSlope, directionA, widthB * factor)
-								else:
+								else: #perpendicular is horizontal
 									if A[1] < B[1]:
 										factor = -1
 									else:
@@ -915,18 +933,18 @@ def populateVertices(lines, vertices):
 
 							if widthA > widthB:
 								if (pointIsLeft(center, A1, B1)):
-									invert1 = False
-									invert2 = True
-								else:
 									invert1 = True
 									invert2 = False
+								else:
+									invert1 = False
+									invert2 = True
 							else:
 								if (pointIsLeft(center, A1, B1)):
-									invert1 = True
-									invert2 = False
-								else:
 									invert1 = False
 									invert2 = True
+								else:
+									invert1 = True
+									invert2 = False
 
 
 
@@ -957,11 +975,18 @@ def populateVertices(lines, vertices):
 							if type == "corner": # it is necessary to find also the opposite corners
 								# vertices are calculated from B to A to have them sorted properly
 								if perpSlope != None:
-									B2 = pointFromCenter(tmpPointB, perpSlope, directionA, -1 * widthB * factor)
-									ausiliaryB2 = pointFromCenter(B, perpSlope, directionA,  -1 * widthB * factor)
+									if perpSlope == 0:
+										B2 = pointFromCenter(tmpPointB, perpSlope, directionA, widthB * factor)
+										ausiliaryB2 = pointFromCenter(B, perpSlope, directionA, widthB * factor)
 
-									A2 = pointFromCenter(tmpPointA, perpSlope, directionA, -1 * widthA * factor)
-									ausiliaryA2 = pointFromCenter(A, perpSlope, directionA, -1 * widthA * factor)
+										A2 = pointFromCenter(tmpPointA, perpSlope, directionA, widthA * factor)
+										ausiliaryA2 = pointFromCenter(A, perpSlope, directionA, widthA * factor)
+									else:
+										B2 = pointFromCenter(tmpPointB, perpSlope, directionA, -1 * widthB * factor)
+										ausiliaryB2 = pointFromCenter(B, perpSlope, directionA,  -1 * widthB * factor)
+
+										A2 = pointFromCenter(tmpPointA, perpSlope, directionA, -1 * widthA * factor)
+										ausiliaryA2 = pointFromCenter(A, perpSlope, directionA, -1 * widthA * factor)
 								else:
 									B2 = [tmpPointB[0], tmpPointB[1] - widthB * factor]
 									ausiliaryB2 = [B[0], B[1] - widthB * factor]
@@ -1100,38 +1125,6 @@ def populateVertices(lines, vertices):
 										# because it is a rigid translation, the new points are given by the location of the new
 										# filleCenter plus the distance between the internal fillet center and the perpendicular point
 										oppositePoint = [oppositeFilletCenter[0] + (point[0] - filletCenter[0]), oppositeFilletCenter[1] + (point[1] - filletCenter[1])]
-										# if mainSlope != None:
-										#     if mainSlope == 0:
-										#         oppositePoint = [oppositeFilletCenter[0] + radius, oppositeFilletCenter[1]]
-										#         if (oppositeFilletCenter[0] > filletCenter[0]):
-										#             centerLocation = "left"
-										#         else:
-										#             centerLocation = "right"
-										#
-										#         if (oppositeFilletCenter[0] > oppositePoint[0]):
-										#             pointLocation = "left"
-										#         else:
-										#             pointLocation = "right"
-										#
-										#         if centerLocation == pointLocation:
-										#             oppositePoint = [oppositeFilletCenter[0] - radius, oppositeFilletCenter[1]]
-										#
-										#     else:
-										#         oppositePoint = pointFromCenter(oppositeFilletCenter, mainSlope, mainDirection, radius)
-										# else:
-										#     oppositePoint = [oppositeFilletCenter[0], oppositeFilletCenter[1] + radius]
-										#     if (oppositeFilletCenter[1] > filletCenter[1]):
-										#         centerLocation = "down"
-										#     else:
-										#         centerLocation = "up"
-										#
-										#     if (oppositeFilletCenter[1] > oppositePoint[1]):
-										#         pointLocation = "down"
-										#     else:
-										#         pointLocation = "up"
-										#
-										#     if centerLocation == pointLocation:
-										#         oppositePoint = [oppositeFilletCenter[0], oppositeFilletCenter[1] - radius]
 
 
 									# add the vertex to the point defining the linear streets
@@ -1160,7 +1153,6 @@ def populateVertices(lines, vertices):
 	streetVerticesList = sortList(streetVerticesList)
 	result = [streetVerticesList, streetCornerVertices]
 	return(result)
-
 # a function to collect data for blender
 def blenderize(list):
 	bVerts = []
