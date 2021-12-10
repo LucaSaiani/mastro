@@ -4,56 +4,128 @@ bl_info = {
     "version" : (0,1),
     "blender" : (3,0,0),
     "category" : "Object",
-    "location" : "Operator search",
-    "description" : "A roads and master plan design plug-in",
+    "location" : "View3D > Add > Mesh > Road",
+    "description" : "Adds roads and buildings to develop master plans",
     "warning" : "",
     "doc_url" : "",
     "tracker_url" : "",
 }
 
-import bpy
+import bpy, bpy.props, bpy_extras
+from mathutils import Vector
 
-class MESH_OT_monkey_grid(bpy.types.Operator):
-    """Let's spread some joy"""
-    bl_idname = "mesh.monkey_grid"
-    bl_label = "Monkey Grid"
+def add_road(self, context):
+    scale_x = self.scale.x
+    scale_y = self.scale.y
+
+    verts = [
+        Vector((0, 0, 0)),
+        Vector((10 * scale_x, 0, 0)),
+    ]
+
+    edges = [[0,1]]
+    faces = []
+
+    mesh = bpy.data.meshes.new(name="Road")
+    mesh.from_pydata(verts, edges, faces)
+    # useful for development when the mesh may be invalid.
+    # mesh.validate(verbose=True)
+    road = bpy_extras.object_utils.object_data_add(context, mesh, operator=self)
+    road.hide_render = True
+
+def add_building(self, context):
+    scale_x = self.scale.x
+    scale_y = self.scale.y
+
+    verts = [
+        Vector((-0.5 * scale_x, -0.5 * scale_y, 0)),
+        Vector((0.5 * scale_x, -0.5 * scale_y, 0)),
+        Vector((0.5 * scale_x, 0.5 * scale_y, 0)),
+        Vector((0 * scale_x, 0.9 * scale_y, 0)),
+        Vector((-0.5 * scale_x, 0.5 * scale_y, 0))
+    ]
+
+    edges = [[0,1], [1,2], [2,3], [3,4], [4,0]]
+    faces = []
+
+    mesh = bpy.data.meshes.new(name="Building")
+    mesh.from_pydata(verts, edges, faces)
+
+    # useful for development when the mesh may be invalid.
+    # mesh.validate(verbose=True)
+    building = bpy_extras.object_utils.object_data_add(context, mesh, operator=self)
+    building.hide_render = True
+    building.lock_rotation = (True, True, True)
+    building.lock_rotation_w = True
+
+
+class OBJECT_OT_add_road(bpy.types.Operator, bpy_extras.object_utils.AddObjectHelper):
+    """Add a road object"""
+    bl_idname = "mesh.add_road"
+    bl_label = "Add Road"
     bl_options = {'REGISTER', 'UNDO'}
 
-    count_x: bpy.props.IntProperty(
-        name = "X",
-        description = "Number of monkeys in the X-direction",
-        default = 3,
-        min = 1, soft_max=10,
-    )
-    count_y: bpy.props.IntProperty(
-        name = "Y",
-        description = "Number of monkeys in the Y-direction",
-        default = 5,
-        min = 1, soft_max=10,
-    )
-    size: bpy.props.FloatProperty(
-        name = "Size",
-        description = "Size of each Monkey",
-        default = 0.5,
-        min = 0, soft_max = 1,
+    scale: bpy.props.FloatVectorProperty(
+        name="scale",
+        default=(1.0, 1.0, 1.0),
+        subtype='TRANSLATION',
+        description="scaling",
     )
 
+    # shows the class only in the 3D view
     @classmethod
     def poll(cls, context):
         return context.area.type == "VIEW_3D"
 
     def execute(self, context):
-        for idx in range(self.count_x * self.count_y):
-            x = idx % self.count_x
-            y = idx // self.count_x
-            bpy.ops.mesh.primitive_monkey_add(
-                size = self.size,
-                location = (x,y,1))
-
+        add_road(self, context)
         return {'FINISHED'}
 
+class OBJECT_OT_add_building(bpy.types.Operator, bpy_extras.object_utils.AddObjectHelper):
+    """Add a building object"""
+    bl_idname = "mesh.add_building"
+    bl_label = "Add Building"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    scale: bpy.props.FloatVectorProperty(
+        name="scale",
+        default=(1.0, 1.0, 1.0),
+        subtype='TRANSLATION',
+        description="scaling",
+    )
+
+    # shows the class only in the 3D view
+    @classmethod
+    def poll(cls, context):
+        return context.area.type == "VIEW_3D"
+
+    def execute(self, context):
+        add_building(self, context)
+        return {'FINISHED'}
+
+#registration
+def add_road_button(self, context):
+    self.layout.operator(
+        OBJECT_OT_add_road.bl_idname,
+        text="Add Road",
+        icon='IPO_EASE_IN_OUT')
+
+def add_building_button(self, context):
+    self.layout.operator(
+        OBJECT_OT_add_building.bl_idname,
+        text="Add Building",
+        icon='IPO_EASE_IN_OUT')
+
 def register():
-    bpy.utils.register_class(MESH_OT_monkey_grid)
+    bpy.utils.register_class(OBJECT_OT_add_road)
+    bpy.types.VIEW3D_MT_mesh_add.append(add_road_button)
+
+    bpy.utils.register_class(OBJECT_OT_add_building)
+    bpy.types.VIEW3D_MT_mesh_add.append(add_building_button)
 
 def unregister():
-    bpy.utils.register_class(MESH_OT_monkey_grid)
+    bpy.utils.register_class(OBJECT_OT_add_road)
+    bpy.types.VIEW3D_MT_mesh_add.remove(add_road_button)
+
+    bpy.utils.register_class(OBJECT_OT_add_building)
+    bpy.types.VIEW3D_MT_mesh_add.remove(add_building_button)
