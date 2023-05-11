@@ -37,13 +37,15 @@ from bpy.types import(
 classes = (
     # OPERATOR_update_RoMa_facade_attribute,
     roma_facade.OBJECT_OT_add_RoMa_facade,
+    roma_facade.OBJECT_OT_AssignFacadeType,
     roma_facade.VIEW3D_PT_RoMa_facade,
-    roma_facade.SetEdgeAttributeOperator_facade_type,
-    roma_facade.ListItem,
-    roma_facade.MY_UL_List,
+#    roma_facade.set_facade_type,
+    roma_facade.ListFacadeType,
+    roma_facade.FACADE_UL_edgeslots,
     roma_facade.LIST_OT_NewItem,
     roma_facade.LIST_OT_DeleteItem,
     roma_facade.LIST_OT_MoveItem,
+    
     
     roma_mass.OBJECT_OT_add_RoMa_Mass,
     roma_mass.VIEW3D_PT_RoMa_Mass,
@@ -65,7 +67,7 @@ def register():
     
     Scene.attribute_facade_type = bpy.props.IntProperty(
                                         name="Type", 
-                                        default=0,
+                                        default=1,
                                         update = roma_facade.update_attribute_facade_type)
     
     Scene.attribute_mass_storeys = bpy.props.IntProperty(
@@ -74,8 +76,8 @@ def register():
                                         default=1,
                                         update = roma_mass.update_attribute_mass_storeys)
     
-    Scene.my_list = CollectionProperty(type = roma_facade.ListItem)
-    Scene.list_index = IntProperty(name = "Index for my_list",
+    Scene.roma_facade_type_list = CollectionProperty(type = roma_facade.ListFacadeType)
+    Scene.roma_facade_type_index = IntProperty(name = "Façade type",
                                              default = 0)
 
 def unregister():
@@ -88,6 +90,6 @@ def unregister():
         
     del Scene.attribute_facade_type
     del Scene.attribute_mass_storeys
-    del Scene.my_list
-    del Scene.list_index
+    del Scene.roma_facade_type_list
+    del Scene.roma_facade_type_index
 
