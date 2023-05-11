@@ -8,15 +8,15 @@ from bpy_extras.object_utils import (
 )
 # from bpy.app.handlers import persistent
 from mathutils import Vector
-from bpy.props import StringProperty
+from bpy.props import StringProperty, IntProperty
 from bpy.types import PropertyGroup, UIList, Operator, Panel
 
 previous_last_index = None
 
 class OBJECT_OT_add_RoMa_facade(Operator, AddObjectHelper):
-    """Create a new RoMa facade"""
+    """Create a new RoMa façade"""
     bl_idname = "mesh.add_roma_facade"
-    bl_label = "Add RoMa facade"
+    bl_label = "RoMa Façade"
     bl_options = {'REGISTER', 'UNDO'}
 
     scale: FloatVectorProperty(
@@ -31,107 +31,125 @@ class OBJECT_OT_add_RoMa_facade(Operator, AddObjectHelper):
         add_RoMa_facade(self, context)
         return {'FINISHED'}
     
-class SetEdgeAttributeOperator_facade_type(bpy.types.Operator):
-    """Set Edge Attribute as facade Type"""
-    bl_idname = "object.set_attribute_facade_type"
-    bl_label = "Set Edge Attribute as facade Type"
-    bl_options = {'REGISTER', 'UNDO'}
+# class set_facade_type(bpy.types.Operator):
+#     """Set Edge Attribute as facade Type"""
+#     bl_idname = "object.set_attribute_facade_type"
+#     bl_label = "Set edge attribute as façade type"
+#     bl_options = {'REGISTER', 'UNDO'}
     
-    def execute(self, context):
-        obj = context.active_object
-        mesh = obj.data
+#     def execute(self, context):
+#         obj = context.active_object
+#         mesh = obj.data
 
-        attribute_facade_type = context.scene.attribute_facade_type
+#         attribute_facade_type = context.scene.attribute_facade_type
         
-        # a custom attribute is assigned to the edges
-        try:
-            mesh.attributes["facade_Type"]
-            # except:
-            #     mesh.attributes.new(name="facade_Type", type="FLOAT", domain="EDGE")
+#         # a custom attribute is assigned to the edges
+#         try:
+#             mesh.attributes["facade_Type"]
+#             # except:
+#             #     mesh.attributes.new(name="facade_Type", type="FLOAT", domain="EDGE")
 
-            # we need to switch from Edit mode to Object mode so the selection gets updated
-            mode = obj.mode
-            bpy.ops.object.mode_set(mode='OBJECT')
+#             # we need to switch from Edit mode to Object mode so the selection gets updated
+#             mode = obj.mode
+#             bpy.ops.object.mode_set(mode='OBJECT')
 
-            selected_edges = [e for e in bpy.context.active_object.data.edges if e.select]
+#             selected_edges = [e for e in bpy.context.active_object.data.edges if e.select]
 
-            mesh_attributes = mesh.attributes["facade_Type"].data.items()
+#             mesh_attributes = mesh.attributes["facade_Type"].data.items()
 
-            for edge in selected_edges:
-                index = edge.index
-                for mesh_attribute in mesh_attributes:
-                    if mesh_attribute[0] == index:
-                        mesh_attribute[1].value = attribute_facade_type
+#             for edge in selected_edges:
+#                 index = edge.index
+#                 for mesh_attribute in mesh_attributes:
+#                     if mesh_attribute[0] == index:
+#                         mesh_attribute[1].value = attribute_facade_type
 
-            # back to whatever mode we were in
-            bpy.ops.object.mode_set(mode=mode)
+#             # back to whatever mode we were in
+#             bpy.ops.object.mode_set(mode=mode)
                     
-            self.report({'INFO'}, "Attribute set to edge "+str(attribute_facade_type))
-            return {'FINISHED'}
-        except:
-            return {'FINISHED'}
+#             self.report({'INFO'}, "Attribute set to edge "+str(attribute_facade_type))
+#             return {'FINISHED'}
+#         except:
+#             return {'FINISHED'}
         
 class VIEW3D_PT_RoMa_facade(Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "RoMa"
-    bl_label = "Facade"
+    bl_label = "Façade"
     
     def draw(self, context):
-        
         layout = self.layout
+        obj = context.active_object
         scene = context.scene
+        
         layout.use_property_split = True
         layout.use_property_decorate = False  # No animation.
         
-        col = layout.column()
-        subcol = col.column()
-        subcol.active = bool(context.active_object.mode=='EDIT')
-        subcol.prop(context.scene, "attribute_facade_type", text="Type")
-        
         # col = layout.column()
         # subcol = col.column()
-        # subcol.label(text="List of Values:")
-        # subcol.template_list("UI_UL_list", "my_list", context.scene, "my_list", context.scene, "my_list_index")
+        # subcol.active = bool(context.active_object.mode=='EDIT')
+        # subcol.prop(context.scene, "attribute_facade_type", text="Type:")
         
         
-        rows = 2
+        
+        is_sortable = len(scene.roma_facade_type_list) > 1
+        rows = 3
+        if is_sortable:
+            rows = 5
+            
         row = layout.row()
-        row.template_list("MY_UL_List", "The_List", scene,
-                           "my_list", scene, "list_index")
+        row.template_list("FACADE_UL_edgeslots", "The_List", scene,
+                           "roma_facade_type_list", scene, "roma_facade_type_index", rows = rows)
+        # row.template_list("FACADE_UL_edgeslots", "The_List", obj,
+        #                    "roma_facade_type_list", obj, "roma_facade_type_index", rows = rows)
         
         col = row.column(align=True)
-        col.operator("my_list.new_item", icon='ADD', text="")
-        col.operator("my_list.delete_item", icon='REMOVE', text="")
+        col.operator("roma_facade_type_list.new_item", icon='ADD', text="")
+        col.operator("roma_facade_type_list.delete_item", icon='REMOVE', text="")
         col.separator()
-        col.operator("my_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
-        col.operator("my_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
+        col.operator("roma_facade_type_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
+        col.operator("roma_facade_type_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
+        
+        #row = layout.row()
+        #row.template_ID(obj, "active_material", new="material.new")
+        
+        # obj.mode = 'OBJECT'
+        # obj.value = 0
+        # obj.mode = 'EDIT'
+        
+        if obj.mode == 'EDIT':
+            mesh = obj.data
+            selected_edges = [e for e in bpy.context.active_object.data.edges if e.select]
+
+            mesh_attributes = mesh.attributes["facade_Type"].data.items()
+
+            
+            for edge in selected_edges:
+                index = edge.index
+                for mesh_attribute in mesh_attributes:
+                    if mesh_attribute[0] == index:
+                        # obj.mode = 'OBJECT'
+                        # obj.value = mesh_attribute[1]
+                        # obj.mode = 'EDIT'
+                        pass
+                        
+            row = layout.row()
+            #print(scene.attribute_facade_type)
+            row.template_ID(scene, "roma_facade_type_list", new="material.new")
+            row = layout.row(align=True)
+            #row.operator("object.material_slot_assign", text="Assign")
+            row.operator("object.set_attribute_facade_type", text="Assign")
+            row.operator("object.material_slot_select", text="Select")
+            row.operator("object.material_slot_deselect", text="Deselect")
 
         
-        # row = layout.row()
-        # row.template_list("MY_UL_List", "The_List", scene,
-        #                   "my_list", scene, "list_index")
-
-        # row = layout.row()
-        # row.operator('my_list.new_item', text='NEW')
-        # row.operator('my_list.delete_item', text='REMOVE')
-        # row.operator('my_list.move_item', text='UP').direction = 'UP'
-        # row.operator('my_list.move_item', text='DOWN').direction = 'DOWN'
-
-        if scene.list_index >= 0 and scene.my_list:
-            item = scene.my_list[scene.list_index]
+        if scene.roma_facade_type_index >= 0 and scene.roma_facade_type_list:
+            item = scene.roma_facade_type_list[scene.roma_facade_type_index]
 
             row = layout.row()
             row.prop(item, "name")
-            row.prop(item, "random_prop")
+            row.prop(item, "index")
         
-
-        # row = layout.row()
-        # row.prop(context.scene, "attribute_facade_type", text="Type")
-        # if context.active_object.mode=='EDIT':
-        #     row.enabled = True
-        # else:
-        #     row.enabled = False
         
 # class OPERATOR_update_RoMa_facade_attribute(bpy.types.Operator):
 #     """Update value of RoMa facade type when an edge is selected"""
@@ -173,21 +191,22 @@ class VIEW3D_PT_RoMa_facade(Panel):
 #         #     pass
 #         return {'FINISHED'}
 
-class ListItem(PropertyGroup):
-    """Group of properties representing an item in the list."""
-
+class ListFacadeType(PropertyGroup):
+    """Group of properties of the façade edges."""
+    index: IntProperty(
+           name="Index",
+           description="Façade type index",
+           default = 0)
+    
     name: StringProperty(
            name="Name",
-           description="A name for this item",
-           default="Untitled")
+           description="The name of the façade segment",
+           default="Façade")
 
-    random_prop: StringProperty(
-           name="Any other property you want",
-           description="",
-           default="")
     
-class MY_UL_List(UIList):
-    """Demo UIList."""
+    
+class FACADE_UL_edgeslots(UIList):
+    """Façade type UIList."""
 
     def draw_item(self, context, layout, data, item, icon, active_data,
                   active_propname, index):
@@ -197,7 +216,13 @@ class MY_UL_List(UIList):
 
         # Make sure your code supports all 3 layout types
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
-            layout.label(text=item.name, icon = custom_icon)
+            split = layout.split(factor=0.3)
+            # split.label(text="Index: %d" % (index))
+            split.label(text=str(item.index)) 
+            split.label(text=item.name, icon=custom_icon) 
+            # layout.label(text=item.name, icon=custom_icon) 
+
+            # layout.label(text=item.name, icon = custom_icon)
 
         elif self.layout_type in {'GRID'}:
             layout.alignment = 'CENTER'
@@ -205,40 +230,49 @@ class MY_UL_List(UIList):
 
 
 class LIST_OT_NewItem(Operator):
-    """Add a new item to the list."""
+    """Add a new item to the list"""
 
-    bl_idname = "my_list.new_item"
+    bl_idname = "roma_facade_type_list.new_item"
     bl_label = "Add a new item"
 
     def execute(self, context):
-        context.scene.my_list.add()
-
+        context.scene.roma_facade_type_list.add()
+        #for el in bpy.context.scene.roma_facade_type_list:
+            #print("pippo", bpy.context.scene.roma_facade_type_list[1].index)
+           # print("pippo", el.index)
+        #print("max", max(bpy.context.scene.roma_facade_type_list, key=lambda x: x.index))
+        temp_list = []
+        for el in bpy.context.scene.roma_facade_type_list:
+            temp_list.append(el.index)
+        print("max index = ", max(temp_list))
+        last = len(bpy.context.scene.roma_facade_type_list)-1
+        bpy.context.scene.roma_facade_type_list[last].index = max(temp_list)+1
         return{'FINISHED'}
 
 
 class LIST_OT_DeleteItem(Operator):
     """Delete the selected item from the list."""
 
-    bl_idname = "my_list.delete_item"
-    bl_label = "Deletes an item"
+    bl_idname = "roma_facade_type_list.delete_item"
+    bl_label = "Delete an item"
 
     @classmethod
     def poll(cls, context):
-        return context.scene.my_list
+        return context.scene.roma_facade_type_list
 
     def execute(self, context):
-        my_list = context.scene.my_list
-        index = context.scene.list_index
+        roma_facade_type_list = context.scene.roma_facade_type_list
+        index = context.scene.roma_facade_type_index
 
-        my_list.remove(index)
-        context.scene.list_index = min(max(0, index - 1), len(my_list) - 1)
+        roma_facade_type_list.remove(index)
+        context.scene.roma_facade_type_index = min(max(0, index - 1), len(roma_facade_type_list) - 1)
 
         return{'FINISHED'}
     
 class LIST_OT_MoveItem(Operator):
     """Move an item in the list."""
 
-    bl_idname = "my_list.move_item"
+    bl_idname = "roma_facade_type_list.move_item"
     bl_label = "Move an item in the list"
 
     direction: bpy.props.EnumProperty(items=(('UP', 'Up', ""),
@@ -246,26 +280,70 @@ class LIST_OT_MoveItem(Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.scene.my_list
+        return context.scene.roma_facade_type_list
 
     def move_index(self):
         """ Move index of an item render queue while clamping it. """
 
-        index = bpy.context.scene.list_index
-        list_length = len(bpy.context.scene.my_list) - 1  # (index starts at 0)
+        index = bpy.context.scene.roma_facade_type_index
+        list_length = len(bpy.context.scene.roma_facade_type_list) - 1  # (index starts at 0)
         new_index = index + (-1 if self.direction == 'UP' else 1)
 
-        bpy.context.scene.list_index = max(0, min(new_index, list_length))
+        bpy.context.scene.roma_facade_type_index = max(0, min(new_index, list_length))
 
     def execute(self, context):
-        my_list = context.scene.my_list
-        index = context.scene.list_index
+        roma_facade_type_list = context.scene.roma_facade_type_list
+        index = context.scene.roma_facade_type_index
 
         neighbor = index + (-1 if self.direction == 'UP' else 1)
-        my_list.move(neighbor, index)
+        roma_facade_type_list.move(neighbor, index)
         self.move_index()
 
         return{'FINISHED'}
+    
+#class OPERATOR_update_RoMa_facade_attribute(bpy.types.Operator):
+class OBJECT_OT_AssignFacadeType(Operator):
+    """Assign a façade type to the selected edge"""
+    bl_idname = "object.set_attribute_facade_type"
+    bl_label = "Assign a façade type to the selected edge"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    def execute(self, context):
+        obj = context.active_object
+        mesh = obj.data
+
+        # attribute_facade_type = context.scene.attribute_facade_type
+        list_index = bpy.context.scene.roma_facade_type_index
+        attribute_facade_type = bpy.context.scene.roma_facade_type_list[list_index].index
+        
+        # a custom attribute is assigned to the edges
+        try:
+            mesh.attributes["facade_Type"]
+            # except:
+            #     mesh.attributes.new(name="facade_Type", type="FLOAT", domain="EDGE")
+
+            # we need to switch from Edit mode to Object mode so the selection gets updated
+            mode = obj.mode
+            bpy.ops.object.mode_set(mode='OBJECT')
+
+            selected_edges = [e for e in bpy.context.active_object.data.edges if e.select]
+
+            mesh_attributes = mesh.attributes["facade_Type"].data.items()
+
+            for edge in selected_edges:
+                index = edge.index
+                for mesh_attribute in mesh_attributes:
+                    if mesh_attribute[0] == index:
+                        mesh_attribute[1].value = attribute_facade_type
+
+            # back to whatever mode we were in
+            bpy.ops.object.mode_set(mode=mode)
+                    
+            self.report({'INFO'}, "Attribute set to edge "+str(attribute_facade_type))
+            return {'FINISHED'}
+        except:
+            return {'FINISHED'}    
+    
     
 def add_RoMa_facade(self, context):
     scale_x = self.scale.x
@@ -289,50 +367,50 @@ def add_RoMa_facade(self, context):
 def add_RoMa_facade_button(self, context):
     self.layout.operator(
         OBJECT_OT_add_RoMa_facade.bl_idname,
-        text="Add RoMa facade",
+        text="RoMa Facade",
         icon='PLUGIN')
     
-def callback_edge_selected(context):
-    global previous_last_index
+# def callback_edge_selected(context):
+#     global previous_last_index
     
-    obj = bpy.context.active_object
-    try:
-        mesh = obj.data
-        mesh.attributes["facade_Type"]
-        if obj.mode == 'EDIT':
-            # Get the bmesh data
-            bm = bmesh.from_edit_mesh(obj.data)
+#     obj = bpy.context.active_object
+#     try:
+#         mesh = obj.data
+#         mesh.attributes["facade_Type"]
+#         if obj.mode == 'EDIT':
+#             # Get the bmesh data
+#             bm = bmesh.from_edit_mesh(obj.data)
 
-            selected_edges = []
-            for edge in bm.edges:
-                if edge.select:
-                    selected_edges.append(edge)
-                    last_index = edge.index
-            if previous_last_index == None or previous_last_index != last_index:
-                previous_last_index = last_index
+#             selected_edges = []
+#             for edge in bm.edges:
+#                 if edge.select:
+#                     selected_edges.append(edge)
+#                     last_index = edge.index
+#             if previous_last_index == None or previous_last_index != last_index:
+#                 previous_last_index = last_index
                     
-                bpy.ops.object.mode_set(mode='OBJECT')
-                mesh = obj.data
-                sel_edges = [e for e in bpy.context.active_object.data.edges if e.select]
-                mesh_attributes = mesh.attributes["facade_Type"].data.items()
+#                 bpy.ops.object.mode_set(mode='OBJECT')
+#                 mesh = obj.data
+#                 sel_edges = [e for e in bpy.context.active_object.data.edges if e.select]
+#                 mesh_attributes = mesh.attributes["facade_Type"].data.items()
                 
-                index = edge.index
-                for mesh_attribute in mesh_attributes:
-                    if mesh_attribute[0] == last_index:
-                        bpy.context.scene.attribute_facade_type = mesh_attribute[1].value
+#                 index = edge.index
+#                 for mesh_attribute in mesh_attributes:
+#                     if mesh_attribute[0] == last_index:
+#                         bpy.context.scene.attribute_facade_type = mesh_attribute[1].value
                         
-                bpy.ops.object.mode_set(mode='EDIT')
+#                 bpy.ops.object.mode_set(mode='EDIT')
                 
        
-    except:
-        pass
+#     except:
+#         pass
     
 def update_attribute_facade_type(self, context):
-    try:
-        if context.area.type == 'VIEW_3D':
-            bpy.ops.object.set_attribute_facade_type()
-    except:
-        pass
+    # try:
+    #     if context.area.type == 'VIEW_3D':
+    bpy.ops.object.set_attribute_facade_type()
+    # except:
+    #     pass
     
     
     
