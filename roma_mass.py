@@ -11,7 +11,7 @@ from bpy.types import Operator, Panel
 class OBJECT_OT_add_RoMa_Mass(Operator, AddObjectHelper):
     """Create a new RoMa Mass"""
     bl_idname = "mesh.add_roma_mass"
-    bl_label = "Add RoMa Mass"
+    bl_label = "RoMa Mass"
     bl_options = {'REGISTER', 'UNDO'}
 
     scale: FloatVectorProperty(
@@ -93,10 +93,10 @@ def add_RoMa_Mass(self, context):
     scale_y = self.scale.y
 
     verts = [
-        Vector((-1 * scale_x, -1 * scale_y, 0)),
-        Vector((1 * scale_x, -1 * scale_y, 0)),
-        Vector((1 * scale_x, 1 * scale_y, 0)),
-        Vector((-1 * scale_x, 1 * scale_y, 0))
+        Vector((-2 * scale_x, -2 * scale_y, 0)),
+        Vector((2 * scale_x, -2 * scale_y, 0)),
+        Vector((2 * scale_x, 2 * scale_y, 0)),
+        Vector((-2 * scale_x, 2 * scale_y, 0))
     ]
 
     edges = []
@@ -112,7 +112,7 @@ def add_RoMa_Mass(self, context):
 def add_RoMa_Mass_button(self, context):
     self.layout.operator(
         OBJECT_OT_add_RoMa_Mass.bl_idname,
-        text="Add RoMa Mass",
+        text="RoMa Mass",
         icon='PLUGIN')
     
 def update_attribute_mass_storeys(self, context):
