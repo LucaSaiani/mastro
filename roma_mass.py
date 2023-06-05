@@ -235,9 +235,11 @@ def add_RoMa_Mass(self, context):
     mesh.attributes.new(name="roma_block_name", type="STRING", domain="FACE")
     mesh.attributes.new(name="roma_use_name", type="STRING", domain="FACE")
     storeyAttribute = mesh.attributes.new(name="roma_number_of_storeys", type="INT", domain="FACE")
+    GEA_Attribute = mesh.attributes.new(name="roma_GEA", type="FLOAT", domain="FACE")
     
     for face in mesh.polygons:
         storeyAttribute.data[face.index].value = 3
+        GEA_Attribute.data[face.index].value = 16
     
     
 def add_RoMa_Mass_button(self, context):
