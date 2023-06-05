@@ -1,5 +1,5 @@
 import bpy
-import bmesh 
+#import bmesh 
 
 from bpy.props import FloatVectorProperty
 from bpy_extras.object_utils import (
@@ -30,46 +30,7 @@ class OBJECT_OT_add_RoMa_facade(Operator, AddObjectHelper):
 
         add_RoMa_facade(self, context)
         return {'FINISHED'}
-    
-# class set_facade_type(bpy.types.Operator):
-#     """Set Edge Attribute as facade Type"""
-#     bl_idname = "object.set_attribute_facade_type"
-#     bl_label = "Set edge attribute as façade type"
-#     bl_options = {'REGISTER', 'UNDO'}
-    
-#     def execute(self, context):
-#         obj = context.active_object
-#         mesh = obj.data
 
-#         attribute_facade_type = context.scene.attribute_facade_type
-        
-#         # a custom attribute is assigned to the edges
-#         try:
-#             mesh.attributes["facade_Type"]
-#             # except:
-#             #     mesh.attributes.new(name="facade_Type", type="FLOAT", domain="EDGE")
-
-#             # we need to switch from Edit mode to Object mode so the selection gets updated
-#             mode = obj.mode
-#             bpy.ops.object.mode_set(mode='OBJECT')
-
-#             selected_edges = [e for e in bpy.context.active_object.data.edges if e.select]
-
-#             mesh_attributes = mesh.attributes["facade_Type"].data.items()
-
-#             for edge in selected_edges:
-#                 index = edge.index
-#                 for mesh_attribute in mesh_attributes:
-#                     if mesh_attribute[0] == index:
-#                         mesh_attribute[1].value = attribute_facade_type
-
-#             # back to whatever mode we were in
-#             bpy.ops.object.mode_set(mode=mode)
-                    
-#             self.report({'INFO'}, "Attribute set to edge "+str(attribute_facade_type))
-#             return {'FINISHED'}
-#         except:
-#             return {'FINISHED'}
         
 class VIEW3D_PT_RoMa_facade(Panel):
     bl_space_type = "VIEW_3D"
@@ -78,6 +39,7 @@ class VIEW3D_PT_RoMa_facade(Panel):
     bl_label = "Façade"
     
     def draw(self, context):
+        
         layout = self.layout
         obj = context.active_object
         scene = context.scene
@@ -89,7 +51,7 @@ class VIEW3D_PT_RoMa_facade(Panel):
         # subcol = col.column()
         # subcol.active = bool(context.active_object.mode=='EDIT')
         # subcol.prop(context.scene, "attribute_facade_type", text="Type:")
-        
+        layout.prop(context.scene, "roma_facade_type_name", text="Select Element")
         
         
         is_sortable = len(scene.roma_facade_type_list) > 1
@@ -121,7 +83,7 @@ class VIEW3D_PT_RoMa_facade(Panel):
             mesh = obj.data
             selected_edges = [e for e in bpy.context.active_object.data.edges if e.select]
 
-            mesh_attributes = mesh.attributes["facade_Type"].data.items()
+            mesh_attributes = mesh.attributes["roma_facade_type"].data.items()
 
             
             for edge in selected_edges:
@@ -135,7 +97,7 @@ class VIEW3D_PT_RoMa_facade(Panel):
                         
             row = layout.row()
             #print(scene.attribute_facade_type)
-            row.template_ID(scene, "roma_facade_type_list", new="material.new")
+            #row.template_ID(scene, "roma_facade_type_list", new="material.new")
             row = layout.row(align=True)
             #row.operator("object.material_slot_assign", text="Assign")
             row.operator("object.set_attribute_facade_type", text="Assign")
@@ -145,51 +107,14 @@ class VIEW3D_PT_RoMa_facade(Panel):
         
         if scene.roma_facade_type_index >= 0 and scene.roma_facade_type_list:
             item = scene.roma_facade_type_list[scene.roma_facade_type_index]
-
             row = layout.row()
             row.prop(item, "name")
             row.prop(item, "index")
+            
         
         
-# class OPERATOR_update_RoMa_facade_attribute(bpy.types.Operator):
-#     """Update value of RoMa facade type when an edge is selected"""
-#     bl_idname = "object.update_roma_facade_type"
-#     bl_label = "Update RoMa facade type attribute"
-#     bl_options = {'REGISTER', 'UNDO'}
-    
-    
-#     def execute(self, context):
-#         # global previous_last_index
-#         # obj = bpy.context.active_object
-#         # try:
-#         #     mesh = obj.data
-#         #     mesh.attributes["facade_Type"]
-#         #     if obj.mode == 'EDIT':
-#         #         # Get the bmesh data
-#         #         bm = bmesh.from_edit_mesh(obj.data)
+        
 
-#         #         selected_edges = []
-#         #         for edge in bm.edges:
-#         #             if edge.select:
-#         #                 selected_edges.append(edge)
-#         #                 last_index = edge.index
-#         #         if previous_last_index == None or previous_last_index != last_index:
-#         #             previous_last_index = last_index
-                        
-#         #             bpy.ops.object.mode_set(mode='OBJECT')
-#         #             mesh = obj.data
-#         #             sel_edges = [e for e in bpy.context.active_object.data.edges if e.select]
-#         #             mesh_attributes = mesh.attributes["facade_Type"].data.items()
-                    
-#         #             index = edge.index
-#         #             for mesh_attribute in mesh_attributes:
-#         #                 if mesh_attribute[0] == last_index:
-#         #                     bpy.context.scene.attribute_facade_type = mesh_attribute[1].value
-                            
-#         #             bpy.ops.object.mode_set(mode='EDIT')
-#         # except:
-#         #     pass
-#         return {'FINISHED'}
 
 class ListFacadeType(PropertyGroup):
     """Group of properties of the façade edges."""
@@ -302,7 +227,7 @@ class LIST_OT_MoveItem(Operator):
         return{'FINISHED'}
     
 #class OPERATOR_update_RoMa_facade_attribute(bpy.types.Operator):
-class OBJECT_OT_AssignFacadeType(Operator):
+class OBJECT_OT_SetFacadeType(Operator):
     """Assign a façade type to the selected edge"""
     bl_idname = "object.set_attribute_facade_type"
     bl_label = "Assign a façade type to the selected edge"
@@ -318,9 +243,9 @@ class OBJECT_OT_AssignFacadeType(Operator):
         
         # a custom attribute is assigned to the edges
         try:
-            mesh.attributes["facade_Type"]
+            mesh.attributes["roma_facade_type"]
             # except:
-            #     mesh.attributes.new(name="facade_Type", type="FLOAT", domain="EDGE")
+            #     mesh.attributes.new(name="roma_facade_type", type="FLOAT", domain="EDGE")
 
             # we need to switch from Edit mode to Object mode so the selection gets updated
             mode = obj.mode
@@ -328,7 +253,7 @@ class OBJECT_OT_AssignFacadeType(Operator):
 
             selected_edges = [e for e in bpy.context.active_object.data.edges if e.select]
 
-            mesh_attributes = mesh.attributes["facade_Type"].data.items()
+            mesh_attributes = mesh.attributes["roma_facade_type"].data.items()
 
             for edge in selected_edges:
                 index = edge.index
@@ -362,7 +287,8 @@ def add_RoMa_facade(self, context):
     # useful for development when the mesh may be invalid.
     # mesh.validate(verbose=True)
     object_data_add(context, mesh, operator=self)
-    mesh.attributes.new(name="facade_Type", type="INT", domain="EDGE")
+    mesh.attributes.new(name="roma_facade_type", type="INT", domain="EDGE")
+    mesh.attributes.new(name="roma_plot_name", type="STRING", domain="FACE")
     
 def add_RoMa_facade_button(self, context):
     self.layout.operator(
@@ -370,40 +296,7 @@ def add_RoMa_facade_button(self, context):
         text="RoMa Facade",
         icon='PLUGIN')
     
-# def callback_edge_selected(context):
-#     global previous_last_index
-    
-#     obj = bpy.context.active_object
-#     try:
-#         mesh = obj.data
-#         mesh.attributes["facade_Type"]
-#         if obj.mode == 'EDIT':
-#             # Get the bmesh data
-#             bm = bmesh.from_edit_mesh(obj.data)
 
-#             selected_edges = []
-#             for edge in bm.edges:
-#                 if edge.select:
-#                     selected_edges.append(edge)
-#                     last_index = edge.index
-#             if previous_last_index == None or previous_last_index != last_index:
-#                 previous_last_index = last_index
-                    
-#                 bpy.ops.object.mode_set(mode='OBJECT')
-#                 mesh = obj.data
-#                 sel_edges = [e for e in bpy.context.active_object.data.edges if e.select]
-#                 mesh_attributes = mesh.attributes["facade_Type"].data.items()
-                
-#                 index = edge.index
-#                 for mesh_attribute in mesh_attributes:
-#                     if mesh_attribute[0] == last_index:
-#                         bpy.context.scene.attribute_facade_type = mesh_attribute[1].value
-                        
-#                 bpy.ops.object.mode_set(mode='EDIT')
-                
-       
-#     except:
-#         pass
     
 def update_attribute_facade_type(self, context):
     # try:
@@ -414,3 +307,47 @@ def update_attribute_facade_type(self, context):
     
     
     
+    
+    
+# import bpy
+
+# # Define the list of items
+# my_list = [("item_1", "Item 1", "This is the first item"),
+#            ("item_2", "Item 2", "This is the second item"),
+#            ("item_3", "Item 3", "This is the third item")]
+
+# # Define the panel
+# class MyPanel(bpy.types.Panel):
+#     bl_label = "My Panel"
+#     bl_idname = "OBJECT_PT_my_panel"
+#     bl_space_type = "VIEW_3D"
+#     bl_region_type = "UI"
+#     bl_category = "My Addon"
+
+#     def draw(self, context):
+#         layout = self.layout
+
+#         # Define the drop-down menu
+#         row = layout.row()
+#         row.label(text="Select an item:")
+#         row = layout.row()
+#         row.prop(context.scene, "my_enum")
+
+# # Define the enum property
+# bpy.types.Scene.my_enum = bpy.props.EnumProperty(
+#     name="My Enum",
+#     items=my_list,
+#     description="Select an item from the list"
+# )
+
+# # Register the panel and enum property
+# bpy.utils.register_class(MyPanel)
+
+# def register():
+#     pass
+
+# def unregister():
+#     pass
+
+# if __name__ == "__main__":
+#     register()
