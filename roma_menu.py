@@ -43,14 +43,4 @@ class RoMa_Menu(Menu):
     def draw(self, context):
         layout = self.layout
         layout.operator(RoMa_MenuOperator.bl_idname)
-        
-        
-# import bpy
-
-# objs = bpy.context.selected_objects
-
-# for obj in objs:
-#     mesh = obj.data
-#     if "roma_plot_name" in mesh.attributes:
-#         value = mesh.attributes["roma_plot_name"].data[0].value
-#         print(value)
+   
