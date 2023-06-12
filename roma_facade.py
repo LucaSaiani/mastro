@@ -306,48 +306,34 @@ def update_attribute_facade_type(self, context):
     #     pass
     
     
+
+
+
+# per sapere quali segmenti sono selezionati
+
+# import bmesh
+# ob = bpy.context.object
+
+# if ob.type != 'MESH':
+#     raise TypeError("Active object is not a Mesh")
+
+# me = ob.data
+
+# if me.is_editmode:
+#     # Gain direct access to the mesh
+#     bm = bmesh.from_edit_mesh(me)
+# else:
+#     # Create a bmesh from mesh
+#     # (won't affect mesh, unless explicitly written back)
+#     bm = bmesh.new()
+#     bm.from_mesh(me)
+
     
-    
-    
-# import bpy
+# # Get active face
+# face = bm.faces.active
 
-# # Define the list of items
-# my_list = [("item_1", "Item 1", "This is the first item"),
-#            ("item_2", "Item 2", "This is the second item"),
-#            ("item_3", "Item 3", "This is the third item")]
+# selected = "selected"
+# not_selected = " ".join(("NOT", selected))
 
-# # Define the panel
-# class MyPanel(bpy.types.Panel):
-#     bl_label = "My Panel"
-#     bl_idname = "OBJECT_PT_my_panel"
-#     bl_space_type = "VIEW_3D"
-#     bl_region_type = "UI"
-#     bl_category = "My Addon"
-
-#     def draw(self, context):
-#         layout = self.layout
-
-#         # Define the drop-down menu
-#         row = layout.row()
-#         row.label(text="Select an item:")
-#         row = layout.row()
-#         row.prop(context.scene, "my_enum")
-
-# # Define the enum property
-# bpy.types.Scene.my_enum = bpy.props.EnumProperty(
-#     name="My Enum",
-#     items=my_list,
-#     description="Select an item from the list"
-# )
-
-# # Register the panel and enum property
-# bpy.utils.register_class(MyPanel)
-
-# def register():
-#     pass
-
-# def unregister():
-#     pass
-
-# if __name__ == "__main__":
-#     register()
+# for edge in face.edges:
+#     print("%12s - bm.edges[%i]" % ((selected if edge.select else not_selected), edge.index))

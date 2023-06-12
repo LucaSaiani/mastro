@@ -1,4 +1,9 @@
 import bpy
+import bmesh
+
+# selected_face_index = -1
+checkingFace = False
+changed_massAttribute = False
 
 from bpy.props import FloatVectorProperty
 from bpy_extras.object_utils import (
@@ -61,6 +66,8 @@ class OBJECT_OT_SetPlotName(Operator):
             bpy.ops.object.mode_set(mode=mode)
                     
             self.report({'INFO'}, "Attribute set to face, plot: "+str(attribute_mass_plot_name))
+            global changed_massAttribute
+            changed_massAttribute = True
             return {'FINISHED'}
         except:
             return {'FINISHED'}
@@ -77,8 +84,6 @@ class OBJECT_OT_SetBlockName(Operator):
 
         attribute_mass_block_name = context.scene.attribute_mass_block_name
         
-        # a custom attribute is assigned to the edges
-       
         try:
             mesh.attributes["roma_block_name"]
             attribute_mass_block_name = context.scene.attribute_mass_block_name
@@ -100,6 +105,8 @@ class OBJECT_OT_SetBlockName(Operator):
             bpy.ops.object.mode_set(mode=mode)
                     
             self.report({'INFO'}, "Attribute set to face, block: "+str(attribute_mass_block_name))
+            global changed_massAttribute
+            changed_massAttribute = True
             return {'FINISHED'}
         except:
             return {'FINISHED'}
@@ -139,6 +146,8 @@ class OBJECT_OT_SetUseName(Operator):
             bpy.ops.object.mode_set(mode=mode)
                     
             self.report({'INFO'}, "Attribute set to face, use: "+str(attribute_mass_use_name))
+            global changed_massAttribute
+            changed_massAttribute = True
             return {'FINISHED'}
         except:
             return {'FINISHED'}
@@ -178,6 +187,9 @@ class OBJECT_OT_SetMassStoreys(Operator):
             bpy.ops.object.mode_set(mode=mode)
                     
             self.report({'INFO'}, "Attribute set to face, number of storeys: "+str(attribute_mass_storeys))
+            
+            global changed_massAttribute
+            changed_massAttribute = True
             return {'FINISHED'}
         except:
             return {'FINISHED'}
@@ -196,7 +208,8 @@ class VIEW3D_PT_RoMa_Mass(Panel):
         
         # col = layout.column()
         # subcol = col.column()
-        layout.active = bool(context.active_object.mode=='EDIT')
+         
+        #layout.active = bool(context.active_object.mode=='EDIT')
         layout.prop(context.scene, "attribute_mass_plot_name", text="Plot Name")
         layout.prop(context.scene, "attribute_mass_block_name", text="Block Name")
         layout.prop(context.scene, "attribute_mass_use_name", text="Use Name")
@@ -208,7 +221,20 @@ class VIEW3D_PT_RoMa_Mass(Panel):
         #     row.enabled = True
         # else:
         #     row.enabled = False
-        
+        # if context.active_object.mode=='EDIT':
+        #     print("pippa")
+            #bpy.ops.wm.mouse_position('INVOKE_DEFAULT')
+        #     obj = context.active_object 
+        #     obj.update_from_editmode()
+        #     mesh = obj.data
+        #     activeFace = mesh.polygons[mesh.polygons.active]
+        #     print("cappero", activeFace.index)
+            #bpy.ops.object.mode_set(mode='OBJECT')
+            #context.scene.attribute_mass_storeys = activeFace.index
+            #       bpy.ops.object.mode_set(mode='EDIT')
+            
+
+    
 def add_RoMa_Mass(self, context):
     scale_x = self.scale.x
     scale_y = self.scale.y
@@ -225,6 +251,7 @@ def add_RoMa_Mass(self, context):
 
     mesh = bpy.data.meshes.new(name="RoMa Mass")
     mesh.from_pydata(verts, edges, faces)
+    mesh.update()
     # useful for development when the mesh may be invalid.
     # mesh.validate(verbose=True)
     object_data_add(context, mesh, operator=self)
@@ -234,12 +261,26 @@ def add_RoMa_Mass(self, context):
     mesh.attributes.new(name="roma_plot_name", type="STRING", domain="FACE")
     mesh.attributes.new(name="roma_block_name", type="STRING", domain="FACE")
     mesh.attributes.new(name="roma_use_name", type="STRING", domain="FACE")
-    storeyAttribute = mesh.attributes.new(name="roma_number_of_storeys", type="INT", domain="FACE")
-    GEA_Attribute = mesh.attributes.new(name="roma_GEA", type="FLOAT", domain="FACE")
+    mesh.attributes.new(name="roma_number_of_storeys", type="INT", domain="FACE")
+    mesh.attributes.new(name="roma_GEA", type="FLOAT", domain="FACE")
     
-    for face in mesh.polygons:
-        storeyAttribute.data[face.index].value = 3
-        GEA_Attribute.data[face.index].value = 16
+    obj = bpy.data.objects.new("RoMa Mass", mesh)
+    
+    for face in obj.data.polygons:
+        mesh_plot = mesh.attributes["roma_plot_name"].data.items()
+        mesh_plot[0][1].value = "Plot Name"
+        
+        mesh_block = mesh.attributes["roma_block_name"].data.items()
+        mesh_block[0][1].value = "Block Name"
+        
+        mesh_use = mesh.attributes["roma_use_name"].data.items()
+        mesh_use[0][1].value = "Use"
+    
+        mesh_Storeys = mesh.attributes["roma_number_of_storeys"].data.items()
+        mesh_Storeys[0][1].value = 3
+        
+        mesh_GEA = mesh.attributes["roma_GEA"].data.items()
+        mesh_GEA[0][1].value = 0
     
     
 def add_RoMa_Mass_button(self, context):
@@ -259,4 +300,68 @@ def update_attribute_mass_use_name(self, context):
         
 def update_attribute_mass_storeys(self, context):
     bpy.ops.object.set_attribute_mass_storeys()
-   
+    
+def get_face_attribute(scene):
+    global checkingFace
+    global changed_massAttribute
+    if changed_massAttribute is True:
+        changed_massAttribute = False
+        checkingFace = False
+    if checkingFace is False:
+        checkingFace = True
+        obj = bpy.context.active_object
+        if obj.mode == 'EDIT':
+            obj.update_from_editmode()
+            mesh = obj.data
+            
+            # activeFace = mesh.polygons[mesh.polygons.active]
+            selected_faces = [p for p in mesh.polygons if p.select]
+            selected_indices = []
+            for f in selected_faces:
+                selected_indices.append(f.index)
+            # print("selected faces", f.index)
+
+            bpy.ops.mesh.select_all(action = 'DESELECT')
+
+            bm = bmesh.from_edit_mesh(mesh)
+
+            # print("active face index",activeFace.index)
+            bMesh_plot = bm.faces.layers.string["roma_plot_name"]
+            bMesh_block = bm.faces.layers.string["roma_block_name"]
+            bMesh_use = bm.faces.layers.string["roma_use_name"]
+            bMesh_storeys = bm.faces.layers.int["roma_number_of_storeys"]
+
+            if bm.faces.active is not None:
+                bMesh_active = bm.faces.active.index
+                for bmFace in bm.faces:
+                    plot = bmFace[bMesh_plot]
+                    block = bmFace[bMesh_block]
+                    use = bmFace[bMesh_use]
+                    storey = bmFace[bMesh_storeys]
+                    if bm.faces.active is not None and bmFace.index == bMesh_active:
+                        #active = " active"
+                        if isinstance (plot, str):
+                            bpy.context.scene.attribute_mass_plot_name = plot
+                        if isinstance (block, str):
+                            bpy.context.scene.attribute_mass_block_name = block
+                        if isinstance (use, str):
+                            bpy.context.scene.attribute_mass_use_name = use
+                        bpy.context.scene.attribute_mass_storeys = storey
+                        
+                        # print(plot, block, use, storey)
+                        break
+                    # else:
+                    #     active = ""
+                    #     print("face",active, " ", bmFace.index, "=", value)
+        
+                # print("selected faces:", selected_indices)
+
+            bm = bmesh.from_edit_mesh(mesh)
+            for f in bm.faces:
+                #print("controllo", f.index)
+                if f.index in selected_indices:
+                    f.select_set(True)
+                    #print("seleziono", f.index)
+            bm.free()  # free and prevent further access
+            checkingFace = False
+            # print("Done", checkingFace)
