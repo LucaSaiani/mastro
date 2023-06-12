@@ -21,10 +21,12 @@ import os
 if "bpy" in locals():
     import importlib
     importlib.reload(roma_menu),
-    importlib.reload(roma_facade)
+    importlib.reload(roma_vertex),
+    importlib.reload(roma_facade),
     importlib.reload(roma_mass)
 else:
     from . import roma_menu
+    from . import roma_vertex
     from . import roma_facade
     from . import roma_mass
 
@@ -42,6 +44,9 @@ classes = (
     roma_menu.RoMa_MenuOperator_PrintData,
     roma_menu.RoMa_MenuOperator_ExportCSV,
     roma_menu.RoMa_Menu,
+    
+    roma_vertex.OBJECT_OT_SetVertexAttribute,
+    roma_vertex.VIEW3D_PT_RoMa_vertex,
 
     # OPERATOR_update_RoMa_facade_attribute,
     roma_facade.OBJECT_OT_add_RoMa_facade,
@@ -90,6 +95,11 @@ def register():
         bpy.types.VIEW3D_MT_mesh_add.append(btn)
         
     bpy.types.VIEW3D_MT_editor_menus.append(roma_menu.roma_menu)
+    
+    Scene.attribute_vertex = bpy.props.IntProperty(
+                                        name="Vertex Custom Attribute", 
+                                        default=1,
+                                        update = roma_vertex.update_attribute_vertex)
     
     
     Scene.attribute_facade_type = bpy.props.IntProperty(
