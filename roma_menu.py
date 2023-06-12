@@ -3,7 +3,55 @@ from bpy.types import Menu, Operator
 
 import csv, os
 
+attribute_set = [
+            {"attr" : "roma_vertex_custom_attribute",
+             "attr_type" :  "INT",
+             "attr_domain" :  "POINT"},
+            {"attr" :  "roma_facade_type",
+             "attr_type" :  "INT",
+             "attr_domain" :  "EDGE"},
+            {"attr" :  "roma_number_of_storeys_per_face",
+             "attr_type" :  "INT",
+             "attr_domain" :  "EDGE"},
+            {"attr" :  "roma_plot_name",
+             "attr_type" :  "STRING",
+             "attr_domain" :  "FACE"},
+            {"attr" :  "roma_block_name",
+             "attr_type" :  "STRING",
+             "attr_domain" :  "FACE"},
+            {"attr" :  "roma_use_name",
+             "attr_type" :  "STRING",
+             "attr_domain" :  "FACE"},
+            {"attr" :  "roma_number_of_storeys",
+             "attr_type" :  "INT",
+             "attr_domain" :  "FACE"},
+            {"attr" :  "roma_GEA",
+             "attr_type" :  "FLOAT",
+             "attr_domain" :  "FACE"}
+]
 
+class roma_MenuOperator_convert_to_RoMa_mesh(Operator):
+    bl_idname = "object.roma_convert_to_roma"
+    bl_label = "Convert the selected mesh to a RoMa mesh"
+    
+    @classmethod
+    def poll(cls, context):
+        return context.mode == 'OBJECT'
+    
+    def execute(self, context):
+        selected_objects = bpy.context.selected_objects
+        selected_meshes = [obj for obj in selected_objects if obj.type == 'MESH']
+        mode = None
+        for obj in selected_meshes:
+            mesh = obj.data
+            for a in attribute_set:
+                try:
+                    mesh.attributes[a["attr"]]
+                except:
+                    mesh.attributes.new(name=a["attr"], type=a["attr_type"], domain=a["attr_domain"])
+     
+        return {'FINISHED'}
+    
 class RoMa_MenuOperator_PrintData(Operator):
     bl_idname = "object.roma_print_data"
     bl_label = "Print the data of the mass"
@@ -88,6 +136,7 @@ class RoMa_Menu(Menu):
 
     def draw(self, context):
         layout = self.layout
+        layout.operator(roma_MenuOperator_convert_to_RoMa_mesh.bl_idname)
         layout.operator(RoMa_MenuOperator_PrintData.bl_idname)
         layout.operator(RoMa_MenuOperator_ExportCSV.bl_idname)
    

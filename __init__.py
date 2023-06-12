@@ -41,6 +41,7 @@ from bpy.types import(
 )
 
 classes = (
+    roma_menu.roma_MenuOperator_convert_to_RoMa_mesh,
     roma_menu.RoMa_MenuOperator_PrintData,
     roma_menu.RoMa_MenuOperator_ExportCSV,
     roma_menu.RoMa_Menu,
@@ -72,9 +73,6 @@ buttons = (
     roma_facade.add_RoMa_facade_button,
     roma_mass.add_RoMa_Mass_button
 )
-
-
-
 
 
 def getFacadeList(scene, context):
@@ -151,8 +149,7 @@ def unregister():
         bpy.types.VIEW3D_MT_mesh_add.remove(btn)
         
     bpy.types.VIEW3D_MT_editor_menus.remove(roma_menu.roma_menu)
-    
-        
+
     del Scene.attribute_facade_type
     del Scene.attribute_mass_plot_name
     del Scene.attribute_mass_block_name
