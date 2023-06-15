@@ -14,13 +14,13 @@ attribute_set = [
              "attr_type" :  "INT",
              "attr_domain" :  "EDGE"},
             {"attr" :  "roma_plot_name",
-             "attr_type" :  "STRING",
+             "attr_type" :  "INT",
              "attr_domain" :  "FACE"},
             {"attr" :  "roma_block_name",
-             "attr_type" :  "STRING",
+             "attr_type" :  "INT",
              "attr_domain" :  "FACE"},
             {"attr" :  "roma_use_name",
-             "attr_type" :  "STRING",
+             "attr_type" :  "INT",
              "attr_domain" :  "FACE"},
             {"attr" :  "roma_number_of_storeys",
              "attr_type" :  "INT",
@@ -67,22 +67,7 @@ class RoMa_MenuOperator_PrintData(Operator):
             if obj.type == "MESH":
                 obj.update_from_editmode()
                 mesh = obj.data
-                if "roma_plot_name" in mesh.attributes:
-                    plotName = mesh.attributes["roma_plot_name"].data[0].value
-                    blockName = mesh.attributes["roma_block_name"].data[0].value
-                    use = mesh.attributes["roma_use_name"].data[0].value
-                    storeys = mesh.attributes["roma_number_of_storeys"].data[0].value
-                    # print([plotName, blockName, use, storeys])
-                    geoNodes_data = obj.evaluated_get(bpy.context.evaluated_depsgraph_get()).data
-                    #print(geoNodes_data)        
-                    data_GEA = geoNodes_data.attributes["roma_GEA"].data
-                    for el in data_GEA:
-                        floor_GEA = el.value
-                        #if floor_GEA > 0:
-                        print([plotName, blockName, use, storeys, floor_GEA])
-                        csvData.append([plotName, blockName, use, storeys, floor_GEA])
-        print()
-        print()
+                get_mass_data(mesh)
         return {'FINISHED'}
     
 class RoMa_MenuOperator_ExportCSV(Operator):
@@ -91,6 +76,10 @@ class RoMa_MenuOperator_ExportCSV(Operator):
 
     def execute(self, context):
         # roma_list = []
+        plotName = None
+        blockName = None
+        use = None
+        storeys = None
         csvData = []
         header = ["Plot Name", "Block Name", "Use", "Number of Storeys", "GEA"]
         csvData.append(header)
@@ -98,22 +87,7 @@ class RoMa_MenuOperator_ExportCSV(Operator):
         for obj in objects:
             if obj.type == "MESH":
                 mesh = obj.data
-                if "roma_plot_name" in mesh.attributes:
-                    plotName = mesh.attributes["roma_plot_name"].data[0].value
-                    blockName = mesh.attributes["roma_block_name"].data[0].value
-                    use = mesh.attributes["roma_use_name"].data[0].value
-                    storeys = mesh.attributes["roma_number_of_storeys"].data[0].value
-                    print([plotName, blockName, use, storeys])
-                    geoNodes_data = obj.evaluated_get(bpy.context.evaluated_depsgraph_get()).data
-                    print(geoNodes_data)        
-                    data_GEA = geoNodes_data.attributes["roma_GEA"].data
-                    for el in data_GEA:
-                        floor_GEA = el.value
-                        if floor_GEA > 0:
-                            print([plotName, blockName, use, storeys, floor_GEA])
-                            csvData.append([plotName, blockName, use, storeys, floor_GEA])
-                    
-                    
+                csvData = get_mass_data(mesh)
         
         current_file_path = bpy.context.blend_data.filepath
 
@@ -122,7 +96,7 @@ class RoMa_MenuOperator_ExportCSV(Operator):
         
         filename = "blenderData"
 
-        savingPath = current_folder + "\\" + filename + ".csv"
+        savingPath = current_folder + filename + ".csv"
         with open(savingPath, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(csvData)
@@ -144,6 +118,28 @@ class RoMa_Menu(Menu):
 def roma_menu(self, context):
     layout = self.layout
     layout.menu(RoMa_Menu.bl_idname)
+
+def get_mass_data(mesh):
+    data = []
+    if "roma_plot_name" in mesh.attributes:
+        plotNameAttributes = mesh.attributes["roma_plot_name"].data
+        blockNameAttributes = mesh.attributes["roma_block_name"].data
+        useAttributes = mesh.attributes["roma_use_name"].data
+        storeysAttributes = mesh.attributes["roma_number_of_storeys"].data
+                    
+        for index, attr in enumerate(plotNameAttributes):
+            #print(plotNameAttributes[index].value, blockNameAttributes[index].value,useAttributes[index].value,storeysAttributes[index].value  )
+            plotName = plotNameAttributes[index].value
+            blockName = blockNameAttributes[index].value
+            use = useAttributes[index].value
+            storeys = storeysAttributes[index].value
+            # if floor_GEA >= 0:
+            print([plotName, blockName, use, storeys])
+            data.append([plotName, blockName, use, storeys])
+        print()
+        print()
+            
+    return(data)
 
 
 # import bpy

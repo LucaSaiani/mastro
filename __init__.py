@@ -40,6 +40,7 @@ from bpy.types import(
     Scene
 )
 
+
 classes = (
     roma_menu.roma_MenuOperator_convert_to_RoMa_mesh,
     roma_menu.RoMa_MenuOperator_PrintData,
@@ -85,6 +86,7 @@ def getFacadeList(scene, context):
           
 def register():
     bpy.app.handlers.depsgraph_update_pre.append(roma_mass.get_face_attribute)
+    
     from bpy.utils import register_class
     for cls in classes:
         register_class(cls)
@@ -106,19 +108,19 @@ def register():
                                         update = roma_facade.update_attribute_facade_type)
     
     
-    Scene.attribute_mass_plot_name = bpy.props.StringProperty(
+    Scene.attribute_mass_plot_name = bpy.props.IntProperty(
                                         name="Plot Name",
-                                        default="Plot Name",
+                                        default=0,
                                         update = roma_mass.update_attribute_mass_plot_name)
      
-    Scene.attribute_mass_block_name = bpy.props.StringProperty(
+    Scene.attribute_mass_block_name = bpy.props.IntProperty(
                                         name="Block Name",
-                                        default="Block Name",
+                                        default=0,
                                         update = roma_mass.update_attribute_mass_block_name)
      
-    Scene.attribute_mass_use_name = bpy.props.StringProperty(
+    Scene.attribute_mass_use_name = bpy.props.IntProperty(
                                         name="Use",
-                                        default="Use",
+                                        default=0,
                                         update = roma_mass.update_attribute_mass_use_name)
      
     Scene.attribute_mass_storeys = bpy.props.IntProperty(
@@ -141,6 +143,7 @@ def register():
     
 
 def unregister():
+    
     from bpy.utils import unregister_class
     for cls in reversed(classes):
         unregister_class(cls)
