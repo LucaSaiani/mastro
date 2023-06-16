@@ -1,5 +1,6 @@
 import bpy
 from bpy.types import Menu, Operator
+from math import ceil as mathCeil
 
 import csv, os
 
@@ -44,6 +45,7 @@ class roma_MenuOperator_convert_to_RoMa_mesh(Operator):
         mode = None
         for obj in selected_meshes:
             mesh = obj.data
+            mesh["RoMa object"] = True
             for a in attribute_set:
                 try:
                     mesh.attributes[a["attr"]]
@@ -57,7 +59,6 @@ class RoMa_MenuOperator_PrintData(Operator):
     bl_label = "Print the data of the mass"
 
     def execute(self, context):
-        print("----------------------------------")
         # roma_list = []
         csvData = []
         header = ["Plot Name", "Block Name", "Use", "Number of Storeys", "GEA"]
@@ -67,7 +68,11 @@ class RoMa_MenuOperator_PrintData(Operator):
             if obj.type == "MESH":
                 obj.update_from_editmode()
                 mesh = obj.data
-                get_mass_data(mesh)
+                data = get_mass_data(mesh)
+        
+        for row in data:
+            print(row)       
+        
         return {'FINISHED'}
     
 class RoMa_MenuOperator_ExportCSV(Operator):
@@ -96,7 +101,7 @@ class RoMa_MenuOperator_ExportCSV(Operator):
         
         filename = "blenderData"
 
-        savingPath = current_folder + filename + ".csv"
+        savingPath = current_folder + "/" + filename + ".csv"
         with open(savingPath, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(csvData)
@@ -129,15 +134,22 @@ def get_mass_data(mesh):
                     
         for index, attr in enumerate(plotNameAttributes):
             #print(plotNameAttributes[index].value, blockNameAttributes[index].value,useAttributes[index].value,storeysAttributes[index].value  )
-            plotName = plotNameAttributes[index].value
+            plotId = plotNameAttributes[index].value
+            if plotId == 0:
+                plotName = None
+            else:
+                for n in bpy.context.scene.roma_plot_name_list:
+                    if n.index == plotId:
+                        plotName = n.name
+                        break
             blockName = blockNameAttributes[index].value
             use = useAttributes[index].value
             storeys = storeysAttributes[index].value
             # if floor_GEA >= 0:
-            print([plotName, blockName, use, storeys])
+            #print([plotName, blockName, use, storeys])
             data.append([plotName, blockName, use, storeys])
-        print()
-        print()
+        # print()
+        # print()
             
     return(data)
 

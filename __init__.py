@@ -20,11 +20,13 @@ import os
 
 if "bpy" in locals():
     import importlib
+    importlib.reload(roma_project_data),
     importlib.reload(roma_menu),
     importlib.reload(roma_vertex),
     importlib.reload(roma_facade),
     importlib.reload(roma_mass)
 else:
+    from . import roma_project_data
     from . import roma_menu
     from . import roma_vertex
     from . import roma_facade
@@ -42,6 +44,13 @@ from bpy.types import(
 
 
 classes = (
+    roma_project_data.VIEW3D_PT_RoMa_project_data,
+    roma_project_data.PLOT_UL_edgeslots,
+    roma_project_data.plot_name_list,
+    roma_project_data.SCENE_OT_add_plot_name,
+    roma_project_data.PLOT_LIST_OT_NewItem,
+    roma_project_data.PLOT_LIST_OT_MoveItem,
+    
     roma_menu.roma_MenuOperator_convert_to_RoMa_mesh,
     roma_menu.RoMa_MenuOperator_PrintData,
     roma_menu.RoMa_MenuOperator_ExportCSV,
@@ -62,7 +71,7 @@ classes = (
     roma_facade.LIST_OT_MoveItem,
     
     roma_mass.OBJECT_OT_add_RoMa_Mass,
-    roma_mass.OBJECT_OT_SetPlotName,
+    roma_mass.OBJECT_OT_SetPlotIndex,
     roma_mass.OBJECT_OT_SetBlockName,
     roma_mass.OBJECT_OT_SetUseName,
     roma_mass.OBJECT_OT_SetMassStoreys,
@@ -75,8 +84,14 @@ buttons = (
     roma_mass.add_RoMa_Mass_button
 )
 
+def get_plot_names_from_list(scene, context):
+    items = []
+    for el in scene.roma_plot_name_list:
+        newProp = (el.name, el.name, "")
+        items.append(newProp)
+    return items
 
-def getFacadeList(scene, context):
+def get_facade_type_names_from_list(scene, context):
     items = []
     for el in scene.roma_facade_type_list:
         newProp = (el.name, el.name, "")
@@ -108,10 +123,10 @@ def register():
                                         update = roma_facade.update_attribute_facade_type)
     
     
-    Scene.attribute_mass_plot_name = bpy.props.IntProperty(
+    Scene.attribute_mass_plot_index = bpy.props.IntProperty(
                                         name="Plot Name",
                                         default=0,
-                                        update = roma_mass.update_attribute_mass_plot_name)
+                                        update = roma_mass.update_attribute_mass_plot_index)
      
     Scene.attribute_mass_block_name = bpy.props.IntProperty(
                                         name="Block Name",
@@ -130,16 +145,24 @@ def register():
                                         update = roma_mass.update_attribute_mass_storeys)
      
     
+    Scene.roma_plot_name_list = CollectionProperty(type = roma_project_data.plot_name_list)
+    Scene.roma_plot_name_list_index = IntProperty(name = "Plot Name",
+                                             default = 0)
+    Scene.roma_plot_names = bpy.props.EnumProperty(
+                                        name="Plot List",
+                                        description="",
+                                        items=get_plot_names_from_list,
+                                        update = roma_mass.update_plot_name_label)
+ 
     
     Scene.roma_facade_type_list = CollectionProperty(type = roma_facade.ListFacadeType)
-    
     Scene.roma_facade_type_index = IntProperty(name = "Façade Type",
                                              default = 0)
-    
     Scene.roma_facade_type_name = bpy.props.EnumProperty(
                                         name="Façade Type List",
                                         description="",
-                                        items=getFacadeList)
+                                        items=get_facade_type_names_from_list)
+ 
     
 
 def unregister():
@@ -153,11 +176,14 @@ def unregister():
         
     bpy.types.VIEW3D_MT_editor_menus.remove(roma_menu.roma_menu)
 
+
     del Scene.attribute_facade_type
-    del Scene.attribute_mass_plot_name
+    # del Scene.attribute_mass_plot_name
     del Scene.attribute_mass_block_name
     del Scene.attribute_mass_use_name
     del Scene.attribute_mass_storeys
+
+    del Scene.roma_plot_name_list
     del Scene.roma_facade_type_list
     del Scene.roma_facade_type_index
     del Scene.roma_facade_type_name
