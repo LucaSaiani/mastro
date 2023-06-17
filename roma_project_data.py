@@ -1,5 +1,5 @@
 import bpy
-import bmesh
+# import bmesh
 
 from bpy.props import StringProperty, IntProperty
 from bpy.types import PropertyGroup, UIList, Operator, Panel
@@ -56,15 +56,17 @@ class PLOT_UL_edgeslots(UIList):
     """Façade type UIList."""
     def draw_item(self, context, layout, data, item, icon, active_data,
                   active_propname, index):
-
+       
         # We could write some code to decide which icon to use here...
         custom_icon = 'OBJECT_DATAMODE'
 
         # Make sure your code supports all 3 layout types
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
+            
+            # split.label(text="Index: %d" % (index))
+            
             split = layout.split(factor=0.3)
-            split.label(text="Index: %d" % (index))
-            split.label(text=str(item.index)) 
+            split.label(text="Id: %d" % (item.id)) 
             split.label(text=item.name, icon=custom_icon) 
             
             # layout.alignment = 'LEFT'
@@ -74,6 +76,33 @@ class PLOT_UL_edgeslots(UIList):
         elif self.layout_type in {'GRID'}:
             layout.alignment = 'CENTER'
             layout.label(text="", icon = custom_icon)
+
+        # self.filter_zero_id(context, data, "roma_plot_name_list")
+
+
+    def filter_items(self, context, data, propname):
+        """Filter and order items in the list."""
+
+        # We initialize filtered and ordered as empty lists. Notice that 
+        # if all sorting and filtering is disabled, we will return
+        # these empty. 
+
+        filtered = []
+        ordered = []
+        items = getattr(data, propname)
+        # Initialize with all items visible
+        filtered = [self.bitflag_filter_item] * len(items)
+        
+        for i, item in enumerate(items):
+            if item.id == 0:
+                filtered[i] &= ~self.bitflag_filter_item
+        return filtered, ordered
+
+
+
+
+            
+    
             
 class PLOT_LIST_OT_NewItem(Operator):
     """Add a new item to the list"""
@@ -81,15 +110,24 @@ class PLOT_LIST_OT_NewItem(Operator):
     bl_idname = "roma_plot_name_list.new_item"
     bl_label = "Add a new plot"
 
-    def execute(self, context):
+    def execute(self, context): 
         context.scene.roma_plot_name_list.add()
-        temp_list = []
+        last = len(context.scene.roma_plot_name_list)-1
+        if last == 0:
+            context.scene.roma_plot_name_list[0].id = 0
+            context.scene.roma_plot_name_list[0].name = ""
+            context.scene.roma_plot_name_list.add()
+        temp_list = []    
         for el in context.scene.roma_plot_name_list:
-            temp_list.append(el.index)
+            temp_list.append(el.id)
         # print("max index = ", max(temp_list))
         last = len(context.scene.roma_plot_name_list)-1
-        context.scene.roma_plot_name_list[last].index = max(temp_list)+1
+        
+        context.scene.roma_plot_name_list[last].id = max(temp_list)+1
+            
         return{'FINISHED'}
+
+
     
 class PLOT_LIST_OT_MoveItem(Operator):
     bl_idname = "roma_plot_name_list.move_item"
@@ -120,18 +158,18 @@ class PLOT_LIST_OT_MoveItem(Operator):
 
         return{'FINISHED'}
             
-class SCENE_OT_add_plot_name(Operator):
-    bl_idname = "scene.add_plot_name"
-    bl_label = "Add a plot name to the current project data"
-    bl_options = {'REGISTER', 'UNDO'}
+# class SCENE_OT_add_plot_name(Operator):
+#     bl_idname = "scene.add_plot_name"
+#     bl_label = "Add a plot name to the current project data"
+#     bl_options = {'REGISTER', 'UNDO'}
     
-    def execute(self, context):
-        print("ciao")
-        return {'FINISHED'}
+#     def execute(self, context):
+#         print("ciao")
+#         return {'FINISHED'}
             
 class plot_name_list(PropertyGroup):
-    index: IntProperty(
-           name="Index",
+    id: IntProperty(
+           name="Id",
            description="Plot name index",
            default = 0)
     
