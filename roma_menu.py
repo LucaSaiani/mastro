@@ -1,6 +1,6 @@
 import bpy
 from bpy.types import Menu, Operator
-from math import ceil as mathCeil
+# from math import ceil as mathCeil
 
 import csv, os
 
@@ -81,10 +81,10 @@ class RoMa_MenuOperator_ExportCSV(Operator):
 
     def execute(self, context):
         # roma_list = []
-        plotName = None
-        blockName = None
-        use = None
-        storeys = None
+        # plotName = None
+        # blockName = None
+        # use = None
+        # storeys = None
         csvData = []
         header = ["Plot Name", "Block Name", "Use", "Number of Storeys", "GEA"]
         csvData.append(header)
@@ -115,6 +115,7 @@ class RoMa_Menu(Menu):
 
     def draw(self, context):
         layout = self.layout
+        layout.active = bool(context.active_object.mode=='OBJECT')
         layout.operator(roma_MenuOperator_convert_to_RoMa_mesh.bl_idname)
         layout.operator(RoMa_MenuOperator_PrintData.bl_idname)
         layout.operator(RoMa_MenuOperator_ExportCSV.bl_idname)
@@ -139,7 +140,7 @@ def get_mass_data(mesh):
                 plotName = None
             else:
                 for n in bpy.context.scene.roma_plot_name_list:
-                    if n.index == plotId:
+                    if n.id == plotId:
                         plotName = n.name
                         break
             blockName = blockNameAttributes[index].value

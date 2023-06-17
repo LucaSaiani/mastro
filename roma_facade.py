@@ -39,7 +39,7 @@ class VIEW3D_PT_RoMa_facade(Panel):
     bl_label = "Façade"
     
     def draw(self, context):
-        
+
         layout = self.layout
         obj = context.active_object
         scene = context.scene

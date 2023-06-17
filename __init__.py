@@ -41,13 +41,13 @@ from bpy.props import (
 from bpy.types import(
     Scene
 )
-
+# from bpy.app.handlers import persistent
 
 classes = (
     roma_project_data.VIEW3D_PT_RoMa_project_data,
     roma_project_data.PLOT_UL_edgeslots,
     roma_project_data.plot_name_list,
-    roma_project_data.SCENE_OT_add_plot_name,
+    # roma_project_data.SCENE_OT_add_plot_name,
     roma_project_data.PLOT_LIST_OT_NewItem,
     roma_project_data.PLOT_LIST_OT_MoveItem,
     
@@ -86,9 +86,12 @@ buttons = (
 
 def get_plot_names_from_list(scene, context):
     items = []
+    
     for el in scene.roma_plot_name_list:
         newProp = (el.name, el.name, "")
         items.append(newProp)
+    # noneItem = ("None", "None", "")
+    # items.append(noneItem)
     return items
 
 def get_facade_type_names_from_list(scene, context):
@@ -98,10 +101,20 @@ def get_facade_type_names_from_list(scene, context):
         items.append(newProp)
     return items
 
+# @persistent
+# def init_data(dummy):
+#     elNumber = 0
+#     for el in Scene.roma_plot_name_list:
+#         elNumber+=1
+#     print("HELLLLL",elNumber)
+#     # if len(Scene.roma_plot_name_list) == 0:
+#             # bpy.ops.roma_plot_name_list.new_item()
+#             # print("inizializzo")
+#     # print("macche")
+#     bpy.app.handlers.load_post.remove(init_data)
           
 def register():
     bpy.app.handlers.depsgraph_update_pre.append(roma_mass.get_face_attribute)
-    
     from bpy.utils import register_class
     for cls in classes:
         register_class(cls)
@@ -123,10 +136,10 @@ def register():
                                         update = roma_facade.update_attribute_facade_type)
     
     
-    Scene.attribute_mass_plot_index = bpy.props.IntProperty(
+    Scene.attribute_mass_plot_id = bpy.props.IntProperty(
                                         name="Plot Name",
                                         default=0,
-                                        update = roma_mass.update_attribute_mass_plot_index)
+                                        update = roma_mass.update_attribute_mass_plot_id)
      
     Scene.attribute_mass_block_name = bpy.props.IntProperty(
                                         name="Block Name",
@@ -152,7 +165,7 @@ def register():
                                         name="Plot List",
                                         description="",
                                         items=get_plot_names_from_list,
-                                        update = roma_mass.update_plot_name_label)
+                                        update=roma_mass.update_plot_name_label)
  
     
     Scene.roma_facade_type_list = CollectionProperty(type = roma_facade.ListFacadeType)
@@ -163,9 +176,12 @@ def register():
                                         description="",
                                         items=get_facade_type_names_from_list)
  
-    
+   
+    # bpy.app.handlers.depsgraph_update_pre.append(init_data)
 
 def unregister():
+    bpy.app.handlers.depsgraph_update_pre.remove(roma_mass.get_face_attribute)
+    
     
     from bpy.utils import unregister_class
     for cls in reversed(classes):

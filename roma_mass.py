@@ -5,7 +5,7 @@ from bpy.app.handlers import persistent
 
 # selected_face_index = -1
 checkingFace = False
-plotName = {"index" : None, "name" : None}
+plotName = {"id" : None, "name" : None}
 # changed_massAttribute = False
 
 from bpy.props import FloatVectorProperty
@@ -36,7 +36,7 @@ class OBJECT_OT_add_RoMa_Mass(Operator, AddObjectHelper):
     
 class OBJECT_OT_SetPlotIndex(Operator):
     """Set Face Attribute as name of the plot"""
-    bl_idname = "object.set_attribute_mass_plot_index"
+    bl_idname = "object.set_attribute_mass_plot_id"
     bl_label = "Set Face Attribute as Name of the Plot"
     bl_options = {'REGISTER', 'UNDO'}
     
@@ -44,13 +44,13 @@ class OBJECT_OT_SetPlotIndex(Operator):
         obj = context.active_object
         mesh = obj.data
 
-        attribute_mass_plot_index = context.scene.attribute_mass_plot_index
+        attribute_mass_plot_id = context.scene.attribute_mass_plot_id
         
         # a custom attribute is assigned to the edges
        
         try:
             mesh.attributes["roma_plot_name"]
-            attribute_mass_plot_index = context.scene.attribute_mass_plot_index
+            attribute_mass_plot_id = context.scene.attribute_mass_plot_id
            
             # we need to switch from Edit mode to Object mode so the selection gets updated
             mode = obj.mode
@@ -63,12 +63,12 @@ class OBJECT_OT_SetPlotIndex(Operator):
                 index = face.index
                 for mesh_attribute in mesh_attributes:
                     if mesh_attribute[0] == index:
-                        mesh_attribute[1].value = attribute_mass_plot_index
+                        mesh_attribute[1].value = attribute_mass_plot_id
            
             # back to whatever mode we were in
             bpy.ops.object.mode_set(mode=mode)
                     
-            self.report({'INFO'}, "Attribute set to face, plot: "+str(attribute_mass_plot_index))
+            self.report({'INFO'}, "Attribute set to face, plot: "+str(attribute_mass_plot_id))
             # global changed_massAttribute
             # changed_massAttribute = True
             return {'FINISHED'}
@@ -224,6 +224,12 @@ class VIEW3D_PT_RoMa_Mass(Panel):
             layout.active = bool(context.active_object.mode=='EDIT')
             row = layout.row()
             row = layout.row(align=True)
+            
+            # split = row.split(factor=0.5)
+            # split.label(text="Id: %d" % (item.id)) 
+            # split.label(text=item.name, icon=custom_icon) 
+            
+            
             row.prop(context.scene, "roma_plot_names", icon="MOD_BOOLEAN", icon_only=True, text="Plot")
             if len(scene.roma_plot_name_list) >0:
                 # item = scene.roma_plot_name_list[scene.roma_plot_name_list_index]
@@ -234,7 +240,7 @@ class VIEW3D_PT_RoMa_Mass(Panel):
                 # row.label(text=" "+ str(item.index) + " " + item.name)
                 row.label(text=plotName["name"])
             # row.prop(item, "name", text="")
-            #layout.prop(context.scene, "attribute_mass_plot_index", text="Plot Index")
+            #layout.prop(context.scene, "attribute_mass_plot_id", text="Plot Index")
             layout.prop(context.scene, "attribute_mass_block_name", text="Block Name")
             layout.prop(context.scene, "attribute_mass_use_name", text="Use Name")
             layout.prop(context.scene, "attribute_mass_storeys", text="N° of storeys")
@@ -313,8 +319,8 @@ def add_RoMa_Mass_button(self, context):
         text="RoMa Mass",
         icon='PLUGIN')
     
-def update_attribute_mass_plot_index(self,context):
-    bpy.ops.object.set_attribute_mass_plot_index()
+def update_attribute_mass_plot_id(self,context):
+    bpy.ops.object.set_attribute_mass_plot_id()
     
 def update_attribute_mass_block_name(self, context):
     bpy.ops.object.set_attribute_mass_block_name()
@@ -332,8 +338,8 @@ def update_plot_name_label(self, context):
     plotName["name"] = " " + name
     for n in scene.roma_plot_name_list:
         if n.name == name:
-            scene.attribute_mass_plot_index = n.index
-            plotName["index"] = n.index
+            scene.attribute_mass_plot_id = n.id
+            plotName["id"] = n.id
             break    
         
     
@@ -379,17 +385,17 @@ def read_face_attribute():
                     use = bmFace[bMesh_use] 
                     storey = bmFace[bMesh_storeys]
                     if bm.faces.active is not None and bmFace.index ==  bMesh_active_index:
-                        if scene.attribute_mass_plot_index != plot:
-                            scene.attribute_mass_plot_index = plot
-                        if plotName["index"] != plot:
-                            plotName["index"] = plot
-                            if plotName["index"] == 0:
-                                plotName["name"] = None
-                            else:
-                                for n in scene.roma_plot_name_list:
-                                    if n.index == plotName["index"]:
-                                        plotName["name"] = " " + n.name 
-                                        break
+                        if scene.attribute_mass_plot_id != plot:
+                            scene.attribute_mass_plot_id = plot
+                        if plotName["id"] != plot:
+                            plotName["id"] = plot
+                            # if plotName["id"] == 0:
+                            #     plotName["name"] = None
+                            # else:
+                            for n in scene.roma_plot_name_list:
+                                if n.id == plotName["id"]:
+                                    plotName["name"] = " " + n.name 
+                                    break
                         if scene.attribute_mass_block_name != block:
                             scene.attribute_mass_block_name = block
                         if scene.attribute_mass_use_name != use:
