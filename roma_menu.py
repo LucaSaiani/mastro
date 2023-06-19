@@ -1,8 +1,10 @@
 import bpy
 from bpy.types import Menu, Operator
+from bpy_extras.io_utils import ExportHelper
+from bpy.props import StringProperty
 # from math import ceil as mathCeil
 
-import csv, os
+import csv #, os
 
 attribute_set = [
             {"attr" : "roma_vertex_custom_attribute",
@@ -102,40 +104,22 @@ class RoMa_MenuOperator_PrintData(Operator):
         
         return {'FINISHED'}
     
-class RoMa_MenuOperator_ExportCSV(Operator):
+class RoMa_MenuOperator_ExportCSV(Operator, ExportHelper):
+    """Export the data of the visibile RoMa Objects as a CSV file"""
     bl_idname = "object.roma_export_csv"
     bl_label = "Export data as CSV"
-
+    
+    filename_ext = ".csv"
+    filter_glob: StringProperty(
+        default="*.csv",
+        options={'HIDDEN'},
+        maxlen=255,  # Max internal buffer length, longer would be clamped.
+    )
+    
+    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
+    
     def execute(self, context):
-        # roma_list = []
-        # plotName = None
-        # blockName = None
-        # use = None
-        # storeys = None
-        csvData = []
-        csvTemp = []
-        header = [["Plot Name", "Block Name", "Use", "Number of Storeys", "GEA"]]
-        csvTemp.append(header)
-        objects = [obj for obj in bpy.context.scene.objects]
-        for obj in objects:
-            if obj.type == "MESH" and "RoMa object" in obj.data:
-                csvTemp.append(get_mass_data(obj))
-        for sublist in csvTemp:
-            csvData.extend(sublist)
-        current_file_path = bpy.context.blend_data.filepath
-
-        # Get the current working folder
-        current_folder = os.path.dirname(bpy.path.abspath(current_file_path))
-        
-        filename = "blenderData.csv"
-
-        savingPath = os.path.join(current_folder, filename)
-        with open(savingPath, 'w', newline='') as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerows(csvData)
-
-        print(f"Data saved to {savingPath}")
-        return {'FINISHED'}
+        return writeCSV(context, self.filepath)
 
 class RoMa_Menu(Menu):
     bl_idname = "VIEW3D_MT_custom_menu"
@@ -148,6 +132,28 @@ class RoMa_Menu(Menu):
         layout.operator(RoMa_MenuOperator_PrintData.bl_idname)
         layout.operator(RoMa_MenuOperator_ExportCSV.bl_idname)
    
+def writeCSV(context, filepath):
+    csvData = []
+    csvTemp = []
+    header = [["Plot Name", "Block Name", "Use", "Number of Storeys", "GEA"]]
+    csvTemp.append(header)
+    objects = [obj for obj in bpy.context.scene.objects]
+
+    for obj in objects:
+        if obj.type == "MESH" and "RoMa object" in obj.data:
+            csvTemp.append(get_mass_data(obj))
+
+    for sublist in csvTemp:
+        csvData.extend(sublist)
+
+    with open(filepath, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerows(csvData)
+
+    print(f"Data saved to {filepath}")
+    return {'FINISHED'}
+    
+    
 # Callback function to add drop down menu
 def roma_menu(self, context):
     layout = self.layout
