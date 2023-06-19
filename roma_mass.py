@@ -6,6 +6,8 @@ from bpy.app.handlers import persistent
 # selected_face_index = -1
 checkingFace = False
 plotName = {"id" : None, "name" : None}
+blockName = {"id" : None, "name" : None}
+useName = {"id" : None, "name" : None}
 # changed_massAttribute = False
 
 from bpy.props import FloatVectorProperty
@@ -30,14 +32,13 @@ class OBJECT_OT_add_RoMa_Mass(Operator, AddObjectHelper):
     )
 
     def execute(self, context):
-
         add_RoMa_Mass(self, context)
         return {'FINISHED'}
     
-class OBJECT_OT_SetPlotIndex(Operator):
+class OBJECT_OT_SetPlotId(Operator):
     """Set Face Attribute as name of the plot"""
     bl_idname = "object.set_attribute_mass_plot_id"
-    bl_label = "Set Face Attribute as Name of the Plot"
+    bl_label = "Set the Id of the plot"
     bl_options = {'REGISTER', 'UNDO'}
     
     def execute(self, context):
@@ -49,7 +50,7 @@ class OBJECT_OT_SetPlotIndex(Operator):
         # a custom attribute is assigned to the edges
        
         try:
-            mesh.attributes["roma_plot_name"]
+            mesh.attributes["roma_plot_id"]
             attribute_mass_plot_id = context.scene.attribute_mass_plot_id
            
             # we need to switch from Edit mode to Object mode so the selection gets updated
@@ -57,7 +58,7 @@ class OBJECT_OT_SetPlotIndex(Operator):
             bpy.ops.object.mode_set(mode='OBJECT')
            
             selected_faces = [p for p in bpy.context.active_object.data.polygons if p.select]
-            mesh_attributes = mesh.attributes["roma_plot_name"].data.items()
+            mesh_attributes = mesh.attributes["roma_plot_id"].data.items()
             
             for face in selected_faces:
                 index = face.index
@@ -68,55 +69,50 @@ class OBJECT_OT_SetPlotIndex(Operator):
             # back to whatever mode we were in
             bpy.ops.object.mode_set(mode=mode)
                     
-            self.report({'INFO'}, "Attribute set to face, plot: "+str(attribute_mass_plot_id))
+            # self.report({'INFO'}, "Attribute set to face, plot: "+str(attribute_mass_plot_id))
             # global changed_massAttribute
             # changed_massAttribute = True
             return {'FINISHED'}
         except:
             return {'FINISHED'}
         
-class OBJECT_OT_SetBlockName(Operator):
+class OBJECT_OT_SetBlockId(Operator):
     """Set Face Attribute as name of the block"""
-    bl_idname = "object.set_attribute_mass_block_name"
-    bl_label = "Set Face Attribute as Name of the Block"
+    bl_idname = "object.set_attribute_mass_block_id"
+    bl_label = "Set the Id of the block"
     bl_options = {'REGISTER', 'UNDO'}
     
     def execute(self, context):
         obj = context.active_object
         mesh = obj.data
 
-        attribute_mass_block_name = context.scene.attribute_mass_block_name
-        
+        attribute_mass_block_id = context.scene.attribute_mass_block_id
         try:
-            mesh.attributes["roma_block_name"]
-            attribute_mass_block_name = context.scene.attribute_mass_block_name
+            mesh.attributes["roma_block_id"]
+            attribute_mass_block_id = context.scene.attribute_mass_block_id
            
-            # we need to switch from Edit mode to Object mode so the selection gets updated
             mode = obj.mode
             bpy.ops.object.mode_set(mode='OBJECT')
            
             selected_faces = [p for p in bpy.context.active_object.data.polygons if p.select]
-            mesh_attributes = mesh.attributes["roma_block_name"].data.items()
+            mesh_attributes = mesh.attributes["roma_block_id"].data.items()
             
             for face in selected_faces:
                 index = face.index
                 for mesh_attribute in mesh_attributes:
                     if mesh_attribute[0] == index:
-                        mesh_attribute[1].value = attribute_mass_block_name
+                        mesh_attribute[1].value = attribute_mass_block_id
            
-            # back to whatever mode we were in
             bpy.ops.object.mode_set(mode=mode)
                     
-            self.report({'INFO'}, "Attribute set to face, block: "+str(attribute_mass_block_name))
-            # global changed_massAttribute
-            # changed_massAttribute = True
+            # self.report({'INFO'}, "Attribute set to face, block: "+str(attribute_mass_block_id))
             return {'FINISHED'}
         except:
             return {'FINISHED'}
         
-class OBJECT_OT_SetUseName(Operator):
+class OBJECT_OT_SetUseId(Operator):
     """Set Face Attribute as use of the block"""
-    bl_idname = "object.set_attribute_mass_use_name"
+    bl_idname = "object.set_attribute_mass_use_id"
     bl_label = "Set Face Attribute as Use of the Block"
     bl_options = {'REGISTER', 'UNDO'}
     
@@ -124,33 +120,27 @@ class OBJECT_OT_SetUseName(Operator):
         obj = context.active_object
         mesh = obj.data
 
-        attribute_mass_use_name = context.scene.attribute_mass_use_name
+        attribute_mass_use_id = context.scene.attribute_mass_use_id
         
-        # a custom attribute is assigned to the edges
-       
         try:
-            mesh.attributes["roma_use_name"]
-            attribute_mass_use_name = context.scene.attribute_mass_use_name
-           
-            # we need to switch from Edit mode to Object mode so the selection gets updated
+            mesh.attributes["roma_use_id"]
+            attribute_mass_use_id = context.scene.attribute_mass_use_id
+
             mode = obj.mode
             bpy.ops.object.mode_set(mode='OBJECT')
            
             selected_faces = [p for p in bpy.context.active_object.data.polygons if p.select]
-            mesh_attributes = mesh.attributes["roma_use_name"].data.items()
+            mesh_attributes = mesh.attributes["roma_use_id"].data.items()
             
             for face in selected_faces:
                 index = face.index
                 for mesh_attribute in mesh_attributes:
                     if mesh_attribute[0] == index:
-                        mesh_attribute[1].value = attribute_mass_use_name
+                        mesh_attribute[1].value = attribute_mass_use_id
            
-            # back to whatever mode we were in
             bpy.ops.object.mode_set(mode=mode)
                     
-            self.report({'INFO'}, "Attribute set to face, use: "+str(attribute_mass_use_name))
-            # global changed_massAttribute
-            # changed_massAttribute = True
+            self.report({'INFO'}, "Attribute set to face, use: "+str(attribute_mass_use_id))
             return {'FINISHED'}
         except:
             return {'FINISHED'}
@@ -189,7 +179,7 @@ class OBJECT_OT_SetMassStoreys(Operator):
             # back to whatever mode we were in
             bpy.ops.object.mode_set(mode=mode)
                     
-            self.report({'INFO'}, "Attribute set to face, number of storeys: "+str(attribute_mass_storeys))
+            # self.report({'INFO'}, "Attribute set to face, number of storeys: "+str(attribute_mass_storeys))
             
             # read_face_attribute(obj)
             
@@ -209,59 +199,75 @@ class VIEW3D_PT_RoMa_Mass(Panel):
     
     def draw(self, context):
         obj = context.active_object 
-        mode = obj.mode
+        if obj is not None and obj.type == "MESH":
         
-        if "RoMa object" in obj.data and mode == "EDIT":
-            scene = context.scene
+            mode = obj.mode
             
-            layout = self.layout
-            layout.use_property_split = True    
-            layout.use_property_decorate = False  # No animation.
-            
-            # col = layout.column()
-            # subcol = col.column()
-            
-            layout.active = bool(context.active_object.mode=='EDIT')
-            row = layout.row()
-            row = layout.row(align=True)
-            
-            # split = row.split(factor=0.5)
-            # split.label(text="Id: %d" % (item.id)) 
-            # split.label(text=item.name, icon=custom_icon) 
-            
-            
-            row.prop(context.scene, "roma_plot_names", icon="MOD_BOOLEAN", icon_only=True, text="Plot")
-            if len(scene.roma_plot_name_list) >0:
-                # item = scene.roma_plot_name_list[scene.roma_plot_name_list_index]
-                # value = ""
-                # for n in scene.roma_plot_name_list:
-                #     if n.index == index:
-                #         value = str(n.index) + n.name
-                # row.label(text=" "+ str(item.index) + " " + item.name)
-                row.label(text=plotName["name"])
-            # row.prop(item, "name", text="")
-            #layout.prop(context.scene, "attribute_mass_plot_id", text="Plot Index")
-            layout.prop(context.scene, "attribute_mass_block_name", text="Block Name")
-            layout.prop(context.scene, "attribute_mass_use_name", text="Use Name")
-            layout.prop(context.scene, "attribute_mass_storeys", text="N° of storeys")
-
-            # row = layout.row()
-            # row.prop(context.scene, "attribute_mass_storeys", text="Number of Storeys")
-            # if context.active_object.mode=='EDIT':
-            #     row.enabled = True
-            # else:
-            #     row.enabled = False
-            # if context.active_object.mode=='EDIT':
-            #     print("pippa")
-                #bpy.ops.wm.mouse_position('INVOKE_DEFAULT')
-            #     obj = context.active_object 
-            #     obj.update_from_editmode()
-            #     mesh = obj.data
-            #     activeFace = mesh.polygons[mesh.polygons.active]
-            #     print("cappero", activeFace.index)
-                #bpy.ops.object.mode_set(mode='OBJECT')
-                #context.scene.attribute_mass_storeys = activeFace.index
-                #       bpy.ops.object.mode_set(mode='EDIT')
+            if mode == "EDIT" and "RoMa object" in obj.data:
+                scene = context.scene
+                
+                layout = self.layout
+                layout.use_property_split = True    
+                layout.use_property_decorate = False  # No animation.
+                
+                # col = layout.column()
+                # subcol = col.column()
+                
+                layout.active = bool(context.active_object.mode=='EDIT')
+                row = layout.row()
+                row = layout.row(align=True)
+                
+                # split = row.split(factor=0.5)
+                # split.label(text="Id: %d" % (item.id)) 
+                # split.label(text=item.name, icon=custom_icon) 
+                
+                ################ PLOT ######################
+                row.prop(context.scene, "roma_plot_names", icon="MOD_BOOLEAN", icon_only=True, text="Plot")
+                if len(scene.roma_plot_name_list) >0:
+                    # item = scene.roma_plot_name_list[scene.roma_plot_name_list_index]
+                    # value = ""
+                    # for n in scene.roma_plot_name_list:
+                    #     if n.index == index:
+                    #         value = str(n.index) + n.name
+                    # row.label(text=" "+ str(item.index) + " " + item.name)
+                    row.label(text=plotName["name"])
+                # row.prop(item, "name", text="")
+                # layout.prop(context.scene, "attribute_mass_plot_id", text="Plot Index")
+                
+                ################ BLOCK ######################
+                row = layout.row()
+                row = layout.row(align=True)
+                row.prop(context.scene, "roma_block_names", icon="MOD_BOOLEAN", icon_only=True, text="Block")
+                if len(scene.roma_block_name_list) >0:
+                    row.label(text=blockName["name"])
+                # layout.prop(context.scene, "attribute_mass_block_id", text="Block Name")
+                ################ USE ######################
+                row = layout.row()
+                row = layout.row(align=True)
+                row.prop(context.scene, "roma_use_names", icon="MOD_BOOLEAN", icon_only=True, text="Use")
+                if len(scene.roma_use_name_list) >0:
+                    row.label(text=useName["name"])
+                # layout.prop(context.scene, "attribute_mass_use_id", text="Use Name")
+                ################ STOREYS ######################
+                layout.prop(context.scene, "attribute_mass_storeys", text="N° of storeys")
+                
+                # row = layout.row()
+                # row.prop(context.scene, "attribute_mass_storeys", text="Number of Storeys")
+                # if context.active_object.mode=='EDIT':
+                #     row.enabled = True
+                # else:
+                #     row.enabled = False
+                # if context.active_object.mode=='EDIT':
+                #     print("pippa")
+                    #bpy.ops.wm.mouse_position('INVOKE_DEFAULT')
+                #     obj = context.active_object 
+                #     obj.update_from_editmode()
+                #     mesh = obj.data
+                #     activeFace = mesh.polygons[mesh.polygons.active]
+                #     print("cappero", activeFace.index)
+                    #bpy.ops.object.mode_set(mode='OBJECT')
+                    #context.scene.attribute_mass_storeys = activeFace.index
+                    #       bpy.ops.object.mode_set(mode='EDIT')
             
 
     
@@ -288,22 +294,22 @@ def add_RoMa_Mass(self, context):
     mesh.attributes.new(name="roma_facade_type", type="INT", domain="EDGE")
     mesh.attributes.new(name="roma_number_of_storeys_per_face", type="INT", domain="EDGE")
     
-    mesh.attributes.new(name="roma_plot_name", type="INT", domain="FACE")
-    mesh.attributes.new(name="roma_block_name", type="INT", domain="FACE")
-    mesh.attributes.new(name="roma_use_name", type="INT", domain="FACE")
+    mesh.attributes.new(name="roma_plot_id", type="INT", domain="FACE")
+    mesh.attributes.new(name="roma_block_id", type="INT", domain="FACE")
+    mesh.attributes.new(name="roma_use_id", type="INT", domain="FACE")
     mesh.attributes.new(name="roma_number_of_storeys", type="INT", domain="FACE")
     mesh.attributes.new(name="roma_GEA", type="FLOAT", domain="FACE")
     
     obj = bpy.data.objects.new("RoMa Mass", mesh)
     
     for face in obj.data.polygons:
-        mesh_plot = mesh.attributes["roma_plot_name"].data.items()
+        mesh_plot = mesh.attributes["roma_plot_id"].data.items()
         mesh_plot[0][1].value = 0
         
-        mesh_block = mesh.attributes["roma_block_name"].data.items()
+        mesh_block = mesh.attributes["roma_block_id"].data.items()
         mesh_block[0][1].value = 0
         
-        mesh_use = mesh.attributes["roma_use_name"].data.items()
+        mesh_use = mesh.attributes["roma_use_id"].data.items()
         mesh_use[0][1].value = 0
     
         mesh_storeys = mesh.attributes["roma_number_of_storeys"].data.items()
@@ -322,11 +328,11 @@ def add_RoMa_Mass_button(self, context):
 def update_attribute_mass_plot_id(self,context):
     bpy.ops.object.set_attribute_mass_plot_id()
     
-def update_attribute_mass_block_name(self, context):
-    bpy.ops.object.set_attribute_mass_block_name()
+def update_attribute_mass_block_id(self, context):
+    bpy.ops.object.set_attribute_mass_block_id()
     
-def update_attribute_mass_use_name(self, context):
-    bpy.ops.object.set_attribute_mass_use_name()
+def update_attribute_mass_use_id(self, context):
+    bpy.ops.object.set_attribute_mass_use_id()
         
 def update_attribute_mass_storeys(self, context):
     bpy.ops.object.set_attribute_mass_storeys()
@@ -340,22 +346,48 @@ def update_plot_name_label(self, context):
         if n.name == name:
             scene.attribute_mass_plot_id = n.id
             plotName["id"] = n.id
-            break    
+            break 
+
+def update_block_name_label(self, context):
+    global blockName
+    scene = context.scene
+    name = scene.roma_block_names
+    blockName["name"] = " " + name
+    for n in scene.roma_block_name_list:
+        if n.name == name:
+            scene.attribute_mass_block_id = n.id
+            blockName["id"] = n.id
+            break   
+
+def update_use_name_label(self, context):
+    global useName
+    scene = context.scene
+    name = scene.roma_use_names
+    useName["name"] = " " + name
+    for n in scene.roma_use_name_list:
+        if n.name == name:
+            scene.attribute_mass_use_id = n.id
+            useName["id"] = n.id
+            break   
         
     
 def read_face_attribute():
     global plotName
+    global blockName
+    global useName
     global checkingFace 
     checkingFace = True
     
     obj = bpy.context.active_object
-    mode = obj.mode
-    if "RoMa object" in obj.data:
-        if mode == "EDIT":
+    if obj.type == "MESH" and "RoMa object" in obj.data:
+        mode = obj.mode
+    
+        if mode == "EDIT" and tuple(bpy.context.scene.tool_settings.mesh_select_mode)[2] == True: #we are in edit mode and selectin faces
             obj.update_from_editmode()
             mesh = obj.data
 
-            #activeFace = mesh.polygons[mesh.polygons.active]
+            # activeFace = mesh.polygons[mesh.polygons.active]
+            # print("faccia attiva", activeFace)
             selected_faces = [p for p in mesh.polygons if p.select]
                 
             if len(selected_faces) > 0:
@@ -368,50 +400,70 @@ def read_face_attribute():
                 bm = bmesh.from_edit_mesh(mesh)
                 bm.faces.ensure_lookup_table()
 
-                bMesh_plot = bm.faces.layers.int["roma_plot_name"]
-                bMesh_block = bm.faces.layers.int["roma_block_name"]
-                bMesh_use = bm.faces.layers.int["roma_use_name"]
+                bMesh_plot = bm.faces.layers.int["roma_plot_id"]
+                bMesh_block = bm.faces.layers.int["roma_block_id"]
+                bMesh_use = bm.faces.layers.int["roma_use_id"]
                 bMesh_storeys = bm.faces.layers.int["roma_number_of_storeys"]
 
                 selected_bmFaces = [face for face in bm.faces if face.select]
-                bMesh_active_index = bm.faces.active.index
-                
-                for face in selected_faces:
-                    bm.faces[face.index].select = False
+                if bm.faces.active is None:
+                    print("NONE FACES !!!!!!!!!!!!!")
+                else:
+                    bMesh_active_index = bm.faces.active.index
                     
-                for bmFace in selected_bmFaces:
-                    plot = bmFace[bMesh_plot]
-                    block = bmFace[bMesh_block]
-                    use = bmFace[bMesh_use] 
-                    storey = bmFace[bMesh_storeys]
-                    if bm.faces.active is not None and bmFace.index ==  bMesh_active_index:
-                        if scene.attribute_mass_plot_id != plot:
-                            scene.attribute_mass_plot_id = plot
-                        if plotName["id"] != plot:
-                            plotName["id"] = plot
-                            # if plotName["id"] == 0:
-                            #     plotName["name"] = None
-                            # else:
-                            for n in scene.roma_plot_name_list:
-                                if n.id == plotName["id"]:
-                                    plotName["name"] = " " + n.name 
-                                    break
-                        if scene.attribute_mass_block_name != block:
-                            scene.attribute_mass_block_name = block
-                        if scene.attribute_mass_use_name != use:
-                            scene.attribute_mass_use_name = use
-                        if scene.attribute_mass_storeys != storey:
-                            scene.attribute_mass_storeys = storey
-                        bmesh.update_edit_mesh(mesh)
-                        bm.free()
-                        break
-
-                bm = bmesh.from_edit_mesh(mesh)
-                bm.faces.ensure_lookup_table()
-                for index in selected_indices:
-                        bm.faces[index].select = True
+                    for face in selected_faces:
+                        bm.faces[face.index].select = False
                         
-                bmesh.update_edit_mesh(mesh)
+                    for bmFace in selected_bmFaces:
+                        plot = bmFace[bMesh_plot]
+                        block = bmFace[bMesh_block]
+                        use = bmFace[bMesh_use] 
+                        storey = bmFace[bMesh_storeys]
+                        # if bm.faces.active is not None and bmFace.index ==  bMesh_active_index:
+                        if bmFace.index ==  bMesh_active_index:
+                            ############# PLOT ####################
+                            if scene.attribute_mass_plot_id != plot:
+                                scene.attribute_mass_plot_id = plot
+                            if plotName["id"] != plot:
+                                plotName["id"] = plot
+                                # if plotName["id"] == 0:
+                                #     plotName["name"] = None
+                                # else:
+                                for n in scene.roma_plot_name_list:
+                                    if n.id == plotName["id"]:
+                                        plotName["name"] = " " + n.name 
+                                        break
+                            ############# BLOCK ####################
+                            if scene.attribute_mass_block_id != block:
+                                scene.attribute_mass_block_id = block
+                            if blockName["id"] != block:
+                                blockName["id"] = block
+                                for n in scene.roma_block_name_list:
+                                    if n.id == blockName["id"]:
+                                        blockName["name"] = " " + n.name 
+                                        break
+                            ############# USE ####################
+                            if scene.attribute_mass_use_id != use:
+                                scene.attribute_mass_use_id = use
+                            if useName["id"] != use:
+                                useName["id"] = use
+                                for n in scene.roma_use_name_list:
+                                    if n.id == useName["id"]:
+                                        useName["name"] = " " + n.name 
+                                        break
+                            ############# STOREYS ####################
+                            if scene.attribute_mass_storeys != storey:
+                                scene.attribute_mass_storeys = storey
+                            bmesh.update_edit_mesh(mesh)
+                            bm.free()
+                            break
+
+                    bm = bmesh.from_edit_mesh(mesh)
+                    bm.faces.ensure_lookup_table()
+                    for index in selected_indices:
+                            bm.faces[index].select = True
+                            
+                    bmesh.update_edit_mesh(mesh)
                 bm.free() 
     checkingFace = False
 

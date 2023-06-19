@@ -62,9 +62,9 @@ class VIEW3D_PT_RoMa_facade(Panel):
                 rows = 5
                 
             row = layout.row()
-            row.template_list("FACADE_UL_edgeslots", "The_List", scene,
+            row.template_list("OBJECT_UL_Facade", "The_List", scene,
                             "roma_facade_type_list", scene, "roma_facade_type_index", rows = rows)
-            # row.template_list("FACADE_UL_edgeslots", "The_List", obj,
+            # row.template_list("OBJECT_UL_Facade", "The_List", obj,
             #                    "roma_facade_type_list", obj, "roma_facade_type_index", rows = rows)
             
             col = row.column(align=True)
@@ -133,7 +133,7 @@ class ListFacadeType(PropertyGroup):
 
     
     
-class FACADE_UL_edgeslots(UIList):
+class OBJECT_UL_Facade(UIList):
     """Façade type UIList."""
 
     def draw_item(self, context, layout, data, item, icon, active_data,
