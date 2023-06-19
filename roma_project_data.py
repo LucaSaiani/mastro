@@ -4,6 +4,7 @@ import bpy
 from bpy.props import StringProperty, IntProperty
 from bpy.types import PropertyGroup, UIList, Operator, Panel
 
+   
 class VIEW3D_PT_RoMa_project_data(Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
@@ -90,7 +91,7 @@ class VIEW3D_PT_RoMa_project_data(Panel):
             row.prop(item, "name", icon_only=True)
             
         ########################## USE #########################
-        layout.label(text="Use")
+        layout.label(text="Use  ")
         
         is_sortable = len(scene.roma_use_name_list) > 1
         rows = 3

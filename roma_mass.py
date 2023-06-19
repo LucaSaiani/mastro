@@ -140,7 +140,7 @@ class OBJECT_OT_SetUseId(Operator):
            
             bpy.ops.object.mode_set(mode=mode)
                     
-            self.report({'INFO'}, "Attribute set to face, use: "+str(attribute_mass_use_id))
+            # self.report({'INFO'}, "Attribute set to face, use: "+str(attribute_mass_use_id))
             return {'FINISHED'}
         except:
             return {'FINISHED'}
@@ -250,7 +250,7 @@ class VIEW3D_PT_RoMa_Mass(Panel):
                 # layout.prop(context.scene, "attribute_mass_use_id", text="Use Name")
                 ################ STOREYS ######################
                 layout.prop(context.scene, "attribute_mass_storeys", text="N° of storeys")
-                
+
                 # row = layout.row()
                 # row.prop(context.scene, "attribute_mass_storeys", text="Number of Storeys")
                 # if context.active_object.mode=='EDIT':
