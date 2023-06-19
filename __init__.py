@@ -45,11 +45,21 @@ from bpy.types import(
 
 classes = (
     roma_project_data.VIEW3D_PT_RoMa_project_data,
-    roma_project_data.PLOT_UL_edgeslots,
+    
+    roma_project_data.OBJECT_UL_Plot,
     roma_project_data.plot_name_list,
-    # roma_project_data.SCENE_OT_add_plot_name,
     roma_project_data.PLOT_LIST_OT_NewItem,
     roma_project_data.PLOT_LIST_OT_MoveItem,
+    
+    roma_project_data.OBJECT_UL_Block,
+    roma_project_data.block_name_list,
+    roma_project_data.BLOCK_LIST_OT_NewItem,
+    roma_project_data.BLOCK_LIST_OT_MoveItem,
+    
+    roma_project_data.OBJECT_UL_Use,
+    roma_project_data.use_name_list,
+    roma_project_data.USE_LIST_OT_NewItem,
+    roma_project_data.USE_LIST_OT_MoveItem,
     
     roma_menu.roma_MenuOperator_convert_to_RoMa_mesh,
     roma_menu.RoMa_MenuOperator_PrintData,
@@ -65,15 +75,15 @@ classes = (
     roma_facade.VIEW3D_PT_RoMa_facade,
 #    roma_facade.set_facade_type,
     roma_facade.ListFacadeType,
-    roma_facade.FACADE_UL_edgeslots,
+    roma_facade.OBJECT_UL_Facade,
     roma_facade.LIST_OT_NewItem,
     roma_facade.LIST_OT_DeleteItem,
     roma_facade.LIST_OT_MoveItem,
     
     roma_mass.OBJECT_OT_add_RoMa_Mass,
-    roma_mass.OBJECT_OT_SetPlotIndex,
-    roma_mass.OBJECT_OT_SetBlockName,
-    roma_mass.OBJECT_OT_SetUseName,
+    roma_mass.OBJECT_OT_SetPlotId,
+    roma_mass.OBJECT_OT_SetBlockId,
+    roma_mass.OBJECT_OT_SetUseId,
     roma_mass.OBJECT_OT_SetMassStoreys,
     roma_mass.VIEW3D_PT_RoMa_Mass,
     
@@ -92,6 +102,20 @@ def get_plot_names_from_list(scene, context):
         items.append(newProp)
     # noneItem = ("None", "None", "")
     # items.append(noneItem)
+    return items
+
+def get_block_names_from_list(scene, context):
+    items = []
+    for el in scene.roma_block_name_list:
+        newProp = (el.name, el.name, "")
+        items.append(newProp)
+    return items
+
+def get_use_names_from_list(scene, context):
+    items = []
+    for el in scene.roma_use_name_list:
+        newProp = (el.name, el.name, "")
+        items.append(newProp)
     return items
 
 def get_facade_type_names_from_list(scene, context):
@@ -137,19 +161,19 @@ def register():
     
     
     Scene.attribute_mass_plot_id = bpy.props.IntProperty(
-                                        name="Plot Name",
+                                        name="Plot Id",
                                         default=0,
                                         update = roma_mass.update_attribute_mass_plot_id)
      
-    Scene.attribute_mass_block_name = bpy.props.IntProperty(
-                                        name="Block Name",
+    Scene.attribute_mass_block_id = bpy.props.IntProperty(
+                                        name="Block Id",
                                         default=0,
-                                        update = roma_mass.update_attribute_mass_block_name)
+                                        update = roma_mass.update_attribute_mass_block_id)
      
-    Scene.attribute_mass_use_name = bpy.props.IntProperty(
-                                        name="Use",
+    Scene.attribute_mass_use_id = bpy.props.IntProperty(
+                                        name="Use Id",
                                         default=0,
-                                        update = roma_mass.update_attribute_mass_use_name)
+                                        update = roma_mass.update_attribute_mass_use_id)
      
     Scene.attribute_mass_storeys = bpy.props.IntProperty(
                                         name="Number of Storeys",
@@ -166,6 +190,24 @@ def register():
                                         description="",
                                         items=get_plot_names_from_list,
                                         update=roma_mass.update_plot_name_label)
+    
+    Scene.roma_block_name_list = CollectionProperty(type = roma_project_data.block_name_list)
+    Scene.roma_block_name_list_index = IntProperty(name = "Block Name",
+                                             default = 0)
+    Scene.roma_block_names = bpy.props.EnumProperty(
+                                        name="Block List",
+                                        description="",
+                                        items=get_block_names_from_list,
+                                        update=roma_mass.update_block_name_label)
+    
+    Scene.roma_use_name_list = CollectionProperty(type = roma_project_data.use_name_list)
+    Scene.roma_use_name_list_index = IntProperty(name = "Use Name",
+                                             default = 0)
+    Scene.roma_use_names = bpy.props.EnumProperty(
+                                        name="Use List",
+                                        description="",
+                                        items=get_use_names_from_list,
+                                        update=roma_mass.update_use_name_label)
  
     
     Scene.roma_facade_type_list = CollectionProperty(type = roma_facade.ListFacadeType)
@@ -194,12 +236,15 @@ def unregister():
 
 
     del Scene.attribute_facade_type
-    # del Scene.attribute_mass_plot_name
-    del Scene.attribute_mass_block_name
-    del Scene.attribute_mass_use_name
+    del Scene.attribute_mass_plot_id
+    del Scene.attribute_mass_block_id
+    del Scene.attribute_mass_use_id
     del Scene.attribute_mass_storeys
 
     del Scene.roma_plot_name_list
+    del Scene.roma_block_name_list
+    del Scene.roma_use_name_list
+    
     del Scene.roma_facade_type_list
     del Scene.roma_facade_type_index
     del Scene.roma_facade_type_name

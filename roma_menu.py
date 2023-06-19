@@ -14,13 +14,13 @@ attribute_set = [
             {"attr" :  "roma_number_of_storeys_per_face",
              "attr_type" :  "INT",
              "attr_domain" :  "EDGE"},
-            {"attr" :  "roma_plot_name",
+            {"attr" :  "roma_plot_id",
              "attr_type" :  "INT",
              "attr_domain" :  "FACE"},
-            {"attr" :  "roma_block_name",
+            {"attr" :  "roma_block_id",
              "attr_type" :  "INT",
              "attr_domain" :  "FACE"},
-            {"attr" :  "roma_use_name",
+            {"attr" :  "roma_use_id",
              "attr_type" :  "INT",
              "attr_domain" :  "FACE"},
             {"attr" :  "roma_number_of_storeys",
@@ -42,7 +42,7 @@ class roma_MenuOperator_convert_to_RoMa_mesh(Operator):
     def execute(self, context):
         selected_objects = bpy.context.selected_objects
         selected_meshes = [obj for obj in selected_objects if obj.type == 'MESH']
-        mode = None
+        # mode = None
         for obj in selected_meshes:
             mesh = obj.data
             mesh["RoMa object"] = True
@@ -51,6 +51,9 @@ class roma_MenuOperator_convert_to_RoMa_mesh(Operator):
                     mesh.attributes[a["attr"]]
                 except:
                     mesh.attributes.new(name=a["attr"], type=a["attr_type"], domain=a["attr_domain"])
+                    # for face in obj.data.polygons:
+                    #     attribute = mesh.attributes[a["attr"]].data.items()
+                    #     attribute[0][1].value = None
      
         return {'FINISHED'}
     
@@ -61,17 +64,41 @@ class RoMa_MenuOperator_PrintData(Operator):
     def execute(self, context):
         # roma_list = []
         csvData = []
-        header = ["Plot Name", "Block Name", "Use", "Number of Storeys", "GEA"]
-        csvData.append(header)
+        csvTemp = []
+        # header = ["Plot Name", "Block Name", "Use", "N. of Storeys", "GEA"]
+        # csvData.append(header)
         objects = [obj for obj in bpy.context.scene.objects]
         for obj in objects:
-            if obj.type == "MESH":
-                obj.update_from_editmode()
-                mesh = obj.data
-                data = get_mass_data(mesh)
+            if obj.visible_get() and obj.type == "MESH" and "RoMa object" in obj.data:
+                csvTemp.append(get_mass_data(obj))
+        for sublist in csvTemp:
+            csvData.extend(sublist)
         
-        for row in data:
-            print(row)       
+        csvData = sorted(csvData, key=lambda x:(x[0], x[1]))
+        header = ["Plot Name", "Block Name", "Use", "N. of Storeys", "GEA"]
+        csvData.insert(0,header)
+        
+        print("")
+        print("")
+        tab = "\t"
+        for r, row in enumerate(csvData):
+            string = ""
+            for el in row:
+                i = 1
+                tabs = tab
+                while i < 3:
+                    if len(str(el) + tabs) >= 10:
+                        break
+                    else:
+                        i += 1
+                        t = 1
+                        while t < i-1:
+                            tabs = tabs + tab
+                            t += 1
+                string = string + str(el) + tabs
+            if r == 1: print("-------------------------------------------------------------------------")
+            print(f"{string}")
+        print("")
         
         return {'FINISHED'}
     
@@ -86,22 +113,23 @@ class RoMa_MenuOperator_ExportCSV(Operator):
         # use = None
         # storeys = None
         csvData = []
-        header = ["Plot Name", "Block Name", "Use", "Number of Storeys", "GEA"]
-        csvData.append(header)
+        csvTemp = []
+        header = [["Plot Name", "Block Name", "Use", "Number of Storeys", "GEA"]]
+        csvTemp.append(header)
         objects = [obj for obj in bpy.context.scene.objects]
         for obj in objects:
-            if obj.type == "MESH":
-                mesh = obj.data
-                csvData = get_mass_data(mesh)
-        
+            if obj.type == "MESH" and "RoMa object" in obj.data:
+                csvTemp.append(get_mass_data(obj))
+        for sublist in csvTemp:
+            csvData.extend(sublist)
         current_file_path = bpy.context.blend_data.filepath
 
         # Get the current working folder
         current_folder = os.path.dirname(bpy.path.abspath(current_file_path))
         
-        filename = "blenderData"
+        filename = "blenderData.csv"
 
-        savingPath = current_folder + "/" + filename + ".csv"
+        savingPath = os.path.join(current_folder, filename)
         with open(savingPath, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(csvData)
@@ -115,7 +143,7 @@ class RoMa_Menu(Menu):
 
     def draw(self, context):
         layout = self.layout
-        layout.active = bool(context.active_object.mode=='OBJECT')
+        #layout.active = bool(context.active_object.mode!='EDIT  ')
         layout.operator(roma_MenuOperator_convert_to_RoMa_mesh.bl_idname)
         layout.operator(RoMa_MenuOperator_PrintData.bl_idname)
         layout.operator(RoMa_MenuOperator_ExportCSV.bl_idname)
@@ -125,32 +153,53 @@ def roma_menu(self, context):
     layout = self.layout
     layout.menu(RoMa_Menu.bl_idname)
 
-def get_mass_data(mesh):
+def get_mass_data(obj):
+    mesh = obj.evaluated_get(bpy.context.evaluated_depsgraph_get()).data
     data = []
-    if "roma_plot_name" in mesh.attributes:
-        plotNameAttributes = mesh.attributes["roma_plot_name"].data
-        blockNameAttributes = mesh.attributes["roma_block_name"].data
-        useAttributes = mesh.attributes["roma_use_name"].data
-        storeysAttributes = mesh.attributes["roma_number_of_storeys"].data
-                    
-        for index, attr in enumerate(plotNameAttributes):
-            #print(plotNameAttributes[index].value, blockNameAttributes[index].value,useAttributes[index].value,storeysAttributes[index].value  )
-            plotId = plotNameAttributes[index].value
-            if plotId == 0:
-                plotName = None
-            else:
-                for n in bpy.context.scene.roma_plot_name_list:
-                    if n.id == plotId:
-                        plotName = n.name
-                        break
-            blockName = blockNameAttributes[index].value
-            use = useAttributes[index].value
-            storeys = storeysAttributes[index].value
-            # if floor_GEA >= 0:
-            #print([plotName, blockName, use, storeys])
-            data.append([plotName, blockName, use, storeys])
-        # print()
-        # print()
+    
+    plotAttributes = mesh.attributes["roma_plot_id"].data
+    blockAttributes = mesh.attributes["roma_block_id"].data
+    useAttributes = mesh.attributes["roma_use_id"].data
+    storeysAttributes = mesh.attributes["roma_number_of_storeys"].data
+    GEAAttributes = mesh.attributes["roma_GEA"].data
+    
+    for index, attr in enumerate(plotAttributes):
+        #print(plotNameAttributes[index].value, blockNameAttributes[index].value,useAttributes[index].value,storeysAttributes[index].value  )
+        ############ PLOT ############
+        plotId = plotAttributes[index].value
+        if plotId == 0:
+            plot = None
+        else:
+            for n in bpy.context.scene.roma_plot_name_list:
+                if n.id == plotId:
+                    plot = n.name
+                    break
+        ############ BLOCK ############
+        blockId = blockAttributes[index].value
+        if blockId == 0:
+            block = None
+        else:
+            for n in bpy.context.scene.roma_block_name_list:
+                if n.id == blockId:
+                    block = n.name
+                    break
+        ############ USE ############
+        useId = useAttributes[index].value
+        if useId == 0:
+            use = None
+        else:
+            for n in bpy.context.scene.roma_use_name_list:
+                if n.id == useId:
+                    use = n.name
+                    break
+        ########### STOREYS ##############
+        storeys = storeysAttributes[index].value
+        ########### GEA ##############
+        GEA = GEAAttributes[index].value
+        
+        if GEA != None and GEA > 0:
+            data.append([plot, block, use, storeys, GEA])
+    
             
     return(data)
 
