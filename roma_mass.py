@@ -213,7 +213,7 @@ class VIEW3D_PT_RoMa_Mass(Panel):
                 # col = layout.column()
                 # subcol = col.column()
                 
-                layout.active = bool(context.active_object.mode=='EDIT')
+                # layout.active = bool(context.active_object.mode=='EDIT')
                 row = layout.row()
                 row = layout.row(align=True)
                 

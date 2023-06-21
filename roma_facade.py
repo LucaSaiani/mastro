@@ -39,80 +39,82 @@ class VIEW3D_PT_RoMa_facade(Panel):
     bl_label = "Façade"
     
     def draw(self, context):
-
-        layout = self.layout
         obj = context.active_object
-        scene = context.scene
-        
-        layout.use_property_split = True
-        layout.use_property_decorate = False  # No animation.
-        
-        layout.active = bool(context.active_object.mode=='EDIT')
-        if "roma_facade_type_list" in scene:
-            # col = layout.column()
-            # subcol = col.column()
-            # subcol.active = bool(context.active_object.mode=='EDIT')
-            # subcol.prop(context.scene, "attribute_facade_type", text="Type:")
-            layout.prop(context.scene, "roma_facade_type_name", text="Select Element")
-            
-            
-            is_sortable = len(scene.roma_facade_type_list) > 1
-            rows = 3
-            if is_sortable:
-                rows = 5
+        if obj is not None and obj.type == "MESH":
+            mode = obj.mode
+            if mode == "EDIT" and "RoMa object" in obj.data:
+                scene = context.scene
                 
-            row = layout.row()
-            row.template_list("OBJECT_UL_Facade", "The_List", scene,
-                            "roma_facade_type_list", scene, "roma_facade_type_index", rows = rows)
-            # row.template_list("OBJECT_UL_Facade", "The_List", obj,
-            #                    "roma_facade_type_list", obj, "roma_facade_type_index", rows = rows)
-            
-            col = row.column(align=True)
-            col.operator("roma_facade_type_list.new_item", icon='ADD', text="")
-            col.operator("roma_facade_type_list.delete_item", icon='REMOVE', text="")
-            col.separator()
-            col.operator("roma_facade_type_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
-            col.operator("roma_facade_type_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
-            
-            #row = layout.row()
-            #row.template_ID(obj, "active_material", new="material.new")
-            
-            # obj.mode = 'OBJECT'
-            # obj.value = 0
-            # obj.mode = 'EDIT'
-            
-            if obj.mode == 'EDIT':
-                mesh = obj.data
-                selected_edges = [e for e in bpy.context.active_object.data.edges if e.select]
+                layout = self.layout
+                layout.use_property_split = True
+                layout.use_property_decorate = False  # No animation.
+                
+                # layout.active = bool(context.active_object.mode=='EDIT')
+                # if "roma_facade_type_list" in scene:
+                    # col = layout.column()
+                    # subcol = col.column()
+                    # subcol.active = bool(context.active_object.mode=='EDIT')
+                    # subcol.prop(context.scene, "attribute_facade_type", text="Type:")
+                layout.prop(context.scene, "roma_facade_type_name", text="Select Element")
+                
+                
+                is_sortable = len(scene.roma_facade_type_list) > 1
+                rows = 3
+                if is_sortable:
+                    rows = 5
+                    
+                row = layout.row()
+                row.template_list("OBJECT_UL_Facade", "The_List", scene,
+                                "roma_facade_type_list", scene, "roma_facade_type_index", rows = rows)
+                # row.template_list("OBJECT_UL_Facade", "The_List", obj,
+                #                    "roma_facade_type_list", obj, "roma_facade_type_index", rows = rows)
+                
+                col = row.column(align=True)
+                col.operator("roma_facade_type_list.new_item", icon='ADD', text="")
+                col.operator("roma_facade_type_list.delete_item", icon='REMOVE', text="")
+                col.separator()
+                col.operator("roma_facade_type_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
+                col.operator("roma_facade_type_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
+                
+                #row = layout.row()
+                #row.template_ID(obj, "active_material", new="material.new")
+                
+                # obj.mode = 'OBJECT'
+                # obj.value = 0
+                # obj.mode = 'EDIT'
+                
+                if obj.mode == 'EDIT':
+                    mesh = obj.data
+                    selected_edges = [e for e in bpy.context.active_object.data.edges if e.select]
 
-                # mesh_attributes = mesh.attributes["roma_facade_type"].data.items()
+                    # mesh_attributes = mesh.attributes["roma_facade_type"].data.items()
+
+                    
+                    # for edge in selected_edges:
+                    #     index = edge.index
+                    #     for mesh_attribute in mesh_attributes:
+                    #         if mesh_attribute[0] == index:
+                    #             # obj.mode = 'OBJECT'
+                    #             # obj.value = mesh_attribute[1]
+                    #             # obj.mode = 'EDIT'
+                    #             pass
+                                
+                    row = layout.row()
+                    #print(scene.attribute_facade_type)
+                    #row.template_ID(scene, "roma_facade_type_list", new="material.new")
+                    row = layout.row(align=True)
+                    #row.operator("object.material_slot_assign", text="Assign")
+                    row.operator("object.set_attribute_facade_type", text="Assign")
+                    row.operator("object.material_slot_select", text="Select")
+                    row.operator("object.material_slot_deselect", text="Deselect")
 
                 
-                # for edge in selected_edges:
-                #     index = edge.index
-                #     for mesh_attribute in mesh_attributes:
-                #         if mesh_attribute[0] == index:
-                #             # obj.mode = 'OBJECT'
-                #             # obj.value = mesh_attribute[1]
-                #             # obj.mode = 'EDIT'
-                #             pass
-                            
-                row = layout.row()
-                #print(scene.attribute_facade_type)
-                #row.template_ID(scene, "roma_facade_type_list", new="material.new")
-                row = layout.row(align=True)
-                #row.operator("object.material_slot_assign", text="Assign")
-                row.operator("object.set_attribute_facade_type", text="Assign")
-                row.operator("object.material_slot_select", text="Select")
-                row.operator("object.material_slot_deselect", text="Deselect")
-
-            
-            # if scene.roma_facade_type_index >= 0 and scene.roma_facade_type_list:
-            if scene.roma_facade_type_index >= 0:
-                item = scene.roma_facade_type_list[scene.roma_facade_type_index]
-                row = layout.row()
-                row.prop(item, "name")
-                row.prop(item, "index")
+                # if scene.roma_facade_type_index >= 0 and scene.roma_facade_type_list:
+                if scene.roma_facade_type_index >= 0:
+                    item = scene.roma_facade_type_list[scene.roma_facade_type_index]
+                    row = layout.row()
+                    row.prop(item, "name")
+                    row.prop(item, "index")
             
         
         
