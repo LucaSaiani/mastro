@@ -1,14 +1,16 @@
 import bpy
 import blf
-from mathutils import Vector, Matrix
+# from mathutils import Vector, Matrix
 from bpy_extras import view3d_utils
-import numpy as np
+# import numpy as np
+import bmesh
+from datetime import datetime
 
 # https://blender.stackexchange.com/questions/107617/how-to-align-modal-draw-to-the-middle-of-the-3d-viewport
 # https://blender.stackexchange.com/questions/237428/get-pixel-coords-for-vertex-in-viewport
-class ModalDrawOperator(bpy.types.Operator):
+class VIEW3D_OT_show_Roma_attributes(bpy.types.Operator):
     """Draw a line with the mouse"""
-    bl_idname = "view3d.modal_operator"
+    bl_idname = "view3d.show_roma_attributes"
     bl_label = "Simple Modal View3D Operator"
 
     font_info = {
@@ -20,12 +22,23 @@ class ModalDrawOperator(bpy.types.Operator):
         obj = bpy.context.active_object
         if "RoMa object" in obj.data:
             
-            if obj.mode == 'EDIT':
-                obj.update_from_editmode()
-                
+            obj.update_from_editmode()
+            
             mesh = obj.data
-            mesh_attributes = mesh.attributes["roma_block_id"].data.items()
+            # mesh_attributes = mesh.attributes["roma_block_id"].data.items()
             matrix = obj.matrix_world
+            
+            if obj.mode == 'EDIT':
+                bm = bmesh.from_edit_mesh(mesh)
+            else:
+                bm = bmesh.new()
+                bm.from_mesh(mesh)
+
+            bm.faces.ensure_lookup_table()      
+            bMesh_plot = bm.faces.layers.int["roma_plot_id"]
+            bMesh_block = bm.faces.layers.int["roma_block_id"]
+            bMesh_use = bm.faces.layers.int["roma_use_id"]
+            bMesh_storey = bm.faces.layers.int["roma_number_of_storeys"]
 
             for a in bpy.context.screen.areas:
                 if a.type == 'VIEW_3D':
@@ -38,19 +51,73 @@ class ModalDrawOperator(bpy.types.Operator):
                 assert False, "Requires a 3D view"
         
             font_id = self.font_info["font_id"]
-            blf.color(font_id, 0, 0.292, 1, 0.7)
-            blf.size(font_id, 50.0)
-            for f in mesh.polygons:
-                center_local = f.center
+            r, g, b, a = [c for c in bpy.context.preferences.addons['roma'].preferences.fontColor]
+            blf.color(font_id, r, g, b, a)
+            font_size =  bpy.context.preferences.addons['roma'].preferences.fontSize
+            blf.size(font_id, font_size)
+            
+            # multi line text
+            # https://blender.stackexchange.com/questions/31780/multi-line-text-in-blf-with-multi-colour-option
+            line_height = (blf.dimensions(font_id, "M")[1] * 1.45)
+            cr = "Carriage Return"
+            
+            for bmFace in bm.faces:
+                center_local = bmFace.calc_center_median()
+                
                 center = matrix @ center_local # convert the coordinates from local to world
-                # text = str(f.index)
-                try:
-                    text = str(mesh_attributes[f.index][1].value)
-                except:
-                    text = ""
-                coords = view3d_utils.location_3d_to_region_2d(region, r3d, center)
-                blf.position(font_id, coords.x, coords.y, 0)
-                blf.draw(font_id, text)
+                idPlot = bmFace[bMesh_plot]
+                idBlock = bmFace[bMesh_block]
+                idUse = bmFace[bMesh_use]
+                storey = bmFace[bMesh_storey]
+                
+                text = []
+                text_plot = ""
+                text_block = ""
+                text_use = ""
+                text_storey = ""
+                
+                if bpy.context.window_manager.toggle_plot_name:   
+                    for n in bpy.context.scene.roma_plot_name_list:
+                        if n.id == idPlot:
+                            text_plot = (("Plot: " + n.name), 0)
+                            text.append(text_plot)
+                            text.append(cr)
+                            break
+                if bpy.context.window_manager.toggle_block_name:   
+                    for n in bpy.context.scene.roma_block_name_list:
+                        if n.id == idBlock:
+                            text_block = (("Block: " + n.name), 0)
+                            text.append(text_block)
+                            text.append(cr)
+                            break
+                if bpy.context.window_manager.toggle_use_name:   
+                    for n in bpy.context.scene.roma_use_name_list:
+                        if n.id == idUse:
+                            text_use = (("Use: " + n.name), 0)
+                            text.append(text_use)
+                            text.append(cr)           
+                            break
+                if bpy.context.window_manager.toggle_storey_number:  
+                    print(storey) 
+                    text_storey = (("N° of storeys: " + str(storey)), 0)
+                    text.append(text_storey)
+                   
+                
+                
+                coord = view3d_utils.location_3d_to_region_2d(region, r3d, center)
+                x_offset = 0
+                y_offset = 0
+                for pstr in text:
+                    if len(pstr) == 2:
+                        string = pstr[0]
+                        text_width, text_height = blf.dimensions(font_id, string)
+                        blf.position(font_id, (coord.x + x_offset), (coord.y + y_offset), 0)
+                        blf.draw(font_id, string)
+                        x_offset += text_width
+                    else:
+                        x_offset = 0
+                        y_offset -= line_height       
+            bm.free()
 
   
     def modal(self, context, event):
@@ -69,7 +136,7 @@ class ModalDrawOperator(bpy.types.Operator):
         #     bpy.types.SpaceView3D.draw_handler_remove(self._handle, 'WINDOW')
         #     return {'CANCELLED'}
         
-        if not context.window_manager.test_toggle:
+        if not context.window_manager.toggle_plot_name and not context.window_manager.toggle_block_name and not context.window_manager.toggle_use_name and not context.window_manager.toggle_storey_number:
             bpy.types.SpaceView3D.draw_handler_remove(self._handle, 'WINDOW')
             return {'FINISHED'}
 

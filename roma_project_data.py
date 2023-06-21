@@ -36,9 +36,7 @@ class VIEW3D_PT_RoMa_project_data(Panel):
         ########################## PLOT #########################
         row = layout.row()
         row.label(text="Plot")
-        
-        row.prop(context.window_manager, 'test_toggle', toggle=True, icon="HIDE_OFF", icon_only=True)
-         
+        row.prop(context.window_manager, 'toggle_plot_name', toggle=True, icon="HIDE_OFF", icon_only=True)
         
         is_sortable = len(scene.roma_plot_name_list) > 1
         rows = 3
@@ -69,7 +67,9 @@ class VIEW3D_PT_RoMa_project_data(Panel):
         # row.prop(item, "index")
         
         ########################## BLOCK #########################
-        layout.label(text="Block")
+        row = layout.row()
+        row.label(text="Block")
+        row.prop(context.window_manager, 'toggle_block_name', toggle=True, icon="HIDE_OFF", icon_only=True)
         
         is_sortable = len(scene.roma_block_name_list) > 1
         rows = 3
@@ -95,7 +95,9 @@ class VIEW3D_PT_RoMa_project_data(Panel):
             row.prop(item, "name", icon_only=True)
             
         ########################## USE #########################
-        layout.label(text="Use  ")
+        row = layout.row()
+        row.label(text="Use")
+        row.prop(context.window_manager, 'toggle_use_name', toggle=True, icon="HIDE_OFF", icon_only=True)
         
         is_sortable = len(scene.roma_use_name_list) > 1
         rows = 3
@@ -119,6 +121,12 @@ class VIEW3D_PT_RoMa_project_data(Panel):
         if scene.roma_use_name_list_index >= 0 and scene.roma_use_name_list:
             item = scene.roma_use_name_list[scene.roma_use_name_list_index]
             row.prop(item, "name", icon_only=True)
+            
+        ########################## STOREYS #########################
+        row = layout.row()
+        row.label(text="Storey")
+        row.prop(context.window_manager, 'toggle_storey_number', toggle=True, icon="HIDE_OFF", icon_only=True)
+        
                 
 
 ############################        ############################
@@ -418,36 +426,35 @@ class use_name_list(PropertyGroup):
            default="")
 
 
-def update_plot_name_toggle(self, context):
-    if self.plot_name_toggle:
-        bpy.ops.plot_name_OT('INVOKE_DEFAULT')
-    return
+# def update_plot_name_toggle(self, context):
+#     if self.plot_name_toggle:
+#         bpy.ops.plot_name_OT('INVOKE_DEFAULT')
+#     return
 
 
 
 ############################## modal operator #############################
-class TEST_OT_modal_operator(Operator):
-    bl_idname = "test.modal"
-    bl_label = "Demo modal operator"
+# class TEST_OT_modal_operator(Operator):
+#     bl_idname = "test.modal"
+#     bl_label = "Demo modal operator"
 
-    def modal(self, context, event):
-        if not context.window_manager.test_toggle:
-            context.window_manager.event_timer_remove(self._timer)
-            print("done")
-            return {'FINISHED'}
-        print("pass through")
-        return {'PASS_THROUGH'}
+#     def modal(self, context, event):
+#         if not context.window_manager.test_toggle:
+#             context.window_manager.event_timer_remove(self._timer)
+#             print("done")
+#             return {'FINISHED'}
+#         print("pass through")
+#         return {'PASS_THROUGH'}
 
-    def invoke(self, context, event):
-        self._timer = context.window_manager.event_timer_add(0.01, window=context.window)
-        context.window_manager.modal_handler_add(self)
-        print("modal")
-        return {'RUNNING_MODAL'}
+#     def invoke(self, context, event):
+#         self._timer = context.window_manager.event_timer_add(0.01, window=context.window)
+#         context.window_manager.modal_handler_add(self)
+#         print("modal")
+#         return {'RUNNING_MODAL'}
 
-def update_function(self, context):
-    print("invoke modal")
-    if self.test_toggle:
-        bpy.ops.view3d.modal_operator('INVOKE_DEFAULT')
+def update_show_attributes(self, context):
+    if self.toggle_plot_name or self.toggle_block_name or self.toggle_use_name or self.toggle_storey_number:
+        bpy.ops.view3d.show_roma_attributes('INVOKE_DEFAULT')
         # bpy.ops.test.modal('INVOKE_DEFAULT')
     return
 
