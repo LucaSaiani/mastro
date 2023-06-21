@@ -20,12 +20,16 @@ import os
 
 if "bpy" in locals():
     import importlib
+    importlib.reload(roma_preferences),
+    importlib.reload(roma_modal_operator)
     importlib.reload(roma_project_data),
     importlib.reload(roma_menu),
     importlib.reload(roma_vertex),
     importlib.reload(roma_facade),
     importlib.reload(roma_mass)
 else:
+    from . import roma_preferences
+    from . import roma_modal_operator
     from . import roma_project_data
     from . import roma_menu
     from . import roma_vertex
@@ -44,7 +48,13 @@ from bpy.types import(
 # from bpy.app.handlers import persistent
 
 classes = (
+    roma_preferences.ExampleAddonPreferences,
+    roma_preferences.OBJECT_OT_addon_prefs_example,
+    
+    roma_modal_operator.ModalDrawOperator,
+    
     roma_project_data.VIEW3D_PT_RoMa_project_data,
+    roma_project_data.TEST_OT_modal_operator,
     
     roma_project_data.OBJECT_UL_Plot,
     roma_project_data.plot_name_list,
@@ -146,6 +156,10 @@ def register():
     for btn in buttons:
         bpy.types.VIEW3D_MT_mesh_add.append(btn)
         
+    bpy.types.WindowManager.test_toggle = bpy.props.BoolProperty(
+                                            default = False,
+                                            update = roma_project_data.update_function)
+        
     bpy.types.VIEW3D_MT_editor_menus.append(roma_menu.roma_menu)
     
     Scene.attribute_vertex = bpy.props.IntProperty(
@@ -219,10 +233,10 @@ def register():
                                         items=get_facade_type_names_from_list)
  
    
-    # bpy.app.handlers.depsgraph_update_pre.append(init_data)
+    
 
 def unregister():
-    bpy.app.handlers.depsgraph_update_pre.remove(roma_mass.get_face_attribute)
+    # bpy.app.handlers.depsgraph_update_pre.remove(roma_mass.get_face_attribute)
     
     
     from bpy.utils import unregister_class
@@ -234,7 +248,8 @@ def unregister():
         
     bpy.types.VIEW3D_MT_editor_menus.remove(roma_menu.roma_menu)
 
-
+    del bpy.types.WindowManager.test_toggle
+    
     del Scene.attribute_facade_type
     del Scene.attribute_mass_plot_id
     del Scene.attribute_mass_block_id
