@@ -237,14 +237,14 @@ class VIEW3D_PT_RoMa_Mass(Panel):
                 ################ BLOCK ######################
                 row = layout.row()
                 row = layout.row(align=True)
-                row.prop(context.scene, "roma_block_names", icon="MOD_BOOLEAN", icon_only=True, text="Block")
+                row.prop(context.scene, "roma_block_names", icon="HOME", icon_only=True, text="Block")
                 if len(scene.roma_block_name_list) >0:
                     row.label(text=blockName["name"])
                 # layout.prop(context.scene, "attribute_mass_block_id", text="Block Name")
                 ################ USE ######################
                 row = layout.row()
                 row = layout.row(align=True)
-                row.prop(context.scene, "roma_use_names", icon="MOD_BOOLEAN", icon_only=True, text="Use")
+                row.prop(context.scene, "roma_use_names", icon="COMMUNITY", icon_only=True, text="Use")
                 if len(scene.roma_use_name_list) >0:
                     row.label(text=useName["name"])
                 # layout.prop(context.scene, "attribute_mass_use_id", text="Use Name")
@@ -406,9 +406,9 @@ def read_face_attribute():
                 bMesh_storeys = bm.faces.layers.int["roma_number_of_storeys"]
 
                 selected_bmFaces = [face for face in bm.faces if face.select]
-                if bm.faces.active is None:
-                    print("NONE FACES !!!!!!!!!!!!!")
-                else:
+                if bm.faces.active is not None:
+                    # print("NONE FACES !!!!!!!!!!!!!")
+                # else:
                     bMesh_active_index = bm.faces.active.index
                     
                     for face in selected_faces:
