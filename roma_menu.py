@@ -7,30 +7,61 @@ from bpy.props import StringProperty
 import csv #, os
 
 attribute_set = [
-            {"attr" : "roma_vertex_custom_attribute",
-             "attr_type" :  "INT",
-             "attr_domain" :  "POINT"},
-            {"attr" :  "roma_facade_type",
-             "attr_type" :  "INT",
-             "attr_domain" :  "EDGE"},
-            {"attr" :  "roma_number_of_storeys_per_face",
-             "attr_type" :  "INT",
-             "attr_domain" :  "EDGE"},
-            {"attr" :  "roma_plot_id",
-             "attr_type" :  "INT",
-             "attr_domain" :  "FACE"},
-            {"attr" :  "roma_block_id",
-             "attr_type" :  "INT",
-             "attr_domain" :  "FACE"},
-            {"attr" :  "roma_use_id",
-             "attr_type" :  "INT",
-             "attr_domain" :  "FACE"},
-            {"attr" :  "roma_number_of_storeys",
-             "attr_type" :  "INT",
-             "attr_domain" :  "FACE"},
-            {"attr" :  "roma_GEA",
-             "attr_type" :  "FLOAT",
-             "attr_domain" :  "FACE"}
+            {
+            "attr" : "roma_vertex_custom_attribute",
+            "attr_type" :  "INT",
+            "attr_domain" :  "POINT"
+            },
+            {
+            "attr" :  "roma_facade_type",
+            "attr_type" :  "INT",
+            "attr_domain" :  "EDGE"
+            },
+            {
+            "attr" :  "roma_number_of_storeys_per_face",
+            "attr_type" :  "INT",
+            "attr_domain" :  "EDGE"
+            },
+            {
+            "attr" :  "roma_plot_id",
+            "attr_type" :  "INT",
+            "attr_domain" :  "FACE"
+            },
+            {
+            "attr" :  "roma_plot_RND",
+            "attr_type" :  "FLOAT",
+            "attr_domain" :  "FACE"
+            },
+            {
+            "attr" :  "roma_block_id",
+            "attr_type" :  "INT",
+            "attr_domain" :  "FACE"
+            },
+            {
+            "attr" :  "roma_block_RND",
+            "attr_type" :  "FLOAT",
+            "attr_domain" :  "FACE"
+            },
+            {
+            "attr" :  "roma_use_id",
+            "attr_type" :  "INT",
+            "attr_domain" :  "FACE"
+            },
+            {
+            "attr" :  "roma_use_RND",
+            "attr_type" :  "FLOAT",
+            "attr_domain" :  "FACE"
+            },
+            {
+            "attr" :  "roma_number_of_storeys",
+            "attr_type" :  "INT",
+            "attr_domain" :  "FACE"
+            },
+            {
+            "attr" :  "roma_GEA",
+            "attr_type" :  "FLOAT",
+            "attr_domain" :  "FACE"
+            }
 ]
 
 class roma_MenuOperator_convert_to_RoMa_mesh(Operator):

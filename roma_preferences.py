@@ -41,8 +41,10 @@ class roma_addon_preferences(AddonPreferences):
         # layout.prop(self, "number")
         # layout.prop(self, "boolean")
         row = layout.row()
-        row.prop(self, "fontSize", text = "Font Size")
-        row.prop(self, "fontColor", text = "Font Color")
+        row.label(text = "Font Size: ")
+        row.prop(self, "fontSize", icon_only=True)
+        row.label(text = "Font Color: ")
+        row.prop(self, "fontColor", icon_only=True)
         
 class OBJECT_OT_roma_addon_prefs(Operator):
     """Display example preferences"""

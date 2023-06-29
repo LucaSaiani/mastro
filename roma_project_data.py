@@ -1,18 +1,28 @@
 import bpy
 # import bmesh
 
-from bpy.props import StringProperty, IntProperty
+from bpy.props import StringProperty, IntProperty, FloatProperty
 from bpy.types import PropertyGroup, UIList, Operator, Panel
+
+import random
+import decimal
+from datetime import datetime
 
    
 class VIEW3D_PT_RoMa_project_data(Panel):
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "UI"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
     bl_category = "RoMa"
-    bl_label = "Project Data"
+    bl_label = "RoMa Project Data"
+    bl_context = "scene"
+    bl_options = {'DEFAULT_CLOSED'}
+    
+    # @classmethod
+    # def poll(cls, context):
+    #     return (context.object is not None)
     
     def draw(self, context):
-        obj = context.active_object
+        # obj = context.active_object
         # enabled = True
         # if obj is not None and obj.type == "MESH":
         #     mode = obj.mode
@@ -24,8 +34,8 @@ class VIEW3D_PT_RoMa_project_data(Panel):
         scene = context.scene
         
         layout = self.layout
-        if obj is not None and obj.type == "MESH":
-            mode = obj.mode
+        # if obj is not None and obj.type == "MESH":
+        #     mode = obj.mode
             # if mode == 'EDIT':
             #    layout.active = False
             # else:
@@ -189,17 +199,22 @@ class PLOT_LIST_OT_NewItem(Operator):
 
     def execute(self, context): 
         context.scene.roma_plot_name_list.add()
-        last = len(context.scene.roma_plot_name_list)-1
-        if last == 0:
-            context.scene.roma_plot_name_list[0].id = 0
-            context.scene.roma_plot_name_list[0].name = ""
-            context.scene.roma_plot_name_list.add()
+        # last = len(context.scene.roma_plot_name_list)-1
+        # if last == 0:
+        #     context.scene.roma_plot_name_list[0].id = 0
+        #     context.scene.roma_plot_name_list[0].name = ""
+        #     random.seed(datetime.now().timestamp())
+        #     rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
+        #     context.scene.roma_plot_name_list[0].RND = rndNumber
+        #     context.scene.roma_plot_name_list.add()
         temp_list = []    
         for el in context.scene.roma_plot_name_list:
             temp_list.append(el.id)
         last = len(context.scene.roma_plot_name_list)-1
         
         context.scene.roma_plot_name_list[last].id = max(temp_list)+1
+        rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
+        context.scene.roma_plot_name_list[last].RND = rndNumber
             
         return{'FINISHED'}
     
@@ -242,6 +257,11 @@ class plot_name_list(PropertyGroup):
            description="The name of the plot",
            default="")
     
+    RND: FloatProperty(
+           name="Random Value per Plot",
+           description="A random value assigned to each plot",
+           default = 0)
+    
 
 ############################        ############################
 ############################ BLOCK  ############################
@@ -281,17 +301,22 @@ class BLOCK_LIST_OT_NewItem(Operator):
 
     def execute(self, context): 
         context.scene.roma_block_name_list.add()
-        last = len(context.scene.roma_block_name_list)-1
-        if last == 0:
-            context.scene.roma_block_name_list[0].id = 0
-            context.scene.roma_block_name_list[0].name = ""
-            context.scene.roma_block_name_list.add()
+        # last = len(context.scene.roma_block_name_list)-1
+        # if last == 0:
+        #     context.scene.roma_block_name_list[0].id = 0
+        #     context.scene.roma_block_name_list[0].name = ""
+        #     random.seed(datetime.now().timestamp())
+        #     rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
+        #     context.scene.roma_block_name_list[0].RND = rndNumber
+        #     context.scene.roma_block_name_list.add()
         temp_list = []    
         for el in context.scene.roma_block_name_list:
             temp_list.append(el.id)
         last = len(context.scene.roma_block_name_list)-1
         
         context.scene.roma_block_name_list[last].id = max(temp_list)+1
+        rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
+        context.scene.roma_block_name_list[last].RND = rndNumber
             
         return{'FINISHED'}
     
@@ -333,6 +358,11 @@ class block_name_list(PropertyGroup):
            name="Block Name",
            description="The name of the block",
            default="")
+    
+    RND: FloatProperty(
+           name="Random Value per Block",
+           description="A random value assigned to each block",
+           default = 0)
 
 ############################        ############################
 ############################ USE    ############################
@@ -372,17 +402,22 @@ class USE_LIST_OT_NewItem(Operator):
 
     def execute(self, context): 
         context.scene.roma_use_name_list.add()
-        last = len(context.scene.roma_use_name_list)-1
-        if last == 0:
-            context.scene.roma_use_name_list[0].id = 0
-            context.scene.roma_use_name_list[0].name = ""
-            context.scene.roma_use_name_list.add()
+        # last = len(context.scene.roma_use_name_list)-1
+        # if last == 0:
+        #     context.scene.roma_use_name_list[0].id = 0
+        #     context.scene.roma_use_name_list[0].name = ""
+        #     random.seed(datetime.now().timestamp())
+        #     rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
+        #     context.scene.roma_use_name_list[0].RND = rndNumber
+        #     context.scene.roma_use_name_list.add()
         temp_list = []    
         for el in context.scene.roma_use_name_list:
             temp_list.append(el.id)
         last = len(context.scene.roma_use_name_list)-1
         
         context.scene.roma_use_name_list[last].id = max(temp_list)+1
+        rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
+        context.scene.roma_use_name_list[last].RND = rndNumber
             
         return{'FINISHED'}
     
@@ -424,7 +459,23 @@ class use_name_list(PropertyGroup):
            name="Use Name",
            description="The use of the block",
            default="")
+    
+    RND: FloatProperty(
+           name="Random Value per Use",
+           description="A random value assigned to each use",
+           default = 0)
 
+class name_with_id(PropertyGroup):
+    id: IntProperty(
+        name="Id",
+        description="Name id",
+        default = 0)
+    
+    name: StringProperty(
+        name="Name",
+        description="Name",
+        default = "")
+        
 
 # def update_plot_name_toggle(self, context):
 #     if self.plot_name_toggle:
@@ -452,9 +503,5 @@ class use_name_list(PropertyGroup):
 #         print("modal")
 #         return {'RUNNING_MODAL'}
 
-def update_show_attributes(self, context):
-    if self.toggle_plot_name or self.toggle_block_name or self.toggle_use_name or self.toggle_storey_number:
-        bpy.ops.view3d.show_roma_attributes('INVOKE_DEFAULT')
-        # bpy.ops.test.modal('INVOKE_DEFAULT')
-    return
+
 
