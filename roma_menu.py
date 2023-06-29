@@ -13,15 +13,20 @@ attribute_set = [
             "attr_domain" :  "POINT"
             },
             {
-            "attr" :  "roma_facade_type",
+            "attr" :  "roma_facade_id",
             "attr_type" :  "INT",
             "attr_domain" :  "EDGE"
             },
             {
-            "attr" :  "roma_number_of_storeys_per_face",
+            "attr" :  "roma_inverted_normal",
             "attr_type" :  "INT",
             "attr_domain" :  "EDGE"
             },
+            # {
+            # "attr" :  "roma_number_of_storeys_per_face",
+            # "attr_type" :  "INT",
+            # "attr_domain" :  "EDGE"
+            # },
             {
             "attr" :  "roma_plot_id",
             "attr_type" :  "INT",

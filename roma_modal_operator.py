@@ -1,7 +1,7 @@
 import bpy
 import blf
 from bpy.app.handlers import persistent
-# from mathutils import Vector, Matrix
+from mathutils import Vector
 from bpy_extras import view3d_utils
 # import numpy as np
 import bmesh
@@ -202,7 +202,7 @@ class show_Roma_attributes():
         
     def draw_callback_px(self, context, event):
         obj = bpy.context.active_object
-        if "RoMa object" in obj.data:
+        if hasattr(obj, "data") and "RoMa object" in obj.data:
             
             obj.update_from_editmode()
             
@@ -216,6 +216,11 @@ class show_Roma_attributes():
                 bm = bmesh.new()
                 bm.from_mesh(mesh)
 
+            bm.verts.ensure_lookup_table()
+            bm.edges.ensure_lookup_table()    
+            bMesh_facade = bm.edges.layers.int["roma_facade_id"]
+            bMesh_normal = bm.edges.layers.int["roma_inverted_normal"]
+            
             bm.faces.ensure_lookup_table()      
             bMesh_plot = bm.faces.layers.int["roma_plot_id"]
             bMesh_block = bm.faces.layers.int["roma_block_id"]
@@ -241,7 +246,71 @@ class show_Roma_attributes():
             # multi line text
             # https://blender.stackexchange.com/questions/31780/multi-line-text-in-blf-with-multi-colour-option
             line_height = (blf.dimensions(font_id, "M")[1] * 1.45)
+            half_line_height = line_height /2
+            
             cr = "Carriage Return"
+            
+            for bmEdge in bm.edges:
+                vertices = bmEdge.verts
+                A = bm.verts[vertices[0].index].co
+                B = bm.verts[vertices[1].index].co
+                edge_center = Vector()
+                edge_center.x = (A.x + B.x)/2
+                edge_center.y = (A.y + B.y)/2
+                edge_center.z = (A.z + B.z)/2
+                center = matrix @ edge_center # convert the coordinates from local to world
+                
+                line_width = 0
+                vert_offset = 0
+                
+                idFacade = bmEdge[bMesh_facade]
+                normal = bmEdge[bMesh_normal]
+                
+                text = []
+                text_edge = ""
+                text_normal = ""
+                
+                if bpy.context.window_manager.toggle_facade_name:   
+                    for n in bpy.context.scene.roma_facade_name_list:
+                        if n.id == idFacade:
+                            text_edge = (n.name, 0)
+                            line_width = blf.dimensions(font_id, n.name)[0]
+                            vert_offset = -1 * half_line_height
+                            text.append(text_edge)
+                            text.append(cr)
+                            break
+                if bpy.context.window_manager.toggle_facade_normal:
+                    if normal == 1:   
+                        symbol = "↔️"
+                        text_normal = (symbol, 0)
+                        # if blf.dimensions(font_id, symbol)[0] > line_width:
+                        line_width = blf.dimensions(font_id, symbol)[0]
+                        # if vert_offset == 0:
+                        vert_offset += (blf.dimensions(font_id, symbol)[1] * 1.45)/2
+                        # else:
+                        #     vert_offset += (blf.dimensions(font_id, symbol)[1] * 1.45)* (-1.5)
+                                
+                            # vert_offset += half_line_height
+                        text.append(text_normal)
+                        
+                
+                        
+                coord = view3d_utils.location_3d_to_region_2d(region, r3d, center)
+                x_offset = (-1 * line_width) / 2
+                y_offset = -1 * vert_offset
+                for pstr in text:
+                    if len(pstr) == 2:
+                        string = pstr[0]
+                        text_width, text_height = blf.dimensions(font_id, string)
+                        blf.position(font_id, (coord.x + x_offset), (coord.y + y_offset), 0)
+                        blf.draw(font_id, string)
+                        x_offset += text_width
+                    else:
+                        x_offset = (-1 * line_width) / 2
+                        y_offset -= line_height
+                        
+                
+                
             
             for bmFace in bm.faces:
                 center_local = bmFace.calc_center_median()
@@ -251,6 +320,9 @@ class show_Roma_attributes():
                 idBlock = bmFace[bMesh_block]
                 idUse = bmFace[bMesh_use]
                 storey = bmFace[bMesh_storey]
+                
+                line_width = 0
+                vert_offset = 0
                 
                 text = []
                 text_plot = ""
@@ -262,6 +334,8 @@ class show_Roma_attributes():
                     for n in bpy.context.scene.roma_plot_name_list:
                         if n.id == idPlot:
                             text_plot = (("Plot: " + n.name), 0)
+                            line_width = blf.dimensions(font_id, text_plot[0])[0]
+                            vert_offset = half_line_height
                             text.append(text_plot)
                             text.append(cr)
                             break
@@ -269,6 +343,9 @@ class show_Roma_attributes():
                     for n in bpy.context.scene.roma_block_name_list:
                         if n.id == idBlock:
                             text_block = (("Block: " + n.name), 0)
+                            if blf.dimensions(font_id, text_block[0])[0] > line_width:
+                                line_width = blf.dimensions(font_id, text_block[0])[0]
+                            vert_offset += half_line_height
                             text.append(text_block)
                             text.append(cr)
                             break
@@ -276,19 +353,26 @@ class show_Roma_attributes():
                     for n in bpy.context.scene.roma_use_name_list:
                         if n.id == idUse:
                             text_use = (("Use: " + n.name), 0)
+                            if blf.dimensions(font_id, text_use[0])[0] > line_width:
+                                line_width = blf.dimensions(font_id, text_use[0])[0]
+                            vert_offset += half_line_height
                             text.append(text_use)
                             text.append(cr)           
                             break
                 if bpy.context.window_manager.toggle_storey_number:  
                    # print(storey) 
                     text_storey = (("N° of storeys: " + str(storey)), 0)
+                    if blf.dimensions(font_id, text_storey[0])[0] > line_width:
+                                line_width = blf.dimensions(font_id, text_storey[0])[0]
+                    vert_offset += half_line_height
                     text.append(text_storey)
+                
                    
                 
                 
                 coord = view3d_utils.location_3d_to_region_2d(region, r3d, center)
-                x_offset = 0
-                y_offset = 0
+                x_offset = (-1 * line_width) / 2
+                y_offset = vert_offset - half_line_height
                 for pstr in text:
                     if len(pstr) == 2:
                         string = pstr[0]
@@ -297,13 +381,19 @@ class show_Roma_attributes():
                         blf.draw(font_id, string)
                         x_offset += text_width
                     else:
-                        x_offset = 0
-                        y_offset -= line_height       
+                        x_offset = (-1 * line_width) / 2
+                        y_offset -= line_height
             bm.free()
     
         
 def update_show_attributes(self, context):
-    if self.toggle_plot_name or self.toggle_block_name or self.toggle_use_name or self.toggle_storey_number:
+    if (self.toggle_plot_name or 
+        self.toggle_block_name or 
+        self.toggle_use_name or 
+        self.toggle_storey_number or
+        self.toggle_facade_name or 
+        self.toggle_facade_normal
+        ):
         # bpy.ops.view3d.show_roma_attributes('INVOKE_DEFAULT')
         # print("pippone")
         show_Roma_attributes()
@@ -326,7 +416,7 @@ class VIEW3D_OT_update_Roma_face_attributes(bpy.types.Operator):
     def __del__(self):
         global refresh_roma_invoked
         refresh_roma_invoked = False
-        print("Finito il ciclo naturalmente", refresh_roma_invoked)
+        # print("Finito il ciclo naturalmente", refresh_roma_invoked)
         
     def execute(self, context):
         # global plotName
@@ -334,95 +424,144 @@ class VIEW3D_OT_update_Roma_face_attributes(bpy.types.Operator):
         # global useName
         
         obj = bpy.context.active_object
-        if tuple(bpy.context.scene.tool_settings.mesh_select_mode)[2] == True: #we are selecting faces
-            #print("controllo dati")
+        # if tuple(bpy.context.scene.tool_settings.mesh_select_mode)[2] == True: #we are selecting faces
+        #print("controllo dati")
+        
+        obj.update_from_editmode()
+        mesh = obj.data
+
+        # activeFace = mesh.polygons[mesh.polygons.active]
+        selected_edges = [e for e in mesh.edges if e.select]
+        selected_faces = [p for p in mesh.polygons if p.select]
             
-            obj.update_from_editmode()
-            mesh = obj.data
-
-            # activeFace = mesh.polygons[mesh.polygons.active]
-            selected_faces = [p for p in mesh.polygons if p.select]
-                
-            if len(selected_faces) > 0:
-                selected_indices = []
+        if len(selected_edges) > 0 or len(selected_faces) > 0:
+            selected_edge_indices = []
+            selected_face_indices = []
+            
+            if len(selected_edges) > 0:
+                for f in selected_edges:
+                    selected_edge_indices.append(f.index)
+                    
+            if len(selected_faces) > 0:    
                 for f in selected_faces:
-                    selected_indices.append(f.index)
-                    
-                scene = bpy.context.scene
-             
-                bm = bmesh.from_edit_mesh(mesh)
-                bm.faces.ensure_lookup_table()
-
-                bMesh_plot = bm.faces.layers.int["roma_plot_id"]
-                bMesh_block = bm.faces.layers.int["roma_block_id"]
-                bMesh_use = bm.faces.layers.int["roma_use_id"]
-                bMesh_storeys = bm.faces.layers.int["roma_number_of_storeys"]
-
-                selected_bmFaces = [face for face in bm.faces if face.select]
+                    selected_face_indices.append(f.index)
                 
-                if bm.faces.active is not None:
-                    # print("NONE FACES !!!!!!!!!!!!!")
-                # else:
-                    bMesh_active_index = bm.faces.active.index
-                    
-                    for face in selected_faces:
-                        bm.faces[face.index].select = False
-                        
-                    for bmFace in selected_bmFaces:
-                        plot = bmFace[bMesh_plot]
-                        block = bmFace[bMesh_block]
-                        use = bmFace[bMesh_use] 
-                        storey = bmFace[bMesh_storeys]
-                        # if bm.faces.active is not None and bmFace.index ==  bMesh_active_index:
-                        if bmFace.index ==  bMesh_active_index:
-                            ############# PLOT ####################
-                            if scene.attribute_mass_plot_id != plot:
-                                scene.attribute_mass_plot_id = plot
-                            if scene.roma_plot_name_current[0].id != plot:
-                                scene.roma_plot_name_current[0].id = plot
-                                # if plotName["id"] == 0:
-                                #     plotName["name"] = None
-                                # else:
-                                for n in scene.roma_plot_name_list:
-                                    if n.id == scene.roma_plot_name_current[0].id:
-                                        scene.roma_plot_name_current[0].name = " " + n.name 
-                                        break
-                                    
-                            ############# BLOCK ####################
-                            if scene.attribute_mass_block_id != block:
-                                scene.attribute_mass_block_id = block
-                            if scene.roma_block_name_current[0].id != block:
-                                scene.roma_block_name_current[0].id = block
-                                for n in scene.roma_block_name_list:
-                                    if n.id == scene.roma_block_name_current[0].id:
-                                        scene.roma_block_name_current[0].name = " " + n.name 
-                                        break
-                                    
-                            ############# USE ####################
-                            if scene.attribute_mass_use_id != use:
-                                scene.attribute_mass_use_id = use
-                            if scene.roma_use_name_current[0].id != use:
-                                scene.roma_use_name_current[0].id = use
-                                for n in scene.roma_use_name_list:
-                                    if n.id == scene.roma_use_name_current[0].id:
-                                        scene.roma_use_name_current[0].name = " " + n.name 
-                                        break
-                                    
-                            ############# STOREYS ####################
-                            if scene.attribute_mass_storeys != storey:
-                                scene.attribute_mass_storeys = storey
-                                
-                            bmesh.update_edit_mesh(mesh)
-                            bm.free()
-                            break
+            scene = bpy.context.scene
+            
+            bm = bmesh.from_edit_mesh(mesh)
+            bm.edges.ensure_lookup_table()
 
-                    bm = bmesh.from_edit_mesh(mesh)
+            bMesh_facade = bm.edges.layers.int["roma_facade_id"]
+            bMesh_normal = bm.edges.layers.int["roma_inverted_normal"]
+            
+            bm.faces.ensure_lookup_table()
+            bMesh_plot = bm.faces.layers.int["roma_plot_id"]
+            bMesh_block = bm.faces.layers.int["roma_block_id"]
+            bMesh_use = bm.faces.layers.int["roma_use_id"]
+            bMesh_storeys = bm.faces.layers.int["roma_number_of_storeys"]
+
+            selected_bmEdges = [edge for edge in bm.edges if edge.select]
+            selected_bmFaces = [face for face in bm.faces if face.select]
+            
+            # active_vert = isinstance(bm.select_history.active, bmesh.types.BMVert)
+            active_edge = isinstance(bm.select_history.active, bmesh.types.BMEdge)
+            active_face = isinstance(bm.select_history.active, bmesh.types.BMFace)
+            
+            # if bm.faces.active is not None:
+                # print("NONE FACES !!!!!!!!!!!!!")
+            # else:
+            if active_edge:
+                bMesh_active_index = bm.select_history.active.index
+                
+                for edge in selected_edges:
+                    bm.edges.ensure_lookup_table()
+                    bm.edges[edge.index].select = False
+                    
+                for bmEdge in selected_bmEdges:
                     bm.faces.ensure_lookup_table()
-                    for index in selected_indices:
-                        bm.faces[index].select = True
+                    facade_type = bmEdge[bMesh_facade]
+                    facade_normal = bmEdge[bMesh_normal]
+                    
+                    if bmEdge.index ==  bMesh_active_index:
+                        ############# FACADE TYPE ####################
+                        if scene.attribute_facade_id != facade_type:
+                            scene.attribute_facade_id = facade_type
+                        if scene.roma_facade_name_current[0].id != facade_type:
+                            scene.roma_facade_name_current[0].id = facade_type
+                            for n in scene.roma_facade_name_list:
+                                if n.id == scene.roma_facade_name_current[0].id:
+                                    scene.roma_facade_name_current[0].name = " " + n.name 
+                                    break
+                        ############# FACADE NORMAL ####################
+                        if scene.attribute_facade_normal != bool(facade_normal):
+                            scene.attribute_facade_normal = bool(facade_normal)
+                        
+                        
+            elif active_face:
+                bMesh_active_index = bm.select_history.active.index
+                
+                for face in selected_faces:
+                    bm.faces[face.index].select = False
+                    
+                for bmFace in selected_bmFaces:
+                    plot = bmFace[bMesh_plot]
+                    block = bmFace[bMesh_block]
+                    use = bmFace[bMesh_use] 
+                    storey = bmFace[bMesh_storeys]
+                    # if bm.faces.active is not None and bmFace.index ==  bMesh_active_index:
+                    if bmFace.index ==  bMesh_active_index:
+                        ############# PLOT ####################
+                        if scene.attribute_mass_plot_id != plot:
+                            scene.attribute_mass_plot_id = plot
+                        if scene.roma_plot_name_current[0].id != plot:
+                            scene.roma_plot_name_current[0].id = plot
+                            # if plotName["id"] == 0:
+                            #     plotName["name"] = None
+                            # else:
+                            for n in scene.roma_plot_name_list:
+                                if n.id == scene.roma_plot_name_current[0].id:
+                                    scene.roma_plot_name_current[0].name = " " + n.name 
+                                    break
+                                
+                        ############# BLOCK ####################
+                        if scene.attribute_mass_block_id != block:
+                            scene.attribute_mass_block_id = block
+                        if scene.roma_block_name_current[0].id != block:
+                            scene.roma_block_name_current[0].id = block
+                            for n in scene.roma_block_name_list:
+                                if n.id == scene.roma_block_name_current[0].id:
+                                    scene.roma_block_name_current[0].name = " " + n.name 
+                                    break
+                                
+                        ############# USE ####################
+                        if scene.attribute_mass_use_id != use:
+                            scene.attribute_mass_use_id = use
+                        if scene.roma_use_name_current[0].id != use:
+                            scene.roma_use_name_current[0].id = use
+                            for n in scene.roma_use_name_list:
+                                if n.id == scene.roma_use_name_current[0].id:
+                                    scene.roma_use_name_current[0].name = " " + n.name 
+                                    break
+                                
+                        ############# STOREYS ####################
+                        if scene.attribute_mass_storeys != storey:
+                            scene.attribute_mass_storeys = storey
                             
-                    bmesh.update_edit_mesh(mesh)
-                bm.free() 
+                        bmesh.update_edit_mesh(mesh)
+                        bm.free()
+                        break
+
+            bm = bmesh.from_edit_mesh(mesh)
+            bm.edges.ensure_lookup_table()
+            for index in selected_edge_indices:
+                bm.edges[index].select = True
+                
+            bm.faces.ensure_lookup_table()
+            for index in selected_face_indices:
+                bm.faces[index].select = True
+                    
+            bmesh.update_edit_mesh(mesh)
+            bm.free() 
     # checkingFace = False
             
             
@@ -436,7 +575,7 @@ class VIEW3D_OT_update_Roma_face_attributes(bpy.types.Operator):
             self.execute(context)
             # print("runno")
         else:
-            print("CANCELLATO")
+            # print("CANCELLATO")
             return {'CANCELLED'}
         
         return {"RUNNING_MODAL"}
@@ -461,9 +600,9 @@ def refresh_roma_face_attributes(dummy):
     global refresh_roma_invoked
     if refresh_roma_invoked == False:
         obj = bpy.context.active_object
-        if obj.type == 'MESH':
+        if hasattr(obj, "type") and obj.type == 'MESH':
             if "RoMa object" in obj.data and obj.mode == 'EDIT':
                 refresh_roma_invoked = True
-                print("invoco", refresh_roma_invoked)
+                # print("invoco", refresh_roma_invoked)
                 bpy.ops.object.update_roma_face_attributes('INVOKE_DEFAULT')
     # return
