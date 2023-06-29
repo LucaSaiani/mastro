@@ -58,6 +58,11 @@ attribute_set = [
             "attr_domain" :  "FACE"
             },
             {
+            "attr" :  "roma_floor_id",
+            "attr_type" :  "INT",
+            "attr_domain" :  "FACE"
+            },
+            {
             "attr" :  "roma_number_of_storeys",
             "attr_type" :  "INT",
             "attr_domain" :  "FACE"

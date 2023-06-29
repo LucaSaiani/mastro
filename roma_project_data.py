@@ -17,35 +17,48 @@ class VIEW3D_PT_RoMa_project_data(Panel):
     bl_options = {'DEFAULT_CLOSED'}
     
     def draw(self, context):
+        pass
+    
+    
+
+class VIEW3D_PT_RoMa_show_data(Panel):
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    # bl_category = "RoMa"
+    bl_label = "Show Data"
+    bl_parent_id = "VIEW3D_PT_RoMa_project_data"
+    # bl_context = "scene"
+    bl_options = {'DEFAULT_CLOSED'}
+    
+    def draw_header(self, context):
+        self.layout.prop(context.window_manager, "toggle_show_data", text="")
+        
+    def draw(self, context):
         layout = self.layout
         layout.use_property_split = True
         layout.use_property_decorate = False  # No animation.
         
-        layout.label(text="Visuals")
-        row = layout.row()
-        row.label(text="Plot")
-        row.prop(context.window_manager, 'toggle_plot_name', toggle=True, icon="HIDE_OFF", icon_only=True)
+        layout.active = context.window_manager.toggle_show_data
         
-        row = layout.row()
-        row.label(text="Block")
-        row.prop(context.window_manager, 'toggle_block_name', toggle=True, icon="HIDE_OFF", icon_only=True)
         
-        row = layout.row()
-        row.label(text="Use")
-        row.prop(context.window_manager, 'toggle_use_name', toggle=True, icon="HIDE_OFF", icon_only=True)
         
-        row = layout.row()
-        row.label(text="Storey")
-        row.prop(context.window_manager, 'toggle_storey_number', toggle=True, icon="HIDE_OFF", icon_only=True)
-        
-        row = layout.row()
-        row.label(text="Façade")
-        row.prop(context.window_manager, 'toggle_facade_name', toggle=True, icon="HIDE_OFF", icon_only=True)
-        
-        row = layout.row()
-        row.label(text="Façade normal")
-        row.prop(context.window_manager, 'toggle_facade_normal', toggle=True, icon="HIDE_OFF", icon_only=True)
-       
+        # flow = layout.grid_flow(row_major=True, columns=0, even_columns=True, even_rows=False, align=True)
+
+        # col = flow.column()
+        # col = flow.column(heading="Mass", align = True)
+        col = layout.column(heading="Mass", align=True)
+        col.prop(context.window_manager, 'toggle_plot_name', icon_only=False)
+        col.prop(context.window_manager, 'toggle_block_name', icon_only=False)
+        col.prop(context.window_manager, 'toggle_use_name', icon_only=False)
+        col.prop(context.window_manager, 'toggle_storey_number', icon_only=False)
+        # col.separator()
+        col = layout.column(heading="Façade", align = True)
+        col.prop(context.window_manager, 'toggle_facade_name', icon_only=False)
+        col.prop(context.window_manager, 'toggle_facade_normal', icon_only=False)
+        # col.separator()
+        col = layout.column(heading="Floor", align = True)
+        col.prop(context.window_manager, 'toggle_floor_name', icon_only=False)
+           
 class VIEW3D_PT_RoMa_mass_data(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
@@ -60,24 +73,9 @@ class VIEW3D_PT_RoMa_mass_data(Panel):
     #     return (context.object is not None)
     
     def draw(self, context):
-        # obj = context.active_object
-        # enabled = True
-        # if obj is not None and obj.type == "MESH":
-        #     mode = obj.mode
-        #     if mode == "EDIT":
-        #         enabled = False
-        
-        # if draw:
-            
         scene = context.scene
         
         layout = self.layout
-        # if obj is not None and obj.type == "MESH":
-        #     mode = obj.mode
-            # if mode == 'EDIT':
-            #    layout.active = False
-            # else:
-            #    layout.active = True
         layout.use_property_split = True
         layout.use_property_decorate = False  # No animation.
         
@@ -115,6 +113,7 @@ class VIEW3D_PT_RoMa_mass_data(Panel):
         
         ########################## BLOCK #########################
         row = layout.row()
+        
         row.label(text="Block")
         # row.prop(context.window_manager, 'toggle_block_name', toggle=True, icon="HIDE_OFF", icon_only=True)
         
@@ -185,6 +184,7 @@ class VIEW3D_PT_RoMa_facade_data(Panel):
         layout = self.layout
         layout.use_property_split = True
         layout.use_property_decorate = False  # No animation.
+        
 
         ########################## FACADE #########################
         row = layout.row()
@@ -211,6 +211,34 @@ class VIEW3D_PT_RoMa_facade_data(Panel):
         
         if scene.roma_facade_name_list_index >= 0 and scene.roma_facade_name_list:
             item = scene.roma_facade_name_list[scene.roma_facade_name_list_index]
+            row.prop(item, "name", icon_only=True)
+        
+        
+        ########################## Floor #########################
+        row = layout.row()
+        row.label(text="Floor")
+        
+        # is_sortable = len(scene.roma_use_name_list) > 1
+        rows = 3
+        # if is_sortable:
+        #     rows = 5
+            
+        row = layout.row()
+        row.template_list("OBJECT_UL_Floor", "floor_list", scene,
+                        "roma_floor_name_list", scene, "roma_floor_name_list_index", rows = rows)
+        
+        
+        col = row.column(align=True)
+        col.operator("roma_floor_name_list.new_item", icon='ADD', text="")
+        col.separator()
+        col.operator("roma_floor_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
+        col.operator("roma_floor_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
+        
+        row = layout.row()
+        row = layout.row(align=True)
+        
+        if scene.roma_floor_name_list_index >= 0 and scene.roma_floor_name_list:
+            item = scene.roma_floor_name_list[scene.roma_floor_name_list_index]
             row.prop(item, "name", icon_only=True)
         
         
@@ -580,7 +608,7 @@ class OBJECT_UL_Facade(UIList):
     
 class FACADE_LIST_OT_NewItem(Operator):
     bl_idname = "roma_facade_name_list.new_item"
-    bl_label = "Add a new façade"
+    bl_label = "Add a new façade type"
 
     def execute(self, context): 
         context.scene.roma_facade_name_list.add()
@@ -646,6 +674,97 @@ class facade_name_list(PropertyGroup):
            name="Façade Normal",
            description="Invert the normal of the façade",
            default = 0)
+    
+############################        ############################
+############################ FLOOR  ############################
+############################        ############################
+
+class OBJECT_UL_Floor(UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data,
+                  active_propname, index):
+       
+        custom_icon = 'VIEW_PERSPECTIVE'
+
+        if self.layout_type in {'DEFAULT', 'COMPACT'}:
+            split = layout.split(factor=0.3)
+            split.label(text="Id: %d" % (item.id)) 
+            split.label(text=item.name, icon=custom_icon) 
+        elif self.layout_type in {'GRID'}:
+            layout.alignment = 'CENTER'
+            layout.label(text="", icon = custom_icon)
+
+    def filter_items(self, context, data, propname):
+        filtered = []
+        ordered = []
+        items = getattr(data, propname)
+        filtered = [self.bitflag_filter_item] * len(items)
+        
+        for i, item in enumerate(items):
+            if item.id == 0:
+                filtered[i] &= ~self.bitflag_filter_item
+        return filtered, ordered
+
+    def draw_filter(self, context, layout):
+        pass
+    
+class FLOOR_LIST_OT_NewItem(Operator):
+    bl_idname = "roma_floor_name_list.new_item"
+    bl_label = "Add a new floor type"
+
+    def execute(self, context): 
+        context.scene.roma_floor_name_list.add()
+        temp_list = []    
+        for el in context.scene.roma_floor_name_list:
+            temp_list.append(el.id)
+        last = len(context.scene.roma_floor_name_list)-1
+        
+        context.scene.roma_floor_name_list[last].id = max(temp_list)+1
+            
+        return{'FINISHED'}
+    
+class FLOOR_LIST_OT_MoveItem(Operator):
+    bl_idname = "roma_floor_name_list.move_item"
+    bl_label = "Move an item in the list"
+
+    direction: bpy.props.EnumProperty(items=(('UP', 'Up', ""),
+                                              ('DOWN', 'Down', ""),))
+
+    @classmethod
+    def poll(cls, context):
+        return context.scene.roma_floor_name_list
+
+    def move_index(self):
+        index = bpy.context.scene.roma_floor_name_list_index
+        list_length = len(bpy.context.scene.roma_floor_name_list) - 1 
+        new_index = index + (-1 if self.direction == 'UP' else 1)
+
+        bpy.context.scene.roma_floor_name_list_index = max(0, min(new_index, list_length))
+
+    def execute(self, context):
+        roma_floor_name_list = context.scene.roma_floor_name_list
+        index = context.scene.roma_floor_name_list_index
+
+        neighbor = index + (-1 if self.direction == 'UP' else 1)
+        roma_floor_name_list.move(neighbor, index)
+        self.move_index()
+
+        return{'FINISHED'}
+            
+class floor_name_list(PropertyGroup):
+    id: IntProperty(
+           name="Id",
+           description="Floor name id",
+           default = 0)
+    
+    name: StringProperty(
+           name="Floor Name",
+           description="The name of the floor",
+           default="")
+    
+    # normal: IntProperty(
+    #        name="Façade Normal",
+    #        description="Invert the normal of the façade",
+    #        default = 0)
 
 ##############################              #############################
 ############################## other stuff  #############################
