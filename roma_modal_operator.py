@@ -195,10 +195,13 @@ class show_Roma_attributes():
         # return(self.font_info["handler"]) 
         
     def end(self):
-        bpy.types.SpaceView3D.draw_handler_remove(show_Roma_attributes.font_info["handler"], 'WINDOW')
-        # print("Addio ", show_Roma_attributes.font_info["handler"])
-        show_Roma_attributes.font_info["handler"] = None
-        # self.font_info["hander"] = None
+        try:
+            bpy.types.SpaceView3D.draw_handler_remove(show_Roma_attributes.font_info["handler"], 'WINDOW')
+            # print("Addio ", show_Roma_attributes.font_info["handler"])
+            show_Roma_attributes.font_info["handler"] = None
+            # self.font_info["hander"] = None
+        except:
+            pass
         
     def draw_callback_px(self, context, event):
         obj = bpy.context.active_object
@@ -226,6 +229,7 @@ class show_Roma_attributes():
             bMesh_block = bm.faces.layers.int["roma_block_id"]
             bMesh_use = bm.faces.layers.int["roma_use_id"]
             bMesh_storey = bm.faces.layers.int["roma_number_of_storeys"]
+            bMesh_floor = bm.faces.layers.int["roma_floor_id"]
 
             for a in bpy.context.screen.areas:
                 if a.type == 'VIEW_3D':
@@ -319,6 +323,7 @@ class show_Roma_attributes():
                 idPlot = bmFace[bMesh_plot]
                 idBlock = bmFace[bMesh_block]
                 idUse = bmFace[bMesh_use]
+                idFloor = bmFace[bMesh_floor]
                 storey = bmFace[bMesh_storey]
                 
                 line_width = 0
@@ -329,6 +334,7 @@ class show_Roma_attributes():
                 text_block = ""
                 text_use = ""
                 text_storey = ""
+                text_flor = ""
                 
                 if bpy.context.window_manager.toggle_plot_name:   
                     for n in bpy.context.scene.roma_plot_name_list:
@@ -359,15 +365,22 @@ class show_Roma_attributes():
                             text.append(text_use)
                             text.append(cr)           
                             break
+                if bpy.context.window_manager.toggle_floor_name:   
+                    for n in bpy.context.scene.roma_floor_name_list:
+                        if n.id == idFloor:
+                            text_floor = (("Floor: " + n.name), 0)
+                            if blf.dimensions(font_id, text_floor[0])[0] > line_width:
+                                line_width = blf.dimensions(font_id, text_floor[0])[0]
+                            vert_offset += half_line_height
+                            text.append(text_floor)
+                            text.append(cr)           
+                            break
                 if bpy.context.window_manager.toggle_storey_number:  
-                   # print(storey) 
                     text_storey = (("N° of storeys: " + str(storey)), 0)
                     if blf.dimensions(font_id, text_storey[0])[0] > line_width:
                                 line_width = blf.dimensions(font_id, text_storey[0])[0]
                     vert_offset += half_line_height
                     text.append(text_storey)
-                
-                   
                 
                 
                 coord = view3d_utils.location_3d_to_region_2d(region, r3d, center)
@@ -387,15 +400,7 @@ class show_Roma_attributes():
     
         
 def update_show_attributes(self, context):
-    if (self.toggle_plot_name or 
-        self.toggle_block_name or 
-        self.toggle_use_name or 
-        self.toggle_storey_number or
-        self.toggle_facade_name or 
-        self.toggle_facade_normal
-        ):
-        # bpy.ops.view3d.show_roma_attributes('INVOKE_DEFAULT')
-        # print("pippone")
+    if (self.toggle_show_data):
         show_Roma_attributes()
     else:
         show_Roma_attributes.end(self)
@@ -403,10 +408,10 @@ def update_show_attributes(self, context):
        
 
         
-class VIEW3D_OT_update_Roma_face_attributes(bpy.types.Operator):
-    """Update RoMa attributes of the active face in the mass panel"""
-    bl_idname = "object.update_roma_face_attributes"
-    bl_label = "Update RoMa attributes of the active face in the mass panel"
+class VIEW3D_OT_update_Roma_mesh_attributes(bpy.types.Operator):
+    """Update RoMa attributes of the active mesh in the mass panel"""
+    bl_idname = "object.update_roma_mesh_attributes"
+    bl_label = "Update RoMa attributes of the active mesh in the mass panel"
  
     def __init__(self):
         pass
@@ -459,6 +464,7 @@ class VIEW3D_OT_update_Roma_face_attributes(bpy.types.Operator):
             bMesh_block = bm.faces.layers.int["roma_block_id"]
             bMesh_use = bm.faces.layers.int["roma_use_id"]
             bMesh_storeys = bm.faces.layers.int["roma_number_of_storeys"]
+            bMesh_floor = bm.faces.layers.int["roma_floor_id"]
 
             selected_bmEdges = [edge for edge in bm.edges if edge.select]
             selected_bmFaces = [face for face in bm.faces if face.select]
@@ -508,6 +514,7 @@ class VIEW3D_OT_update_Roma_face_attributes(bpy.types.Operator):
                     block = bmFace[bMesh_block]
                     use = bmFace[bMesh_use] 
                     storey = bmFace[bMesh_storeys]
+                    floor = bmFace[bMesh_floor]
                     # if bm.faces.active is not None and bmFace.index ==  bMesh_active_index:
                     if bmFace.index ==  bMesh_active_index:
                         ############# PLOT ####################
@@ -546,6 +553,16 @@ class VIEW3D_OT_update_Roma_face_attributes(bpy.types.Operator):
                         ############# STOREYS ####################
                         if scene.attribute_mass_storeys != storey:
                             scene.attribute_mass_storeys = storey
+                            
+                        ############# FLOOR ####################
+                        if scene.attribute_floor_id != floor:
+                            scene.attribute_floor_id = floor
+                        if scene.roma_floor_name_current[0].id != floor:
+                            scene.roma_floor_name_current[0].id = floor
+                            for n in scene.roma_floor_name_list:
+                                if n.id == scene.roma_floor_name_current[0].id:
+                                    scene.roma_floor_name_current[0].name = " " + n.name 
+                                    break
                             
                         bmesh.update_edit_mesh(mesh)
                         bm.free()
@@ -596,7 +613,7 @@ class VIEW3D_OT_update_Roma_face_attributes(bpy.types.Operator):
         
 
 @persistent
-def refresh_roma_face_attributes(dummy):
+def refresh_roma_mesh_attributes(dummy):
     global refresh_roma_invoked
     if refresh_roma_invoked == False:
         obj = bpy.context.active_object
@@ -604,5 +621,5 @@ def refresh_roma_face_attributes(dummy):
             if "RoMa object" in obj.data and obj.mode == 'EDIT':
                 refresh_roma_invoked = True
                 # print("invoco", refresh_roma_invoked)
-                bpy.ops.object.update_roma_face_attributes('INVOKE_DEFAULT')
+                bpy.ops.object.update_roma_mesh_attributes('INVOKE_DEFAULT')
     # return
