@@ -110,7 +110,11 @@ class OBJECT_OT_SetFacadeNormal(Operator):
                 index = edge.index
                 for mesh_attribute in mesh_attributes_normals:
                     if mesh_attribute[0] == index:
-                        mesh_attribute[1].value = attribute_facade_normal*1 # convert boolean to 0 or 1
+                        # mesh_attribute[1].value = attribute_facade_normal*1 # convert boolean to 0 or 1
+                        if attribute_facade_normal:
+                            mesh_attribute[1].value = -1
+                        else:
+                            mesh_attribute[1].value = 1
                 
             bpy.ops.object.mode_set(mode=mode)
                     

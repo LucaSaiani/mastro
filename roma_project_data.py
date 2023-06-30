@@ -673,7 +673,7 @@ class facade_name_list(PropertyGroup):
     normal: IntProperty(
            name="Façade Normal",
            description="Invert the normal of the façade",
-           default = 0)
+           default = 1)
     
 ############################        ############################
 ############################ FLOOR  ############################

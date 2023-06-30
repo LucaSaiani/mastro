@@ -284,7 +284,7 @@ class show_Roma_attributes():
                             text.append(cr)
                             break
                 if bpy.context.window_manager.toggle_facade_normal:
-                    if normal == 1:   
+                    if normal == -1:   
                         symbol = "↔️"
                         text_normal = (symbol, 0)
                         # if blf.dimensions(font_id, symbol)[0] > line_width:
@@ -454,6 +454,7 @@ class VIEW3D_OT_update_Roma_mesh_attributes(bpy.types.Operator):
             scene = bpy.context.scene
             
             bm = bmesh.from_edit_mesh(mesh)
+            print("AGGIUNGO BMESH")
             bm.edges.ensure_lookup_table()
 
             bMesh_facade = bm.edges.layers.int["roma_facade_id"]
@@ -499,8 +500,14 @@ class VIEW3D_OT_update_Roma_mesh_attributes(bpy.types.Operator):
                                     scene.roma_facade_name_current[0].name = " " + n.name 
                                     break
                         ############# FACADE NORMAL ####################
-                        if scene.attribute_facade_normal != bool(facade_normal):
-                            scene.attribute_facade_normal = bool(facade_normal)
+                        print(scene.attribute_facade_normal*1, facade_normal)
+                        # if (scene.attribute_facade_normal*1) != facade_normal:
+                        if facade_normal == -1:
+                            print("true")
+                            scene.attribute_facade_normal = True
+                        else:
+                            print("false")
+                            scene.attribute_facade_normal = False
                         
                         
             elif active_face:
@@ -563,10 +570,10 @@ class VIEW3D_OT_update_Roma_mesh_attributes(bpy.types.Operator):
                                 if n.id == scene.roma_floor_name_current[0].id:
                                     scene.roma_floor_name_current[0].name = " " + n.name 
                                     break
-                            
-                        bmesh.update_edit_mesh(mesh)
-                        bm.free()
-                        break
+                    break   
+            bmesh.update_edit_mesh(mesh)
+            bm.free()
+                
 
             bm = bmesh.from_edit_mesh(mesh)
             bm.edges.ensure_lookup_table()
@@ -579,6 +586,7 @@ class VIEW3D_OT_update_Roma_mesh_attributes(bpy.types.Operator):
                     
             bmesh.update_edit_mesh(mesh)
             bm.free() 
+            print("RIMUOVO BMESH")
     # checkingFace = False
             
             
