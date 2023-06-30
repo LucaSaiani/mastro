@@ -173,7 +173,7 @@ class VIEW3D_PT_RoMa_facade_data(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     # bl_category = "RoMa"
-    bl_label = "Façade Data"
+    bl_label = "Building Data"
     bl_parent_id = "VIEW3D_PT_RoMa_project_data"
     # bl_context = "scene"
     bl_options = {'DEFAULT_CLOSED'}
