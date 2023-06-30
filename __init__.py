@@ -174,21 +174,25 @@ def onFileLoaded(scene):
         bpy.context.scene.roma_plot_name_current.add()
         bpy.context.scene.roma_plot_name_current[0].id = 0
         bpy.context.scene.roma_plot_name_current[0].name = " "
+        print("roma_plot_name_current",len(bpy.context.scene.roma_plot_name_current))
     
     if len(bpy.context.scene.roma_block_name_current) == 0:
         bpy.context.scene.roma_block_name_current.add()
         bpy.context.scene.roma_block_name_current[0].id = 0
         bpy.context.scene.roma_block_name_current[0].name = " "
+        print("roma_block_name_current)", len(bpy.context.scene.roma_block_name_current))
         
     if len(bpy.context.scene.roma_use_name_current) == 0:
         bpy.context.scene.roma_use_name_current.add()
         bpy.context.scene.roma_use_name_current[0].id = 0
         bpy.context.scene.roma_use_name_current[0].name = " "
+        print("roma_use_name_current",len(bpy.context.scene.roma_use_name_current))
         
     if len(bpy.context.scene.roma_facade_name_current) == 0:
         bpy.context.scene.roma_facade_name_current.add()
         bpy.context.scene.roma_facade_name_current[0].id = 0
         bpy.context.scene.roma_facade_name_current[0].name = " "
+        print("roma_facade_name_current",len(bpy.context.scene.roma_facade_name_current))
         
     if len(bpy.context.scene.roma_floor_name_current) == 0:
         bpy.context.scene.roma_floor_name_current.add()
@@ -271,7 +275,7 @@ def register():
     
     bpy.types.WindowManager.toggle_facade_normal = bpy.props.BoolProperty(
                                             name = "Inverted Normals",
-                                            default = False,
+                                            default = True,
                                             update = roma_modal_operator.update_show_attributes)
     
     bpy.types.WindowManager.toggle_floor_name = bpy.props.BoolProperty(
