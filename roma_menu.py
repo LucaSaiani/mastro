@@ -10,17 +10,20 @@ attribute_set = [
             {
             "attr" : "roma_vertex_custom_attribute",
             "attr_type" :  "INT",
-            "attr_domain" :  "POINT"
+            "attr_domain" :  "POINT",
+            "attr_default" : 0
             },
             {
             "attr" :  "roma_facade_id",
             "attr_type" :  "INT",
-            "attr_domain" :  "EDGE"
+            "attr_domain" :  "EDGE",
+            "attr_default" : 0
             },
             {
             "attr" :  "roma_inverted_normal",
             "attr_type" :  "INT",
-            "attr_domain" :  "EDGE"
+            "attr_domain" :  "EDGE",
+            "attr_default" : 1
             },
             # {
             # "attr" :  "roma_number_of_storeys_per_face",
@@ -30,47 +33,56 @@ attribute_set = [
             {
             "attr" :  "roma_plot_id",
             "attr_type" :  "INT",
-            "attr_domain" :  "FACE"
+            "attr_domain" :  "FACE",
+            "attr_default" : 0
             },
             {
             "attr" :  "roma_plot_RND",
             "attr_type" :  "FLOAT",
-            "attr_domain" :  "FACE"
+            "attr_domain" :  "FACE",
+            "attr_default" : 0
             },
             {
             "attr" :  "roma_block_id",
             "attr_type" :  "INT",
-            "attr_domain" :  "FACE"
+            "attr_domain" :  "FACE",
+            "attr_default" : 0
             },
             {
             "attr" :  "roma_block_RND",
             "attr_type" :  "FLOAT",
-            "attr_domain" :  "FACE"
+            "attr_domain" :  "FACE",
+            "attr_default" : 0
             },
             {
             "attr" :  "roma_use_id",
             "attr_type" :  "INT",
-            "attr_domain" :  "FACE"
+            "attr_domain" :  "FACE",
+            "attr_default" : 0
             },
             {
             "attr" :  "roma_use_RND",
             "attr_type" :  "FLOAT",
-            "attr_domain" :  "FACE"
+            "attr_domain" :  "FACE",
+            "attr_default" : 0
             },
             {
             "attr" :  "roma_floor_id",
             "attr_type" :  "INT",
-            "attr_domain" :  "FACE"
+            "attr_domain" :  "FACE",
+            "attr_default" : 0
             },
             {
             "attr" :  "roma_number_of_storeys",
             "attr_type" :  "INT",
-            "attr_domain" :  "FACE"
+            "attr_domain" :  "FACE",
+            "attr_default" : 0
             },
             {
             "attr" :  "roma_GEA",
             "attr_type" :  "FLOAT",
-            "attr_domain" :  "FACE"
+            "attr_domain" :  "FACE",
+            "attr_default" : 0
             }
 ]
 
@@ -94,9 +106,25 @@ class roma_MenuOperator_convert_to_RoMa_mesh(Operator):
                     mesh.attributes[a["attr"]]
                 except:
                     mesh.attributes.new(name=a["attr"], type=a["attr_type"], domain=a["attr_domain"])
-                    # for face in obj.data.polygons:
-                    #     attribute = mesh.attributes[a["attr"]].data.items()
+                    if a["attr_domain"] == 'FACE':
+                        attribute = mesh.attributes[a["attr"]].data.items()
+                        for face in mesh.polygons:
+                            index = face.index
+                            for mesh_attribute in attribute:
+                                if mesh_attribute[0]  == index:
+                                    mesh_attribute[1].value = a["attr_default"]
+                                    break
+                    elif a["attr_domain"] == 'EDGE':
+                        attribute = mesh.attributes[a["attr"]].data.items()
+                        for edge in mesh.edges:
+                            index = edge.index
+                            for mesh_attribute in attribute:
+                                if mesh_attribute[0]  == index:
+                                    mesh_attribute[1].value = a["attr_default"]
+                                    break
+                    #     
                     #     attribute[0][1].value = None
+            
      
         return {'FINISHED'}
     
