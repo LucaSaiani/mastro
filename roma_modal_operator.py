@@ -5,9 +5,14 @@ from mathutils import Vector
 from bpy_extras import view3d_utils
 # import numpy as np
 import bmesh
-# from datetime import datetime
+from datetime import datetime
 
-refresh_roma_invoked = False
+# refresh_roma_invoked = False
+# running_refresh_modal = False
+# running_refresh_modal_event = None
+
+# _event = None
+# from bpy.props import IntProperty, FloatProperty
 
 
 # https://blender.stackexchange.com/questions/107617/how-to-align-modal-draw-to-the-middle-of-the-3d-viewport
@@ -185,21 +190,17 @@ class show_Roma_attributes():
         }
    
     def __init__(self):
-        # Default font.
         self.font_info["font_id"] = 0
 
         # set the font drawing routine to run every frame
         if self.font_info["handler"] == None:
             self.font_info["handler"] = bpy.types.SpaceView3D.draw_handler_add(self.draw_callback_px, (None, None), 'WINDOW', 'POST_PIXEL')  
-            # print("Benvenuto ", show_Roma_attributes.font_info["handler"])
         # return(self.font_info["handler"]) 
         
     def end(self):
         try:
             bpy.types.SpaceView3D.draw_handler_remove(show_Roma_attributes.font_info["handler"], 'WINDOW')
-            # print("Addio ", show_Roma_attributes.font_info["handler"])
             show_Roma_attributes.font_info["handler"] = None
-            # self.font_info["hander"] = None
         except:
             pass
         
@@ -210,7 +211,6 @@ class show_Roma_attributes():
             obj.update_from_editmode()
             
             mesh = obj.data
-            # mesh_attributes = mesh.attributes["roma_block_id"].data.items()
             matrix = obj.matrix_world
             
             if obj.mode == 'EDIT':
@@ -334,7 +334,7 @@ class show_Roma_attributes():
                 text_block = ""
                 text_use = ""
                 text_storey = ""
-                text_flor = ""
+                text_floor = ""
                 
                 if bpy.context.window_manager.toggle_plot_name:   
                     for n in bpy.context.scene.roma_plot_name_list:
@@ -413,18 +413,268 @@ class VIEW3D_OT_update_Roma_mesh_attributes(bpy.types.Operator):
     bl_idname = "object.update_roma_mesh_attributes"
     bl_label = "Update RoMa attributes of the active mesh in the mass panel"
  
+#     def __init__(self):
+#         pass
+#         # global refresh_roma_invoked
+#         # print("Start", refresh_roma_invoked)
+
+#     def __del__(self):
+#         global refresh_roma_invoked
+#         refresh_roma_invoked = False
+#         # print("Finito il ciclo naturalmente", refresh_roma_invoked)
+        
+#     def execute(self, context):
+#         # global plotName
+#         # global blockName
+#         # global useName
+        
+#         obj = bpy.context.active_object
+#         # if tuple(bpy.context.scene.tool_settings.mesh_select_mode)[2] == True: #we are selecting faces
+#         #print("controllo dati")
+        
+#         obj.update_from_editmode()
+#         mesh = obj.data
+
+#         # activeFace = mesh.polygons[mesh.polygons.active]
+#         selected_edges = [e for e in mesh.edges if e.select]
+#         selected_faces = [p for p in mesh.polygons if p.select]
+            
+#         if len(selected_edges) > 0 or len(selected_faces) > 0:
+#             selected_edge_indices = []
+#             selected_face_indices = []
+            
+#             if len(selected_edges) > 0:
+#                 for f in selected_edges:
+#                     selected_edge_indices.append(f.index)
+                    
+#             if len(selected_faces) > 0:    
+#                 for f in selected_faces:
+#                     selected_face_indices.append(f.index)
+                
+#             scene = bpy.context.scene
+            
+#             bm = bmesh.from_edit_mesh(mesh)
+#             print("AGGIUNGO BMESH")
+#             bm.edges.ensure_lookup_table()
+
+#             bMesh_facade = bm.edges.layers.int["roma_facade_id"]
+#             bMesh_normal = bm.edges.layers.int["roma_inverted_normal"]
+            
+#             bm.faces.ensure_lookup_table()
+#             bMesh_plot = bm.faces.layers.int["roma_plot_id"]
+#             bMesh_block = bm.faces.layers.int["roma_block_id"]
+#             bMesh_use = bm.faces.layers.int["roma_use_id"]
+#             bMesh_storeys = bm.faces.layers.int["roma_number_of_storeys"]
+#             bMesh_floor = bm.faces.layers.int["roma_floor_id"]
+
+#             selected_bmEdges = [edge for edge in bm.edges if edge.select]
+#             selected_bmFaces = [face for face in bm.faces if face.select]
+            
+#             # active_vert = isinstance(bm.select_history.active, bmesh.types.BMVert)
+#             active_edge = isinstance(bm.select_history.active, bmesh.types.BMEdge)
+#             active_face = isinstance(bm.select_history.active, bmesh.types.BMFace)
+            
+#             # if bm.faces.active is not None:
+#                 # print("NONE FACES !!!!!!!!!!!!!")
+#             # else:
+#             if active_edge:
+#                 bMesh_active_index = bm.select_history.active.index
+                
+#                 for edge in selected_edges:
+#                     bm.edges.ensure_lookup_table()
+#                     bm.edges[edge.index].select = False
+                    
+#                 for bmEdge in selected_bmEdges:
+#                     bm.faces.ensure_lookup_table()
+#                     facade_type = bmEdge[bMesh_facade]
+#                     facade_normal = bmEdge[bMesh_normal]
+                    
+#                     if bmEdge.index ==  bMesh_active_index:
+#                         ############# FACADE TYPE ####################
+#                         if scene.attribute_facade_id != facade_type:
+#                             scene.attribute_facade_id = facade_type
+#                         if scene.roma_facade_name_current[0].id != facade_type:
+#                             scene.roma_facade_name_current[0].id = facade_type
+#                             for n in scene.roma_facade_name_list:
+#                                 if n.id == scene.roma_facade_name_current[0].id:
+#                                     scene.roma_facade_name_current[0].name = " " + n.name 
+#                                     break
+#                         ############# FACADE NORMAL ####################
+#                         print(scene.attribute_facade_normal*1, facade_normal)
+#                         # if (scene.attribute_facade_normal*1) != facade_normal:
+#                         if facade_normal == -1:
+#                             print("true")
+#                             scene.attribute_facade_normal = True
+#                         else:
+#                             print("false")
+#                             scene.attribute_facade_normal = False
+                        
+                        
+#             elif active_face:
+#                 bMesh_active_index = bm.select_history.active.index
+                
+#                 for face in selected_faces:
+#                     bm.faces[face.index].select = False
+                    
+#                 for bmFace in selected_bmFaces:
+#                     plot = bmFace[bMesh_plot]
+#                     block = bmFace[bMesh_block]
+#                     use = bmFace[bMesh_use] 
+#                     storey = bmFace[bMesh_storeys]
+#                     floor = bmFace[bMesh_floor]
+#                     # if bm.faces.active is not None and bmFace.index ==  bMesh_active_index:
+#                     if bmFace.index ==  bMesh_active_index:
+#                         ############# PLOT ####################
+#                         if scene.attribute_mass_plot_id != plot:
+#                             scene.attribute_mass_plot_id = plot
+#                         if scene.roma_plot_name_current[0].id != plot:
+#                             scene.roma_plot_name_current[0].id = plot
+#                             # if plotName["id"] == 0:
+#                             #     plotName["name"] = None
+#                             # else:
+#                             for n in scene.roma_plot_name_list:
+#                                 if n.id == scene.roma_plot_name_current[0].id:
+#                                     scene.roma_plot_name_current[0].name = " " + n.name 
+#                                     break
+                                
+#                         ############# BLOCK ####################
+#                         if scene.attribute_mass_block_id != block:
+#                             scene.attribute_mass_block_id = block
+#                         if scene.roma_block_name_current[0].id != block:
+#                             scene.roma_block_name_current[0].id = block
+#                             for n in scene.roma_block_name_list:
+#                                 if n.id == scene.roma_block_name_current[0].id:
+#                                     scene.roma_block_name_current[0].name = " " + n.name 
+#                                     break
+                                
+#                         ############# USE ####################
+#                         if scene.attribute_mass_use_id != use:
+#                             scene.attribute_mass_use_id = use
+#                         if scene.roma_use_name_current[0].id != use:
+#                             scene.roma_use_name_current[0].id = use
+#                             for n in scene.roma_use_name_list:
+#                                 if n.id == scene.roma_use_name_current[0].id:
+#                                     scene.roma_use_name_current[0].name = " " + n.name 
+#                                     break
+                                
+#                         ############# STOREYS ####################
+#                         if scene.attribute_mass_storeys != storey:
+#                             scene.attribute_mass_storeys = storey
+                            
+#                         ############# FLOOR ####################
+#                         if scene.attribute_floor_id != floor:
+#                             scene.attribute_floor_id = floor
+#                         if scene.roma_floor_name_current[0].id != floor:
+#                             scene.roma_floor_name_current[0].id = floor
+#                             for n in scene.roma_floor_name_list:
+#                                 if n.id == scene.roma_floor_name_current[0].id:
+#                                     scene.roma_floor_name_current[0].name = " " + n.name 
+#                                     break
+#                     break   
+#             bmesh.update_edit_mesh(mesh)
+#             bm.free()
+                
+
+#             bm = bmesh.from_edit_mesh(mesh)
+#             bm.edges.ensure_lookup_table()
+#             for index in selected_edge_indices:
+#                 bm.edges[index].select = True
+                
+#             bm.faces.ensure_lookup_table()
+#             for index in selected_face_indices:
+#                 bm.faces[index].select = True
+                    
+#             bmesh.update_edit_mesh(mesh)
+#             bm.free() 
+#             print("RIMUOVO BMESH")
+#     # checkingFace = False
+            
+            
+#         return {'FINISHED'}
+                
+    
+    # def modal(self, context, event):
+    #     # self.mouseEventType = event.type
+    #     # global refresh_roma_invoked
+    #     if event.type in {'LEFTMOUSE', 'RIGHTMOUSE'}:
+    #         self.execute(context)
+    #         # print("runno")
+    #     else:
+    #         # print("CANCELLATO")
+    #         return {'CANCELLED'}
+        
+    #     return {"RUNNING_MODAL"}
+    
+    # def invoke(self, context, event):
+    #     # if event.type in {'LEFTMOUSE', 'RIGHTMOUSE'}:
+    #     #     print("MOUSE",event.type)
+    #     #     self.execute(context)
+    #     #     context.window_manager.modal_handler_add(self)
+    #     #     return {'RUNNING_MODAL'}
+    #     # else:
+    #     #     print("CANCELLATO")
+    #     #     return{'CANCELLED'}
+    #     self.execute(context)
+    #     context.window_manager.modal_handler_add(self)
+    #     return {"RUNNING_MODAL"}
+        
+        
+
+# @persistent
+# def refresh_roma_mesh_attributes(dummy):
+#     global refresh_roma_invoked
+#     if refresh_roma_invoked == False:
+#         obj = bpy.context.active_object
+#         if hasattr(obj, "type") and obj.type == 'MESH':
+#             if "RoMa object" in obj.data and obj.mode == 'EDIT':
+#                 refresh_roma_invoked = True
+#                 bpy.ops.object.update_roma_mesh_attributes('INVOKE_DEFAULT')
+  
+    
+# @persistent
+# def refresh_roma_mesh_attributes(scene, context):
+#     global running_refresh_modal
+#     global running_refresh_modal_event
+#     if running_refresh_modal == False:
+#         running_refresh_modal = True
+#         prev_event = running_refresh_modal_event
+#         running_refresh_modal_event = get_event('INVOKE_REGION_WIN')
+#         if prev_event != running_refresh_modal_event:
+#             prev_event = running_refresh_modal_event
+#             print(running_refresh_modal_event)
+#         running_refresh_modal = False
+  
+# class VIEW_OT_get_event(bpy.types.Operator):
+#     bl_idname  = "wm.get_event"
+#     bl_label   = ""
+    
+#     def invoke(self, context, event):
+#         global _event
+#         _event = str(event.type)
+#         return {'FINISHED'}
+    
+# def get_event(exec_context='INVOKE_DEFAULT'):
+#     global _event
+#     bpy.ops.wm.get_event(exec_context)
+#     return _event
+
+
+class VIEW_3D_OT_update_mesh_attributes(bpy.types.Operator):
+    """Update RoMa attributes of the active mesh in the RoMa panel"""
+    bl_idname = "wm.update_mesh_attributes_modal_operator"
+    bl_label = "Update RoMa attributes of the active mesh in the RoMa panel"
+    
+    oldTime = 0
+    newTime = 0
+    
     def __init__(self):
         pass
-        # global refresh_roma_invoked
-        # print("Start", refresh_roma_invoked)
-
+    
     def __del__(self):
-        global refresh_roma_invoked
-        refresh_roma_invoked = False
-        # print("Finito il ciclo naturalmente", refresh_roma_invoked)
-        
+        pass
+    
     def execute(self, context):
-        # global plotName
+    # global plotName
         # global blockName
         # global useName
         
@@ -454,7 +704,7 @@ class VIEW3D_OT_update_Roma_mesh_attributes(bpy.types.Operator):
             scene = bpy.context.scene
             
             bm = bmesh.from_edit_mesh(mesh)
-            print("AGGIUNGO BMESH")
+            # print("AGGIUNGO BMESH")
             bm.edges.ensure_lookup_table()
 
             bMesh_facade = bm.edges.layers.int["roma_facade_id"]
@@ -503,10 +753,10 @@ class VIEW3D_OT_update_Roma_mesh_attributes(bpy.types.Operator):
                         print(scene.attribute_facade_normal*1, facade_normal)
                         # if (scene.attribute_facade_normal*1) != facade_normal:
                         if facade_normal == -1:
-                            print("true")
+                            # print("true")
                             scene.attribute_facade_normal = True
                         else:
-                            print("false")
+                            # print("false")
                             scene.attribute_facade_normal = False
                         
                         
@@ -586,48 +836,64 @@ class VIEW3D_OT_update_Roma_mesh_attributes(bpy.types.Operator):
                     
             bmesh.update_edit_mesh(mesh)
             bm.free() 
-            print("RIMUOVO BMESH")
+            # print("RIMUOVO BMESH")
+            
     # checkingFace = False
             
-            
+        bpy.context.scene.updating_mesh_attributes_is_active = False    
         return {'FINISHED'}
-                
-    
-    def modal(self, context, event):
-        # self.mouseEventType = event.type
-        # global refresh_roma_invoked
-        if event.type in {'LEFTMOUSE', 'RIGHTMOUSE'}:
-            self.execute(context)
-            # print("runno")
-        else:
-            # print("CANCELLATO")
-            return {'CANCELLED'}
-        
-        return {"RUNNING_MODAL"}
-    
-    def invoke(self, context, event):
-        # if event.type in {'LEFTMOUSE', 'RIGHTMOUSE'}:
-        #     print("MOUSE",event.type)
-        #     self.execute(context)
-        #     context.window_manager.modal_handler_add(self)
-        #     return {'RUNNING_MODAL'}
-        # else:
-        #     print("CANCELLATO")
-        #     return{'CANCELLED'}
-        self.execute(context)
-        context.window_manager.modal_handler_add(self)
-        return {"RUNNING_MODAL"}
-        
-        
 
+    
+        
+    def modal(self, context, event):
+        if event.type in {'LEFTMOUSE', 'RIGHTMOUSE'}:
+            obj = bpy.context.active_object
+            if obj is not None and obj.type == "MESH":
+                if obj.mode == "EDIT" and "RoMa object" in obj.data:
+                # print("RUNNING MODAL")
+                    self.execute(context)
+               
+            
+            
+            # obj = bpy.context.active_object
+            # if hasattr(obj, "type") and obj.type == 'MESH':
+            #     if "RoMa object" in obj.data and obj.mode == 'EDIT':
+            #         now = datetime.now()
+            #         self.newTime = int(now.timestamp() * 1000)
+            #         if self.newTime > self.oldTime + 500:
+            #             self.oldTime = self.newTime
+            #             # print("Current Time =", int(now.timestamp() * 1000))
+            #             self.execute(context)
+        else:
+            bpy.context.scene.updating_mesh_attributes_is_active = False
+        return {'PASS_THROUGH'}
+        
+    def invoke(self, context, event):
+        # now = datetime.now()
+        # self.oldtime = int(now.timestamp() * 1000)
+        # self.execute(context)
+        # context.window_manager.modal_handler_add(self)
+        # print("INVOKED")
+        if event.type in {'LEFTMOUSE', 'RIGHTMOUSE'}:
+            obj = bpy.context.active_object
+            if obj is not None and obj.type == "MESH":
+                if obj.mode == "EDIT" and "RoMa object" in obj.data:
+                    # print("INVOKED")
+                    self.execute(context)
+        else:
+            bpy.context.scene.updating_mesh_attributes_is_active = False
+        return {'RUNNING_MODAL'}
+       
+       
+    
+# @persistent
+# def update_mesh_attributes(scene, context):
+#     bpy.ops.wm.update_mesh_attributes_modal_operator('INVOKE_DEFAULT')
+    
 @persistent
-def refresh_roma_mesh_attributes(dummy):
-    global refresh_roma_invoked
-    if refresh_roma_invoked == False:
-        obj = bpy.context.active_object
-        if hasattr(obj, "type") and obj.type == 'MESH':
-            if "RoMa object" in obj.data and obj.mode == 'EDIT':
-                refresh_roma_invoked = True
-                # print("invoco", refresh_roma_invoked)
-                bpy.ops.object.update_roma_mesh_attributes('INVOKE_DEFAULT')
-    # return
+def update_mesh_attributes_depsgraph(scene, context):
+    if bpy.context.scene.updating_mesh_attributes_is_active == False:
+        bpy.context.scene.updating_mesh_attributes_is_active = True
+        bpy.ops.wm.update_mesh_attributes_modal_operator('INVOKE_DEFAULT')
+    # bpy.app.handlers.depsgraph_update_post.remove(update_mesh_attributes_depsgraph)
+    
