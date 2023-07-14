@@ -190,6 +190,22 @@ class RoMa_MenuOperator_ExportCSV(Operator, ExportHelper):
     def execute(self, context):
         return writeCSV(context, self.filepath)
 
+class RoMa_Operator_transformation_orientation(Operator):
+    """Create transformation orientation from selection"""
+    bl_idname = "object.roma_transformation_orientation"
+    bl_label = "Create transformation orientation from selection"
+    
+    def execute(self, context):
+        try:
+            bpy.ops.transform.delete_orientation()
+        except:
+            pass
+        bpy.ops.transform.create_orientation(use=True)
+        return {'FINISHED'} 
+        
+        
+        
+    
 class RoMa_Menu(Menu):
     bl_idname = "VIEW3D_MT_custom_menu"
     bl_label = "RoMa"
@@ -198,8 +214,12 @@ class RoMa_Menu(Menu):
         layout = self.layout
         #layout.active = bool(context.active_object.mode!='EDIT  ')
         layout.operator(roma_MenuOperator_convert_to_RoMa_mesh.bl_idname)
+        layout.separator()
         layout.operator(RoMa_MenuOperator_PrintData.bl_idname)
         layout.operator(RoMa_MenuOperator_ExportCSV.bl_idname)
+        layout.separator()
+        layout.operator(RoMa_Operator_transformation_orientation.bl_idname)
+        
    
 def writeCSV(context, filepath):
     csvData = []
