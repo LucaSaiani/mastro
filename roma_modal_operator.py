@@ -221,6 +221,7 @@ class show_Roma_attributes():
                         x_offset = (-1 * line_width) / 2
                         y_offset -= line_height
             bm.free()
+            print("BM Free")
     
         
 def update_show_attributes(self, context):
@@ -276,7 +277,7 @@ class VIEW_3D_OT_update_mesh_attributes(bpy.types.Operator):
             scene = bpy.context.scene
             
             bm = bmesh.from_edit_mesh(mesh)
-            # print("AGGIUNGO BMESH")
+            print("AGGIUNGO BMESH")
             bm.edges.ensure_lookup_table()
 
             bMesh_facade = bm.edges.layers.int["roma_facade_id"]
@@ -407,8 +408,9 @@ class VIEW_3D_OT_update_mesh_attributes(bpy.types.Operator):
                 bm.faces[index].select = True
                     
             bmesh.update_edit_mesh(mesh)
+        
             bm.free() 
-            # print("RIMUOVO BMESH")
+            print("RIMUOVO BMESH")
             
     # checkingFace = False
             
