@@ -96,6 +96,7 @@ classes = (
     roma_menu.roma_MenuOperator_convert_to_RoMa_mesh,
     roma_menu.RoMa_MenuOperator_PrintData,
     roma_menu.RoMa_MenuOperator_ExportCSV,
+    roma_menu.RoMa_Operator_transformation_orientation,
     roma_menu.RoMa_Menu,
     
     # roma_vertex.OBJECT_OT_SetVertexAttribute,
