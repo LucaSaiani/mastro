@@ -4,6 +4,7 @@ from bpy.app.handlers import persistent
 from mathutils import Vector
 from bpy_extras import view3d_utils
 import bmesh
+# from datetime import datetime
 
         
 class show_Roma_attributes():
@@ -251,7 +252,7 @@ class VIEW_3D_OT_update_mesh_attributes(bpy.types.Operator):
         
         obj = bpy.context.active_object
         # if tuple(bpy.context.scene.tool_settings.mesh_select_mode)[2] == True: #we are selecting faces
-        #print("controllo dati")
+        # print("controllo dati", datetime.now())
         
         obj.update_from_editmode()
         mesh = obj.data
@@ -423,8 +424,8 @@ class VIEW_3D_OT_update_mesh_attributes(bpy.types.Operator):
                 if obj.mode == "EDIT" and "RoMa object" in obj.data:
                 # print("RUNNING MODAL")
                     self.execute(context)
-        else:
-            bpy.context.scene.updating_mesh_attributes_is_active = False
+        # else:
+        bpy.context.scene.updating_mesh_attributes_is_active = False
         return {'PASS_THROUGH'}
         
     def invoke(self, context, event):
@@ -434,8 +435,8 @@ class VIEW_3D_OT_update_mesh_attributes(bpy.types.Operator):
                 if obj.mode == "EDIT" and "RoMa object" in obj.data:
                     # print("INVOKED")
                     self.execute(context)
-        else:
-            bpy.context.scene.updating_mesh_attributes_is_active = False
+        # else:
+        bpy.context.scene.updating_mesh_attributes_is_active = False
         return {'RUNNING_MODAL'}
        
 
@@ -443,6 +444,7 @@ class VIEW_3D_OT_update_mesh_attributes(bpy.types.Operator):
 @persistent
 def update_mesh_attributes_depsgraph(scene, context):
     if bpy.context.scene.updating_mesh_attributes_is_active == False:
+        # print("... e invoco", datetime.now())
         bpy.context.scene.updating_mesh_attributes_is_active = True
         bpy.ops.wm.update_mesh_attributes_modal_operator('INVOKE_DEFAULT')
     # bpy.app.handlers.depsgraph_update_post.remove(update_mesh_attributes_depsgraph)
