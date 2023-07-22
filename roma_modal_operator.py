@@ -126,17 +126,21 @@ class show_Roma_attributes():
                 coord = view3d_utils.location_3d_to_region_2d(region, r3d, center)
                 x_offset = (-1 * line_width) / 2
                 y_offset = -1 * vert_offset
-                for pstr in text:
-                    if len(pstr) == 2:
-                        string = pstr[0]
-                        text_width, text_height = blf.dimensions(font_id, string)
-                        blf.position(font_id, (coord.x + x_offset), (coord.y + y_offset), 0)
-                        blf.draw(font_id, string)
-                        x_offset += text_width
-                    else:
-                        x_offset = (-1 * line_width) / 2
-                        y_offset -= line_height
-                        
+                
+                for a in bpy.context.screen.areas:
+                    if a.type == 'VIEW_3D':
+                        for pstr in text:
+                            if len(pstr) == 2:
+                                string = pstr[0]
+                                text_width, text_height = blf.dimensions(font_id, string)
+                                blf.position(font_id, (coord.x + x_offset), (coord.y + y_offset), 0)
+                                blf.draw(font_id, string)
+                                x_offset += text_width
+                            else:
+                                x_offset = (-1 * line_width) / 2
+                                y_offset -= line_height
+                        break
+                                
                 
                 
             
