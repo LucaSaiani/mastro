@@ -7,6 +7,7 @@ from bpy.props import StringProperty
 import csv #, os
 
 attribute_set = [
+
             {
             "attr" : "roma_vertex_custom_attribute",
             "attr_type" :  "INT",
@@ -67,6 +68,18 @@ attribute_set = [
             "attr_default" : 0
             },
             {
+            "attr" :  "roma_typology_id",
+            "attr_type" :  "INT",
+            "attr_domain" :  "FACE",
+            "attr_default" : 0
+            },
+            {
+            "attr" :  "roma_typology_RND",
+            "attr_type" :  "FLOAT",
+            "attr_domain" :  "FACE",
+            "attr_default" : 0
+            },
+            {
             "attr" :  "roma_floor_id",
             "attr_type" :  "INT",
             "attr_domain" :  "FACE",
@@ -86,6 +99,7 @@ attribute_set = [
             }
 ]
 
+
 class roma_MenuOperator_convert_to_RoMa_mesh(Operator):
     bl_idname = "object.roma_convert_to_roma"
     bl_label = "Convert the selected mesh to a RoMa mesh"
@@ -99,34 +113,56 @@ class roma_MenuOperator_convert_to_RoMa_mesh(Operator):
         selected_meshes = [obj for obj in selected_objects if obj.type == 'MESH']
         # mode = None
         for obj in selected_meshes:
+            # print("pippo")
+            # bpy.types.Object.roma_props = bpy.props.PointerProperty(type=romaAddonProperties)
+            # print("pippa", bpy.types.Object.roma_props)
             mesh = obj.data
             mesh["RoMa object"] = True
             for a in attribute_set:
                 try:
                     mesh.attributes[a["attr"]]
                 except:
-                    mesh.attributes.new(name=a["attr"], type=a["attr_type"], domain=a["attr_domain"])
-                    if a["attr_domain"] == 'FACE':
-                        attribute = mesh.attributes[a["attr"]].data.items()
-                        for face in mesh.polygons:
-                            index = face.index
-                            for mesh_attribute in attribute:
-                                if mesh_attribute[0]  == index:
-                                    mesh_attribute[1].value = a["attr_default"]
-                                    break
-                    elif a["attr_domain"] == 'EDGE':
-                        attribute = mesh.attributes[a["attr"]].data.items()
-                        for edge in mesh.edges:
-                            index = edge.index
-                            for mesh_attribute in attribute:
-                                if mesh_attribute[0]  == index:
-                                    mesh_attribute[1].value = a["attr_default"]
-                                    break
-                    #     
-                    #     attribute[0][1].value = None
+                    if a["attr_domain"] is None: # to set custom attributes to the object, not to vertex, edge or face
+                        obj[a["attr"]] = a["attr_default"]
+                    else:
+                        mesh.attributes.new(name=a["attr"], type=a["attr_type"], domain=a["attr_domain"])
+                        if a["attr_domain"] == 'FACE':
+                            attribute = mesh.attributes[a["attr"]].data.items()
+                            for face in mesh.polygons:
+                                index = face.index
+                                for mesh_attribute in attribute:
+                                    if mesh_attribute[0]  == index:
+                                        mesh_attribute[1].value = a["attr_default"]
+                                        break
+                        elif a["attr_domain"] == 'EDGE':
+                            attribute = mesh.attributes[a["attr"]].data.items()
+                            for edge in mesh.edges:
+                                index = edge.index
+                                for mesh_attribute in attribute:
+                                    if mesh_attribute[0]  == index:
+                                        mesh_attribute[1].value = a["attr_default"]
+                                        break
+                        #     
+                        #     attribute[0][1].value = None
             
      
         return {'FINISHED'}
+
+# Definisci la classe per le proprietà personalizzate
+class romaAddonProperties(bpy.types.PropertyGroup):
+    roma_option_attribute: bpy.props.IntProperty(
+        name="RoMa Option Attribute",
+        default=1,
+        min=1,
+        description="The project option of the building"
+    )
+    
+    roma_phase_attribute: bpy.props.IntProperty(
+        name="RoMa Phase Attribute",
+        default=1,
+        min=1,
+        description="The construction phase of the building"
+    )
     
 class RoMa_MenuOperator_PrintData(Operator):
     bl_idname = "object.roma_print_data"
