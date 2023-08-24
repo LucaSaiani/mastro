@@ -186,7 +186,7 @@ class RoMa_MenuOperator_PrintData(Operator):
         
         csvData = sorted(csvData, key=lambda x:(x[0], x[1]))
         header = ["Option", "Phase", "Plot Name", "Block Name", "Use", "N. of Storeys", "Footprint", "GEA"]
-        csvData.insert(0,header)
+        csvData.insert(0, header)
         
         print("")
         print("")
@@ -264,7 +264,7 @@ def writeCSV(context, filepath):
     csvData = []
     csvTemp = []
     header = ["Option", "Phase", "Plot Name", "Block Name", "Use", "N. of Storeys", "Footprint", "GEA"]
-    csvTemp.append(header)
+    #csvTemp.append(header)
     objects = [obj for obj in bpy.context.scene.objects]
 
     for obj in objects:
@@ -276,6 +276,7 @@ def writeCSV(context, filepath):
 
     with open(filepath, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
+        writer.writerow(header)
         writer.writerows(csvData)
 
     print(f"Data saved to {filepath}")
@@ -288,7 +289,8 @@ def roma_menu(self, context):
     layout.menu(RoMa_Menu.bl_idname)
 
 def get_mass_data(obj):
-    mesh = obj.evaluated_get(bpy.context.evaluated_depsgraph_get()).data
+    #mesh = obj.evaluated_get(bpy.context.evaluated_depsgraph_get()).data
+    mesh = obj.data
     bm = bmesh.new()
     bm.from_mesh(mesh)
         
