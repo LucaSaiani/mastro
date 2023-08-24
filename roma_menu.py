@@ -1,4 +1,5 @@
 import bpy
+import bmesh 
 from bpy.types import Menu, Operator
 from bpy_extras.io_utils import ExportHelper
 from bpy.props import StringProperty
@@ -91,12 +92,12 @@ attribute_set = [
             "attr_domain" :  "FACE",
             "attr_default" : 0
             },
-            {
-            "attr" :  "roma_GEA",
-            "attr_type" :  "FLOAT",
-            "attr_domain" :  "FACE",
-            "attr_default" : 0
-            }
+            # {
+            # "attr" :  "roma_GEA",
+            # "attr_type" :  "FLOAT",
+            # "attr_domain" :  "FACE",
+            # "attr_default" : 0
+            # }
 ]
 
 
@@ -113,6 +114,8 @@ class roma_MenuOperator_convert_to_RoMa_mesh(Operator):
         selected_meshes = [obj for obj in selected_objects if obj.type == 'MESH']
         # mode = None
         for obj in selected_meshes:
+            obj.roma_props['roma_option_attribute'] = 1
+            obj.roma_props['roma_phase_attribute'] = 1
             # print("pippo")
             # bpy.types.Object.roma_props = bpy.props.PointerProperty(type=romaAddonProperties)
             # print("pippa", bpy.types.Object.roma_props)
@@ -182,7 +185,7 @@ class RoMa_MenuOperator_PrintData(Operator):
             csvData.extend(sublist)
         
         csvData = sorted(csvData, key=lambda x:(x[0], x[1]))
-        header = ["Plot Name", "Block Name", "Use", "N. of Storeys", "GEA"]
+        header = ["Option", "Phase", "Plot Name", "Block Name", "Use", "N. of Storeys", "Footprint", "GEA"]
         csvData.insert(0,header)
         
         print("")
@@ -203,7 +206,7 @@ class RoMa_MenuOperator_PrintData(Operator):
                             tabs = tabs + tab
                             t += 1
                 string = string + str(el) + tabs
-            if r == 1: print("-------------------------------------------------------------------------")
+            if r == 1: print("-----------------------------------------------------------------------------------------------------------------------------")
             print(f"{string}")
         print("")
         
@@ -260,7 +263,7 @@ class RoMa_Menu(Menu):
 def writeCSV(context, filepath):
     csvData = []
     csvTemp = []
-    header = [["Plot Name", "Block Name", "Use", "Number of Storeys", "GEA"]]
+    header = ["Option", "Phase", "Plot Name", "Block Name", "Use", "N. of Storeys", "Footprint", "GEA"]
     csvTemp.append(header)
     objects = [obj for obj in bpy.context.scene.objects]
 
@@ -286,18 +289,26 @@ def roma_menu(self, context):
 
 def get_mass_data(obj):
     mesh = obj.evaluated_get(bpy.context.evaluated_depsgraph_get()).data
+    bm = bmesh.new()
+    bm.from_mesh(mesh)
+        
     data = []
+    option = None
+    phase = None
     plot = None
     block = None
     use = None
+    footprint = None
+    GEA = None
     
     plotAttributes = mesh.attributes["roma_plot_id"].data
     blockAttributes = mesh.attributes["roma_block_id"].data
     useAttributes = mesh.attributes["roma_use_id"].data
     storeysAttributes = mesh.attributes["roma_number_of_storeys"].data
-    GEAAttributes = mesh.attributes["roma_GEA"].data
+    #GEAAttributes = mesh.attributes["roma_GEA"].data
     
-    
+    option = obj.roma_props['roma_option_attribute']
+    phase = obj.roma_props['roma_phase_attribute']
     
     for index, attr in enumerate(plotAttributes):
         #print(plotNameAttributes[index].value, blockNameAttributes[index].value,useAttributes[index].value,storeysAttributes[index].value  )
@@ -331,10 +342,16 @@ def get_mass_data(obj):
         ########### STOREYS ##############
         storeys = storeysAttributes[index].value
         ########### GEA ##############
-        GEA = GEAAttributes[index].value
-        
-        if GEA != None and GEA > 0 and plot != None and block != None and use != None:
-            data.append([plot, block, use, storeys, GEA])
+        for f in bm.faces:
+            if f.index == index:
+                footprint = f.calc_area()
+                footprint = round(footprint,2)
+                GEA = footprint * storeys
+                GEA = round(GEA,2)        
+        # if GEA != None and GEA > 0 and plot != None and block != None and use != None:
+        data.append([option, phase, plot, block, use, storeys, footprint, GEA])
+    
+   
     
             
     return(data)
