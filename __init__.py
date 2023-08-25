@@ -380,8 +380,8 @@ def register():
      
     Scene.attribute_mass_storeys = bpy.props.IntProperty(
                                         name="Number of Storeys",
-                                        min=0, 
-                                        default=0,
+                                        min=1, 
+                                        default=1,
                                         update = roma_mass.update_attribute_mass_storeys)
     
     bpy.types.Object.roma_props = bpy.props.PointerProperty(type=roma_menu.romaAddonProperties)
