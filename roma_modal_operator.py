@@ -281,7 +281,7 @@ class VIEW_3D_OT_update_mesh_attributes(bpy.types.Operator):
             scene = bpy.context.scene
             
             bm = bmesh.from_edit_mesh(mesh)
-            print("AGGIUNGO BMESH")
+            # print("AGGIUNGO BMESH")
             bm.edges.ensure_lookup_table()
 
             bMesh_facade = bm.edges.layers.int["roma_facade_id"]
@@ -308,33 +308,40 @@ class VIEW_3D_OT_update_mesh_attributes(bpy.types.Operator):
                 bMesh_active_index = bm.select_history.active.index
                 
                 for edge in selected_edges:
-                    bm.edges.ensure_lookup_table()
-                    bm.edges[edge.index].select = False
+                    try:
+                        bm.edges.ensure_lookup_table()
+                        bm.edges[edge.index].select = False
+                    except:
+                        pass
                     
                 for bmEdge in selected_bmEdges:
-                    bm.faces.ensure_lookup_table()
-                    facade_type = bmEdge[bMesh_facade]
-                    facade_normal = bmEdge[bMesh_normal]
+                    try:
+                        bm.faces.ensure_lookup_table()
+                        facade_type = bmEdge[bMesh_facade]
+                        facade_normal = bmEdge[bMesh_normal]
+                        
+                        if bmEdge.index ==  bMesh_active_index:
+                            ############# FACADE TYPE ####################
+                            if scene.attribute_facade_id != facade_type:
+                                scene.attribute_facade_id = facade_type
+                            if scene.roma_facade_name_current[0].id != facade_type:
+                                scene.roma_facade_name_current[0].id = facade_type
+                                for n in scene.roma_facade_name_list:
+                                    if n.id == scene.roma_facade_name_current[0].id:
+                                        scene.roma_facade_name_current[0].name = " " + n.name 
+                                        break
+                            ############# FACADE NORMAL ####################
+                            print(scene.attribute_facade_normal*1, facade_normal)
+                            # if (scene.attribute_facade_normal*1) != facade_normal:
+                            if facade_normal == -1:
+                                # print("true")
+                                scene.attribute_facade_normal = True
+                            else:
+                                # print("false")
+                                scene.attribute_facade_normal = False
+                    except:
+                        pass
                     
-                    if bmEdge.index ==  bMesh_active_index:
-                        ############# FACADE TYPE ####################
-                        if scene.attribute_facade_id != facade_type:
-                            scene.attribute_facade_id = facade_type
-                        if scene.roma_facade_name_current[0].id != facade_type:
-                            scene.roma_facade_name_current[0].id = facade_type
-                            for n in scene.roma_facade_name_list:
-                                if n.id == scene.roma_facade_name_current[0].id:
-                                    scene.roma_facade_name_current[0].name = " " + n.name 
-                                    break
-                        ############# FACADE NORMAL ####################
-                        print(scene.attribute_facade_normal*1, facade_normal)
-                        # if (scene.attribute_facade_normal*1) != facade_normal:
-                        if facade_normal == -1:
-                            # print("true")
-                            scene.attribute_facade_normal = True
-                        else:
-                            # print("false")
-                            scene.attribute_facade_normal = False
                         
                         
             elif active_face:
@@ -414,7 +421,7 @@ class VIEW_3D_OT_update_mesh_attributes(bpy.types.Operator):
             bmesh.update_edit_mesh(mesh)
         
             bm.free() 
-            print("RIMUOVO BMESH")
+            # print("RIMUOVO BMESH")
             
     # checkingFace = False
             
