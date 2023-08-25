@@ -7,6 +7,9 @@ from bpy.props import StringProperty
 
 import csv #, os
 
+header = ["Option", "Phase", "Plot Name", "Block Name", "Use", "N. of Storeys", "Footprint", "GEA", "Perimeter"]
+    
+
 attribute_set = [
 
             {
@@ -90,7 +93,7 @@ attribute_set = [
             "attr" :  "roma_number_of_storeys",
             "attr_type" :  "INT",
             "attr_domain" :  "FACE",
-            "attr_default" : 0
+            "attr_default" : 1
             },
             # {
             # "attr" :  "roma_GEA",
@@ -172,6 +175,7 @@ class RoMa_MenuOperator_PrintData(Operator):
     bl_label = "Print the data of the mass"
 
     def execute(self, context):
+        global header
         # roma_list = []
         csvData = []
         csvTemp = []
@@ -185,7 +189,7 @@ class RoMa_MenuOperator_PrintData(Operator):
             csvData.extend(sublist)
         
         csvData = sorted(csvData, key=lambda x:(x[0], x[1]))
-        header = ["Option", "Phase", "Plot Name", "Block Name", "Use", "N. of Storeys", "Footprint", "GEA"]
+        # header = ["Option", "Phase", "Plot Name", "Block Name", "Use", "N. of Storeys", "Footprint", "GEA"]
         csvData.insert(0, header)
         
         print("")
@@ -197,7 +201,7 @@ class RoMa_MenuOperator_PrintData(Operator):
                 i = 1
                 tabs = tab
                 while i < 3:
-                    if len(str(el) + tabs) >= 10:
+                    if len(str(el) + tabs) >= 9:
                         break
                     else:
                         i += 1
@@ -206,7 +210,7 @@ class RoMa_MenuOperator_PrintData(Operator):
                             tabs = tabs + tab
                             t += 1
                 string = string + str(el) + tabs
-            if r == 1: print("-----------------------------------------------------------------------------------------------------------------------------")
+            if r == 1: print("--------------------------------------------------------------------------------------------------------------------------------------------")
             print(f"{string}")
         print("")
         
@@ -261,9 +265,10 @@ class RoMa_Menu(Menu):
         
    
 def writeCSV(context, filepath):
+    global header
     csvData = []
     csvTemp = []
-    header = ["Option", "Phase", "Plot Name", "Block Name", "Use", "N. of Storeys", "Footprint", "GEA"]
+    # header = ["Option", "Phase", "Plot Name", "Block Name", "Use", "N. of Storeys", "Footprint", "GEA", "Perimeter"]
     #csvTemp.append(header)
     objects = [obj for obj in bpy.context.scene.objects]
 
@@ -350,8 +355,15 @@ def get_mass_data(obj):
                 footprint = round(footprint,2)
                 GEA = footprint * storeys
                 GEA = round(GEA,2)        
-        # if GEA != None and GEA > 0 and plot != None and block != None and use != None:
-        data.append([option, phase, plot, block, use, storeys, footprint, GEA])
+        ########### PERIMETER ###############
+        perimeter = 0
+        for f in bm.faces:
+            for e in f.edges:
+                perimeter += e.calc_length()
+        perimeter = round(perimeter,2)
+        
+        
+        data.append([option, phase, plot, block, use, storeys, footprint, GEA, perimeter])
     
    
     
