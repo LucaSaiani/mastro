@@ -390,17 +390,30 @@ def get_mass_data(obj):
         GEA = footprint * storeys
         
         perimeter = 0
+        common_edges = []
         for e in f.edges:
             # if there is no angle, then the edge is not a edge in common between faces
             try:
                 angle = e.calc_face_angle()
+                common_edges.append(e.index)
             except ValueError:
                 perimeter += e.calc_length()
-                
         
-        floorToFloor = 4.2
+        # this is the area of the perimeter walls
+        floorToFloor = 2
         facade_area = perimeter * floorToFloor * storeys
-        
+        # but if the faces having an edge in common have different storey numbers,
+        # then the difference is added to the facade area
+        for index in common_edges:
+            for fa in bm.faces:
+                for ed in fa.edges:
+                    if ed.index == index and fa.index != f.index:
+                        if f[bm_layer_storey] > fa[bm_layer_storey]:
+                            diff = f[bm_layer_storey] - fa[bm_layer_storey]
+                            length = ed.calc_length()
+                            facade_area += length * diff * floorToFloor
+                            
+                            
         GEA = Decimal(GEA)
         GEA = GEA.quantize(Decimal('0.01'), rounding=ROUND_HALF_DOWN)
         
