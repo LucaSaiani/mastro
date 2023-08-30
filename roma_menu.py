@@ -400,7 +400,7 @@ def get_mass_data(obj):
                 perimeter += e.calc_length()
         
         # this is the area of the perimeter walls
-        floorToFloor = 2
+        floorToFloor = 4.2
         facade_area = perimeter * floorToFloor * storeys
         # but if the faces having an edge in common have different storey numbers,
         # then the difference is added to the facade area
