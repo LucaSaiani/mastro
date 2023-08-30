@@ -3,11 +3,12 @@ import bmesh
 from bpy.types import Menu, Operator
 from bpy_extras.io_utils import ExportHelper
 from bpy.props import StringProperty
+from decimal import Decimal, ROUND_HALF_DOWN
 # from math import ceil as mathCeil
 
 import csv #, os
 
-header = ["Option", "Phase", "Plot Name", "Block Name", "Use", "N. of Storeys", "Footprint", "GEA", "Perimeter"]
+header = ["Option", "Phase", "Plot Name", "Block Name", "Use", "N. of Storeys", "Footprint", "Perimeter", "Façade area", "GEA"]
     
 
 attribute_set = [
@@ -59,18 +60,18 @@ attribute_set = [
             "attr_domain" :  "FACE",
             "attr_default" : 0
             },
-            {
-            "attr" :  "roma_use_id",
-            "attr_type" :  "INT",
-            "attr_domain" :  "FACE",
-            "attr_default" : 0
-            },
-            {
-            "attr" :  "roma_use_RND",
-            "attr_type" :  "FLOAT",
-            "attr_domain" :  "FACE",
-            "attr_default" : 0
-            },
+            # {
+            # "attr" :  "roma_use_id",
+            # "attr_type" :  "INT",
+            # "attr_domain" :  "FACE",
+            # "attr_default" : 0
+            # },
+            # {
+            # "attr" :  "roma_use_RND",
+            # "attr_type" :  "FLOAT",
+            # "attr_domain" :  "FACE",
+            # "attr_default" : 0
+            # },
             {
             "attr" :  "roma_typology_id",
             "attr_type" :  "INT",
@@ -176,21 +177,41 @@ class RoMa_MenuOperator_PrintData(Operator):
 
     def execute(self, context):
         global header
-        # roma_list = []
+        roughData = []
         csvData = []
         csvTemp = []
-        # header = ["Plot Name", "Block Name", "Use", "N. of Storeys", "GEA"]
-        # csvData.append(header)
         objects = [obj for obj in bpy.context.scene.objects]
         for obj in objects:
             if obj.visible_get() and obj.type == "MESH" and "RoMa object" in obj.data:
                 csvTemp.append(get_mass_data(obj))
         for sublist in csvTemp:
-            csvData.extend(sublist)
+            roughData.extend(sublist)
         
-        csvData = sorted(csvData, key=lambda x:(x[0], x[1]))
-        # header = ["Option", "Phase", "Plot Name", "Block Name", "Use", "N. of Storeys", "Footprint", "GEA"]
-        csvData.insert(0, header)
+        # roughData = sorted(roughData, key=lambda x:(x[0], x[1], x[2], x[3], x[4]))
+        
+        # csvData.append(roughData[0])
+        # for el in roughData[1:]:
+        #     if el[:5] == csvData[-1][:5]:
+        #         prev_storeys = csvData[-1][5]
+        #         # update number of storeys
+        #         storeys = el[5]
+        #         if storeys > prev_storeys:
+        #             csvData[-1][5] = storeys
+        #         # sum footprint
+        #         csvData[-1][6] += el[6]
+        #         # sum perimeter
+        #         csvData[-1][7] += el[7]
+        #         # sum facade
+        #         csvData[-1][8] += el[8]
+        #         # sum GEA
+        #         csvData[-1][9] += el[9]
+                
+        #     else:
+        #         csvData.append(el)
+            
+        # csvData.insert(0, header)
+        
+        csvData = aggregateData(roughData)
         
         print("")
         print("")
@@ -210,7 +231,7 @@ class RoMa_MenuOperator_PrintData(Operator):
                             tabs = tabs + tab
                             t += 1
                 string = string + str(el) + tabs
-            if r == 1: print("--------------------------------------------------------------------------------------------------------------------------------------------")
+            if r == 1: print("--------------------------------------------------------------------------------------------------------------------------------------------------------------")
             print(f"{string}")
         print("")
         
@@ -263,25 +284,55 @@ class RoMa_Menu(Menu):
         layout.separator()
         layout.operator(RoMa_Operator_transformation_orientation.bl_idname)
         
+        
+def aggregateData(roughData):
+    data = []
+
+    roughData = sorted(roughData, key=lambda x:(x[0], x[1], x[2], x[3], x[4]))
+    data.append(roughData[0])
+
+    for el in roughData[1:]:
+        if el[:5] == data[-1][:5]:
+            prev_storeys = data[-1][5]
+            # update number of storeys
+            storeys = el[5]
+            if storeys > prev_storeys:
+                data[-1][5] = storeys
+            # sum footprint
+            data[-1][6] += el[6]
+            # sum perimeter
+            data[-1][7] += el[7]
+            # sum facade
+            data[-1][8] += el[8]
+            # sum GEA
+            data[-1][9] += el[9]
+        else:
+            data.append(el)
+    data.insert(0, header)
+
+    return(data)
+    
    
 def writeCSV(context, filepath):
     global header
     csvData = []
-    csvTemp = []
-    # header = ["Option", "Phase", "Plot Name", "Block Name", "Use", "N. of Storeys", "Footprint", "GEA", "Perimeter"]
-    #csvTemp.append(header)
+    data = []
+    dataRough = []
+
     objects = [obj for obj in bpy.context.scene.objects]
 
     for obj in objects:
         if obj.type == "MESH" and "RoMa object" in obj.data:
-            csvTemp.append(get_mass_data(obj))
+            dataRough.append(get_mass_data(obj))
 
-    for sublist in csvTemp:
-        csvData.extend(sublist)
+    for sublist in dataRough:
+        data.extend(sublist)
+        
+    csvData = aggregateData(data)
 
     with open(filepath, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(header)
+        # writer.writerow(header)
         writer.writerows(csvData)
 
     print(f"Data saved to {filepath}")
@@ -293,79 +344,75 @@ def roma_menu(self, context):
     layout = self.layout
     layout.menu(RoMa_Menu.bl_idname)
 
+
 def get_mass_data(obj):
     #mesh = obj.evaluated_get(bpy.context.evaluated_depsgraph_get()).data
+    if "roma_option_attribute" in obj.roma_props.keys():
+        option = obj.roma_props['roma_option_attribute']
+    else:
+        option = None
+        
+    if "roma_phase_attribute" in obj.roma_props.keys():
+        phase = obj.roma_props['roma_phase_attribute']
+    else:
+        phase = None
+    
+    phase = obj.roma_props['roma_phase_attribute']
+    
     mesh = obj.data
+    
     bm = bmesh.new()
     bm.from_mesh(mesh)
         
     data = []
-    option = None
-    phase = None
-    plot = None
-    block = None
-    use = None
-    footprint = None
-    GEA = None
     
-    plotAttributes = mesh.attributes["roma_plot_id"].data
-    blockAttributes = mesh.attributes["roma_block_id"].data
-    useAttributes = mesh.attributes["roma_use_id"].data
-    storeysAttributes = mesh.attributes["roma_number_of_storeys"].data
-    #GEAAttributes = mesh.attributes["roma_GEA"].data
+    bm_layer_plot = bm.faces.layers.int["roma_plot_id"]
+    bm_layer_block = bm.faces.layers.int["roma_block_id"]
+    bm_layer_typology = bm.faces.layers.int["roma_typology_id"]
+    bm_layer_storey = bm.faces.layers.int["roma_number_of_storeys"]
     
-    option = obj.roma_props['roma_option_attribute']
-    phase = obj.roma_props['roma_phase_attribute']
-    
-    for index, attr in enumerate(plotAttributes):
-        #print(plotNameAttributes[index].value, blockNameAttributes[index].value,useAttributes[index].value,storeysAttributes[index].value  )
-        ############ PLOT ############
-        plotId = plotAttributes[index].value
-        if plotId == 0:
-            plot = None
-        else:
-            for n in bpy.context.scene.roma_plot_name_list:
-                if n.id == plotId:
-                    plot = n.name
-                    break
-        ############ BLOCK ############
-        blockId = blockAttributes[index].value
-        if blockId == 0:
-            block = None
-        else:
-            for n in bpy.context.scene.roma_block_name_list:
-                if n.id == blockId:
-                    block = n.name
-                    break
-        ############ USE ############
-        useId = useAttributes[index].value
-        if useId == 0:
-            use = None
-        else:
-            for n in bpy.context.scene.roma_use_name_list:
-                if n.id == useId:
-                    use = n.name
-                    break
-        ########### STOREYS ##############
-        storeys = storeysAttributes[index].value
-        ########### GEA ##############
-        for f in bm.faces:
-            if f.index == index:
-                footprint = f.calc_area()
-                footprint = round(footprint,2)
-                GEA = footprint * storeys
-                GEA = round(GEA,2)        
-        ########### PERIMETER ###############
+    for f in bm.faces:
+        for n in bpy.context.scene.roma_plot_name_list:
+            if n.id == f[bm_layer_plot]:
+                plot = n.name
+                break
+        for n in bpy.context.scene.roma_block_name_list:
+            if n.id == f[bm_layer_block]:
+                block = n.name
+                break
+        for n in bpy.context.scene.roma_typology_name_list:
+            if n.id == f[bm_layer_typology]:
+                typology = n.name
+                break
+        storeys = f[bm_layer_storey]
+        footprint = f.calc_area()
+        
+        GEA = footprint * storeys
+        
         perimeter = 0
-        for f in bm.faces:
-            for e in f.edges:
+        for e in f.edges:
+            # if there is no angle, then the edge is not a edge in common between faces
+            try:
+                angle = e.calc_face_angle()
+            except ValueError:
                 perimeter += e.calc_length()
-        perimeter = round(perimeter,2)
+                
         
+        floorToFloor = 4.2
+        facade_area = perimeter * floorToFloor * storeys
         
-        data.append([option, phase, plot, block, use, storeys, footprint, GEA, perimeter])
-    
-   
-    
+        GEA = Decimal(GEA)
+        GEA = GEA.quantize(Decimal('0.01'), rounding=ROUND_HALF_DOWN)
+        
+        facade_area = Decimal(facade_area)
+        facade_area = facade_area.quantize(Decimal('0.01'), rounding=ROUND_HALF_DOWN)
+        
+        perimeter = Decimal(perimeter)
+        perimeter = perimeter.quantize(Decimal('0.01'), rounding=ROUND_HALF_DOWN)
+        
+        footprint = Decimal(footprint)
+        footprint = footprint.quantize(Decimal('0.01'), rounding=ROUND_HALF_DOWN)
+        
+        data.append([option, phase, plot, block, typology, storeys, footprint, perimeter, facade_area, GEA])
             
     return(data)
