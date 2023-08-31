@@ -8,8 +8,10 @@ from decimal import Decimal, ROUND_HALF_DOWN
 
 import csv #, os
 
-header = ["Option", "Phase", "Plot Name", "Block Name", "Use", "N. of Storeys", "Footprint", "Perimeter", "Façade area", "GEA"]
+header_aggregateData = ["Option", "Phase", "Plot Name", "Block Name", "Use", "N. of Storeys", "Footprint", "Perimeter", "Façade area", "GEA"]
+header_granularData = ["Option", "Phase", "Plot Name", "Block Name", "Use", "Floor", "Level", "GEA", "Perimeter", "Façade area"]
     
+floorToFloorLevel = 4.2
 
 attribute_set = [
 
@@ -104,6 +106,50 @@ attribute_set = [
             # }
 ]
 
+# Defines class for custom properties
+class romaAddonProperties(bpy.types.PropertyGroup):
+    roma_option_attribute: bpy.props.IntProperty(
+        name="RoMa Option Attribute",
+        default=1,
+        min=1,
+        description="The project option of the building"
+    )
+    
+    roma_phase_attribute: bpy.props.IntProperty(
+        name="RoMa Phase Attribute",
+        default=1,
+        min=1,
+        description="The construction phase of the building"
+    )
+    
+class faceEdge():
+     def __init__(self, index = None, face = None, storeys = None, topStorey = None, length = None, perimeter = None):
+        #  self.objName = objName
+         self.index = index
+         self.face = face
+         self.storeys = storeys
+         self.topStorey = topStorey
+         self.length = length
+         self.perimeter = perimeter
+         
+
+class RoMa_Menu(Menu):
+    bl_idname = "VIEW3D_MT_custom_menu"
+    bl_label = "RoMa"
+
+    def draw(self, context):
+        layout = self.layout
+        #layout.active = bool(context.active_object.mode!='EDIT  ')
+        layout.operator(roma_MenuOperator_convert_to_RoMa_mesh.bl_idname)
+        layout.separator()
+        printAggregate = layout.operator(RoMa_MenuOperator_PrintData.bl_idname, text="Print the data of the mass in compact form")
+        printAggregate.text = "aggregate"
+        printGranular = layout.operator(RoMa_MenuOperator_PrintData.bl_idname, text="Print the data of the mass in extended form")
+        printGranular.text = "granular"
+        layout.operator(RoMa_MenuOperator_ExportCSV.bl_idname)
+        layout.separator()
+        layout.operator(RoMa_Operator_transformation_orientation.bl_idname)
+
 
 class roma_MenuOperator_convert_to_RoMa_mesh(Operator):
     bl_idname = "object.roma_convert_to_roma"
@@ -120,9 +166,6 @@ class roma_MenuOperator_convert_to_RoMa_mesh(Operator):
         for obj in selected_meshes:
             obj.roma_props['roma_option_attribute'] = 1
             obj.roma_props['roma_phase_attribute'] = 1
-            # print("pippo")
-            # bpy.types.Object.roma_props = bpy.props.PointerProperty(type=romaAddonProperties)
-            # print("pippa", bpy.types.Object.roma_props)
             mesh = obj.data
             mesh["RoMa object"] = True
             for a in attribute_set:
@@ -155,28 +198,17 @@ class roma_MenuOperator_convert_to_RoMa_mesh(Operator):
      
         return {'FINISHED'}
 
-# Definisci la classe per le proprietà personalizzate
-class romaAddonProperties(bpy.types.PropertyGroup):
-    roma_option_attribute: bpy.props.IntProperty(
-        name="RoMa Option Attribute",
-        default=1,
-        min=1,
-        description="The project option of the building"
-    )
-    
-    roma_phase_attribute: bpy.props.IntProperty(
-        name="RoMa Phase Attribute",
-        default=1,
-        min=1,
-        description="The construction phase of the building"
-    )
     
 class RoMa_MenuOperator_PrintData(Operator):
     bl_idname = "object.roma_print_data"
     bl_label = "Print the data of the mass"
+    
+    text : bpy.props.StringProperty (
+        name = "text",
+        default = "aggregate"
+    )
 
     def execute(self, context):
-        global header
         roughData = []
         csvData = []
         csvTemp = []
@@ -186,32 +218,11 @@ class RoMa_MenuOperator_PrintData(Operator):
                 csvTemp.append(get_mass_data(obj))
         for sublist in csvTemp:
             roughData.extend(sublist)
-        
-        # roughData = sorted(roughData, key=lambda x:(x[0], x[1], x[2], x[3], x[4]))
-        
-        # csvData.append(roughData[0])
-        # for el in roughData[1:]:
-        #     if el[:5] == csvData[-1][:5]:
-        #         prev_storeys = csvData[-1][5]
-        #         # update number of storeys
-        #         storeys = el[5]
-        #         if storeys > prev_storeys:
-        #             csvData[-1][5] = storeys
-        #         # sum footprint
-        #         csvData[-1][6] += el[6]
-        #         # sum perimeter
-        #         csvData[-1][7] += el[7]
-        #         # sum facade
-        #         csvData[-1][8] += el[8]
-        #         # sum GEA
-        #         csvData[-1][9] += el[9]
-                
-        #     else:
-        #         csvData.append(el)
             
-        # csvData.insert(0, header)
-        
-        csvData = aggregateData(roughData)
+        if self.text == "aggregate":
+            csvData = aggregateData(roughData)
+        else:
+            csvData = granularData(roughData)
         
         print("")
         print("")
@@ -219,6 +230,10 @@ class RoMa_MenuOperator_PrintData(Operator):
         for r, row in enumerate(csvData):
             string = ""
             for el in row:
+                if isinstance(el, float): # if the entry is a float, it is rounded
+                     el = Decimal(el)
+                     el = el.quantize(Decimal('0.001'))
+                     
                 i = 1
                 tabs = tab
                 while i < 3:
@@ -230,6 +245,12 @@ class RoMa_MenuOperator_PrintData(Operator):
                         while t < i-1:
                             tabs = tabs + tab
                             t += 1
+                
+        
+        # level = Decimal(level)
+        # level = level.quantize(Decimal('0.001'))
+        
+                    
                 string = string + str(el) + tabs
             if r == 1: print("--------------------------------------------------------------------------------------------------------------------------------------------------------------")
             print(f"{string}")
@@ -268,27 +289,10 @@ class RoMa_Operator_transformation_orientation(Operator):
         return {'FINISHED'} 
         
         
-        
-    
-class RoMa_Menu(Menu):
-    bl_idname = "VIEW3D_MT_custom_menu"
-    bl_label = "RoMa"
-
-    def draw(self, context):
-        layout = self.layout
-        #layout.active = bool(context.active_object.mode!='EDIT  ')
-        layout.operator(roma_MenuOperator_convert_to_RoMa_mesh.bl_idname)
-        layout.separator()
-        layout.operator(RoMa_MenuOperator_PrintData.bl_idname)
-        layout.operator(RoMa_MenuOperator_ExportCSV.bl_idname)
-        layout.separator()
-        layout.operator(RoMa_Operator_transformation_orientation.bl_idname)
-        
-        
 def aggregateData(roughData):
-    data = []
-
     roughData = sorted(roughData, key=lambda x:(x[0], x[1], x[2], x[3], x[4]))
+        
+    data = []
     data.append(roughData[0])
 
     for el in roughData[1:]:
@@ -299,22 +303,107 @@ def aggregateData(roughData):
             if storeys > prev_storeys:
                 data[-1][5] = storeys
             # sum footprint
-            data[-1][6] += el[6]
-            # sum perimeter
             data[-1][7] += el[7]
-            # sum facade
+            # sum perimeter
             data[-1][8] += el[8]
-            # sum GEA
+            # sum facade
             data[-1][9] += el[9]
+            # sum GEA
+            data[-1][10] += el[10]
         else:
             data.append(el)
-    data.insert(0, header)
+            
+    # remove unwanted elements
+    for index, el in enumerate(data):
+        del data[index][11] #edge
+        del data[index][6] #level
+        
+    data = sorted(data, key=lambda x:(x[0], x[1], x[2], x[3], x[4]))
+    data.insert(0, header_aggregateData)
 
     return(data)
+
+
+def granularData(roughData):
+    roughData = sorted(roughData, key=lambda x:(x[0], x[1], x[2], x[3], x[4], x[6]))
+    
+    data = []
+    data.append(roughData[0])
+
+    for el in roughData[1:]:
+        if el[:6] == data[-1][:6]:
+            # prev_storeys = data[-1][5]
+            # # update number of storeys
+            # storeys = el[5]
+            # if storeys > prev_storeys:
+            #     data[-1][5] = storeys
+            # sum footprint
+            data[-1][7] += el[7]
+            # sum perimeter
+            data[-1][8] += el[8]
+            # sum facade
+            data[-1][9] += el[9]
+        else:
+           data.append(el)
+           
+    expandedData = []
+    for index, el in reversed(list(enumerate(data))):
+        # if there is more than one floor,
+        # it is necessary to unwrap data
+        if el[5] > 1:
+            edges = el[11]
+            
+            for i, e in enumerate(range(el[5]), 1):
+                floor = i
+                level = el[6] + (floorToFloorLevel * i)
+                
+                perimeter = 0
+                for edge in edges:
+                    if edge.perimeter == True:
+                        perimeter += edge.length
+                    else:
+                        # check if the current storey is in the range of that edge. 
+                        # The range is the maximum number of storey for that edge minus the number of the visible storey
+                        if floor >= (edge.topStorey - edge.storeys +1):
+                            perimeter += edge.length
+                            # print(edge.index, edge.face, edge.length, edge.storeys, edge.topStorey)
+                # perimeter = None
+                facadeArea = perimeter * floorToFloorLevel
+                expandedData.append([el[0], el[1], el[2], el[3], el[4], floor, level, el[7], perimeter, facadeArea])
+            del data[index]
+            
+    data.extend(expandedData)
+    
+    # remove unwanted elements
+    for index, el in enumerate(data):
+        if len(data[index]) == 12: # only some entryes have the element we want to delete
+            del data[index][11] #edge
+        if len(data[index]) == 11: # only some entryes have the element we want to delete
+            del data[index][10] #GEA
+    
+    #once all the levels are set, it is necessary to group the ones with the same features
+    data = sorted(data, key=lambda x:(x[0], x[1], x[2], x[3], x[4], x[5]))
+    
+    granularData = []
+    granularData.append(data[0])
+
+    for el in data[1:]:
+        if el[:6] == granularData[-1][:6]:
+            # sum footprint
+            granularData[-1][7] += el[7]
+            # sum perimeter
+            granularData[-1][8] += el[8]
+            # sum facade
+            granularData[-1][9] += el[9]
+        else:
+           granularData.append(el)
+        
+    granularData.insert(0, header_granularData)
+
+    return(granularData)
     
    
 def writeCSV(context, filepath):
-    global header
     csvData = []
     data = []
     dataRough = []
@@ -328,11 +417,10 @@ def writeCSV(context, filepath):
     for sublist in dataRough:
         data.extend(sublist)
         
-    csvData = aggregateData(data)
+    csvData = granularData(data)
 
     with open(filepath, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
-        # writer.writerow(header)
         writer.writerows(csvData)
 
     print(f"Data saved to {filepath}")
@@ -372,60 +460,99 @@ def get_mass_data(obj):
     bm_layer_storey = bm.faces.layers.int["roma_number_of_storeys"]
     
     for f in bm.faces:
+        edges = []
+        #plot
         for n in bpy.context.scene.roma_plot_name_list:
             if n.id == f[bm_layer_plot]:
                 plot = n.name
                 break
+
+        #block
         for n in bpy.context.scene.roma_block_name_list:
             if n.id == f[bm_layer_block]:
                 block = n.name
                 break
+
+        #typology
         for n in bpy.context.scene.roma_typology_name_list:
             if n.id == f[bm_layer_typology]:
                 typology = n.name
                 break
+
         storeys = f[bm_layer_storey]
+
         footprint = f.calc_area()
-        
+
         GEA = footprint * storeys
         
+        #perimeter        
         perimeter = 0
         common_edges = []
         for e in f.edges:
+            edge = faceEdge()
+            # edge.objName = obj.name
+            edge.index = e.index
+            edge.face = f.index
+            edge.length = e.calc_length()
+            edge.topStorey = storeys
+            edge.storeys = None
             # if there is no angle, then the edge is not a edge in common between faces
             try:
                 angle = e.calc_face_angle()
                 common_edges.append(e.index)
+                edge.perimeter = False
             except ValueError:
-                perimeter += e.calc_length()
+                perimeter += edge.length
+                edge.perimeter = True
+                edge.storeys = storeys
+            edges.append(edge)
         
+        #facade area
         # this is the area of the perimeter walls
-        floorToFloor = 4.2
-        facade_area = perimeter * floorToFloor * storeys
+       
+        facade_area = perimeter * floorToFloorLevel * storeys
         # but if the faces having an edge in common have different storey numbers,
         # then the difference is added to the facade area
         for index in common_edges:
-            for fa in bm.faces:
-                for ed in fa.edges:
-                    if ed.index == index and fa.index != f.index:
-                        if f[bm_layer_storey] > fa[bm_layer_storey]:
-                            diff = f[bm_layer_storey] - fa[bm_layer_storey]
-                            length = ed.calc_length()
-                            facade_area += length * diff * floorToFloor
-                            
-                            
-        GEA = Decimal(GEA)
-        GEA = GEA.quantize(Decimal('0.01'), rounding=ROUND_HALF_DOWN)
+            for fa in bm.faces: 
+                if f.index != fa.index: #there is no point in evaluating the same face
+                    for ed in fa.edges:
+                        if index == ed.index:
+                            if f[bm_layer_storey] > fa[bm_layer_storey]:
+                                diff = f[bm_layer_storey] - fa[bm_layer_storey]
+                                length = ed.calc_length()
+                                facade_area += length * diff * floorToFloorLevel
+                                for ed in edges:
+                                    if ed.index == index:
+                                        ed.storeys = diff 
+                                        break
         
-        facade_area = Decimal(facade_area)
-        facade_area = facade_area.quantize(Decimal('0.01'), rounding=ROUND_HALF_DOWN)
+        # removes the edges marked as not perimeter 
+        # and are duplicates of the edges that are visibile
+        for index, edge in reversed(list(enumerate(edges))):
+            if edge.storeys == None:
+                edges.pop(index)
         
-        perimeter = Decimal(perimeter)
-        perimeter = perimeter.quantize(Decimal('0.01'), rounding=ROUND_HALF_DOWN)
+        #lowest Z coordinate of the face
+        obj_origin_z = obj.location[2]
+        face_z = f.calc_center_median()[2]
+        level = obj_origin_z + face_z
         
-        footprint = Decimal(footprint)
-        footprint = footprint.quantize(Decimal('0.01'), rounding=ROUND_HALF_DOWN)
+        # GEA = Decimal(GEA)
+        # GEA = GEA.quantize(Decimal('0.01'), rounding=ROUND_HALF_DOWN)
         
-        data.append([option, phase, plot, block, typology, storeys, footprint, perimeter, facade_area, GEA])
+        # facade_area = Decimal(facade_area)
+        # facade_area = facade_area.quantize(Decimal('0.01'), rounding=ROUND_HALF_DOWN)
+        
+        # perimeter = Decimal(perimeter)
+        # perimeter = perimeter.quantize(Decimal('0.01'), rounding=ROUND_HALF_DOWN)
+        
+        # footprint = Decimal(footprint)
+        # footprint = footprint.quantize(Decimal('0.01'), rounding=ROUND_HALF_DOWN)
+        
+        # level = Decimal(level)
+        # level = level.quantize(Decimal('0.001'))
+        
+        data.append([option, phase, plot, block, typology, storeys, level, footprint, perimeter, facade_area, GEA, edges])
             
     return(data)
