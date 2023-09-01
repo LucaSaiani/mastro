@@ -411,7 +411,7 @@ def writeCSV(context, filepath):
     objects = [obj for obj in bpy.context.scene.objects]
 
     for obj in objects:
-        if obj.type == "MESH" and "RoMa object" in obj.data:
+        if obj.visible_get() and obj.type == "MESH" and "RoMa object" in obj.data:
             dataRough.append(get_mass_data(obj))
 
     for sublist in dataRough:
