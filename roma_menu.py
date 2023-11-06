@@ -151,7 +151,7 @@ class RoMa_Menu(Menu):
         layout.operator(RoMa_Operator_transformation_orientation.bl_idname)
 
 
-class roma_MenuOperator_convert_to_RoMa_mesh(Operator):
+class RoMa_MenuOperator_convert_to_RoMa_mesh(Operator):
     bl_idname = "object.roma_convert_to_roma"
     bl_label = "Convert the selected mesh to a RoMa mesh"
     

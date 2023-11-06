@@ -16,10 +16,6 @@ bl_info = {
 
 # import sys
 # import os
-import random
-import decimal
-from datetime import datetime
-
 
 if "bpy" in locals():
     import importlib
@@ -38,19 +34,23 @@ else:
     # from . import roma_vertex
     from . import roma_facade
     from . import roma_mass
-
-
+    
 import bpy
-# from bpy.props import (
-#     BoolProperty,
+
+from bpy.props import (
+    BoolProperty
 #     IntProperty, 
 #     CollectionProperty
-#     )
+    )
 
 from bpy.types import(
     Scene
 )
+
 from bpy.app.handlers import persistent
+import random
+import decimal
+from datetime import datetime
 
 classes = (
     roma_preferences.roma_addon_preferences,
@@ -58,6 +58,7 @@ classes = (
     
     # roma_modal_operator.VIEW3D_OT_update_Roma_mesh_attributes,
     # roma_modal_operator.VIEW_OT_get_event,
+    roma_modal_operator.VIEW_3D_OT_show_roma_attributes,
     roma_modal_operator.VIEW_3D_OT_update_mesh_attributes,
     
     roma_project_data.VIEW3D_PT_RoMa_project_data,
@@ -94,6 +95,12 @@ classes = (
     roma_project_data.TYPOLOGY_LIST_OT_NewItem,
     roma_project_data.TYPOLOGY_LIST_OT_MoveItem,
     
+    roma_project_data.OBJECT_UL_Typology_Uses,
+    roma_project_data.typology_uses_name_list,
+    roma_project_data.TYPOLOGY_USES_LIST_OT_NewItem,
+    roma_project_data.TYPOLOGY_USES_LIST_OT_DeleteItem,
+    roma_project_data.TYPOLOGY_USES_LIST_OT_MoveItem,
+    
     roma_project_data.OBJECT_UL_Facade,
     roma_project_data.facade_name_list,
     roma_project_data.FACADE_LIST_OT_NewItem,
@@ -104,7 +111,7 @@ classes = (
     roma_project_data.FLOOR_LIST_OT_NewItem,
     roma_project_data.FLOOR_LIST_OT_MoveItem,
     
-    roma_menu.roma_MenuOperator_convert_to_RoMa_mesh,
+    roma_menu.RoMa_MenuOperator_convert_to_RoMa_mesh,
     roma_menu.RoMa_MenuOperator_PrintData,
     roma_menu.RoMa_MenuOperator_ExportCSV,
     roma_menu.RoMa_Operator_transformation_orientation,
@@ -117,7 +124,7 @@ classes = (
     # roma_mass.OBJECT_OT_add_RoMa_Mass,
     roma_mass.OBJECT_OT_SetPlotId,
     roma_mass.OBJECT_OT_SetBlockId,
-    roma_mass.OBJECT_OT_SetUseId,
+    roma_mass.OBJECT_OT_SetTypologyId,
     roma_mass.OBJECT_OT_SetMassStoreys,
     # roma_mass.OBJECT_OT_SetObjOption,
     # roma_mass.OBJECT_OT_SetObjPhase,
@@ -250,9 +257,9 @@ def onFileLoaded(scene):
         bpy.context.scene.roma_use_name_list.add()
         bpy.context.scene.roma_use_name_list[0].id = 0
         bpy.context.scene.roma_use_name_list[0].name = ""
-        random.seed(datetime.now().timestamp())
-        rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
-        bpy.context.scene.roma_use_name_list[0].RND = rndNumber
+        # random.seed(datetime.now().timestamp())
+        # rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
+        # bpy.context.scene.roma_use_name_list[0].RND = rndNumber
     
     if len(bpy.context.scene.roma_typology_name_list) == 0:
         bpy.context.scene.roma_typology_name_list.add()
@@ -297,6 +304,8 @@ def register():
      
     bpy.types.VIEW3D_MT_editor_menus.append(roma_menu.roma_menu)
     
+    bpy.types.WindowManager.roma_show_properties_run_opengl = BoolProperty(default=False)
+    
     bpy.types.WindowManager.toggle_show_data = bpy.props.BoolProperty(
                                             default = False,
                                             update = roma_modal_operator.update_show_attributes)
@@ -309,9 +318,9 @@ def register():
                                             name = "Block",
                                             default = False)
     
-    bpy.types.WindowManager.toggle_use_name = bpy.props.BoolProperty(
-                                            name = "Use",
-                                            default = False)
+    # bpy.types.WindowManager.toggle_use_name = bpy.props.BoolProperty(
+    #                                         name = "Use",
+    #                                         default = False)
     
     bpy.types.WindowManager.toggle_typology_name = bpy.props.BoolProperty(
                                             name = "Typology",
@@ -354,10 +363,10 @@ def register():
                                         default=0,
                                         update = roma_mass.update_attribute_mass_block_id)
      
-    Scene.attribute_mass_use_id = bpy.props.IntProperty(
-                                        name="Use Id",
-                                        default=0,
-                                        update = roma_mass.update_attribute_mass_use_id)
+    # Scene.attribute_mass_use_id = bpy.props.IntProperty(
+    #                                     name="Use Id",
+    #                                     default=0,
+    #                                     update = roma_mass.update_attribute_mass_use_id)
     
     Scene.attribute_mass_typology_id = bpy.props.IntProperty(
                                         name="Typology Id",
@@ -423,11 +432,6 @@ def register():
     Scene.roma_use_name_current = bpy.props.CollectionProperty(type =roma_project_data.name_with_id)
     Scene.roma_use_name_list_index = bpy.props.IntProperty(name = "Use Name",
                                              default = 0)
-    Scene.roma_use_names = bpy.props.EnumProperty(
-                                        name="Use List",
-                                        description="",
-                                        items=get_use_names_from_list,
-                                        update=roma_mass.update_use_name_label)
     
     Scene.roma_typology_name_list = bpy.props.CollectionProperty(type = roma_project_data.typology_name_list)
     Scene.roma_typology_name_current = bpy.props.CollectionProperty(type =roma_project_data.name_with_id)
@@ -438,6 +442,11 @@ def register():
                                         description="",
                                         items=get_typology_names_from_list,
                                         update=roma_mass.update_typology_name_label)
+    
+    Scene.roma_typology_uses_name_list = bpy.props.CollectionProperty(type = roma_project_data.typology_uses_name_list)
+    Scene.roma_typology_uses_name_current = bpy.props.CollectionProperty(type =roma_project_data.name_with_id)
+    Scene.roma_typology_uses_name_list_index = bpy.props.IntProperty(name = "Typology Use Name",
+                                             default = 0)
     
     Scene.roma_facade_name_list = bpy.props.CollectionProperty(type = roma_project_data.facade_name_list)
     Scene.roma_facade_name_current = bpy.props.CollectionProperty(type =roma_project_data.name_with_id)
@@ -459,6 +468,13 @@ def register():
                                         items=get_floor_names_from_list,
                                         update=roma_facade.update_floor_name_label)
     
+    Scene.roma_typology_uses_names = bpy.props.EnumProperty(
+                                        name="",
+                                        description="Typology use",
+                                        items=get_use_names_from_list,
+                                        update=roma_project_data.update_typology_uses_name_label)
+                                        
+    
    
     
 
@@ -478,11 +494,16 @@ def unregister():
     #     bpy.types.VIEW3D_MT_mesh_add.remove(btn)
         
     bpy.types.VIEW3D_MT_editor_menus.remove(roma_menu.roma_menu)
+    
+    wm = bpy.context.window_manager
+    p = 'roma_show_properties_run_opengl'
+    if p in wm:
+        del wm[p]
 
     del bpy.types.WindowManager.toggle_show_data
     del bpy.types.WindowManager.toggle_plot_name
     del bpy.types.WindowManager.toggle_block_name
-    del bpy.types.WindowManager.toggle_use_name
+    # del bpy.types.WindowManager.toggle_use_name
     del bpy.types.WindowManager.toggle_typology_name
     del bpy.types.WindowManager.toggle_storey_number
     del bpy.types.WindowManager.toggle_facade_name
@@ -492,7 +513,7 @@ def unregister():
     del Scene.updating_mesh_attributes_is_active
     del Scene.attribute_mass_plot_id
     del Scene.attribute_mass_block_id
-    del Scene.attribute_mass_use_id
+    # del Scene.attribute_mass_use_id
     del Scene.attribute_mass_typology_id
     del Scene.attribute_facade_id
     del Scene.attribute_facade_normal
@@ -526,13 +547,13 @@ def unregister():
     
     del Scene.roma_plot_names
     del Scene.roma_block_names
-    del Scene.roma_use_names
+    del Scene.roma_typology_uses_names
     del Scene.roma_typology_names
     del Scene.roma_facade_names
     del Scene.roma_floor_names
     
-    
-    
+if __name__ == "__main__":
+    register()   
     
     
    

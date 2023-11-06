@@ -46,7 +46,7 @@ class VIEW3D_PT_RoMa_show_data(Panel):
         col = layout.column(heading="Mass", align=True)
         col.prop(context.window_manager, 'toggle_plot_name', icon_only=False)
         col.prop(context.window_manager, 'toggle_block_name', icon_only=False)
-        col.prop(context.window_manager, 'toggle_use_name', icon_only=False)
+        col.prop(context.window_manager, 'toggle_typology_name', icon_only=False)
         col.prop(context.window_manager, 'toggle_storey_number', icon_only=False)
         # col.separator()
         col = layout.column(heading="Façade", align = True)
@@ -115,9 +115,10 @@ class VIEW3D_PT_RoMa_mass_plot_data(Panel):
         # row.prop(context.scene, "roma_plot_names", icon="MOD_BOOLEAN", icon_only=True, text="")
         # row.operator("scene.add_plot_name", icon="ADD", text="New")
         
-        if scene.roma_plot_name_list_index >= 0 and scene.roma_plot_name_list:
-            item = scene.roma_plot_name_list[scene.roma_plot_name_list_index]
-            row.prop(item, "name", icon_only=True)
+        # if scene.roma_plot_name_list_index >= 0 and scene.roma_plot_name_list:
+        #     item = scene.roma_plot_name_list[scene.roma_plot_name_list_index]
+        #     row.prop(item, "name", icon_only=True, text="Plot Name")
+            
         # row.prop(item, "index")
         
 class OBJECT_UL_Plot(UIList):
@@ -136,7 +137,11 @@ class OBJECT_UL_Plot(UIList):
             
             split = layout.split(factor=0.3)
             split.label(text="Id: %d" % (item.id)) 
-            split.label(text=item.name, icon=custom_icon) 
+            # split.label(text=item.name, icon=custom_icon) 
+            split.prop(context.scene.roma_plot_name_list[index],
+                       "name",
+                       icon_only=True,
+                       icon = custom_icon)
             
             # layout.alignment = 'LEFT'
             # layout.label(text=item.name, icon="MOD_BOOLEAN")
@@ -282,9 +287,10 @@ class VIEW3D_PT_RoMa_mass_block_data(Panel):
         row = layout.row()
         row = layout.row(align=True)
         
-        if scene.roma_block_name_list_index >= 0 and scene.roma_block_name_list:
-            item = scene.roma_block_name_list[scene.roma_block_name_list_index]
-            row.prop(item, "name", icon_only=True)
+        # if scene.roma_block_name_list_index >= 0 and scene.roma_block_name_list:
+        #     item = scene.roma_block_name_list[scene.roma_block_name_list_index]
+        #     row.prop(item, "name", icon_only=True, text="Block Name")
+            
             
 class OBJECT_UL_Block(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data,
@@ -295,7 +301,11 @@ class OBJECT_UL_Block(UIList):
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
             split = layout.split(factor=0.3)
             split.label(text="Id: %d" % (item.id)) 
-            split.label(text=item.name, icon=custom_icon) 
+            # split.label(text=item.name, icon=custom_icon) 
+            split.prop(context.scene.roma_block_name_list[index],
+                       "name",
+                       icon_only=True,
+                       icon = custom_icon)
         elif self.layout_type in {'GRID'}:
             layout.alignment = 'CENTER'
             layout.label(text="", icon = custom_icon)
@@ -424,9 +434,10 @@ class VIEW3D_PT_RoMa_mass_use_data(Panel):
         row = layout.row()
         row = layout.row(align=True)
         
-        if scene.roma_use_name_list_index >= 0 and scene.roma_use_name_list:
-            item = scene.roma_use_name_list[scene.roma_use_name_list_index]
-            row.prop(item, "name", icon_only=True)
+        # if scene.roma_use_name_list_index >= 0 and scene.roma_use_name_list:
+        #     item = scene.roma_use_name_list[scene.roma_use_name_list_index]
+        #     row.prop(item, "name", icon_only=True, text="Use Name")
+            
             
 class OBJECT_UL_Use(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data,
@@ -437,7 +448,11 @@ class OBJECT_UL_Use(UIList):
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
             split = layout.split(factor=0.3)
             split.label(text="Id: %d" % (item.id)) 
-            split.label(text=item.name, icon=custom_icon) 
+            # split.label(text=item.name, icon=custom_icon) 
+            split.prop(context.scene.roma_use_name_list[index],
+                       "name",
+                       icon_only=True,
+                       icon = custom_icon)
         elif self.layout_type in {'GRID'}:
             layout.alignment = 'CENTER'
             layout.label(text="", icon = custom_icon)
@@ -545,7 +560,6 @@ class VIEW3D_PT_RoMa_mass_typology_data(Panel):
         
         row = layout.row()
         rows = 3
-        row = layout.row()
         row.template_list("OBJECT_UL_Typology", "typology_list", scene,
                         "roma_typology_name_list", scene, "roma_typology_name_list_index", rows = rows)
         
@@ -559,9 +573,32 @@ class VIEW3D_PT_RoMa_mass_typology_data(Panel):
         row = layout.row()
         row = layout.row(align=True)
         
-        if scene.roma_typology_name_list_index >= 0 and scene.roma_typology_name_list:
-            item = scene.roma_typology_name_list[scene.roma_typology_name_list_index]
-            row.prop(item, "name", icon_only=True)
+        # if scene.roma_typology_name_list_index >= 0 and scene.roma_typology_name_list:
+        #     item = scene.roma_typology_name_list[scene.roma_typology_name_list_index]
+        #     row.prop(item, "name", icon_only=True, text="Typology Name")
+            
+        ########## typology uses ###############
+        #if scene.roma_typology_uses_name_index >= 1:
+        row = layout.row()
+        row.label(text="Typology Uses:") 
+        row = layout.row()
+        rows = 3
+        row = layout.row()
+        row.template_list("OBJECT_UL_Typology_Uses", "typology_uses_list", scene,
+                        "roma_typology_uses_name_list", scene, "roma_typology_uses_name_list_index", rows = rows)
+        
+        
+        col = row.column(align=True)
+        col.operator("roma_typology_uses_name_list.new_item", icon='ADD', text="")
+        col.operator("roma_typology_uses_name_list.delete_item", icon='REMOVE', text="")
+        col.separator()
+        col.operator("roma_typology_uses_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
+        col.operator("roma_typology_uses_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
+        
+        # row = layout.row(align=True)
+        # row.prop(context.scene, "roma_typology_uses_names", icon="COMMUNITY", icon_only=True, text="Use")
+        # row.label(text=scene.roma_use_name_current[0].name)
+
             
 class OBJECT_UL_Typology(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data,
@@ -572,7 +609,14 @@ class OBJECT_UL_Typology(UIList):
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
             split = layout.split(factor=0.3)
             split.label(text="Id: %d" % (item.id)) 
-            split.label(text=item.name, icon=custom_icon) 
+            # split.label(text=item.name, icon=custom_icon) 
+            # item = context.scene.roma_typology_name_list[context.scene.roma_typology_name_list_index]
+            split.prop(context.scene.roma_typology_name_list[index],
+                       "name",
+                       icon_only=True,
+                       icon = custom_icon)
+            
+            
         elif self.layout_type in {'GRID'}:
             layout.alignment = 'CENTER'
             layout.label(text="", icon = custom_icon)
@@ -635,11 +679,11 @@ class TYPOLOGY_LIST_OT_MoveItem(Operator):
         bpy.context.scene.roma_typology_name_list_index = max(0, min(new_index, list_length))
 
     def execute(self, context):
-        roma_use_name_list = context.scene.roma_typology_name_list
+        roma_typology_name_list = context.scene.roma_typology_name_list
         index = context.scene.roma_typology_name_list_index
 
         neighbor = index + (-1 if self.direction == 'UP' else 1)
-        roma_use_name_list.move(neighbor, index)
+        roma_typology_name_list.move(neighbor, index)
         self.move_index()
 
         return{'FINISHED'}
@@ -659,6 +703,137 @@ class typology_name_list(PropertyGroup):
            name="Random Value per Typology",
            description="A random value assigned to each typology",
            default = 0)
+    
+class OBJECT_UL_Typology_Uses(UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data,
+                  active_propname, index):
+       
+        custom_icon = 'COMMUNITY'
+
+        if self.layout_type in {'DEFAULT', 'COMPACT'}:
+            split = layout.split(factor=0.3)
+            split.label(text="Id: %d" % (item.id)) 
+            row = split.row()
+            # row = layout.row(align=True)
+            
+            row.prop(context.scene, "roma_typology_uses_names", index = index, icon=custom_icon, icon_only=True)
+            row.label(text=item.name) 
+            # row.prop(context.scene, "roma_plot_names", icon="MOD_BOOLEAN", icon_only=True, text="Plot")
+            # split.prop(context.scene.roma_typology_uses_name_list[index],
+            #            "name",
+            #            icon_only=True,
+            #            icon = custom_icon)
+
+        elif self.layout_type in {'GRID'}:
+            layout.alignment = 'CENTER'
+            layout.label(text="", icon = custom_icon)
+
+    def filter_items(self, context, data, propname):
+        filtered = []
+        ordered = []
+        items = getattr(data, propname)
+        filtered = [self.bitflag_filter_item] * len(items)
+        
+        for i, item in enumerate(items):
+            if item.id == 0:
+                filtered[i] &= ~self.bitflag_filter_item
+        return filtered, ordered
+
+    def draw_filter(self, context, layout):
+        pass
+    
+
+    
+class TYPOLOGY_USES_LIST_OT_NewItem(Operator):
+    bl_idname = "roma_typology_uses_name_list.new_item"
+    bl_label = "Add a new typology use"
+
+    def execute(self, context): 
+        context.scene.roma_typology_uses_name_list.add()
+        # last = len(context.scene.roma_use_name_list)-1
+        # if last == 0:
+        #     context.scene.roma_use_name_list[0].id = 0
+        #     context.scene.roma_use_name_list[0].name = ""
+        #     random.seed(datetime.now().timestamp())
+        #     rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
+        #     context.scene.roma_use_name_list[0].RND = rndNumber
+        #     context.scene.roma_use_name_list.add()
+        temp_list = []    
+        for el in context.scene.roma_typology_uses_name_list:
+            temp_list.append(el.id)
+        last = len(context.scene.roma_typology_uses_name_list)-1
+        
+        context.scene.roma_typology_uses_name_list[last].id = max(temp_list)+1
+            
+        return{'FINISHED'}
+    
+class TYPOLOGY_USES_LIST_OT_DeleteItem(Operator):
+    bl_idname = "roma_typology_uses_name_list.delete_item"
+    bl_label = "Deletes an item"
+    
+    @classmethod
+    def poll(cls, context):
+        return context.scene.roma_typology_uses_name_list
+        
+    def execute(self, context):
+        my_list = context.scene.roma_typology_uses_name_list
+        index = context.scene.roma_typology_uses_name_list_index
+
+        my_list.remove(index)
+        context.scene.roma_typology_uses_name_list_index = min(max(0, index - 1), len(my_list) - 1)
+
+        return{'FINISHED'}
+    
+class TYPOLOGY_USES_LIST_OT_MoveItem(Operator):
+    bl_idname = "roma_typology_uses_name_list.move_item"
+    bl_label = "Move an item in the list"
+
+    direction: bpy.props.EnumProperty(items=(('UP', 'Up', ""),
+                                              ('DOWN', 'Down', ""),))
+
+    @classmethod
+    def poll(cls, context):
+        return context.scene.roma_typology_uses_name_list
+
+    def move_index(self):
+        index = bpy.context.scene.roma_typology_uses_name_list_index
+        list_length = len(bpy.context.scene.roma_typology_uses_name_list) - 1 
+        new_index = index + (-1 if self.direction == 'UP' else 1)
+
+        bpy.context.scene.roma_typology_uses_name_list_index = max(0, min(new_index, list_length))
+
+    def execute(self, context):
+        roma_typology_uses_name_list = context.scene.roma_typology_uses_name_list
+        index = context.scene.roma_typology_uses_name_list_index
+
+        neighbor = index + (-1 if self.direction == 'UP' else 1)
+        roma_typology_uses_name_list.move(neighbor, index)
+        self.move_index()
+
+        return{'FINISHED'}
+    
+def update_typology_uses_name_label(self, context):
+    # global useName
+    scene = context.scene
+    name = scene.roma_typology_uses_names
+    scene.roma_typology_uses_name_list[scene.roma_typology_uses_name_list_index].name = name
+    
+            
+class typology_uses_name_list(PropertyGroup):
+    id: IntProperty(
+           name="Id",
+           description="Typology use name id",
+           default = 0)
+    
+    name: StringProperty(
+           name="Typology uses name",
+           description="The typology use name",
+           default="")
+    
+    position: IntProperty(
+           name="Use position",
+           description="Position of the use in the typology (bottom, center, top)",
+           default = 1)
     
 ############################            ############################
 ############################ BUILDING   ############################
@@ -717,9 +892,10 @@ class VIEW3D_PT_RoMa_building_facade_data(Panel):
         row = layout.row()
         row = layout.row(align=True)
         
-        if scene.roma_facade_name_list_index >= 0 and scene.roma_facade_name_list:
-            item = scene.roma_facade_name_list[scene.roma_facade_name_list_index]
-            row.prop(item, "name", icon_only=True)
+        # if scene.roma_facade_name_list_index >= 0 and scene.roma_facade_name_list:
+        #     item = scene.roma_facade_name_list[scene.roma_facade_name_list_index]
+        #     row.prop(item, "name", icon_only=True, text="Element Name")
+            
             
 class OBJECT_UL_Facade(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data,
@@ -730,7 +906,11 @@ class OBJECT_UL_Facade(UIList):
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
             split = layout.split(factor=0.3)
             split.label(text="Id: %d" % (item.id)) 
-            split.label(text=item.name, icon=custom_icon) 
+            # split.label(text=item.name, icon=custom_icon) 
+            split.prop(context.scene.roma_facade_name_list[index],
+                       "name",
+                       icon_only=True,
+                       icon = custom_icon)
         elif self.layout_type in {'GRID'}:
             layout.alignment = 'CENTER'
             layout.label(text="", icon = custom_icon)
@@ -859,9 +1039,10 @@ class VIEW3D_PT_RoMa_building_floor_data(Panel):
         row = layout.row()
         row = layout.row(align=True)
         
-        if scene.roma_floor_name_list_index >= 0 and scene.roma_floor_name_list:
-            item = scene.roma_floor_name_list[scene.roma_floor_name_list_index]
-            row.prop(item, "name", icon_only=True)
+        # if scene.roma_floor_name_list_index >= 0 and scene.roma_floor_name_list:
+        #     item = scene.roma_floor_name_list[scene.roma_floor_name_list_index]
+        #     row.prop(item, "name", icon_only=True, text="Floor Name")
+            
           
 class OBJECT_UL_Floor(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data,
@@ -872,7 +1053,11 @@ class OBJECT_UL_Floor(UIList):
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
             split = layout.split(factor=0.3)
             split.label(text="Id: %d" % (item.id)) 
-            split.label(text=item.name, icon=custom_icon) 
+            # split.label(text=item.name, icon=custom_icon) 
+            split.prop(context.scene.roma_floor_name_list[index],
+                       "name",
+                       icon_only=True,
+                       icon = custom_icon)
         elif self.layout_type in {'GRID'}:
             layout.alignment = 'CENTER'
             layout.label(text="", icon = custom_icon)
