@@ -48,6 +48,10 @@ class VIEW3D_PT_RoMa_Mass(Panel):
     # def poll(cls, context):
     #     return (context.object is not None)
     
+    @classmethod
+    def poll(cls, context):
+        return (context.object is not None and context.object.type == "MESH" and "RoMa object" in context.object.data)
+    
     def draw(self, context):
         # obj = context.active_object 
         obj = context.object
@@ -109,12 +113,12 @@ class VIEW3D_PT_RoMa_Mass(Panel):
                 if len(scene.roma_block_name_list) >0:
                     row.label(text=scene.roma_block_name_current[0].name)
                 # layout.prop(context.scene, "attribute_mass_block_id", text="Block Name")
-                ################ USE ######################
+                ################ TYPOLOGY ######################
                 row = layout.row()
                 row = layout.row(align=True)
-                row.prop(context.scene, "roma_use_names", icon="COMMUNITY", icon_only=True, text="Use")
-                if len(scene.roma_use_name_list) >0:
-                    row.label(text=scene.roma_use_name_current[0].name)
+                row.prop(context.scene, "roma_typology_names", icon="ASSET_MANAGER", icon_only=True, text="Typology")
+                if len(scene.roma_typology_name_list) >0:
+                    row.label(text=scene.roma_typology_name_current[0].name)
                 # layout.prop(context.scene, "attribute_mass_use_id", text="Use Name")
                 ################ STOREYS ######################
                 layout.prop(context.scene, "attribute_mass_storeys", text="N° of storeys")
@@ -224,37 +228,37 @@ class OBJECT_OT_SetBlockId(Operator):
         except:
             return {'FINISHED'}
         
-class OBJECT_OT_SetUseId(Operator):
-    """Set Face Attribute as use of the block"""
-    bl_idname = "object.set_attribute_mass_use_id"
-    bl_label = "Set Face Attribute as Use of the Block"
+class OBJECT_OT_SetTypologyId(Operator):
+    """Set Face Attribute as typology of the block"""
+    bl_idname = "object.set_attribute_mass_typology_id"
+    bl_label = "Set Face Attribute as Typology of the Block"
     bl_options = {'REGISTER', 'UNDO'}
     
     def execute(self, context):
         obj = context.active_object
         mesh = obj.data
 
-        attribute_mass_use_id = context.scene.attribute_mass_use_id
+        attribute_mass_typology_id = context.scene.attribute_mass_typology_id
         
         try:
-            mesh.attributes["roma_use_id"]
-            attribute_mass_use_id = context.scene.attribute_mass_use_id
+            mesh.attributes["roma_typology_id"]
+            attribute_mass_typology_id = context.scene.attribute_mass_typology_id
 
             mode = obj.mode
             bpy.ops.object.mode_set(mode='OBJECT')
            
             selected_faces = [p for p in bpy.context.active_object.data.polygons if p.select]
-            mesh_attributes_id = mesh.attributes["roma_use_id"].data.items()
-            mesh_attributes_RND = mesh.attributes["roma_use_RND"].data.items()
+            mesh_attributes_id = mesh.attributes["roma_typology_id"].data.items()
+            mesh_attributes_RND = mesh.attributes["roma_typology_RND"].data.items()
             for face in selected_faces:
                 index = face.index
                 for mesh_attribute in mesh_attributes_id:
                     if mesh_attribute[0] == index:
-                        mesh_attribute[1].value = attribute_mass_use_id
+                        mesh_attribute[1].value = attribute_mass_typology_id
                 for mesh_attribute in mesh_attributes_RND:
                     if mesh_attribute[0] == index:
                         for el in context.scene.roma_block_name_list:
-                            if el["id"] == attribute_mass_use_id:
+                            if el["id"] == attribute_mass_typology_id:
                                 mesh_attribute[1].value = el["RND"]
                                 break
            
@@ -419,7 +423,7 @@ class OBJECT_OT_SetMassStoreys(Operator):
 #         mesh_block[0][1].value = 0
         
 #         mesh_use = mesh.attributes["roma_use_id"].data.items()
-#         mesh_use[0][1].value = 0
+#         mesh_typology[0][1].value = 0
     
 #         mesh_storeys = mesh.attributes["roma_number_of_storeys"].data.items()
 #         mesh_storeys[0][1].value = 3
@@ -440,8 +444,8 @@ def update_attribute_mass_plot_id(self,context):
 def update_attribute_mass_block_id(self, context):
     bpy.ops.object.set_attribute_mass_block_id()
     
-def update_attribute_mass_use_id(self, context):
-    bpy.ops.object.set_attribute_mass_use_id()
+# def update_attribute_mass_use_id(self, context):
+#     bpy.ops.object.set_attribute_mass_typology_id()
     
 def update_attribute_mass_typology_id(self, context):
     bpy.ops.object.set_attribute_mass_typology_id()
@@ -475,17 +479,6 @@ def update_block_name_label(self, context):
         if n.name == name:
             scene.attribute_mass_block_id = n.id
             scene.roma_block_name_current[0].id = n.id
-            break   
-
-def update_use_name_label(self, context):
-    # global useName
-    scene = context.scene
-    name = scene.roma_use_names
-    scene.roma_use_name_current[0].name = " " + name
-    for n in scene.roma_use_name_list:
-        if n.name == name:
-            scene.attribute_mass_use_id = n.id
-            scene.roma_use_name_current[0].id = n.id
             break   
         
 def update_typology_name_label(self, context):
