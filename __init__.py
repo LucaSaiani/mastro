@@ -37,11 +37,11 @@ else:
     
 import bpy
 
-from bpy.props import (
-    BoolProperty
+#from bpy.props import (
+#    BoolProperty
 #     IntProperty, 
 #     CollectionProperty
-    )
+#    )
 
 from bpy.types import(
     Scene
@@ -52,12 +52,15 @@ import random
 import decimal
 from datetime import datetime
 
+
+
 classes = (
     roma_preferences.roma_addon_preferences,
-    roma_preferences.OBJECT_OT_roma_addon_prefs,
+    # roma_preferences.OBJECT_OT_roma_addon_prefs,
     
     # roma_modal_operator.VIEW3D_OT_update_Roma_mesh_attributes,
     # roma_modal_operator.VIEW_OT_get_event,
+    roma_modal_operator.VIEW_3D_OT_show_roma_selection,
     roma_modal_operator.VIEW_3D_OT_show_roma_attributes,
     roma_modal_operator.VIEW_3D_OT_update_mesh_attributes,
     
@@ -100,6 +103,7 @@ classes = (
     roma_project_data.TYPOLOGY_USES_LIST_OT_NewItem,
     roma_project_data.TYPOLOGY_USES_LIST_OT_DeleteItem,
     roma_project_data.TYPOLOGY_USES_LIST_OT_MoveItem,
+    # roma_project_data.update_typology_uses_OT,
     
     roma_project_data.OBJECT_UL_Facade,
     roma_project_data.facade_name_list,
@@ -287,9 +291,8 @@ def onFileLoaded(scene):
         pass
     
 def register():
-    # bpy.app.handlers.load_post.append(onFileLoaded)
+    bpy.app.handlers.depsgraph_update_post.append(roma_project_data.update_typology_uses_function)
     bpy.app.handlers.depsgraph_update_pre.append(onFileLoaded)
-    # bpy.app.handlers.load_post.append(roma_modal_operator.update_mesh_attributes)
     bpy.app.handlers.depsgraph_update_post.append(roma_modal_operator.update_mesh_attributes_depsgraph)
     
     # bpy.app.handlers.depsgraph_update_post.append(roma_modal_operator.refresh_roma_mesh_attributes)
@@ -304,8 +307,15 @@ def register():
      
     bpy.types.VIEW3D_MT_editor_menus.append(roma_menu.roma_menu)
     
-    bpy.types.WindowManager.roma_show_properties_run_opengl = BoolProperty(default=False)
+   
     
+    bpy.types.WindowManager.roma_show_properties_run_opengl = bpy.props.BoolProperty(default=False)
+    
+    bpy.types.WindowManager.toggle_selection_overlay = bpy.props.BoolProperty(
+                                                    default = False,
+                                                    name = "Selection overlay",
+                                                    update = roma_modal_operator.roma_selection_overlay)
+
     bpy.types.WindowManager.toggle_show_data = bpy.props.BoolProperty(
                                             default = False,
                                             update = roma_modal_operator.update_show_attributes)
@@ -447,6 +457,14 @@ def register():
     Scene.roma_typology_uses_name_current = bpy.props.CollectionProperty(type =roma_project_data.name_with_id)
     Scene.roma_typology_uses_name_list_index = bpy.props.IntProperty(name = "Typology Use Name",
                                              default = 0)
+    Scene.roma_previous_selected_typology = bpy.props.IntProperty(
+                                        name="Previous Typology Id",
+                                        default = -1)
+    Scene.roma_typology_uses_names = bpy.props.EnumProperty(
+                                        name="",
+                                        description="Typology use",
+                                        items=get_use_names_from_list,
+                                        update=roma_project_data.update_typology_uses_name_label)
     
     Scene.roma_facade_name_list = bpy.props.CollectionProperty(type = roma_project_data.facade_name_list)
     Scene.roma_facade_name_current = bpy.props.CollectionProperty(type =roma_project_data.name_with_id)
@@ -468,23 +486,15 @@ def register():
                                         items=get_floor_names_from_list,
                                         update=roma_facade.update_floor_name_label)
     
-    Scene.roma_typology_uses_names = bpy.props.EnumProperty(
-                                        name="",
-                                        description="Typology use",
-                                        items=get_use_names_from_list,
-                                        update=roma_project_data.update_typology_uses_name_label)
                                         
     
    
     
 
 def unregister():
-    # bpy.app.handlers.load_post.remove(onFileLoaded)
-    # bpy.app.handlers.load_post.remove(roma_modal_operator.update_mesh_attributes_depsgraph)
-    
-    #bpy.app.handlers.depsgraph_update_post.remove(roma_modal_operator.update_mesh_attributes_depsgraph)
-    # bpy.app.handlers.depsgraph_update_pre.remove(roma_mass.get_face_attribute)
-    #bpy.app.handlers.depsgraph_update_pre.remove(roma_modal_operator.refresh_roma_face_attributes)
+    # bpy.app.handlers.depsgraph_update_post.remove(roma_project_data.update_typology_uses_function)
+    # bpy.app.handlers.depsgraph_update_pre.remove(onFileLoaded)
+    # bpy.app.handlers.depsgraph_update_post.remove(roma_modal_operator.update_mesh_attributes_depsgraph)
     
     from bpy.utils import unregister_class
     for cls in reversed(classes):
@@ -500,6 +510,7 @@ def unregister():
     if p in wm:
         del wm[p]
 
+    del bpy.types.WindowManager.toggle_selection_overlay
     del bpy.types.WindowManager.toggle_show_data
     del bpy.types.WindowManager.toggle_plot_name
     del bpy.types.WindowManager.toggle_block_name
@@ -551,6 +562,8 @@ def unregister():
     del Scene.roma_typology_names
     del Scene.roma_facade_names
     del Scene.roma_floor_names
+    
+    del Scene.roma_previous_selected_typology
     
 if __name__ == "__main__":
     register()   

@@ -1,16 +1,106 @@
 import bpy
 import blf
 import bmesh
+import gpu
+from gpu_extras.batch import batch_for_shader
 
 from bpy.app.handlers import persistent
-
 from bpy_extras import view3d_utils
+from bpy.types import Operator
 
 from mathutils import Vector
 # from datetime import datetime
 
+class VIEW_3D_OT_show_roma_selection(Operator):
+    bl_idname = "wm.show_roma_selection"
+    bl_label = "Show RoMa selection"
+    
+    _handle = None
+    
+    @staticmethod
+    def handle_add(self, context):
+        if VIEW_3D_OT_show_roma_selection._handle is None:
+            VIEW_3D_OT_show_roma_selection._handle =bpy.types.SpaceView3D.draw_handler_add(draw_callback_selection_overlay,
+                                                                                           (self, context),
+                                                                                           'WINDOW',
+                                                                                           'POST_VIEW')
+            # print("aggiunto")
+    
+    @staticmethod
+    def handle_remove(self, context):
+        bpy.types.SpaceView3D.draw_handler_remove(VIEW_3D_OT_show_roma_selection._handle, 'WINDOW')
+        VIEW_3D_OT_show_roma_selection._handle = None
+        # print("rimosso")
+    
+    def execute(self, context):
+        if bpy.context.window_manager['toggle_selection_overlay']:
+            self.handle_add(self, context)
+        else:
+            self.handle_remove(self, context)
+        return {'FINISHED'}
 
-class VIEW_3D_OT_show_roma_attributes(bpy.types.Operator):
+def draw_selection_overlay(context):
+    coords = []
+    edgeIndices = []
+    shader = gpu.shader.from_builtin('UNIFORM_COLOR')
+    
+    obj = bpy.context.active_object
+    mesh = obj.data
+    
+    if mesh.is_editmode:
+        bm = bmesh.from_edit_mesh(mesh)
+    # else:
+    #     bm = bmesh.new()
+    #     bm.from_mesh(mesh)
+        
+        # draw the edges of the selected object
+        for vert in bm.verts:
+            # print(vert.index, vert.co, obj.matrix_world @ vert.co)
+            coords.append(obj.matrix_world @ vert.co)
+            
+        for edge in bm.edges:
+            tmpEdge = (edge.verts[0].index, edge.verts[1].index)
+            edgeIndices.append(tmpEdge)
+            
+        
+        batch = batch_for_shader(shader, 'LINES', {"pos": coords}, indices=edgeIndices)
+        r, g, b, a = [c for c in bpy.context.preferences.addons['roma'].preferences.edgeColor]
+        shader.uniform_float("color", (r, g, b, a))
+    
+        gpu.state.line_width_set(bpy.context.preferences.addons['roma'].preferences.edgeSize)
+        gpu.state.blend_set("ALPHA")
+        batch.draw(shader)
+        
+        
+        # draw the selected faces
+        faces = [f for f in bm.faces if f.select == True]
+        
+        # create a new Bmesh with only the newly created faces
+        dbm = bmesh.new()
+        for face in faces:
+            dbm.faces.new((dbm.verts.new(obj.matrix_world @ v.co, v) for v in face.verts), face)
+        dbm.verts.index_update()    
+
+        dVertices = [v.co for v in dbm.verts]
+        dFaceindices = [(loop.vert.index for loop in looptris) for looptris in dbm.calc_loop_triangles()]
+        dEdgeindices = [(v.index for v in e.verts) for e in dbm.edges]
+        batch = batch_for_shader(shader, 'TRIS', {"pos": dVertices}, indices=dFaceindices)
+        r, g, b, a = [c for c in bpy.context.preferences.addons['roma'].preferences.faceColor]
+        shader.uniform_float("color", (r, g, b, a))       
+        # gpu.state.blend_set("NONE")
+        batch.draw(shader)
+        
+        dbm.free()
+        bm.free()
+    
+def draw_callback_selection_overlay(self, context):
+    draw_selection_overlay(context)
+
+def roma_selection_overlay(self, context):
+    bpy.ops.wm.show_roma_selection()
+
+
+class VIEW_3D_OT_show_roma_attributes(Operator):
     bl_idname = "wm.show_roma_attributes"
     bl_label = "Show RoMa attributes"
     
@@ -28,7 +118,6 @@ class VIEW_3D_OT_show_roma_attributes(bpy.types.Operator):
     @staticmethod
     def handle_remove(self, context):
         if VIEW_3D_OT_show_roma_attributes._handle is not None:
-            # print("spento")
             bpy.types.SpaceView3D.draw_handler_remove(VIEW_3D_OT_show_roma_attributes._handle, 'WINDOW')
         VIEW_3D_OT_show_roma_attributes._handle = None
         context.window_manager.roma_show_properties_run_opengl = False
@@ -59,7 +148,7 @@ def draw_main_show_attributes(context):
         mesh = obj.data
         matrix = obj.matrix_world
         
-        if obj.mode == 'EDIT':
+        if mesh.is_editmode:
             bm = bmesh.from_edit_mesh(mesh)
         else:
             bm = bmesh.new()
@@ -266,6 +355,7 @@ def draw_main_show_attributes(context):
                     x_offset = (-1 * line_width) / 2
                     y_offset -= line_height
         bm.free()
+        # del bm
         # print("BM Free")
         
         
@@ -278,7 +368,7 @@ def update_show_attributes(self, context):
     bpy.ops.wm.show_roma_attributes()
 
 
-class VIEW_3D_OT_update_mesh_attributes(bpy.types.Operator):
+class VIEW_3D_OT_update_mesh_attributes(Operator):
     """Update RoMa attributes of the active mesh in the RoMa panel"""
     bl_idname = "wm.update_mesh_attributes_modal_operator"
     bl_label = "Update RoMa attributes of the active mesh in the RoMa panel"
@@ -470,6 +560,7 @@ class VIEW_3D_OT_update_mesh_attributes(bpy.types.Operator):
             bmesh.update_edit_mesh(mesh)
         
             bm.free() 
+            # del bm
             # print("RIMUOVO BMESH")
             
     # checkingFace = False
