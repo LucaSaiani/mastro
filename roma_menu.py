@@ -140,7 +140,7 @@ class RoMa_Menu(Menu):
     def draw(self, context):
         layout = self.layout
         #layout.active = bool(context.active_object.mode!='EDIT  ')
-        layout.operator(roma_MenuOperator_convert_to_RoMa_mesh.bl_idname)
+        layout.operator(RoMa_MenuOperator_convert_to_RoMa_mesh.bl_idname)
         layout.separator()
         printAggregate = layout.operator(RoMa_MenuOperator_PrintData.bl_idname, text="Print the data of the mass in compact form")
         printAggregate.text = "aggregate"

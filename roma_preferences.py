@@ -23,7 +23,13 @@ class roma_addon_preferences(AddonPreferences):
     fontSize: IntProperty(
         name="Font Size",
         min = 8,
-        default = 25
+        default = 8
+    )
+    
+    edgeSize: IntProperty(
+        name="Edge thickness of the selection",
+        min = 1,
+        default = 3
     )
     
     fontColor: bpy.props.FloatVectorProperty(
@@ -33,6 +39,23 @@ class roma_addon_preferences(AddonPreferences):
                  min = 0.0,
                  max = 1.0,
                  default = (1.0, 1.0, 0.0, 1.0))
+    
+    edgeColor: bpy.props.FloatVectorProperty(
+                 name = "Color of the edges of the selected object",
+                 subtype = "COLOR",
+                 size = 4,
+                 min = 0.0,
+                 max = 1.0,
+                 default = (1.0, 0.3, 0.0, 0.2))
+    
+    faceColor: bpy.props.FloatVectorProperty(
+                 name = "Color of the selected faces",
+                 subtype = "COLOR",
+                 size = 4,
+                 min = 0.0,
+                 max = 1.0,
+                 default = (1.0, 0.0, 0.0, 0.4))
+
 
     def draw(self, context):
         layout = self.layout
@@ -40,30 +63,42 @@ class roma_addon_preferences(AddonPreferences):
         # layout.prop(self, "filepath")
         # layout.prop(self, "number")
         # layout.prop(self, "boolean")
+        # layout.label(text="Text")
         row = layout.row()
-        row.label(text = "Font Size: ")
+        row.label(text = "Font Size:")
         row.prop(self, "fontSize", icon_only=True)
-        row.label(text = "Font Color: ")
+        row = layout.row()
+        row.label(text = "Font Color:")
         row.prop(self, "fontColor", icon_only=True)
+        row = layout.row()
+        row.label(text = "Edge selection size:")
+        row.prop(self, "edgeSize", icon_only=True)
+        row = layout.row()
+        row.label(text = "Edge selection color:")
+        row.prop(self, "edgeColor", icon_only=True)
+        row = layout.row()
+        row.label(text = "Face selection color:")
+        row.prop(self, "faceColor", icon_only=True)
+       
         
-class OBJECT_OT_roma_addon_prefs(Operator):
-    """Display example preferences"""
-    bl_idname = "object.roma_addon_prefs"
-    bl_label = "RoMa add-on Preferences"
-    bl_options = {'REGISTER', 'UNDO'}
+# class OBJECT_OT_roma_addon_prefs(Operator):
+#     """Display example preferences"""
+#     bl_idname = "object.roma_addon_prefs"
+#     bl_label = "RoMa add-on Preferences"
+#     bl_options = {'REGISTER', 'UNDO'}
 
-    def execute(self, context):
-        preferences = context.preferences
-        # addon_prefs = preferences.addons[__name__].preferences
-        addon_prefs = preferences.addons[__package__].preferences
+#     def execute(self, context):
+#         preferences = context.preferences
+#         # addon_prefs = preferences.addons[__name__].preferences
+#         addon_prefs = preferences.addons[__package__].preferences
 
 
-        # info = ("Path: %s, Number: %d, Boolean %r" %
-        #         (addon_prefs.filepath, addon_prefs.number, addon_prefs.boolean))
-        info = ("Font Size: %s, Font color: %d" %
-                (addon_prefs.fontSize, addon_prefs.fontColor))
+#         # info = ("Path: %s, Number: %d, Boolean %r" %
+#         #         (addon_prefs.filepath, addon_prefs.number, addon_prefs.boolean))
+#         info = ("Font Size: %s, Font color: %d" %
+#                 (addon_prefs.fontSize, addon_prefs.fontColor))
 
-        self.report({'INFO'}, info)
-        # print(info)
+#         self.report({'INFO'}, info)
+#         # print(info)
 
-        return {'FINISHED'}
+#         return {'FINISHED'}

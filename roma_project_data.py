@@ -1,12 +1,113 @@
 import bpy
 # import bmesh
+# import gpu
+# from gpu_extras.batch import batch_for_shader
+
+# import bmesh
 
 from bpy.props import StringProperty, IntProperty, FloatProperty
 from bpy.types import PropertyGroup, UIList, Operator, Panel
+from bpy.app.handlers import persistent
 
 import random
 import decimal
 from datetime import datetime
+
+# selectedTypology = None
+
+# switch = False
+
+# coords = [(1, 1, 1), (-2, 0, 0), (-2, -1, 3), (0, 1, 1)]
+# coords = []
+# indices = []
+# shader = gpu.shader.from_builtin('UNIFORM_COLOR')
+# # batch = batch_for_shader(shader, 'LINES', {"pos": coords})
+# batch = None
+
+# class SimpleOperator(Operator):
+    
+#     """Print object name in Console"""
+#     bl_idname = "object.simple_operator"
+#     bl_label = "Simple Object Operator"
+    
+    
+            
+#     _handle = None
+    
+#     def execute(self, context):
+#         global switch
+#         global coords
+#         global indices
+#         global shader
+#         global batch
+#         if switch == False:
+#             switch = True
+            
+#             obj = bpy.context.view_layer.objects.active
+#             # location = obj.location
+#             mesh = obj.data
+#             mesh.calc_loop_triangles()
+            
+#             for vert in mesh.vertices:
+#                 coords.append(obj.matrix_world @ vert.co)
+#             for tri in mesh.loop_triangles:
+#                 # tmpCoords = (obj.matrix_world @ mesh.vertices[tri.vertices[0]].co,
+#                 #        obj.matrix_world @ mesh.vertices[tri.vertices[1]].co,
+#                 #        obj.matrix_world @ mesh.vertices[tri.vertices[2]].co)
+#                 # coords.append(tmpCoords)
+                
+#                 tmpIndices = (tri.vertices[0],
+#                               tri.vertices[1],
+#                               tri.vertices[2])
+#                 indices.append(tmpIndices)
+                
+                
+                
+            
+            
+            
+#             # bm = bmesh.new()
+            
+#             # bm.from_mesh(mesh)
+            
+#             # for c in bm.verts:
+#             #     # from local to global coordinates
+#             #     globalCoord = obj.matrix_world @ c.co
+                
+#             #     vert = (globalCoord.x, globalCoord.y, globalCoord.z)
+#             #     coords.append(vert)
+                
+#             # for e in bm.edges:
+#             #     tmp = (e.verts[0].index, e.verts[1].index)
+#             #     indices.append(tmp)
+                
+
+#             # print(coords)
+#             # print(indices)
+#             # batch = batch_for_shader(shader, 'LINES', {"pos": coords}, indices=indices)
+#             batch = batch_for_shader(shader, 'TRIS', {"pos": coords}, indices=indices)
+#             # bm.free()
+            
+#             SimpleOperator._handle = bpy.types.SpaceView3D.draw_handler_add(draw, (), 'WINDOW', 'POST_VIEW')
+#             print("acceso")
+#         else:
+#             switch = False
+            
+#             coords = []
+#             indices = []
+#             batch = None
+            
+#             bpy.types.SpaceView3D.draw_handler_remove(SimpleOperator._handle, 'WINDOW')
+#             SimpleOperator._handle = None
+            
+#             print("spento")
+            
+#         return {'FINISHED'}
+    
+# def draw():
+#     shader.uniform_float("color", (1, 1, 0, 0.01))
+#     batch.draw(shader)
+    
 
 class VIEW3D_PT_RoMa_project_data(Panel):
     bl_space_type = "PROPERTIES"
@@ -17,7 +118,15 @@ class VIEW3D_PT_RoMa_project_data(Panel):
     bl_options = {'DEFAULT_CLOSED'}
     
     def draw(self, context):
-        pass
+        layout = self.layout
+        # obj = context.object
+
+        # layout.label(text="Operators:")
+        col = layout.column(align=True)
+        # col.operator(SimpleOperator.bl_idname, text="Execute Something", icon="CONSOLE")
+        col.prop(context.window_manager, 'toggle_selection_overlay', icon_only=False)
+        
+        layout.separator()
 
 
 class VIEW3D_PT_RoMa_show_data(Panel):
@@ -580,7 +689,12 @@ class VIEW3D_PT_RoMa_mass_typology_data(Panel):
         ########## typology uses ###############
         #if scene.roma_typology_uses_name_index >= 1:
         row = layout.row()
-        row.label(text="Typology Uses:") 
+        # index = scene.roma_typology_name_list_index
+        # for el in scene.roma_typology_name_list:
+        #     if el.id == index:
+        #         txt = "Uses of " + el.name
+        #         break
+        row.label(text="Uses:")
         row = layout.row()
         rows = 3
         row = layout.row()
@@ -595,18 +709,39 @@ class VIEW3D_PT_RoMa_mass_typology_data(Panel):
         col.operator("roma_typology_uses_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
         col.operator("roma_typology_uses_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
         
-        # row = layout.row(align=True)
-        # row.prop(context.scene, "roma_typology_uses_names", icon="COMMUNITY", icon_only=True, text="Use")
-        # row.label(text=scene.roma_use_name_current[0].name)
+        row = layout.row(align=True)
+        row.prop(context.scene, "roma_typology_uses_names", icon="COMMUNITY", icon_only=False, text="Use")
+        row.label(text=scene.roma_use_name_current[0].name)
 
             
 class OBJECT_UL_Typology(UIList):
+    
     def draw_item(self, context, layout, data, item, icon, active_data,
                   active_propname, index):
-       
+        # global selectedTypology
         custom_icon = 'ASSET_MANAGER'
 
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
+            #update the uses list for the current typology
+            
+            # selected_typology_index = context.scene.roma_typology_name_list_index
+            # selected_typology_id = context.scene.roma_typology_name_list[selected_typology_index].id
+            # if selectedTypology != selected_typology_id:
+            #     selectedTypology = selected_typology_id
+            #     use_name_list = context.scene.roma_typology_uses_name_list
+            #     index = context.scene.roma_typology_uses_name_list_index
+            #     # use_name_list.remove(index)
+                # use_name_length = len(use_name_list)
+                # counter = 0
+                # while counter < use_name_length:
+                #     bpy.ops.roma_typology_uses_name_list.delete_item()
+                #     counter +=1
+                
+                # print("selected one", selectedTypology, index)
+                # context.scene.roma_typology_uses_name_list[index].name = "cappero"
+            #print("selected typology: ", context.scene.roma_typology_name_list[selected_typology_index].id)
+            
+            
             split = layout.split(factor=0.3)
             split.label(text="Id: %d" % (item.id)) 
             # split.label(text=item.name, icon=custom_icon) 
@@ -655,6 +790,7 @@ class TYPOLOGY_LIST_OT_NewItem(Operator):
         last = len(context.scene.roma_typology_name_list)-1
         
         context.scene.roma_typology_name_list[last].id = max(temp_list)+1
+        
         rndNumber = float(decimal.Decimal(random.randrange(0,1000))/1000)
         context.scene.roma_typology_name_list[last].RND = rndNumber
             
@@ -685,6 +821,10 @@ class TYPOLOGY_LIST_OT_MoveItem(Operator):
         neighbor = index + (-1 if self.direction == 'UP' else 1)
         roma_typology_name_list.move(neighbor, index)
         self.move_index()
+        
+        # this is because moving up and down values, 
+        # doesn't trigger update_typology_uses_function
+        context.scene.roma_previous_selected_typology = -1
 
         return{'FINISHED'}
             
@@ -704,19 +844,28 @@ class typology_name_list(PropertyGroup):
            description="A random value assigned to each typology",
            default = 0)
     
+    useList: StringProperty(
+           name="Uses in the typology",
+           description="The uses for the typology",
+           default="")
+    
+    storeyList: StringProperty(
+           name="The number of storeys for each use",
+           description="The number of storeys for each use",
+           default="") 
+    
 class OBJECT_UL_Typology_Uses(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data,
                   active_propname, index):
        
         custom_icon = 'COMMUNITY'
-
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
             split = layout.split(factor=0.3)
-            split.label(text="Id: %d" % (item.id)) 
+            split.label(text="Use Id: %d" % (item.id)) 
             row = split.row()
             # row = layout.row(align=True)
             
-            row.prop(context.scene, "roma_typology_uses_names", index = index, icon=custom_icon, icon_only=True)
+            # row.prop(context.scene, "roma_typology_uses_names", index = index, icon=custom_icon, icon_only=True)
             row.label(text=item.name) 
             # row.prop(context.scene, "roma_plot_names", icon="MOD_BOOLEAN", icon_only=True, text="Plot")
             # split.prop(context.scene.roma_typology_uses_name_list[index],
@@ -742,7 +891,6 @@ class OBJECT_UL_Typology_Uses(UIList):
     def draw_filter(self, context, layout):
         pass
     
-
     
 class TYPOLOGY_USES_LIST_OT_NewItem(Operator):
     bl_idname = "roma_typology_uses_name_list.new_item"
@@ -764,7 +912,9 @@ class TYPOLOGY_USES_LIST_OT_NewItem(Operator):
         last = len(context.scene.roma_typology_uses_name_list)-1
         
         context.scene.roma_typology_uses_name_list[last].id = max(temp_list)+1
-            
+        
+        #add the new element to the typology uses list
+        # add_new_element_to_typology_uses(context, context.scene.roma_typology_uses_name_list[last].id)    
         return{'FINISHED'}
     
 class TYPOLOGY_USES_LIST_OT_DeleteItem(Operator):
@@ -781,7 +931,8 @@ class TYPOLOGY_USES_LIST_OT_DeleteItem(Operator):
 
         my_list.remove(index)
         context.scene.roma_typology_uses_name_list_index = min(max(0, index - 1), len(my_list) - 1)
-
+        
+        update_typology_uses_list(context)
         return{'FINISHED'}
     
 class TYPOLOGY_USES_LIST_OT_MoveItem(Operator):
@@ -809,15 +960,101 @@ class TYPOLOGY_USES_LIST_OT_MoveItem(Operator):
         neighbor = index + (-1 if self.direction == 'UP' else 1)
         roma_typology_uses_name_list.move(neighbor, index)
         self.move_index()
-
+        
+        update_typology_uses_list(context)
         return{'FINISHED'}
+
+# when a typology is selected, it is necessary to update the
+# uses in the UIList using the ones stored in Scene.roma_typology_uses_name_list 
+def update_typology_uses_UI(context):
+    use_name_list = context.scene.roma_typology_uses_name_list
+    # print("updating UI")
+
+    # index = context.scene.roma_typology_uses_name_list_index
+    # use_name_length = len(use_name_list)
+    # if use_name_length > 0:
+        # remove all the entries
+        # counter = 0
+        # while counter <= use_name_length:
+   
+    while len(use_name_list) > 0:
+        # print("lenght pre", len(use_name_list))
+        index = context.scene.roma_typology_uses_name_list_index
+        # bpy.ops.roma_typology_uses_name_list.delete_item()
+        use_name_list.remove(index)
+        context.scene.roma_typology_uses_name_list_index = min(max(0, index - 1), len(use_name_list) - 1)
+        # print("lenght post", len(use_name_list))
+            # counter +=1
+            
+    # add the uses stored in the typology to the current typology use UIList        
+    selected_typology_index = context.scene.roma_typology_name_list_index
+    # selected_typology_id = context.scene.roma_typology_name_list[selected_typology_index].id
+    list = context.scene.roma_typology_name_list[selected_typology_index].useList
+    if len(list) > 0:
+        split_list = list.split(";")
+        for el in split_list:
+            context.scene.roma_typology_uses_name_list.add()
+            temp_list = []    
+            # for el in context.scene.roma_typology_uses_name_list:
+            temp_list.append(int(el))
+            last = len(context.scene.roma_typology_uses_name_list)-1
+            # context.scene.roma_typology_uses_name_list[last].id = max(temp_list)+1
+            # look for the correspondent use name in roma_use_name_list
+            for use in context.scene.roma_use_name_list:
+                if int(el) == use.id:
+                    context.scene.roma_typology_uses_name_list[last].id = use.id
+                    context.scene.roma_typology_uses_name_list[last].name = use.name 
+                    break
+            
+        
+# when a use related to the current typology is updated in the UIList,
+# it is necessary to update the relative list in Scene.roma_typology_uses_name_list
+def update_typology_uses_list(context):
+    selected_typology_index = context.scene.roma_typology_name_list_index
+    # selected_typology_id = context.scene.roma_typology_name_list[selected_typology_index].id
     
+    #the exististing list is replaced with what is in the UiList
+    # print("existing", context.scene.roma_typology_name_list[selected_typology_index].useList)
+    
+    tmp = ""
+    for el in context.scene.roma_typology_uses_name_list:
+        tmp += str(el.id) + ";"
+    # remove the last ";" in the string
+    tmp = tmp[:-1]
+    context.scene.roma_typology_name_list[selected_typology_index].useList = tmp
+    # if len(context.scene.roma_typology_name_list[selected_typology_id].useList) == 0:
+    #     context.scene.roma_typology_name_list[selected_typology_id].useList += str(use_id)
+    # else:
+    #     context.scene.roma_typology_name_list[selected_typology_id].useList += ";" + str(use_id)
+    # print("updated", context.scene.roma_typology_name_list[selected_typology_index].useList)
+    
+    
+
+# when the typology is selected, the relative uses listed in the UIList need to be updated in the UI
+@persistent    
+def update_typology_uses_function(self, context):
+    scene = context.scene
+    previous = scene.roma_previous_selected_typology
+    current = scene.roma_typology_name_list_index
+    if previous != current:
+        scene.roma_previous_selected_typology = current
+        update_typology_uses_UI(context)
+        
+# update the typology use in the UIList with the name selected
+# in the drop down menu       
 def update_typology_uses_name_label(self, context):
     # global useName
     scene = context.scene
     name = scene.roma_typology_uses_names
-    scene.roma_typology_uses_name_list[scene.roma_typology_uses_name_list_index].name = name
-    
+    # if the typology is newly created, the index is equal to -1 and therefore there is an out of range error
+    # Also, in this case, there are no values to update
+    if scene.roma_typology_uses_name_list_index > -1:
+        scene.roma_typology_uses_name_list[scene.roma_typology_uses_name_list_index].name = name
+        for n in scene.roma_use_name_list:
+            if n.name == name:
+                scene.roma_typology_uses_name_list[scene.roma_typology_uses_name_list_index].id = n.id
+                update_typology_uses_list(context)
+                break    
             
 class typology_uses_name_list(PropertyGroup):
     id: IntProperty(
@@ -830,10 +1067,10 @@ class typology_uses_name_list(PropertyGroup):
            description="The typology use name",
            default="")
     
-    position: IntProperty(
-           name="Use position",
-           description="Position of the use in the typology (bottom, center, top)",
-           default = 1)
+    # position: IntProperty(
+    #        name="Use position",
+    #        description="Position of the use in the typology (bottom, center, top)",
+    #        default = 1)
     
 ############################            ############################
 ############################ BUILDING   ############################
