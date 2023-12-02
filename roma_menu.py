@@ -2,11 +2,18 @@ import bpy
 import bmesh 
 from bpy.types import Menu, Operator
 from bpy_extras.io_utils import ExportHelper
+from bpy_extras.object_utils import AddObjectHelper
 from bpy.props import StringProperty
-from decimal import Decimal, ROUND_HALF_DOWN
+
+import random
+# import decimal
+from decimal import Decimal #, ROUND_HALF_DOWN
+from datetime import datetime
 # from math import ceil as mathCeil
 
 import csv #, os
+from bpy.utils import resource_path
+from pathlib import Path
 
 header_aggregateData = ["Option", "Phase", "Plot Name", "Block Name", "Use", "N. of Storeys", "Footprint", "Perimeter", "Façade area", "GEA"]
 header_granularData = ["Option", "Phase", "Plot Name", "Block Name", "Use", "Floor", "Level", "GEA", "Perimeter", "Façade area"]
@@ -122,6 +129,20 @@ class romaAddonProperties(bpy.types.PropertyGroup):
         description="The construction phase of the building"
     )
     
+    roma_plot_attribute: bpy.props.IntProperty(
+        name="RoMa Plot Attribute",
+        default=1,
+        min=1,
+        description="Plot name"
+    )
+    
+    roma_block_attribute: bpy.props.IntProperty(
+        name="RoMa Block Attribute",
+        default=1,
+        min=1,
+        description="Block name"
+    )
+    
 class faceEdge():
      def __init__(self, index = None, face = None, storeys = None, topStorey = None, length = None, perimeter = None):
         #  self.objName = objName
@@ -140,6 +161,7 @@ class RoMa_Menu(Menu):
     def draw(self, context):
         layout = self.layout
         #layout.active = bool(context.active_object.mode!='EDIT  ')
+        layout.operator(RoMa_MenuOperator_add_RoMa_mesh.bl_idname)
         layout.operator(RoMa_MenuOperator_convert_to_RoMa_mesh.bl_idname)
         layout.separator()
         printAggregate = layout.operator(RoMa_MenuOperator_PrintData.bl_idname, text="Print the data of the mass in compact form")
@@ -150,7 +172,93 @@ class RoMa_Menu(Menu):
         layout.separator()
         layout.operator(RoMa_Operator_transformation_orientation.bl_idname)
 
+class RoMa_MenuOperator_add_RoMa_mesh(Operator, AddObjectHelper):
+    """Add a RoMa mesh"""
+    bl_idname = "object.roma_add_roma_mesh"
+    bl_label = "RoMa mesh"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    width: bpy.props.FloatProperty(
+        name="Width",
+        description="RoMa mesh width",
+        # min=0.01, max=100.0,
+        min=0,
+        default=10,
+    )
+    
+    depth: bpy.props.FloatProperty(
+        name="Depth",
+        description="RoMa mesh depth",
+        # min=0.01, max=100.0,
+        min=0,
+        default=10,
+    )
+    
+    def execute(self, context):
 
+        verts_loc, faces = add_roma_mesh(
+            self.width,
+            self.depth,
+        )
+
+        mesh = bpy.data.meshes.new("RoMa mesh")
+
+        bm = bmesh.new()
+
+        for v_co in verts_loc:
+            bm.verts.new(v_co)
+
+        bm.verts.ensure_lookup_table()
+        for f_idx in faces:
+            bm.faces.new([bm.verts[i] for i in f_idx])
+
+        bm.to_mesh(mesh)
+        mesh.update()
+
+        # add the mesh as an object into the scene with this utility module
+        from bpy_extras import object_utils
+        object_utils.object_data_add(context, mesh, operator=self)
+        
+        obj = bpy.context.active_object
+        obj.select_set(True)
+        
+        addAttributes(obj)
+        addNodes()
+        initLists()
+        # add roma mass geo node to the created object
+        geoName = "RoMa Mass"
+        obj.modifiers.new(geoName, "NODES")
+        group = bpy.data.node_groups["Roma Mass"]
+        obj.modifiers[geoName].node_group = group
+        return {'FINISHED'}
+    
+def add_roma_mesh(width, depth):
+    """
+    This function takes inputs and returns vertex and face arrays.
+    no actual mesh data creation is done here.
+    """
+
+    verts = [
+        (+0.0, +0.0,  +0.0),
+        (+1.0, +0.0,  +0.0),
+        (+1.0, +1.0,  +0.0),
+        (+0.0, +1.0,  +0.0),
+        ]
+
+    faces = [
+        (0, 1, 2, 3),
+    ]
+
+    # apply size
+    for i, v in enumerate(verts):
+        verts[i] = v[0] * width, v[1] * depth, v[2]
+
+    return verts, faces
+
+# add the entri to the add menu
+def roma_add_menu_func(self, context):
+    self.layout.operator(RoMa_MenuOperator_add_RoMa_mesh.bl_idname, icon='MESH_CUBE')
+    
 class RoMa_MenuOperator_convert_to_RoMa_mesh(Operator):
     bl_idname = "object.roma_convert_to_roma"
     bl_label = "Convert the selected mesh to a RoMa mesh"
@@ -164,40 +272,151 @@ class RoMa_MenuOperator_convert_to_RoMa_mesh(Operator):
         selected_meshes = [obj for obj in selected_objects if obj.type == 'MESH']
         # mode = None
         for obj in selected_meshes:
-            obj.roma_props['roma_option_attribute'] = 1
-            obj.roma_props['roma_phase_attribute'] = 1
-            mesh = obj.data
-            mesh["RoMa object"] = True
-            for a in attribute_set:
-                try:
-                    mesh.attributes[a["attr"]]
-                except:
-                    if a["attr_domain"] is None: # to set custom attributes to the object, not to vertex, edge or face
-                        obj[a["attr"]] = a["attr_default"]
-                    else:
-                        mesh.attributes.new(name=a["attr"], type=a["attr_type"], domain=a["attr_domain"])
-                        if a["attr_domain"] == 'FACE':
-                            attribute = mesh.attributes[a["attr"]].data.items()
-                            for face in mesh.polygons:
-                                index = face.index
-                                for mesh_attribute in attribute:
-                                    if mesh_attribute[0]  == index:
-                                        mesh_attribute[1].value = a["attr_default"]
-                                        break
-                        elif a["attr_domain"] == 'EDGE':
-                            attribute = mesh.attributes[a["attr"]].data.items()
-                            for edge in mesh.edges:
-                                index = edge.index
-                                for mesh_attribute in attribute:
-                                    if mesh_attribute[0]  == index:
-                                        mesh_attribute[1].value = a["attr_default"]
-                                        break
-                        #     
-                        #     attribute[0][1].value = None
+            addAttributes(obj)
             
-     
+        addNodes()
+        initLists()
         return {'FINISHED'}
 
+# assign the roma attributes to the selected object
+def addAttributes(obj):
+    obj.roma_props['roma_option_attribute'] = 1
+    obj.roma_props['roma_phase_attribute'] = 1
+    obj.roma_props['roma_plot_attribute'] = 0
+    obj.roma_props['roma_block_attribute'] = 0
+    mesh = obj.data
+    mesh["RoMa object"] = True
+    for a in attribute_set:
+        try:
+            mesh.attributes[a["attr"]]
+        except:
+            if a["attr_domain"] is None: # to set custom attributes to the object, not to vertex, edge or face
+                obj[a["attr"]] = a["attr_default"]
+            else:
+                mesh.attributes.new(name=a["attr"], type=a["attr_type"], domain=a["attr_domain"])
+                if a["attr_domain"] == 'FACE':
+                    attribute = mesh.attributes[a["attr"]].data.items()
+                    for face in mesh.polygons:
+                        index = face.index
+                        for mesh_attribute in attribute:
+                            if mesh_attribute[0]  == index:
+                                mesh_attribute[1].value = a["attr_default"]
+                                break
+                elif a["attr_domain"] == 'EDGE':
+                    attribute = mesh.attributes[a["attr"]].data.items()
+                    for edge in mesh.edges:
+                        index = edge.index
+                        for mesh_attribute in attribute:
+                            if mesh_attribute[0]  == index:
+                                mesh_attribute[1].value = a["attr_default"]
+                                break
+                #     
+                #     attribute[0][1].value = None
+    
+# import the roma nodes in the file
+def addNodes():
+    USER = Path(resource_path('USER'))
+    src = USER / "scripts/addons" / "roma"
+
+    file_path = src / "roma.blend"
+    inner_path = "NodeTree"
+    geoNodes_list = ("Roma Mass", "Roma Mullions")
+
+    for group in geoNodes_list:
+        if group not in bpy.data.node_groups:
+            bpy.ops.wm.append(
+                filepath=str(file_path / inner_path / group),
+                directory=str(file_path / inner_path),
+                filename = group
+                )   
+    
+def initLists():
+    # if bpy.context.preferences.addons['roma'].preferences.toggleSelectionOverlay:
+    #     bpy.data.window_managers["WinMan"].toggle_selection_overlay = True
+    
+    
+    if len(bpy.context.scene.roma_plot_name_current) == 0:
+        bpy.context.scene.roma_plot_name_current.add()
+        bpy.context.scene.roma_plot_name_current[0].id = 0
+        bpy.context.scene.roma_plot_name_current[0].name = " "
+        # print("roma_plot_name_current",len(bpy.context.scene.roma_plot_name_current))
+    
+    if len(bpy.context.scene.roma_block_name_current) == 0:
+        bpy.context.scene.roma_block_name_current.add()
+        bpy.context.scene.roma_block_name_current[0].id = 0
+        bpy.context.scene.roma_block_name_current[0].name = " "
+        # print("roma_block_name_current)", len(bpy.context.scene.roma_block_name_current))
+        
+    if len(bpy.context.scene.roma_use_name_current) == 0:
+        bpy.context.scene.roma_use_name_current.add()
+        bpy.context.scene.roma_use_name_current[0].id = 0
+        bpy.context.scene.roma_use_name_current[0].name = " "
+        # print("roma_use_name_current",len(bpy.context.scene.roma_use_name_current))
+        
+    if len(bpy.context.scene.roma_typology_name_current) == 0:
+        bpy.context.scene.roma_typology_name_current.add()
+        bpy.context.scene.roma_typology_name_current[0].id = 0
+        bpy.context.scene.roma_typology_name_current[0].name = " "
+        # print("roma_use_name_current",len(bpy.context.scene.roma_use_name_current))
+        
+    if len(bpy.context.scene.roma_facade_name_current) == 0:
+        bpy.context.scene.roma_facade_name_current.add()
+        bpy.context.scene.roma_facade_name_current[0].id = 0
+        bpy.context.scene.roma_facade_name_current[0].name = " "
+        # print("roma_facade_name_current",len(bpy.context.scene.roma_facade_name_current))
+        
+    if len(bpy.context.scene.roma_floor_name_current) == 0:
+        bpy.context.scene.roma_floor_name_current.add()
+        bpy.context.scene.roma_floor_name_current[0].id = 0
+        bpy.context.scene.roma_floor_name_current[0].name = " "
+    
+    if len(bpy.context.scene.roma_plot_name_list) == 0:
+        bpy.context.scene.roma_plot_name_list.add()
+        bpy.context.scene.roma_plot_name_list[0].id = 0
+        bpy.context.scene.roma_plot_name_list[0].name = ""
+        random.seed(datetime.now().timestamp())
+        rndNumber = float(Decimal(random.randrange(0,10000000))/10000000)
+        bpy.context.scene.roma_plot_name_list[0].RND = rndNumber
+        
+    if len(bpy.context.scene.roma_block_name_list) == 0:
+        bpy.context.scene.roma_block_name_list.add()
+        bpy.context.scene.roma_block_name_list[0].id = 0
+        bpy.context.scene.roma_block_name_list[0].name = ""
+        random.seed(datetime.now().timestamp())
+        rndNumber = float(Decimal(random.randrange(0,10000000))/10000000)
+        bpy.context.scene.roma_block_name_list[0].RND = rndNumber
+        
+    if len(bpy.context.scene.roma_use_name_list) == 0:
+        bpy.context.scene.roma_use_name_list.add()
+        bpy.context.scene.roma_use_name_list[0].id = 0
+        bpy.context.scene.roma_use_name_list[0].name = ""
+        # random.seed(datetime.now().timestamp())
+        # rndNumber = float(Decimal(random.randrange(0,10000000))/10000000)
+        # bpy.context.scene.roma_use_name_list[0].RND = rndNumber
+    
+    if len(bpy.context.scene.roma_typology_name_list) == 0:
+        bpy.context.scene.roma_typology_name_list.add()
+        bpy.context.scene.roma_typology_name_list[0].id = 0
+        bpy.context.scene.roma_typology_name_list[0].name = ""
+        random.seed(datetime.now().timestamp())
+        rndNumber = float(Decimal(random.randrange(0,10000000))/10000000)
+        bpy.context.scene.roma_typology_name_list[0].RND = rndNumber
+        
+    if len(bpy.context.scene.roma_facade_name_list) == 0:
+        bpy.context.scene.roma_facade_name_list.add()
+        bpy.context.scene.roma_facade_name_list[0].id = 0
+        bpy.context.scene.roma_facade_name_list[0].name = ""
+        bpy.context.scene.roma_facade_name_list[0].normal = 0
+      
+    if len(bpy.context.scene.roma_floor_name_list) == 0:
+        bpy.context.scene.roma_floor_name_list.add()
+        bpy.context.scene.roma_floor_name_list[0].id = 0
+        bpy.context.scene.roma_floor_name_list[0].name = ""
+
+   
+        
+    
+    
     
 class RoMa_MenuOperator_PrintData(Operator):
     bl_idname = "object.roma_print_data"

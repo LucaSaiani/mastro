@@ -121,12 +121,9 @@ class VIEW3D_PT_RoMa_project_data(Panel):
         layout = self.layout
         # obj = context.object
 
-        # layout.label(text="Operators:")
-        col = layout.column(align=True)
-        # col.operator(SimpleOperator.bl_idname, text="Execute Something", icon="CONSOLE")
-        col.prop(context.window_manager, 'toggle_selection_overlay', icon_only=False)
-        
-        layout.separator()
+        # col = layout.column(align=True)
+        # col.prop(context.window_manager, 'toggle_selection_overlay', icon_only=False)
+        # layout.separator()
 
 
 class VIEW3D_PT_RoMa_show_data(Panel):

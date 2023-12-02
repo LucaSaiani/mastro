@@ -37,6 +37,8 @@ else:
     
 import bpy
 
+
+
 #from bpy.props import (
 #    BoolProperty
 #     IntProperty, 
@@ -48,12 +50,13 @@ from bpy.types import(
 )
 
 from bpy.app.handlers import persistent
-import random
-import decimal
-from datetime import datetime
 
 
 
+# add the roma nodes to the blend file
+
+
+    
 classes = (
     roma_preferences.roma_addon_preferences,
     # roma_preferences.OBJECT_OT_roma_addon_prefs,
@@ -115,6 +118,7 @@ classes = (
     roma_project_data.FLOOR_LIST_OT_NewItem,
     roma_project_data.FLOOR_LIST_OT_MoveItem,
     
+    roma_menu.RoMa_MenuOperator_add_RoMa_mesh,
     roma_menu.RoMa_MenuOperator_convert_to_RoMa_mesh,
     roma_menu.RoMa_MenuOperator_PrintData,
     roma_menu.RoMa_MenuOperator_ExportCSV,
@@ -126,7 +130,7 @@ classes = (
     # roma_vertex.VIEW3D_PT_RoMa_vertex,
     
     # roma_mass.OBJECT_OT_add_RoMa_Mass,
-    roma_mass.OBJECT_OT_SetPlotId,
+    # roma_mass.OBJECT_OT_SetPlotId,
     roma_mass.OBJECT_OT_SetBlockId,
     roma_mass.OBJECT_OT_SetTypologyId,
     roma_mass.OBJECT_OT_SetMassStoreys,
@@ -137,10 +141,7 @@ classes = (
     roma_facade.OBJECT_OT_SetFacadeId,
     roma_facade.OBJECT_OT_SetFacadeNormal,
     roma_facade.OBJECT_OT_SetFloorId,
-    roma_facade.VIEW3D_PT_RoMa_Facade
-    
-    
-    
+    roma_facade.VIEW3D_PT_RoMa_Facade,
 )
 
 # buttons = (
@@ -204,96 +205,25 @@ def get_floor_names_from_list(scene, context):
 #             # print("inizializzo")
 #     # print("macche")
 #     bpy.app.handlers.load_post.remove(init_data)
+
 @persistent
 def onFileLoaded(scene):
-    if len(bpy.context.scene.roma_plot_name_current) == 0:
-        bpy.context.scene.roma_plot_name_current.add()
-        bpy.context.scene.roma_plot_name_current[0].id = 0
-        bpy.context.scene.roma_plot_name_current[0].name = " "
-        # print("roma_plot_name_current",len(bpy.context.scene.roma_plot_name_current))
+    roma_menu.initLists()
     
-    if len(bpy.context.scene.roma_block_name_current) == 0:
-        bpy.context.scene.roma_block_name_current.add()
-        bpy.context.scene.roma_block_name_current[0].id = 0
-        bpy.context.scene.roma_block_name_current[0].name = " "
-        # print("roma_block_name_current)", len(bpy.context.scene.roma_block_name_current))
-        
-    if len(bpy.context.scene.roma_use_name_current) == 0:
-        bpy.context.scene.roma_use_name_current.add()
-        bpy.context.scene.roma_use_name_current[0].id = 0
-        bpy.context.scene.roma_use_name_current[0].name = " "
-        # print("roma_use_name_current",len(bpy.context.scene.roma_use_name_current))
-        
-    if len(bpy.context.scene.roma_typology_name_current) == 0:
-        bpy.context.scene.roma_typology_name_current.add()
-        bpy.context.scene.roma_typology_name_current[0].id = 0
-        bpy.context.scene.roma_typology_name_current[0].name = " "
-        # print("roma_use_name_current",len(bpy.context.scene.roma_use_name_current))
-        
-    if len(bpy.context.scene.roma_facade_name_current) == 0:
-        bpy.context.scene.roma_facade_name_current.add()
-        bpy.context.scene.roma_facade_name_current[0].id = 0
-        bpy.context.scene.roma_facade_name_current[0].name = " "
-        # print("roma_facade_name_current",len(bpy.context.scene.roma_facade_name_current))
-        
-    if len(bpy.context.scene.roma_floor_name_current) == 0:
-        bpy.context.scene.roma_floor_name_current.add()
-        bpy.context.scene.roma_floor_name_current[0].id = 0
-        bpy.context.scene.roma_floor_name_current[0].name = " "
-    
-    if len(bpy.context.scene.roma_plot_name_list) == 0:
-        bpy.context.scene.roma_plot_name_list.add()
-        bpy.context.scene.roma_plot_name_list[0].id = 0
-        bpy.context.scene.roma_plot_name_list[0].name = ""
-        random.seed(datetime.now().timestamp())
-        rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
-        bpy.context.scene.roma_plot_name_list[0].RND = rndNumber
-        
-    if len(bpy.context.scene.roma_block_name_list) == 0:
-        bpy.context.scene.roma_block_name_list.add()
-        bpy.context.scene.roma_block_name_list[0].id = 0
-        bpy.context.scene.roma_block_name_list[0].name = ""
-        random.seed(datetime.now().timestamp())
-        rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
-        bpy.context.scene.roma_block_name_list[0].RND = rndNumber
-        
-    if len(bpy.context.scene.roma_use_name_list) == 0:
-        bpy.context.scene.roma_use_name_list.add()
-        bpy.context.scene.roma_use_name_list[0].id = 0
-        bpy.context.scene.roma_use_name_list[0].name = ""
-        # random.seed(datetime.now().timestamp())
-        # rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
-        # bpy.context.scene.roma_use_name_list[0].RND = rndNumber
-    
-    if len(bpy.context.scene.roma_typology_name_list) == 0:
-        bpy.context.scene.roma_typology_name_list.add()
-        bpy.context.scene.roma_typology_name_list[0].id = 0
-        bpy.context.scene.roma_typology_name_list[0].name = ""
-        random.seed(datetime.now().timestamp())
-        rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
-        bpy.context.scene.roma_typology_name_list[0].RND = rndNumber
-        
-    if len(bpy.context.scene.roma_facade_name_list) == 0:
-        bpy.context.scene.roma_facade_name_list.add()
-        bpy.context.scene.roma_facade_name_list[0].id = 0
-        bpy.context.scene.roma_facade_name_list[0].name = ""
-        bpy.context.scene.roma_facade_name_list[0].normal = 0
-      
-    if len(bpy.context.scene.roma_floor_name_list) == 0:
-        bpy.context.scene.roma_floor_name_list.add()
-        bpy.context.scene.roma_floor_name_list[0].id = 0
-        bpy.context.scene.roma_floor_name_list[0].name = ""
-
     bpy.context.scene.updating_mesh_attributes_is_active = False
+    bpy.context.scene.show_selection_overlay_is_active = False
+  
     try:
         bpy.app.handlers.depsgraph_update_pre.remove(onFileLoaded)
     except:
         pass
     
+    
 def register():
     bpy.app.handlers.depsgraph_update_post.append(roma_project_data.update_typology_uses_function)
     bpy.app.handlers.depsgraph_update_pre.append(onFileLoaded)
     bpy.app.handlers.depsgraph_update_post.append(roma_modal_operator.update_mesh_attributes_depsgraph)
+    bpy.app.handlers.depsgraph_update_post.append(roma_modal_operator.update_show_overlay)
     
     # bpy.app.handlers.depsgraph_update_post.append(roma_modal_operator.refresh_roma_mesh_attributes)
     
@@ -301,20 +231,22 @@ def register():
     for cls in classes:
         register_class(cls)
         
+    
     # for btn in buttons:
     #     bpy.types.VIEW3D_MT_mesh_add.append(btn)
     
      
     bpy.types.VIEW3D_MT_editor_menus.append(roma_menu.roma_menu)
     
-   
+    bpy.types.VIEW3D_MT_mesh_add.append(roma_menu.roma_add_menu_func)
     
-    bpy.types.WindowManager.roma_show_properties_run_opengl = bpy.props.BoolProperty(default=False)
+    # bpy.types.WindowManager.roma_show_properties_run_opengl = bpy.props.BoolProperty(default=False)
     
-    bpy.types.WindowManager.toggle_selection_overlay = bpy.props.BoolProperty(
-                                                    default = False,
-                                                    name = "Selection overlay",
-                                                    update = roma_modal_operator.roma_selection_overlay)
+    # bpy.types.WindowManager.toggle_selection_overlay = bpy.props.BoolProperty(
+    #                                                 default = True,
+    #                                                 name = "Selection overlay",
+    #                                                 description = "Show selection overlay when the RoMa mass is in edit mode",
+    #                                                 update = roma_modal_operator.roma_selection_overlay)
 
     bpy.types.WindowManager.toggle_show_data = bpy.props.BoolProperty(
                                             default = False,
@@ -361,17 +293,21 @@ def register():
     Scene.updating_mesh_attributes_is_active = bpy.props.BoolProperty(
                                         name = "update attributes via depsgraph",
                                         default = False
-                                         )
+                                        )
+    Scene.show_selection_overlay_is_active = bpy.props.BoolProperty(
+                                        name = "show selection overlay",
+                                        default = False
+                                        )
     
     Scene.attribute_mass_plot_id = bpy.props.IntProperty(
                                         name="Plot Id",
-                                        default=0,
-                                        update = roma_mass.update_attribute_mass_plot_id)
+                                        default=0)
+                                        # update = roma_mass.update_attribute_mass_plot_id)
      
     Scene.attribute_mass_block_id = bpy.props.IntProperty(
                                         name="Block Id",
-                                        default=0,
-                                        update = roma_mass.update_attribute_mass_block_id)
+                                        default=0)
+                                        # update = roma_mass.update_attribute_mass_block_id)
      
     # Scene.attribute_mass_use_id = bpy.props.IntProperty(
     #                                     name="Use Id",
@@ -423,20 +359,20 @@ def register():
     Scene.roma_plot_name_list_index = bpy.props.IntProperty(name = "Plot Name",
                                              default = 0)
     Scene.roma_plot_names = bpy.props.EnumProperty(
-                                        name="Plot List",
-                                        description="",
+                                        name="Plot names",
+                                        description="Current plot name",
                                         items=get_plot_names_from_list,
-                                        update=roma_mass.update_plot_name_label)
+                                        update=roma_mass.update_plot_name_id)
     
     Scene.roma_block_name_list = bpy.props.CollectionProperty(type = roma_project_data.block_name_list)
     Scene.roma_block_name_current = bpy.props.CollectionProperty(type =roma_project_data.name_with_id)
     Scene.roma_block_name_list_index = bpy.props.IntProperty(name = "Block Name",
                                              default = 0)
     Scene.roma_block_names = bpy.props.EnumProperty(
-                                        name="Block List",
-                                        description="",
+                                        name="Block names",
+                                        description="Current block name ",
                                         items=get_block_names_from_list,
-                                        update=roma_mass.update_block_name_label)
+                                        update=roma_mass.update_block_name_id)
     
     Scene.roma_use_name_list = bpy.props.CollectionProperty(type = roma_project_data.use_name_list)
     Scene.roma_use_name_current = bpy.props.CollectionProperty(type =roma_project_data.name_with_id)
@@ -504,13 +440,14 @@ def unregister():
     #     bpy.types.VIEW3D_MT_mesh_add.remove(btn)
         
     bpy.types.VIEW3D_MT_editor_menus.remove(roma_menu.roma_menu)
+    bpy.types.VIEW3D_MT_mesh_add.remove(roma_menu.roma_add_menu_func)
     
-    wm = bpy.context.window_manager
-    p = 'roma_show_properties_run_opengl'
-    if p in wm:
-        del wm[p]
+    # wm = bpy.context.window_manager
+    # p = 'roma_show_properties_run_opengl'
+    # if p in wm:
+    #     del wm[p]
 
-    del bpy.types.WindowManager.toggle_selection_overlay
+    # del bpy.types.WindowManager.toggle_selection_overlay
     del bpy.types.WindowManager.toggle_show_data
     del bpy.types.WindowManager.toggle_plot_name
     del bpy.types.WindowManager.toggle_block_name
