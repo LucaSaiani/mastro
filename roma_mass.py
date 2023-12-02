@@ -65,12 +65,22 @@ class VIEW3D_PT_RoMa_Mass(Panel):
                 layout.use_property_split = True    
                 layout.use_property_decorate = False  # No animation.
                 
-                row = layout.row()
+                # row = layout.row()
                 row = layout.row(align=True)
                 
                 layout.prop(obj.roma_props, "roma_option_attribute", text="Option")
                 layout.prop(obj.roma_props, "roma_phase_attribute", text="Phase")
-            
+                # row = layout.row()
+                row = layout.row(align=True)
+                row.prop(context.scene, "roma_plot_names", icon="MOD_BOOLEAN", icon_only=True, text="Plot")
+                if scene.roma_plot_name_list and len(scene.roma_plot_name_list) >0:
+                    row.label(text = scene.roma_plot_name_current[0].name)
+                row = layout.row(align=True)
+                row.prop(context.scene, "roma_block_names", icon="HOME", icon_only=True, text="Block")
+                if scene.roma_block_name_list and len(scene.roma_block_name_list) >0:
+                    row.label(text = scene.roma_block_name_current[0].name)
+                
+                    
             elif mode == "EDIT" and "RoMa object" in obj.data:
                 scene = context.scene
                 
@@ -86,7 +96,7 @@ class VIEW3D_PT_RoMa_Mass(Panel):
                 # subcol = col.column()
                 
                 # layout.active = bool(context.active_object.mode=='EDIT')
-                row = layout.row()
+                # row = layout.row()
                 row = layout.row(align=True)
                 
                 # split = row.split(factor=0.5)
@@ -94,27 +104,18 @@ class VIEW3D_PT_RoMa_Mass(Panel):
                 # split.label(text=item.name, icon=custom_icon) 
                 
                 ################ PLOT ######################
-                row.prop(context.scene, "roma_plot_names", icon="MOD_BOOLEAN", icon_only=True, text="Plot")
-                if scene.roma_plot_name_list and len(scene.roma_plot_name_list) >0:
-                    # item = scene.roma_plot_name_list[scene.roma_plot_name_list_index]
-                    # value = ""
-                    # for n in scene.roma_plot_name_list:
-                    #     if n.index == index:
-                    #         value = str(n.index) + n.name
-                    # row.label(text=" "+ str(item.index) + " " + item.name)
-                    row.label(text = scene.roma_plot_name_current[0].name)
-                # row.prop(item, "name", text="")
-                # layout.prop(context.scene, "attribute_mass_plot_id", text="Plot Index")
+                # row.prop(context.scene, "roma_plot_names", icon="MOD_BOOLEAN", icon_only=True, text="Plot")
+                # if scene.roma_plot_name_list and len(scene.roma_plot_name_list) >0:
+                #     row.label(text = scene.roma_plot_name_current[0].name)
                 
                 ################ BLOCK ######################
-                row = layout.row()
-                row = layout.row(align=True)
-                row.prop(context.scene, "roma_block_names", icon="HOME", icon_only=True, text="Block")
-                if len(scene.roma_block_name_list) >0:
-                    row.label(text=scene.roma_block_name_current[0].name)
-                # layout.prop(context.scene, "attribute_mass_block_id", text="Block Name")
+                # row = layout.row()
+                # row = layout.row(align=True)
+                # row.prop(context.scene, "roma_block_names", icon="HOME", icon_only=True, text="Block")
+                # if len(scene.roma_block_name_list) >0:
+                #     row.label(text=scene.roma_block_name_current[0].name)
                 ################ TYPOLOGY ######################
-                row = layout.row()
+                # row = layout.row()
                 row = layout.row(align=True)
                 row.prop(context.scene, "roma_typology_names", icon="ASSET_MANAGER", icon_only=True, text="Typology")
                 if len(scene.roma_typology_name_list) >0:
@@ -141,52 +142,55 @@ class VIEW3D_PT_RoMa_Mass(Panel):
                     #context.scene.attribute_mass_storeys = activeFace.index
                     #       bpy.ops.object.mode_set(mode='EDIT')
     
-class OBJECT_OT_SetPlotId(Operator):
-    """Set Face Attribute as name of the plot"""
-    bl_idname = "object.set_attribute_mass_plot_id"
-    bl_label = "Set the Id of the plot"
-    bl_options = {'REGISTER', 'UNDO'}
+# update the plot id attribute of the selected face
+# class OBJECT_OT_SetPlotId(Operator):
+#     """Set the attribute attribute_mass_plot_id to the selected faces"""
+#     bl_idname = "object.set_attribute_mass_plot_id"
+#     bl_label = "Set the Id of the plot"
+#     bl_options = {'REGISTER', 'UNDO'}
     
-    def execute(self, context):
-        obj = context.active_object
-        mesh = obj.data
+#     def execute(self, context):
+#         obj = context.active_object
+#         mesh = obj.data
 
-        attribute_mass_plot_id = context.scene.attribute_mass_plot_id
-        
-        # a custom attribute is assigned to the edges
-       
-        try:
-            mesh.attributes["roma_plot_id"]
-            attribute_mass_plot_id = context.scene.attribute_mass_plot_id
+#         attribute_mass_plot_id = context.scene.attribute_mass_plot_id
+#         try:
+#             mesh.attributes["roma_plot_id"]
+#             attribute_mass_plot_id = context.scene.attribute_mass_plot_id
            
-            # we need to switch from Edit mode to Object mode so the selection gets updated
-            mode = obj.mode
-            bpy.ops.object.mode_set(mode='OBJECT')
+#             # we need to switch from Edit mode to Object mode so the selection gets updated
+#             mode = obj.mode
+#             bpy.ops.object.mode_set(mode='EDIT')
+#             bpy.ops.mesh.select_all(action='SELECT')
+            
+#             bpy.ops.object.mode_set(mode='OBJECT')
            
-            selected_faces = [p for p in bpy.context.active_object.data.polygons if p.select]
-            mesh_attributes_id = mesh.attributes["roma_plot_id"].data.items()
-            mesh_attributes_RND = mesh.attributes["roma_plot_RND"].data.items()
-            for face in selected_faces:
-                index = face.index
-                for mesh_attribute in mesh_attributes_id:
-                    if mesh_attribute[0] == index:
-                        mesh_attribute[1].value = attribute_mass_plot_id
-                for mesh_attribute in mesh_attributes_RND:
-                    if mesh_attribute[0] == index:
-                        for el in context.scene.roma_plot_name_list:
-                            if el["id"] == attribute_mass_plot_id:
-                                mesh_attribute[1].value = el["RND"]
-                                break
+#             # selected_faces = [p for p in bpy.context.active_object.data.polygons if p.select]
+            
+#             mesh_attributes_id = mesh.attributes["roma_plot_id"].data.items()
+#             mesh_attributes_RND = mesh.attributes["roma_plot_RND"].data.items()
+#             # for face in selected_faces:
+#             for face in mesh.polygons:
+#                 index = face.index
+#                 for mesh_attribute in mesh_attributes_id:
+#                     if mesh_attribute[0] == index:
+#                         mesh_attribute[1].value = attribute_mass_plot_id
+#                 for mesh_attribute in mesh_attributes_RND:
+#                     if mesh_attribute[0] == index:
+#                         for el in context.scene.roma_plot_name_list:
+#                             if el["id"] == attribute_mass_plot_id:
+#                                 mesh_attribute[1].value = el["RND"]
+#                                 break
            
-            # back to whatever mode we were in
-            bpy.ops.object.mode_set(mode=mode)
+#             # back to whatever mode we were in
+#             bpy.ops.object.mode_set(mode=mode)
                     
-            # self.report({'INFO'}, "Attribute set to face, plot: "+str(attribute_mass_plot_id))
-            # global changed_massAttribute
-            # changed_massAttribute = True
-            return {'FINISHED'}
-        except:
-            return {'FINISHED'}
+#             # self.report({'INFO'}, "Attribute set to face, plot: "+str(attribute_mass_plot_id))
+#             # global changed_massAttribute
+#             # changed_massAttribute = True
+#             return {'FINISHED'}
+#         except:
+#             return {'FINISHED'}
         
 class OBJECT_OT_SetBlockId(Operator):
     """Set Face Attribute as name of the block"""
@@ -438,11 +442,13 @@ class OBJECT_OT_SetMassStoreys(Operator):
 #         text="RoMa Mass",
 #         icon='PLUGIN')
     
-def update_attribute_mass_plot_id(self,context):
-    bpy.ops.object.set_attribute_mass_plot_id()
+# update the plot id assigned to the selected faces    
+# def update_attribute_mass_plot_id(self,context):
+    # bpy.ops.object.set_attribute_mass_plot_id()
     
-def update_attribute_mass_block_id(self, context):
-    bpy.ops.object.set_attribute_mass_block_id()
+# update the block id assigned to the selected faces  
+# def update_attribute_mass_block_id(self, context):
+#     bpy.ops.object.set_attribute_mass_block_id()
     
 # def update_attribute_mass_use_id(self, context):
 #     bpy.ops.object.set_attribute_mass_typology_id()
@@ -459,33 +465,41 @@ def update_attribute_mass_storeys(self, context):
 # def update_attribute_obj_phase(self, context):
 #     bpy.ops.object.set_attribute_obj_phase()
 
-def update_plot_name_label(self, context):
-    # global plotName
+# update the plot id attribute assigned to the selected object
+def update_plot_name_id(self, context):
     scene = context.scene
     name = scene.roma_plot_names
-    scene.roma_plot_name_current[0].name = " " + name
+    # scene.roma_plot_name_current[0].name = " " + name
+    scene.roma_plot_name_current[0].name = name
     for n in scene.roma_plot_name_list:
         if n.name == name:
             scene.attribute_mass_plot_id = n.id
             scene.roma_plot_name_current[0].id = n.id
+            
+            obj = context.active_object
+            obj.roma_props['roma_plot_attribute'] = n.id
+            # print("Aggiorno")
             break 
 
-def update_block_name_label(self, context):
+def update_block_name_id(self, context):
     # global blockName
     scene = context.scene
     name = scene.roma_block_names
-    scene.roma_block_name_current[0].name = " " + name
+    scene.roma_block_name_current[0].name = name
     for n in scene.roma_block_name_list:
         if n.name == name:
             scene.attribute_mass_block_id = n.id
             scene.roma_block_name_current[0].id = n.id
+            
+            obj = context.active_object
+            obj.roma_props['roma_block_attribute'] = n.id
             break   
         
 def update_typology_name_label(self, context):
     # global useName
     scene = context.scene
     name = scene.roma_typology_names
-    scene.roma_typology_name_current[0].name = " " + name
+    scene.roma_typology_name_current[0].name = name
     for n in scene.roma_typology_name_list:
         if n.name == name:
             scene.attribute_mass_typology_id = n.id

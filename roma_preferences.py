@@ -1,6 +1,9 @@
 import bpy
 from bpy.types import Operator, AddonPreferences
-from bpy.props import IntProperty, FloatVectorProperty #StringProperty, FloatProperty, BoolProperty
+
+
+    
+# from bpy.props import IntProperty, FloatVectorProperty #StringProperty, FloatProperty, BoolProperty
 
 class roma_addon_preferences(AddonPreferences):
     # this must match the add-on name, use '__package__'
@@ -20,13 +23,13 @@ class roma_addon_preferences(AddonPreferences):
     #     name="Example Boolean",
     #     default=False,
     # )
-    fontSize: IntProperty(
+    fontSize: bpy.props.IntProperty(
         name="Font Size",
         min = 8,
         default = 8
     )
     
-    edgeSize: IntProperty(
+    edgeSize: bpy.props.IntProperty(
         name="Edge thickness of the selection",
         min = 1,
         default = 3
@@ -55,6 +58,12 @@ class roma_addon_preferences(AddonPreferences):
                  min = 0.0,
                  max = 1.0,
                  default = (1.0, 0.0, 0.0, 0.4))
+    
+    toggleSelectionOverlay: bpy.props.BoolProperty(
+                name = "Selection overlay",
+                default = True,
+                description = "Show selection overlay when the RoMa mass is in edit mode"
+                )
 
 
     def draw(self, context):
@@ -71,6 +80,13 @@ class roma_addon_preferences(AddonPreferences):
         row.label(text = "Font Color:")
         row.prop(self, "fontColor", icon_only=True)
         row = layout.row()
+        
+        layout.separator
+        # col = layout.column(align=True)
+        row = layout.row()
+        row.label(text = "Toggle selection overlay:")
+        row.prop(self, "toggleSelectionOverlay", icon_only=True)
+        row = layout.row()
         row.label(text = "Edge selection size:")
         row.prop(self, "edgeSize", icon_only=True)
         row = layout.row()
@@ -81,6 +97,7 @@ class roma_addon_preferences(AddonPreferences):
         row.prop(self, "faceColor", icon_only=True)
        
         
+
 # class OBJECT_OT_roma_addon_prefs(Operator):
 #     """Display example preferences"""
 #     bl_idname = "object.roma_addon_prefs"
