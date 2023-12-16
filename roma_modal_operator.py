@@ -9,7 +9,8 @@ from bpy_extras import view3d_utils
 from bpy.types import Operator
 
 from mathutils import Vector
-# from datetime import datetime
+from datetime import datetime
+import math
 
 class VIEW_3D_OT_show_roma_selection(Operator):
     bl_idname = "wm.show_roma_selection"
@@ -37,7 +38,8 @@ class VIEW_3D_OT_show_roma_selection(Operator):
             self.handle_remove(self, context)
         return {'FINISHED'}
     
-    def invoke(self, context, event):
+    def invoke(self, context, event):  # attributes["storey A"][index][1].value = int(list_storey_A)
+      
         
         self.execute(context)
         return {'RUNNING_MODAL'}
@@ -378,13 +380,14 @@ def draw_main_show_attributes(context):
             if bpy.context.window_manager.toggle_typology_name:   
                 for n in scene.roma_typology_name_list:
                     if n.id == idUse:
-                        text_typology = (("Typology: " + n.name), 0)
-                        if blf.dimensions(font_id, text_typology[0])[0] > line_width:
-                            line_width = blf.dimensions(font_id, text_typology[0])[0]
-                        vert_offset += half_line_height
-                        text_face.append(text_typology)
-                        text_face.append(cr)           
-                        break
+                        if n.name != "":
+                            text_typology = (("Typology: " + n.name), 0)
+                            if blf.dimensions(font_id, text_typology[0])[0] > line_width:
+                                line_width = blf.dimensions(font_id, text_typology[0])[0]
+                            vert_offset += half_line_height
+                            text_face.append(text_typology)
+                            text_face.append(cr)           
+                            break
             if bpy.context.window_manager.toggle_floor_name:   
                 for n in scene.roma_floor_name_list:
                     if n.id == idFloor:
@@ -462,14 +465,15 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
             if n.id == blockId:
                 scene.roma_block_name_current[0].name = n.name
                 break
-            
+        bpy.context.scene.updating_mesh_attributes_is_active = False    
+        return {'FINISHED'}
+        
         
     
     def execute_edit (self, context):
-    # global plotName
-        # global blockName
-        # global useName
+        # print("eseguo")
         scene = bpy.context.scene
+        projectUses = scene.roma_use_name_list
         
         obj = bpy.context.active_object
         # if tuple(bpy.context.scene.tool_settings.mesh_select_mode)[2] == True: #we are selecting faces
@@ -477,8 +481,8 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
         
         obj.update_from_editmode()
         mesh = obj.data
-        
-       
+        # attr = mesh.attributes["roma_typology_id"].data.items()
+        # print("aaaa", attr)
 
         # activeFace = mesh.polygons[mesh.polygons.active]
         selected_edges = [e for e in mesh.edges if e.select]
@@ -500,30 +504,55 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
             
             bm = bmesh.from_edit_mesh(mesh)
             # print("AGGIUNGO BMESH")
-            bm.edges.ensure_lookup_table()
+            # bm.edges.ensure_lookup_table()
 
             bMesh_facade = bm.edges.layers.int["roma_facade_id"]
             bMesh_normal = bm.edges.layers.int["roma_inverted_normal"]
             
-            bm.faces.ensure_lookup_table()
+            # bm.faces.ensure_lookup_table()
             # bMesh_plot = bm.faces.layers.int["roma_plot_id"]
             # bMesh_block = bm.faces.layers.int["roma_block_id"]
             bMesh_typology = bm.faces.layers.int["roma_typology_id"]
             bMesh_storeys = bm.faces.layers.int["roma_number_of_storeys"]
             bMesh_floor = bm.faces.layers.int["roma_floor_id"]
+            bMesh_use_list = bm.faces.layers.int["roma_list_use_id"]
+            bMesh_storey_list = bm.faces.layers.int["roma_list_storeys"]
+            bMesh_height_A = bm.faces.layers.int["roma_list_height_A"]
+            bMesh_height_B = bm.faces.layers.int["roma_list_height_B"]
+            bMesh_height_C = bm.faces.layers.int["roma_list_height_C"]
+            bMesh_height_D = bm.faces.layers.int["roma_list_height_D"]
+            bMesh_height_E = bm.faces.layers.int["roma_list_height_E"]
+            # bMesh_storey_B = bm.faces.layers.int["roma_list_storey_B"]
+            #               "storey A" : mesh.attributes["roma_list_storey_A"].data.items(),
+            #               "storey B" : mesh.attributes["roma_list_storey_B"].data.items(),
+            #               "height A" : mesh.attributes["roma_list_height_A"].data.items(),
+            #               "height B" : mesh.attributes["roma_list_height_B"].data.items(),
+            #               "height C" : mesh.attributes["roma_list_height_C"].data.items(),
+            #               "height D" : mesh.attributes["roma_list_height_D"].data.items(),
+            #               "height E" : mesh.attributes["roma_list_height_E"].data.items(),
 
             selected_bmEdges = [edge for edge in bm.edges if edge.select]
             selected_bmFaces = [face for face in bm.faces if face.select]
             
             # active_vert = isinstance(bm.select_history.active, bmesh.types.BMVert)
-            active_edge = isinstance(bm.select_history.active, bmesh.types.BMEdge)
-            active_face = isinstance(bm.select_history.active, bmesh.types.BMFace)
+            # active_edge = isinstance(bm.select_history.active, bmesh.types.BMEdge)
+            # active_face = isinstance(bm.select_history.active, bmesh.types.BMFace)
+            activElem = bm.select_history.active
+            # print("contreollo", len(selected_bmFaces), activElem)
+            # if activElem == None:
+            #     bpy.context.scene.updating_mesh_attributes_is_active = False    
+            #     return {'FINISHED'}
+                # print("ce ne è uno", activElem)
+                # for el in activElem:
+                #     print(el)
+            
             
             # if bm.faces.active is not None:
-                # print("NONE FACES !!!!!!!!!!!!!")
+            #     print("NONE FACES !!!!!!!!!!!!!")
             # else:
-            if active_edge:
-                bMesh_active_index = bm.select_history.active.index
+            # if active_edge:
+            if (activElem != None and type(activElem).__name__ == 'BMEdge'):
+                bMesh_active_index = activElem.index
                 
                 for edge in selected_edges:
                     try:
@@ -562,9 +591,11 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
                     
                         
                         
-            elif active_face:
-                bMesh_active_index = bm.select_history.active.index
-                
+            # elif active_face:
+            elif (activElem != None and type(activElem).__name__ == 'BMFace'):
+            # elif tuple(bpy.context.scene.tool_settings.mesh_select_mode)[2] == True: #we are selecting faces
+                # print("active")
+                bMesh_active_index = activElem.index
                 for face in selected_faces:
                     try:
                         bm.faces.ensure_lookup_table()
@@ -573,14 +604,18 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
                         pass
                     
                 for bmFace in selected_bmFaces:
+                    # print("ciao")
                     try:
                         # plot = bmFace[bMesh_plot]
                         # block = bmFace[bMesh_block]
                         typology = bmFace[bMesh_typology] 
-                        storey = bmFace[bMesh_storeys]
+                        storey = bmFace[bMesh_storeys]  
                         floor = bmFace[bMesh_floor]
+                        # print("list", typology, storey, floor)
                         # if bm.faces.active is not None and bmFace.index ==  bMesh_active_index:
+                        # print("quack", bmFace.index, bMesh_active_index)
                         if bmFace.index ==  bMesh_active_index:
+                            # print("yo")
                             ############# PLOT ####################
                             # if scene.attribute_mass_plot_id != plot:
                             #     scene.attribute_mass_plot_id = plot
@@ -627,9 +662,169 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
                                     if n.id == scene.roma_floor_name_current[0].id:
                                         scene.roma_floor_name_current[0].name = " " + n.name 
                                         break
+                            
+                            
+                           
                         break   
                     except:
                         pass
+            
+            # update the attributes of the selected faces
+            if len(selected_bmFaces) > 0:
+                try:
+                    for bmFace in selected_bmFaces:
+                        typology_id = bmFace[bMesh_typology] 
+                        numberOfStoreys = bmFace[bMesh_storeys] 
+                        # if typology_id > 0:
+                        #     print("typology",typology_id)
+                        use_list = bpy.context.scene.roma_typology_name_list[typology_id].useList
+                        # print("useList", use_list)
+                        useSplit = use_list.split(";")
+                        
+                        use_id_list = "1"
+                        storey_list = "1"
+                        height_A = "1"
+                        height_B = "1"
+                        height_C = "1"
+                        height_D = "1"
+                        height_E = "1"
+                        liquidPosition = [] # to count how many liquid uses they are
+                        fixedStoreys = 0 # to count how many fixed storeys they are
+                        
+                        usesUiList = bpy.context.scene.roma_obj_typology_uses_name_list
+                        # clean the list
+                        while len(usesUiList) > 0:
+                            index = bpy.context.scene.roma_obj_typology_uses_name_list_index
+                            usesUiList.remove(index)
+                            bpy.context.scene.roma_obj_typology_uses_name_list_index = min(max(0, index - 1), len(usesUiList) - 1)
+                        
+                        for enum, el in enumerate(useSplit):
+                            # print("split",el)
+                            #### list_use_id
+                            if int(el) < 10:
+                                use_id_list += "0" + el
+                            else:
+                                use_id_list += el
+                            # print("use_id_list", use_id_list)
+                                
+                            ###setting the values for each use
+                            for use in projectUses:
+                                if use.id == int(el):
+                                    # number of storeys for the use
+                                    # if a use is "liquid" the number of storeys is set as 00
+                                    if use.liquid: 
+                                        storeys = "00"
+                                        liquidPosition.append(enum)
+                                    else:
+                                        fixedStoreys += use.storeys
+                                        storeys = str(use.storeys)
+                                        if use.storeys < 10:
+                                            storeys = "0" + storeys
+                                            
+                                    storey_list += storeys
+                                    
+                                    #### floor to floor height for each use, stored in A, B, C, ...
+                                    #### due to the fact that arrays can't be used
+                                    #### and array like (3.555, 12.664, 0.123)
+                                    #### is saved as
+                                    #### A (1010) tens
+                                    #### B (1320) units
+                                    #### C (1561) first decimal
+                                    #### D (1562) second decimal
+                                    #### E (1543) third decimal
+                                    #### each array starting with 1 since a number can't start with 0
+                                    height = str(round(use.floorToFloor,3))
+                                    if use.floorToFloor < 10:
+                                        height = "0" + height
+                                    height_A += height[0]
+                                    height_B += height[1]
+                                    try:
+                                        # height[3]
+                                        height_C += height[3]
+                                        try:
+                                            height_D += height[4]
+                                            try:
+                                                height_E += height[5]
+                                            except:
+                                                height_E += "0"
+                                        except:
+                                            height_D += "0"
+                                            height_E += "0"
+                                    except:
+                                        height_C += "0"
+                                        height_D += "0"
+                                        height_E += "0"
+                                    break
+                        # print("HALLO", int(use_id_list))
+                        bmFace[bMesh_use_list] = int(use_id_list)
+                        
+                        # print("HELLO")
+                        # liquid storeys need to be converted to actual storeys
+                        # print()
+                        # print("total storeys", numberOfStoreys)
+                        # print("in position", liquidPosition )
+                        storeyCheck = numberOfStoreys - fixedStoreys - len(liquidPosition)
+                        # if the typology has more storeys than the selected mass
+                        # some extra storeys are added
+                        if storeyCheck < 1: 
+                            scene.attribute_mass_storeys = fixedStoreys + len(liquidPosition)
+                        storeyLeft = numberOfStoreys - fixedStoreys
+                        # print("ciao", len(liquidPosition), storeyLeft)
+                        storey_list = storey_list[1:] # the 1 at the start of the number is removed
+                        if len(liquidPosition) > 0:
+                            n = storeyLeft/len(liquidPosition)
+                            liquidStoreyNumber = math.floor(n)
+
+                            insert = str(liquidStoreyNumber)
+                            if liquidStoreyNumber < 10:
+                                insert = "0" + insert
+                                
+                            index = 0
+                            while index < len(liquidPosition):
+                                el = liquidPosition[index]
+                                # if the rounding of the liquid storeys is uneven,
+                                # the last liquid floor is increased of 1 storey
+                                if index == len(liquidPosition) -1 and  math.modf(n)[0] > 0:
+                                    insert = str(liquidStoreyNumber +1) 
+                                    if liquidStoreyNumber +1 < 10:
+                                        insert = "0" + insert
+                                    
+                                storey_list = storey_list[:el*2] + insert + storey_list[el*2 +2:]
+                                # print("el", el)
+                                index += 1
+                                
+                        
+                        # update the uses shown in the UIList in the Mass menu
+                        # in the 3D view
+                        # print("usesplit", useSplit)
+                        for enum, el in enumerate(useSplit):
+                            id = int(el)
+                            usesUiList.add()
+                            usesUiList[enum].id = enum + 1
+                            for use in bpy.context.scene.roma_use_name_list:
+                                if id == use.id:
+                                    usesUiList[enum].name = use.name
+                                    s = storey_list[enum*2:(enum*2+2)]
+                                    usesUiList[enum].storeys = int(s)
+                                    break
+                            # print("fatto")
+                            
+                                    
+                        storey_list = "1" + storey_list # the 1 is readded  
+                        bmFace[bMesh_storey_list] = int(storey_list)
+                        bmFace[bMesh_height_A] = int(height_A)
+                        bmFace[bMesh_height_B] = int(height_B)
+                        bmFace[bMesh_height_C] = int(height_C)
+                        bmFace[bMesh_height_D] = int(height_D)
+                        bmFace[bMesh_height_E] = int(height_E)
+                        
+                        # print("updated", storey_list)
+                            
+                except:
+                    pass
+            
+            
+                
             bmesh.update_edit_mesh(mesh)
             bm.free()
                 
@@ -650,7 +845,7 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
             # print("RIMUOVO BMESH")
             
     # checkingFace = False
-            
+        # print("fatto")
         bpy.context.scene.updating_mesh_attributes_is_active = False    
         return {'FINISHED'}
 
@@ -668,18 +863,28 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
     #     return {'PASS_THROUGH'}
         
     def invoke(self, context, event):
+        # print("invoked")
         if event.type in {'LEFTMOUSE', 'RIGHTMOUSE'}:
+            # print("IFFO")
             obj = bpy.context.active_object
             if obj is not None and obj.type == "MESH":
+                # print("IFFO1", obj.name)
                 if "RoMa object" in obj.data:
+                    # print("IFFO2", obj.mode)
                     if obj.mode == "OBJECT":
                         self.execute_object(context)
+                        bpy.context.scene.updating_mesh_attributes_is_active = False
                     elif obj.mode == "EDIT":
+                        # print("IFFO3")
                         self.execute_edit(context)
-                    # print("INVOKED")
-                        
-        # else:
-        bpy.context.scene.updating_mesh_attributes_is_active = False
+                        bpy.context.scene.updating_mesh_attributes_is_active = False
+                    # return {'RUNNING_MODAL'}
+            # else:
+            bpy.context.scene.updating_mesh_attributes_is_active = False
+        else:
+            # print("ritorno")
+            bpy.context.scene.updating_mesh_attributes_is_active = False
+            
         return {'RUNNING_MODAL'}
        
 
@@ -689,6 +894,7 @@ def update_mesh_attributes_depsgraph(self, context):
     if context.scene.updating_mesh_attributes_is_active == False:
         # print("... e invoco", datetime.now())
         context.scene.updating_mesh_attributes_is_active = True
+        
         bpy.ops.wm.update_mesh_attributes_modal_operator('INVOKE_DEFAULT')
     # bpy.app.handlers.depsgraph_update_post.remove(update_mesh_attributes_depsgraph)
     
