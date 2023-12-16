@@ -9,7 +9,7 @@ import random
 # import decimal
 from decimal import Decimal #, ROUND_HALF_DOWN
 from datetime import datetime
-# from math import ceil as mathCeil
+import math
 
 import csv #, os
 from bpy.utils import resource_path
@@ -45,30 +45,30 @@ attribute_set = [
             # "attr_type" :  "INT",
             # "attr_domain" :  "EDGE"
             # },
-            {
-            "attr" :  "roma_plot_id",
-            "attr_type" :  "INT",
-            "attr_domain" :  "FACE",
-            "attr_default" : 0
-            },
-            {
-            "attr" :  "roma_plot_RND",
-            "attr_type" :  "FLOAT",
-            "attr_domain" :  "FACE",
-            "attr_default" : 0
-            },
-            {
-            "attr" :  "roma_block_id",
-            "attr_type" :  "INT",
-            "attr_domain" :  "FACE",
-            "attr_default" : 0
-            },
-            {
-            "attr" :  "roma_block_RND",
-            "attr_type" :  "FLOAT",
-            "attr_domain" :  "FACE",
-            "attr_default" : 0
-            },
+            # {
+            # "attr" :  "roma_plot_id",
+            # "attr_type" :  "INT",
+            # "attr_domain" :  "FACE",
+            # "attr_default" : 0
+            # },
+            # {
+            # "attr" :  "roma_plot_RND",
+            # "attr_type" :  "FLOAT",
+            # "attr_domain" :  "FACE",
+            # "attr_default" : 0
+            # },
+            # {
+            # "attr" :  "roma_block_id",
+            # "attr_type" :  "INT",
+            # "attr_domain" :  "FACE",
+            # "attr_default" : 0
+            # },
+            # {
+            # "attr" :  "roma_block_RND",
+            # "attr_type" :  "FLOAT",
+            # "attr_domain" :  "FACE",
+            # "attr_default" : 0
+            # },
             # {
             # "attr" :  "roma_use_id",
             # "attr_type" :  "INT",
@@ -85,14 +85,62 @@ attribute_set = [
             "attr" :  "roma_typology_id",
             "attr_type" :  "INT",
             "attr_domain" :  "FACE",
-            "attr_default" : 0
+            # "attr_default" : "typology id"
             },
             {
-            "attr" :  "roma_typology_RND",
-            "attr_type" :  "FLOAT",
+            "attr" :  "roma_list_use_id",
+            "attr_type" :  "INT",
             "attr_domain" :  "FACE",
-            "attr_default" : 0
+            # "attr_default" : 0
             },
+            {
+            "attr" :  "roma_list_storeys",
+            "attr_type" :  "INT",
+            "attr_domain" :  "FACE",
+            # "attr_default" : 0
+            },
+            # {
+            # "attr" :  "roma_list_storey_B",
+            # "attr_type" :  "INT",
+            # "attr_domain" :  "FACE",
+            # "attr_default" : 0
+            # },
+            {
+            "attr" :  "roma_list_height_A",
+            "attr_type" :  "INT",
+            "attr_domain" :  "FACE",
+            # "attr_default" : 0
+            },
+            {
+            "attr" :  "roma_list_height_B",
+            "attr_type" :  "INT",
+            "attr_domain" :  "FACE",
+            # "attr_default" : 0
+            },
+            {
+            "attr" :  "roma_list_height_C",
+            "attr_type" :  "INT",
+            "attr_domain" :  "FACE",
+            # "attr_default" : 0
+            },
+            {
+            "attr" :  "roma_list_height_D",
+            "attr_type" :  "INT",
+            "attr_domain" :  "FACE",
+            # "attr_default" : 0
+            },
+            {
+            "attr" :  "roma_list_height_E",
+            "attr_type" :  "INT",
+            "attr_domain" :  "FACE",
+            # "attr_default" : 0
+            },
+            # {
+            # "attr" :  "roma_typology_RND",
+            # "attr_type" :  "FLOAT",
+            # "attr_domain" :  "FACE",
+            # "attr_default" : 0
+            # },
             {
             "attr" :  "roma_floor_id",
             "attr_type" :  "INT",
@@ -183,7 +231,7 @@ class RoMa_MenuOperator_add_RoMa_mesh(Operator, AddObjectHelper):
         description="RoMa mesh width",
         # min=0.01, max=100.0,
         min=0,
-        default=10,
+        default=12,
     )
     
     depth: bpy.props.FloatProperty(
@@ -191,8 +239,15 @@ class RoMa_MenuOperator_add_RoMa_mesh(Operator, AddObjectHelper):
         description="RoMa mesh depth",
         # min=0.01, max=100.0,
         min=0,
-        default=10,
+        default=8,
     )
+    
+    storeys: bpy.props.IntProperty(
+            name="Number of Storeys",
+            description="Number of storeys of the mass",
+            min = 1,
+            default = 3)
+    
     
     def execute(self, context):
 
@@ -223,12 +278,23 @@ class RoMa_MenuOperator_add_RoMa_mesh(Operator, AddObjectHelper):
         obj.select_set(True)
         
         addAttributes(obj)
+            
         addNodes()
-        initLists()
+        # initLists()
+        
+        
+        mesh_attributes = obj.data.attributes["roma_number_of_storeys"].data.items()
+        # face = obj.data.polygons[0]
+        mesh_attributes[0][1].value = self.storeys
+        # index = face.index
+        # for mesh_attribute in mesh_attributes:
+        #     if mesh_attribute[0] == index:
+        #         mesh_attribute[1].value = self.storeys
+
         # add roma mass geo node to the created object
         geoName = "RoMa Mass"
         obj.modifiers.new(geoName, "NODES")
-        group = bpy.data.node_groups["Roma Mass"]
+        group = bpy.data.node_groups["RoMa Mass"]
         obj.modifiers[geoName].node_group = group
         return {'FINISHED'}
     
@@ -275,7 +341,7 @@ class RoMa_MenuOperator_convert_to_RoMa_mesh(Operator):
             addAttributes(obj)
             
         addNodes()
-        initLists()
+        # initLists()
         return {'FINISHED'}
 
 # assign the roma attributes to the selected object
@@ -286,6 +352,98 @@ def addAttributes(obj):
     obj.roma_props['roma_block_attribute'] = 0
     mesh = obj.data
     mesh["RoMa object"] = True
+    
+    typology_id = bpy.context.scene.roma_typology_name_list_index
+    projectUses = bpy.context.scene.roma_use_name_list
+    
+    use_list = bpy.context.scene.roma_typology_name_list[typology_id].useList
+    useSplit = use_list.split(";")
+
+    use_id_list = "1"
+    storey_list = "1"
+    height_A = "1"
+    height_B = "1"
+    height_C = "1"
+    height_D = "1"
+    height_E = "1"
+    liquidPosition = []
+    fixedStoreys = 0
+    numberOfStoreys = 3 # default value for initial number of storeys
+    
+    for enum,el in enumerate(useSplit):
+        if int(el) < 10:
+            use_id_list += "0" + el
+        else:
+            use_id_list += el
+            
+        for use in projectUses:
+            if use.id == int(el):
+                # number of storeys for the use
+                # if a use is "liquid" the number of storeys is set as 00
+                if use.liquid: 
+                    storeys = "00"
+                    liquidPosition.append(enum)
+                else:
+                    fixedStoreys += use.storeys
+                    storeys = str(use.storeys)
+                    if use.storeys < 10:
+                        storeys = "0" + storeys
+                        
+                storey_list += storeys
+                height = str(round(use.floorToFloor,3))
+                if use.floorToFloor < 10:
+                    height = "0" + height
+                height_A += height[0]
+                height_B += height[1]
+                try:
+                    # height[3]
+                    height_C += height[3]
+                    try:
+                        height_D += height[4]
+                        try:
+                            height_E += height[5]
+                        except:
+                            height_E += "0"
+                    except:
+                        height_D += "0"
+                        height_E += "0"
+                except:
+                    height_C += "0"
+                    height_D += "0"
+                    height_E += "0"
+                break
+            
+        storeyCheck = numberOfStoreys - fixedStoreys - len(liquidPosition)
+        # if the typology has more storeys than the selected mass
+        # some extra storeys are added
+        if storeyCheck < 1: 
+            bpy.scene.attribute_mass_storeys = fixedStoreys + len(liquidPosition)
+        storeyLeft = numberOfStoreys - fixedStoreys
+        
+        storey_list = storey_list[1:] # the 1 at the start of the number is removed
+        if len(liquidPosition) > 0:
+            n = storeyLeft/len(liquidPosition)
+            liquidStoreyNumber = math.floor(n)
+
+            insert = str(liquidStoreyNumber)
+            if liquidStoreyNumber < 10:
+                insert = "0" + insert
+                
+            index = 0
+            while index < len(liquidPosition):
+                el = liquidPosition[index]
+                # if the rounding of the liquid storeys is uneven,
+                # the last liquid floor is increased of 1 storey
+                if index == len(liquidPosition) -1 and  math.modf(n)[0] > 0:
+                    insert = str(liquidStoreyNumber +1) 
+                    if liquidStoreyNumber +1 < 10:
+                        insert = "0" + insert
+                    
+                storey_list = storey_list[:el*2] + insert + storey_list[el*2 +2:]
+                # print("el", el)
+                index += 1
+        storey_list = "1" + storey_list # the 1 is readded  
+            
     for a in attribute_set:
         try:
             mesh.attributes[a["attr"]]
@@ -300,7 +458,25 @@ def addAttributes(obj):
                         index = face.index
                         for mesh_attribute in attribute:
                             if mesh_attribute[0]  == index:
-                                mesh_attribute[1].value = a["attr_default"]
+                                if a["attr"] == "roma_typology_id":
+                                    mesh_attribute[1].value = bpy.context.scene.roma_typology_name_list[typology_id].id
+                                elif a["attr"] == "roma_list_use_id": 
+                                    mesh_attribute[1].value = int(use_id_list)
+                                elif a["attr"] == "roma_list_storeys":
+                                    mesh_attribute[1].value = int(storey_list)
+                                    print("storeys", storey_list)
+                                elif a["attr"] == "roma_list_height_A":
+                                    mesh_attribute[1].value = int(height_A)
+                                elif a["attr"] == "roma_list_height_B":
+                                    mesh_attribute[1].value = int(height_B)
+                                elif a["attr"] == "roma_list_height_C":
+                                    mesh_attribute[1].value = int(height_C)
+                                elif a["attr"] == "roma_list_height_D":
+                                    mesh_attribute[1].value = int(height_D)
+                                elif a["attr"] == "roma_list_height_E":
+                                    mesh_attribute[1].value = int(height_E)
+                                else:
+                                    mesh_attribute[1].value = a["attr_default"]
                                 break
                 elif a["attr_domain"] == 'EDGE':
                     attribute = mesh.attributes[a["attr"]].data.items()
@@ -320,7 +496,7 @@ def addNodes():
 
     file_path = src / "roma.blend"
     inner_path = "NodeTree"
-    geoNodes_list = ("Roma Mass", "Roma Mullions")
+    geoNodes_list = ("RoMa Mass", "RoMa Mullions")
 
     for group in geoNodes_list:
         if group not in bpy.data.node_groups:
@@ -330,90 +506,7 @@ def addNodes():
                 filename = group
                 )   
     
-def initLists():
-    # if bpy.context.preferences.addons['roma'].preferences.toggleSelectionOverlay:
-    #     bpy.data.window_managers["WinMan"].toggle_selection_overlay = True
-    
-    
-    if len(bpy.context.scene.roma_plot_name_current) == 0:
-        bpy.context.scene.roma_plot_name_current.add()
-        bpy.context.scene.roma_plot_name_current[0].id = 0
-        bpy.context.scene.roma_plot_name_current[0].name = " "
-        # print("roma_plot_name_current",len(bpy.context.scene.roma_plot_name_current))
-    
-    if len(bpy.context.scene.roma_block_name_current) == 0:
-        bpy.context.scene.roma_block_name_current.add()
-        bpy.context.scene.roma_block_name_current[0].id = 0
-        bpy.context.scene.roma_block_name_current[0].name = " "
-        # print("roma_block_name_current)", len(bpy.context.scene.roma_block_name_current))
-        
-    if len(bpy.context.scene.roma_use_name_current) == 0:
-        bpy.context.scene.roma_use_name_current.add()
-        bpy.context.scene.roma_use_name_current[0].id = 0
-        bpy.context.scene.roma_use_name_current[0].name = " "
-        # print("roma_use_name_current",len(bpy.context.scene.roma_use_name_current))
-        
-    if len(bpy.context.scene.roma_typology_name_current) == 0:
-        bpy.context.scene.roma_typology_name_current.add()
-        bpy.context.scene.roma_typology_name_current[0].id = 0
-        bpy.context.scene.roma_typology_name_current[0].name = " "
-        # print("roma_use_name_current",len(bpy.context.scene.roma_use_name_current))
-        
-    if len(bpy.context.scene.roma_facade_name_current) == 0:
-        bpy.context.scene.roma_facade_name_current.add()
-        bpy.context.scene.roma_facade_name_current[0].id = 0
-        bpy.context.scene.roma_facade_name_current[0].name = " "
-        # print("roma_facade_name_current",len(bpy.context.scene.roma_facade_name_current))
-        
-    if len(bpy.context.scene.roma_floor_name_current) == 0:
-        bpy.context.scene.roma_floor_name_current.add()
-        bpy.context.scene.roma_floor_name_current[0].id = 0
-        bpy.context.scene.roma_floor_name_current[0].name = " "
-    
-    if len(bpy.context.scene.roma_plot_name_list) == 0:
-        bpy.context.scene.roma_plot_name_list.add()
-        bpy.context.scene.roma_plot_name_list[0].id = 0
-        bpy.context.scene.roma_plot_name_list[0].name = ""
-        random.seed(datetime.now().timestamp())
-        rndNumber = float(Decimal(random.randrange(0,10000000))/10000000)
-        bpy.context.scene.roma_plot_name_list[0].RND = rndNumber
-        
-    if len(bpy.context.scene.roma_block_name_list) == 0:
-        bpy.context.scene.roma_block_name_list.add()
-        bpy.context.scene.roma_block_name_list[0].id = 0
-        bpy.context.scene.roma_block_name_list[0].name = ""
-        random.seed(datetime.now().timestamp())
-        rndNumber = float(Decimal(random.randrange(0,10000000))/10000000)
-        bpy.context.scene.roma_block_name_list[0].RND = rndNumber
-        
-    if len(bpy.context.scene.roma_use_name_list) == 0:
-        bpy.context.scene.roma_use_name_list.add()
-        bpy.context.scene.roma_use_name_list[0].id = 0
-        bpy.context.scene.roma_use_name_list[0].name = ""
-        # random.seed(datetime.now().timestamp())
-        # rndNumber = float(Decimal(random.randrange(0,10000000))/10000000)
-        # bpy.context.scene.roma_use_name_list[0].RND = rndNumber
-    
-    if len(bpy.context.scene.roma_typology_name_list) == 0:
-        bpy.context.scene.roma_typology_name_list.add()
-        bpy.context.scene.roma_typology_name_list[0].id = 0
-        bpy.context.scene.roma_typology_name_list[0].name = ""
-        random.seed(datetime.now().timestamp())
-        rndNumber = float(Decimal(random.randrange(0,10000000))/10000000)
-        bpy.context.scene.roma_typology_name_list[0].RND = rndNumber
-        
-    if len(bpy.context.scene.roma_facade_name_list) == 0:
-        bpy.context.scene.roma_facade_name_list.add()
-        bpy.context.scene.roma_facade_name_list[0].id = 0
-        bpy.context.scene.roma_facade_name_list[0].name = ""
-        bpy.context.scene.roma_facade_name_list[0].normal = 0
-      
-    if len(bpy.context.scene.roma_floor_name_list) == 0:
-        bpy.context.scene.roma_floor_name_list.add()
-        bpy.context.scene.roma_floor_name_list[0].id = 0
-        bpy.context.scene.roma_floor_name_list[0].name = ""
 
-   
         
     
     
@@ -673,24 +766,24 @@ def get_mass_data(obj):
         
     data = []
     
-    bm_layer_plot = bm.faces.layers.int["roma_plot_id"]
-    bm_layer_block = bm.faces.layers.int["roma_block_id"]
+    # bm_layer_plot = bm.faces.layers.int["roma_plot_id"]
+    # bm_layer_block = bm.faces.layers.int["roma_block_id"]
     bm_layer_typology = bm.faces.layers.int["roma_typology_id"]
     bm_layer_storey = bm.faces.layers.int["roma_number_of_storeys"]
     
     for f in bm.faces:
         edges = []
         #plot
-        for n in bpy.context.scene.roma_plot_name_list:
-            if n.id == f[bm_layer_plot]:
-                plot = n.name
-                break
+        # for n in bpy.context.scene.roma_plot_name_list:
+        #     if n.id == f[bm_layer_plot]:
+        #         plot = n.name
+        #         break
 
         #block
-        for n in bpy.context.scene.roma_block_name_list:
-            if n.id == f[bm_layer_block]:
-                block = n.name
-                break
+        # for n in bpy.context.scene.roma_block_name_list:
+        #     if n.id == f[bm_layer_block]:
+        #         block = n.name
+        #         break
 
         #typology
         for n in bpy.context.scene.roma_typology_name_list:

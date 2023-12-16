@@ -5,7 +5,14 @@ class VIEW3D_PT_RoMa_Facade(Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "RoMa"
-    bl_label = "Building"
+    bl_label = "Architecture"
+    
+    @classmethod
+    def poll(cls, context):
+        return (context.object is not None and 
+                context.object.type == "MESH" and 
+                context.object.mode == "EDIT" and
+                "RoMa object" in context.object.data)
     
     def draw(self, context):
         obj = context.active_object 

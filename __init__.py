@@ -131,9 +131,11 @@ classes = (
     
     # roma_mass.OBJECT_OT_add_RoMa_Mass,
     # roma_mass.OBJECT_OT_SetPlotId,
-    roma_mass.OBJECT_OT_SetBlockId,
+    # roma_mass.OBJECT_OT_SetBlockId,
     roma_mass.OBJECT_OT_SetTypologyId,
+    roma_mass.OBJECT_UL_OBJ_Typology_Uses,
     roma_mass.OBJECT_OT_SetMassStoreys,
+    roma_mass.obj_typology_uses_name_list,
     # roma_mass.OBJECT_OT_SetObjOption,
     # roma_mass.OBJECT_OT_SetObjPhase,
     roma_mass.VIEW3D_PT_RoMa_Mass,
@@ -144,10 +146,101 @@ classes = (
     roma_facade.VIEW3D_PT_RoMa_Facade,
 )
 
-# buttons = (
-#     roma_facade.add_RoMa_facade_button,
-#     roma_mass.add_RoMa_Mass_button
-# )
+def initLists():
+    # if bpy.context.preferences.addons['roma'].preferences.toggleSelectionOverlay:
+    #     bpy.data.window_managers["WinMan"].toggle_selection_overlay = True
+    if len(bpy.context.scene.roma_plot_name_list) == 0:
+        bpy.context.scene.roma_plot_name_list.add()
+        bpy.context.scene.roma_plot_name_list[0].id = 0
+        bpy.context.scene.roma_plot_name_list[0].name = "Plot name..."
+        # random.seed(datetime.now().timestamp())
+        # rndNumber = float(Decimal(random.randrange(0,10000000))/10000000)
+        # bpy.context.scene.roma_plot_name_list[0].RND = rndNumber
+        
+    if len(bpy.context.scene.roma_block_name_list) == 0:
+        bpy.context.scene.roma_block_name_list.add()
+        bpy.context.scene.roma_block_name_list[0].id = 0
+        bpy.context.scene.roma_block_name_list[0].name = "Block name..."
+        # random.seed(datetime.now().timestamp())
+        # rndNumber = float(Decimal(random.randrange(0,10000000))/10000000)
+        # bpy.context.scene.roma_block_name_list[0].RND = rndNumber
+        
+    if len(bpy.context.scene.roma_use_name_list) == 0:
+        bpy.context.scene.roma_use_name_list.add()
+        bpy.context.scene.roma_use_name_list[0].id = 0
+        bpy.context.scene.roma_use_name_list[0].name = "Use name..."
+        bpy.context.scene.roma_use_name_list[0].storeys = 3
+        bpy.context.scene.roma_use_name_list[0].liquid = True
+        # random.seed(datetime.now().timestamp())
+        # rndNumber = float(Decimal(random.randrange(0,10000000))/10000000)
+        # bpy.context.scene.roma_use_name_list[0].RND = rndNumber
+    
+    if len(bpy.context.scene.roma_typology_name_list) == 0:
+        bpy.context.scene.roma_typology_name_list.add()
+        bpy.context.scene.roma_typology_name_list[0].id = 0
+        bpy.context.scene.roma_typology_name_list[0].name = "Typology name... "
+        bpy.context.scene.roma_typology_name_list[0].useList = "0"
+        # bpy.context.scene.roma_typology_name_list[0].storeyList = "103"
+        
+        
+        # random.seed(datetime.now().timestamp())
+        # rndNumber = float(Decimal(random.randrange(0,10000000))/10000000)
+        # bpy.context.scene.roma_typology_name_list[0].RND = rndNumber
+    
+    if len(bpy.context.scene.roma_obj_typology_uses_name_list) == 0:
+        bpy.context.scene.roma_obj_typology_uses_name_list.add()
+        bpy.context.scene.roma_obj_typology_uses_name_list[0].id = 0
+        bpy.context.scene.roma_obj_typology_uses_name_list[0].name =  bpy.context.scene.roma_use_name_list[0].name
+    
+    if len(bpy.context.scene.roma_facade_name_list) == 0:
+        bpy.context.scene.roma_facade_name_list.add()
+        bpy.context.scene.roma_facade_name_list[0].id = 0
+        bpy.context.scene.roma_facade_name_list[0].name = "Facade type... "
+        bpy.context.scene.roma_facade_name_list[0].normal = 0
+    
+    if len(bpy.context.scene.roma_floor_name_list) == 0:
+        bpy.context.scene.roma_floor_name_list.add()
+        bpy.context.scene.roma_floor_name_list[0].id = 0
+        bpy.context.scene.roma_floor_name_list[0].name = "Floor type..."
+        
+        
+    if len(bpy.context.scene.roma_plot_name_current) == 0:
+        bpy.context.scene.roma_plot_name_current.add()
+        bpy.context.scene.roma_plot_name_current[0].id = 0
+        bpy.context.scene.roma_plot_name_current[0].name = bpy.context.scene.roma_plot_name_list[0].name
+        # print("roma_plot_name_current",len(bpy.context.scene.roma_plot_name_current))
+    
+    if len(bpy.context.scene.roma_block_name_current) == 0:
+        bpy.context.scene.roma_block_name_current.add()
+        bpy.context.scene.roma_block_name_current[0].id = 0
+        bpy.context.scene.roma_block_name_current[0].name = bpy.context.scene.roma_block_name_list[0].name
+        # print("roma_block_name_current)", len(bpy.context.scene.roma_block_name_current))
+        
+    if len(bpy.context.scene.roma_use_name_current) == 0:
+        bpy.context.scene.roma_use_name_current.add()
+        bpy.context.scene.roma_use_name_current[0].id = 0
+        bpy.context.scene.roma_use_name_current[0].name = bpy.context.scene.roma_use_name_list[0].name
+        # print("roma_use_name_current",len(bpy.context.scene.roma_use_name_current))
+        
+    if len(bpy.context.scene.roma_typology_name_current) == 0:
+        bpy.context.scene.roma_typology_name_current.add()
+        bpy.context.scene.roma_typology_name_current[0].id = 0
+        bpy.context.scene.roma_typology_name_current[0].name = bpy.context.scene.roma_typology_name_list[0].name
+        # print("roma_use_name_current",len(bpy.context.scene.roma_use_name_current))
+        
+    if len(bpy.context.scene.roma_facade_name_current) == 0:
+        bpy.context.scene.roma_facade_name_current.add()
+        bpy.context.scene.roma_facade_name_current[0].id = 0
+        bpy.context.scene.roma_facade_name_current[0].name = bpy.context.scene.roma_facade_name_list[0].name
+        # print("roma_facade_name_current",len(bpy.context.scene.roma_facade_name_current))
+        
+    if len(bpy.context.scene.roma_floor_name_current) == 0:
+        bpy.context.scene.roma_floor_name_current.add()
+        bpy.context.scene.roma_floor_name_current[0].id = 0
+        bpy.context.scene.roma_floor_name_current[0].name = bpy.context.scene.roma_floor_name_list[0].name
+
+   
+
 
 def get_plot_names_from_list(scene, context):
     items = []
@@ -208,20 +301,36 @@ def get_floor_names_from_list(scene, context):
 
 @persistent
 def onFileLoaded(scene):
-    roma_menu.initLists()
+    initLists()
     
     bpy.context.scene.updating_mesh_attributes_is_active = False
     bpy.context.scene.show_selection_overlay_is_active = False
   
-    try:
-        bpy.app.handlers.depsgraph_update_pre.remove(onFileLoaded)
-    except:
-        pass
+    # try:
+    #     bpy.app.handlers.depsgraph_update_pre.remove(onFileLoaded)
+    # except:
+    #     pass
     
+def onRegister(scene):
+    #  myCollection = bpy.context.scene.myCollection
+    # # set default value if <myCollection> is empty
+    # if not myCollection:
+    #     collectionItem = myCollection.add()
+    #     collectionItem.name = "Name 1"
+    #     collectionItem.value = "Value 1"
+    #     collectionItem = myCollection.add()
+    #     collectionItem.name = "Name 2"
+    #     collectionItem.value = "Value 2"
+    initLists()
+    bpy.app.handlers.depsgraph_update_post.remove(onRegister)
+
+   
     
 def register():
     bpy.app.handlers.depsgraph_update_post.append(roma_project_data.update_typology_uses_function)
-    bpy.app.handlers.depsgraph_update_pre.append(onFileLoaded)
+    # bpy.app.handlers.depsgraph_update_pre.append(onFileLoaded)
+    bpy.app.handlers.depsgraph_update_post.append(onRegister)
+    bpy.app.handlers.load_post.append(onFileLoaded)
     bpy.app.handlers.depsgraph_update_post.append(roma_modal_operator.update_mesh_attributes_depsgraph)
     bpy.app.handlers.depsgraph_update_post.append(roma_modal_operator.update_show_overlay)
     
@@ -336,7 +445,7 @@ def register():
     Scene.attribute_mass_storeys = bpy.props.IntProperty(
                                         name="Number of Storeys",
                                         min=1, 
-                                        default=1,
+                                        default=3,
                                         update = roma_mass.update_attribute_mass_storeys)
     
     bpy.types.Object.roma_props = bpy.props.PointerProperty(type=roma_menu.romaAddonProperties)
@@ -402,6 +511,10 @@ def register():
                                         items=get_use_names_from_list,
                                         update=roma_project_data.update_typology_uses_name_label)
     
+    Scene.roma_obj_typology_uses_name_list = bpy.props.CollectionProperty(type = roma_mass.obj_typology_uses_name_list)
+    Scene.roma_obj_typology_uses_name_list_index = bpy.props.IntProperty(name = "Typology Use Name of the selected object",
+                                             default = 0)
+    
     Scene.roma_facade_name_list = bpy.props.CollectionProperty(type = roma_project_data.facade_name_list)
     Scene.roma_facade_name_current = bpy.props.CollectionProperty(type =roma_project_data.name_with_id)
     Scene.roma_facade_name_list_index = bpy.props.IntProperty(name = "Façade Name",
@@ -421,9 +534,6 @@ def register():
                                         description="",
                                         items=get_floor_names_from_list,
                                         update=roma_facade.update_floor_name_label)
-    
-                                        
-    
    
     
 
@@ -476,6 +586,7 @@ def unregister():
     del Scene.roma_block_name_list
     del Scene.roma_use_name_list
     del Scene.roma_typology_name_list
+    del Scene.roma_obj_typology_uses_name_list
     del Scene.roma_facade_name_list
     del Scene.roma_floor_name_list
     
@@ -490,6 +601,7 @@ def unregister():
     del Scene.roma_block_name_list_index
     del Scene.roma_use_name_list_index
     del Scene.roma_typology_name_list_index
+    del Scene.roma_obj_typology_uses_name_list_index
     del Scene.roma_facade_name_list_index
     del Scene.roma_floor_name_list_index
     
@@ -501,6 +613,10 @@ def unregister():
     del Scene.roma_floor_names
     
     del Scene.roma_previous_selected_typology
+    
+    bpy.app.handlers.load_post.remove(onFileLoaded)
+    
+    
     
 if __name__ == "__main__":
     register()   

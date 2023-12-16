@@ -5,7 +5,7 @@ import bpy
 
 # import bmesh
 
-from bpy.props import StringProperty, IntProperty, FloatProperty
+from bpy.props import StringProperty, IntProperty, FloatProperty, BoolProperty
 from bpy.types import PropertyGroup, UIList, Operator, Panel
 from bpy.app.handlers import persistent
 
@@ -216,8 +216,8 @@ class VIEW3D_PT_RoMa_mass_plot_data(Panel):
         col.operator("roma_plot_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
         col.operator("roma_plot_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
         
-        row = layout.row()
-        row = layout.row(align=True)
+        # row = layout.row()
+        # row = layout.row(align=True)
         # row.prop(context.scene, "roma_plot_names", icon="MOD_BOOLEAN", icon_only=True, text="")
         # row.operator("scene.add_plot_name", icon="ADD", text="New")
         
@@ -273,9 +273,9 @@ class OBJECT_UL_Plot(UIList):
         # Initialize with all items visible
         filtered = [self.bitflag_filter_item] * len(items)
         
-        for i, item in enumerate(items):
-            if item.id == 0:
-                filtered[i] &= ~self.bitflag_filter_item
+        # for i, item in enumerate(items):
+        #     if item.id == 0:
+        #         filtered[i] &= ~self.bitflag_filter_item
         return filtered, ordered
 
     def draw_filter(self, context, layout):
@@ -301,8 +301,8 @@ class PLOT_LIST_OT_NewItem(Operator):
         last = len(context.scene.roma_plot_name_list)-1
         
         context.scene.roma_plot_name_list[last].id = max(temp_list)+1
-        rndNumber = float(decimal.Decimal(random.randrange(0,1000))/1000)
-        context.scene.roma_plot_name_list[last].RND = rndNumber
+        # rndNumber = float(decimal.Decimal(random.randrange(0,1000))/1000)
+        # context.scene.roma_plot_name_list[last].RND = rndNumber
             
         return{'FINISHED'}
     
@@ -345,10 +345,10 @@ class plot_name_list(PropertyGroup):
            description="The name of the plot",
            default="")
     
-    RND: FloatProperty(
-           name="Random Value per Plot",
-           description="A random value assigned to each plot",
-           default = 0)
+    # RND: FloatProperty(
+    #        name="Random Value per Plot",
+    #        description="A random value assigned to each plot",
+    #        default = 0)
         
 ############################        ############################
 ############################ BLOCK  ############################
@@ -390,8 +390,8 @@ class VIEW3D_PT_RoMa_mass_block_data(Panel):
         col.operator("roma_block_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
         col.operator("roma_block_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
         
-        row = layout.row()
-        row = layout.row(align=True)
+        # row = layout.row()
+        # row = layout.row(align=True)
         
         # if scene.roma_block_name_list_index >= 0 and scene.roma_block_name_list:
         #     item = scene.roma_block_name_list[scene.roma_block_name_list_index]
@@ -422,9 +422,9 @@ class OBJECT_UL_Block(UIList):
         items = getattr(data, propname)
         filtered = [self.bitflag_filter_item] * len(items)
         
-        for i, item in enumerate(items):
-            if item.id == 0:
-                filtered[i] &= ~self.bitflag_filter_item
+        # for i, item in enumerate(items):
+        #     if item.id == 0:
+        #         filtered[i] &= ~self.bitflag_filter_item
         return filtered, ordered
 
     def draw_filter(self, context, layout):
@@ -450,8 +450,8 @@ class BLOCK_LIST_OT_NewItem(Operator):
         last = len(context.scene.roma_block_name_list)-1
         
         context.scene.roma_block_name_list[last].id = max(temp_list)+1
-        rndNumber = float(decimal.Decimal(random.randrange(0,1000))/1000)
-        context.scene.roma_block_name_list[last].RND = rndNumber
+        # rndNumber = float(decimal.Decimal(random.randrange(0,1000))/1000)
+        # context.scene.roma_block_name_list[last].RND = rndNumber
             
         return{'FINISHED'}
     
@@ -494,10 +494,10 @@ class block_name_list(PropertyGroup):
            description="The name of the block",
            default="")
     
-    RND: FloatProperty(
-           name="Random Value per Block",
-           description="A random value assigned to each block",
-           default = 0)
+    # RND: FloatProperty(
+    #        name="Random Value per Block",
+    #        description="A random value assigned to each block",
+    #        default = 0)
             
 ############################        ############################
 ############################ USE    ############################
@@ -537,9 +537,21 @@ class VIEW3D_PT_RoMa_mass_use_data(Panel):
         col.operator("roma_use_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
         col.operator("roma_use_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
         
-        row = layout.row()
+        # row = layout.row()
         row = layout.row(align=True)
-        
+        index = context.scene.roma_use_name_list_index
+        # layout.label(text=()"Current use:",context.scene.roma_use_name_list[index].name))
+        # layout.label(text=str(context.scene.roma_use_name_list[index].floorToFloor))
+        # layout.label(text=str(context.scene.roma_use_name_list[index].liquidHeight))
+        layout.prop(context.scene.roma_use_name_list[index],"floorToFloor", text="Floor to floor height")
+        row = layout.row(align=True)
+        sub = row.row()
+        sub.prop(context.scene.roma_use_name_list[index],"storeys", text="Number of storeys")
+        layout.prop(context.scene.roma_use_name_list[index],"liquid", text="Variable number of storeys")
+        if context.scene.roma_use_name_list[index].liquid:
+            sub.enabled = False
+        else:
+            sub.enabled = True
         # if scene.roma_use_name_list_index >= 0 and scene.roma_use_name_list:
         #     item = scene.roma_use_name_list[scene.roma_use_name_list_index]
         #     row.prop(item, "name", icon_only=True, text="Use Name")
@@ -569,9 +581,9 @@ class OBJECT_UL_Use(UIList):
         items = getattr(data, propname)
         filtered = [self.bitflag_filter_item] * len(items)
         
-        for i, item in enumerate(items):
-            if item.id == 0:
-                filtered[i] &= ~self.bitflag_filter_item
+        # for i, item in enumerate(items):
+        #     if item.id == 0:
+        #         filtered[i] &= ~self.bitflag_filter_item
         return filtered, ordered
 
     def draw_filter(self, context, layout):
@@ -597,8 +609,8 @@ class USE_LIST_OT_NewItem(Operator):
         last = len(context.scene.roma_use_name_list)-1
         
         context.scene.roma_use_name_list[last].id = max(temp_list)+1
-        rndNumber = float(decimal.Decimal(random.randrange(0,1000))/1000)
-        context.scene.roma_use_name_list[last].RND = rndNumber
+        # rndNumber = float(decimal.Decimal(random.randrange(0,1000))/1000)
+        # context.scene.roma_use_name_list[last].RND = rndNumber
             
         return{'FINISHED'}
     
@@ -641,10 +653,30 @@ class use_name_list(PropertyGroup):
            description="The use of the block",
            default="")
     
-    RND: FloatProperty(
-           name="Random Value per Use",
-           description="A random value assigned to each use",
-           default = 0)
+    # RND: FloatProperty(
+    #        name="Random Value per Use",
+    #        description="A random value assigned to each use",
+    #        default = 0)
+    
+    floorToFloor: FloatProperty(
+           name="Floor to floor",
+           description="Floor to floor height for the selected use",
+           min=0,
+           max=99,
+           precision=3,
+           default = 3.150)
+    
+    storeys:IntProperty(
+           name="Number of storeys",
+           description="Number of storeys for the selected use",
+           min=1,
+           max=99,
+           default = 1)
+    
+    liquid: BoolProperty(
+                name = "Liquid number of storeys",
+                description = "It indicates whether the number of storeys is fixed or variable",
+                default = False)
     
 ############################            ############################
 ############################ TYPOLOGY   ############################
@@ -661,7 +693,7 @@ class VIEW3D_PT_RoMa_mass_typology_data(Panel):
         scene = context.scene
         
         layout = self.layout
-        layout.use_property_split = True
+        # layout.use_property_split = True
         layout.use_property_decorate = False  # No animation.
         
         row = layout.row()
@@ -676,8 +708,8 @@ class VIEW3D_PT_RoMa_mass_typology_data(Panel):
         col.operator("roma_typology_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
         col.operator("roma_typology_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
         
-        row = layout.row()
-        row = layout.row(align=True)
+        # row = layout.row()
+        # row = layout.row(align=True)
         
         # if scene.roma_typology_name_list_index >= 0 and scene.roma_typology_name_list:
         #     item = scene.roma_typology_name_list[scene.roma_typology_name_list_index]
@@ -701,14 +733,22 @@ class VIEW3D_PT_RoMa_mass_typology_data(Panel):
         
         col = row.column(align=True)
         col.operator("roma_typology_uses_name_list.new_item", icon='ADD', text="")
-        col.operator("roma_typology_uses_name_list.delete_item", icon='REMOVE', text="")
+        sub = col.row()
+        sub.operator("roma_typology_uses_name_list.delete_item", icon='REMOVE', text="")
+        if len(scene.roma_typology_uses_name_list) < 2:
+            sub.enabled = False
+        else:
+            sub.enabled = True
+            
+        
         col.separator()
         col.operator("roma_typology_uses_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
+        
         col.operator("roma_typology_uses_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
         
         row = layout.row(align=True)
         row.prop(context.scene, "roma_typology_uses_names", icon="COMMUNITY", icon_only=False, text="Use")
-        row.label(text=scene.roma_use_name_current[0].name)
+        # row.label(text=scene.roma_use_name_current[0].name)
 
             
 class OBJECT_UL_Typology(UIList):
@@ -759,9 +799,9 @@ class OBJECT_UL_Typology(UIList):
         items = getattr(data, propname)
         filtered = [self.bitflag_filter_item] * len(items)
         
-        for i, item in enumerate(items):
-            if item.id == 0:
-                filtered[i] &= ~self.bitflag_filter_item
+        # for i, item in enumerate(items):
+        #     if item.id == 0:
+        #         filtered[i] &= ~self.bitflag_filter_item
         return filtered, ordered
 
     def draw_filter(self, context, layout):
@@ -788,8 +828,8 @@ class TYPOLOGY_LIST_OT_NewItem(Operator):
         
         context.scene.roma_typology_name_list[last].id = max(temp_list)+1
         
-        rndNumber = float(decimal.Decimal(random.randrange(0,1000))/1000)
-        context.scene.roma_typology_name_list[last].RND = rndNumber
+        # rndNumber = float(decimal.Decimal(random.randrange(0,1000))/1000)
+        # context.scene.roma_typology_name_list[last].RND = rndNumber
             
         return{'FINISHED'}
     
@@ -836,34 +876,56 @@ class typology_name_list(PropertyGroup):
            description="The typology of the block",
            default="")
     
-    RND: FloatProperty(
-           name="Random Value per Typology",
-           description="A random value assigned to each typology",
-           default = 0)
+    # RND: FloatProperty(
+    #        name="Random Value per Typology",
+    #        description="A random value assigned to each typology",
+    #        default = 0)
     
     useList: StringProperty(
            name="Uses in the typology",
            description="The uses for the typology",
            default="")
     
-    storeyList: StringProperty(
-           name="The number of storeys for each use",
-           description="The number of storeys for each use",
-           default="") 
+    # storeyList: StringProperty(
+    #        name="The number of storeys for each use",
+    #        description="The number of storeys for each use",
+    #        default="") 
     
 class OBJECT_UL_Typology_Uses(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data,
                   active_propname, index):
        
         custom_icon = 'COMMUNITY'
+       
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
-            split = layout.split(factor=0.3)
-            split.label(text="Use Id: %d" % (item.id)) 
-            row = split.row()
+            id = item.id
+            if item.name != "":
+                for el in bpy.data.scenes['Scene'].roma_use_name_list:
+                    if id == el.id:
+                        # floorToFloor = round(el.floorToFloor,3)
+                        storeys = el.storeys
+                        liquid = el.liquid
+                        break
+                split = layout.split(factor=0.3)
+                if liquid:
+                    split.label(text="Storeys: variable")
+                    # split.label(text="", icon = "MOD_LENGTH")
+                else:
+                    split.label(text="Storeys: %s" % (storeys))
+                    
+                split.label(text=item.name)
+                # if liquid:
+                #     # split.label(text="Height: variable")
+                #     split.label(text="", icon = "MOD_LENGTH")
+                # else:
+                #     split.label(text="N. of storeys: %s" % (storeys))
+                   
+            # split.label(text="Use Id: %d" % (item.id)) 
+            # row = split.row()
             # row = layout.row(align=True)
             
             # row.prop(context.scene, "roma_typology_uses_names", index = index, icon=custom_icon, icon_only=True)
-            row.label(text=item.name) 
+            # row.label(text=item.name) 
             # row.prop(context.scene, "roma_plot_names", icon="MOD_BOOLEAN", icon_only=True, text="Plot")
             # split.prop(context.scene.roma_typology_uses_name_list[index],
             #            "name",
@@ -880,9 +942,9 @@ class OBJECT_UL_Typology_Uses(UIList):
         items = getattr(data, propname)
         filtered = [self.bitflag_filter_item] * len(items)
         
-        for i, item in enumerate(items):
-            if item.id == 0:
-                filtered[i] &= ~self.bitflag_filter_item
+        # for i, item in enumerate(items):
+        #     if item.id == 0:
+        #         filtered[i] &= ~self.bitflag_filter_item
         return filtered, ordered
 
     def draw_filter(self, context, layout):
@@ -1064,6 +1126,7 @@ class typology_uses_name_list(PropertyGroup):
            description="The typology use name",
            default="")
     
+    
     # position: IntProperty(
     #        name="Use position",
     #        description="Position of the use in the typology (bottom, center, top)",
@@ -1078,7 +1141,7 @@ class VIEW3D_PT_RoMa_building_data(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     # bl_category = "RoMa"
-    bl_label = "Building Data"
+    bl_label = "Architecture Data"
     bl_parent_id = "VIEW3D_PT_RoMa_project_data"
     # bl_context = "scene"
     bl_options = {'DEFAULT_CLOSED'}
@@ -1155,9 +1218,9 @@ class OBJECT_UL_Facade(UIList):
         items = getattr(data, propname)
         filtered = [self.bitflag_filter_item] * len(items)
         
-        for i, item in enumerate(items):
-            if item.id == 0:
-                filtered[i] &= ~self.bitflag_filter_item
+        # for i, item in enumerate(items):
+        #     if item.id == 0:
+        #         filtered[i] &= ~self.bitflag_filter_item
         return filtered, ordered
 
     def draw_filter(self, context, layout):
@@ -1302,9 +1365,9 @@ class OBJECT_UL_Floor(UIList):
         items = getattr(data, propname)
         filtered = [self.bitflag_filter_item] * len(items)
         
-        for i, item in enumerate(items):
-            if item.id == 0:
-                filtered[i] &= ~self.bitflag_filter_item
+        # for i, item in enumerate(items):
+        #     if item.id == 0:
+        #         filtered[i] &= ~self.bitflag_filter_item
         return filtered, ordered
 
     def draw_filter(self, context, layout):
