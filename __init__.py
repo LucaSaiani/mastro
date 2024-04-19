@@ -66,6 +66,9 @@ classes = (
     roma_modal_operator.VIEW_3D_OT_show_roma_selection,
     roma_modal_operator.VIEW_3D_OT_show_roma_attributes,
     roma_modal_operator.VIEW_3D_OT_update_mesh_attributes,
+    roma_modal_operator.VIEW_3D_OT_update_all_mesh_attributes,
+    
+    roma_project_data.updateNodeFilterByUse_OT,
     
     roma_project_data.VIEW3D_PT_RoMa_project_data,
     roma_project_data.VIEW3D_PT_RoMa_show_data,
@@ -139,12 +142,18 @@ classes = (
     # roma_mass.OBJECT_OT_SetObjOption,
     # roma_mass.OBJECT_OT_SetObjPhase,
     roma_mass.VIEW3D_PT_RoMa_Mass,
+    # roma_mass.print_message,
 
     roma_facade.OBJECT_OT_SetFacadeId,
     roma_facade.OBJECT_OT_SetFacadeNormal,
     roma_facade.OBJECT_OT_SetFloorId,
     roma_facade.VIEW3D_PT_RoMa_Facade,
 )
+
+def initNodes():
+    bpy.ops.node.update_filter_by_use()
+    
+    
 
 def initLists():
     # if bpy.context.preferences.addons['roma'].preferences.toggleSelectionOverlay:
@@ -302,7 +311,7 @@ def get_floor_names_from_list(scene, context):
 @persistent
 def onFileLoaded(scene):
     initLists()
-    
+    initNodes()
     bpy.context.scene.updating_mesh_attributes_is_active = False
     bpy.context.scene.show_selection_overlay_is_active = False
   
@@ -322,7 +331,11 @@ def onRegister(scene):
     #     collectionItem.name = "Name 2"
     #     collectionItem.value = "Value 2"
     initLists()
-    bpy.app.handlers.depsgraph_update_post.remove(onRegister)
+    initNodes()
+    try:
+        bpy.app.handlers.depsgraph_update_post.remove(onRegister)
+    except:
+        pass
 
    
     

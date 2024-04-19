@@ -738,6 +738,7 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
                                         height = "0" + height
                                     height_A += height[0]
                                     height_B += height[1]
+                                    # print("B", height_B)
                                     try:
                                         # height[3]
                                         height_C += height[3]
@@ -882,10 +883,12 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
             # else:
             bpy.context.scene.updating_mesh_attributes_is_active = False
         else:
+            # self.execute_edit(context)
             # print("ritorno")
             bpy.context.scene.updating_mesh_attributes_is_active = False
             
         return {'RUNNING_MODAL'}
+    
        
 
     
@@ -899,4 +902,165 @@ def update_mesh_attributes_depsgraph(self, context):
     # bpy.app.handlers.depsgraph_update_post.remove(update_mesh_attributes_depsgraph)
     
 
+class VIEW_3D_OT_update_all_mesh_attributes(Operator):
+    """Update RoMa attributes of all the RoMa meshes. Updated attributes are floor to floor height,..."""
+    bl_idname = "wm.update_all_mesh_attributes_modal_operator"
+    bl_label = "Update RoMa attributes of the all RoMa meshes"
     
+    # oldTime = 0
+    # newTime = 0
+    
+    def __init__(self):
+        pass
+    
+    def __del__(self):
+        pass
+    
+    def execute (self, context):
+        scene = bpy.context.scene
+        projectUses = scene.roma_use_name_list
+        
+        objs = bpy.data.objects
+        #get the current active object
+        activeObj = bpy.context.active_object
+        activeObjMode = activeObj.mode
+        for ob in objs:
+            if ob is not None and ob.type == "MESH" and "RoMa object" in ob.data:
+                bpy.context.view_layer.objects.active = ob
+                objMode = ob.mode
+                mesh = ob.data
+                bpy.ops.object.mode_set(mode="EDIT")
+                bm = bmesh.from_edit_mesh(mesh)
+                
+                bMesh_typology = bm.faces.layers.int["roma_typology_id"]
+                bMesh_storeys = bm.faces.layers.int["roma_number_of_storeys"]
+                bMesh_storey_list = bm.faces.layers.int["roma_list_storeys"]
+                bMesh_height_A = bm.faces.layers.int["roma_list_height_A"]
+                bMesh_height_B = bm.faces.layers.int["roma_list_height_B"]
+                bMesh_height_C = bm.faces.layers.int["roma_list_height_C"]
+                bMesh_height_D = bm.faces.layers.int["roma_list_height_D"]
+                bMesh_height_E = bm.faces.layers.int["roma_list_height_E"]
+                
+                for bmFace in bm.faces:
+                    typology_id = bmFace[bMesh_typology] 
+                    numberOfStoreys = bmFace[bMesh_storeys] 
+                    
+                    use_list = bpy.context.scene.roma_typology_name_list[typology_id].useList
+                    useSplit = use_list.split(";")
+                    
+                    use_id_list = "1"
+                    storey_list = "1"
+                    height_A = "1"
+                    height_B = "1"
+                    height_C = "1"
+                    height_D = "1"
+                    height_E = "1"
+                    liquidPosition = [] # to count how many liquid uses they are
+                    fixedStoreys = 0 # to count how many fixed storeys they are
+                    
+                    for enum, el in enumerate(useSplit):
+                        #### list_use_id
+                        if int(el) < 10:
+                            use_id_list += "0" + el
+                        else:
+                            use_id_list += el
+                        ###setting the values for each use
+                        for use in projectUses:
+                            if use.id == int(el):
+                                # number of storeys for the use
+                                # if a use is "liquid" the number of storeys is set as 00
+                                if use.liquid: 
+                                    storeys = "00"
+                                    liquidPosition.append(enum)
+                                else:
+                                    fixedStoreys += use.storeys
+                                    storeys = str(use.storeys)
+                                    if use.storeys < 10:
+                                        storeys = "0" + storeys
+                                        
+                                storey_list += storeys
+                                
+                                #### floor to floor height for each use, stored in A, B, C, ...
+                                #### due to the fact that arrays can't be used
+                                #### and array like (3.555, 12.664, 0.123)
+                                #### is saved as
+                                #### A (1010) tens
+                                #### B (1320) units
+                                #### C (1561) first decimal
+                                #### D (1562) second decimal
+                                #### E (1543) third decimal
+                                #### each array starting with 1 since a number can't start with 0
+                                height = str(round(use.floorToFloor,3))
+                                if use.floorToFloor < 10:
+                                    height = "0" + height
+                                height_A += height[0]
+                                height_B += height[1]
+                                try:
+                                    # height[3]
+                                    height_C += height[3]
+                                    try:
+                                        height_D += height[4]
+                                        try:
+                                            height_E += height[5]
+                                        except:
+                                            height_E += "0"
+                                    except:
+                                        height_D += "0"
+                                        height_E += "0"
+                                except:
+                                    height_C += "0"
+                                    height_D += "0"
+                                    height_E += "0"
+                                break
+                    # bmFace[bMesh_use_list] = int(use_id_list)
+                    storeyCheck = numberOfStoreys - fixedStoreys - len(liquidPosition)
+                    # if the typology has more storeys than the selected mass
+                    # some extra storeys are added
+                    if storeyCheck < 1: 
+                        scene.attribute_mass_storeys = fixedStoreys + len(liquidPosition)
+                    storeyLeft = numberOfStoreys - fixedStoreys
+                    storey_list = storey_list[1:] # the 1 at the start of the number is removed
+                    if len(liquidPosition) > 0:
+                        n = storeyLeft/len(liquidPosition)
+                        liquidStoreyNumber = math.floor(n)
+
+                        insert = str(liquidStoreyNumber)
+                        if liquidStoreyNumber < 10:
+                            insert = "0" + insert
+                            
+                        index = 0
+                        while index < len(liquidPosition):
+                            el = liquidPosition[index]
+                            # if the rounding of the liquid storeys is uneven,
+                            # the last liquid floor is increased of 1 storey
+                            if index == len(liquidPosition) -1 and  math.modf(n)[0] > 0:
+                                insert = str(liquidStoreyNumber +1) 
+                                if liquidStoreyNumber +1 < 10:
+                                    insert = "0" + insert
+                                
+                            storey_list = storey_list[:el*2] + insert + storey_list[el*2 +2:]
+                            index += 1
+                    storey_list = "1" + storey_list # the 1 is readded  
+                    bmFace[bMesh_storey_list] = int(storey_list)
+                    bmFace[bMesh_height_A] = int(height_A)
+                    bmFace[bMesh_height_B] = int(height_B)
+                    bmFace[bMesh_height_C] = int(height_C)
+                    bmFace[bMesh_height_D] = int(height_D)
+                    bmFace[bMesh_height_E] = int(height_E)
+                
+                bmesh.update_edit_mesh(mesh)
+                bm.free()
+                bpy.ops.object.mode_set(mode=objMode)
+
+        #return the focus to the current active object
+        bpy.context.view_layer.objects.active = activeObj
+        bpy.ops.object.mode_set(mode=activeObjMode)
+        
+        return {'FINISHED'}
+        
+    
+    
+        
+    def invoke(self, context, event):
+        self.execute(context)
+        return {'RUNNING_MODAL'}

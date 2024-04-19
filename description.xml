@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<data>
+    <streets>
+        <street type="A">
+            <segment id="0">
+                <width>.5</width>
+                <radius>.2</radius>
+            </segment>
+        </street>
+        <street type="B">
+            <segment id="0">
+                <width>.3</width>
+                <radius>.1</radius>
+            </segment>
+        </street>
+    </streets>
+</data>
