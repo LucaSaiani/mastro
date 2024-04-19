@@ -294,6 +294,7 @@ def update_typology_name_label(self, context):
             scene.attribute_mass_typology_id = n.id
             scene.roma_typology_name_current[0].id = n.id
             break  
+
         
     
 

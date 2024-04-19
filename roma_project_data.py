@@ -107,6 +107,84 @@ from datetime import datetime
 # def draw():
 #     shader.uniform_float("color", (1, 1, 0, 0.01))
 #     batch.draw(shader)
+
+class updateNodeFilterByUse_OT(Operator):
+    """Tooltip"""
+    bl_idname = "node.update_filter_by_use"
+    bl_label = "Simple Node Operator"
+    
+    # def create_node(self, group, type_name, node_x_location, node_location_step_x=0):
+    #     node_x_location += node_location_step_x
+    #     node_obj = group.nodes.new(type=type_name)
+    #     node_obj.location.x = node_x_location
+        
+    #     return node_obj, node_x_location
+    
+    def execute(self, context):
+        #Create NodeGroup
+        groupName = "RoMa Filter by Use"
+        node_y_location = 0
+
+        # if groupName not in bpy.data.node_groups:
+        filterByUseGroup = bpy.data.node_groups.new(groupName,'GeometryNodeTree')
+        
+        #Add the Input Sockets and change their Default Values
+        filterByUseGroup.interface.new_socket(name="Geometry",description="Geometry",in_out ="INPUT", socket_type="NodeSocketGeometry")
+        # filterByUseGroup.interface.items_tree[0].default_value = [1.0,1.0,1.0,1.0]
+        # filterByUseGroup.interface.new_socket(name="Some Float Input",description="some_float_input",in_out ="INPUT", socket_type="NodeSocketFloat")
+        # filterByUseGroup.interface.items_tree[1].default_value = 1.0
+
+        
+        #Add Group Input
+        group_input : bpy.types.GeometryNodeGroup = filterByUseGroup.nodes.new('NodeGroupInput')
+        group_input.location = (0, 0)
+        
+        #Add Group Output
+        group_output : bpy.types.GeometryNodeGroup = filterByUseGroup.nodes.new('NodeGroupOutput')
+        group_output.location = (600, 0)
+        
+        named_attribute_node = filterByUseGroup.nodes.new(type="GeometryNodeInputNamedAttribute")
+        named_attribute_node.location = (0,-100)
+        named_attribute_node.data_type = 'INT'
+        named_attribute_node.inputs[0].default_value = "GN_Use"
+        
+        index = 0
+        for el in bpy.context.scene.roma_use_name_list:
+            if hasattr(el, "id"):
+                separate_geometry_node = filterByUseGroup.nodes.new(type="GeometryNodeSeparateGeometry")
+                separate_geometry_node.location = (300, node_y_location)
+                separate_geometry_node.domain = 'FACE'
+                separate_geometry_node.hide = True
+                if el.name == "":
+                    useName = "no use"
+                else:
+                    useName = el.name
+                separate_geometry_node.label = useName
+                
+                compare_node = filterByUseGroup.nodes.new(type="FunctionNodeCompare")
+                compare_node.location = (300, node_y_location-35)
+                compare_node.data_type = 'INT'
+                compare_node.operation = 'EQUAL'
+                compare_node.inputs[3].default_value = el.id
+                compare_node.hide = True
+                compare_node.label="="+str(el.id)
+                
+                node_y_location -= 100
+            
+                #Add the Output Sockets and change their Default Value
+                filterByUseGroup.interface.new_socket(name=useName,description=el.name,in_out ="OUTPUT", socket_type="NodeSocketGeometry")
+            
+                #Add Links
+                filterByUseGroup.links.new(group_input.outputs[0], separate_geometry_node.inputs[0])
+                filterByUseGroup.links.new(named_attribute_node.outputs[0], compare_node.inputs[2])
+                filterByUseGroup.links.new(compare_node.outputs[0], separate_geometry_node.inputs[1])
+                filterByUseGroup.links.new(separate_geometry_node.outputs[0], group_output.inputs[index])
+                
+                index += 1
+
+       
+
+        return {'FINISHED'}
     
 
 class VIEW3D_PT_RoMa_project_data(Panel):
@@ -641,6 +719,24 @@ class USE_LIST_OT_MoveItem(Operator):
         self.move_index()
 
         return{'FINISHED'}
+
+# once the floor to floor height is updated, it is necessary
+# to update all the heights of the existing roma masses    
+def update_roma_masses_floorToFloor(self, context):
+    # objs = bpy.data.objects
+    # activeObj = bpy.context.active_object
+    # activeObjMode = activeObj.mode
+    # for ob in objs:
+    #     if ob is not None and ob.type == "MESH" and "RoMa object" in ob.data:
+    #         objMode = ob.mode
+    #         bpy.context.view_layer.objects.active = ob
+    #         bpy.ops.object.mode_set(mode="EDIT")
+    #         bpy.ops.wm.update_mesh_attributes_modal_operator('INVOKE_DEFAULT')
+    #         bpy.ops.object.mode_set(mode=objMode)
+    # bpy.context.view_layer.objects.active = activeObj
+    # bpy.ops.object.mode_set(mode=activeObjMode)
+    bpy.ops.wm.update_all_mesh_attributes_modal_operator('INVOKE_DEFAULT')
+    return None
             
 class use_name_list(PropertyGroup):
     id: IntProperty(
@@ -664,7 +760,8 @@ class use_name_list(PropertyGroup):
            min=0,
            max=99,
            precision=3,
-           default = 3.150)
+           default = 3.150,
+           update=update_roma_masses_floorToFloor)
     
     storeys:IntProperty(
            name="Number of storeys",
@@ -1092,6 +1189,10 @@ def update_typology_uses_list(context):
 # when the typology is selected, the relative uses listed in the UIList need to be updated in the UI
 @persistent    
 def update_typology_uses_function(self, context):
+    # ob = bpy.data.scenes["Scene"].roma_use_name_list
+    # depsgraph = bpy.context.evaluated_depsgraph_get()
+    # ob_eval = ob.evaluated_get(depsgraph)
+    # print("ciao", datetime.now(), depsgraph)
     scene = context.scene
     previous = scene.roma_previous_selected_typology
     current = scene.roma_typology_name_list_index
