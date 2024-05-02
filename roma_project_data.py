@@ -108,82 +108,277 @@ from datetime import datetime
 #     shader.uniform_float("color", (1, 1, 0, 0.01))
 #     batch.draw(shader)
 
-class updateNodeFilterByUse_OT(Operator):
-    """Tooltip"""
-    bl_idname = "node.update_filter_by_use"
-    bl_label = "Simple Node Operator"
+class update_GN_Filter_OT(Operator):
+    """Update the GN node Filter by Use"""
+    bl_idname = "node.update_gn_filter"
+    bl_label = "Update the GN filter by Use"
     
-    # def create_node(self, group, type_name, node_x_location, node_location_step_x=0):
-    #     node_x_location += node_location_step_x
-    #     node_obj = group.nodes.new(type=type_name)
-    #     node_obj.location.x = node_x_location
+    # filter_name: bpy.props.StringProperty(name="Filter type name")
         
     #     return node_obj, node_x_location
-    
-    def execute(self, context):
-        #Create NodeGroup
-        groupName = "RoMa Filter by Use"
-        node_y_location = 0
-
-        # if groupName not in bpy.data.node_groups:
-        filterByUseGroup = bpy.data.node_groups.new(groupName,'GeometryNodeTree')
+    def newGroup (self, groupName, type):
+        attributeName = "GN_Use"
+        # if self.filter_name == "use": attributeName = "GN_Use"
+        # elif self.filter_name == "typology": attributeName = "roma_typology_id"
         
-        #Add the Input Sockets and change their Default Values
-        filterByUseGroup.interface.new_socket(name="Geometry",description="Geometry",in_out ="INPUT", socket_type="NodeSocketGeometry")
-        # filterByUseGroup.interface.items_tree[0].default_value = [1.0,1.0,1.0,1.0]
-        # filterByUseGroup.interface.new_socket(name="Some Float Input",description="some_float_input",in_out ="INPUT", socket_type="NodeSocketFloat")
-        # filterByUseGroup.interface.items_tree[1].default_value = 1.0
-
-        
-        #Add Group Input
-        group_input : bpy.types.GeometryNodeGroup = filterByUseGroup.nodes.new('NodeGroupInput')
-        group_input.location = (0, 0)
+         # geometry nodes group
+        # if type == "GN":
+        group = bpy.data.node_groups.new(groupName,'GeometryNodeTree')
         
         #Add Group Output
-        group_output : bpy.types.GeometryNodeGroup = filterByUseGroup.nodes.new('NodeGroupOutput')
-        group_output.location = (600, 0)
-        
-        named_attribute_node = filterByUseGroup.nodes.new(type="GeometryNodeInputNamedAttribute")
-        named_attribute_node.location = (0,-100)
+        group_output = group.nodes.new('NodeGroupOutput')
+        # Add named attribute
+        named_attribute_node = group.nodes.new(type="GeometryNodeInputNamedAttribute")
         named_attribute_node.data_type = 'INT'
-        named_attribute_node.inputs[0].default_value = "GN_Use"
+        named_attribute_node.inputs[0].default_value = attributeName
+        # else: # shader group
+        #     group = bpy.data.node_groups.new(groupName,'ShaderNodeTree')
+        #     #Add Group Output
+        #     group_output = group.nodes.new('NodeGroupOutput')
+        #     # Add named attribute
+        #     named_attribute_node = group.nodes.new(type="ShaderNodeAttribute")
+        #     named_attribute_node.attribute_type = 'GEOMETRY'
+        #     named_attribute_node.attribute_name = attributeName
+        #     named_attribute_node.name = "Named Attribute" # this to keep more generic the following code
+        #     named_attribute_node.label = "Named Attribute"
+            
+        group_output.location = (600, 0)
+        named_attribute_node.location = (0,-100)
+        return(group)
         
-        index = 0
-        for el in bpy.context.scene.roma_use_name_list:
+        
+    def execute(self, context):
+        # groupTypes = ["GN", "Shader"]
+        
+        #Create NodeGroup
+        # for type in groupTypes:
+        name = "RoMa Geometry Filter by Use"
+            # if type == "GN": name = "RoMa Geometry Filter by " + self.filter_name
+            # else: name = "RoMa Shader Filter by " + self.filter_name
+            
+        if name not in bpy.data.node_groups:
+            filterBy_Group = self.newGroup(name, "GN")
+            #     if type == "GN": filterBy_Group = self.newGroup(name, "GN")
+            #     elif type == "Shader": filterBy_Group = self.newGroup(name, "Shader")
+        else:
+            filterBy_Group = bpy.data.node_groups[name]
+                
+        nodes = filterBy_Group.nodes
+        
+        group_output = nodes["Group Output"]
+        named_attribute_node = nodes["Named Attribute"]
+                    
+        filterNodeIds = []
+        filterNodeDescriptions = []
+        for node in nodes:
+            if node.type == "COMPARE":
+                tmpId = node.inputs[3].default_value
+                filterNodeIds.append(tmpId)
+                filterNodeDescriptions.append(filterBy_Group.interface.items_tree[tmpId].description)
+            # elif node.type == "MATH":
+            #         tmpId = int(node.inputs[1].default_value)
+            #         filterNodeIds.append(tmpId)
+            #         filterNodeDescriptions.append(filterBy_Group.interface.items_tree[tmpId].description)
+                    
+            
+        if len(filterNodeIds) == 0:
+            lastId = -1           
+        else:
+            lastId = max(filterNodeIds)
+            # print(lastId, len(nodes))
+                
+            # if self.filter_name == "use": listToLoop = bpy.context.scene.roma_use_name_list
+            # elif self.filter_name == "typology": listToLoop = bpy.context.scene.roma_typology_name_list
+        listToLoop = bpy.context.scene.roma_use_name_list
+        for el in listToLoop:
             if hasattr(el, "id"):
-                separate_geometry_node = filterByUseGroup.nodes.new(type="GeometryNodeSeparateGeometry")
-                separate_geometry_node.location = (300, node_y_location)
-                separate_geometry_node.domain = 'FACE'
-                separate_geometry_node.hide = True
-                if el.name == "":
-                    useName = "no use"
-                else:
-                    useName = el.name
-                separate_geometry_node.label = useName
-                
-                compare_node = filterByUseGroup.nodes.new(type="FunctionNodeCompare")
-                compare_node.location = (300, node_y_location-35)
-                compare_node.data_type = 'INT'
-                compare_node.operation = 'EQUAL'
-                compare_node.inputs[3].default_value = el.id
-                compare_node.hide = True
-                compare_node.label="="+str(el.id)
-                
-                node_y_location -= 100
+                #a new name has been added
+                if el.id not in filterNodeIds:
+                    if lastId >= 0:
+                        node_y_location = nodes["Compare " + str(lastId)].location[1] -25
+                    else:
+                        node_y_location = 0
+                    
+                    # if type == "GN":
+                    compare_node = filterBy_Group.nodes.new(type="FunctionNodeCompare")
+                    compare_node.data_type = 'INT'
+                    compare_node.operation = 'EQUAL'
+                    compare_node.inputs[3].default_value = el.id
+                    # else:
+                    #     compare_node = filterBy_Group.nodes.new(type="ShaderNodeMath")
+                    #     compare_node.operation = "COMPARE"
+                    #     compare_node.inputs[1].default_value = el.id
+                    #     compare_node.inputs[2].default_value = 0.001
+                        
+                    compare_node.location = (300, node_y_location-35)
+                    compare_node.hide = True
+                    compare_node.label="="+str(el.id)
+                    compare_node.name="Compare "+str(el.id)
+                    lastId = el.id
+                    
+                    #Add the Output Sockets and change their Default Value
+                    if el.name == "":
+                        elName = "Use name..."
+                    else:
+                        elName = el.name
+                    descr = "id: " + str(el.id) + " - " + elName
+                    filterBy_Group.interface.new_socket(name=elName,description=descr,in_out ="OUTPUT", socket_type="NodeSocketBool")
             
-                #Add the Output Sockets and change their Default Value
-                filterByUseGroup.interface.new_socket(name=useName,description=el.name,in_out ="OUTPUT", socket_type="NodeSocketGeometry")
+                    #Add Links
+                    index = len(group_output.inputs) -2
+                    filterBy_Group.links.new(named_attribute_node.outputs[0], compare_node.inputs[2])
+                    # if type == "GN":
+                    #     filterBy_Group.links.new(named_attribute_node.outputs[0], compare_node.inputs[2])
+                    # else:
+                    #     filterBy_Group.links.new(named_attribute_node.outputs[2], compare_node.inputs[0])
+                    filterBy_Group.links.new(compare_node.outputs[0], group_output.inputs[index])
+
+                # a name has been renamed
+                elif ("id: " + str(el.id) + " - " + str(el.name)) not in filterNodeDescriptions:
+                    for i, desc in enumerate(filterNodeDescriptions):
+                        if i == int(el.id):
+                            filterBy_Group.interface.items_tree[i].name = str(el.name)
+                            filterBy_Group.interface.items_tree[i].description = "id: " + str(el.id) + " - " + str(el.name)
+                            
+                            
+                            
+                        
+
+        return {'FINISHED'}
+    
+class update_Shader_Filter_OT(Operator):
+    """Update the shader node Filter by... based on the passed type value"""
+    bl_idname = "node.update_shader_filter"
+    bl_label = "Update the Shader filter by..."
+    
+    filter_name: bpy.props.StringProperty(name="Filter type name")
+        
+    #     return node_obj, node_x_location
+    def newGroup (self, groupName, type):
+        if self.filter_name == "plot": attributeName = "roma_plot_id"
+        elif self.filter_name == "block": attributeName = "roma_block_id"
+        elif self.filter_name == "use": attributeName = "GN_Use"
+        elif self.filter_name == "typology": attributeName = "roma_typology_id"
+        
+         # geometry nodes group
+        # if type == "GN":
+        #     group = bpy.data.node_groups.new(groupName,'GeometryNodeTree')
+        #     #Add Group Output
+        #     group_output = group.nodes.new('NodeGroupOutput')
+        #     # Add named attribute
+        #     named_attribute_node = group.nodes.new(type="GeometryNodeInputNamedAttribute")
+        #     named_attribute_node.data_type = 'INT'
+        #     named_attribute_node.inputs[0].default_value = attributeName
+        
+        # shader group
+        group = bpy.data.node_groups.new(groupName,'ShaderNodeTree')
+        #Add Group Output
+        group_output = group.nodes.new('NodeGroupOutput')
+        # Add named attribute
+        named_attribute_node = group.nodes.new(type="ShaderNodeAttribute")
+        named_attribute_node.attribute_type = 'GEOMETRY'
+        named_attribute_node.attribute_name = attributeName
+        named_attribute_node.name = "Named Attribute" # this to keep more generic the following code
+        named_attribute_node.label = "Named Attribute"
             
-                #Add Links
-                filterByUseGroup.links.new(group_input.outputs[0], separate_geometry_node.inputs[0])
-                filterByUseGroup.links.new(named_attribute_node.outputs[0], compare_node.inputs[2])
-                filterByUseGroup.links.new(compare_node.outputs[0], separate_geometry_node.inputs[1])
-                filterByUseGroup.links.new(separate_geometry_node.outputs[0], group_output.inputs[index])
+        group_output.location = (600, 0)
+        named_attribute_node.location = (0,-100)
+        return(group)
+        
+        
+    def execute(self, context):
+        # groupTypes = ["GN", "Shader"]
+        
+        #Create NodeGroup
+        # for type in groupTypes:
+        #     if type == "GN": name = "RoMa Geometry Filter by " + self.filter_name
+        #     else: name = "RoMa Shader Filter by " + self.filter_name
+        name = "RoMa Shader Filter by " + self.filter_name
+        
+        if name not in bpy.data.node_groups:
+            # if type == "GN": filterBy_Group = self.newGroup(name, "GN")
+            # elif type == "Shader": filterBy_Group = self.newGroup(name, "Shader")
+            filterBy_Group = self.newGroup(name, "Shader")
+        else:
+            filterBy_Group = bpy.data.node_groups[name]
+            
+        nodes = filterBy_Group.nodes
+        
+        group_output = nodes["Group Output"]
+        named_attribute_node = nodes["Named Attribute"]
+                    
+        filterNodeIds = []
+        filterNodeDescriptions = []
+        for node in nodes:
+            # if node.type == "COMPARE":
+            #     tmpId = node.inputs[3].default_value
+            #     filterNodeIds.append(tmpId)
+            #     filterNodeDescriptions.append(filterBy_Group.interface.items_tree[tmpId].description)
+            if node.type == "MATH":
+                tmpId = int(node.inputs[1].default_value)
+                filterNodeIds.append(tmpId)
+                filterNodeDescriptions.append(filterBy_Group.interface.items_tree[tmpId].description)
                 
-                index += 1
+        
+        if len(filterNodeIds) == 0:
+            lastId = -1           
+        else:
+            lastId = max(filterNodeIds)
+            # print(lastId, len(nodes))
+            
+        if self.filter_name == "plot": listToLoop = bpy.context.scene.roma_plot_name_list
+        elif self.filter_name == "block": listToLoop = bpy.context.scene.roma_block_name_list
+        elif self.filter_name == "use": listToLoop = bpy.context.scene.roma_use_name_list
+        elif self.filter_name == "typology": listToLoop = bpy.context.scene.roma_typology_name_list
+            
+        for el in listToLoop:
+            if hasattr(el, "id"):
+                #a new name has been added
+                if el.id not in filterNodeIds:
+                    if lastId >= 0:
+                        node_y_location = nodes["Compare " + str(lastId)].location[1] -25
+                    else:
+                        node_y_location = 0
+                    
+                    # if type == "GN":
+                    #     compare_node = filterBy_Group.nodes.new(type="FunctionNodeCompare")
+                    #     compare_node.data_type = 'INT'
+                    #     compare_node.operation = 'EQUAL'
+                    #     compare_node.inputs[3].default_value = el.id
+                    # else:
+                    compare_node = filterBy_Group.nodes.new(type="ShaderNodeMath")
+                    compare_node.operation = "COMPARE"
+                    compare_node.inputs[1].default_value = el.id
+                    compare_node.inputs[2].default_value = 0.001
+                        
+                    compare_node.location = (300, node_y_location-35)
+                    compare_node.hide = True
+                    compare_node.label="="+str(el.id)
+                    compare_node.name="Compare "+str(el.id)
+                    lastId = el.id
+                    
+                    #Add the Output Sockets and change their Default Value
+                    if el.name == "":
+                        elName = self.filter_name + " name..."
+                    else:
+                        elName = el.name
+                    descr = "id: " + str(el.id) + " - " + elName
+                    filterBy_Group.interface.new_socket(name=elName,description=descr,in_out ="OUTPUT", socket_type="NodeSocketBool")
+            
+                    #Add Links
+                    index = len(group_output.inputs) -2
+                    # if type == "GN":
+                    #     filterBy_Group.links.new(named_attribute_node.outputs[0], compare_node.inputs[2])
+                    # else:
+                    filterBy_Group.links.new(named_attribute_node.outputs[2], compare_node.inputs[0])
+                    filterBy_Group.links.new(compare_node.outputs[0], group_output.inputs[index])
 
-       
-
+                # a name has been renamed
+                elif ("id: " + str(el.id) + " - " + str(el.name)) not in filterNodeDescriptions:
+                    for i, desc in enumerate(filterNodeDescriptions):
+                        if i == int(el.id):
+                            filterBy_Group.interface.items_tree[i].name = str(el.name)
+                            filterBy_Group.interface.items_tree[i].description = "id: " + str(el.id) + " - " + str(el.name)
         return {'FINISHED'}
     
 
@@ -381,7 +576,7 @@ class PLOT_LIST_OT_NewItem(Operator):
         context.scene.roma_plot_name_list[last].id = max(temp_list)+1
         # rndNumber = float(decimal.Decimal(random.randrange(0,1000))/1000)
         # context.scene.roma_plot_name_list[last].RND = rndNumber
-            
+        bpy.ops.node.update_shader_filter(filter_name="plot")   
         return{'FINISHED'}
     
 class PLOT_LIST_OT_MoveItem(Operator):
@@ -411,6 +606,12 @@ class PLOT_LIST_OT_MoveItem(Operator):
         self.move_index()
 
         return{'FINISHED'}
+    
+# update the node "filter by plot" if a new plot is added or
+# a plot name has changed
+def update_roma_filter_by_plot(self, context):
+    bpy.ops.node.update_shader_filter(filter_name="plot")
+    return None
             
 class plot_name_list(PropertyGroup):
     id: IntProperty(
@@ -421,7 +622,8 @@ class plot_name_list(PropertyGroup):
     name: StringProperty(
            name="Plot Name",
            description="The name of the plot",
-           default="")
+           default="Plot name...",
+           update=update_roma_filter_by_plot)
     
     # RND: FloatProperty(
     #        name="Random Value per Plot",
@@ -530,7 +732,7 @@ class BLOCK_LIST_OT_NewItem(Operator):
         context.scene.roma_block_name_list[last].id = max(temp_list)+1
         # rndNumber = float(decimal.Decimal(random.randrange(0,1000))/1000)
         # context.scene.roma_block_name_list[last].RND = rndNumber
-            
+        bpy.ops.node.update_shader_filter(filter_name="block")
         return{'FINISHED'}
     
 class BLOCK_LIST_OT_MoveItem(Operator):
@@ -560,6 +762,12 @@ class BLOCK_LIST_OT_MoveItem(Operator):
         self.move_index()
 
         return{'FINISHED'}
+    
+# update the node "filter by block" if a new block is added or
+# a block name has changed
+def update_roma_filter_by_block(self, context):
+    bpy.ops.node.update_shader_filter(filter_name="block")
+    return None
             
 class block_name_list(PropertyGroup):
     id: IntProperty(
@@ -570,7 +778,8 @@ class block_name_list(PropertyGroup):
     name: StringProperty(
            name="Block Name",
            description="The name of the block",
-           default="")
+           default="Block name...",
+           update=update_roma_filter_by_block)
     
     # RND: FloatProperty(
     #        name="Random Value per Block",
@@ -689,7 +898,8 @@ class USE_LIST_OT_NewItem(Operator):
         context.scene.roma_use_name_list[last].id = max(temp_list)+1
         # rndNumber = float(decimal.Decimal(random.randrange(0,1000))/1000)
         # context.scene.roma_use_name_list[last].RND = rndNumber
-            
+        bpy.ops.node.update_gn_filter()
+        bpy.ops.node.update_shader_filter(filter_name="use")
         return{'FINISHED'}
     
 class USE_LIST_OT_MoveItem(Operator):
@@ -722,20 +932,15 @@ class USE_LIST_OT_MoveItem(Operator):
 
 # once the floor to floor height is updated, it is necessary
 # to update all the heights of the existing roma masses    
-def update_roma_masses_floorToFloor(self, context):
-    # objs = bpy.data.objects
-    # activeObj = bpy.context.active_object
-    # activeObjMode = activeObj.mode
-    # for ob in objs:
-    #     if ob is not None and ob.type == "MESH" and "RoMa object" in ob.data:
-    #         objMode = ob.mode
-    #         bpy.context.view_layer.objects.active = ob
-    #         bpy.ops.object.mode_set(mode="EDIT")
-    #         bpy.ops.wm.update_mesh_attributes_modal_operator('INVOKE_DEFAULT')
-    #         bpy.ops.object.mode_set(mode=objMode)
-    # bpy.context.view_layer.objects.active = activeObj
-    # bpy.ops.object.mode_set(mode=activeObjMode)
+def update_roma_masses_data(self, context):
     bpy.ops.wm.update_all_mesh_attributes_modal_operator('INVOKE_DEFAULT')
+    return None
+
+# update the node "filter by use" if a new use is added or
+# a use name has changed
+def update_roma_filter_by_use(self, context):
+    bpy.ops.node.update_gn_filter()
+    bpy.ops.node.update_shader_filter(filter_name="use")
     return None
             
 class use_name_list(PropertyGroup):
@@ -747,7 +952,8 @@ class use_name_list(PropertyGroup):
     name: StringProperty(
            name="Use Name",
            description="The use of the block",
-           default="")
+           default = "Use name...",
+           update=update_roma_filter_by_use)
     
     # RND: FloatProperty(
     #        name="Random Value per Use",
@@ -755,25 +961,27 @@ class use_name_list(PropertyGroup):
     #        default = 0)
     
     floorToFloor: FloatProperty(
-           name="Floor to floor",
-           description="Floor to floor height for the selected use",
-           min=0,
-           max=99,
-           precision=3,
-           default = 3.150,
-           update=update_roma_masses_floorToFloor)
-    
+        name="Floor to floor",
+        description="Floor to floor height for the selected use",
+        min=0,
+        max=99,
+        precision=3,
+        default = 3.150,
+        update=update_roma_masses_data)
+
     storeys:IntProperty(
-           name="Number of storeys",
-           description="Number of storeys for the selected use",
-           min=1,
-           max=99,
-           default = 1)
+        name="Number of storeys",
+        description="Number of storeys for the selected use",
+        min=1,
+        max=99,
+        default = 1,
+        update=update_roma_masses_data)
     
     liquid: BoolProperty(
-                name = "Liquid number of storeys",
-                description = "It indicates whether the number of storeys is fixed or variable",
-                default = False)
+            name = "Liquid number of storeys",
+            description = "It indicates whether the number of storeys is fixed or variable",
+            default = False,
+            update=update_roma_masses_data)
     
 ############################            ############################
 ############################ TYPOLOGY   ############################
@@ -927,6 +1135,7 @@ class TYPOLOGY_LIST_OT_NewItem(Operator):
         
         # rndNumber = float(decimal.Decimal(random.randrange(0,1000))/1000)
         # context.scene.roma_typology_name_list[last].RND = rndNumber
+        bpy.ops.node.update_shader_filter(filter_name="typology")
             
         return{'FINISHED'}
     
@@ -961,6 +1170,12 @@ class TYPOLOGY_LIST_OT_MoveItem(Operator):
         context.scene.roma_previous_selected_typology = -1
 
         return{'FINISHED'}
+
+# update the node "filter by typology" if a new typology is added or
+# a typology name has changed
+def update_roma_filter_by_typology(self, context):
+    bpy.ops.node.update_shader_filter(filter_name="typology")
+    return None
             
 class typology_name_list(PropertyGroup):
     id: IntProperty(
@@ -971,7 +1186,8 @@ class typology_name_list(PropertyGroup):
     name: StringProperty(
            name="Typology Name",
            description="The typology of the block",
-           default="")
+           default="Typology name...",
+           update=update_roma_filter_by_typology)
     
     # RND: FloatProperty(
     #        name="Random Value per Typology",
@@ -1226,6 +1442,7 @@ class typology_uses_name_list(PropertyGroup):
            name="Typology uses name",
            description="The typology use name",
            default="")
+          
     
     
     # position: IntProperty(

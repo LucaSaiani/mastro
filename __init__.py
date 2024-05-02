@@ -68,7 +68,8 @@ classes = (
     roma_modal_operator.VIEW_3D_OT_update_mesh_attributes,
     roma_modal_operator.VIEW_3D_OT_update_all_mesh_attributes,
     
-    roma_project_data.updateNodeFilterByUse_OT,
+    roma_project_data.update_GN_Filter_OT,
+    roma_project_data.update_Shader_Filter_OT,
     
     roma_project_data.VIEW3D_PT_RoMa_project_data,
     roma_project_data.VIEW3D_PT_RoMa_show_data,
@@ -151,7 +152,13 @@ classes = (
 )
 
 def initNodes():
-    bpy.ops.node.update_filter_by_use()
+    # bpy.ops.node.update_gn_filter(filter_name="use")
+    bpy.ops.node.update_gn_filter()
+    bpy.ops.node.update_shader_filter(filter_name="plot")
+    bpy.ops.node.update_shader_filter(filter_name="block")
+    bpy.ops.node.update_shader_filter(filter_name="use")
+    bpy.ops.node.update_shader_filter(filter_name="typology")
+    
     
     
 
