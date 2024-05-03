@@ -25,7 +25,8 @@ if "bpy" in locals():
     importlib.reload(roma_menu),
     # importlib.reload(roma_vertex),
     importlib.reload(roma_facade),
-    importlib.reload(roma_mass)
+    importlib.reload(roma_mass),
+    importlib.reload(roma_schedule)
 else:
     from . import roma_preferences
     from . import roma_modal_operator
@@ -34,6 +35,7 @@ else:
     # from . import roma_vertex
     from . import roma_facade
     from . import roma_mass
+    from . import roma_schedule
     
 import bpy
 
@@ -129,6 +131,10 @@ classes = (
     roma_menu.RoMa_Operator_transformation_orientation,
     roma_menu.RoMa_Menu,
     roma_menu.romaAddonProperties,
+    
+    roma_schedule.RoMa_Schedule_Tree,
+    roma_schedule.RoMa_Schedule_Panel,
+    roma_schedule.Roma_Draw_Schedule,
     
     # roma_vertex.OBJECT_OT_SetVertexAttribute,
     # roma_vertex.VIEW3D_PT_RoMa_vertex,
