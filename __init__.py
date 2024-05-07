@@ -25,7 +25,7 @@ if "bpy" in locals():
     importlib.reload(roma_menu),
     # importlib.reload(roma_vertex),
     importlib.reload(roma_facade),
-    importlib.reload(roma_mass),
+    importlib.reload(roma_massing),
     importlib.reload(roma_schedule)
 else:
     from . import roma_preferences
@@ -34,7 +34,7 @@ else:
     from . import roma_menu
     # from . import roma_vertex
     from . import roma_facade
-    from . import roma_mass
+    from . import roma_massing
     from . import roma_schedule
     
 import bpy
@@ -61,10 +61,6 @@ from bpy.app.handlers import persistent
     
 classes = (
     roma_preferences.roma_addon_preferences,
-    # roma_preferences.OBJECT_OT_roma_addon_prefs,
-    
-    # roma_modal_operator.VIEW3D_OT_update_Roma_mesh_attributes,
-    # roma_modal_operator.VIEW_OT_get_event,
     roma_modal_operator.VIEW_3D_OT_show_roma_selection,
     roma_modal_operator.VIEW_3D_OT_show_roma_attributes,
     roma_modal_operator.VIEW_3D_OT_update_mesh_attributes,
@@ -124,8 +120,8 @@ classes = (
     roma_project_data.FLOOR_LIST_OT_NewItem,
     roma_project_data.FLOOR_LIST_OT_MoveItem,
     
-    roma_menu.RoMa_MenuOperator_add_RoMa_mesh,
-    roma_menu.RoMa_MenuOperator_convert_to_RoMa_mesh,
+    roma_menu.RoMa_MenuOperator_add_RoMa_mass,
+    roma_menu.RoMa_MenuOperator_convert_to_RoMa_mass,
     roma_menu.RoMa_MenuOperator_PrintData,
     roma_menu.RoMa_MenuOperator_ExportCSV,
     roma_menu.RoMa_Operator_transformation_orientation,
@@ -139,17 +135,12 @@ classes = (
     # roma_vertex.OBJECT_OT_SetVertexAttribute,
     # roma_vertex.VIEW3D_PT_RoMa_vertex,
     
-    # roma_mass.OBJECT_OT_add_RoMa_Mass,
-    # roma_mass.OBJECT_OT_SetPlotId,
-    # roma_mass.OBJECT_OT_SetBlockId,
-    roma_mass.OBJECT_OT_SetTypologyId,
-    roma_mass.OBJECT_UL_OBJ_Typology_Uses,
-    roma_mass.OBJECT_OT_SetMassStoreys,
-    roma_mass.obj_typology_uses_name_list,
-    # roma_mass.OBJECT_OT_SetObjOption,
-    # roma_mass.OBJECT_OT_SetObjPhase,
-    roma_mass.VIEW3D_PT_RoMa_Mass,
-    # roma_mass.print_message,
+    roma_massing.OBJECT_OT_SetTypologyId,
+    roma_massing.OBJECT_UL_OBJ_Typology_Uses,
+    roma_massing.OBJECT_OT_SetMassStoreys,
+    roma_massing.obj_typology_uses_name_list,
+    roma_massing.VIEW3D_PT_RoMa_Mass,
+
 
     roma_facade.OBJECT_OT_SetFacadeId,
     roma_facade.OBJECT_OT_SetFacadeNormal,
@@ -360,7 +351,7 @@ def register():
     bpy.app.handlers.depsgraph_update_post.append(roma_modal_operator.update_mesh_attributes_depsgraph)
     bpy.app.handlers.depsgraph_update_post.append(roma_modal_operator.update_show_overlay)
     
-    # bpy.app.handlers.depsgraph_update_post.append(roma_modal_operator.refresh_roma_mesh_attributes)
+    # bpy.app.handlers.depsgraph_update_post.append(roma_modal_operator.refresh_roma_mass_attributes)
     
     from bpy.utils import register_class
     for cls in classes:
@@ -437,22 +428,22 @@ def register():
     Scene.attribute_mass_plot_id = bpy.props.IntProperty(
                                         name="Plot Id",
                                         default=0)
-                                        # update = roma_mass.update_attribute_mass_plot_id)
+                                   
      
     Scene.attribute_mass_block_id = bpy.props.IntProperty(
                                         name="Block Id",
                                         default=0)
-                                        # update = roma_mass.update_attribute_mass_block_id)
+                                   
      
     # Scene.attribute_mass_use_id = bpy.props.IntProperty(
     #                                     name="Use Id",
     #                                     default=0,
-    #                                     update = roma_mass.update_attribute_mass_use_id)
+    #                                
     
     Scene.attribute_mass_typology_id = bpy.props.IntProperty(
                                         name="Typology Id",
                                         default=0,
-                                        update = roma_mass.update_attribute_mass_typology_id)
+                                        update = roma_massing.update_attribute_mass_typology_id)
     
     Scene.attribute_facade_id = bpy.props.IntProperty(
                                         name="Façade Id",
@@ -472,7 +463,7 @@ def register():
                                         name="Number of Storeys",
                                         min=1, 
                                         default=3,
-                                        update = roma_mass.update_attribute_mass_storeys)
+                                        update = roma_massing.update_attribute_mass_storeys)
     
     bpy.types.Object.roma_props = bpy.props.PointerProperty(type=roma_menu.romaAddonProperties)
     
@@ -480,13 +471,13 @@ def register():
     #                                     name="Building option",
     #                                     min=1, 
     #                                     default=1,
-    #                                     update = roma_mass.update_attribute_obj_option)
+
     
     # Scene.attribute_obj_phase = bpy.props.IntProperty(
     #                                     name="Building phase",
     #                                     min=1, 
     #                                     default=1,
-    #                                     update = roma_mass.update_attribute_obj_phase)
+
      
     
     Scene.roma_plot_name_list = bpy.props.CollectionProperty(type = roma_project_data.plot_name_list)
@@ -497,7 +488,7 @@ def register():
                                         name="Plot names",
                                         description="Current plot name",
                                         items=get_plot_names_from_list,
-                                        update=roma_mass.update_plot_name_id)
+                                        update=roma_massing.update_plot_name_id)
     
     Scene.roma_block_name_list = bpy.props.CollectionProperty(type = roma_project_data.block_name_list)
     Scene.roma_block_name_current = bpy.props.CollectionProperty(type =roma_project_data.name_with_id)
@@ -507,7 +498,7 @@ def register():
                                         name="Block names",
                                         description="Current block name ",
                                         items=get_block_names_from_list,
-                                        update=roma_mass.update_block_name_id)
+                                        update=roma_massing.update_block_name_id)
     
     Scene.roma_use_name_list = bpy.props.CollectionProperty(type = roma_project_data.use_name_list)
     Scene.roma_use_name_current = bpy.props.CollectionProperty(type =roma_project_data.name_with_id)
@@ -522,7 +513,7 @@ def register():
                                         name="Typology List",
                                         description="",
                                         items=get_typology_names_from_list,
-                                        update=roma_mass.update_typology_name_label)
+                                        update=roma_massing.update_typology_name_label)
     
     Scene.roma_typology_uses_name_list = bpy.props.CollectionProperty(type = roma_project_data.typology_uses_name_list)
     Scene.roma_typology_uses_name_current = bpy.props.CollectionProperty(type =roma_project_data.name_with_id)
@@ -537,7 +528,7 @@ def register():
                                         items=get_use_names_from_list,
                                         update=roma_project_data.update_typology_uses_name_label)
     
-    Scene.roma_obj_typology_uses_name_list = bpy.props.CollectionProperty(type = roma_mass.obj_typology_uses_name_list)
+    Scene.roma_obj_typology_uses_name_list = bpy.props.CollectionProperty(type = roma_massing.obj_typology_uses_name_list)
     Scene.roma_obj_typology_uses_name_list_index = bpy.props.IntProperty(name = "Typology Use Name of the selected object",
                                              default = 0)
     
