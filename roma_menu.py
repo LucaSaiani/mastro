@@ -209,8 +209,8 @@ class RoMa_Menu(Menu):
     def draw(self, context):
         layout = self.layout
         #layout.active = bool(context.active_object.mode!='EDIT  ')
-        layout.operator(RoMa_MenuOperator_add_RoMa_mesh.bl_idname)
-        layout.operator(RoMa_MenuOperator_convert_to_RoMa_mesh.bl_idname)
+        layout.operator(RoMa_MenuOperator_add_RoMa_mass.bl_idname)
+        layout.operator(RoMa_MenuOperator_convert_to_RoMa_mass.bl_idname)
         layout.separator()
         printAggregate = layout.operator(RoMa_MenuOperator_PrintData.bl_idname, text="Print the data of the mass in compact form")
         printAggregate.text = "aggregate"
@@ -220,15 +220,15 @@ class RoMa_Menu(Menu):
         layout.separator()
         layout.operator(RoMa_Operator_transformation_orientation.bl_idname)
 
-class RoMa_MenuOperator_add_RoMa_mesh(Operator, AddObjectHelper):
-    """Add a RoMa mesh"""
-    bl_idname = "object.roma_add_roma_mesh"
-    bl_label = "RoMa mesh"
+class RoMa_MenuOperator_add_RoMa_mass(Operator, AddObjectHelper):
+    """Add a RoMa mass"""
+    bl_idname = "object.roma_add_roma_mass"
+    bl_label = "RoMa mass"
     bl_options = {'REGISTER', 'UNDO'}
     
     width: bpy.props.FloatProperty(
         name="Width",
-        description="RoMa mesh width",
+        description="RoMa mass width",
         # min=0.01, max=100.0,
         min=0,
         default=12,
@@ -236,7 +236,7 @@ class RoMa_MenuOperator_add_RoMa_mesh(Operator, AddObjectHelper):
     
     depth: bpy.props.FloatProperty(
         name="Depth",
-        description="RoMa mesh depth",
+        description="RoMa mass depth",
         # min=0.01, max=100.0,
         min=0,
         default=8,
@@ -251,12 +251,12 @@ class RoMa_MenuOperator_add_RoMa_mesh(Operator, AddObjectHelper):
     
     def execute(self, context):
 
-        verts_loc, faces = add_roma_mesh(
+        verts_loc, faces = add_roma_mass(
             self.width,
             self.depth,
         )
 
-        mesh = bpy.data.meshes.new("RoMa mesh")
+        mesh = bpy.data.meshes.new("RoMa mass")
 
         bm = bmesh.new()
 
@@ -298,7 +298,7 @@ class RoMa_MenuOperator_add_RoMa_mesh(Operator, AddObjectHelper):
         obj.modifiers[geoName].node_group = group
         return {'FINISHED'}
     
-def add_roma_mesh(width, depth):
+def add_roma_mass(width, depth):
     """
     This function takes inputs and returns vertex and face arrays.
     no actual mesh data creation is done here.
@@ -323,11 +323,11 @@ def add_roma_mesh(width, depth):
 
 # add the entri to the add menu
 def roma_add_menu_func(self, context):
-    self.layout.operator(RoMa_MenuOperator_add_RoMa_mesh.bl_idname, icon='MESH_CUBE')
+    self.layout.operator(RoMa_MenuOperator_add_RoMa_mass.bl_idname, icon='MESH_CUBE')
     
-class RoMa_MenuOperator_convert_to_RoMa_mesh(Operator):
+class RoMa_MenuOperator_convert_to_RoMa_mass(Operator):
     bl_idname = "object.roma_convert_to_roma"
-    bl_label = "Convert the selected mesh to a RoMa mesh"
+    bl_label = "Convert the selected mesh to a RoMa mass"
     
     @classmethod
     def poll(cls, context):

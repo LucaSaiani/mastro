@@ -903,9 +903,9 @@ def update_mesh_attributes_depsgraph(self, context):
     
 
 class VIEW_3D_OT_update_all_mesh_attributes(Operator):
-    """Update RoMa attributes of all the RoMa meshes. Updated attributes are floor to floor height,..."""
+    """Update RoMa attributes of all the RoMa masses. Updated attributes are floor to floor height,..."""
     bl_idname = "wm.update_all_mesh_attributes_modal_operator"
-    bl_label = "Update RoMa attributes of the all RoMa meshes"
+    bl_label = "Update RoMa attributes of the all RoMa masses"
     
     # oldTime = 0
     # newTime = 0
