@@ -15,8 +15,8 @@ import csv #, os
 from bpy.utils import resource_path
 from pathlib import Path
 
-header_aggregateData = ["Option", "Phase", "Plot Name", "Block Name", "Use", "N. of Storeys", "Footprint", "Perimeter", "Façade area", "GEA"]
-header_granularData = ["Option", "Phase", "Plot Name", "Block Name", "Use", "Floor", "Level", "GEA", "Perimeter", "Façade area"]
+header_aggregateData = ["Option", "Phase", "Plot Name", "Block Name", "Use", "N. of Storeys", "Footprint", "Perimeter", "Wall area", "GEA"]
+header_granularData = ["Option", "Phase", "Plot Name", "Block Name", "Use", "Floor", "Level", "GEA", "Perimeter", "Wall area"]
     
 floorToFloorLevel = 4.2
 
@@ -29,7 +29,7 @@ attribute_set = [
             "attr_default" : 0
             },
             {
-            "attr" :  "roma_facade_id",
+            "attr" :  "roma_wall_id",
             "attr_type" :  "INT",
             "attr_domain" :  "EDGE",
             "attr_default" : 0
@@ -618,7 +618,7 @@ def aggregateData(roughData):
             data[-1][7] += el[7]
             # sum perimeter
             data[-1][8] += el[8]
-            # sum facade
+            # sum wall
             data[-1][9] += el[9]
             # sum GEA
             data[-1][10] += el[10]
@@ -653,7 +653,7 @@ def granularData(roughData):
             data[-1][7] += el[7]
             # sum perimeter
             data[-1][8] += el[8]
-            # sum facade
+            # sum wall
             data[-1][9] += el[9]
         else:
            data.append(el)
@@ -680,8 +680,8 @@ def granularData(roughData):
                             perimeter += edge.length
                             # print(edge.index, edge.face, edge.length, edge.storeys, edge.topStorey)
                 # perimeter = None
-                facadeArea = perimeter * floorToFloorLevel
-                expandedData.append([el[0], el[1], el[2], el[3], el[4], floor, level, el[7], perimeter, facadeArea])
+                wallArea = perimeter * floorToFloorLevel
+                expandedData.append([el[0], el[1], el[2], el[3], el[4], floor, level, el[7], perimeter, wallArea])
             del data[index]
             
     data.extend(expandedData)
@@ -705,7 +705,7 @@ def granularData(roughData):
             granularData[-1][7] += el[7]
             # sum perimeter
             granularData[-1][8] += el[8]
-            # sum facade
+            # sum wall
             granularData[-1][9] += el[9]
         else:
            granularData.append(el)
@@ -819,12 +819,12 @@ def get_mass_data(obj):
                 edge.storeys = storeys
             edges.append(edge)
         
-        #facade area
+        #wall area
         # this is the area of the perimeter walls
        
-        facade_area = perimeter * floorToFloorLevel * storeys
+        wall_area = perimeter * floorToFloorLevel * storeys
         # but if the faces having an edge in common have different storey numbers,
-        # then the difference is added to the facade area
+        # then the difference is added to the wall area
         for index in common_edges:
             for fa in bm.faces: 
                 if f.index != fa.index: #there is no point in evaluating the same face
@@ -833,7 +833,7 @@ def get_mass_data(obj):
                             if f[bm_layer_storey] > fa[bm_layer_storey]:
                                 diff = f[bm_layer_storey] - fa[bm_layer_storey]
                                 length = ed.calc_length()
-                                facade_area += length * diff * floorToFloorLevel
+                                wall_area += length * diff * floorToFloorLevel
                                 for ed in edges:
                                     if ed.index == index:
                                         ed.storeys = diff 
@@ -853,8 +853,8 @@ def get_mass_data(obj):
         # GEA = Decimal(GEA)
         # GEA = GEA.quantize(Decimal('0.01'), rounding=ROUND_HALF_DOWN)
         
-        # facade_area = Decimal(facade_area)
-        # facade_area = facade_area.quantize(Decimal('0.01'), rounding=ROUND_HALF_DOWN)
+        # wall_area = Decimal(wall_area)
+        # wall_area = wall_area.quantize(Decimal('0.01'), rounding=ROUND_HALF_DOWN)
         
         # perimeter = Decimal(perimeter)
         # perimeter = perimeter.quantize(Decimal('0.01'), rounding=ROUND_HALF_DOWN)
@@ -865,6 +865,6 @@ def get_mass_data(obj):
         # level = Decimal(level)
         # level = level.quantize(Decimal('0.001'))
         
-        data.append([option, phase, plot, block, typology, storeys, level, footprint, perimeter, facade_area, GEA, edges])
+        data.append([option, phase, plot, block, typology, storeys, level, footprint, perimeter, wall_area, GEA, edges])
             
     return(data)

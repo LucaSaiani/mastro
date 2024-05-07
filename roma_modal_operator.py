@@ -192,7 +192,7 @@ def draw_main_show_attributes(context):
 
         bm.verts.ensure_lookup_table()
         bm.edges.ensure_lookup_table()    
-        bMesh_facade = bm.edges.layers.int["roma_facade_id"]
+        bMesh_wall = bm.edges.layers.int["roma_wall_id"]
         bMesh_normal = bm.edges.layers.int["roma_inverted_normal"]
         
         bm.faces.ensure_lookup_table()      
@@ -262,23 +262,23 @@ def draw_main_show_attributes(context):
             line_width = 0
             vert_offset = 0
             
-            idFacade = bmEdge[bMesh_facade]
+            idWall = bmEdge[bMesh_wall]
             normal = bmEdge[bMesh_normal]
             
             text_edge = []
             text_edge = ""
             text_normal = ""
             
-            if bpy.context.window_manager.toggle_facade_name:   
-                for n in bpy.context.scene.roma_facade_name_list:
-                    if n.id == idFacade:
+            if bpy.context.window_manager.toggle_wall_name:   
+                for n in bpy.context.scene.roma_wall_name_list:
+                    if n.id == idWall:
                         text_edge = (n.name, 0)
                         line_width = blf.dimensions(font_id, n.name)[0]
                         vert_offset = -1 * half_line_height
                         text_edge.append(text_edge)
                         text_edge.append(cr)
                         break
-            if bpy.context.window_manager.toggle_facade_normal:
+            if bpy.context.window_manager.toggle_wall_normal:
                 if normal == -1:   
                     symbol = "↔️"
                     text_normal = (symbol, 0)
@@ -506,7 +506,7 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
             # print("AGGIUNGO BMESH")
             # bm.edges.ensure_lookup_table()
 
-            bMesh_facade = bm.edges.layers.int["roma_facade_id"]
+            bMesh_wall = bm.edges.layers.int["roma_wall_id"]
             bMesh_normal = bm.edges.layers.int["roma_inverted_normal"]
             
             # bm.faces.ensure_lookup_table()
@@ -564,28 +564,28 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
                 for bmEdge in selected_bmEdges:
                     try:
                         bm.faces.ensure_lookup_table()
-                        facade_type = bmEdge[bMesh_facade]
-                        facade_normal = bmEdge[bMesh_normal]
+                        wall_type = bmEdge[bMesh_wall]
+                        wall_normal = bmEdge[bMesh_normal]
                         
                         if bmEdge.index ==  bMesh_active_index:
                             ############# FACADE TYPE ####################
-                            if scene.attribute_facade_id != facade_type:
-                                scene.attribute_facade_id = facade_type
-                            if scene.roma_facade_name_current[0].id != facade_type:
-                                scene.roma_facade_name_current[0].id = facade_type
-                                for n in scene.roma_facade_name_list:
-                                    if n.id == scene.roma_facade_name_current[0].id:
-                                        scene.roma_facade_name_current[0].name = " " + n.name 
+                            if scene.attribute_wall_id != wall_type:
+                                scene.attribute_wall_id = wall_type
+                            if scene.roma_wall_name_current[0].id != wall_type:
+                                scene.roma_wall_name_current[0].id = wall_type
+                                for n in scene.roma_wall_name_list:
+                                    if n.id == scene.roma_wall_name_current[0].id:
+                                        scene.roma_wall_name_current[0].name = " " + n.name 
                                         break
                             ############# FACADE NORMAL ####################
-                            # print(scene.attribute_facade_normal*1, facade_normal)
-                            # if (scene.attribute_facade_normal*1) != facade_normal:
-                            if facade_normal == -1:
+                            # print(scene.attribute_wall_normal*1, wall_normal)
+                            # if (scene.attribute_wall_normal*1) != wall_normal:
+                            if wall_normal == -1:
                                 # print("true")
-                                scene.attribute_facade_normal = True
+                                scene.attribute_wall_normal = True
                             else:
                                 # print("false")
-                                scene.attribute_facade_normal = False
+                                scene.attribute_wall_normal = False
                     except:
                         pass
                     

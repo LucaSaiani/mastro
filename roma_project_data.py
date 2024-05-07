@@ -428,9 +428,9 @@ class VIEW3D_PT_RoMa_show_data(Panel):
         col.prop(context.window_manager, 'toggle_typology_name', icon_only=False)
         col.prop(context.window_manager, 'toggle_storey_number', icon_only=False)
         # col.separator()
-        col = layout.column(heading="Façade", align = True)
-        col.prop(context.window_manager, 'toggle_facade_name', icon_only=False)
-        col.prop(context.window_manager, 'toggle_facade_normal', icon_only=False)
+        col = layout.column(heading="Wall", align = True)
+        col.prop(context.window_manager, 'toggle_wall_name', icon_only=False)
+        col.prop(context.window_manager, 'toggle_wall_normal', icon_only=False)
         # col.separator()
         col = layout.column(heading="Floor", align = True)
         col.prop(context.window_manager, 'toggle_floor_name', icon_only=False)
@@ -484,7 +484,7 @@ class VIEW3D_PT_RoMa_mass_plot_data(Panel):
         
         col = row.column(align=True)
         col.operator("roma_plot_name_list.new_item", icon='ADD', text="")
-        # col.operator("roma_facade_type_list.delete_item", icon='REMOVE', text="")
+        # col.operator("roma_wall_type_list.delete_item", icon='REMOVE', text="")
         col.separator()
         col.operator("roma_plot_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
         col.operator("roma_plot_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
@@ -502,7 +502,7 @@ class VIEW3D_PT_RoMa_mass_plot_data(Panel):
         
 class OBJECT_UL_Plot(UIList):
    
-    """Façade type UIList."""
+    """Wall type UIList."""
     def draw_item(self, context, layout, data, item, icon, active_data,
                   active_propname, index):
        
@@ -1471,10 +1471,10 @@ class VIEW3D_PT_RoMa_building_data(Panel):
 ############################ FACADE ############################
 ############################        ############################
         
-class VIEW3D_PT_RoMa_building_facade_data(Panel):
+class VIEW3D_PT_RoMa_building_wall_data(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
-    bl_label = "Façade"
+    bl_label = "Wall"
     bl_parent_id = "VIEW3D_PT_RoMa_building_data"
     bl_options = {'DEFAULT_CLOSED'}      
     
@@ -1486,7 +1486,7 @@ class VIEW3D_PT_RoMa_building_facade_data(Panel):
         layout.use_property_decorate = False  # No animation.  
         
         row = layout.row()
-       # row.label(text="Façade")
+       # row.label(text="Wall")
         
         # is_sortable = len(scene.roma_use_name_list) > 1
         rows = 3
@@ -1494,25 +1494,25 @@ class VIEW3D_PT_RoMa_building_facade_data(Panel):
         #     rows = 5
             
         row = layout.row()
-        row.template_list("OBJECT_UL_Facade", "facade_list", scene,
-                        "roma_facade_name_list", scene, "roma_facade_name_list_index", rows = rows)
+        row.template_list("OBJECT_UL_Wall", "wall_list", scene,
+                        "roma_wall_name_list", scene, "roma_wall_name_list_index", rows = rows)
         
         
         col = row.column(align=True)
-        col.operator("roma_facade_name_list.new_item", icon='ADD', text="")
+        col.operator("roma_wall_name_list.new_item", icon='ADD', text="")
         col.separator()
-        col.operator("roma_facade_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
-        col.operator("roma_facade_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
+        col.operator("roma_wall_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
+        col.operator("roma_wall_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
         
         row = layout.row()
         row = layout.row(align=True)
         
-        # if scene.roma_facade_name_list_index >= 0 and scene.roma_facade_name_list:
-        #     item = scene.roma_facade_name_list[scene.roma_facade_name_list_index]
+        # if scene.roma_wall_name_list_index >= 0 and scene.roma_wall_name_list:
+        #     item = scene.roma_wall_name_list[scene.roma_wall_name_list_index]
         #     row.prop(item, "name", icon_only=True, text="Element Name")
             
             
-class OBJECT_UL_Facade(UIList):
+class OBJECT_UL_Wall(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data,
                   active_propname, index):
        
@@ -1522,7 +1522,7 @@ class OBJECT_UL_Facade(UIList):
             split = layout.split(factor=0.3)
             split.label(text="Id: %d" % (item.id)) 
             # split.label(text=item.name, icon=custom_icon) 
-            split.prop(context.scene.roma_facade_name_list[index],
+            split.prop(context.scene.roma_wall_name_list[index],
                        "name",
                        icon_only=True,
                        icon = custom_icon)
@@ -1545,11 +1545,11 @@ class OBJECT_UL_Facade(UIList):
         pass
     
 class FACADE_LIST_OT_NewItem(Operator):
-    bl_idname = "roma_facade_name_list.new_item"
-    bl_label = "Add a new façade type"
+    bl_idname = "roma_wall_name_list.new_item"
+    bl_label = "Add a new wall type"
 
     def execute(self, context): 
-        context.scene.roma_facade_name_list.add()
+        context.scene.roma_wall_name_list.add()
         # last = len(context.scene.roma_use_name_list)-1
         # if last == 0:
         #     context.scene.roma_use_name_list[0].id = 0
@@ -1559,18 +1559,18 @@ class FACADE_LIST_OT_NewItem(Operator):
         #     context.scene.roma_use_name_list[0].RND = rndNumber
         #     context.scene.roma_use_name_list.add()
         temp_list = []    
-        for el in context.scene.roma_facade_name_list:
+        for el in context.scene.roma_wall_name_list:
             temp_list.append(el.id)
-        last = len(context.scene.roma_facade_name_list)-1
+        last = len(context.scene.roma_wall_name_list)-1
         
-        context.scene.roma_facade_name_list[last].id = max(temp_list)+1
+        context.scene.roma_wall_name_list[last].id = max(temp_list)+1
         # rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
         # context.scene.roma_use_name_list[last].RND = rndNumber
             
         return{'FINISHED'}
     
 class FACADE_LIST_OT_MoveItem(Operator):
-    bl_idname = "roma_facade_name_list.move_item"
+    bl_idname = "roma_wall_name_list.move_item"
     bl_label = "Move an item in the list"
 
     direction: bpy.props.EnumProperty(items=(('UP', 'Up', ""),
@@ -1578,39 +1578,39 @@ class FACADE_LIST_OT_MoveItem(Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.scene.roma_facade_name_list
+        return context.scene.roma_wall_name_list
 
     def move_index(self):
-        index = bpy.context.scene.roma_facade_name_list_index
-        list_length = len(bpy.context.scene.roma_facade_name_list) - 1 
+        index = bpy.context.scene.roma_wall_name_list_index
+        list_length = len(bpy.context.scene.roma_wall_name_list) - 1 
         new_index = index + (-1 if self.direction == 'UP' else 1)
 
-        bpy.context.scene.roma_facade_name_list_index = max(0, min(new_index, list_length))
+        bpy.context.scene.roma_wall_name_list_index = max(0, min(new_index, list_length))
 
     def execute(self, context):
-        roma_facade_name_list = context.scene.roma_facade_name_list
-        index = context.scene.roma_facade_name_list_index
+        roma_wall_name_list = context.scene.roma_wall_name_list
+        index = context.scene.roma_wall_name_list_index
 
         neighbor = index + (-1 if self.direction == 'UP' else 1)
-        roma_facade_name_list.move(neighbor, index)
+        roma_wall_name_list.move(neighbor, index)
         self.move_index()
 
         return{'FINISHED'}
             
-class facade_name_list(PropertyGroup):
+class wall_name_list(PropertyGroup):
     id: IntProperty(
            name="Id",
-           description="Façade name id",
+           description="Wall name id",
            default = 0)
     
     name: StringProperty(
-           name="Façade Name",
-           description="The name of the façade",
+           name="Wall Name",
+           description="The name of the wall",
            default="")
     
     normal: IntProperty(
-           name="Façade Normal",
-           description="Invert the normal of the façade",
+           name="Wall Normal",
+           description="Invert the normal of the wall",
            default = 1)
     
 ############################        ############################
@@ -1746,8 +1746,8 @@ class floor_name_list(PropertyGroup):
            default="")
     
     # normal: IntProperty(
-    #        name="Façade Normal",
-    #        description="Invert the normal of the façade",
+    #        name="Wall Normal",
+    #        description="Invert the normal of the wall",
     #        default = 0) 
         
 

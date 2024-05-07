@@ -24,7 +24,7 @@ if "bpy" in locals():
     importlib.reload(roma_project_data),
     importlib.reload(roma_menu),
     # importlib.reload(roma_vertex),
-    importlib.reload(roma_facade),
+    importlib.reload(roma_wall),
     importlib.reload(roma_massing),
     importlib.reload(roma_schedule)
 else:
@@ -33,7 +33,7 @@ else:
     from . import roma_project_data
     from . import roma_menu
     # from . import roma_vertex
-    from . import roma_facade
+    from . import roma_wall
     from . import roma_massing
     from . import roma_schedule
     
@@ -77,7 +77,7 @@ classes = (
     roma_project_data.VIEW3D_PT_RoMa_mass_use_data,
     roma_project_data.VIEW3D_PT_RoMa_mass_typology_data,
     roma_project_data.VIEW3D_PT_RoMa_building_data,
-    roma_project_data.VIEW3D_PT_RoMa_building_facade_data,
+    roma_project_data.VIEW3D_PT_RoMa_building_wall_data,
     roma_project_data.VIEW3D_PT_RoMa_building_floor_data,
     # roma_project_data.TEST_OT_modal_operator,
     
@@ -110,8 +110,8 @@ classes = (
     roma_project_data.TYPOLOGY_USES_LIST_OT_MoveItem,
     # roma_project_data.update_typology_uses_OT,
     
-    roma_project_data.OBJECT_UL_Facade,
-    roma_project_data.facade_name_list,
+    roma_project_data.OBJECT_UL_Wall,
+    roma_project_data.wall_name_list,
     roma_project_data.FACADE_LIST_OT_NewItem,
     roma_project_data.FACADE_LIST_OT_MoveItem,
     
@@ -142,10 +142,10 @@ classes = (
     roma_massing.VIEW3D_PT_RoMa_Mass,
 
 
-    roma_facade.OBJECT_OT_SetFacadeId,
-    roma_facade.OBJECT_OT_SetFacadeNormal,
-    roma_facade.OBJECT_OT_SetFloorId,
-    roma_facade.VIEW3D_PT_RoMa_Facade,
+    roma_wall.OBJECT_OT_SetWallId,
+    roma_wall.OBJECT_OT_SetWallNormal,
+    roma_wall.OBJECT_OT_SetFloorId,
+    roma_wall.VIEW3D_PT_RoMa_Wall,
 )
 
 def initNodes():
@@ -205,11 +205,11 @@ def initLists():
         bpy.context.scene.roma_obj_typology_uses_name_list[0].id = 0
         bpy.context.scene.roma_obj_typology_uses_name_list[0].name =  bpy.context.scene.roma_use_name_list[0].name
     
-    if len(bpy.context.scene.roma_facade_name_list) == 0:
-        bpy.context.scene.roma_facade_name_list.add()
-        bpy.context.scene.roma_facade_name_list[0].id = 0
-        bpy.context.scene.roma_facade_name_list[0].name = "Facade type... "
-        bpy.context.scene.roma_facade_name_list[0].normal = 0
+    if len(bpy.context.scene.roma_wall_name_list) == 0:
+        bpy.context.scene.roma_wall_name_list.add()
+        bpy.context.scene.roma_wall_name_list[0].id = 0
+        bpy.context.scene.roma_wall_name_list[0].name = "Wall type... "
+        bpy.context.scene.roma_wall_name_list[0].normal = 0
     
     if len(bpy.context.scene.roma_floor_name_list) == 0:
         bpy.context.scene.roma_floor_name_list.add()
@@ -241,11 +241,11 @@ def initLists():
         bpy.context.scene.roma_typology_name_current[0].name = bpy.context.scene.roma_typology_name_list[0].name
         # print("roma_use_name_current",len(bpy.context.scene.roma_use_name_current))
         
-    if len(bpy.context.scene.roma_facade_name_current) == 0:
-        bpy.context.scene.roma_facade_name_current.add()
-        bpy.context.scene.roma_facade_name_current[0].id = 0
-        bpy.context.scene.roma_facade_name_current[0].name = bpy.context.scene.roma_facade_name_list[0].name
-        # print("roma_facade_name_current",len(bpy.context.scene.roma_facade_name_current))
+    if len(bpy.context.scene.roma_wall_name_current) == 0:
+        bpy.context.scene.roma_wall_name_current.add()
+        bpy.context.scene.roma_wall_name_current[0].id = 0
+        bpy.context.scene.roma_wall_name_current[0].name = bpy.context.scene.roma_wall_name_list[0].name
+        # print("roma_wall_name_current",len(bpy.context.scene.roma_wall_name_current))
         
     if len(bpy.context.scene.roma_floor_name_current) == 0:
         bpy.context.scene.roma_floor_name_current.add()
@@ -286,9 +286,9 @@ def get_typology_names_from_list(scene, context):
         items.append(newProp)
     return items
 
-def get_facade_names_from_list(scene, context):
+def get_wall_names_from_list(scene, context):
     items = []
-    for el in scene.roma_facade_name_list:
+    for el in scene.roma_wall_name_list:
         newProp = (el.name, el.name, "")
         items.append(newProp)
     return items
@@ -394,11 +394,11 @@ def register():
                                             name = "Typology",
                                             default = False)
     
-    bpy.types.WindowManager.toggle_facade_name = bpy.props.BoolProperty(
+    bpy.types.WindowManager.toggle_wall_name = bpy.props.BoolProperty(
                                             name = "Type",
                                             default = False)
     
-    bpy.types.WindowManager.toggle_facade_normal = bpy.props.BoolProperty(
+    bpy.types.WindowManager.toggle_wall_normal = bpy.props.BoolProperty(
                                             name = "Inverted Normals",
                                             default = False)
     
@@ -445,19 +445,19 @@ def register():
                                         default=0,
                                         update = roma_massing.update_attribute_mass_typology_id)
     
-    Scene.attribute_facade_id = bpy.props.IntProperty(
-                                        name="Façade Id",
+    Scene.attribute_wall_id = bpy.props.IntProperty(
+                                        name="Wall Id",
                                         default=0,
-                                        update = roma_facade.update_attribute_facade_id)
+                                        update = roma_wall.update_attribute_wall_id)
     
-    Scene.attribute_facade_normal = bpy.props.BoolProperty(
+    Scene.attribute_wall_normal = bpy.props.BoolProperty(
                                             default = False,
-                                            update = roma_facade.update_facade_normal)
+                                            update = roma_wall.update_wall_normal)
     
     Scene.attribute_floor_id = bpy.props.IntProperty(
                                         name="Floor Id",
                                         default=0,
-                                        update = roma_facade.update_attribute_floor_id)
+                                        update = roma_wall.update_attribute_floor_id)
      
     Scene.attribute_mass_storeys = bpy.props.IntProperty(
                                         name="Number of Storeys",
@@ -532,15 +532,15 @@ def register():
     Scene.roma_obj_typology_uses_name_list_index = bpy.props.IntProperty(name = "Typology Use Name of the selected object",
                                              default = 0)
     
-    Scene.roma_facade_name_list = bpy.props.CollectionProperty(type = roma_project_data.facade_name_list)
-    Scene.roma_facade_name_current = bpy.props.CollectionProperty(type =roma_project_data.name_with_id)
-    Scene.roma_facade_name_list_index = bpy.props.IntProperty(name = "Façade Name",
+    Scene.roma_wall_name_list = bpy.props.CollectionProperty(type = roma_project_data.wall_name_list)
+    Scene.roma_wall_name_current = bpy.props.CollectionProperty(type =roma_project_data.name_with_id)
+    Scene.roma_wall_name_list_index = bpy.props.IntProperty(name = "Wall Name",
                                              default = 0)
-    Scene.roma_facade_names = bpy.props.EnumProperty(
-                                        name="Façade List",
+    Scene.roma_wall_names = bpy.props.EnumProperty(
+                                        name="Wall List",
                                         description="",
-                                        items=get_facade_names_from_list,
-                                        update=roma_facade.update_facade_name_label)
+                                        items=get_wall_names_from_list,
+                                        update=roma_wall.update_wall_name_label)
     
     Scene.roma_floor_name_list = bpy.props.CollectionProperty(type = roma_project_data.floor_name_list)
     Scene.roma_floor_name_current = bpy.props.CollectionProperty(type =roma_project_data.name_with_id)
@@ -550,7 +550,7 @@ def register():
                                         name="Floor List",
                                         description="",
                                         items=get_floor_names_from_list,
-                                        update=roma_facade.update_floor_name_label)
+                                        update=roma_wall.update_floor_name_label)
    
     
 
@@ -581,8 +581,8 @@ def unregister():
     # del bpy.types.WindowManager.toggle_use_name
     del bpy.types.WindowManager.toggle_typology_name
     del bpy.types.WindowManager.toggle_storey_number
-    del bpy.types.WindowManager.toggle_facade_name
-    del bpy.types.WindowManager.toggle_facade_normal
+    del bpy.types.WindowManager.toggle_wall_name
+    del bpy.types.WindowManager.toggle_wall_normal
     del bpy.types.WindowManager.toggle_floor_name
     
     del Scene.updating_mesh_attributes_is_active
@@ -590,8 +590,8 @@ def unregister():
     del Scene.attribute_mass_block_id
     # del Scene.attribute_mass_use_id
     del Scene.attribute_mass_typology_id
-    del Scene.attribute_facade_id
-    del Scene.attribute_facade_normal
+    del Scene.attribute_wall_id
+    del Scene.attribute_wall_normal
     del Scene.attribute_floor_id
     del Scene.attribute_mass_storeys
     # del Scene.attribute_obj_option
@@ -604,14 +604,14 @@ def unregister():
     del Scene.roma_use_name_list
     del Scene.roma_typology_name_list
     del Scene.roma_obj_typology_uses_name_list
-    del Scene.roma_facade_name_list
+    del Scene.roma_wall_name_list
     del Scene.roma_floor_name_list
     
     del Scene.roma_plot_name_current
     del Scene.roma_block_name_current
     del Scene.roma_use_name_current
     del Scene.roma_typology_name_current
-    del Scene.roma_facade_name_current
+    del Scene.roma_wall_name_current
     del Scene.roma_floor_name_current
     
     del Scene.roma_plot_name_list_index
@@ -619,14 +619,14 @@ def unregister():
     del Scene.roma_use_name_list_index
     del Scene.roma_typology_name_list_index
     del Scene.roma_obj_typology_uses_name_list_index
-    del Scene.roma_facade_name_list_index
+    del Scene.roma_wall_name_list_index
     del Scene.roma_floor_name_list_index
     
     del Scene.roma_plot_names
     del Scene.roma_block_names
     del Scene.roma_typology_uses_names
     del Scene.roma_typology_names
-    del Scene.roma_facade_names
+    del Scene.roma_wall_names
     del Scene.roma_floor_names
     
     del Scene.roma_previous_selected_typology
