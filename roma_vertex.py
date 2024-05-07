@@ -23,9 +23,9 @@ class VIEW3D_PT_RoMa_vertex(Panel):
         
         layout.prop(context.scene, "attribute_vertex", text="Custom Attribute")
     
-#class OPERATOR_update_RoMa_facade_attribute(bpy.types.Operator):
+#class OPERATOR_update_RoMa_wall_attribute(bpy.types.Operator):
 class OBJECT_OT_SetVertexAttribute(Operator):
-    """Assign a façade type to the selected edge"""
+    """Assign a wall type to the selected edge"""
     bl_idname = "object.set_attribute_vertex"
     bl_label = "Assign a custom value to the selected vertex"
     bl_options = {'REGISTER', 'UNDO'}
@@ -61,7 +61,7 @@ class OBJECT_OT_SetVertexAttribute(Operator):
             return {'FINISHED'}    
     
     
-# def add_RoMa_facade(self, context):
+# def add_RoMa_wall(self, context):
 #     scale_x = self.scale.x
 #     # scale_y = self.scale.y
 
@@ -73,18 +73,18 @@ class OBJECT_OT_SetVertexAttribute(Operator):
 #     edges = [[0,1]]
 #     faces = []
 
-#     mesh = bpy.data.meshes.new(name="RoMa facade")
+#     mesh = bpy.data.meshes.new(name="RoMa wall")
 #     mesh.from_pydata(verts, edges, faces)
 #     # useful for development when the mesh may be invalid.
 #     # mesh.validate(verbose=True)
 #     object_data_add(context, mesh, operator=self)
-#     mesh.attributes.new(name="roma_facade_type", type="INT", domain="EDGE")
+#     mesh.attributes.new(name="roma_wall_type", type="INT", domain="EDGE")
 #     mesh.attributes.new(name="roma_plot_name", type="STRING", domain="FACE")
     
-# def add_RoMa_facade_button(self, context):
+# def add_RoMa_wall_button(self, context):
 #     self.layout.operator(
-#         OBJECT_OT_add_RoMa_facade.bl_idname,
-#         text="RoMa Facade",
+#         OBJECT_OT_add_RoMa_wall.bl_idname,
+#         text="RoMa Wall",
 #         icon='PLUGIN')
     
 
