@@ -5,7 +5,7 @@ class VIEW3D_PT_RoMa_Wall(Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "RoMa"
-    bl_label = "Architecture"
+    bl_label = "Room"
     
     @classmethod
     def poll(cls, context):
@@ -24,7 +24,7 @@ class VIEW3D_PT_RoMa_Wall(Panel):
                 layout.use_property_split = True    
                 layout.use_property_decorate = False  # No animation.
                 
-                ################ FACADE ######################
+                ################ WALL ######################
                 row = layout.row()
                 row = layout.row(align=True)
                 
@@ -36,9 +36,19 @@ class VIEW3D_PT_RoMa_Wall(Panel):
                 row.prop(context.scene, "roma_wall_names", icon="NODE_TEXTURE", icon_only=True, text="Wall Type")
                 if len(scene.roma_plot_name_list) >0:
                     row.label(text = scene.roma_wall_name_current[0].name)
+                    wallId = scene.roma_wall_name_current[0].id
+                    # thickness = round(scene.roma_wall_name_list[wallId].wallThickness,3)
+                    thickness = "%.3f" % scene.roma_wall_name_list[wallId].wallThickness
+                    layout.label(text = str(thickness))
+                    # scene.attribute_wall_thickness = thickness
+                    layout.prop(context.scene, 'attribute_wall_thickness', text="Thickness")
+                    # layout.prop(context.scene, 'attribute_wall_offset', text="Offset")
                 else:
                     row.label(text = "")
-                row.prop(context.scene, 'attribute_wall_normal', toggle=True, icon="ARROW_LEFTRIGHT", icon_only=True)
+                
+                
+                # layout.prop(context.scene, 'attribute_wall_normal', toggle=True, icon="ARROW_LEFTRIGHT", icon_only=True)
+                
                 
                 ################ FLOOR ######################
                 row = layout.row()
@@ -56,7 +66,7 @@ class VIEW3D_PT_RoMa_Wall(Panel):
                     row.label(text = "")
                 
 ############################        ############################
-############################ FACADE ############################
+############################ WALL ############################
 ############################        ############################
 
 class OBJECT_OT_SetWallId(Operator):
@@ -69,23 +79,25 @@ class OBJECT_OT_SetWallId(Operator):
         obj = context.active_object
         mesh = obj.data
 
-        attribute_wall_id = context.scene.attribute_wall_id
+        # attribute_wall_id = context.scene.attribute_wall_id
         
         try:
             mesh.attributes["roma_wall_id"]
             attribute_wall_id = context.scene.attribute_wall_id
+            thickness = context.scene.roma_wall_name_list[attribute_wall_id].wallThickness
 
             mode = obj.mode
             bpy.ops.object.mode_set(mode='OBJECT')
            
             selected_edges = [e for e in bpy.context.active_object.data.edges if e.select]
             mesh_attributes_id = mesh.attributes["roma_wall_id"].data.items()
+            mesh_attributes_thickness = mesh.attributes["roma_wall_thickness"].data.items()
             for edge in selected_edges:
                 index = edge.index
-                for mesh_attribute in mesh_attributes_id:
+                for ind, mesh_attribute in enumerate(mesh_attributes_id):
                     if mesh_attribute[0] == index:
                         mesh_attribute[1].value = attribute_wall_id
-                
+                        mesh_attributes_thickness[ind][1].value = thickness
             bpy.ops.object.mode_set(mode=mode)
                     
             # self.report({'INFO'}, "Attribute set to face, use: "+str(attribute_mass_use_id))

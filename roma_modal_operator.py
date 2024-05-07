@@ -568,7 +568,7 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
                         wall_normal = bmEdge[bMesh_normal]
                         
                         if bmEdge.index ==  bMesh_active_index:
-                            ############# FACADE TYPE ####################
+                            ############# WALL TYPE ####################
                             if scene.attribute_wall_id != wall_type:
                                 scene.attribute_wall_id = wall_type
                             if scene.roma_wall_name_current[0].id != wall_type:
@@ -577,7 +577,7 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
                                     if n.id == scene.roma_wall_name_current[0].id:
                                         scene.roma_wall_name_current[0].name = " " + n.name 
                                         break
-                            ############# FACADE NORMAL ####################
+                            ############# WALL NORMAL ####################
                             # print(scene.attribute_wall_normal*1, wall_normal)
                             # if (scene.attribute_wall_normal*1) != wall_normal:
                             if wall_normal == -1:
