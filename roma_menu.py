@@ -35,6 +35,18 @@ attribute_set = [
             "attr_default" : 0
             },
             {
+            "attr" :  "roma_wall_thickness",
+            "attr_type" :  "FLOAT",
+            "attr_domain" :  "EDGE",
+            "attr_default" : 0.300
+            },
+            {
+            "attr" :  "roma_wall_offset",
+            "attr_type" :  "FLOAT",
+            "attr_domain" :  "EDGE",
+            "attr_default" : 0
+            },
+            {
             "attr" :  "roma_inverted_normal",
             "attr_type" :  "INT",
             "attr_domain" :  "EDGE",

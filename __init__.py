@@ -112,8 +112,8 @@ classes = (
     
     roma_project_data.OBJECT_UL_Wall,
     roma_project_data.wall_name_list,
-    roma_project_data.FACADE_LIST_OT_NewItem,
-    roma_project_data.FACADE_LIST_OT_MoveItem,
+    roma_project_data.WALL_LIST_OT_NewItem,
+    roma_project_data.WALL_LIST_OT_MoveItem,
     
     roma_project_data.OBJECT_UL_Floor,
     roma_project_data.floor_name_list,
@@ -450,6 +450,17 @@ def register():
                                         default=0,
                                         update = roma_wall.update_attribute_wall_id)
     
+    Scene.attribute_wall_thickness = bpy.props.FloatProperty(
+                                        name = "Wall thickness",
+                                        default=0.300,
+                                        precision=3
+                                        )
+    Scene.attribute_wall_offset = bpy.props.FloatProperty(
+                                        name = "Wall offset",
+                                        default=0,
+                                        precision=3
+                                        )
+    
     Scene.attribute_wall_normal = bpy.props.BoolProperty(
                                             default = False,
                                             update = roma_wall.update_wall_normal)
@@ -591,7 +602,9 @@ def unregister():
     # del Scene.attribute_mass_use_id
     del Scene.attribute_mass_typology_id
     del Scene.attribute_wall_id
+    del Scene.attribute_wall_thickness
     del Scene.attribute_wall_normal
+    del Scene.attribute_wall_offset
     del Scene.attribute_floor_id
     del Scene.attribute_mass_storeys
     # del Scene.attribute_obj_option

@@ -117,8 +117,8 @@ class update_GN_Filter_OT(Operator):
         
     #     return node_obj, node_x_location
     def newGroup (self, groupName, type):
-        attributeName = "GN_Use"
-        # if self.filter_name == "use": attributeName = "GN_Use"
+        attributeName = "RoMa_Use"
+        # if self.filter_name == "use": attributeName = "RoMa_Use"
         # elif self.filter_name == "typology": attributeName = "roma_typology_id"
         
          # geometry nodes group
@@ -257,7 +257,7 @@ class update_Shader_Filter_OT(Operator):
     def newGroup (self, groupName, type):
         if self.filter_name == "plot": attributeName = "roma_plot_id"
         elif self.filter_name == "block": attributeName = "roma_block_id"
-        elif self.filter_name == "use": attributeName = "GN_Use"
+        elif self.filter_name == "use": attributeName = "RoMa_Use"
         elif self.filter_name == "typology": attributeName = "roma_typology_id"
         
          # geometry nodes group
@@ -1451,7 +1451,7 @@ class typology_uses_name_list(PropertyGroup):
     #        default = 1)
     
 ############################            ############################
-############################ BUILDING   ############################
+############################ ROOM       ############################
 ############################            ############################
         
         
@@ -1468,7 +1468,7 @@ class VIEW3D_PT_RoMa_building_data(Panel):
         pass
         
 ############################        ############################
-############################ FACADE ############################
+############################ WALL   ############################
 ############################        ############################
         
 class VIEW3D_PT_RoMa_building_wall_data(Panel):
@@ -1504,8 +1504,17 @@ class VIEW3D_PT_RoMa_building_wall_data(Panel):
         col.operator("roma_wall_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
         col.operator("roma_wall_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
         
-        row = layout.row()
-        row = layout.row(align=True)
+        # row = layout.row()
+        # row = layout.row(align=True)
+        # layout.prop(context.scene, "roma_typology_uses_names", icon="COMMUNITY", icon_only=False, text="Type:")
+        index = context.scene.roma_wall_name_list_index
+        layout.prop(context.scene.roma_wall_name_list[index], "shortName", text="Short name")
+        layout.prop(context.scene.roma_wall_name_list[index], "wallThickness", text="Thickness")
+        layout.prop(context.scene.roma_wall_name_list[index], "wallOffset", text="Offset")
+       
+       
+       
+       
         
         # if scene.roma_wall_name_list_index >= 0 and scene.roma_wall_name_list:
         #     item = scene.roma_wall_name_list[scene.roma_wall_name_list_index]
@@ -1544,7 +1553,7 @@ class OBJECT_UL_Wall(UIList):
     def draw_filter(self, context, layout):
         pass
     
-class FACADE_LIST_OT_NewItem(Operator):
+class WALL_LIST_OT_NewItem(Operator):
     bl_idname = "roma_wall_name_list.new_item"
     bl_label = "Add a new wall type"
 
@@ -1569,7 +1578,7 @@ class FACADE_LIST_OT_NewItem(Operator):
             
         return{'FINISHED'}
     
-class FACADE_LIST_OT_MoveItem(Operator):
+class WALL_LIST_OT_MoveItem(Operator):
     bl_idname = "roma_wall_name_list.move_item"
     bl_label = "Move an item in the list"
 
@@ -1606,7 +1615,32 @@ class wall_name_list(PropertyGroup):
     name: StringProperty(
            name="Wall Name",
            description="The name of the wall",
-           default="")
+           default="Wall type...")
+    
+    shortName: StringProperty(
+           name="Wall Name",
+           description="A short name describing the wall",
+           default="WLL")
+    
+    wallThickness: FloatProperty(
+        name="Wall thickness",
+        description="The thickness of the wall",
+        min=0,
+        #max=99,
+        precision=3,
+        default = 0.300,
+        # update=update_roma_masses_data
+        )
+    
+    wallOffset: FloatProperty(
+        name="Wall offset",
+        description="The offset of the wall from its center line",
+        min=0,
+        #max=99,
+        precision=3,
+        default = 0,
+        # update=update_roma_masses_data
+        )
     
     normal: IntProperty(
            name="Wall Normal",
