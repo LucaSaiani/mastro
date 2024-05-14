@@ -830,6 +830,7 @@ class VIEW3D_PT_RoMa_mass_use_data(Panel):
         # layout.label(text=()"Current use:",context.scene.roma_use_name_list[index].name))
         # layout.label(text=str(context.scene.roma_use_name_list[index].floorToFloor))
         # layout.label(text=str(context.scene.roma_use_name_list[index].liquidHeight))
+        layout.prop(context.scene.roma_use_name_list[index],"name", text="Name")
         layout.prop(context.scene.roma_use_name_list[index],"floorToFloor", text="Floor to floor height")
         row = layout.row(align=True)
         sub = row.row()
@@ -853,11 +854,11 @@ class OBJECT_UL_Use(UIList):
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
             split = layout.split(factor=0.3)
             split.label(text="Id: %d" % (item.id)) 
-            # split.label(text=item.name, icon=custom_icon) 
-            split.prop(context.scene.roma_use_name_list[index],
-                       "name",
-                       icon_only=True,
-                       icon = custom_icon)
+            split.label(text=item.name, icon=custom_icon) 
+            # split.prop(context.scene.roma_use_name_list[index],
+            #            "name",
+            #            icon_only=True,
+            #            icon = custom_icon)
         elif self.layout_type in {'GRID'}:
             layout.alignment = 'CENTER'
             layout.label(text="", icon = custom_icon)
