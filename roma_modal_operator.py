@@ -675,12 +675,12 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
                     for bmFace in selected_bmFaces:
                         typology_id = bmFace[bMesh_typology] 
                         numberOfStoreys = bmFace[bMesh_storeys] 
-                        # if typology_id > 0:
-                        #     print("typology",typology_id)
                         use_list = bpy.context.scene.roma_typology_name_list[typology_id].useList
-                        # print("useList", use_list)
-                        useSplit = use_list.split(";")
+                        # uses are listed top to bottom, but they need to
+                        # be added bottom to top                       
+                        use_list = use_list [::-1]
                         
+                        useSplit = use_list.split(";")
                         use_id_list = "1"
                         storey_list = "1"
                         height_A = "1"
@@ -797,7 +797,8 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
                         
                         # update the uses shown in the UIList in the Mass menu
                         # in the 3D view
-                        # print("usesplit", useSplit)
+                        # list needs to be revesed again
+                        useSplit.reverse()
                         for enum, el in enumerate(useSplit):
                             id = int(el)
                             usesUiList.add()

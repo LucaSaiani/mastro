@@ -209,10 +209,6 @@ class OBJECT_OT_SetMassStoreys(Operator):
             
             selected_faces = [p for p in bpy.context.active_object.data.polygons if p.select]
             mesh_attributes = mesh.attributes["roma_number_of_storeys"].data.items()
-
-            
-            
-            
             
             for face in selected_faces:
                 index = face.index
@@ -267,7 +263,6 @@ def update_plot_name_id(self, context):
             
             obj = context.active_object
             obj.roma_props['roma_plot_attribute'] = n.id
-            # print("Aggiorno")
             break 
 
 def update_block_name_id(self, context):
