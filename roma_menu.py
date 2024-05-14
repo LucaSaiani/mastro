@@ -429,7 +429,7 @@ def addAttributes(obj):
         # if the typology has more storeys than the selected mass
         # some extra storeys are added
         if storeyCheck < 1: 
-            bpy.scene.attribute_mass_storeys = fixedStoreys + len(liquidPosition)
+            bpy.context.scene.attribute_mass_storeys = fixedStoreys + len(liquidPosition)
         storeyLeft = numberOfStoreys - fixedStoreys
         
         storey_list = storey_list[1:] # the 1 at the start of the number is removed
