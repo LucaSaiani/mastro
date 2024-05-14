@@ -797,8 +797,10 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
                         
                         # update the uses shown in the UIList in the Mass menu
                         # in the 3D view
-                        # list needs to be revesed again
+                        # lists needs to be revesed again since we want to show top to bottom
                         useSplit.reverse()
+                        reversed_storey_list = "".join(map(str.__add__, storey_list[-2::-2] ,storey_list[-1::-2]))
+                        print(reversed_storey_list)
                         for enum, el in enumerate(useSplit):
                             id = int(el)
                             usesUiList.add()
@@ -806,11 +808,9 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
                             for use in bpy.context.scene.roma_use_name_list:
                                 if id == use.id:
                                     usesUiList[enum].name = use.name
-                                    s = storey_list[enum*2:(enum*2+2)]
+                                    s = reversed_storey_list[enum*2:(enum*2+2)]
                                     usesUiList[enum].storeys = int(s)
                                     break
-                            # print("fatto")
-                            
                                     
                         storey_list = "1" + storey_list # the 1 is readded  
                         bmFace[bMesh_storey_list] = int(storey_list)
@@ -819,8 +819,6 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
                         bmFace[bMesh_height_C] = int(height_C)
                         bmFace[bMesh_height_D] = int(height_D)
                         bmFace[bMesh_height_E] = int(height_E)
-                        
-                        # print("updated", storey_list)
                             
                 except:
                     pass
