@@ -117,7 +117,7 @@ class update_GN_Filter_OT(Operator):
         
     #     return node_obj, node_x_location
     def newGroup (self, groupName, type):
-        attributeName = "RoMa_Use"
+        attributeName = "roma_use"
         # if self.filter_name == "use": attributeName = "RoMa_Use"
         # elif self.filter_name == "typology": attributeName = "roma_typology_id"
         
@@ -257,7 +257,7 @@ class update_Shader_Filter_OT(Operator):
     def newGroup (self, groupName, type):
         if self.filter_name == "plot": attributeName = "roma_plot_id"
         elif self.filter_name == "block": attributeName = "roma_block_id"
-        elif self.filter_name == "use": attributeName = "RoMa_Use"
+        elif self.filter_name == "use": attributeName = "roma_use"
         elif self.filter_name == "typology": attributeName = "roma_typology_id"
         
          # geometry nodes group
@@ -1196,9 +1196,9 @@ class typology_name_list(PropertyGroup):
     #        default = 0)
     
     useList: StringProperty(
-           name="Uses in the typology",
-           description="The uses for the typology",
-           default="")
+            name="Uses in the typology",
+            description="The uses for the typology",
+            default="")
     
     # storeyList: StringProperty(
     #        name="The number of storeys for each use",
@@ -1213,7 +1213,7 @@ class OBJECT_UL_Typology_Uses(UIList):
        
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
             id = item.id
-            if item.name != "":
+            if item.name != "...":
                 for el in bpy.data.scenes['Scene'].roma_use_name_list:
                     if id == el.id:
                         # floorToFloor = round(el.floorToFloor,3)
@@ -1226,25 +1226,12 @@ class OBJECT_UL_Typology_Uses(UIList):
                     # split.label(text="", icon = "MOD_LENGTH")
                 else:
                     split.label(text="Storeys: %s" % (storeys))
-                    
                 split.label(text=item.name)
-                # if liquid:
-                #     # split.label(text="Height: variable")
-                #     split.label(text="", icon = "MOD_LENGTH")
-                # else:
-                #     split.label(text="N. of storeys: %s" % (storeys))
-                   
-            # split.label(text="Use Id: %d" % (item.id)) 
-            # row = split.row()
-            # row = layout.row(align=True)
-            
-            # row.prop(context.scene, "roma_typology_uses_names", index = index, icon=custom_icon, icon_only=True)
-            # row.label(text=item.name) 
-            # row.prop(context.scene, "roma_plot_names", icon="MOD_BOOLEAN", icon_only=True, text="Plot")
-            # split.prop(context.scene.roma_typology_uses_name_list[index],
-            #            "name",
-            #            icon_only=True,
-            #            icon = custom_icon)
+            else:
+                split = layout.split(factor=0.3)
+                split.label(text="")
+                split.label(text=item.name)
+     
 
         elif self.layout_type in {'GRID'}:
             layout.alignment = 'CENTER'
@@ -1306,6 +1293,7 @@ class TYPOLOGY_USES_LIST_OT_DeleteItem(Operator):
         context.scene.roma_typology_uses_name_list_index = min(max(0, index - 1), len(my_list) - 1)
         
         update_typology_uses_list(context)
+        update_roma_masses_data(self, context)
         return{'FINISHED'}
     
 class TYPOLOGY_USES_LIST_OT_MoveItem(Operator):
@@ -1335,6 +1323,7 @@ class TYPOLOGY_USES_LIST_OT_MoveItem(Operator):
         self.move_index()
         
         update_typology_uses_list(context)
+        update_roma_masses_data(self, context)
         return{'FINISHED'}
 
 # when a typology is selected, it is necessary to update the
@@ -1431,6 +1420,7 @@ def update_typology_uses_name_label(self, context):
             if n.name == name:
                 scene.roma_typology_uses_name_list[scene.roma_typology_uses_name_list_index].id = n.id
                 update_typology_uses_list(context)
+                update_roma_masses_data(self, context)
                 break    
             
 class typology_uses_name_list(PropertyGroup):
@@ -1442,7 +1432,8 @@ class typology_uses_name_list(PropertyGroup):
     name: StringProperty(
            name="Typology uses name",
            description="The typology use name",
-           default="")
+           default="...",
+           update=update_roma_masses_data)
           
     
     
