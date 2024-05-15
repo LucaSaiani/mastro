@@ -476,7 +476,6 @@ def addAttributes(obj):
                                     mesh_attribute[1].value = int(use_id_list)
                                 elif a["attr"] == "roma_list_storeys":
                                     mesh_attribute[1].value = int(storey_list)
-                                    print("storeys", storey_list)
                                 elif a["attr"] == "roma_list_height_A":
                                     mesh_attribute[1].value = int(height_A)
                                 elif a["attr"] == "roma_list_height_B":
