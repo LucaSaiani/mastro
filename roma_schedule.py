@@ -92,7 +92,7 @@ class Roma_Draw_Schedule(Operator):
     bl_label = "Simple Object Operator"
 
     def execute(self, context):
-        print("ciao")
+        # print("ciao")
         vertices = (
             (100, 100), (300, 100),
             (100, 200), (300, 200))
