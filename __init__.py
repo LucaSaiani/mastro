@@ -200,6 +200,11 @@ def initLists():
         # rndNumber = float(Decimal(random.randrange(0,10000000))/10000000)
         # bpy.context.scene.roma_typology_name_list[0].RND = rndNumber
     
+    if len(bpy.context.scene.roma_typology_uses_name_list) == 0:
+        bpy.context.scene.roma_typology_uses_name_list.add()
+        bpy.context.scene.roma_typology_uses_name_list[0].id = 0
+        bpy.context.scene.roma_typology_uses_name_list[0].name = bpy.context.scene.roma_use_name_list[0].name
+        
     if len(bpy.context.scene.roma_obj_typology_uses_name_list) == 0:
         bpy.context.scene.roma_obj_typology_uses_name_list.add()
         bpy.context.scene.roma_obj_typology_uses_name_list[0].id = 0
