@@ -22,12 +22,12 @@ floorToFloorLevel = 4.2
 
 attribute_set = [
 
-            {
-            "attr" : "roma_vertex_custom_attribute",
-            "attr_type" :  "INT",
-            "attr_domain" :  "POINT",
-            "attr_default" : 0
-            },
+            # {
+            # "attr" : "roma_vertex_custom_attribute",
+            # "attr_type" :  "INT",
+            # "attr_domain" :  "POINT",
+            # "attr_default" : 0
+            # },
             {
             "attr" :  "roma_wall_id",
             "attr_type" :  "INT",
@@ -100,13 +100,25 @@ attribute_set = [
             # "attr_default" : "typology id"
             },
             {
-            "attr" :  "roma_list_use_id",
+            "attr" :  "roma_list_use_id_A",
+            "attr_type" :  "INT",
+            "attr_domain" :  "FACE",
+            # "attr_default" : 0
+            },
+             {
+            "attr" :  "roma_list_use_id_B",
             "attr_type" :  "INT",
             "attr_domain" :  "FACE",
             # "attr_default" : 0
             },
             {
-            "attr" :  "roma_list_storeys",
+            "attr" :  "roma_list_storey_A",
+            "attr_type" :  "INT",
+            "attr_domain" :  "FACE",
+            # "attr_default" : 0
+            },
+            {
+            "attr" :  "roma_list_storey_B",
             "attr_type" :  "INT",
             "attr_domain" :  "FACE",
             # "attr_default" : 0
@@ -292,16 +304,10 @@ class RoMa_MenuOperator_add_RoMa_mass(Operator, AddObjectHelper):
         addAttributes(obj)
             
         addNodes()
-        # initLists()
         
         
         mesh_attributes = obj.data.attributes["roma_number_of_storeys"].data.items()
-        # face = obj.data.polygons[0]
         mesh_attributes[0][1].value = self.storeys
-        # index = face.index
-        # for mesh_attribute in mesh_attributes:
-        #     if mesh_attribute[0] == index:
-        #         mesh_attribute[1].value = self.storeys
 
         # add roma mass geo node to the created object
         geoName = "RoMa Mass"
@@ -371,8 +377,10 @@ def addAttributes(obj):
     use_list = bpy.context.scene.roma_typology_name_list[typology_id].useList
     useSplit = use_list.split(";")
 
-    use_id_list = "1"
-    storey_list = "1"
+    use_id_list_A = "1"
+    use_id_list_B = "1"
+    storey_list_A = "1"
+    storey_list_B = "1"
     height_A = "1"
     height_B = "1"
     height_C = "1"
@@ -384,9 +392,13 @@ def addAttributes(obj):
     
     for enum,el in enumerate(useSplit):
         if int(el) < 10:
-            use_id_list += "0" + el
+            tmpUse = "0" + el
         else:
-            use_id_list += el
+            tmpUse = str(el)
+       
+        # print(el[0], el[1])
+        use_id_list_A += tmpUse[0]
+        use_id_list_B += tmpUse[1]
             
         for use in projectUses:
             if use.id == int(el):
@@ -401,7 +413,9 @@ def addAttributes(obj):
                     if use.storeys < 10:
                         storeys = "0" + storeys
                         
-                storey_list += storeys
+                storey_list_A += storeys[0]
+                storey_list_B += storeys[1]
+                
                 height = str(round(use.floorToFloor,3))
                 if use.floorToFloor < 10:
                     height = "0" + height
@@ -432,7 +446,9 @@ def addAttributes(obj):
             bpy.context.scene.attribute_mass_storeys = fixedStoreys + len(liquidPosition)
         storeyLeft = numberOfStoreys - fixedStoreys
         
-        storey_list = storey_list[1:] # the 1 at the start of the number is removed
+        # the 1 at the start of the number is removed
+        storey_list_A = storey_list_A[1:]
+        storey_list_B = storey_list_B[1:]  
         if len(liquidPosition) > 0:
             n = storeyLeft/len(liquidPosition)
             liquidStoreyNumber = math.floor(n)
@@ -445,16 +461,19 @@ def addAttributes(obj):
             while index < len(liquidPosition):
                 el = liquidPosition[index]
                 # if the rounding of the liquid storeys is uneven,
-                # the last liquid floor is increased of 1 storey
+                # the last liquid floor is increased of 1 storeyx
                 if index == len(liquidPosition) -1 and  math.modf(n)[0] > 0:
                     insert = str(liquidStoreyNumber +1) 
                     if liquidStoreyNumber +1 < 10:
                         insert = "0" + insert
-                    
-                storey_list = storey_list[:el*2] + insert + storey_list[el*2 +2:]
+
+                storey_list_A = storey_list_A[:el] + insert[0] + storey_list_A[el +1:]
+                storey_list_B = storey_list_B[:el] + insert[1] + storey_list_B[el +1:]
                 # print("el", el)
                 index += 1
-        storey_list = "1" + storey_list # the 1 is readded  
+        # the 1 is readded
+        storey_list_A = "1" + storey_list_A  
+        storey_list_B = "1" + storey_list_B
             
     for a in attribute_set:
         try:
@@ -472,10 +491,14 @@ def addAttributes(obj):
                             if mesh_attribute[0]  == index:
                                 if a["attr"] == "roma_typology_id":
                                     mesh_attribute[1].value = bpy.context.scene.roma_typology_name_list[typology_id].id
-                                elif a["attr"] == "roma_list_use_id": 
-                                    mesh_attribute[1].value = int(use_id_list)
-                                elif a["attr"] == "roma_list_storeys":
-                                    mesh_attribute[1].value = int(storey_list)
+                                elif a["attr"] == "roma_list_use_id_A": 
+                                    mesh_attribute[1].value = int(use_id_list_A)
+                                elif a["attr"] == "roma_list_use_id_B": 
+                                    mesh_attribute[1].value = int(use_id_list_B)
+                                elif a["attr"] == "roma_list_storey_A":
+                                    mesh_attribute[1].value = int(storey_list_A)
+                                elif a["attr"] == "roma_list_storey_B":
+                                    mesh_attribute[1].value = int(storey_list_B)
                                 elif a["attr"] == "roma_list_height_A":
                                     mesh_attribute[1].value = int(height_A)
                                 elif a["attr"] == "roma_list_height_B":
