@@ -790,92 +790,92 @@ class block_name_list(PropertyGroup):
 ############################ USE    ############################
 ############################        ############################
 
-class VIEW3D_PT_RoMa_mass_use_data(Panel):
-    bl_space_type = "PROPERTIES"
-    bl_region_type = "WINDOW"
-    bl_label = "Use"
-    bl_parent_id = "VIEW3D_PT_RoMa_mass_data"
-    bl_options = {'DEFAULT_CLOSED'}
+# class VIEW3D_PT_RoMa_mass_use_data(Panel):
+#     bl_space_type = "PROPERTIES"
+#     bl_region_type = "WINDOW"
+#     bl_label = "Use"
+#     bl_parent_id = "VIEW3D_PT_RoMa_mass_data"
+#     bl_options = {'DEFAULT_CLOSED'}
     
-    def draw(self, context):
-        scene = context.scene
+#     def draw(self, context):
+#         scene = context.scene
         
-        layout = self.layout
-        layout.use_property_split = True
-        layout.use_property_decorate = False  # No animation.
+#         layout = self.layout
+#         layout.use_property_split = True
+#         layout.use_property_decorate = False  # No animation.
         
-        row = layout.row()
-        #row.label(text="Use")
-        # row.prop(context.window_manager, 'toggle_use_name', toggle=True, icon="HIDE_OFF", icon_only=True)
+#         row = layout.row()
+#         #row.label(text="Use")
+#         # row.prop(context.window_manager, 'toggle_use_name', toggle=True, icon="HIDE_OFF", icon_only=True)
         
-        # is_sortable = len(scene.roma_use_name_list) > 1
-        rows = 3
-        # if is_sortable:
-        #     rows = 5
+#         # is_sortable = len(scene.roma_use_name_list) > 1
+#         rows = 3
+#         # if is_sortable:
+#         #     rows = 5
             
-        row = layout.row()
-        row.template_list("OBJECT_UL_Use", "use_list", scene,
-                        "roma_use_name_list", scene, "roma_use_name_list_index", rows = rows)
+#         row = layout.row()
+#         row.template_list("OBJECT_UL_Use", "use_list", scene,
+#                         "roma_use_name_list", scene, "roma_use_name_list_index", rows = rows)
         
         
-        col = row.column(align=True)
-        col.operator("roma_use_name_list.new_item", icon='ADD', text="")
-        col.separator()
-        col.operator("roma_use_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
-        col.operator("roma_use_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
+#         col = row.column(align=True)
+#         col.operator("roma_use_name_list.new_item", icon='ADD', text="")
+#         col.separator()
+#         col.operator("roma_use_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
+#         col.operator("roma_use_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
         
-        # row = layout.row()
-        row = layout.row(align=True)
-        index = context.scene.roma_use_name_list_index
-        # layout.label(text=()"Current use:",context.scene.roma_use_name_list[index].name))
-        # layout.label(text=str(context.scene.roma_use_name_list[index].floorToFloor))
-        # layout.label(text=str(context.scene.roma_use_name_list[index].liquidHeight))
-        layout.prop(context.scene.roma_use_name_list[index],"name", text="Name")
-        layout.prop(context.scene.roma_use_name_list[index],"floorToFloor", text="Floor to floor height")
-        row = layout.row(align=True)
-        sub = row.row()
-        sub.prop(context.scene.roma_use_name_list[index],"storeys", text="Number of storeys")
-        layout.prop(context.scene.roma_use_name_list[index],"liquid", text="Variable number of storeys")
-        if context.scene.roma_use_name_list[index].liquid:
-            sub.enabled = False
-        else:
-            sub.enabled = True
-        # if scene.roma_use_name_list_index >= 0 and scene.roma_use_name_list:
-        #     item = scene.roma_use_name_list[scene.roma_use_name_list_index]
-        #     row.prop(item, "name", icon_only=True, text="Use Name")
+#         # row = layout.row()
+#         row = layout.row(align=True)
+#         index = context.scene.roma_use_name_list_index
+#         # layout.label(text=()"Current use:",context.scene.roma_use_name_list[index].name))
+#         # layout.label(text=str(context.scene.roma_use_name_list[index].floorToFloor))
+#         # layout.label(text=str(context.scene.roma_use_name_list[index].liquidHeight))
+#         layout.prop(context.scene.roma_use_name_list[index],"name", text="Name")
+#         layout.prop(context.scene.roma_use_name_list[index],"floorToFloor", text="Floor to floor height")
+#         row = layout.row(align=True)
+#         sub = row.row()
+#         sub.prop(context.scene.roma_use_name_list[index],"storeys", text="Number of storeys")
+#         layout.prop(context.scene.roma_use_name_list[index],"liquid", text="Variable number of storeys")
+#         if context.scene.roma_use_name_list[index].liquid:
+#             sub.enabled = False
+#         else:
+#             sub.enabled = True
+#         # if scene.roma_use_name_list_index >= 0 and scene.roma_use_name_list:
+#         #     item = scene.roma_use_name_list[scene.roma_use_name_list_index]
+#         #     row.prop(item, "name", icon_only=True, text="Use Name")
             
             
-class OBJECT_UL_Use(UIList):
-    def draw_item(self, context, layout, data, item, icon, active_data,
-                  active_propname, index):
+# class OBJECT_UL_Use(UIList):
+#     def draw_item(self, context, layout, data, item, icon, active_data,
+#                   active_propname, index):
        
-        custom_icon = 'COMMUNITY'
+#         custom_icon = 'COMMUNITY'
 
-        if self.layout_type in {'DEFAULT', 'COMPACT'}:
-            split = layout.split(factor=0.3)
-            split.label(text="Id: %d" % (item.id)) 
-            split.label(text=item.name, icon=custom_icon) 
-            # split.prop(context.scene.roma_use_name_list[index],
-            #            "name",
-            #            icon_only=True,
-            #            icon = custom_icon)
-        elif self.layout_type in {'GRID'}:
-            layout.alignment = 'CENTER'
-            layout.label(text="", icon = custom_icon)
+#         if self.layout_type in {'DEFAULT', 'COMPACT'}:
+#             split = layout.split(factor=0.3)
+#             split.label(text="Id: %d" % (item.id)) 
+#             split.label(text=item.name, icon=custom_icon) 
+#             # split.prop(context.scene.roma_use_name_list[index],
+#             #            "name",
+#             #            icon_only=True,
+#             #            icon = custom_icon)
+#         elif self.layout_type in {'GRID'}:
+#             layout.alignment = 'CENTER'
+#             layout.label(text="", icon = custom_icon)
 
-    def filter_items(self, context, data, propname):
-        filtered = []
-        ordered = []
-        items = getattr(data, propname)
-        filtered = [self.bitflag_filter_item] * len(items)
+#     def filter_items(self, context, data, propname):
+#         filtered = []
+#         ordered = []
+#         items = getattr(data, propname)
+#         filtered = [self.bitflag_filter_item] * len(items)
         
-        # for i, item in enumerate(items):
-        #     if item.id == 0:
-        #         filtered[i] &= ~self.bitflag_filter_item
-        return filtered, ordered
+#         # for i, item in enumerate(items):
+#         #     if item.id == 0:
+#         #         filtered[i] &= ~self.bitflag_filter_item
+#         return filtered, ordered
 
-    def draw_filter(self, context, layout):
-        pass
+#     def draw_filter(self, context, layout):
+#         pass
     
 class USE_LIST_OT_NewItem(Operator):
     bl_idname = "roma_use_name_list.new_item"
@@ -883,53 +883,53 @@ class USE_LIST_OT_NewItem(Operator):
 
     def execute(self, context): 
         context.scene.roma_use_name_list.add()
-        # last = len(context.scene.roma_use_name_list)-1
-        # if last == 0:
-        #     context.scene.roma_use_name_list[0].id = 0
-        #     context.scene.roma_use_name_list[0].name = ""
-        #     random.seed(datetime.now().timestamp())
-        #     rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
-        #     context.scene.roma_use_name_list[0].RND = rndNumber
-        #     context.scene.roma_use_name_list.add()
         temp_list = []    
         for el in context.scene.roma_use_name_list:
             temp_list.append(el.id)
         last = len(context.scene.roma_use_name_list)-1
         
-        context.scene.roma_use_name_list[last].id = max(temp_list)+1
-        # rndNumber = float(decimal.Decimal(random.randrange(0,1000))/1000)
-        # context.scene.roma_use_name_list[last].RND = rndNumber
+        id = max(temp_list)+1
+        context.scene.roma_use_name_list[last].id = id
+        
+        subIndex = context.scene.roma_typology_uses_name_list_index
+        context.scene.roma_typology_uses_name_list[subIndex].name = context.scene.roma_use_name_list[last].name
+        context.scene.roma_typology_uses_name_list[subIndex].id = id
+        update_typology_uses_list(context)
+        update_roma_masses_data(self, context)
+        
         bpy.ops.node.update_gn_filter()
         bpy.ops.node.update_shader_filter(filter_name="use")
+        
+        
         return{'FINISHED'}
     
-class USE_LIST_OT_MoveItem(Operator):
-    bl_idname = "roma_use_name_list.move_item"
-    bl_label = "Move an item in the list"
+# class USE_LIST_OT_MoveItem(Operator):
+#     bl_idname = "roma_use_name_list.move_item"
+#     bl_label = "Move an item in the list"
 
-    direction: bpy.props.EnumProperty(items=(('UP', 'Up', ""),
-                                              ('DOWN', 'Down', ""),))
+#     direction: bpy.props.EnumProperty(items=(('UP', 'Up', ""),
+#                                               ('DOWN', 'Down', ""),))
 
-    @classmethod
-    def poll(cls, context):
-        return context.scene.roma_use_name_list
+#     @classmethod
+#     def poll(cls, context):
+#         return context.scene.roma_use_name_list
 
-    def move_index(self):
-        index = bpy.context.scene.roma_use_name_list_index
-        list_length = len(bpy.context.scene.roma_use_name_list) - 1 
-        new_index = index + (-1 if self.direction == 'UP' else 1)
+#     def move_index(self):
+#         index = bpy.context.scene.roma_use_name_list_index
+#         list_length = len(bpy.context.scene.roma_use_name_list) - 1 
+#         new_index = index + (-1 if self.direction == 'UP' else 1)
 
-        bpy.context.scene.roma_use_name_list_index = max(0, min(new_index, list_length))
+#         bpy.context.scene.roma_use_name_list_index = max(0, min(new_index, list_length))
 
-    def execute(self, context):
-        roma_use_name_list = context.scene.roma_use_name_list
-        index = context.scene.roma_use_name_list_index
+#     def execute(self, context):
+#         roma_use_name_list = context.scene.roma_use_name_list
+#         index = context.scene.roma_use_name_list_index
 
-        neighbor = index + (-1 if self.direction == 'UP' else 1)
-        roma_use_name_list.move(neighbor, index)
-        self.move_index()
+#         neighbor = index + (-1 if self.direction == 'UP' else 1)
+#         roma_use_name_list.move(neighbor, index)
+#         self.move_index()
 
-        return{'FINISHED'}
+#         return{'FINISHED'}
 
 # once the floor to floor height is updated, it is necessary
 # to update all the heights of the existing roma masses    
@@ -939,50 +939,61 @@ def update_roma_masses_data(self, context):
 
 # update the node "filter by use" if a new use is added or
 # a use name has changed
+# also updates the names of roma_typology_uses_name_list_index  
 def update_roma_filter_by_use(self, context):
     bpy.ops.node.update_gn_filter()
     bpy.ops.node.update_shader_filter(filter_name="use")
+    # updating roma_typology_uses_name_list_index
+    current_list = context.scene.roma_typology_uses_name_list
+    for i, el in enumerate(current_list):
+        name = context.scene.roma_use_name_list[el.id].name
+        context.scene.roma_typology_uses_name_list[i].name = name
+    # updating the names in bpy.context.scene.roma_obj_typology_uses_name_list
+    # if they are shown in the RoMa panel in the 3dView
+    usesUiList = context.scene.roma_obj_typology_uses_name_list
+    subIndex = context.scene.roma_typology_uses_name_list_index
+    subName = context.scene.roma_typology_uses_name_list[subIndex].name
+    useIndex = context.scene.roma_use_name_list.find(subName)
+    for use in usesUiList:
+        if use.nameId == useIndex:
+            use.name = subName
+            break
     return None
             
-class use_name_list(PropertyGroup):
-    id: IntProperty(
-           name="Id",
-           description="Use name id",
-           default = 0)
+# class use_name_list(PropertyGroup):
+#     id: IntProperty(
+#            name="Id",
+#            description="Use name id",
+#            default = 0)
     
-    name: StringProperty(
-           name="Use Name",
-           description="The use of the block",
-           default = "Use name...",
-           update=update_roma_filter_by_use)
+#     name: StringProperty(
+#            name="Use Name",
+#            description="The use of the block",
+#            default = "Use name...",
+#            update=update_roma_filter_by_use)
     
-    # RND: FloatProperty(
-    #        name="Random Value per Use",
-    #        description="A random value assigned to each use",
-    #        default = 0)
-    
-    floorToFloor: FloatProperty(
-        name="Floor to floor",
-        description="Floor to floor height for the selected use",
-        min=0,
-        max=99,
-        precision=3,
-        default = 3.150,
-        update=update_roma_masses_data)
+#     floorToFloor: FloatProperty(
+#         name="Floor to floor",
+#         description="Floor to floor height for the selected use",
+#         min=0,
+#         max=99,
+#         precision=3,
+#         default = 3.150,
+#         update=update_roma_masses_data)
 
-    storeys:IntProperty(
-        name="Number of storeys",
-        description="Number of storeys for the selected use",
-        min=1,
-        max=99,
-        default = 1,
-        update=update_roma_masses_data)
+#     storeys:IntProperty(
+#         name="Number of storeys",
+#         description="Number of storeys for the selected use",
+#         min=1,
+#         max=99,
+#         default = 1,
+#         update=update_roma_masses_data)
     
-    liquid: BoolProperty(
-            name = "Liquid number of storeys",
-            description = "It indicates whether the number of storeys is fixed or variable",
-            default = False,
-            update=update_roma_masses_data)
+#     liquid: BoolProperty(
+#             name = "Liquid number of storeys",
+#             description = "It indicates whether the number of storeys is fixed or variable",
+#             default = False,
+#             update=update_roma_masses_data)
     
 ############################            ############################
 ############################ TYPOLOGY   ############################
@@ -999,7 +1010,7 @@ class VIEW3D_PT_RoMa_mass_typology_data(Panel):
         scene = context.scene
         
         layout = self.layout
-        # layout.use_property_split = True
+        layout.use_property_split = True
         layout.use_property_decorate = False  # No animation.
         
         row = layout.row()
@@ -1051,11 +1062,29 @@ class VIEW3D_PT_RoMa_mass_typology_data(Panel):
         col.operator("roma_typology_uses_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
         
         col.operator("roma_typology_uses_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
-        
-        row = layout.row(align=True)
-        row.prop(context.scene, "roma_typology_uses_names", icon="COMMUNITY", icon_only=False, text="Use")
-        # row.label(text=scene.roma_use_name_current[0].name)
 
+        # use editor        
+        row = layout.row(align=True)
+        subIndex = context.scene.roma_typology_uses_name_list_index
+        subName = context.scene.roma_typology_uses_name_list[subIndex].name
+        index = context.scene.roma_use_name_list.find(subName)
+        col = layout.column(align=True)
+        
+        row = col.row(align=True)
+        row.prop(context.scene, "roma_typology_uses_name", icon="COMMUNITY", icon_only=True, text="")
+        row.prop(context.scene.roma_use_name_list[index],"name", text="")
+        row.operator("roma_use_name_list.new_item", icon='ADD', text="")
+        
+        layout.prop(context.scene.roma_use_name_list[index],"floorToFloor", text="Floor to floor height")
+        row = layout.row(align=True)
+        sub = row.row()
+        sub.prop(context.scene.roma_use_name_list[index],"storeys", text="Number of storeys")
+        layout.prop(context.scene.roma_use_name_list[index],"liquid", text="Variable number of storeys")
+        if context.scene.roma_use_name_list[index].liquid:
+            sub.enabled = False
+        else:
+            sub.enabled = True
+        
             
 class OBJECT_UL_Typology(UIList):
     
@@ -1178,32 +1207,9 @@ def update_roma_filter_by_typology(self, context):
     bpy.ops.node.update_shader_filter(filter_name="typology")
     return None
             
-class typology_name_list(PropertyGroup):
-    id: IntProperty(
-           name="Id",
-           description="Typology name id",
-           default = 0)
+
     
-    name: StringProperty(
-           name="Typology Name",
-           description="The typology of the block",
-           default="Typology name...",
-           update=update_roma_filter_by_typology)
-    
-    # RND: FloatProperty(
-    #        name="Random Value per Typology",
-    #        description="A random value assigned to each typology",
-    #        default = 0)
-    
-    useList: StringProperty(
-            name="Uses in the typology",
-            description="The uses for the typology",
-            default="")
-    
-    # storeyList: StringProperty(
-    #        name="The number of storeys for each use",
-    #        description="The number of storeys for each use",
-    #        default="") 
+
     
 class OBJECT_UL_Typology_Uses(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data,
@@ -1214,19 +1220,28 @@ class OBJECT_UL_Typology_Uses(UIList):
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
             id = item.id
             if item.name != "...":
-                for el in bpy.data.scenes['Scene'].roma_use_name_list:
+                for el in context.scene.roma_use_name_list:
                     if id == el.id:
                         # floorToFloor = round(el.floorToFloor,3)
                         storeys = el.storeys
                         liquid = el.liquid
                         break
                 split = layout.split(factor=0.3)
+                col1 = split.column()
+                col2 = split.column()
+                subSplit = col1.split(factor=0.3)
+                subSplit1 = subSplit.column()
+                subSplit2 = subSplit.column()
                 if liquid:
-                    split.label(text="Storeys: variable")
+                    subSplit1.label(text="Id: %d" % (item.id))
+                    subSplit2.label(text="Storeys: variable")
                     # split.label(text="", icon = "MOD_LENGTH")
                 else:
-                    split.label(text="Storeys: %s" % (storeys))
-                split.label(text=item.name)
+                    subSplit1.label(text="Id: %d" % (item.id))
+                    subSplit2.label(text="Storeys: %s" % (storeys))
+#             split.label(text=item.name, icon=custom_icon) 
+                    
+                col2.label(text=item.name)
             else:
                 split = layout.split(factor=0.3)
                 split.label(text="")
@@ -1255,6 +1270,10 @@ class OBJECT_UL_Typology_Uses(UIList):
 class TYPOLOGY_USES_LIST_OT_NewItem(Operator):
     bl_idname = "roma_typology_uses_name_list.new_item"
     bl_label = "Add a new typology use"
+    
+    @classmethod
+    def poll(cls, context):
+        return len(context.scene.roma_typology_uses_name_list) <7
 
     def execute(self, context): 
         context.scene.roma_typology_uses_name_list.add()
@@ -1411,8 +1430,9 @@ def update_typology_uses_function(self, context):
 def update_typology_uses_name_label(self, context):
     # global useName
     scene = context.scene
-    name = scene.roma_typology_uses_names
-    # if the typology is newly created, the index is equal to -1 and therefore there is an out of range error
+    name = scene.roma_typology_uses_name
+    # if the typology is newly created, the index is equal to -1 and 
+    # therefore there is an out of range error
     # Also, in this case, there are no values to update
     if scene.roma_typology_uses_name_list_index > -1:
         scene.roma_typology_uses_name_list[scene.roma_typology_uses_name_list_index].name = name
@@ -1422,6 +1442,58 @@ def update_typology_uses_name_label(self, context):
                 update_typology_uses_list(context)
                 update_roma_masses_data(self, context)
                 break    
+            
+class typology_name_list(PropertyGroup):
+    id: IntProperty(
+           name="Id",
+           description="Typology name id",
+           default = 0)
+    
+    name: StringProperty(
+           name="Typology Name",
+           description="The typology of the block",
+           default="Typology name...",
+           update=update_roma_filter_by_typology)
+    
+    useList: StringProperty(
+            name="Uses in the typology",
+            description="The uses for the typology",
+            default="")
+            
+class use_name_list(PropertyGroup):
+    id: IntProperty(
+           name="Id",
+           description="Use name id",
+           default = 0)
+    
+    name: StringProperty(
+           name="Use Name",
+           description="The use of the block",
+           default = "Use name...",
+           update=update_roma_filter_by_use)
+    
+    floorToFloor: FloatProperty(
+        name="Floor to floor",
+        description="Floor to floor height for the selected use",
+        min=0,
+        max=99,
+        precision=3,
+        default = 3.150,
+        update=update_roma_masses_data)
+
+    storeys:IntProperty(
+        name="Number of storeys",
+        description="Number of storeys for the selected use",
+        min=1,
+        max=99,
+        default = 1,
+        update=update_roma_masses_data)
+    
+    liquid: BoolProperty(
+            name = "Liquid number of storeys",
+            description = "It indicates whether the number of storeys is fixed or variable",
+            default = False,
+            update=update_roma_masses_data)
             
 class typology_uses_name_list(PropertyGroup):
     id: IntProperty(
@@ -1498,7 +1570,7 @@ class VIEW3D_PT_RoMa_building_wall_data(Panel):
         
         # row = layout.row()
         # row = layout.row(align=True)
-        # layout.prop(context.scene, "roma_typology_uses_names", icon="COMMUNITY", icon_only=False, text="Type:")
+        # layout.prop(context.scene, "roma_typology_uses_name", icon="COMMUNITY", icon_only=False, text="Type:")
         index = context.scene.roma_wall_name_list_index
         layout.prop(context.scene.roma_wall_name_list[index], "shortName", text="Short name")
         layout.prop(context.scene.roma_wall_name_list[index], "wallThickness", text="Thickness")

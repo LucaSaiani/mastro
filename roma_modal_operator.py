@@ -515,8 +515,10 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
             bMesh_typology = bm.faces.layers.int["roma_typology_id"]
             bMesh_storeys = bm.faces.layers.int["roma_number_of_storeys"]
             bMesh_floor = bm.faces.layers.int["roma_floor_id"]
-            bMesh_use_list = bm.faces.layers.int["roma_list_use_id"]
-            bMesh_storey_list = bm.faces.layers.int["roma_list_storeys"]
+            bMesh_use_list_A = bm.faces.layers.int["roma_list_use_id_A"]
+            bMesh_use_list_B = bm.faces.layers.int["roma_list_use_id_B"]
+            bMesh_storey_list_A = bm.faces.layers.int["roma_list_storey_A"]
+            bMesh_storey_list_B = bm.faces.layers.int["roma_list_storey_B"]
             bMesh_height_A = bm.faces.layers.int["roma_list_height_A"]
             bMesh_height_B = bm.faces.layers.int["roma_list_height_B"]
             bMesh_height_C = bm.faces.layers.int["roma_list_height_C"]
@@ -677,12 +679,17 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
                         numberOfStoreys = bmFace[bMesh_storeys] 
                         use_list = bpy.context.scene.roma_typology_name_list[typology_id].useList
                         # uses are listed top to bottom, but they need to
-                        # be added bottom to top                       
-                        use_list = use_list [::-1]
+                        # be added bottom to top           
+                        # use_list = use_list [::-1]
+                        useSplit = use_list.split(";")            
+                        useSplit.reverse() 
                         
-                        useSplit = use_list.split(";")
-                        use_id_list = "1"
-                        storey_list = "1"
+                        
+                        use_id_list_A = "1"
+                        use_id_list_B = "1"
+                        storey_list_A = "1"
+                        storey_list_B = "1"
+                        storey_list_UI = "1" # this is needed to show the number of storeys in the UI
                         height_A = "1"
                         height_B = "1"
                         height_C = "1"
@@ -702,13 +709,12 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
                             # print("split",el)
                             #### list_use_id
                             if int(el) < 10:
-                                use_id_list += "0" + el
-                                # use_id_list = use_id_list [ : 1] + "0" + el + use_id_list [1:]
+                                tmpUse = "0" + el
                             else:
-                                use_id_list += el
-                                # use_id_list = use_id_list [ : 1] + el + use_id_list [1:]
-                            # print("use_id_list", use_id_list)
-                                
+                                tmpUse = el
+                            use_id_list_A += tmpUse[0]
+                            use_id_list_B += tmpUse[1]
+                                                            
                             ###setting the values for each use
                             for use in projectUses:
                                 if use.id == int(el):
@@ -723,7 +729,9 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
                                         if use.storeys < 10:
                                             storeys = "0" + storeys
                                             
-                                    storey_list += storeys
+                                    storey_list_A += storeys[0]
+                                    storey_list_B += storeys[1]
+                                    storey_list_UI +=storeys
                                     
                                     #### floor to floor height for each use, stored in A, B, C, ...
                                     #### due to the fact that arrays can't be used
@@ -758,30 +766,25 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
                                         height_D += "0"
                                         height_E += "0"
                                     break
-                        #  # invert the use_id_list every 2 characters
-                        # use_id_list = "".join(map(str.__add__, use_id_list[-2::-2] ,use_id_list[-1::-2]))
-                        # # after the inversion, if the "length" of the number is odd, a 0 needs to be added 
-                        # # in front. Also the 1 needs to be added in front
-                        # if len(str(use_id_list)) & 1:
-                        #     use_id_list = "10" + use_id_list
-                        # else:
-                        #     use_id_list = "1" + use_id_list
-                        bmFace[bMesh_use_list] = int(use_id_list)
+                      
+                        bmFace[bMesh_use_list_A] = int(use_id_list_A)
+                        bmFace[bMesh_use_list_B] = int(use_id_list_B)
                         
-                        # print("HELLO")
                         # liquid storeys need to be converted to actual storeys
-                        # print()
-                        # print("total storeys", numberOfStoreys)
-                        # print("in position", liquidPosition )
                         storeyCheck = numberOfStoreys - fixedStoreys - len(liquidPosition)
                         # if the typology has more storeys than the selected mass
                         # some extra storeys are added
                         if storeyCheck < 1: 
                             scene.attribute_mass_storeys = fixedStoreys + len(liquidPosition)
                         storeyLeft = numberOfStoreys - fixedStoreys
-                        # print("ciao", len(liquidPosition), storeyLeft)
-                        storey_list = storey_list[1:] # the 1 at the start of the number is removed
+
+                         # the 1 at the start of the number is removed
+                        storey_list_UI = storey_list_UI[1:]
                         if len(liquidPosition) > 0:
+                            # the 1 at the start of the number is removed
+                            storey_list_A = storey_list_A[1:]
+                            storey_list_B = storey_list_B[1:]
+                            
                             n = storeyLeft/len(liquidPosition)
                             liquidStoreyNumber = math.floor(n)
 
@@ -799,16 +802,24 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
                                     if liquidStoreyNumber +1 < 10:
                                         insert = "0" + insert
                                     
-                                storey_list = storey_list[:el*2] + insert + storey_list[el*2 +2:]
+                                storey_list_A = storey_list_A[:el] + insert[0] + storey_list_A[el +1:]
+                                storey_list_B = storey_list_B[:el] + insert[1] + storey_list_B[el +1:]
+                                storey_list_UI = storey_list_UI[:el*2] + insert + storey_list_UI[el*2 +2:]
                                 # print("el", el)
                                 index += 1
-                                
+                            # the 1 is readded  
+                            storey_list_A = "1" + storey_list_A
+                            storey_list_B = "1" + storey_list_B
+                        
+                        # else there are no liquid storeys, the storey operator is off
+                        bpy.data.scenes["Scene"].attribute_mass_storeys
+                            
                         
                         # update the uses shown in the UIList in the Mass menu
                         # in the 3D view
                         # lists needs to be reversed again since we want to show top to bottom
                         useSplit.reverse()
-                        reversed_storey_list = "".join(map(str.__add__, storey_list[-2::-2] ,storey_list[-1::-2]))
+                        reversed_storey_list = "".join(map(str.__add__, storey_list_UI[-2::-2] ,storey_list_UI[-1::-2]))
                         # print(reversed_storey_list)
                         for enum, el in enumerate(useSplit):
                             id = int(el)
@@ -817,12 +828,15 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
                             for use in bpy.context.scene.roma_use_name_list:
                                 if id == use.id:
                                     usesUiList[enum].name = use.name
+                                    usesUiList[enum].nameId = use.id
                                     s = reversed_storey_list[enum*2:(enum*2+2)]
                                     usesUiList[enum].storeys = int(s)
                                     break
-                                    
-                        storey_list = "1" + storey_list # the 1 is readded  
-                        bmFace[bMesh_storey_list] = int(storey_list)
+                        
+                        
+                        # storey_list_UI = "1" + storey_list_UI
+                        bmFace[bMesh_storey_list_A] = int(storey_list_A)
+                        bmFace[bMesh_storey_list_B] = int(storey_list_B)
                         bmFace[bMesh_height_A] = int(height_A)
                         bmFace[bMesh_height_B] = int(height_B)
                         bmFace[bMesh_height_C] = int(height_C)
@@ -942,8 +956,10 @@ class VIEW_3D_OT_update_all_mesh_attributes(Operator):
                 
                 bMesh_typology = bm.faces.layers.int["roma_typology_id"]
                 bMesh_storeys = bm.faces.layers.int["roma_number_of_storeys"]
-                bMesh_storey_list = bm.faces.layers.int["roma_list_storeys"]
-                bMesh_use_list = bm.faces.layers.int["roma_list_use_id"]
+                bMesh_use_list_A = bm.faces.layers.int["roma_list_use_id_A"]
+                bMesh_use_list_B = bm.faces.layers.int["roma_list_use_id_B"]
+                bMesh_storey_list_A = bm.faces.layers.int["roma_list_storey_A"]
+                bMesh_storey_list_B = bm.faces.layers.int["roma_list_storey_B"]
                 bMesh_height_A = bm.faces.layers.int["roma_list_height_A"]
                 bMesh_height_B = bm.faces.layers.int["roma_list_height_B"]
                 bMesh_height_C = bm.faces.layers.int["roma_list_height_C"]
@@ -957,12 +973,16 @@ class VIEW_3D_OT_update_all_mesh_attributes(Operator):
                     use_list = bpy.context.scene.roma_typology_name_list[typology_id].useList
                     # uses are listed top to bottom, but they need to
                     # be added bottom to top                       
-                    use_list = use_list [::-1]
+                    # use_list = use_list [::-1]
                     
                     useSplit = use_list.split(";")
                     
-                    use_id_list = "1"
-                    storey_list = "1"
+                    useSplit.reverse()
+                    
+                    use_id_list_A = "1"
+                    use_id_list_B = "1"
+                    storey_list_A = "1"
+                    storey_list_B = "1"
                     height_A = "1"
                     height_B = "1"
                     height_C = "1"
@@ -974,11 +994,12 @@ class VIEW_3D_OT_update_all_mesh_attributes(Operator):
                     for enum, el in enumerate(useSplit):
                         #### list_use_id
                         if int(el) < 10:
-                            use_id_list += "0" + el
-                            # use_id_list = use_id_list [ : 1] + "0" + el + use_id_list [1:]
+                            tmpUse = "0" + el
                         else:
-                            use_id_list += el
-                            # use_id_list = use_id_list [ : 1] + el + use_id_list [1:]
+                            tmpUse = el
+                        use_id_list_A += tmpUse[0]
+                        use_id_list_B += tmpUse[1]
+
                         ###setting the values for each use
                         for use in projectUses:
                             if use.id == int(el):
@@ -993,7 +1014,8 @@ class VIEW_3D_OT_update_all_mesh_attributes(Operator):
                                     if use.storeys < 10:
                                         storeys = "0" + storeys
                                         
-                                storey_list += storeys
+                                storey_list_A += storeys[0]
+                                storey_list_B += storeys[1]
                                 
                                 #### floor to floor height for each use, stored in A, B, C, ...
                                 #### due to the fact that arrays can't be used
@@ -1027,24 +1049,22 @@ class VIEW_3D_OT_update_all_mesh_attributes(Operator):
                                     height_D += "0"
                                     height_E += "0"
                                 break
-                    # # invert the use_id_list every 2 characters
-                    # use_id_list = "".join(map(str.__add__, use_id_list[-2::-2] ,use_id_list[-1::-2]))
-                    # # after the inversion, if the "length" of the number is odd, a 0 needs to be added 
-                    # # in front. Also the 1 needs to be added in front
-                    # if len(str(use_id_list)) & 1:
-                    #     use_id_list = "10" + use_id_list
-                    # else:
-                    #      use_id_list = "1" + use_id_list
+               
 
-                    bmFace[bMesh_use_list] = int(use_id_list)
+                    bmFace[bMesh_use_list_A] = int(use_id_list_A)
+                    bmFace[bMesh_use_list_B] = int(use_id_list_B)
+                    
                     storeyCheck = numberOfStoreys - fixedStoreys - len(liquidPosition)
                     # if the typology has more storeys than the selected mass
                     # some extra storeys are added
                     if storeyCheck < 1: 
                         scene.attribute_mass_storeys = fixedStoreys + len(liquidPosition)
                     storeyLeft = numberOfStoreys - fixedStoreys
-                    storey_list = storey_list[1:] # the 1 at the start of the number is removed
+                    
                     if len(liquidPosition) > 0:
+                         # the 1 at the start of the number is removed
+                        storey_list_A = storey_list_A[1:]
+                        storey_list_B = storey_list_B[1:]
                         n = storeyLeft/len(liquidPosition)
                         liquidStoreyNumber = math.floor(n)
 
@@ -1061,11 +1081,15 @@ class VIEW_3D_OT_update_all_mesh_attributes(Operator):
                                 insert = str(liquidStoreyNumber +1) 
                                 if liquidStoreyNumber +1 < 10:
                                     insert = "0" + insert
-                                
-                            storey_list = storey_list[:el*2] + insert + storey_list[el*2 +2:]
+
+                            storey_list_A = storey_list_A[:el] + insert[0] + storey_list_A[el +1:]
+                            storey_list_B = storey_list_B[:el] + insert[1] + storey_list_B[el +1:]
                             index += 1
-                    storey_list = "1" + storey_list # the 1 is readded  
-                    bmFace[bMesh_storey_list] = int(storey_list)
+                        # the 1 is readded  
+                        storey_list_A = "1" + storey_list_A
+                        storey_list_B = "1" + storey_list_B
+                    bmFace[bMesh_storey_list_A] = int(storey_list_A)
+                    bmFace[bMesh_storey_list_B] = int(storey_list_B)
                     bmFace[bMesh_height_A] = int(height_A)
                     bmFace[bMesh_height_B] = int(height_B)
                     bmFace[bMesh_height_C] = int(height_C)

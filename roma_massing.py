@@ -10,6 +10,7 @@ class VIEW3D_PT_RoMa_Mass(Panel):
     bl_region_type = "UI"
     bl_category = "RoMa"
     bl_label = "Mass"
+    #bl_idname = "ROMA_PT_Mass"
     
     
     # global plotName
@@ -67,17 +68,29 @@ class VIEW3D_PT_RoMa_Mass(Panel):
                 
                 # layout.active = bool(context.active_object.mode=='EDIT')
                 # row = layout.row()
-                row = layout.row(align=True)
                 
          
                 ################ TYPOLOGY ######################
-                # row = layout.row()
+                row = layout.row(align=True)
                 
-                row.prop(context.scene, "attribute_mass_storeys", text="N° of storeys")
+                # disable the number of storeys if there are no liquids
+                current_typology = scene.roma_typology_name_current[0]
+                use_list = context.scene.roma_typology_name_list[current_typology.id].useList
+                uses = use_list.split(";")
+                tmp_enabled = False
+                for useID in uses:
+                    if context.scene.roma_use_name_list[int(useID)].liquid == True:
+                        tmp_enabled = True
+                        break
+                row.prop(context.scene, "attribute_mass_storeys", text="N° of storeys") 
+                row.enabled = tmp_enabled
+                   
+                
+                
                 row = layout.row(align=True)
                 row.prop(context.scene, "roma_typology_names", icon="ASSET_MANAGER", icon_only=True, text="Typology")
                 if len(scene.roma_typology_name_list) >0:
-                    row.label(text=scene.roma_typology_name_current[0].name)
+                    row.label(text= current_typology.name)
                 rows = 3
                 row = layout.row()
                 row.template_list("OBJECT_UL_OBJ_Typology_Uses", 
@@ -85,8 +98,9 @@ class VIEW3D_PT_RoMa_Mass(Panel):
                                   scene,
                                   "roma_obj_typology_uses_name_list",
                                   scene,
-                                  "roma_typology_uses_name_list_index",
+                                  "roma_obj_typology_uses_name_list_index",
                                   rows = rows)
+                
             
                 
       
@@ -94,35 +108,11 @@ class VIEW3D_PT_RoMa_Mass(Panel):
 class OBJECT_UL_OBJ_Typology_Uses(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data,
                   active_propname, index):
-        # global selectedTypology
-        # print("miao")
         custom_icon = 'COMMUNITY'
-        # obj = context.active_object
-        
-        # print("miao") 
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
-            # bm = bmesh.from_edit_mesh(obj.data)
-            # bMesh_storey_list = bm.faces.layers.int["roma_list_storeys"]
-            # numberOfStoreys = bmFace[bMesh_storeys] 
-            # print(bMesh_storey_list)
-            # id = item.id
-            # for el in bpy.data.scenes['Scene'].roma_use_name_list:
-            #     # print("el", el.id)
-            #     if id == el.id:
-            #         # floorToFloor = round(el.floorToFloor,3)
-            #         storeys = el.storeys
-            #         # liquid = el.liquid
-            #         name = el.name
-            #         break
             split = layout.split(factor=0.5)
-            # if liquid:
-            #     split.label(text="Storeys: variable")
-            #     # split.label(text="", icon = "MOD_LENGTH")
-            # else:
             split.label(text="Storeys: %s" % (item.storeys))
-            # print("miao")
             split.label(text=item.name)
-            # bm.free()
             
         elif self.layout_type in {'GRID'}:
             layout.alignment = 'CENTER'
@@ -232,14 +222,19 @@ class obj_typology_uses_name_list(PropertyGroup):
            description="Obj typology use name id",
            default = 0)
     
+    nameId: IntProperty(
+           name="nameId",
+           description="The id of the name in the main uses list",
+           default = 0)
+    
     name: StringProperty(
            name="Obj floor use name",
-           description="The use associated at that set of floors",
+           description="The use associated to that set of floors",
            default="")
     
     storeys: IntProperty(
            name="Number of storeys",
-           description="The number of storeys associated at that use",
+           description="The number of storeys associated to that use",
            default = 0)
     
 def update_attribute_mass_typology_id(self, context):
