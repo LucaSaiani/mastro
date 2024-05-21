@@ -74,7 +74,7 @@ classes = (
     roma_project_data.VIEW3D_PT_RoMa_mass_data,
     roma_project_data.VIEW3D_PT_RoMa_mass_plot_data,
     roma_project_data.VIEW3D_PT_RoMa_mass_block_data,
-    roma_project_data.VIEW3D_PT_RoMa_mass_use_data,
+    # roma_project_data.VIEW3D_PT_RoMa_mass_use_data,
     roma_project_data.VIEW3D_PT_RoMa_mass_typology_data,
     roma_project_data.VIEW3D_PT_RoMa_building_data,
     roma_project_data.VIEW3D_PT_RoMa_building_wall_data,
@@ -93,10 +93,10 @@ classes = (
     roma_project_data.BLOCK_LIST_OT_NewItem,
     roma_project_data.BLOCK_LIST_OT_MoveItem,
     
-    roma_project_data.OBJECT_UL_Use,
+    # roma_project_data.OBJECT_UL_Use,
     roma_project_data.use_name_list,
     roma_project_data.USE_LIST_OT_NewItem,
-    roma_project_data.USE_LIST_OT_MoveItem,
+    # roma_project_data.USE_LIST_OT_MoveItem,
     
     roma_project_data.OBJECT_UL_Typology,
     roma_project_data.typology_name_list,
@@ -149,12 +149,12 @@ classes = (
 )
 
 def initNodes():
-    # bpy.ops.node.update_gn_filter(filter_name="use")
-    bpy.ops.node.update_gn_filter()
-    bpy.ops.node.update_shader_filter(filter_name="plot")
-    bpy.ops.node.update_shader_filter(filter_name="block")
-    bpy.ops.node.update_shader_filter(filter_name="use")
-    bpy.ops.node.update_shader_filter(filter_name="typology")
+    # bpy.ops.node.update_gn_filter()
+    # bpy.ops.node.update_shader_filter(filter_name="plot")
+    # bpy.ops.node.update_shader_filter(filter_name="block")
+    # bpy.ops.node.update_shader_filter(filter_name="use")
+    # bpy.ops.node.update_shader_filter(filter_name="typology")
+    pass
     
     
     
@@ -193,6 +193,12 @@ def initLists():
         bpy.context.scene.roma_typology_name_list[0].id = 0
         bpy.context.scene.roma_typology_name_list[0].name = "Typology name... "
         bpy.context.scene.roma_typology_name_list[0].useList = "0"
+        
+        # print("pippo")
+        # print(len(bpy.context.scene.roma_typology_name_list))
+        # selected_typology_index = bpy.context.scene.roma_typology_name_list_index
+        # print(bpy.context.scene.roma_typology_name_list[selected_typology_index].useList)
+        # print("fatto")
         # bpy.context.scene.roma_typology_name_list[0].storeyList = "103"
         
         
@@ -234,11 +240,11 @@ def initLists():
         bpy.context.scene.roma_block_name_current[0].name = bpy.context.scene.roma_block_name_list[0].name
         # print("roma_block_name_current)", len(bpy.context.scene.roma_block_name_current))
         
-    if len(bpy.context.scene.roma_use_name_current) == 0:
-        bpy.context.scene.roma_use_name_current.add()
-        bpy.context.scene.roma_use_name_current[0].id = 0
-        bpy.context.scene.roma_use_name_current[0].name = bpy.context.scene.roma_use_name_list[0].name
-        # print("roma_use_name_current",len(bpy.context.scene.roma_use_name_current))
+    # if len(bpy.context.scene.roma_use_name_current) == 0:
+    #     bpy.context.scene.roma_use_name_current.add()
+    #     bpy.context.scene.roma_use_name_current[0].id = 0
+    #     bpy.context.scene.roma_use_name_current[0].name = bpy.context.scene.roma_use_name_list[0].name
+    #     # print("roma_use_name_current",len(bpy.context.scene.roma_use_name_current))
         
     if len(bpy.context.scene.roma_typology_name_current) == 0:
         bpy.context.scene.roma_typology_name_current.add()
@@ -323,22 +329,13 @@ def onFileLoaded(scene):
     initNodes()
     bpy.context.scene.updating_mesh_attributes_is_active = False
     bpy.context.scene.show_selection_overlay_is_active = False
-  
     # try:
     #     bpy.app.handlers.depsgraph_update_pre.remove(onFileLoaded)
     # except:
     #     pass
     
+@persistent
 def onRegister(scene):
-    #  myCollection = bpy.context.scene.myCollection
-    # # set default value if <myCollection> is empty
-    # if not myCollection:
-    #     collectionItem = myCollection.add()
-    #     collectionItem.name = "Name 1"
-    #     collectionItem.value = "Value 1"
-    #     collectionItem = myCollection.add()
-    #     collectionItem.name = "Name 2"
-    #     collectionItem.value = "Value 2"
     initLists()
     initNodes()
     try:
@@ -349,14 +346,15 @@ def onRegister(scene):
    
     
 def register():
-    bpy.app.handlers.depsgraph_update_post.append(roma_project_data.update_typology_uses_function)
-    # bpy.app.handlers.depsgraph_update_pre.append(onFileLoaded)
-    bpy.app.handlers.depsgraph_update_post.append(onRegister)
     bpy.app.handlers.load_post.append(onFileLoaded)
+    bpy.app.handlers.depsgraph_update_post.append(onRegister)
+    bpy.app.handlers.depsgraph_update_post.append(roma_project_data.update_typology_uses_function)
     bpy.app.handlers.depsgraph_update_post.append(roma_modal_operator.update_mesh_attributes_depsgraph)
     bpy.app.handlers.depsgraph_update_post.append(roma_modal_operator.update_show_overlay)
     
     # bpy.app.handlers.depsgraph_update_post.append(roma_modal_operator.refresh_roma_mass_attributes)
+    # bpy.app.handlers.depsgraph_update_pre.append(onFileLoaded)
+
     
     from bpy.utils import register_class
     for cls in classes:
@@ -517,9 +515,9 @@ def register():
                                         update=roma_massing.update_block_name_id)
     
     Scene.roma_use_name_list = bpy.props.CollectionProperty(type = roma_project_data.use_name_list)
-    Scene.roma_use_name_current = bpy.props.CollectionProperty(type =roma_project_data.name_with_id)
-    Scene.roma_use_name_list_index = bpy.props.IntProperty(name = "Use Name",
-                                             default = 0)
+    # Scene.roma_use_name_current = bpy.props.CollectionProperty(type =roma_project_data.name_with_id)
+    # Scene.roma_use_name_list_index = bpy.props.IntProperty(name = "Use Name",
+    #                                          default = 0)
     
     Scene.roma_typology_name_list = bpy.props.CollectionProperty(type = roma_project_data.typology_name_list)
     Scene.roma_typology_name_current = bpy.props.CollectionProperty(type =roma_project_data.name_with_id)
@@ -532,13 +530,13 @@ def register():
                                         update=roma_massing.update_typology_name_label)
     
     Scene.roma_typology_uses_name_list = bpy.props.CollectionProperty(type = roma_project_data.typology_uses_name_list)
-    Scene.roma_typology_uses_name_current = bpy.props.CollectionProperty(type =roma_project_data.name_with_id)
+    # Scene.roma_typology_uses_name_current = bpy.props.CollectionProperty(type =roma_project_data.name_with_id)
     Scene.roma_typology_uses_name_list_index = bpy.props.IntProperty(name = "Typology Use Name",
                                              default = 0)
     Scene.roma_previous_selected_typology = bpy.props.IntProperty(
                                         name="Previous Typology Id",
                                         default = -1)
-    Scene.roma_typology_uses_names = bpy.props.EnumProperty(
+    Scene.roma_typology_uses_name = bpy.props.EnumProperty(
                                         name="",
                                         description="Typology use",
                                         items=get_use_names_from_list,
@@ -627,14 +625,14 @@ def unregister():
     
     del Scene.roma_plot_name_current
     del Scene.roma_block_name_current
-    del Scene.roma_use_name_current
+    # del Scene.roma_use_name_current
     del Scene.roma_typology_name_current
     del Scene.roma_wall_name_current
     del Scene.roma_floor_name_current
     
     del Scene.roma_plot_name_list_index
     del Scene.roma_block_name_list_index
-    del Scene.roma_use_name_list_index
+    # del Scene.roma_use_name_list_index
     del Scene.roma_typology_name_list_index
     del Scene.roma_obj_typology_uses_name_list_index
     del Scene.roma_wall_name_list_index
@@ -642,7 +640,7 @@ def unregister():
     
     del Scene.roma_plot_names
     del Scene.roma_block_names
-    del Scene.roma_typology_uses_names
+    del Scene.roma_typology_uses_name
     del Scene.roma_typology_names
     del Scene.roma_wall_names
     del Scene.roma_floor_names
