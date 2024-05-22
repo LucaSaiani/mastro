@@ -1137,6 +1137,7 @@ class VIEW3D_PT_RoMa_mass_typology_data(Panel):
             sub.enabled = False
         else:
             sub.enabled = True
+        layout.prop(context.scene.roma_use_name_list[index],"void", text="Void")
         
             
 class OBJECT_UL_Typology(UIList):
@@ -1401,7 +1402,7 @@ class TYPOLOGY_USES_LIST_OT_MoveItem(Operator):
 # when a typology is selected, it is necessary to update the
 # uses in the UIList using the ones stored in Scene.roma_typology_uses_name_list 
 def update_typology_uses_UI(context):
-    from . import initLists
+    # from . import initLists
     use_name_list = context.scene.roma_typology_uses_name_list
     # print("updating UI")
 
@@ -1424,12 +1425,13 @@ def update_typology_uses_UI(context):
     # add the uses stored in the typology to the current typology use UIList        
     selected_typology_index = context.scene.roma_typology_name_list_index
     # selected_typology_id = context.scene.roma_typology_name_list[selected_typology_index].id
-    if  len(context.scene.roma_typology_name_list) == 0: 
-        initLists()
+    # if  len(context.scene.roma_typology_name_list) == 0: 
+    #     initLists()
        
-    list = context.scene.roma_typology_name_list[selected_typology_index].useList    
+    
     # print("len", len(list))
-    if len(list) > 0:
+    if len(context.scene.roma_typology_name_list) > 0:
+        list = context.scene.roma_typology_name_list[selected_typology_index].useList    
         split_list = list.split(";")
         for el in split_list:
             context.scene.roma_typology_uses_name_list.add()
@@ -1550,6 +1552,12 @@ class use_name_list(PropertyGroup):
     liquid: BoolProperty(
             name = "Liquid number of storeys",
             description = "It indicates whether the number of storeys is fixed or variable",
+            default = False,
+            update=update_roma_masses_data)
+    
+    void: BoolProperty(
+            name = "Void use",
+            description = "This use is considered as a void volume in the mass",
             default = False,
             update=update_roma_masses_data)
             
