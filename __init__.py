@@ -111,6 +111,7 @@ classes = (
     roma_project_data.OBJECT_UL_Typology_Uses,
     roma_project_data.typology_uses_name_list,
     roma_project_data.TYPOLOGY_USES_LIST_OT_NewItem,
+    roma_project_data.TYPOLOGY_LIST_OT_DuplicateItem,
     roma_project_data.TYPOLOGY_USES_LIST_OT_DeleteItem,
     roma_project_data.TYPOLOGY_USES_LIST_OT_MoveItem,
     # roma_project_data.update_typology_uses_OT,
