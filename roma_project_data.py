@@ -925,8 +925,9 @@ class block_name_list(PropertyGroup):
 #         pass
     
 class USE_LIST_OT_NewItem(Operator):
+    '''Add a new use to the list of the uses for the current project'''
     bl_idname = "roma_use_name_list.new_item"
-    bl_label = "Add a new use"
+    bl_label = "New use"
 
     def execute(self, context): 
         context.scene.roma_use_name_list.add()
@@ -1074,6 +1075,7 @@ class VIEW3D_PT_RoMa_mass_typology_data(Panel):
         
         col = row.column(align=True)
         col.operator("roma_typology_name_list.new_item", icon='ADD', text="")
+        col.operator("roma_typology_name_list.duplicate_item", icon='COPYDOWN', text="")
         col.separator()
         col.operator("roma_typology_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
         col.operator("roma_typology_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
@@ -1197,35 +1199,50 @@ class OBJECT_UL_Typology(UIList):
         pass
     
 class TYPOLOGY_LIST_OT_NewItem(Operator):
+    '''Add a new typology'''
     bl_idname = "roma_typology_name_list.new_item"
-    bl_label = "Add a new typology"
+    bl_label = "New typology"
 
     def execute(self, context): 
         context.scene.roma_typology_name_list.add()
-        # last = len(context.scene.roma_use_name_list)-1
-        # if last == 0:
-        #     context.scene.roma_use_name_list[0].id = 0
-        #     context.scene.roma_use_name_list[0].name = ""
-        #     random.seed(datetime.now().timestamp())
-        #     rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
-        #     context.scene.roma_use_name_list[0].RND = rndNumber
-        #     context.scene.roma_use_name_list.add()
         temp_list = []    
         for el in context.scene.roma_typology_name_list:
             temp_list.append(el.id)
         last = len(context.scene.roma_typology_name_list)-1
-        
         context.scene.roma_typology_name_list[last].id = max(temp_list)+1
-        
-        # rndNumber = float(decimal.Decimal(random.randrange(0,1000))/1000)
-        # context.scene.roma_typology_name_list[last].RND = rndNumber
         bpy.ops.node.update_shader_filter(filter_name="typology")
-            
+        # update the filter shader
+        return{'FINISHED'}
+
+
+class TYPOLOGY_LIST_OT_DuplicateItem(Operator):
+    '''Make a duplicate of the current typology and its uses'''
+    bl_idname = "roma_typology_name_list.duplicate_item"
+    bl_label = "Duplicate typology"
+
+    def execute(self, context): 
+        # get the index of the current element
+        index = context.scene.roma_typology_name_list_index
+        nameToCopy = context.scene.roma_typology_name_list[index].name
+        usesToCopy = context.scene.roma_typology_name_list[index].useList
+        # create a new entry
+        context.scene.roma_typology_name_list.add()
+        temp_list = []    
+        for el in context.scene.roma_typology_name_list:
+            temp_list.append(el.id)
+        last = len(context.scene.roma_typology_name_list)-1
+        context.scene.roma_typology_name_list[last].id = max(temp_list)+1
+        # copy data to the new entry
+        context.scene.roma_typology_name_list[last].name = nameToCopy + " copy"
+        context.scene.roma_typology_name_list[last].useList = usesToCopy
+        # update the filter shader
+        bpy.ops.node.update_shader_filter(filter_name="typology")
         return{'FINISHED'}
     
 class TYPOLOGY_LIST_OT_MoveItem(Operator):
+    '''Move the selected typology up or down in the list'''
     bl_idname = "roma_typology_name_list.move_item"
-    bl_label = "Move an item in the list"
+    bl_label = "Move typology"
 
     direction: bpy.props.EnumProperty(items=(('UP', 'Up', ""),
                                               ('DOWN', 'Down', ""),))
@@ -1322,8 +1339,9 @@ class OBJECT_UL_Typology_Uses(UIList):
     
     
 class TYPOLOGY_USES_LIST_OT_NewItem(Operator):
+    '''Add a new use to the list of uses of the selected typology. Uses are limited to seven uses for each typology'''
     bl_idname = "roma_typology_uses_name_list.new_item"
-    bl_label = "Add a new typology use"
+    bl_label = "Add use"
     
     @classmethod
     def poll(cls, context):
@@ -1351,8 +1369,9 @@ class TYPOLOGY_USES_LIST_OT_NewItem(Operator):
         return{'FINISHED'}
     
 class TYPOLOGY_USES_LIST_OT_DeleteItem(Operator):
+    '''Remove the selected use from the current typology'''
     bl_idname = "roma_typology_uses_name_list.delete_item"
-    bl_label = "Deletes an item"
+    bl_label = "Remove"
     
     @classmethod
     def poll(cls, context):
@@ -1370,8 +1389,9 @@ class TYPOLOGY_USES_LIST_OT_DeleteItem(Operator):
         return{'FINISHED'}
     
 class TYPOLOGY_USES_LIST_OT_MoveItem(Operator):
+    '''Move the selected use up or down in the list'''
     bl_idname = "roma_typology_uses_name_list.move_item"
-    bl_label = "Move an item in the list"
+    bl_label = "Move use"
 
     direction: bpy.props.EnumProperty(items=(('UP', 'Up', ""),
                                               ('DOWN', 'Down', ""),))
@@ -1506,17 +1526,17 @@ def update_typology_uses_name_label(self, context):
 class typology_name_list(PropertyGroup):
     id: IntProperty(
            name="Id",
-           description="Typology name id",
+           description="Typology id",
            default = 0)
     
     name: StringProperty(
-           name="Typology Name",
-           description="The typology of the block",
+           name="Name",
+           description="The name of the typology",
            default="Typology name...",
            update=update_roma_filter_by_typology)
     
     useList: StringProperty(
-            name="Uses in the typology",
+            name="Use",
             description="The uses for the typology",
             default="")
             
@@ -1527,14 +1547,14 @@ class use_name_list(PropertyGroup):
            default = 0)
     
     name: StringProperty(
-           name="Use Name",
-           description="The use of the block",
+           name="Name",
+           description="The name of the use",
            default = "Use name...",
            update=update_roma_filter_by_use)
     
     floorToFloor: FloatProperty(
-        name="Floor to floor",
-        description="Floor to floor height for the selected use",
+        name="Height",
+        description="Floor to floor height of the selected use",
         min=0,
         max=99,
         precision=3,
@@ -1542,8 +1562,8 @@ class use_name_list(PropertyGroup):
         update=update_roma_masses_data)
 
     storeys:IntProperty(
-        name="Number of storeys",
-        description="Number of storeys for the selected use",
+        name="Storeys",
+        description="Number of storeys of the selected use.\nIf \"Variable number of storeys\" is selected, this value is ignored",
         min=1,
         max=99,
         default = 1,
@@ -1551,24 +1571,24 @@ class use_name_list(PropertyGroup):
     
     liquid: BoolProperty(
             name = "Liquid number of storeys",
-            description = "It indicates whether the number of storeys is fixed or variable",
+            description = "It indicates whether the number of storeys is fixed or variable\nIf selected it has the priority on \"Number of storeys\"",
             default = False,
             update=update_roma_masses_data)
     
     void: BoolProperty(
-            name = "Void use",
-            description = "This use is considered as a void volume in the mass",
+            name = "Void",
+            description = "It indicates whether the use is considered to be a void volume in the mass, or not",
             default = False,
             update=update_roma_masses_data)
             
 class typology_uses_name_list(PropertyGroup):
     id: IntProperty(
            name="Id",
-           description="Typology use name id",
+           description="The typology use name id",
            default = 0)
     
     name: StringProperty(
-           name="Typology uses name",
+           name="Name",
            description="The typology use name",
            default="...",
            update=update_roma_masses_data)
