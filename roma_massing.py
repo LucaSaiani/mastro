@@ -1,3 +1,23 @@
+# Copyright (C) 2022-2024 Luca Saiani
+
+# luca.saiani@gmail.com
+
+# Created by Luca Saiani
+# This is part of RoMa addon for Blender
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTIBILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
 import bpy
 
 from bpy.props import StringProperty, IntProperty
@@ -90,7 +110,7 @@ class VIEW3D_PT_RoMa_Mass(Panel):
                 row = layout.row(align=True)
                 row.prop(context.scene, "roma_typology_names", icon="ASSET_MANAGER", icon_only=True, text="Typology")
                 if len(scene.roma_typology_name_list) >0:
-                    row.label(text= current_typology.name)
+                    row.label(text=current_typology.name)
                 rows = 3
                 row = layout.row()
                 row.template_list("OBJECT_UL_OBJ_Typology_Uses", 

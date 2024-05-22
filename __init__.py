@@ -1,3 +1,24 @@
+# Copyright (C) 2022-2024 Luca Saiani
+
+# luca.saiani@gmail.com
+
+# Created by Luca Saiani
+# This is part of RoMa addon for Blender
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTIBILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+
 # ----------------------------------------------
 # Define Addon info
 # ----------------------------------------------
@@ -231,6 +252,7 @@ def get_use_names_from_list(scene, context):
     for el in scene.roma_use_name_list:
         newProp = (el.name, el.name, "")
         items.append(newProp)
+    items.sort()
     return items
 
 def get_typology_names_from_list(scene, context):
@@ -238,6 +260,7 @@ def get_typology_names_from_list(scene, context):
     for el in scene.roma_typology_name_list:
         newProp = (el.name, el.name, "")
         items.append(newProp)
+    # items.sort()
     return items
 
 def get_wall_names_from_list(scene, context):
@@ -266,7 +289,7 @@ def onFileLoaded(scene):
 def onFileDefault(scene):
     initLists()
     initNodes()
-    print("fatto")
+    # print("fatto")
     
 # @persistent
 # def onRegister(scene):
@@ -393,7 +416,6 @@ def register():
                                              default = 0)
     Scene.roma_typology_names = bpy.props.EnumProperty(
                                         name="Typology List",
-                                        description="",
                                         items=get_typology_names_from_list,
                                         update=roma_massing.update_typology_name_label)
     Scene.roma_typology_uses_name_list = bpy.props.CollectionProperty(type = roma_project_data.typology_uses_name_list)

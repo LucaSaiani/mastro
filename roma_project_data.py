@@ -1,3 +1,23 @@
+# Copyright (C) 2022-2024 Luca Saiani
+
+# luca.saiani@gmail.com
+
+# Created by Luca Saiani
+# This is part of RoMa addon for Blender
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTIBILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
 import bpy
 # import bmesh
 # import gpu
@@ -8,6 +28,7 @@ import bpy
 from bpy.props import StringProperty, IntProperty, FloatProperty, BoolProperty
 from bpy.types import PropertyGroup, UIList, Operator, Panel
 from bpy.app.handlers import persistent
+
 
 import random
 import decimal
@@ -293,9 +314,16 @@ class update_Shader_Filter_OT(Operator):
         named_attribute_node.attribute_name = attributeName
         named_attribute_node.name = "Named Attribute" # this to keep more generic the following code
         named_attribute_node.label = "Named Attribute"
+        #Add value attribute
+        # value_attribute_node = group.nodes.new(type="ShaderNodeValue")
+        # value_attribute_node.label = self.filter_name + " number"
+        # value_attribute_node.outputs[0].default_value = 0
+
             
         group_output.location = (600, 0)
         named_attribute_node.location = (0,-100)
+        # value_attribute_node.location = (0,100)
+        
         return(group)
         
         
@@ -319,6 +347,8 @@ class update_Shader_Filter_OT(Operator):
         
         group_output = nodes["Group Output"]
         named_attribute_node = nodes["Named Attribute"]
+        # nodeName = self.filter_name + " number"
+        # value_attribute_node = nodes[nodeName]
                     
         filterNodeIds = []
         filterNodeDescriptions = []
@@ -343,6 +373,10 @@ class update_Shader_Filter_OT(Operator):
         elif self.filter_name == "block": listToLoop = bpy.context.scene.roma_block_name_list
         elif self.filter_name == "use": listToLoop = bpy.context.scene.roma_use_name_list
         elif self.filter_name == "typology": listToLoop = bpy.context.scene.roma_typology_name_list
+        
+        # filterBy_Group.links.new(named_attribute_node.outputs[2], group_output.inputs[0])
+        # filterBy_Group.links.new(value_attribute_node.outputs[0], group_output.inputs[1])
+        
             
         for el in listToLoop:
             if hasattr(el, "id"):
@@ -954,6 +988,7 @@ def update_roma_masses_data(self, context):
 # a use name has changed
 # also updates the names of roma_typology_uses_name_list_index  
 def update_roma_filter_by_use(self, context):
+    from . import initLists
     bpy.ops.node.update_gn_filter()
     bpy.ops.node.update_shader_filter(filter_name="use")
     # updating roma_typology_uses_name_list_index
@@ -965,6 +1000,8 @@ def update_roma_filter_by_use(self, context):
     # if they are shown in the RoMa panel in the 3dView
     usesUiList = context.scene.roma_obj_typology_uses_name_list
     subIndex = context.scene.roma_typology_uses_name_list_index
+    if  len(context.scene.roma_typology_uses_name_list) == 0: 
+        initLists()
     subName = context.scene.roma_typology_uses_name_list[subIndex].name
     useIndex = context.scene.roma_use_name_list.find(subName)
     for use in usesUiList:
@@ -1364,6 +1401,7 @@ class TYPOLOGY_USES_LIST_OT_MoveItem(Operator):
 # when a typology is selected, it is necessary to update the
 # uses in the UIList using the ones stored in Scene.roma_typology_uses_name_list 
 def update_typology_uses_UI(context):
+    from . import initLists
     use_name_list = context.scene.roma_typology_uses_name_list
     # print("updating UI")
 
@@ -1386,11 +1424,11 @@ def update_typology_uses_UI(context):
     # add the uses stored in the typology to the current typology use UIList        
     selected_typology_index = context.scene.roma_typology_name_list_index
     # selected_typology_id = context.scene.roma_typology_name_list[selected_typology_index].id
-    # if  len(context.scene.roma_typology_name_list) == 0: 
-    #         initRomaLists("romaTypologyName")
+    if  len(context.scene.roma_typology_name_list) == 0: 
+        initLists()
        
     list = context.scene.roma_typology_name_list[selected_typology_index].useList    
-
+    # print("len", len(list))
     if len(list) > 0:
         split_list = list.split(";")
         for el in split_list:
