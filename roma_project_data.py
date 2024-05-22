@@ -108,6 +108,19 @@ from datetime import datetime
 #     shader.uniform_float("color", (1, 1, 0, 0.01))
 #     batch.draw(shader)
 
+
+# def initRomaLists(listName):
+#     if listName == "romaTypologyName":
+#         bpy.context.scene.roma_typology_name_list.add()
+#         bpy.context.scene.roma_typology_name_list[0].id = 0
+#         bpy.context.scene.roma_typology_name_list[0].name = "Typology name... "
+#         bpy.context.scene.roma_typology_name_list[0].useList = "0"
+#     elif listName == "romaTypologyUsesName":
+#         bpy.context.scene.oma_typology_uses_name_list.add()
+#         bpy.context.scene.roma_typology_uses_name_list[0].id = 0
+#         bpy.context.scene.roma_typology_uses_name_list[0].name = bpy.context.scene.roma_use_name_list[0].name
+       
+
 class update_GN_Filter_OT(Operator):
     """Update the GN node Filter by Use"""
     bl_idname = "node.update_gn_filter"
@@ -685,7 +698,7 @@ class OBJECT_UL_Block(UIList):
         custom_icon = 'HOME'
 
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
-            split = layout.split(factor=0.3)
+            split = layout.split(factor=0.5)
             split.label(text="Id: %d" % (item.id)) 
             # split.label(text=item.name, icon=custom_icon) 
             split.prop(context.scene.roma_block_name_list[index],
@@ -1006,6 +1019,9 @@ class VIEW3D_PT_RoMa_mass_typology_data(Panel):
     bl_parent_id = "VIEW3D_PT_RoMa_mass_data"
     bl_options = {'DEFAULT_CLOSED'}
     
+    # if len(bpy.context.scene.roma_typology_uses_name_list) == 0: 
+    #         initRomaLists("romaTypologyUsesName")
+    
     def draw(self, context):
         scene = context.scene
         
@@ -1114,7 +1130,7 @@ class OBJECT_UL_Typology(UIList):
             #print("selected typology: ", context.scene.roma_typology_name_list[selected_typology_index].id)
             
             
-            split = layout.split(factor=0.3)
+            split = layout.split(factor=0.5)
             split.label(text="Id: %d" % (item.id)) 
             # split.label(text=item.name, icon=custom_icon) 
             # item = context.scene.roma_typology_name_list[context.scene.roma_typology_name_list_index]
@@ -1226,7 +1242,7 @@ class OBJECT_UL_Typology_Uses(UIList):
                         storeys = el.storeys
                         liquid = el.liquid
                         break
-                split = layout.split(factor=0.3)
+                split = layout.split(factor=0.5)
                 col1 = split.column()
                 col2 = split.column()
                 subSplit = col1.split(factor=0.3)
@@ -1243,7 +1259,7 @@ class OBJECT_UL_Typology_Uses(UIList):
                     
                 col2.label(text=item.name)
             else:
-                split = layout.split(factor=0.3)
+                split = layout.split(factor=0.5)
                 split.label(text="")
                 split.label(text=item.name)
      
@@ -1370,7 +1386,11 @@ def update_typology_uses_UI(context):
     # add the uses stored in the typology to the current typology use UIList        
     selected_typology_index = context.scene.roma_typology_name_list_index
     # selected_typology_id = context.scene.roma_typology_name_list[selected_typology_index].id
-    list = context.scene.roma_typology_name_list[selected_typology_index].useList
+    # if  len(context.scene.roma_typology_name_list) == 0: 
+    #         initRomaLists("romaTypologyName")
+       
+    list = context.scene.roma_typology_name_list[selected_typology_index].useList    
+
     if len(list) > 0:
         split_list = list.split(";")
         for el in split_list:
@@ -1592,7 +1612,7 @@ class OBJECT_UL_Wall(UIList):
         custom_icon = 'NODE_TEXTURE'
 
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
-            split = layout.split(factor=0.3)
+            split = layout.split(factor=0.5)
             split.label(text="Id: %d" % (item.id)) 
             # split.label(text=item.name, icon=custom_icon) 
             split.prop(context.scene.roma_wall_name_list[index],
@@ -1764,7 +1784,7 @@ class OBJECT_UL_Floor(UIList):
         custom_icon = 'VIEW_PERSPECTIVE'
 
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
-            split = layout.split(factor=0.3)
+            split = layout.split(factor=0.5)
             split.label(text="Id: %d" % (item.id)) 
             # split.label(text=item.name, icon=custom_icon) 
             split.prop(context.scene.roma_floor_name_list[index],
