@@ -138,8 +138,6 @@ def initNodes():
     bpy.ops.node.update_shader_filter(filter_name="block")
     bpy.ops.node.update_shader_filter(filter_name="use")
     bpy.ops.node.update_shader_filter(filter_name="typology")
-    pass
-    
 
 def initLists():
     if len(bpy.context.scene.roma_plot_name_list) == 0:
@@ -210,6 +208,7 @@ def initLists():
         bpy.context.scene.roma_floor_name_current.add()
         bpy.context.scene.roma_floor_name_current[0].id = 0
         bpy.context.scene.roma_floor_name_current[0].name = bpy.context.scene.roma_floor_name_list[0].name
+   
 
 
 def get_plot_names_from_list(scene, context):
@@ -257,27 +256,27 @@ def get_floor_names_from_list(scene, context):
 
 @persistent
 def onFileLoaded(scene):
-    initLists()
-    initNodes()
+    # initLists()
+    # initNodes()
     bpy.context.scene.updating_mesh_attributes_is_active = False
     bpy.context.scene.show_selection_overlay_is_active = False
-    try:
-        bpy.app.handlers.depsgraph_update_pre.remove(onFileLoaded)
-    except:
-        pass
+
     
 @persistent
-def onRegister(scene):
+def onFileDefault(scene):
     initLists()
     initNodes()
-    try:
-        bpy.app.handlers.depsgraph_update_post.remove(onRegister)
-    except:
-        pass
+    print("fatto")
+    
+# @persistent
+# def onRegister(scene):
+#     print("vado")
+#     initLists()
+#     initNodes()
     
 def register():
     bpy.app.handlers.load_post.append(onFileLoaded)
-    bpy.app.handlers.depsgraph_update_post.append(onRegister)
+    bpy.app.handlers.load_factory_startup_post.append(onFileDefault)
     bpy.app.handlers.depsgraph_update_post.append(roma_project_data.update_typology_uses_function)
     bpy.app.handlers.depsgraph_update_post.append(roma_modal_operator.update_mesh_attributes_depsgraph)
     bpy.app.handlers.depsgraph_update_post.append(roma_modal_operator.update_show_overlay)
@@ -429,9 +428,13 @@ def register():
                                         description="",
                                         items=get_floor_names_from_list,
                                         update=roma_wall.update_floor_name_label)
+    
+    bpy.app.timers.register(initLists, first_interval=.1)
+    bpy.app.timers.register(initNodes, first_interval=.1)
 
 def unregister():
-    # bpy.app.handlers.load_post.remove(onFileLoaded)
+    bpy.app.handlers.load_post.remove(onFileLoaded)
+    bpy.app.handlers.load_factory_startup_post.remove(onFileDefault)
     bpy.app.handlers.depsgraph_update_post.remove(roma_project_data.update_typology_uses_function)
     bpy.app.handlers.depsgraph_update_post.remove(roma_modal_operator.update_mesh_attributes_depsgraph)
     bpy.app.handlers.depsgraph_update_post.remove(roma_modal_operator.update_show_overlay)
