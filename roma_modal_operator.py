@@ -455,7 +455,7 @@ def update_show_attributes(self, context):
 
 
 class VIEW_3D_OT_update_mesh_attributes(Operator):
-    """Update RoMa attributes of the active mesh in the RoMa panel"""
+    '''Update RoMa attributes of the active mesh that are shown in the RoMa panel'''
     bl_idname = "wm.update_mesh_attributes_modal_operator"
     bl_label = "Update RoMa attributes of the active mesh in the RoMa panel"
     
@@ -690,13 +690,17 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
                     for bmFace in selected_bmFaces:
                         typology_id = bmFace[bMesh_typology] 
                         numberOfStoreys = bmFace[bMesh_storeys] 
-                        use_list = bpy.context.scene.roma_typology_name_list[typology_id].useList
+                        # use_list = bpy.context.scene.roma_typology_name_list[typology_id].useList
+                        # since it is possible to sort typologies in the ui, it can be that the index of the element
+                        # in the list doesn't correspond to typology_id. Therefore it is necessary to find elements
+                        # in the way below and not with use_list = bpy.context.scene.roma_typology_name_list[typology_id].useList
+                        item = next(i for i in bpy.context.scene.roma_typology_name_list if i["id"] == typology_id)
+                        use_list = item.useList
                         # uses are listed top to bottom, but they need to
                         # be added bottom to top           
                         # use_list = use_list [::-1]
                         useSplit = use_list.split(";")            
                         useSplit.reverse() 
-                        
                         
                         use_id_list_A = "1"
                         use_id_list_B = "1"
@@ -905,7 +909,7 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
         
     def invoke(self, context, event):
         # print("invoked")
-        if event.type in {'LEFTMOUSE', 'RIGHTMOUSE'}:
+        if event.type in {'LEFTMOUSE', 'RIGHTMOUSE', 'ENT', 'NUMPAD_ENTER'}:
             # print("IFFO")
             obj = bpy.context.active_object
             if obj is not None and obj.type == "MESH":
@@ -990,15 +994,15 @@ class VIEW_3D_OT_update_all_mesh_attributes(Operator):
                     typology_id = bmFace[bMesh_typology] 
                     numberOfStoreys = bmFace[bMesh_storeys] 
                     
-                    use_list = bpy.context.scene.roma_typology_name_list[typology_id].useList
+                    item = next(i for i in bpy.context.scene.roma_typology_name_list if i["id"] == typology_id)
+                    use_list = item.useList
                     # uses are listed top to bottom, but they need to
                     # be added bottom to top                       
                     # use_list = use_list [::-1]
                     
                     useSplit = use_list.split(";")
-                    
                     useSplit.reverse()
-                    
+
                     use_id_list_A = "1"
                     use_id_list_B = "1"
                     storey_list_A = "1"
