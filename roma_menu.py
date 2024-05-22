@@ -143,12 +143,6 @@ attribute_set = [
             "attr_domain" :  "FACE",
             # "attr_default" : 0
             },
-            # {
-            # "attr" :  "roma_list_storey_B",
-            # "attr_type" :  "INT",
-            # "attr_domain" :  "FACE",
-            # "attr_default" : 0
-            # },
             {
             "attr" :  "roma_list_height_A",
             "attr_type" :  "INT",
@@ -179,12 +173,12 @@ attribute_set = [
             "attr_domain" :  "FACE",
             # "attr_default" : 0
             },
-            # {
-            # "attr" :  "roma_typology_RND",
-            # "attr_type" :  "FLOAT",
-            # "attr_domain" :  "FACE",
+            {
+            "attr" :  "roma_list_void",
+            "attr_type" :  "INT",
+            "attr_domain" :  "FACE",
             # "attr_default" : 0
-            # },
+            },
             {
             "attr" :  "roma_floor_id",
             "attr_type" :  "INT",
@@ -197,12 +191,7 @@ attribute_set = [
             "attr_domain" :  "FACE",
             "attr_default" : 1
             },
-            # {
-            # "attr" :  "roma_GEA",
-            # "attr_type" :  "FLOAT",
-            # "attr_domain" :  "FACE",
-            # "attr_default" : 0
-            # }
+
 ]
 
 # Defines class for custom properties
@@ -409,6 +398,7 @@ def addAttributes(obj):
     liquidPosition = []
     fixedStoreys = 0
     numberOfStoreys = 3 # default value for initial number of storeys
+    void = "1"
     
     for enum,el in enumerate(useSplit):
         if int(el) < 10:
@@ -419,6 +409,8 @@ def addAttributes(obj):
         # print(el[0], el[1])
         use_id_list_A += tmpUse[0]
         use_id_list_B += tmpUse[1]
+        
+        
             
         for use in projectUses:
             if use.id == int(el):
@@ -435,6 +427,8 @@ def addAttributes(obj):
                         
                 storey_list_A += storeys[0]
                 storey_list_B += storeys[1]
+                
+                void += str(int(use.void))
                 
                 height = str(round(use.floorToFloor,3))
                 if use.floorToFloor < 10:
@@ -529,8 +523,10 @@ def addAttributes(obj):
                                     mesh_attribute[1].value = int(height_D)
                                 elif a["attr"] == "roma_list_height_E":
                                     mesh_attribute[1].value = int(height_E)
-                                else:
-                                    mesh_attribute[1].value = a["attr_default"]
+                                elif a["attr"] == "roma_list_void":
+                                    mesh_attribute[1].value = int(void)
+                                # else:
+                                #     mesh_attribute[1].value = a["attr_default"]
                                 break
                 elif a["attr_domain"] == 'EDGE':
                     attribute = mesh.attributes[a["attr"]].data.items()

@@ -544,14 +544,7 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
             bMesh_height_C = bm.faces.layers.int["roma_list_height_C"]
             bMesh_height_D = bm.faces.layers.int["roma_list_height_D"]
             bMesh_height_E = bm.faces.layers.int["roma_list_height_E"]
-            # bMesh_storey_B = bm.faces.layers.int["roma_list_storey_B"]
-            #               "storey A" : mesh.attributes["roma_list_storey_A"].data.items(),
-            #               "storey B" : mesh.attributes["roma_list_storey_B"].data.items(),
-            #               "height A" : mesh.attributes["roma_list_height_A"].data.items(),
-            #               "height B" : mesh.attributes["roma_list_height_B"].data.items(),
-            #               "height C" : mesh.attributes["roma_list_height_C"].data.items(),
-            #               "height D" : mesh.attributes["roma_list_height_D"].data.items(),
-            #               "height E" : mesh.attributes["roma_list_height_E"].data.items(),
+            bMesh_void = bm.faces.layers.int["roma_list_void"]
 
             selected_bmEdges = [edge for edge in bm.edges if edge.select]
             selected_bmFaces = [face for face in bm.faces if face.select]
@@ -717,6 +710,7 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
                         height_E = "1"
                         liquidPosition = [] # to count how many liquid uses they are
                         fixedStoreys = 0 # to count how many fixed storeys they are
+                        void = "1"
                         
                         usesUiList = bpy.context.scene.roma_obj_typology_uses_name_list
                         # clean the list
@@ -753,6 +747,8 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
                                     storey_list_B += storeys[1]
                                     storey_list_UI +=storeys
                                     
+                                    void += str(int(use.void))
+                                    
                                     #### floor to floor height for each use, stored in A, B, C, ...
                                     #### due to the fact that arrays can't be used
                                     #### and array like (3.555, 12.664, 0.123)
@@ -787,8 +783,7 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
                                         height_E += "0"
                                     break
                       
-                        bmFace[bMesh_use_list_A] = int(use_id_list_A)
-                        bmFace[bMesh_use_list_B] = int(use_id_list_B)
+                        
                         
                         # liquid storeys need to be converted to actual storeys
                         storeyCheck = numberOfStoreys - fixedStoreys - len(liquidPosition)
@@ -855,6 +850,8 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
                         
                         
                         # storey_list_UI = "1" + storey_list_UI
+                        bmFace[bMesh_use_list_A] = int(use_id_list_A)
+                        bmFace[bMesh_use_list_B] = int(use_id_list_B)
                         bmFace[bMesh_storey_list_A] = int(storey_list_A)
                         bmFace[bMesh_storey_list_B] = int(storey_list_B)
                         bmFace[bMesh_height_A] = int(height_A)
@@ -862,6 +859,7 @@ class VIEW_3D_OT_update_mesh_attributes(Operator):
                         bmFace[bMesh_height_C] = int(height_C)
                         bmFace[bMesh_height_D] = int(height_D)
                         bmFace[bMesh_height_E] = int(height_E)
+                        bmFace[bMesh_void] = int(void)
                             
                 except:
                     pass
@@ -965,7 +963,8 @@ class VIEW_3D_OT_update_all_mesh_attributes(Operator):
         objs = bpy.data.objects
         #get the current active object
         activeObj = bpy.context.active_object
-        activeObjMode = activeObj.mode
+        if hasattr(activeObj, "type"):
+            activeObjMode = activeObj.mode
         for ob in objs:
             if ob is not None and ob.type == "MESH" and "RoMa object" in ob.data:
                 bpy.context.view_layer.objects.active = ob
@@ -985,6 +984,7 @@ class VIEW_3D_OT_update_all_mesh_attributes(Operator):
                 bMesh_height_C = bm.faces.layers.int["roma_list_height_C"]
                 bMesh_height_D = bm.faces.layers.int["roma_list_height_D"]
                 bMesh_height_E = bm.faces.layers.int["roma_list_height_E"]
+                bMesh_void = bm.faces.layers.int["roma_list_void"]
                 
                 for bmFace in bm.faces:
                     typology_id = bmFace[bMesh_typology] 
@@ -1010,6 +1010,7 @@ class VIEW_3D_OT_update_all_mesh_attributes(Operator):
                     height_E = "1"
                     liquidPosition = [] # to count how many liquid uses they are
                     fixedStoreys = 0 # to count how many fixed storeys they are
+                    void = "1"
                     
                     for enum, el in enumerate(useSplit):
                         #### list_use_id
@@ -1036,6 +1037,8 @@ class VIEW_3D_OT_update_all_mesh_attributes(Operator):
                                         
                                 storey_list_A += storeys[0]
                                 storey_list_B += storeys[1]
+                                
+                                void += str(int(use.void))
                                 
                                 #### floor to floor height for each use, stored in A, B, C, ...
                                 #### due to the fact that arrays can't be used
@@ -1071,8 +1074,7 @@ class VIEW_3D_OT_update_all_mesh_attributes(Operator):
                                 break
                
 
-                    bmFace[bMesh_use_list_A] = int(use_id_list_A)
-                    bmFace[bMesh_use_list_B] = int(use_id_list_B)
+                   
                     
                     storeyCheck = numberOfStoreys - fixedStoreys - len(liquidPosition)
                     # if the typology has more storeys than the selected mass
@@ -1108,6 +1110,9 @@ class VIEW_3D_OT_update_all_mesh_attributes(Operator):
                         # the 1 is readded  
                         storey_list_A = "1" + storey_list_A
                         storey_list_B = "1" + storey_list_B
+                        
+                    bmFace[bMesh_use_list_A] = int(use_id_list_A)
+                    bmFace[bMesh_use_list_B] = int(use_id_list_B)
                     bmFace[bMesh_storey_list_A] = int(storey_list_A)
                     bmFace[bMesh_storey_list_B] = int(storey_list_B)
                     bmFace[bMesh_height_A] = int(height_A)
@@ -1115,14 +1120,16 @@ class VIEW_3D_OT_update_all_mesh_attributes(Operator):
                     bmFace[bMesh_height_C] = int(height_C)
                     bmFace[bMesh_height_D] = int(height_D)
                     bmFace[bMesh_height_E] = int(height_E)
+                    bmFace[bMesh_void] = int(void)
                 
                 bmesh.update_edit_mesh(mesh)
                 bm.free()
                 bpy.ops.object.mode_set(mode=objMode)
 
         #return the focus to the current active object
-        bpy.context.view_layer.objects.active = activeObj
-        bpy.ops.object.mode_set(mode=activeObjMode)
+        if hasattr(activeObj, "type"):
+            bpy.context.view_layer.objects.active = activeObj
+            bpy.ops.object.mode_set(mode=activeObjMode)
         
         return {'FINISHED'}
         
