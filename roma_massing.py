@@ -95,7 +95,13 @@ class VIEW3D_PT_RoMa_Mass(Panel):
                 
                 # disable the number of storeys if there are no liquids
                 current_typology = scene.roma_typology_name_current[0]
-                use_list = context.scene.roma_typology_name_list[current_typology.id].useList
+                
+                
+                # since it is possible to sort typologies in the ui, it can be that the index of the element
+                # in the list doesn't correspond to typology_id. Therefore it is necessary to find elements
+                # in the way below and not with use_list = bpy.context.scene.roma_typology_name_list[typology_id].useList
+                item = next(i for i in bpy.context.scene.roma_typology_name_list if i["id"] == current_typology.id)
+                use_list = item.useList
                 uses = use_list.split(";")
                 tmp_enabled = False
                 for useID in uses:
