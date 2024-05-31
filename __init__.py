@@ -59,6 +59,7 @@ else:
     from . import roma_schedule
     
 import bpy
+import bmesh
 
 from bpy.types import(
                         Scene
@@ -67,10 +68,11 @@ from bpy.app.handlers import persistent
 
 classes = (
     roma_preferences.roma_addon_preferences,
-    roma_modal_operator.VIEW_3D_OT_show_roma_selection,
+    roma_modal_operator.VIEW_3D_OT_show_roma_overlay,
     roma_modal_operator.VIEW_3D_OT_show_roma_attributes,
-    roma_modal_operator.VIEW_3D_OT_update_mesh_attributes,
-    roma_modal_operator.VIEW_3D_OT_update_all_mesh_attributes,
+    # roma_modal_operator.VIEW_3D_OT_update_mesh_attributes,
+    # roma_modal_operator.VIEW_3D_OT_update_all_meshes_attributes,
+    # roma_modal_operator.EventReporter,
     
     roma_project_data.update_GN_Filter_OT,
     roma_project_data.update_Shader_Filter_OT,
@@ -143,7 +145,8 @@ classes = (
     
     roma_massing.OBJECT_OT_SetTypologyId,
     roma_massing.OBJECT_UL_OBJ_Typology_Uses,
-    roma_massing.OBJECT_OT_SetMassStoreys,
+    roma_massing.OBJECT_OT_Set_Face_Attribute_Storeys,
+    roma_massing.OBJECT_OT_Set_Face_Attribute_Uses,
     roma_massing.obj_typology_uses_name_list,
     roma_massing.VIEW3D_PT_RoMa_Mass,
 
@@ -282,28 +285,27 @@ def get_floor_names_from_list(scene, context):
 def onFileLoaded(scene):
     # initLists()
     # initNodes()
-    bpy.context.scene.updating_mesh_attributes_is_active = False
+    # bpy.context.scene.updating_mesh_attributes_is_active = False
     bpy.context.scene.show_selection_overlay_is_active = False
-
+    bpy.context.scene.previous_selection_object_name = ""
+    bpy.context.scene.previous_selection_face_id = -1
     
 @persistent
 def onFileDefault(scene):
     initLists()
     initNodes()
-    # print("fatto")
-    
-# @persistent
-# def onRegister(scene):
-#     print("vado")
-#     initLists()
-#     initNodes()
+    bpy.context.scene.show_selection_overlay_is_active = False
+    bpy.context.scene.previous_selection_object_name = ""
+    bpy.context.scene.previous_selection_face_id = -1
+
     
 def register():
     bpy.app.handlers.load_post.append(onFileLoaded)
     bpy.app.handlers.load_factory_startup_post.append(onFileDefault)
-    bpy.app.handlers.depsgraph_update_post.append(roma_project_data.update_typology_uses_function)
-    bpy.app.handlers.depsgraph_update_post.append(roma_modal_operator.update_mesh_attributes_depsgraph)
-    bpy.app.handlers.depsgraph_update_post.append(roma_modal_operator.update_show_overlay)
+    bpy.app.handlers.depsgraph_update_post.append(roma_modal_operator.updates)
+    # bpy.app.handlers.depsgraph_update_post.append(roma_project_data.update_typology_uses_function)
+    # bpy.app.handlers.depsgraph_update_post.append(roma_modal_operator.update_mesh_attributes_depsgraph)
+    # bpy.app.handlers.depsgraph_update_post.append(roma_modal_operator.update_show_overlay)
     
     from bpy.utils import register_class
     for cls in classes:
@@ -337,12 +339,16 @@ def register():
                                             default = False)
     bpy.types.Object.roma_props = bpy.props.PointerProperty(type=roma_menu.romaAddonProperties)
 
-    Scene.updating_mesh_attributes_is_active = bpy.props.BoolProperty(
-                                        name = "update attributes via depsgraph",
-                                        default = False
-                                        )
+    # Scene.updating_mesh_attributes_is_active = bpy.props.BoolProperty(
+    #                                     name = "update attributes via depsgraph",
+    #                                     default = False
+    #                                     )
+    # Scene.update_attributes = bpy.props.IntProperty(
+    #                                     name = "Update attributes once faces are selected",
+    #                                     default = 0
+    #                                     )
     Scene.show_selection_overlay_is_active = bpy.props.BoolProperty(
-                                        name = "show selection overlay",
+                                        name = "Show selection overlay",
                                         default = False
                                         )
     Scene.attribute_mass_plot_id = bpy.props.IntProperty(
@@ -353,8 +359,8 @@ def register():
                                         default=0)
     Scene.attribute_mass_typology_id = bpy.props.IntProperty(
                                         name="Typology Id",
-                                        default=0,
-                                        update = roma_massing.update_attribute_mass_typology_id)
+                                        default=0)
+                                        # update = roma_massing.update_attributes_roma_mesh)
     Scene.attribute_wall_id = bpy.props.IntProperty(
                                         name="Wall Id",
                                         default=0,
@@ -380,7 +386,10 @@ def register():
                                         name="Number of Storeys",
                                         min=1, 
                                         default=3,
-                                        update = roma_massing.update_attribute_mass_storeys)
+                                        update = roma_massing.update_attributes_roma_mesh_storeys)
+    # Scene.mouse_keyboard_event = bpy.props.StringProperty(
+    #                                     name="Mouse and keyboard event"
+    #                             )
     # Scene.attribute_obj_option = bpy.props.IntProperty(
     #                                     name="Building option",
     #                                     min=1, 
@@ -389,6 +398,16 @@ def register():
     #                                     name="Building phase",
     #                                     min=1, 
     #                                     default=1,
+    Scene.previous_selection_object_name = bpy.props.StringProperty(
+                                    name="Previously selected object name",
+                                    default = "",
+                                    description="Store the name of the previous selected object"
+                                    )
+    Scene.previous_selection_face_id = bpy.props.IntProperty(
+                                    name="Previously selected face Id",
+                                    default = -1,
+                                    description="Store the id of the previous selected face"
+                                    )                  
     Scene.roma_plot_name_list = bpy.props.CollectionProperty(type = roma_project_data.plot_name_list)
     Scene.roma_plot_name_current = bpy.props.CollectionProperty(type =roma_project_data.name_with_id)
     Scene.roma_plot_name_list_index = bpy.props.IntProperty(name = "Plot Name",
@@ -418,7 +437,7 @@ def register():
     Scene.roma_typology_names = bpy.props.EnumProperty(
                                         name="Typology List",
                                         items=get_typology_names_from_list,
-                                        update=roma_massing.update_typology_name_label)
+                                        update=roma_massing.update_attributes_roma_mesh_typology)
     Scene.roma_typology_uses_name_list = bpy.props.CollectionProperty(type = roma_project_data.typology_uses_name_list)
     Scene.roma_typology_uses_name_list_index = bpy.props.IntProperty(name = "Typology Use Name",
                                              default = 0)
@@ -454,13 +473,15 @@ def register():
     
     bpy.app.timers.register(initLists, first_interval=.1)
     bpy.app.timers.register(initNodes, first_interval=.1)
+    # bpy.app.timers.register(roma_modal_operator.update_mesh_attributes_depsgraph, first_interval=.1)
 
 def unregister():
     bpy.app.handlers.load_post.remove(onFileLoaded)
     bpy.app.handlers.load_factory_startup_post.remove(onFileDefault)
-    bpy.app.handlers.depsgraph_update_post.remove(roma_project_data.update_typology_uses_function)
-    bpy.app.handlers.depsgraph_update_post.remove(roma_modal_operator.update_mesh_attributes_depsgraph)
-    bpy.app.handlers.depsgraph_update_post.remove(roma_modal_operator.update_show_overlay)
+    bpy.app.handlers.depsgraph_update_post.remove(roma_modal_operator.updates)
+    # bpy.app.handlers.depsgraph_update_post.remove(roma_project_data.update_typology_uses_function)
+    # bpy.app.handlers.depsgraph_update_post.remove(roma_modal_operator.update_mesh_attributes_depsgraph)
+    # bpy.app.handlers.depsgraph_update_post.remove(roma_modal_operator.update_show_overlay)
     
     from bpy.utils import unregister_class
     for cls in reversed(classes):
@@ -479,7 +500,7 @@ def unregister():
     del bpy.types.WindowManager.toggle_floor_name
     del bpy.types.Object.roma_props
     
-    del Scene.updating_mesh_attributes_is_active
+    # del Scene.updating_mesh_attributes_is_active
     del Scene.attribute_mass_plot_id
     del Scene.attribute_mass_block_id
     del Scene.attribute_mass_typology_id
@@ -489,7 +510,11 @@ def unregister():
     del Scene.attribute_wall_offset
     del Scene.attribute_floor_id
     del Scene.attribute_mass_storeys
+    # del Scene.update_attributes
+    # del Scene.mouse_keyboard_event
 
+    del Scene.previous_selection_object_name
+    del Scene.previous_selection_face_id
     del Scene.roma_plot_name_list
     del Scene.roma_block_name_list
     del Scene.roma_use_name_list
