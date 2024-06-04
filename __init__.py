@@ -116,6 +116,7 @@ classes = (
     roma_project_data.TYPOLOGY_LIST_OT_DuplicateItem,
     roma_project_data.TYPOLOGY_USES_LIST_OT_DeleteItem,
     roma_project_data.TYPOLOGY_USES_LIST_OT_MoveItem,
+    roma_project_data.OBJECT_OT_update_all_RoMa_meshes_attributes,
     # roma_project_data.update_typology_uses_OT,
     
     roma_project_data.OBJECT_UL_Wall,
@@ -445,8 +446,8 @@ def register():
                                         name="Previous Typology Id",
                                         default = -1)
     Scene.roma_typology_uses_name = bpy.props.EnumProperty(
-                                        name="",
-                                        description="Typology use",
+                                        name="Typology uses drop down menu",
+                                        description="Typology use drop down list in the Typology Uses UI",
                                         items=get_use_names_from_list,
                                         update=roma_project_data.update_typology_uses_name_label)
     Scene.roma_obj_typology_uses_name_list = bpy.props.CollectionProperty(type = roma_massing.obj_typology_uses_name_list)

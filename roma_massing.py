@@ -222,10 +222,17 @@ class OBJECT_OT_Set_Face_Attribute_Storeys(Operator):
         return {'FINISHED'}
         
 '''function to update number of storeys accordingly to the assigned number of storeys'''
-def update_mesh_attributes_storeys(context, mesh, faceIndex):
+def update_mesh_attributes_storeys(context, mesh, faceIndex, storeysSet = None):
     typology_id = mesh.attributes["roma_typology_id"].data[faceIndex].value
     projectUses = context.scene.roma_use_name_list
-    numberOfStoreys = context.scene.attribute_mass_storeys
+    # if the function is run once the user updates the number of storeys,
+    # the number of storeys is read from context.scene.attribute_mass_storeys.
+    # Else the function is run because the user is updating the typology list and
+    # in this case the number of storeys used is the one stored in each face of the mesh
+    if storeysSet == None:
+        numberOfStoreys = context.scene.attribute_mass_storeys
+    else:
+        numberOfStoreys = storeysSet
             
     # since it is possible to sort typologies in the ui, it can be that the index of the element
     # in the list doesn't correspond to typology_id. Therefore it is necessary to find elements
@@ -306,7 +313,7 @@ def update_mesh_attributes_storeys(context, mesh, faceIndex):
             }
     return data
 
-'''Set the uses and their heights in the selected face attribute of the RoMa mesh'''
+# Set the uses and their heights in the selected face attribute of the RoMa mesh
 class OBJECT_OT_Set_Face_Attribute_Uses(Operator):
     bl_idname = "object.set_mesh_attribute_uses"
     bl_label = "Set face attributes assigned to the RoMa mesh"
@@ -340,11 +347,16 @@ class OBJECT_OT_Set_Face_Attribute_Uses(Operator):
        
         return {'FINISHED'}
 
-'''function to update the uses and their relative heights accordingly to the assigned typology'''
-def update_mesh_attributes_uses(context, mesh, faceIndex):
-    typology_id = context.scene.attribute_mass_typology_id
+# function to update the uses and their relative heights accordingly to the assigned typologySet:
+# if the function is run by the user when in edit mode the typologyId is read from 
+# context.scene.attribute_mass_typology_id, else the typology is updated from the
+# typology panel and the typologyId used is the one stored in the face
+def update_mesh_attributes_uses(context, mesh, faceIndex, typologySet=None):
+    if typologySet == None:
+        typology_id = context.scene.attribute_mass_typology_id
+    else:
+      typology_id = typologySet
     projectUses = context.scene.roma_use_name_list
-            
     # since it is possible to sort typologies in the ui, it can be that the index of the element
     # in the list doesn't correspond to typology_id. Therefore it is necessary to find elements
     # in the way below and not with use_list = bpy.context.scene.roma_typology_name_list[typology_id].useList

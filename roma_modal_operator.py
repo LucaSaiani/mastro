@@ -475,7 +475,7 @@ def draw_callback_px_show_attributes(self, context):
 def update_show_attributes(self, context):
     bpy.ops.wm.show_roma_attributes()
     
-'''Manage all the required updates fired by depsgraph_update'''    
+# Manage all the required updates fired by depsgraph_update  
 @persistent
 def updates(scene):
     # update the values in the UI accordingly with the selected faces #############
