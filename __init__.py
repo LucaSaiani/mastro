@@ -59,11 +59,14 @@ else:
     from . import roma_schedule
     
 import bpy
-import bmesh
+# import bmesh
 
 from bpy.types import(
                         Scene
                         )
+import nodeitems_utils
+# from nodeitems_utils import NodeCategory, NodeItem
+
 from bpy.app.handlers import persistent
 
 classes = (
@@ -137,9 +140,21 @@ classes = (
     roma_menu.RoMa_Menu,
     roma_menu.romaAddonProperties,
     
-    roma_schedule.RoMa_Schedule_Tree,
+    roma_schedule.RoMaTree,
+    roma_schedule.RoMa_romaObjectName_item,
+    roma_schedule.RoMa_romaMeshList_Socket,
+    # roma_schedule.RoMaTreeNode,
+    roma_schedule.RoMaInterfaceSocket,
+    roma_schedule.RoMaGroupInput,
+    # roma_schedule.MyCustomNode,
+    # roma_schedule.CustomNodeText,
+    # roma_schedule.CustomNodeFloat,
+    # roma_schedule.CustomNodeJoin,
+    # roma_schedule.CustomNodePrint,
+    roma_schedule.RoMaViewer,
     roma_schedule.RoMa_Schedule_Panel,
     roma_schedule.Roma_Draw_Schedule,
+    
     
     # roma_vertex.OBJECT_OT_SetVertexAttribute,
     # roma_vertex.VIEW3D_PT_RoMa_vertex,
@@ -157,6 +172,20 @@ classes = (
     roma_wall.OBJECT_OT_SetFloorId,
     roma_wall.VIEW3D_PT_RoMa_Wall,
 )
+
+# RoMaGroupInput = roma_schedule.RoMaGroupInput
+# RoMaViewer = roma_schedule.RoMaViewer
+# CustomNodeText = roma_schedule.CustomNodeText
+# CustomNodeFloat = roma_schedule.CustomNodeFloat
+# CustomNodeJoin = roma_schedule.CustomNodeJoin
+
+
+# ROMA_NODE_GROUP_HANDLE = 0
+# ROMA_VIEWER_HANDLE = 1
+
+# CUSTOM_NODE_TEXT_HANDLE = 1
+# CUSTOM_NODE_FLOAT_HANDLE = 2
+# CUSTOM_NODE_JOIN_HANDLE = 3
 
 def initNodes():
     bpy.ops.node.update_gn_filter()
@@ -311,7 +340,49 @@ def register():
     from bpy.utils import register_class
     for cls in classes:
         register_class(cls)
-     
+    
+    nodeitems_utils.register_node_categories('ROMA_NODES', roma_schedule.node_categories) 
+    
+    # bpy.msgbus.subscribe_rna(
+    #     key=RoMaGroupInput,
+    #     owner=ROMA_NODE_GROUP_HANDLE,
+    #     args = (),
+    #     notify=roma_schedule.execute_active_node_tree,
+    #     options={"PERSISTENT",}
+    # )
+    
+    # bpy.msgbus.subscribe_rna(
+    #     key=RoMaViewer,
+    #     owner=ROMA_VIEWER_HANDLE,
+    #     args = (),
+    #     notify=roma_schedule.execute_active_node_tree,
+    #     options={"PERSISTENT",}
+    # )
+    
+    
+    
+    # bpy.msgbus.subscribe_rna(
+    #     key=CustomNodeText,
+    #     owner=CUSTOM_NODE_TEXT_HANDLE,
+    #     args = (),
+    #     notify=roma_schedule.execute_active_node_tree,
+    #     options={"PERSISTENT",}
+    # )
+    # bpy.msgbus.subscribe_rna(
+    #     key=CustomNodeFloat,
+    #     owner=CUSTOM_NODE_FLOAT_HANDLE,
+    #     args = (),
+    #     notify=roma_schedule.execute_active_node_tree,
+    #     options={"PERSISTENT",}
+    # )
+    # bpy.msgbus.subscribe_rna(
+    #     key=CustomNodeJoin,
+    #     owner=CUSTOM_NODE_JOIN_HANDLE,
+    #     args = (),
+    #     notify=roma_schedule.execute_active_node_tree,
+    #     options={"PERSISTENT",}
+    # )
+    
     bpy.types.VIEW3D_MT_editor_menus.append(roma_menu.roma_menu)
     bpy.types.VIEW3D_MT_mesh_add.append(roma_menu.roma_add_menu_func)
     bpy.types.WindowManager.toggle_show_data = bpy.props.BoolProperty(
@@ -484,9 +555,13 @@ def unregister():
     # bpy.app.handlers.depsgraph_update_post.remove(roma_modal_operator.update_mesh_attributes_depsgraph)
     # bpy.app.handlers.depsgraph_update_post.remove(roma_modal_operator.update_show_overlay)
     
-    from bpy.utils import unregister_class
-    for cls in reversed(classes):
-        unregister_class(cls)
+    # bpy.msgbus.clear_by_owner(ROMA_NODE_GROUP_HANDLE)
+    # bpy.msgbus.clear_by_owner(ROMA_VIEWER_HANDLE)
+    # bpy.msgbus.clear_by_owner(CUSTOM_NODE_JOIN_HANDLE)
+    # bpy.msgbus.clear_by_owner(CUSTOM_NODE_FLOAT_HANDLE)
+    # bpy.msgbus.clear_by_owner(CUSTOM_NODE_TEXT_HANDLE)
+    
+    nodeitems_utils.unregister_node_categories('ROMA_NODES')
 
     bpy.types.VIEW3D_MT_editor_menus.remove(roma_menu.roma_menu)
     bpy.types.VIEW3D_MT_mesh_add.remove(roma_menu.roma_add_menu_func)
@@ -545,6 +620,10 @@ def unregister():
     del Scene.roma_floor_names
     
     del Scene.roma_previous_selected_typology
+    
+    from bpy.utils import unregister_class
+    for cls in reversed(classes):
+        unregister_class(cls)
     
     
 if __name__ == "__main__":
