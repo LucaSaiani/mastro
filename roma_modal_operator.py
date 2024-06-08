@@ -478,7 +478,10 @@ def update_show_attributes(self, context):
 # Manage all the required updates fired by depsgraph_update  
 @persistent
 def updates(scene):
+    ###############################################################################
     # update the values in the UI accordingly with the selected faces #############
+    ###############################################################################
+
     obj = bpy.context.active_object
     if scene.previous_selection_object_name != obj.name:
         scene.previous_selection_object_name = obj.name
@@ -547,14 +550,18 @@ def updates(scene):
                             usesUiList[enum].storeys = int(storeys)
                             break
             bm.free
-      
-    # show graphic overlays #############################################################################
+    ###############################################################################
+    # show graphic overlays #######################################################
+    ###############################################################################
+
     if scene.show_selection_overlay_is_active != bpy.context.preferences.addons['roma'].preferences.toggleSelectionOverlay:
         scene.show_selection_overlay_is_active = bpy.context.preferences.addons['roma'].preferences.toggleSelectionOverlay
         bpy.ops.wm.show_roma_overlay('INVOKE_DEFAULT')
         
+    ####################################################################################################
     # when a typology is selected, it is necessary to update the #######################################
     # uses in the UIList using the ones stored in scene.roma_typology_uses_name_list ###################
+    ####################################################################################################
     previous = scene.roma_previous_selected_typology
     current = scene.roma_typology_name_list_index
     if previous != current:
@@ -580,6 +587,27 @@ def updates(scene):
                         scene.roma_typology_uses_name_list[last].id = use.id
                         scene.roma_typology_uses_name_list[last].name = use.name 
                         break
+    
+    #############################################################################################
+    # is the selection has changed, some  data in the RoMa schedule need to be updated ##########
+    #############################################################################################
+    # list of RoMaTreeType
+    trees = [x for x in bpy.data.node_groups if x.bl_idname == "RoMaTreeType"]
+    if trees:
+        for tree in trees:
+            nodes = tree.nodes
+            if nodes:
+               groupInput = [x for x in nodes if x.bl_idname == "Input RoMa Mesh"]
+               if groupInput:
+                   for group in groupInput:
+                       group.update_selected_objects()
+            # execute the node tree
+            tree.execute(bpy.context)
+                   
+               
+        
+    
+
 
 
 # class VIEW_3D_OT_update_mesh_attributes(Operator):
