@@ -29,8 +29,10 @@ from bpy_extras import view3d_utils
 from bpy.types import Operator
 
 from mathutils import Vector
-from datetime import datetime
-import math
+
+from .roma_schedule import RoMaMathNode, execute_active_node_tree
+# from datetime import datetime
+# import math
 
 class VIEW_3D_OT_show_roma_overlay(Operator):
     bl_idname = "wm.show_roma_overlay"
@@ -481,75 +483,75 @@ def updates(scene):
     ###############################################################################
     # update the values in the UI accordingly with the selected faces #############
     ###############################################################################
-
     obj = bpy.context.active_object
-    if scene.previous_selection_object_name != obj.name:
-        scene.previous_selection_object_name = obj.name
-        scene.previous_selection_face_id = -1
-    else:
-        if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data and obj.mode == 'EDIT':
-            bm = bmesh.from_edit_mesh(obj.data)
-            bMesh_storeys = bm.faces.layers.int["roma_number_of_storeys"]
-            bMesh_storey_list_A = bm.faces.layers.int["roma_list_storey_A"]
-            bMesh_storey_list_B = bm.faces.layers.int["roma_list_storey_B"]
-            bMesh_typology = bm.faces.layers.int["roma_typology_id"]
-        
-            # check if there is an active face
-            if isinstance(bm.select_history.active, bmesh.types.BMFace):
-                active_face = bm.select_history.active.index
-                if scene.previous_selection_face_id != active_face:
-                    scene.previous_selection_face_id = active_face
-            else:
-                selected_faces = [face for face in bm.faces if face.select]
-                if len(selected_faces) > 0:
-                    for f in selected_faces:
-                        scene.previous_selection_face_id = f.index
+    if obj:
+        if scene.previous_selection_object_name != obj.name:
+            scene.previous_selection_object_name = obj.name
+            scene.previous_selection_face_id = -1
+        else:
+            if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data and obj.mode == 'EDIT':
+                bm = bmesh.from_edit_mesh(obj.data)
+                bMesh_storeys = bm.faces.layers.int["roma_number_of_storeys"]
+                bMesh_storey_list_A = bm.faces.layers.int["roma_list_storey_A"]
+                bMesh_storey_list_B = bm.faces.layers.int["roma_list_storey_B"]
+                bMesh_typology = bm.faces.layers.int["roma_typology_id"]
+            
+                # check if there is an active face
+                if isinstance(bm.select_history.active, bmesh.types.BMFace):
+                    active_face = bm.select_history.active.index
+                    if scene.previous_selection_face_id != active_face:
+                        scene.previous_selection_face_id = active_face
                 else:
-                    scene.previous_selection_face_id = -1
-            if scene.previous_selection_face_id != -1:
-                #updating the information in UI
-                bm.faces.ensure_lookup_table()
-                storeys = bm.faces[scene.previous_selection_face_id][bMesh_storeys]
-                list_storey_A = bm.faces[scene.previous_selection_face_id][bMesh_storey_list_A]
-                list_storey_B = bm.faces[scene.previous_selection_face_id][bMesh_storey_list_B]
-                typology = bm.faces[scene.previous_selection_face_id][bMesh_typology]
-                
-                # number of storeys
-                scene["attribute_mass_storeys"] = storeys
-                
-                # typology name
-                # since it is possible to sort typologies in the ui, it can be that the index of the element
-                # in the list doesn't correspond to typology_id. Therefore it is necessary to find elements
-                # in the way below and not with use_list = bpy.context.scene.roma_typology_name_list[typology_id].useList
-                item = next(i for i in scene.roma_typology_name_list if i["id"] == typology)
-                scene.roma_typology_name_current[0].name = item.name
-                # uses related to the typology
-                usesUiList = bpy.context.scene.roma_obj_typology_uses_name_list 
-                # clean the list
-                while len(usesUiList) > 0:
-                    index = scene.roma_obj_typology_uses_name_list_index
-                    usesUiList.remove(index)
-                    scene.roma_obj_typology_uses_name_list_index = min(max(0, index - 1), len(usesUiList) - 1)
-                # populate the list of uses
-                use_list = item.useList
-                list_storey_A = str(list_storey_A)[1:]
-                list_storey_B = str(list_storey_B)[1:]
-                list_storey_A = list_storey_A[::-1]
-                list_storey_B = list_storey_B[::-1]
-                
-                useSplit = use_list.split(";") 
-                for enum, el in enumerate(useSplit):
-                    id = int(el)
-                    usesUiList.add()
-                    usesUiList[enum].id = enum + 1
-                    for use in scene.roma_use_name_list:
-                        if id == use.id:
-                            usesUiList[enum].name = use.name
-                            usesUiList[enum].nameId = use.id
-                            storeys = list_storey_A[enum] + list_storey_B[enum]
-                            usesUiList[enum].storeys = int(storeys)
-                            break
-            bm.free
+                    selected_faces = [face for face in bm.faces if face.select]
+                    if len(selected_faces) > 0:
+                        for f in selected_faces:
+                            scene.previous_selection_face_id = f.index
+                    else:
+                        scene.previous_selection_face_id = -1
+                if scene.previous_selection_face_id != -1:
+                    #updating the information in UI
+                    bm.faces.ensure_lookup_table()
+                    storeys = bm.faces[scene.previous_selection_face_id][bMesh_storeys]
+                    list_storey_A = bm.faces[scene.previous_selection_face_id][bMesh_storey_list_A]
+                    list_storey_B = bm.faces[scene.previous_selection_face_id][bMesh_storey_list_B]
+                    typology = bm.faces[scene.previous_selection_face_id][bMesh_typology]
+                    
+                    # number of storeys
+                    scene["attribute_mass_storeys"] = storeys
+                    
+                    # typology name
+                    # since it is possible to sort typologies in the ui, it can be that the index of the element
+                    # in the list doesn't correspond to typology_id. Therefore it is necessary to find elements
+                    # in the way below and not with use_list = bpy.context.scene.roma_typology_name_list[typology_id].useList
+                    item = next(i for i in scene.roma_typology_name_list if i["id"] == typology)
+                    scene.roma_typology_name_current[0].name = item.name
+                    # uses related to the typology
+                    usesUiList = bpy.context.scene.roma_obj_typology_uses_name_list 
+                    # clean the list
+                    while len(usesUiList) > 0:
+                        index = scene.roma_obj_typology_uses_name_list_index
+                        usesUiList.remove(index)
+                        scene.roma_obj_typology_uses_name_list_index = min(max(0, index - 1), len(usesUiList) - 1)
+                    # populate the list of uses
+                    use_list = item.useList
+                    list_storey_A = str(list_storey_A)[1:]
+                    list_storey_B = str(list_storey_B)[1:]
+                    list_storey_A = list_storey_A[::-1]
+                    list_storey_B = list_storey_B[::-1]
+                    
+                    useSplit = use_list.split(";") 
+                    for enum, el in enumerate(useSplit):
+                        id = int(el)
+                        usesUiList.add()
+                        usesUiList[enum].id = enum + 1
+                        for use in scene.roma_use_name_list:
+                            if id == use.id:
+                                usesUiList[enum].name = use.name
+                                usesUiList[enum].nameId = use.id
+                                storeys = list_storey_A[enum] + list_storey_B[enum]
+                                usesUiList[enum].storeys = int(storeys)
+                                break
+                bm.free
     ###############################################################################
     # show graphic overlays #######################################################
     ###############################################################################
@@ -597,16 +599,12 @@ def updates(scene):
         for tree in trees:
             nodes = tree.nodes
             if nodes:
-               groupInput = [x for x in nodes if x.bl_idname == "Input RoMa Mesh"]
-               if groupInput:
-                   for group in groupInput:
-                       group.update_selected_objects()
-            # execute the node tree
-            tree.execute(bpy.context)
-                   
-               
-        
-    
+                groupInput = [x for x in nodes if x.bl_idname == "Input RoMa Mesh"]
+                if groupInput:
+                    for group in groupInput:
+                        group.update_selected_objects()
+                    # execute the node tree
+                    tree.execute(bpy.context)
 
 
 
