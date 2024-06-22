@@ -41,22 +41,22 @@ bl_info = {
 if "bpy" in locals():
     import importlib
     importlib.reload(roma_preferences),
-    importlib.reload(roma_modal_operator)
     importlib.reload(roma_project_data),
     importlib.reload(roma_menu),
     # importlib.reload(roma_vertex),
     importlib.reload(roma_wall),
     importlib.reload(roma_massing),
     importlib.reload(roma_schedule)
+    importlib.reload(roma_modal_operator)
 else:
     from . import roma_preferences
-    from . import roma_modal_operator
     from . import roma_project_data
     from . import roma_menu
     # from . import roma_vertex
     from . import roma_wall
     from . import roma_massing
     from . import roma_schedule
+    from . import roma_modal_operator
     
 import bpy
 # import bmesh
@@ -71,11 +71,6 @@ from bpy.app.handlers import persistent
 
 classes = (
     roma_preferences.roma_addon_preferences,
-    roma_modal_operator.VIEW_3D_OT_show_roma_overlay,
-    roma_modal_operator.VIEW_3D_OT_show_roma_attributes,
-    # roma_modal_operator.VIEW_3D_OT_update_mesh_attributes,
-    # roma_modal_operator.VIEW_3D_OT_update_all_meshes_attributes,
-    # roma_modal_operator.EventReporter,
     
     roma_project_data.update_GN_Filter_OT,
     roma_project_data.update_Shader_Filter_OT,
@@ -141,17 +136,31 @@ classes = (
     roma_menu.romaAddonProperties,
     
     roma_schedule.RoMaTree,
-    roma_schedule.RoMa_romaObjectName_item,
-    roma_schedule.RoMa_romaMeshList_Socket,
+    roma_schedule.RoMa_string_item,
+    roma_schedule.RoMa_attribute_item,
+    roma_schedule.RoMa_stringCollection_Socket,
     # roma_schedule.RoMaTreeNode,
     roma_schedule.RoMaInterfaceSocket,
+    roma_schedule.RoMa_attributesCollection_Socket,
     roma_schedule.RoMaGroupInput,
+    roma_schedule.RoMaCaptureAttribute,
+    roma_schedule.RoMaAreaAttribute,
+    roma_schedule.RomaMathSubMenuEntries,
+    roma_schedule.RoMaIntegerNode,
+    roma_schedule.RoMaFloatNode,
+    roma_schedule.RoMaMathMenu,
+    # roma_schedule.RoMaMathSubMenuFunctions,
+    # roma_schedule.RoMaMathSubMenuComparisons,
+    roma_schedule.RoMaMathNode,
+    roma_schedule.RoMaAddColumn,
+    
     # roma_schedule.MyCustomNode,
     # roma_schedule.CustomNodeText,
     # roma_schedule.CustomNodeFloat,
     # roma_schedule.CustomNodeJoin,
     # roma_schedule.CustomNodePrint,
     roma_schedule.RoMaViewer,
+    roma_schedule.RoMaAttributeToColumn,
     roma_schedule.RoMa_Schedule_Panel,
     roma_schedule.Roma_Draw_Schedule,
     
@@ -165,6 +174,12 @@ classes = (
     roma_massing.OBJECT_OT_Set_Face_Attribute_Uses,
     roma_massing.obj_typology_uses_name_list,
     roma_massing.VIEW3D_PT_RoMa_Mass,
+    
+    roma_modal_operator.VIEW_3D_OT_show_roma_overlay,
+    roma_modal_operator.VIEW_3D_OT_show_roma_attributes,
+    # roma_modal_operator.VIEW_3D_OT_update_mesh_attributes,
+    # roma_modal_operator.VIEW_3D_OT_update_all_meshes_attributes,
+    # roma_modal_operator.EventReporter,
 
 
     roma_wall.OBJECT_OT_SetWallId,
@@ -176,16 +191,17 @@ classes = (
 # RoMaGroupInput = roma_schedule.RoMaGroupInput
 # RoMaViewer = roma_schedule.RoMaViewer
 # CustomNodeText = roma_schedule.CustomNodeText
-# CustomNodeFloat = roma_schedule.CustomNodeFloat
+
+# RoMaNodeInteger = roma_schedule.RoMaIntegerNode
+# RoMaNodeFloat = roma_schedule.RoMaFloatNode
+# RoMaNodeCaptureAttribute = roma_schedule.RoMaCaptureAttribute
+# RoMaNodeMath = roma_schedule.RoMaMathNode
 # CustomNodeJoin = roma_schedule.CustomNodeJoin
 
 
-# ROMA_NODE_GROUP_HANDLE = 0
-# ROMA_VIEWER_HANDLE = 1
-
-# CUSTOM_NODE_TEXT_HANDLE = 1
-# CUSTOM_NODE_FLOAT_HANDLE = 2
-# CUSTOM_NODE_JOIN_HANDLE = 3
+# ROMA_NODE_CAPTURE_ATTRIBUTE_HANDLE = 0
+# ROMA_NODE_INTEGER_HANDLE = 1
+# ROMA_NODE_FLOAT_HANDLE = 2
 
 def initNodes():
     bpy.ops.node.update_gn_filter()
@@ -320,6 +336,30 @@ def onFileLoaded(scene):
     bpy.context.scene.previous_selection_object_name = ""
     bpy.context.scene.previous_selection_face_id = -1
     
+    # bpy.msgbus.subscribe_rna(
+    #     key=RoMaNodeCaptureAttribute,
+    #     owner=ROMA_NODE_CAPTURE_ATTRIBUTE_HANDLE,
+    #     args = (),
+    #     notify=roma_schedule.execute_active_node_tree,
+    #     options={"PERSISTENT",}
+    # )
+        
+    # bpy.msgbus.subscribe_rna(
+    #     key=RoMaNodeInteger,
+    #     owner=ROMA_NODE_INTEGER_HANDLE,
+    #     args = (),
+    #     notify=roma_schedule.execute_active_node_tree,
+    #     options={"PERSISTENT",}
+    # )
+    
+    # bpy.msgbus.subscribe_rna(
+    #     key=RoMaNodeFloat,
+    #     owner=ROMA_NODE_FLOAT_HANDLE,
+    #     args = (),
+    #     notify=roma_schedule.execute_active_node_tree,
+    #     options={"PERSISTENT",}
+    # )
+   
 @persistent
 def onFileDefault(scene):
     initLists()
@@ -327,6 +367,30 @@ def onFileDefault(scene):
     bpy.context.scene.show_selection_overlay_is_active = False
     bpy.context.scene.previous_selection_object_name = ""
     bpy.context.scene.previous_selection_face_id = -1
+    
+    # bpy.msgbus.subscribe_rna(
+    #     key=RoMaNodeCaptureAttribute,
+    #     owner=ROMA_NODE_CAPTURE_ATTRIBUTE_HANDLE,
+    #     args = (),
+    #     notify=roma_schedule.execute_active_node_tree,
+    #     options={"PERSISTENT",}
+    # )
+        
+    # bpy.msgbus.subscribe_rna(
+    #     key=RoMaNodeInteger,
+    #     owner=ROMA_NODE_INTEGER_HANDLE,
+    #     args = (),
+    #     notify=roma_schedule.execute_active_node_tree,
+    #     options={"PERSISTENT",}
+    # )
+    
+    # bpy.msgbus.subscribe_rna(
+    #     key=RoMaNodeFloat,
+    #     owner=ROMA_NODE_FLOAT_HANDLE,
+    #     args = (),
+    #     notify=roma_schedule.execute_active_node_tree,
+    #     options={"PERSISTENT",}
+    # )
 
     
 def register():
@@ -368,9 +432,32 @@ def register():
     #     notify=roma_schedule.execute_active_node_tree,
     #     options={"PERSISTENT",}
     # )
+    
     # bpy.msgbus.subscribe_rna(
-    #     key=CustomNodeFloat,
-    #     owner=CUSTOM_NODE_FLOAT_HANDLE,
+    #     key=RoMaNodeCaptureAttribute,
+    #     owner=ROMA_NODE_CAPTURE_ATTRIBUTE_HANDLE,
+    #     args = (),
+    #     notify=roma_schedule.execute_active_node_tree,
+    #     options={"PERSISTENT",}
+    # )
+        
+    # bpy.msgbus.subscribe_rna(
+    #     key=RoMaNodeInteger,
+    #     owner=ROMA_NODE_INTEGER_HANDLE,
+    #     args = (),
+    #     notify=roma_schedule.execute_active_node_tree,
+    #     options={"PERSISTENT",}
+    # )
+    # bpy.msgbus.subscribe_rna(
+    #     key=RoMaNodeFloat,
+    #     owner=ROMA_NODE_FLOAT_HANDLE,
+    #     args = (),
+    #     notify=roma_schedule.execute_active_node_tree,
+    #     options={"PERSISTENT",}
+    # )
+    # bpy.msgbus.subscribe_rna(
+    #     key=RoMaNodeMath,
+    #     owner=ROMA_NODE_MATH_HANDLE,
     #     args = (),
     #     notify=roma_schedule.execute_active_node_tree,
     #     options={"PERSISTENT",}
@@ -382,6 +469,7 @@ def register():
     #     notify=roma_schedule.execute_active_node_tree,
     #     options={"PERSISTENT",}
     # )
+    # bpy.types.Scene.RoMa_math_node_entries = bpy.props.PointerProperty(type=roma_schedule.RomaMathSubMenuEntries)
     
     bpy.types.VIEW3D_MT_editor_menus.append(roma_menu.roma_menu)
     bpy.types.VIEW3D_MT_mesh_add.append(roma_menu.roma_add_menu_func)
@@ -419,6 +507,7 @@ def register():
     #                                     name = "Update attributes once faces are selected",
     #                                     default = 0
     #                                     )
+    Scene.keyDictionary = bpy.props.CollectionProperty(type=roma_schedule.RoMa_string_item)
     Scene.show_selection_overlay_is_active = bpy.props.BoolProperty(
                                         name = "Show selection overlay",
                                         default = False
@@ -555,16 +644,17 @@ def unregister():
     # bpy.app.handlers.depsgraph_update_post.remove(roma_modal_operator.update_mesh_attributes_depsgraph)
     # bpy.app.handlers.depsgraph_update_post.remove(roma_modal_operator.update_show_overlay)
     
-    # bpy.msgbus.clear_by_owner(ROMA_NODE_GROUP_HANDLE)
-    # bpy.msgbus.clear_by_owner(ROMA_VIEWER_HANDLE)
-    # bpy.msgbus.clear_by_owner(CUSTOM_NODE_JOIN_HANDLE)
-    # bpy.msgbus.clear_by_owner(CUSTOM_NODE_FLOAT_HANDLE)
-    # bpy.msgbus.clear_by_owner(CUSTOM_NODE_TEXT_HANDLE)
+
+    # bpy.msgbus.clear_by_owner(ROMA_NODE_CAPTURE_ATTRIBUTE_HANDLE)
+    # bpy.msgbus.clear_by_owner(ROMA_NODE_INTEGER_HANDLE)
+    # bpy.msgbus.clear_by_owner(ROMA_NODE_FLOAT_HANDLE)
     
     nodeitems_utils.unregister_node_categories('ROMA_NODES')
 
     bpy.types.VIEW3D_MT_editor_menus.remove(roma_menu.roma_menu)
     bpy.types.VIEW3D_MT_mesh_add.remove(roma_menu.roma_add_menu_func)
+    
+    # del bpy.types.Scene.RoMa_math_node_entries
     
     del bpy.types.WindowManager.toggle_show_data
     del bpy.types.WindowManager.toggle_plot_name
@@ -576,6 +666,7 @@ def unregister():
     del bpy.types.WindowManager.toggle_floor_name
     del bpy.types.Object.roma_props
     
+    del Scene.keyDictionary
     # del Scene.updating_mesh_attributes_is_active
     del Scene.attribute_mass_plot_id
     del Scene.attribute_mass_block_id
