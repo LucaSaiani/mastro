@@ -202,11 +202,11 @@ class RoMaAreaAttribute(RoMaTreeNode, Node):
         self.outputs['Area'].display_shape = 'DIAMOND_DOT'
         
     def update(self):
-         self.browseTree()
+        #  self.browseTree()
+        pass
         
     def execute(self, context):
         self.browseTree()
-                
                 
     def browseTree(self):
         links = self.outputs['Area'].links
@@ -600,7 +600,6 @@ class RoMaViewer(RoMaTreeNode, Node):
     '''Add a viewer node'''
     bl_idname = 'RoMa Viewer'
     bl_label = 'RoMa Viewer'
-    # bl_icon = 'NODE'
     
     validated = True
     
@@ -642,22 +641,25 @@ class RoMaViewer(RoMaTreeNode, Node):
                 #     print(o.name)
                 if self.inputs['Attribute'].is_linked:
                     object_items = self.inputs['Attribute'].links[0].from_socket.object_items
-                    print("----------------------------------")
-                    print("Reader Node - Oggetti Selezionati:")
-                    for a in object_items:
-                         print(a.meshName, a.polyId, a.id, a.area)
+                    # print("----------------------------------")
+                    # print("Reader Node - Oggetti Selezionati:")
+                    # for a in object_items:
+                    #      print(a.meshName, a.polyId, a.id, a.area)
                             
         
     # def execute(self, context):
     #     self.update()
     #     if self.validated:
+
             
     def draw_buttons(self, context, layout):
-        nodeName = self.name
-        treeName = self.id_data.name
-        nodeIndentifier = f"{treeName}::{nodeName}"
+        # nodeName = self.name
+        # treeName = self.id_data.name
+        # nodeIndentifier = f"{treeName}::{nodeName}"
         col = layout.column(align=True)
-        col.operator("object.roma_add_column").sourceNode = nodeIndentifier
+        # col.operator("object.roma_add_column").sourceNode = nodeIndentifier
+        # col.operator("node.schedule_viewer").sourceNode = nodeIndentifier
+        col.prop(context.window_manager, "toggle_schedule_in_editor", text="Show Schedule")
                 
     # def draw_buttons(self, context, layout):
     #     if self.validated:
@@ -905,69 +907,163 @@ def execute_active_node_tree():
 ###################################################################################
 ############### Schedule panel ####################################################
 ###################################################################################
-class RoMa_Schedule_Panel(bpy.types.Panel):
-    """Creates a Panel in the scene context of the properties editor"""
-    bl_label = "RoMa"
-    bl_idname = "NODE_PT_RoMa_Schedule"
-    bl_space_type = 'NODE_EDITOR'
-    bl_region_type = 'UI'
-    bl_category = "RoMa"
-    # bl_context = "scene"
+# class RoMa_Schedule_Panel(bpy.types.Panel):
+#     """Creates a Panel in the scene context of the properties editor"""
+#     bl_label = "RoMa"
+#     bl_idname = "NODE_PT_RoMa_Schedule"
+#     bl_space_type = 'NODE_EDITOR'
+#     bl_region_type = 'UI'
+#     bl_category = "RoMa"
+#     # bl_context = "scene"
     
     
     
-    @classmethod
-    def poll(cls, context):
-        tree_type = context.space_data.tree_type
+#     @classmethod
+#     def poll(cls, context):
+#         tree_type = context.space_data.tree_type
    
-        return (tree_type == "RoMaTreeType")
+#         return (tree_type == "RoMaTreeType")
    
 
-    def draw(self, context):
+#     def draw(self, context):
         
-        layout = self.layout
+#         layout = self.layout
 
-        scene = context.scene
+#         scene = context.scene
 
-        # Create a simple row.
-        layout.label(text=" Simple Row:")
-        col = layout.column(align=True)
+#         # Create a simple row.
+#         layout.label(text=" Simple Row:")
+#         col = layout.column(align=True)
         
-        # nodeName = "Column from Data"
-        # treeName = "RoMa Schedule"
-        # nodeIndentifier = f"{treeName}::{nodeName}"
+#         # nodeName = "Column from Data"
+#         # treeName = "RoMa Schedule"
+#         # nodeIndentifier = f"{treeName}::{nodeName}"
 
-        # col.operator("object.roma_add_column").sourceNode = nodeIndentifier
+#         # col.operator("object.roma_add_column").sourceNode = nodeIndentifier
         
-        col.operator("node.box")
+#         col.operator("node.schedule_viewer")
 
         
-class Roma_Draw_Schedule(Operator):
+class NODE_EDITOR_Roma_Draw_Schedule(Operator):
     """Tooltip"""
-    bl_idname = "node.box"
-    bl_label = "Simple Object Operator"
-
+    bl_idname = "node.schedule_viewer"
+    bl_label = "Show a schedule in the schedule editor"
+    
+    _handle = None
+    
+    sourceNode : bpy.props.StringProperty(name="Source Node")
+    
+    @staticmethod
+    def handle_add(self, context):
+        if NODE_EDITOR_Roma_Draw_Schedule._handle is None:
+            NODE_EDITOR_Roma_Draw_Schedule._handle =bpy.types.SpaceNodeEditor.draw_handler_add(draw_callback_schedule_overlay,
+                                                                                                (self, context, self.sourceNode),
+                                                                                                'WINDOW',
+                                                                                                'POST_VIEW')
+    @staticmethod
+    def handle_remove(self, context):
+        bpy.types.SpaceNodeEditor.draw_handler_remove(NODE_EDITOR_Roma_Draw_Schedule._handle, 'WINDOW')
+        NODE_EDITOR_Roma_Draw_Schedule._handle = None
+    
     def execute(self, context):
-        # print("ciao")
-        vertices = (
-            (100, 100), (300, 100),
-            (100, 200), (300, 200))
-
-        indices = (
-            (0, 1, 2), (2, 1, 3))
-
-        shader = gpu.shader.from_builtin('UNIFORM_COLOR')
-        batch = batch_for_shader(shader, 'TRIS', {"pos": vertices}, indices=indices)
-
-
-        def draw():
-            shader.uniform_float("color", (0, 0.5, 0.5, 1.0))
-            batch.draw(shader)
-
-
-        bpy.types.SpaceNodeEditor.draw_handler_add(draw, (), 'WINDOW', 'POST_PIXEL')
-        
+        if NODE_EDITOR_Roma_Draw_Schedule._handle is None:
+            self.handle_add(self, context)
+            context.area.tag_redraw()
+        else:
+            self.handle_remove(self, context)
+            context.area.tag_redraw()
         return {'FINISHED'}
+    
+    def invoke(self, context, event):
+        self.execute(context)
+        return {'RUNNING_MODAL'}
+
+def draw_schedule_overlay(self, context, sourceNode):
+    path = sourceNode.split("::")
+    treeName = path[0]
+    nodeName = path[1]
+    
+    # for area in bpy.context.screen.areas:
+    #     if area.ui_type == 'RoMaTreeType':
+    #         for space in area.spaces:
+    #             if space.type == 'NODE_EDITOR' and space.node_tree and space.node_tree.name == treeName:
+    node = bpy.data.node_groups[treeName].nodes[nodeName]
+
+
+    # verts = [
+    #     (+0.0, +0.0,  +0.0),
+    #     (+400.0, +0.0,  +0.0),
+    #     (+400.0, -100.0,  +0.0),
+    #     (+0.0, -100.0,  +0.0),
+    #     ]
+
+
+    edges = [
+        (0, 1),
+        (1, 2),
+        (2, 3),
+        (3, 0),
+    ]
+    
+    # coords = []
+    
+    
+
+    
+    #get the node area
+    # areaName = None
+    # found = False
+    # for area in bpy.context.screen.areas:
+    #     if area.type == 'NODE_EDITOR':
+    #         for space in area.spaces:
+    #             if space.type == 'NODE_EDITOR' and space.node_tree and space.node_tree.name == treeName:
+    #                 # areaName = area
+    #                 found = True
+    #                 break
+    #     if found:
+    #         break
+                    
+    # if found:
+    # region = areaName.regions[-1]
+    # view2d = region.view2d
+    
+    # node location
+    nodeLocation = node.location
+    node_width = node.width
+    node_height = node.height
+    
+    shader = gpu.shader.from_builtin('UNIFORM_COLOR')
+        
+    scale = context.preferences.view.ui_scale/0.8
+        
+    verts = [
+        (nodeLocation.x * scale, nodeLocation.y * scale),
+        ((nodeLocation.x + node_width) * scale, nodeLocation.y * scale),
+        ((nodeLocation.x + node_width) * scale, (nodeLocation.y + node_height) * scale),
+        (nodeLocation.x * scale, (nodeLocation.y + node_height) * scale),
+    ]    
+    
+    batch = batch_for_shader(shader, 'LINES', {"pos": verts}, indices=edges)
+    # r, g, b, a = [c for c in bpy.context.preferences.addons['roma'].preferences.edgeColor]
+    shader.uniform_float("color", (0.0 ,1.0, 0.0, 1.0))
+        
+    gpu.state.line_width_set(10)
+    gpu.state.blend_set("ALPHA")
+    batch.draw(shader)
+            
+   
+        
+    
+
+def draw_callback_schedule_overlay(self, context, sourceNode):
+    draw_schedule_overlay(self, context, sourceNode)
+    
+def update_schedule_node_editor(self, context):
+    nodeName = context.active_node.name
+    treeName = context.active_node.id_data.name
+    nodeIdentifier = f"{treeName}::{nodeName}"
+    bpy.ops.node.schedule_viewer(sourceNode = nodeIdentifier)
+
     
 ###################################################################################
 ############### 3D schedule #######################################################
