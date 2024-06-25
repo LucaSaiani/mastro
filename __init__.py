@@ -161,8 +161,8 @@ classes = (
     # roma_schedule.CustomNodePrint,
     roma_schedule.RoMaViewer,
     roma_schedule.RoMaAttributeToColumn,
-    roma_schedule.RoMa_Schedule_Panel,
-    roma_schedule.Roma_Draw_Schedule,
+    # roma_schedule.RoMa_Schedule_Panel,
+    roma_schedule.NODE_EDITOR_Roma_Draw_Schedule,
     
     
     # roma_vertex.OBJECT_OT_SetVertexAttribute,
@@ -497,6 +497,11 @@ def register():
     bpy.types.WindowManager.toggle_storey_number = bpy.props.BoolProperty(
                                             name = "Number of Storeys",
                                             default = False)
+    bpy.types.WindowManager.toggle_schedule_in_editor = bpy.props.BoolProperty(
+                                            name = "Show Schedule",
+                                            default = False,
+                                            update = roma_schedule.update_schedule_node_editor)
+    
     bpy.types.Object.roma_props = bpy.props.PointerProperty(type=roma_menu.romaAddonProperties)
 
     # Scene.updating_mesh_attributes_is_active = bpy.props.BoolProperty(
@@ -664,6 +669,7 @@ def unregister():
     del bpy.types.WindowManager.toggle_wall_name
     del bpy.types.WindowManager.toggle_wall_normal
     del bpy.types.WindowManager.toggle_floor_name
+    del bpy.types.WindowManager.toggle_schedule_in_editor
     del bpy.types.Object.roma_props
     
     del Scene.keyDictionary
