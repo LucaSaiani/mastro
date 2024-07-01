@@ -20,7 +20,7 @@
 
 import bpy 
 import gpu
-
+import blf
 import bmesh
 
 import math
@@ -28,11 +28,164 @@ import math
 from bpy.types import NodeTree, Node, NodeSocket, NodeTreeInterfaceSocket, Operator, PropertyGroup, Menu
 from bpy.props import  EnumProperty, StringProperty, PointerProperty, FloatProperty, IntProperty, CollectionProperty
 import mathutils
-# from bpy_extras.object_utils import AddObjectHelper
-# from bpy_extras import object_utils
-import nodeitems_utils
+# import nodeitems_utils
 from nodeitems_utils import NodeCategory, NodeItem
 from gpu_extras.batch import batch_for_shader
+
+font_info = {
+    "font_id": 0,
+    "handler": None,
+}
+
+
+
+#############################################################################
+########## Node Related funcions  ###########################################
+#############################################################################
+
+# add keys to the node
+def addKeysToNode(self,  **kwargs):
+    for item_name, list in kwargs.items():
+        if item_name == "inputs":
+            for input in list:
+                key = self.path_resolve('inputs[\"'+input+'\"]')
+                bpy.msgbus.subscribe_rna(
+                        key=key,
+                        owner=None,
+                        args=(),
+                        notify=execute_active_node_tree,
+                        options={"PERSISTENT"}
+                    )
+                #add the key to the keyDictionary
+                bpy.context.scene.keyDictionary.add()
+                last = len(bpy.context.scene.keyDictionary)-1
+                bpy.context.scene.keyDictionary[last].name = str(key)
+                # print("KEY", key)
+        elif item_name == "outputs":
+            for output in list:
+                key = self.path_resolve('outputs[\"'+output+'\"]')
+                bpy.msgbus.subscribe_rna(
+                        key=key,
+                        owner=None,
+                        args=(),
+                        notify=execute_active_node_tree,
+                        options={"PERSISTENT"}
+                    )
+                #add the key to the keyDictionary
+                bpy.context.scene.keyDictionary.add()
+                last = len(bpy.context.scene.keyDictionary)-1
+                bpy.context.scene.keyDictionary[last].name = str(key)
+                # print("KEY", key)
+        elif item_name == "key":
+            key = self
+            bpy.msgbus.subscribe_rna(
+                    key=key,
+                    owner=None,
+                    args=(),
+                    notify=execute_active_node_tree,
+                    options={"PERSISTENT"}
+                )
+            #add the key to the keyDictionary
+            bpy.context.scene.keyDictionary.add()
+            last = len(bpy.context.scene.keyDictionary)-1
+            bpy.context.scene.keyDictionary[last].name = str(key)
+            # print("KEY", key)
+        
+# remove all the keys from the node
+def removeKeyFromNode(self, **kwargs):
+    for item_name, list in kwargs.items():
+        if item_name == "inputs":
+            for input in list:
+                key = self.path_resolve('inputs[\"'+input+'\"]')
+                for i, el in enumerate(bpy.context.scene.keyDictionary):
+                    if el.name == str(key):
+                        bpy.context.scene.keyDictionary.remove(i)
+                        break
+        elif item_name == "outputs":
+            for output in list:
+                key = self.path_resolve('outputs[\"'+output+'\"]')
+                for i, el in enumerate(bpy.context.scene.keyDictionary):
+                    if el.name == str(key):
+                        bpy.context.scene.keyDictionary.remove(i)
+                        break
+        elif item_name == "key":
+            key = self
+            for i, el in enumerate(bpy.context.scene.keyDictionary):
+                    if el.name == str(key):
+                        bpy.context.scene.keyDictionary.remove(i)
+                        break
+
+def cleanInputs(self):
+    for input in self.inputs:
+        input.object_items.clear()
+                                
+def cleanOutputs(self):
+    for output in self.outputs:
+        output.object_items.clear()
+            
+            
+# A Function to check if the links are compatible
+def checkLink(self):
+    inputs = self.inputs
+    self.use_custom_color = False
+    validated = True
+    for input in inputs:
+        if input.is_linked:
+            inputType = input.rna_type.name
+            outputType = input.links[0].from_socket.rna_type.name
+            if inputType != outputType:
+                self.color = (0.51, 0.19, 0.29)
+                self.use_custom_color = True
+                validated = False
+    return(validated)
+            
+               
+            
+    
+# get the source (RoMa mesh) from which get the attribute
+def getAttributeSource(link):
+    # name = link.to_socket.name
+    # idName = link.to_socket.bl_idname
+    sockets = [x for x in link.to_node.inputs if x.rna_type.name == 'RoMa_stringCollection_SocketType']
+    if sockets:
+        socket = sockets[0]
+        if socket.is_linked:
+            # print("linked", socket.name)
+            parent_node = socket.links[0].from_node
+            if parent_node.bl_idname == "Input RoMa Mesh" or parent_node.bl_idname == "Input RoMa Selected Mesh":
+                items = parent_node.outputs['RoMa Mesh'].object_items
+                for i in items:
+                    print(f"Name {i.name}")
+                return(items)
+    return()
+
+    
+
+# execute the active node tree
+def execute_active_node_tree():
+    # node_editor = next((a for a in bpy.context.screen.areas if a.type == 'NODE_EDITOR'), None)
+    # if (node_editor == None): return
+    # for space in node_editor.spaces:
+    #     node_tree = getattr(space, 'node_tree')
+    #     if (node_tree):
+    #         node_tree.execute(bpy.context)
+    #         break
+    trees = [x for x in bpy.data.node_groups if x.bl_idname == "RoMaTreeType"]
+    if trees:
+        for tree in trees:
+            tree.execute()
+            # tree.execute(bpy.context)
+            
+def update_schedule_node_editor(self, context):
+        nodeName = context.active_node.name
+        treeName = context.active_node.id_data.name
+        nodeIdentifier = f"{treeName}::{nodeName}"
+        bpy.ops.node.schedule_viewer(sourceNode = nodeIdentifier)
+            
+            
+#############################################################################
+########## RoMa Nodetree   ##################################################
+#############################################################################           
 
 # The node tree for RoMa schedules
 class RoMaTree(NodeTree):
@@ -41,9 +194,9 @@ class RoMaTree(NodeTree):
     bl_label = "RoMa Schedule"
     bl_icon = 'NODETREE'
     
-    def execute(self, context):
+    def execute(self):
         for node in self.nodes:
-            node.execute(context)
+            node.execute()
             
 # Class to store the name of RoMa objects
 # This class is used to define the list in 
@@ -140,7 +293,7 @@ class RoMaTreeNode:
     def poll(cls, ntree):
         return ntree.bl_idname == 'RoMaTreeType'
     
-    def execute(self, context):
+    def execute(self):
         pass
 
 ##########################################################################
@@ -150,7 +303,7 @@ class RoMaTreeNode:
 class RoMaGroupInput(RoMaTreeNode, Node):
     '''Input node containing all the RoMa meshes existing in the scene'''
     bl_idname = 'Input RoMa Mesh'
-    bl_label = 'Group Input'
+    bl_label = 'Group Input - All'
     # bl_icon = 'NODE'
 
     # text : StringProperty(name='',)
@@ -163,12 +316,15 @@ class RoMaGroupInput(RoMaTreeNode, Node):
     #     layout.prop(self, 'text')
     
     def update_selected_objects(self):
-        self.outputs['RoMa Mesh'].object_items.clear()
+        # self.outputs['RoMa Mesh'].object_items.clear()
+        cleanOutputs(self)
         objs = bpy.context.scene.objects
+        # romaObjs = []
         romaObjs = [obj for obj in objs if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data]
         for obj in romaObjs:
             item = self.outputs['RoMa Mesh'].object_items.add()
             item.name = obj.name
+        # print(f"RoMa meshes collected {len(self.outputs['RoMa Mesh'].object_items)}")
         
 
     # def execute(self, context):
@@ -192,6 +348,28 @@ class RoMaGroupInput(RoMaTreeNode, Node):
     # def draw_color_simple(self):
     #     return (29, 29, 29, 1)
     
+class RoMaSelectedInput(RoMaTreeNode, Node):
+    '''Input node containing the selected RoMa meshes'''
+    bl_idname = 'Input RoMa Selected Mesh'
+    bl_label = 'Group Input - Selected'
+   
+    def init(self, context):
+        self.outputs.new('RoMa_stringCollection_SocketType', 'RoMa Mesh')
+    
+    def update_selected_objects(self):
+        cleanOutputs(self)
+        objs = bpy.context.selected_objects
+        romaObjs = [obj for obj in objs if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data]
+        for obj in romaObjs:
+            item = self.outputs['RoMa Mesh'].object_items.add()
+            item.name = obj.name
+
+    # def copy(self, node):
+    #     pass
+
+    # def free(self):
+        # pass
+    
 class RoMaAreaAttribute(RoMaTreeNode, Node):
     '''RoMa Area Attribute'''
     bl_idname = 'RoMa Area Attribute'
@@ -202,13 +380,10 @@ class RoMaAreaAttribute(RoMaTreeNode, Node):
         self.outputs['Area'].display_shape = 'DIAMOND_DOT'
         
     def update(self):
-        #  self.browseTree()
-        pass
+        self.execute()
         
-    def execute(self, context):
-        self.browseTree()
-                
-    def browseTree(self):
+    def execute(self):
+        cleanOutputs(self)
         links = self.outputs['Area'].links
         # if the node is linked at least once
         if len(links) > 0:
@@ -217,7 +392,7 @@ class RoMaAreaAttribute(RoMaTreeNode, Node):
                 # return the meshe name
                 source = getAttributeSource(link)
                 if len(source) > 0:
-                    self.outputs['Area'].object_items.clear()
+                    # self.outputs['Area'].object_items.clear()
                     for romaMesh in source:
                         obj = bpy.data.objects[romaMesh.name]
                         polygons = obj.data.polygons
@@ -227,6 +402,7 @@ class RoMaAreaAttribute(RoMaTreeNode, Node):
                             item.polyId = poly.index
                             item.id = romaMesh.name + "_" + str(poly.index)
                             item.area = poly.area
+       
                             
    
 class RoMaCaptureAttribute(RoMaTreeNode, Node):
@@ -261,9 +437,11 @@ class RoMaCaptureAttribute(RoMaTreeNode, Node):
     def free(self):
         removeKeyFromNode(self, inputs=self.inputList, outputs=self.inputList)
                 
+    # def update(self):
+    #     self.validated = checkLink(self)
+    #     clearInputs(self)
     def update(self):
-        self.validated = checkLink(self)
-        clearInputs(self)
+        self.execute()
         
         # if self.inputs['RoMa Mesh'].is_linked:
         #     pass        
@@ -276,11 +454,13 @@ class RoMaCaptureAttribute(RoMaTreeNode, Node):
         #     self.outputs['Attribute'].object_items.clear()
         
         
-    def execute(self, context):
-        self.update()
-        self.outputs['RoMa Mesh'].object_items.clear()
-        self.outputs['Attribute'].object_items.clear()
-        if self.validated:
+    def execute(self):
+        # self.update()
+        # self.outputs['RoMa Mesh'].object_items.clear()
+        # self.outputs['Attribute'].object_items.clear()
+        if checkLink(self):
+            cleanInputs(self)
+            cleanOutputs(self)
             if self.inputs['RoMa Mesh'].is_linked:
                 input_socket = self.inputs['RoMa Mesh'].links[0].from_socket
                 object_items = input_socket.object_items
@@ -295,62 +475,65 @@ class RoMaCaptureAttribute(RoMaTreeNode, Node):
                         # duplicate attributes
                         for prop_name in obj.__annotations__.keys():
                             setattr(item, prop_name, getattr(obj, prop_name))
+                            
                         
 
-class RoMaMathMenu(Menu):
-    bl_label = "Math"
-    bl_idname = "ROMA_NODE_MT_menu_math"
+# class RoMaMathMenu(Menu):
+#     bl_label = "Math"
+#     bl_idname = "ROMA_NODE_MT_menu_math"
     
-    # print("miao", props.dropdown_box_math)
+#     # print("miao", props.dropdown_box_math)
     
-    def draw(self, context):
-        node = context.node
-        props = node.RoMa_math_node_entries
-        enumItems = props.bl_rna.properties["dropdown_box_math"].enum_items
+#     def draw(self, context):
+#         node = context.node
+#         props = node.RoMa_math_node_entries
+#         enumItems = props.bl_rna.properties["dropdown_box_math"].enum_items
         
-        set1 = enumItems[:10]        
-        set2 = enumItems[10:15]   
-        set3 = enumItems[15:]   
-        layout = self.layout
-        col = layout.column()
-        col.prop_tabs_enum(props, "dropdown_box_math")
+#         set1 = enumItems[:10]        
+#         set2 = enumItems[10:15]   
+#         set3 = enumItems[15:]   
+#         layout = self.layout
+#         col = layout.column()
+#         col.prop_tabs_enum(props, "dropdown_box_math")
 
-        row = layout.row()
-        col = row.column()
-        col.label(text="Functions")
-        for item in set1:
-            col.prop_enum(props, "dropdown_box_math",item.name, icon='BLANK1')
-        col = row.column()
-        col.label(text="Comparison")
-        for item in set2:
-            col.prop_enum(props, "dropdown_box_math",item.name, icon="CUBE")
-        col = row.column()
-        col.label(text="Rounding")
-        for item in set3:
-            col.prop_enum(props, "dropdown_box_math",item.name, icon='BLANK1')
+#         row = layout.row()
+#         col = row.column()
+#         col.label(text="Functions")
+#         for item in set1:
+#             col.prop_enum(props, "dropdown_box_math",item.name, icon='BLANK1')
+#         col = row.column()
+#         col.label(text="Comparison")
+#         for item in set2:
+#             col.prop_enum(props, "dropdown_box_math",item.name, icon="CUBE")
+#         col = row.column()
+#         col.label(text="Rounding")
+#         for item in set3:
+#             col.prop_enum(props, "dropdown_box_math",item.name, icon='BLANK1')
         
-            
-class RomaMathSubMenuEntries(PropertyGroup):
+        
+class RoMaMathNode(RoMaTreeNode, Node):
+    '''Read RoMa attributes'''
+    bl_idname = 'RoMa Math Node'
+    bl_label = "Math Node"
+    
+    # EnumProperty for dropdown box math
     dropdown_box_math: EnumProperty(
         items=(
             ("Add", "Add", "A + B."),
             ("Subtract", "Subtract", "A - B."),
             ("Multiply", "Multiply", "A * B."),
             ("Divide", "Divide", "A / B."),
-            # ("","",""),
             ("Power", "Power", "A power B."),
             ("Logarithm", "Logarithm", "Logarithm A base B."),
             ("Square Root", "Square Root", "Square root of A."),
             ("Inverse Square Root", "Inverse Square Root", "1 / Square root of A."),
             ("Absolute", "Absolute", "Magnitude of A."),
             ("Exponent", "Exponent", "exp(A)."),
-            # (" ","",""),
-            ("Minimum", "Minimum", "The minumum from A and B."),
+            ("Minimum", "Minimum", "The minimum from A and B."),
             ("Maximum", "Maximum", "The maximum from A and B."),
             ("Less Than", "Less Than", "1 if A < 0 else 0."),
             ("Greater Than", "Greater Than", "1 if A > B else 0."),
             ("Compare", "Compare", "1 if (A == B)."),
-            # ("","",""),
             ("Round", "Round", "Round A to the nearest integer. Round upward if the fraction part is 0.5."),
             ("Floor", "Floor", "The largest integer smaller than or equal A."),
             ("Ceil", "Ceil", "The smallest integer greater than or equal A."),
@@ -358,29 +541,21 @@ class RomaMathSubMenuEntries(PropertyGroup):
         ),
         name="Mathematical functions",
         default="Add",
-        update=lambda self, context: context.node.update_socket_visibility()
-        # description="Tooltip for the Dropdown box",
+        update=lambda self, context: self.update_socket_visibility()
     )
-  
-
     
-class RoMaMathNode(RoMaTreeNode, Node):
-    '''Read RoMa attributes'''
-    bl_idname = 'RoMa Math Node'
-    bl_label = "Math Node"
-    
-    RoMa_math_node_entries: PointerProperty(type=RomaMathSubMenuEntries)
+    # RoMa_math_node_entries: PointerProperty(type=dropdown_box_maths)
     
     output : FloatProperty(
-                name='',
+                name='output',
                 precision=3,)
     
     A : FloatProperty(
-                name='',
+                name='A',
                 precision=3,)
      
     B : FloatProperty(
-                name='',
+                name='B',
                 precision=3,)
     
     inputList = ["A","B"]
@@ -401,27 +576,27 @@ class RoMaMathNode(RoMaTreeNode, Node):
         self.inputs['B'].display_shape = 'DIAMOND_DOT'
           
         self.outputs.new('NodeSocketFloat', 'Value')
-        self.outputs['Value'].hide_value = True
+        # self.outputs['Value'].hide_value = True
         self.outputs['Value'].display_shape = 'DIAMOND_DOT'
+        
+        self.update_socket_visibility()
         
         addKeysToNode(self, inputs=self.inputList)
         
     def copy(self, node):
         addKeysToNode(self, inputs=self.inputList)
+        self.update_socket_visibility()
         
     def free(self):
         removeKeyFromNode(self, inputs=self.inputList)
 
     
-    def execute(self, context):
-        props = self.RoMa_math_node_entries
-        selection = props.dropdown_box_math
+    def execute(self):
+        # props = self.RoMa_math_node_entries
+        selection = self.dropdown_box_math
 
 
-        if (selection in self.AB_List or 
-            selection in self.AB_Power or
-            selection in self.AB_Log
-            ):
+        if (selection in self.AB_List + self.AB_Power + self.AB_Log):
             if self.inputs['A'].is_linked:
                 self.A = self.inputs['A'].links[0].from_socket.default_value
             else:
@@ -459,61 +634,40 @@ class RoMaMathNode(RoMaTreeNode, Node):
             self.output = math.exp(self.A)
             
         self.outputs['Value'].default_value = self.output
-        
-        # if self.inputs['Attribute'].is_linked:
-        #     input_socket = self.inputs['Attribute'].links[0].from_socket.default_value
-        #     output = "ciccio" + input_socket
-        #     self.outputs['Value'].default_value = output
-        
-    # def update(self):
-    #     props = self.RoMa_math_node_entries
-    #     selection = props.dropdown_box_math
-    #     if selection in self.AB_List:
-    #         if self.inputs['A'].is_linked:
-    #             self.A = self.inputs['A'].links[0].from_socket.default_value
-    #         else:
-    #             self.A = self.inputs['A'].default_value
-    #         if self.inputs['B'].is_linked:
-    #             self.B = self.inputs['B'].links[0].from_socket.default_value
-    #         else:
-    #             self.B = self.inputs['B'].default_value
             
     def update(self):
-        execute_active_node_tree()
+        self.execute()
         
             
     def draw_buttons(self, context, layout):
-        props = self.RoMa_math_node_entries
+        layout.prop(self, "dropdown_box_math", text="")
+        # props = self.RoMa_math_node_entries
         
-        selection = props.dropdown_box_math
-        layout.menu(RoMaMathMenu.bl_idname, text=selection)
+        # selection = props.dropdown_box_math
+        # layout.menu(RoMaMathMenu.bl_idname, text=selection)
 
     def update_socket_visibility(self):
-        selection = self.RoMa_math_node_entries.dropdown_box_math
+        selection = self.dropdown_box_math
+        self.inputs['A'].hide = False
+        self.inputs['B'].hide = False
         if selection in self.AB_List:
-            self.inputs['A'].hide = False
             self.inputs['A'].name = "Value"
-            self.inputs['B'].hide = False
             self.inputs['B'].name = "Value"
         elif selection in self.AB_Power:
-            self.inputs['A'].hide = False
             self.inputs['A'].name = "Base"
-            self.inputs['B'].hide = False
             self.inputs['B'].name = "Exponent"
         elif selection in self.AB_Log:
-            self.inputs['A'].hide = False
             self.inputs['A'].name = "Value"
-            self.inputs['B'].hide = False
             self.inputs['B'].name = "Base"
         elif selection in self.AB_Square:
-            self.inputs['A'].hide = False
             self.inputs['A'].name = "Value"
             self.inputs['B'].hide = True
             
         else:
             self.inputs['A'].hide = True
             self.inputs['B'].hide = True
-        execute_active_node_tree()
+        
+        self.update()
         
         
 class RoMaFloatNode(RoMaTreeNode, Node):
@@ -533,11 +687,14 @@ class RoMaFloatNode(RoMaTreeNode, Node):
         
     def free(self):
         removeKeyFromNode(self, key="")
+    
+    def update(self):
+        self.execute()
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'float')
 
-    def execute(self, context):
+    def execute(self):
         self.outputs['Value'].default_value = self.float
         
         
@@ -557,11 +714,14 @@ class RoMaIntegerNode(RoMaTreeNode, Node):
         
     def free(self):
         removeKeyFromNode(self, key="")
+        
+    def update(self):
+        self.execute()
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'integer')
         
-    def execute(self, context):
+    def execute(self):
         self.outputs['Integer'].default_value = self.integer
        
 
@@ -580,13 +740,12 @@ class RoMaAttributeToColumn(RoMaTreeNode, Node):
         self.outputs['Attribute'].display_shape = 'DIAMOND_DOT'
         
     def update(self):
-        self.validated = checkLink(self)
-        clearInputs(self)
+        self.execute()
     
-    def execute(self, context):
-        self.validated = checkLink(self)
-        self.outputs['Attribute'].object_items.clear()
+    def execute(self):
         if self.validated:
+            cleanInputs(self)
+            cleanOutputs(self)
             if self.inputs['Attribute'].is_linked:
                     object_items = self.inputs['Attribute'].links[0].from_socket.object_items
                     for obj in object_items:
@@ -595,12 +754,19 @@ class RoMaAttributeToColumn(RoMaTreeNode, Node):
                         for prop_name in obj.__annotations__.keys():
                             setattr(item, prop_name, getattr(obj, prop_name))
     
-    
+
+
+        
 class RoMaViewer(RoMaTreeNode, Node):
     '''Add a viewer node'''
     bl_idname = 'RoMa Viewer'
     bl_label = 'RoMa Viewer'
     
+    toggle : bpy.props.BoolProperty(
+            name = "Show Schedule",
+            default = False,
+            update = update_schedule_node_editor)
+
     validated = True
     
     def init(self, context):
@@ -609,133 +775,30 @@ class RoMaViewer(RoMaTreeNode, Node):
         self.inputs.new('RoMa_attributeCollection_SocketType', 'Attribute')
         self.inputs['Attribute'].hide_value = True
         self.inputs['Attribute'].display_shape = 'DIAMOND_DOT'
-        
-    # def update(self):
-    #     if self.inputs['RoMa Mesh'].is_linked:
-    #         input_socket = self.inputs['RoMa Mesh'].links[0].from_socket
-    #         object_items = input_socket.object_items
-    #         toPrint = ""
-    #         for o in object_items:
-    #             toPrint = str(o.name)
-    #             layout.label(text=f'{toPrint}')
-    #     if self.inputs['Value'].is_linked:
-    #         value = self.inputs['Value'].links[0].from_socket.default_value
-    #         value = round(float(value),3)
-    #         layout.label(text=f'{value}')
-            
-        
-    # def update(self):
-    #     if self.inputs['RoMa Mesh'].is_linked:
-    #         input_socket = self.inputs['RoMa Mesh'].links[0].from_socket
-    #         object_items = input_socket.object_items
-    #         print("Reader Node - Oggetti Selezionati:")
-    #         for item in object_items:
-    #             print(item.name)
     
     def update(self):
-        self.validated = checkLink(self)
+        self.execute()
+        
+    def execute(self):
         if self.validated:
+            # cleanInputs(self)
             if self.inputs['RoMa Mesh'].is_linked:
-                # obj = self.inputs['RoMa Mesh'].links[0].from_socket.object_items
-                # for o in obj:
-                #     print(o.name)
                 if self.inputs['Attribute'].is_linked:
                     object_items = self.inputs['Attribute'].links[0].from_socket.object_items
                     # print("----------------------------------")
+                    # print(f"{len(object_items)}")
                     # print("Reader Node - Oggetti Selezionati:")
                     # for a in object_items:
-                    #      print(a.meshName, a.polyId, a.id, a.area)
-                            
-        
-    # def execute(self, context):
-    #     self.update()
-    #     if self.validated:
-
+                    #      print(a.meshName, a.polyId, a.id, a.area, len(object_items))
             
     def draw_buttons(self, context, layout):
-        # nodeName = self.name
-        # treeName = self.id_data.name
-        # nodeIndentifier = f"{treeName}::{nodeName}"
+        nodeName = self.name
+        treeName = self.id_data.name
+        nodeIndentifier = f"{treeName}::{nodeName}"
         col = layout.column(align=True)
-        # col.operator("object.roma_add_column").sourceNode = nodeIndentifier
-        # col.operator("node.schedule_viewer").sourceNode = nodeIndentifier
-        col.prop(context.window_manager, "toggle_schedule_in_editor", text="Show Schedule")
-                
-    # def draw_buttons(self, context, layout):
-    #     if self.validated:
-    #         if self.inputs['RoMa Mesh'].is_linked:
-    #             input_socket = self.inputs['RoMa Mesh'].links[0].from_socket
-    #             object_items = input_socket.object_items
-    #             toPrint = ""
-    #             for o in object_items:
-    #                 toPrint = str(o.name)
-    #                 layout.label(text=f'{toPrint}')
-    #         if self.inputs['Value'].is_linked:
-    #             value = self.inputs['Value'].links[0].from_socket.default_value
-    #             value = round(float(value),3)
-    #             layout.label(text=f'{value}')
-            
-    
-            
-            
-    
-# class CustomNodeText(RoMaTreeNode, Node):
-#     bl_label = 'Text'
+        col.operator("object.roma_add_column").sourceNode = nodeIndentifier
+        col.prop(self, "toggle", text="Show Schedule")
 
-#     text : StringProperty(name="OOO")
-
-#     def init(self, context):
-#         self.outputs.new('NodeSocketString', 'Text')
-
-#     # def draw_buttons(self, context, layout):
-#     #     layout.prop(self, 'text')
-
-#     def execute(self, context):
-#         self.outputs['Text'].default_value = "OOOa"
-        
-
-
-# class CustomNodeJoin(RoMaTreeNode, Node):
-#     bl_label = 'Join'
-
-#     def init(self, context):
-#         self.inputs.new('NodeSocketString', 'Value1')
-#         self.inputs.new('NodeSocketString', 'Value2')
-
-#         self.outputs.new('NodeSocketString', 'Value')
-
-#     def draw_buttons(self, context, layout):
-#         pass
-
-#     def update(self):
-#         if self.inputs['Value1'].is_linked and self.inputs['Value2'].is_linked:
-#             text = self.inputs['Value1'].links[0].from_socket.default_value + self.inputs['Value2'].links[0].from_socket.default_value
-#         elif self.inputs['Value1'].is_linked and not self.inputs['Value2'].is_linked:
-#             text = self.inputs['Value1'].links[0].from_socket.default_value + self.inputs['Value2'].default_value
-#         elif self.inputs['Value2'].is_linked and not self.inputs['Value1'].is_linked:
-#             text = self.inputs['Value1'].default_value + self.inputs['Value2'].links[0].from_socket.default_value
-#         else:
-#             text = self.inputs['Value1'].default_value + self.inputs['Value2'].default_value
-
-#         self.outputs['Value'].default_value = text
-
-
-    
-# class CustomNodePrint(RoMaTreeNode, Node):
-#     bl_label = 'Print'
-
-#     def init(self, context):
-#         # self.inputs.new('NodeSocketCollection', 'Geometry')
-#         self.inputs.new('NodeSocketString', 'Print')
-
-#     def draw_buttons(self, context, layout):
-#         if self.inputs['Print'].is_linked:
-#             data = self.inputs['Print'].links[0].from_socket
-#             print_value = (data)
-#             layout.label(text=f'{print_value}')
-#         # if self.inputs['Print'].is_linked:
-#         #     print_value = self.inputs['Print'].links[0].from_socket.default_value
-#         #     layout.label(text=f'{print_value}')
     
 #############################################################################
 ################ Add menu ###################################################
@@ -754,7 +817,8 @@ node_categories = [
         NodeItem("RoMa Math Node", label="Math"),
     ]),
     RoMaNodeCategory('INPUT', "Input", items=[
-        NodeItem("Input RoMa Mesh", label="RoMa Mesh"),
+        NodeItem("Input RoMa Mesh", label="All RoMa Meshes"),
+        NodeItem("Input RoMa Selected Mesh", label="Selected RoMa Meshes"),
         NodeItem("RoMa Integer", label="Integer"),
         NodeItem("RoMa Value", label="Value"),
     ]),
@@ -767,183 +831,14 @@ node_categories = [
     
 ]
 
-#############################################################################
-########## Node Related funcions  ###########################################
-#############################################################################
-
-# add keys to the node
-def addKeysToNode(self,  **kwargs):
-    for item_name, list in kwargs.items():
-        if item_name == "inputs":
-            for input in list:
-                key = self.path_resolve('inputs[\"'+input+'\"]')
-                bpy.msgbus.subscribe_rna(
-                        key=key,
-                        owner=None,
-                        args=(),
-                        notify=execute_active_node_tree,
-                        options={"PERSISTENT"}
-                    )
-                #add the key to the keyDictionary
-                bpy.context.scene.keyDictionary.add()
-                last = len(bpy.context.scene.keyDictionary)-1
-                bpy.context.scene.keyDictionary[last].name = str(key)
-                # print("KEY", key)
-        elif item_name == "outputs":
-            for output in list:
-                key = self.path_resolve('outputs[\"'+output+'\"]')
-                bpy.msgbus.subscribe_rna(
-                        key=key,
-                        owner=None,
-                        args=(),
-                        notify=execute_active_node_tree,
-                        options={"PERSISTENT"}
-                    )
-                #add the key to the keyDictionary
-                bpy.context.scene.keyDictionary.add()
-                last = len(bpy.context.scene.keyDictionary)-1
-                bpy.context.scene.keyDictionary[last].name = str(key)
-                # print("KEY", key)
-        elif item_name == "key":
-            key = self
-            bpy.msgbus.subscribe_rna(
-                    key=key,
-                    owner=None,
-                    args=(),
-                    notify=execute_active_node_tree,
-                    options={"PERSISTENT"}
-                )
-            #add the key to the keyDictionary
-            bpy.context.scene.keyDictionary.add()
-            last = len(bpy.context.scene.keyDictionary)-1
-            bpy.context.scene.keyDictionary[last].name = str(key)
-            # print("KEY", key)
-        
-# remove all the keys from the node
-def removeKeyFromNode(self, **kwargs):
-    for item_name, list in kwargs.items():
-        if item_name == "inputs":
-            for input in list:
-                key = self.path_resolve('inputs[\"'+input+'\"]')
-                for i, el in enumerate(bpy.context.scene.keyDictionary):
-                    if el.name == str(key):
-                        bpy.context.scene.keyDictionary.remove(i)
-                        break
-        elif item_name == "outputs":
-            for output in list:
-                key = self.path_resolve('outputs[\"'+output+'\"]')
-                for i, el in enumerate(bpy.context.scene.keyDictionary):
-                    if el.name == str(key):
-                        bpy.context.scene.keyDictionary.remove(i)
-                        break
-        elif item_name == "key":
-            key = self
-            for i, el in enumerate(bpy.context.scene.keyDictionary):
-                    if el.name == str(key):
-                        bpy.context.scene.keyDictionary.remove(i)
-                        break
-                    
-def clearInputs(self):
-    for input in self.inputs:
-        if input.is_linked == False:
-            name = input.name
-            self.outputs[name].object_items.clear()
-            
-            
-# A Function to check if the links are compatible
-def checkLink(self):
-    inputs = self.inputs
-    self.use_custom_color = False
-    validated = True
-    for input in inputs:
-        if input.is_linked:
-            inputType = input.rna_type.name
-            outputType = input.links[0].from_socket.rna_type.name
-            if inputType != outputType:
-                self.color = (0.51, 0.19, 0.29)
-                self.use_custom_color = True
-                validated = False
-    return(validated)
-            
-               
-            
-    
-# get the source (RoMa mesh) from which get the attribute
-def getAttributeSource(link):
-    # name = link.to_socket.name
-    # idName = link.to_socket.bl_idname
-    sockets = [x for x in link.to_node.inputs if x.rna_type.name == 'RoMa_stringCollection_SocketType']
-    if sockets:
-        socket = sockets[0]
-        if socket.is_linked:
-            # print("linked", socket.name)
-            parent_node = socket.links[0].from_node
-            if parent_node.bl_idname == "Input RoMa Mesh":
-                items = parent_node.outputs['RoMa Mesh'].object_items
-                return(items)
-    return()
 
     
-
-# execute the active node tree
-def execute_active_node_tree():
-    # node_editor = next((a for a in bpy.context.screen.areas if a.type == 'NODE_EDITOR'), None)
-    # if (node_editor == None): return
-    # for space in node_editor.spaces:
-    #     node_tree = getattr(space, 'node_tree')
-    #     if (node_tree):
-    #         node_tree.execute(bpy.context)
-    #         break
-    trees = [x for x in bpy.data.node_groups if x.bl_idname == "RoMaTreeType"]
-    if trees:
-        for tree in trees:
-            tree.execute(bpy.context)
-            
-            
-            # tree.execute(bpy.context)
-            
-    
         
-###################################################################################
-############### Schedule panel ####################################################
-###################################################################################
-# class RoMa_Schedule_Panel(bpy.types.Panel):
-#     """Creates a Panel in the scene context of the properties editor"""
-#     bl_label = "RoMa"
-#     bl_idname = "NODE_PT_RoMa_Schedule"
-#     bl_space_type = 'NODE_EDITOR'
-#     bl_region_type = 'UI'
-#     bl_category = "RoMa"
-#     # bl_context = "scene"
-    
-    
-    
-#     @classmethod
-#     def poll(cls, context):
-#         tree_type = context.space_data.tree_type
-   
-#         return (tree_type == "RoMaTreeType")
-   
+############################################################################################
+############### Schedule in node editor ####################################################
+############################################################################################
 
-#     def draw(self, context):
-        
-#         layout = self.layout
 
-#         scene = context.scene
-
-#         # Create a simple row.
-#         layout.label(text=" Simple Row:")
-#         col = layout.column(align=True)
-        
-#         # nodeName = "Column from Data"
-#         # treeName = "RoMa Schedule"
-#         # nodeIndentifier = f"{treeName}::{nodeName}"
-
-#         # col.operator("object.roma_add_column").sourceNode = nodeIndentifier
-        
-#         col.operator("node.schedule_viewer")
-
-        
 class NODE_EDITOR_Roma_Draw_Schedule(Operator):
     """Tooltip"""
     bl_idname = "node.schedule_viewer"
@@ -956,7 +851,7 @@ class NODE_EDITOR_Roma_Draw_Schedule(Operator):
     @staticmethod
     def handle_add(self, context):
         if NODE_EDITOR_Roma_Draw_Schedule._handle is None:
-            NODE_EDITOR_Roma_Draw_Schedule._handle =bpy.types.SpaceNodeEditor.draw_handler_add(draw_callback_schedule_overlay,
+            NODE_EDITOR_Roma_Draw_Schedule._handle = bpy.types.SpaceNodeEditor.draw_handler_add(draw_callback_schedule_overlay,
                                                                                                 (self, context, self.sourceNode),
                                                                                                 'WINDOW',
                                                                                                 'POST_VIEW')
@@ -978,129 +873,66 @@ class NODE_EDITOR_Roma_Draw_Schedule(Operator):
         self.execute(context)
         return {'RUNNING_MODAL'}
 
-def draw_schedule_overlay(self, context, sourceNode):
-    path = sourceNode.split("::")
-    treeName = path[0]
-    nodeName = path[1]
-    
-    # for area in bpy.context.screen.areas:
-    #     if area.ui_type == 'RoMaTreeType':
-    #         for space in area.spaces:
-    #             if space.type == 'NODE_EDITOR' and space.node_tree and space.node_tree.name == treeName:
-    node = bpy.data.node_groups[treeName].nodes[nodeName]
-
-
-    # verts = [
-    #     (+0.0, +0.0,  +0.0),
-    #     (+400.0, +0.0,  +0.0),
-    #     (+400.0, -100.0,  +0.0),
-    #     (+0.0, -100.0,  +0.0),
-    #     ]
-
-
-    edges = [
-        (0, 1),
-        (1, 2),
-        (2, 3),
-        (3, 0),
-    ]
-    
-    # coords = []
-    
-    
-
-    
-    #get the node area
-    # areaName = None
-    # found = False
-    # for area in bpy.context.screen.areas:
-    #     if area.type == 'NODE_EDITOR':
-    #         for space in area.spaces:
-    #             if space.type == 'NODE_EDITOR' and space.node_tree and space.node_tree.name == treeName:
-    #                 # areaName = area
-    #                 found = True
-    #                 break
-    #     if found:
-    #         break
-                    
-    # if found:
-    # region = areaName.regions[-1]
-    # view2d = region.view2d
-    
-    # node location
-    nodeLocation = node.location
-    node_width = node.width
-    node_height = node.height
-    
-    shader = gpu.shader.from_builtin('UNIFORM_COLOR')
-        
-    scale = context.preferences.view.ui_scale/0.8
-        
-    verts = [
-        (nodeLocation.x * scale, nodeLocation.y * scale),
-        ((nodeLocation.x + node_width) * scale, nodeLocation.y * scale),
-        ((nodeLocation.x + node_width) * scale, (nodeLocation.y + node_height) * scale),
-        (nodeLocation.x * scale, (nodeLocation.y + node_height) * scale),
-    ]    
-    
-    batch = batch_for_shader(shader, 'LINES', {"pos": verts}, indices=edges)
-    # r, g, b, a = [c for c in bpy.context.preferences.addons['roma'].preferences.edgeColor]
-    shader.uniform_float("color", (0.0 ,1.0, 0.0, 1.0))
-        
-    gpu.state.line_width_set(10)
-    gpu.state.blend_set("ALPHA")
-    batch.draw(shader)
-            
-   
-        
-    
-
 def draw_callback_schedule_overlay(self, context, sourceNode):
-    draw_schedule_overlay(self, context, sourceNode)
-    
-def update_schedule_node_editor(self, context):
-    nodeName = context.active_node.name
-    treeName = context.active_node.id_data.name
-    nodeIdentifier = f"{treeName}::{nodeName}"
-    bpy.ops.node.schedule_viewer(sourceNode = nodeIdentifier)
+    if context.area.ui_type == "RoMaTreeType":
+        path = sourceNode.split("::")
+        treeName = path[0]
+        nodeName = path[1]
+        node = bpy.data.node_groups[treeName].nodes[nodeName]
+        
+        nodeX, nodeY = node.location
+        nodeWidth = node.width
+        nodeHeight = node.height
+        
+        system = bpy.context.preferences.system
+        ui_scale = system.ui_scale
+        
+        nodePosX = nodeX + nodeWidth
+        nodePosY = nodeY - nodeHeight
+        
+        cellX = 200
+        cellY = 50
+        orientation = "column"
+        verts, edges, faces, data = dataForGraphic(sourceNode, 
+                                                    posX = nodePosX, 
+                                                    posY = nodePosY, 
+                                                    cellWidth= cellX, 
+                                                    cellHeight=cellY, 
+                                                    orientation=orientation, 
+                                                    scale = ui_scale,
+                                                    direction = "up")
+        
+        shader = gpu.shader.from_builtin('UNIFORM_COLOR')
+        
+        batch = batch_for_shader(shader, 'LINES', {"pos": verts}, indices=edges)
+        shader.uniform_float("color", (0.0 ,1.0, 0.0, 1.0))
+            
+        gpu.state.line_width_set(1)
+        gpu.state.blend_set("ALPHA")
+        batch.draw(shader)
+        
+        font_id = font_info["font_id"]
+        blf.size(font_id, 50.0)
+
+        for i, el in enumerate(data):
+            index = (len(data)-1) - i
+            blf.size(font_id, 50)
+            if orientation == "column":
+                x = (nodePosX + 10) * ui_scale
+                y = (nodePosY + 10 + (index * cellY)) * ui_scale
+            else:
+                x = ((nodePosX + 10) + (index * cellX)) * ui_scale
+                y = (nodePosY + 10) * ui_scale
+                
+            blf.position(font_id, x, y, 0)
+            blf.draw(font_id, f"{round(el.area,2)}")
+    else:
+        return
 
     
 ###################################################################################
 ############### 3D schedule #######################################################
 ###################################################################################
-    
-
-def add_cell(width, height, index):
-    """
-    This function takes inputs and returns vertex and face arrays.
-    no actual mesh data creation is done here.
-    """
-
-    vertical_shift = -1 * index
-    vert_increment = index * 4
-    verts = [
-        (+0.0, +0.0 + vertical_shift,  +0.0),
-        (+1.0, +0.0 + vertical_shift,  +0.0),
-        (+1.0, -1.0 + vertical_shift,  +0.0),
-        (+0.0, -1.0 + vertical_shift,  +0.0),
-        ]
-
-    edges = [
-        (0 + vert_increment, 1 + vert_increment),
-        (1 + vert_increment, 2 + vert_increment),
-        (2 + vert_increment, 3 + vert_increment),
-        (3 + vert_increment, 0 + vert_increment),
-    ]
-    faces = [
-        (0 + vert_increment, 1 + vert_increment, 2 + vert_increment, 3 + vert_increment),
-    ]
-
-    # apply size
-    for i, v in enumerate(verts):
-        verts[i] = v[0] * width, v[1] * height, v[2]
-
-    return verts, edges, faces
-
 class RoMaAddColumn(Operator):
     '''Add a column to the schedule'''
     bl_idname="object.roma_add_column"
@@ -1109,53 +941,47 @@ class RoMaAddColumn(Operator):
     
     sourceNode : bpy.props.StringProperty(name="Source Node")
     
-    width: FloatProperty(
-        name="Width",
-        description="Cell Width",
-        min=0.01, max=100.0,
-        default=3.0,
-    )
+    # width: FloatProperty(
+    #     name="Width",
+    #     description="Cell Width",
+    #     min=0.01, max=100.0,
+    #     default=3.0,
+    # )
     
-    height: FloatProperty(
-        name="Height",
-        description="Cell Height",
-        min=0.01, max=100.0,
-        default=2.0,
-    )
+    # height: FloatProperty(
+    #     name="Height",
+    #     description="Cell Height",
+    #     min=0.01, max=100.0,
+    #     default=2.0,
+    # )
     
     # data : bpy.props.StringProperty(name="Filter type name")
     
     def execute(self, context):
         # retrieve data from node
-        path = self.sourceNode.split("::")
-        treeName = path[0]
-        nodeName = path[1]
-        node = bpy.data.node_groups[treeName].nodes[nodeName]
-        data = node.inputs['Attribute'].links[0].from_socket.object_items
+        # path = self.sourceNode.split("::")
+        # treeName = path[0]
+        # nodeName = path[1]
+        # node = bpy.data.node_groups[treeName].nodes[nodeName]
+        # data = node.inputs['Attribute'].links[0].from_socket.object_items
         
         # create a column with its cells
         mesh = bpy.data.meshes.new("RoMa Column")
         bm = bmesh.new()
-        # index = 0
-        for index, el in enumerate(data):
-        # while index < len(data):
-            verts_loc, edges, faces = add_cell(
-                self.width,
-                self.height,
-                index,
-            )
-            for v_co in verts_loc:
-                bm.verts.new(v_co)
-
-            bm.verts.ensure_lookup_table()
-            for e_idx in edges:
-                bm.edges.new([bm.verts[i] for i in e_idx])
-            # for f_idx in faces:
-            #     bm.faces.new([bm.verts[i] for i in f_idx])
-            # index += 1
-
-        # remove duplicated vertices
-        bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.1)
+        verts, edges, faces, data = dataForGraphic(self.sourceNode, 
+                                                   posX = 0, 
+                                                   posY = 0, 
+                                                   cellWidth= 3, 
+                                                   cellHeight=2, 
+                                                   orientation="column", 
+                                                   scale=1,
+                                                   direction = "down")
+        for vert in verts:
+            bm.verts.new(vert)
+        bm.verts.ensure_lookup_table()
+        
+        for e in edges:
+            bm.edges.new([bm.verts[i] for i in e])
         
         bm.to_mesh(mesh)
         mesh.update()
@@ -1170,11 +996,61 @@ class RoMaAddColumn(Operator):
             font_curve.body = f"{round(el.area)}"
             font_obj = bpy.data.objects.new(name="Font Object", object_data=font_curve)
             bpy.context.scene.collection.objects.link(font_obj)
-            newPos = mathutils.Vector((0.3, -1.3 - (self.height * index), 0.0))
+            newPos = mathutils.Vector((0.3, -1.3 - (2 * index), 0.0))
             font_obj.location = font_obj.location + newPos
             # index += 1
             # parenting
             font_obj.parent = bpy.data.objects[column.name]
         return {'FINISHED'}
+    
+################################################################################################################
+############### Function to retrieve data for schedules  #######################################################
+################################################################################################################
 
+    
+# collect the data from the source node and return all
+# the elements necessary to draw the column or the row
+def dataForGraphic(sourceNode, posX = 0, posY = 0, cellWidth = 3, cellHeight = 2, orientation="column", scale=1, direction="up"):
+    # retrieve data from node
+    path = sourceNode.split("::")
+    treeName = path[0]
+    nodeName = path[1]
+    node = bpy.data.node_groups[treeName].nodes[nodeName]
+    data = node.inputs['Attribute'].links[0].from_socket.object_items
+    
+    verts = []
+    edges = []
+    faces = []
+    dir = 1
+    if direction == "down":
+        dir = -1
+    for index in range(len(data) + 1):
+        if orientation == "column":
+            verticalIncrement = dir * cellHeight * index
+            tmpVert = ((+0.0 + posX) * scale, (verticalIncrement + posY) * scale, 0) 
+            verts.append(tmpVert)
+            tmpVert = tmpVert = ((cellWidth + posX) * scale, (verticalIncrement + posY) * scale, 0)  
+            verts.append(tmpVert)
+        elif orientation == "row":
+            horizontalIncrement = 1 * cellWidth * index
+            tmpVert = ((horizontalIncrement + posX) * scale, (0 + posY) * scale, 0)   
+            verts.append(tmpVert)
+            tmpVert = ((horizontalIncrement + posX) * scale, (cellHeight + posY) * scale, 0)   
+            verts.append(tmpVert)
+        else:
+            return
+            
+        if index < len(data):
+            tmpEdge = (index * 2, (index * 2) +1)    
+            edges.append(tmpEdge)
+            tmpEdge = (index * 2, (index * 2) +2)   
+            edges.append(tmpEdge)
+            tmpEdge = ((index * 2) +1, (index * 2) +3)   
+            edges.append(tmpEdge)
+        
+    tmpEdge = (len(data) * 2, len(data) * 2 +1)    
+    edges.append(tmpEdge)
+    
+    faces = []
+    return verts, edges, faces, data
     

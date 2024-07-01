@@ -599,12 +599,12 @@ def updates(scene):
         for tree in trees:
             nodes = tree.nodes
             if nodes:
-                groupInput = [x for x in nodes if x.bl_idname == "Input RoMa Mesh"]
+                groupInput = [x for x in nodes if x.bl_idname == "Input RoMa Mesh" or x.bl_idname == "Input RoMa Selected Mesh"]
                 if groupInput:
                     for group in groupInput:
                         group.update_selected_objects()
                     # execute the node tree
-                    tree.execute(bpy.context)
+                    tree.execute()
 
 
 
