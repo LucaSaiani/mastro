@@ -69,6 +69,7 @@ import nodeitems_utils
 
 from bpy.app.handlers import persistent
 
+
 classes = (
     roma_preferences.roma_addon_preferences,
     
@@ -143,12 +144,13 @@ classes = (
     roma_schedule.RoMaInterfaceSocket,
     roma_schedule.RoMa_attributesCollection_Socket,
     roma_schedule.RoMaGroupInput,
+    roma_schedule.RoMaSelectedInput,
     roma_schedule.RoMaCaptureAttribute,
     roma_schedule.RoMaAreaAttribute,
-    roma_schedule.RomaMathSubMenuEntries,
+    # roma_schedule.RomaMathSubMenuEntries,
     roma_schedule.RoMaIntegerNode,
     roma_schedule.RoMaFloatNode,
-    roma_schedule.RoMaMathMenu,
+    # roma_schedule.RoMaMathMenu,
     # roma_schedule.RoMaMathSubMenuFunctions,
     # roma_schedule.RoMaMathSubMenuComparisons,
     roma_schedule.RoMaMathNode,
@@ -327,6 +329,7 @@ def get_floor_names_from_list(scene, context):
         items.append(newProp)
     return items
 
+
 @persistent
 def onFileLoaded(scene):
     # initLists()
@@ -497,10 +500,10 @@ def register():
     bpy.types.WindowManager.toggle_storey_number = bpy.props.BoolProperty(
                                             name = "Number of Storeys",
                                             default = False)
-    bpy.types.WindowManager.toggle_schedule_in_editor = bpy.props.BoolProperty(
-                                            name = "Show Schedule",
-                                            default = False,
-                                            update = roma_schedule.update_schedule_node_editor)
+    # bpy.types.WindowManager.toggle_schedule_in_editor = bpy.props.BoolProperty(
+    #                                         name = "Show Schedule",
+    #                                         default = False,
+    #                                         update = roma_schedule.update_schedule_node_editor)
     
     bpy.types.Object.roma_props = bpy.props.PointerProperty(type=roma_menu.romaAddonProperties)
 
@@ -669,7 +672,7 @@ def unregister():
     del bpy.types.WindowManager.toggle_wall_name
     del bpy.types.WindowManager.toggle_wall_normal
     del bpy.types.WindowManager.toggle_floor_name
-    del bpy.types.WindowManager.toggle_schedule_in_editor
+    # del bpy.types.WindowManager.toggle_schedule_in_editor
     del bpy.types.Object.roma_props
     
     del Scene.keyDictionary
