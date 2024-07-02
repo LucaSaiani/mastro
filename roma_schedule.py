@@ -176,59 +176,66 @@ def getAttributes(objs):
     
             for f in bm.faces:
                 storeys = f[bMesh_storeys]
-                # # unravel uses
-                # uses = []
-                # i = 0
-                # while i < len(f[bMesh_use_id_list_A]):
-                #     tmp =
-                #     i += 1
+                # get typology name
                 for n in bpy.context.scene.roma_typology_name_list:
                     if n.id == f[bMesh_typology]:
                         typologyId = n.id
                         typologyName = n.name
                         break
-                storey = 0
-                indexList = 0
+                floor = 0
+                indexList = 1
                 storeyPreviousGroup = 0
-                while storey < storeys:
+                while floor < storeys:
                     length = int(math.log10(f[bMesh_storey_list_A])) +1
                     pos = length - indexList -1
-                    storey_A = (f[bMesh_storey_list_A] / 10 ** pos) % 10
-                    storey_B = (f[bMesh_storey_list_B] / 10 ** pos) % 10
+                    storey_A = int((f[bMesh_storey_list_A] / 10 ** pos) % 10)
+                    storey_B = int((f[bMesh_storey_list_B] / 10 ** pos) % 10)
+                    # print(f"{storey_A} {storey_B}  storey {storey_A * 10 + storey_B}")
 
-                    use_A = (f[bMesh_use_id_list_A] / 10 ** pos) % 10
-                    use_B = (f[bMesh_use_id_list_B] / 10 ** pos) % 10
-                    use = use_A * 10 + use_B
+                    use_A = int((f[bMesh_use_id_list_A] / 10 ** pos) % 10)
+                    use_B = int((f[bMesh_use_id_list_B] / 10 ** pos) % 10)
+                    useId = use_A * 10 + use_B
+                    # get use name
+                    for n in bpy.context.scene.roma_use_name_list:
+                        if n.id == useId:
+                            useName = n.name
+                            break
 
-                    height_A = (f[bMesh_height_A] / 10 ** pos) % 10
-                    height_B = (f[bMesh_height_B] / 10 ** pos) % 10
-                    height_C = (f[bMesh_height_C] / 10 ** pos) % 10
-                    height_D = (f[bMesh_height_D] / 10 ** pos) % 10
-                    height_E = (f[bMesh_height_E] / 10 ** pos) % 10 
-                    height = height_A * 100 + height_B *10 + height_C + height_D * 0.1 + height_E * 0.01
+                    # print(f"{use_A} {use_B} {use}")
 
-                    void = f[bMesh_void]
+                    height_A = int((f[bMesh_height_A] / 10 ** pos) % 10)
+                    height_B = int((f[bMesh_height_B] / 10 ** pos) % 10)
+                    height_C = int((f[bMesh_height_C] / 10 ** pos) % 10)
+                    height_D = int((f[bMesh_height_D] / 10 ** pos) % 10)
+                    height_E = int((f[bMesh_height_E] / 10 ** pos) % 10)
+                    height = height_A * 10 + height_B + height_C * 0.1 + height_D * 0.01 + height_E * 0.001
+
+                    void = int((f[bMesh_void] / 10 ** pos) % 10)
                     
                     storeyGroup = (storey_A * 10 + storey_B) + storeyPreviousGroup
-                    if storeyGroup == storey:
+                    # print(f"Storeygroup {storeyGroup}       storey {storey}")
+                    if storeyGroup == floor +1:
                         storeyPreviousGroup = storeyGroup
                         indexList += 1
                         
-                    area = f.calc_area()
+                    area = round(f.calc_area(),2)
                     if void == 1:
                         area = 0
                     tmpData = {
                                 "typologyID"    : typologyId,
                                 "typologyName"  : typologyName,
-                                "storey"        : storey,
+                                "floor"         : floor,
                                 "area"          : area,
-                                "use"           : use,
+                                "useID"         : useId,
+                                "useName"       : useName,
                                 "height"        : height,
                                 "void"          : void,
+                                "option"        : option,
+                                "phase"         : phase,
                     }
 
                     data.append([tmpData])
-                    storey += 1
+                    floor += 1
         
             bm.free
         return(data)
@@ -456,7 +463,7 @@ class RoMaSelectedInput(RoMaTreeNode, Node):
         attributes = getAttributes(objs)
         if attributes:
             for a in attributes:
-                print(f"CIAo {a}")
+                print(f"{a}")
         # romaObjs = [obj for obj in objs if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data]
         # for obj in romaObjs:
         #     item = self.outputs['RoMa Mesh'].object_items.add()
