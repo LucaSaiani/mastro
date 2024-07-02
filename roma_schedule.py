@@ -43,7 +43,8 @@ font_info = {
 ########## Node Related funcions  ###########################################
 #############################################################################
 
-# add keys to the node
+# add keys to the node to be able to run
+# some tasks when key is updated
 def addKeysToNode(self,  **kwargs):
     for item_name, list in kwargs.items():
         if item_name == "inputs":
@@ -92,6 +93,7 @@ def addKeysToNode(self,  **kwargs):
             # print("KEY", key)
         
 # remove all the keys from the node
+# when the node is deleted
 def removeKeyFromNode(self, **kwargs):
     for item_name, list in kwargs.items():
         if item_name == "inputs":
@@ -124,7 +126,7 @@ def cleanOutputs(self):
         output.object_items.clear()
             
             
-# A Function to check if the links are compatible
+# A Function to check if the links are compatible wit the input
 def checkLink(self):
     inputs = self.inputs
     self.use_custom_color = False
@@ -139,25 +141,115 @@ def checkLink(self):
                 validated = False
     return(validated)
             
-               
-            
+# a function to get all the attributes of the 
+# selected meshes
+def getAttributes(objs):
+    romaObjs = [obj for obj in objs if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data]
+    if len(romaObjs) > 0:
+        data = []
+        for obj in romaObjs:
+            option = None
+            phase = None
+            if "roma_option_attribute" in obj.roma_props.keys():
+                option = obj.roma_props['roma_option_attribute']
+            if "roma_phase_attribute" in obj.roma_props.keys():
+                phase = obj.roma_props['roma_phase_attribute']
     
-# get the source (RoMa mesh) from which get the attribute
-def getAttributeSource(link):
-    # name = link.to_socket.name
-    # idName = link.to_socket.bl_idname
-    sockets = [x for x in link.to_node.inputs if x.rna_type.name == 'RoMa_stringCollection_SocketType']
-    if sockets:
-        socket = sockets[0]
-        if socket.is_linked:
-            # print("linked", socket.name)
-            parent_node = socket.links[0].from_node
-            if parent_node.bl_idname == "Input RoMa Mesh" or parent_node.bl_idname == "Input RoMa Selected Mesh":
-                items = parent_node.outputs['RoMa Mesh'].object_items
-                for i in items:
-                    print(f"Name {i.name}")
-                return(items)
-    return()
+            mesh = obj.data
+            bm = bmesh.new()
+            bm.from_mesh(mesh)
+            # bm.faces.ensure_lookup_table()    
+           
+         
+            bMesh_typology = bm.faces.layers.int["roma_typology_id"]
+            bMesh_use_id_list_A = bm.faces.layers.int["roma_list_use_id_A"]
+            bMesh_use_id_list_B = bm.faces.layers.int["roma_list_use_id_B"]
+            bMesh_storeys = bm.faces.layers.int["roma_number_of_storeys"]
+            bMesh_storey_list_A = bm.faces.layers.int["roma_list_storey_A"]
+            bMesh_storey_list_B = bm.faces.layers.int["roma_list_storey_B"]
+            bMesh_height_A = bm.faces.layers.int["roma_list_height_A"]
+            bMesh_height_B = bm.faces.layers.int["roma_list_height_B"]
+            bMesh_height_C = bm.faces.layers.int["roma_list_height_C"]
+            bMesh_height_D = bm.faces.layers.int["roma_list_height_D"]
+            bMesh_height_E = bm.faces.layers.int["roma_list_height_E"]
+            bMesh_void = bm.faces.layers.int["roma_list_void"]
+    
+            for f in bm.faces:
+                storeys = f[bMesh_storeys]
+                # # unravel uses
+                # uses = []
+                # i = 0
+                # while i < len(f[bMesh_use_id_list_A]):
+                #     tmp =
+                #     i += 1
+                for n in bpy.context.scene.roma_typology_name_list:
+                    if n.id == f[bMesh_typology]:
+                        typologyId = n.id
+                        typologyName = n.name
+                        break
+                storey = 0
+                indexList = 0
+                storeyPreviousGroup = 0
+                while storey < storeys:
+                    length = int(math.log10(f[bMesh_storey_list_A])) +1
+                    pos = length - indexList -1
+                    storey_A = (f[bMesh_storey_list_A] / 10 ** pos) % 10
+                    storey_B = (f[bMesh_storey_list_B] / 10 ** pos) % 10
+
+                    use_A = (f[bMesh_use_id_list_A] / 10 ** pos) % 10
+                    use_B = (f[bMesh_use_id_list_B] / 10 ** pos) % 10
+                    use = use_A * 10 + use_B
+
+                    height_A = (f[bMesh_height_A] / 10 ** pos) % 10
+                    height_B = (f[bMesh_height_B] / 10 ** pos) % 10
+                    height_C = (f[bMesh_height_C] / 10 ** pos) % 10
+                    height_D = (f[bMesh_height_D] / 10 ** pos) % 10
+                    height_E = (f[bMesh_height_E] / 10 ** pos) % 10 
+                    height = height_A * 100 + height_B *10 + height_C + height_D * 0.1 + height_E * 0.01
+
+                    void = f[bMesh_void]
+                    
+                    storeyGroup = (storey_A * 10 + storey_B) + storeyPreviousGroup
+                    if storeyGroup == storey:
+                        storeyPreviousGroup = storeyGroup
+                        indexList += 1
+                        
+                    area = f.calc_area()
+                    if void == 1:
+                        area = 0
+                    tmpData = {
+                                "typologyID"    : typologyId,
+                                "typologyName"  : typologyName,
+                                "storey"        : storey,
+                                "area"          : area,
+                                "use"           : use,
+                                "height"        : height,
+                                "void"          : void,
+                    }
+
+                    data.append([tmpData])
+                    storey += 1
+        
+            bm.free
+        return(data)
+    return
+    
+# # get the source (RoMa mesh) from which get the attribute
+# def getAttributeSource(link):
+#     # name = link.to_socket.name
+#     # idName = link.to_socket.bl_idname
+#     sockets = [x for x in link.to_node.inputs if x.rna_type.name == 'RoMa_stringCollection_SocketType']
+#     if sockets:
+#         socket = sockets[0]
+#         if socket.is_linked:
+#             # print("linked", socket.name)
+#             parent_node = socket.links[0].from_node
+#             if parent_node.bl_idname == "Input RoMa Mesh" or parent_node.bl_idname == "Input RoMa Selected Mesh":
+#                 items = parent_node.outputs['RoMa Mesh'].object_items
+#                 for i in items:
+#                     print(f"Name {i.name}")
+#                 return(items)
+#     return()
 
     
 
@@ -319,11 +411,13 @@ class RoMaGroupInput(RoMaTreeNode, Node):
         # self.outputs['RoMa Mesh'].object_items.clear()
         cleanOutputs(self)
         objs = bpy.context.scene.objects
+        attributes = getAttributes(objs)
+       
         # romaObjs = []
-        romaObjs = [obj for obj in objs if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data]
-        for obj in romaObjs:
-            item = self.outputs['RoMa Mesh'].object_items.add()
-            item.name = obj.name
+        # romaObjs = [obj for obj in objs if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data]
+        # for obj in romaObjs:
+        #     item = self.outputs['RoMa Mesh'].object_items.add()
+        #     item.name = obj.name
         # print(f"RoMa meshes collected {len(self.outputs['RoMa Mesh'].object_items)}")
         
 
@@ -359,10 +453,14 @@ class RoMaSelectedInput(RoMaTreeNode, Node):
     def update_selected_objects(self):
         cleanOutputs(self)
         objs = bpy.context.selected_objects
-        romaObjs = [obj for obj in objs if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data]
-        for obj in romaObjs:
-            item = self.outputs['RoMa Mesh'].object_items.add()
-            item.name = obj.name
+        attributes = getAttributes(objs)
+        if attributes:
+            for a in attributes:
+                print(f"CIAo {a}")
+        # romaObjs = [obj for obj in objs if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data]
+        # for obj in romaObjs:
+        #     item = self.outputs['RoMa Mesh'].object_items.add()
+        #     item.name = obj.name
 
     # def copy(self, node):
     #     pass
@@ -384,24 +482,24 @@ class RoMaAreaAttribute(RoMaTreeNode, Node):
         
     def execute(self):
         cleanOutputs(self)
-        links = self.outputs['Area'].links
-        # if the node is linked at least once
-        if len(links) > 0:
-            for link in links:
-                # look for the meshes from which get the data
-                # return the meshe name
-                source = getAttributeSource(link)
-                if len(source) > 0:
-                    # self.outputs['Area'].object_items.clear()
-                    for romaMesh in source:
-                        obj = bpy.data.objects[romaMesh.name]
-                        polygons = obj.data.polygons
-                        for poly in polygons:
-                            item = self.outputs['Area'].object_items.add()
-                            item.meshName = romaMesh.name
-                            item.polyId = poly.index
-                            item.id = romaMesh.name + "_" + str(poly.index)
-                            item.area = poly.area
+        # links = self.outputs['Area'].links
+        # # if the node is linked at least once
+        # if len(links) > 0:
+        #     for link in links:
+        #         # look for the meshes from which get the data
+        #         # return the meshe name
+        #         source = getAttributeSource(link)
+        #         if len(source) > 0:
+        #             # self.outputs['Area'].object_items.clear()
+        #             for romaMesh in source:
+        #                 obj = bpy.data.objects[romaMesh.name]
+        #                 polygons = obj.data.polygons
+        #                 for poly in polygons:
+        #                     item = self.outputs['Area'].object_items.add()
+        #                     item.meshName = romaMesh.name
+        #                     item.polyId = poly.index
+        #                     item.id = romaMesh.name + "_" + str(poly.index)
+        #                     item.area = poly.area
        
                             
    
