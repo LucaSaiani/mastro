@@ -126,7 +126,7 @@ def cleanOutputs(self):
         output.object_items.clear()
             
             
-# A Function to check if the links are compatible wit the input
+# A Function to check if the links are compatible with the input
 def checkLink(self):
     inputs = self.inputs
     self.use_custom_color = False
@@ -241,22 +241,34 @@ def getAttributes(objs):
         return(data)
     return
     
-# # get the source (RoMa mesh) from which get the attribute
-# def getAttributeSource(link):
-#     # name = link.to_socket.name
-#     # idName = link.to_socket.bl_idname
-#     sockets = [x for x in link.to_node.inputs if x.rna_type.name == 'RoMa_stringCollection_SocketType']
-#     if sockets:
-#         socket = sockets[0]
-#         if socket.is_linked:
-#             # print("linked", socket.name)
-#             parent_node = socket.links[0].from_node
-#             if parent_node.bl_idname == "Input RoMa Mesh" or parent_node.bl_idname == "Input RoMa Selected Mesh":
-#                 items = parent_node.outputs['RoMa Mesh'].object_items
-#                 for i in items:
-#                     print(f"Name {i.name}")
-#                 return(items)
-#     return()
+# a function to walk the nodes, looking for the source 
+# of the attribute, the source being the RoMa objects
+def walkNodes(links):
+    items = None
+    if len(links) > 0:
+        for link in links:
+            sockets = [x for x in link.to_node.inputs]
+            for socket in sockets:
+                if socket.is_linked:
+                    if socket.rna_type.name == 'RoMa_stringCollection_SocketType':
+                        parent_node = socket.links[0].from_node
+                        if parent_node.bl_idname == "Input RoMa Mesh" or parent_node.bl_idname == "Input RoMa Selected Mesh":
+                            items = parent_node.outputs['RoMa Mesh'].object_items
+                            return(items)
+                    else:
+                        next_node = socket.links[0].to_node
+                        if next_node.outputs:
+                            links = next_node.outputs[0].links
+                            if links:
+                                items = walkNodes(links)
+                                if items:
+                                    return(items)
+        # if items:
+        #     print("ti conosco mascherian")
+        #     return(items)
+    else:
+        return None
+
 
     
 
@@ -405,49 +417,27 @@ class RoMaGroupInput(RoMaTreeNode, Node):
     bl_label = 'Group Input - All'
     # bl_icon = 'NODE'
 
-    # text : StringProperty(name='',)
-
     def init(self, context):
-        # self.outputs.new('RoMa_stringCollection_SocketType', 'RoMa Mesh')
         self.outputs.new('RoMa_stringCollection_SocketType', 'RoMa Mesh')
-
-    # def draw_buttons(self, context, layout):
-    #     layout.prop(self, 'text')
     
     def update_selected_objects(self):
-        # self.outputs['RoMa Mesh'].object_items.clear()
         cleanOutputs(self)
         objs = bpy.context.scene.objects
-        attributes = getAttributes(objs)
+        # attributes = getAttributes(objs)
        
-        # romaObjs = []
-        # romaObjs = [obj for obj in objs if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data]
-        # for obj in romaObjs:
-        #     item = self.outputs['RoMa Mesh'].object_items.add()
-        #     item.name = obj.name
+        romaObjs = []
+        romaObjs = [obj for obj in objs if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data]
+        for obj in romaObjs:
+            item = self.outputs['RoMa Mesh'].object_items.add()
+            item.name = obj.name
         # print(f"RoMa meshes collected {len(self.outputs['RoMa Mesh'].object_items)}")
-        
 
-    # def execute(self, context):
-    #     self.outputs['RoMa Mesh'].object_items.clear()
-    #     for obj in bpy.context.selected_objects:
-    #         item = self.outputs['RoMa Mesh'].object_items.add()
-    #         item.name = obj.name
-            
-        # self.outputs['RoMa Mesh'].default_value = bpy.context.selected_objects
-        
-    # Copy function to initialize a copied node from an existing one.
-    def copy(self, node):
-        pass
-        # print("Copying from node ", node)
+    # def copy(self, node):
+    #     pass
 
-    # Free function to clean up on removal.
-    def free(self):
-        pass
-        # print("Removing node ", self, ", Goodbye!")
-        
-    # def draw_color_simple(self):
-    #     return (29, 29, 29, 1)
+    # def free(self):
+    #     pass
+
     
 class RoMaSelectedInput(RoMaTreeNode, Node):
     '''Input node containing the selected RoMa meshes'''
@@ -460,14 +450,14 @@ class RoMaSelectedInput(RoMaTreeNode, Node):
     def update_selected_objects(self):
         cleanOutputs(self)
         objs = bpy.context.selected_objects
-        attributes = getAttributes(objs)
-        if attributes:
-            for a in attributes:
-                print(f"{a}")
-        # romaObjs = [obj for obj in objs if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data]
-        # for obj in romaObjs:
-        #     item = self.outputs['RoMa Mesh'].object_items.add()
-        #     item.name = obj.name
+        # attributes = getAttributes(objs)
+        # if attributes:
+        #     for a in attributes:
+        #         print(f"{a}")
+        romaObjs = [obj for obj in objs if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data]
+        for obj in romaObjs:
+            item = self.outputs['RoMa Mesh'].object_items.add()
+            item.name = obj.name
 
     # def copy(self, node):
     #     pass
@@ -484,13 +474,21 @@ class RoMaAreaAttribute(RoMaTreeNode, Node):
         self.outputs.new('RoMa_attributeCollection_SocketType', 'Area')
         self.outputs['Area'].display_shape = 'DIAMOND_DOT'
         
-    def update(self):
-        self.execute()
+    # def update(self):
+    #     self.execute()
         
     def execute(self):
         cleanOutputs(self)
-        # links = self.outputs['Area'].links
-        # # if the node is linked at least once
+        links = self.outputs['Area'].links
+        source = walkNodes(links)
+        if source:
+            for s in source:
+                obj = bpy.data.objects[s.name]
+                print(f"Source: {obj.name}")
+        else:
+            print("no source")
+        
+        # if the node is linked at least once
         # if len(links) > 0:
         #     for link in links:
         #         # look for the meshes from which get the data
@@ -670,18 +668,16 @@ class RoMaMathNode(RoMaTreeNode, Node):
     AB_Square = ["Square Root", "Inverse Square Root", "Absolute", "Exponent"]
     
     def init(self, context):
-        # self.inputs.new('NodeSocketString', 'Attribute')
-        # self.inputs['Attribute'].hide_value = True
-        # self.inputs['Attribute'].hide = True
-        
-        self.inputs.new('NodeSocketFloat', 'Value', identifier='A')
+        self.inputs.new('RoMa_attributeCollection_SocketType', 'Value', identifier='A')
+        # self.inputs.new('NodeSocketFloat', 'Value', identifier='A')
         self.inputs['A'].display_shape = 'DIAMOND_DOT'
         
-        self.inputs.new('NodeSocketFloat', 'Value', identifier='B')
+        self.inputs.new('RoMa_attributeCollection_SocketType', 'Value', identifier='B')
+        # self.inputs.new('NodeSocketFloat', 'Value', identifier='B')
         self.inputs['B'].display_shape = 'DIAMOND_DOT'
           
-        self.outputs.new('NodeSocketFloat', 'Value')
-        # self.outputs['Value'].hide_value = True
+        self.outputs.new('RoMa_attributeCollection_SocketType', 'Value')
+        # self.outputs.new('NodeSocketFloat', 'Value')
         self.outputs['Value'].display_shape = 'DIAMOND_DOT'
         
         self.update_socket_visibility()
@@ -702,20 +698,21 @@ class RoMaMathNode(RoMaTreeNode, Node):
 
 
         if (selection in self.AB_List + self.AB_Power + self.AB_Log):
-            if self.inputs['A'].is_linked:
-                self.A = self.inputs['A'].links[0].from_socket.default_value
-            else:
-                self.A = self.inputs['A'].default_value
+            pass
+        #     if self.inputs['A'].is_linked:
+        #         self.A = self.inputs['A'].links[0].from_socket.default_value
+        #     else:
+        #         self.A = self.inputs['A'].default_value
             
-            if self.inputs['B'].is_linked:
-                self.B = self.inputs['B'].links[0].from_socket.default_value
-            else:
-                self.B = self.inputs['B'].default_value
-        elif selection in self.AB_Square:
-            if self.inputs['A'].is_linked:
-                self.A = self.inputs['A'].links[0].from_socket.default_value
-            else:
-                self.A = self.inputs['A'].default_value
+        #     if self.inputs['B'].is_linked:
+        #         self.B = self.inputs['B'].links[0].from_socket.default_value
+        #     else:
+        #         self.B = self.inputs['B'].default_value
+        # elif selection in self.AB_Square:
+        #     if self.inputs['A'].is_linked:
+        #         self.A = self.inputs['A'].links[0].from_socket.default_value
+        #     else:
+        #         self.A = self.inputs['A'].default_value
             
         if selection == "Add":
             self.output = self.A + self.B
