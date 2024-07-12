@@ -138,15 +138,24 @@ classes = (
     
     roma_schedule.RoMaTree,
     roma_schedule.RoMa_string_item,
-    roma_schedule.RoMa_attribute_item,
+    roma_schedule.RoMa_keyValueItem,
+    roma_schedule.RoMa_attribute_collectionItem,
+    roma_schedule.RoMa_attribute_propertyGroup,
     roma_schedule.RoMa_stringCollection_Socket,
     # roma_schedule.RoMaTreeNode,
     roma_schedule.RoMaInterfaceSocket,
     roma_schedule.RoMa_attributesCollection_Socket,
+    # roma_schedule.RoMa_attribute_addItemOperator,
+    # roma_schedule.RoMa_attribute_removeItemOperator,
+    # roma_schedule.RoMa_attribute_addKeyValueItemOperator,
+    # roma_schedule.RoMa_attribute_removeKeyValueItemOperator,
+    # roma_schedule.RoMa_attribute_deleteItemOperator,
     roma_schedule.RoMaGroupInput,
     roma_schedule.RoMaSelectedInput,
     roma_schedule.RoMaCaptureAttribute,
+    roma_schedule.RoMaAllAttributes,
     roma_schedule.RoMaAreaAttribute,
+    roma_schedule.RoMaUseAttribute,
     # roma_schedule.RomaMathSubMenuEntries,
     roma_schedule.RoMaIntegerNode,
     roma_schedule.RoMaFloatNode,
@@ -506,6 +515,8 @@ def register():
     #                                         update = roma_schedule.update_schedule_node_editor)
     
     bpy.types.Object.roma_props = bpy.props.PointerProperty(type=roma_menu.romaAddonProperties)
+    
+    # bpy.types.Scene.roma_attribute_collection = bpy.props.PointerProperty(type=roma_schedule.RoMa_attribute_propertyGroup)
 
     # Scene.updating_mesh_attributes_is_active = bpy.props.BoolProperty(
     #                                     name = "update attributes via depsgraph",
@@ -663,7 +674,7 @@ def unregister():
     bpy.types.VIEW3D_MT_mesh_add.remove(roma_menu.roma_add_menu_func)
     
     # del bpy.types.Scene.RoMa_math_node_entries
-    
+    # del bpy.types.Scene.RoMaAttributes
     del bpy.types.WindowManager.toggle_show_data
     del bpy.types.WindowManager.toggle_plot_name
     del bpy.types.WindowManager.toggle_block_name
@@ -686,6 +697,7 @@ def unregister():
     del Scene.attribute_wall_offset
     del Scene.attribute_floor_id
     del Scene.attribute_mass_storeys
+    # del Scene.roma_attribute_collection
     # del Scene.update_attributes
     # del Scene.mouse_keyboard_event
 

@@ -34,6 +34,8 @@ from .roma_schedule import RoMaMathNode, execute_active_node_tree
 # from datetime import datetime
 # import math
 
+previous_selection = {}
+
 class VIEW_3D_OT_show_roma_overlay(Operator):
     bl_idname = "wm.show_roma_overlay"
     bl_label = "Show RoMa selection"
@@ -479,7 +481,7 @@ def update_show_attributes(self, context):
     
 # Manage all the required updates fired by depsgraph_update  
 @persistent
-def updates(scene):
+def updates(scene, depsgraph):
     ###############################################################################
     # update the values in the UI accordingly with the selected faces #############
     ###############################################################################
@@ -559,53 +561,79 @@ def updates(scene):
     if scene.show_selection_overlay_is_active != bpy.context.preferences.addons['roma'].preferences.toggleSelectionOverlay:
         scene.show_selection_overlay_is_active = bpy.context.preferences.addons['roma'].preferences.toggleSelectionOverlay
         bpy.ops.wm.show_roma_overlay('INVOKE_DEFAULT')
+     
         
     ####################################################################################################
     # when a typology is selected, it is necessary to update the #######################################
     # uses in the UIList using the ones stored in scene.roma_typology_uses_name_list ###################
     ####################################################################################################
-    previous = scene.roma_previous_selected_typology
-    current = scene.roma_typology_name_list_index
-    if previous != current:
-        scene.roma_previous_selected_typology = current
-        use_name_list = scene.roma_typology_uses_name_list
-        while len(use_name_list) > 0:
-            index = scene.roma_typology_uses_name_list_index
-            use_name_list.remove(index)
-            scene.roma_typology_uses_name_list_index = min(max(0, index - 1), len(use_name_list) - 1)
-        # add the uses stored in the typology to the current typology use UIList        
-        selected_typology_index = scene.roma_typology_name_list_index
-        if len(scene.roma_typology_name_list) > 0:
-            list = scene.roma_typology_name_list[selected_typology_index].useList    
-            split_list = list.split(";")
-            for el in split_list:
-                scene.roma_typology_uses_name_list.add()
-                temp_list = []    
-                temp_list.append(int(el))
-                last = len(scene.roma_typology_uses_name_list)-1
-                # look for the correspondent use name in roma_use_name_list
-                for use in scene.roma_use_name_list:
-                    if int(el) == use.id:
-                        scene.roma_typology_uses_name_list[last].id = use.id
-                        scene.roma_typology_uses_name_list[last].name = use.name 
-                        break
+    if bpy.context.area:
+        if bpy.context.area.type == 'PROPERTIES':
+            previous = scene.roma_previous_selected_typology
+            current = scene.roma_typology_name_list_index
+            if previous != current:
+                scene.roma_previous_selected_typology = current
+                use_name_list = scene.roma_typology_uses_name_list
+                while len(use_name_list) > 0:
+                    index = scene.roma_typology_uses_name_list_index
+                    use_name_list.remove(index)
+                    scene.roma_typology_uses_name_list_index = min(max(0, index - 1), len(use_name_list) - 1)
+                # add the uses stored in the typology to the current typology use UIList        
+                selected_typology_index = scene.roma_typology_name_list_index
+                if len(scene.roma_typology_name_list) > 0:
+                    list = scene.roma_typology_name_list[selected_typology_index].useList    
+                    split_list = list.split(";")
+                    for el in split_list:
+                        scene.roma_typology_uses_name_list.add()
+                        temp_list = []    
+                        temp_list.append(int(el))
+                        last = len(scene.roma_typology_uses_name_list)-1
+                        # look for the correspondent use name in roma_use_name_list
+                        for use in scene.roma_use_name_list:
+                            if int(el) == use.id:
+                                scene.roma_typology_uses_name_list[last].id = use.id
+                                scene.roma_typology_uses_name_list[last].name = use.name 
+                                break
     
     #############################################################################################
     # is the selection has changed, some  data in the RoMa schedule need to be updated ##########
     #############################################################################################
-    # list of RoMaTreeType
-    trees = [x for x in bpy.data.node_groups if x.bl_idname == "RoMaTreeType"]
-    if trees:
-        for tree in trees:
-            nodes = tree.nodes
-            if nodes:
-                groupInput = [x for x in nodes if x.bl_idname == "Input RoMa Mesh" or x.bl_idname == "Input RoMa Selected Mesh"]
-                if groupInput:
-                    for group in groupInput:
-                        group.update_selected_objects()
-                    # execute the node tree
-                    tree.execute()
-
+    # Detect selection changes or added or remove objects
+    global previous_selection
+    newSelection = False
+    current_selection = {obj.name: obj for obj in scene.objects if obj.select_get()}
+    if current_selection != previous_selection:
+        for obj in current_selection: 
+            mesh = bpy.data.objects[obj].data
+            if "RoMa object" in mesh:
+                newSelection = True
+                break
+    previous_selection = current_selection
+    
+    # this for the new or deleted objects    
+    # for update in depsgraph.updates:
+    #     if isinstance(update.id, bpy.types.Object):
+    #         # newSelection = True
+    #         break
+        
+        
+    if newSelection:          
+        newSelection = False  
+        
+        # list of RoMaTreeType
+        trees = [x for x in bpy.data.node_groups if x.bl_idname == "RoMaTreeType"]
+        if trees:
+            for tree in trees:
+                nodes = tree.nodes
+                if nodes:
+                    groupInput = [x for x in nodes if x.bl_idname == "Input RoMa Mesh" or x.bl_idname == "Input RoMa Selected Mesh"]
+                    if groupInput:
+                        for group in groupInput:
+                            group.update_selected_objects()
+                        # execute the node tree
+                        print(f"updating tree from modalllllllllllllllllllllllllllllllllllllllll")
+                        tree.execute()
+    
 
 
 # class VIEW_3D_OT_update_mesh_attributes(Operator):
