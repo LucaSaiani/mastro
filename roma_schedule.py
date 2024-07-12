@@ -32,6 +32,8 @@ import mathutils
 from nodeitems_utils import NodeCategory, NodeItem
 from gpu_extras.batch import batch_for_shader
 
+from itertools import chain # to identify unique keys in a list of dictionaries
+
 font_info = {
     "font_id": 0,
     "handler": None,
@@ -42,6 +44,37 @@ font_info = {
 #############################################################################
 ########## Node Related funcions  ###########################################
 #############################################################################
+
+# Function to store in a string tree and node name
+# in order to be able to identify the node
+def writeNodeFingerPrint(node):
+    nodeName = node.name
+    treeName = node.id_data.name
+    nodeIndentifier = f"{treeName}::{nodeName}"
+    return(nodeIndentifier)
+
+# Function to unravel the nodeFingerPrint
+def readNodeFingerPrint(fingerPrint):
+    path = fingerPrint.split("::")
+    treeName = path[0]
+    nodeName = path[1]
+    node = bpy.data.node_groups[treeName].nodes[nodeName]
+    return(node)
+
+# function to identify unique keys in a list of dictionaries
+# it is possibile to pass extra parameters as to 
+# sort = True to sort the list
+# and remove = ["A", "B"] to remove said values from the list
+def uniqueKeys(arr, **kwargs):
+    result = list(set(chain.from_iterable(sub.keys() for sub in arr)))
+    for name, value in kwargs.items():
+        if name == "remove":
+            for el in value:
+                if el in result:
+                    result.remove(el)
+        if name == "sort" and value == True:
+            result.sort()
+    return(result)
 
 # add keys to the node to be able to run
 # some tasks when key is updated
@@ -117,13 +150,43 @@ def removeKeyFromNode(self, **kwargs):
                         bpy.context.scene.keyDictionary.remove(i)
                         break
 
+def cleanSocket(link, socketName, inputOutput):
+    if inputOutput == "both":
+        inOuts = ['input', 'output']
+    elif inputOutput == "input":
+        inOuts = ['input']
+    else:
+        inOuts = ['output']
+        
+    for inOut in inOuts:
+        if inOut == "input":
+            l = link.inputs[socketName]
+        else:
+            l = link.outputs[socketName]
+    
+        if l.bl_rna.name == 'RoMa_stringCollection_SocketType':
+            l.object_items.clear()
+        elif l.bl_rna.name == 'RoMa_attributeCollection_SocketType':
+            # l.pop('object_items', None)
+            nodeFingerPrint = writeNodeFingerPrint(link)
+            RoMa_attribute_removeItem(nodeFingerPrint, socketName, inOut)
+            
+    
 def cleanInputs(self):
     for input in self.inputs:
-        input.object_items.clear()
+        cleanSocket(input.node, input.name, "input")
+        # if input.bl_rna.name == 'RoMa_stringCollection_SocketType':
+        #     input.object_items.clear()
+        # elif input.bl_rna.name == 'RoMa_attributeCollection_SocketType':
+        #     input.pop('object_items', None)
                                 
 def cleanOutputs(self):
-    for output in self.outputs:
-        output.object_items.clear()
+     for output in self.outputs:
+        cleanSocket(output.node, output.name, "output") 
+        # if output.bl_rna.name == 'RoMa_stringCollection_SocketType':
+        #     output.object_items.clear()
+        # elif output.bl_rna.name == 'RoMa_attributeCollection_SocketType':
+        #     output.pop('object_items', None)
             
             
 # A Function to check if the links are compatible with the input
@@ -143,11 +206,13 @@ def checkLink(self):
             
 # a function to get all the attributes of the 
 # selected meshes
-def getAttributes(objs):
-    romaObjs = [obj for obj in objs if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data]
+def getAttributes(objNames, attrType):
+    for o in objNames: print(f"ottengo gli attributi per {o.name}")
+    romaObjs = [obj for obj in objNames if obj is not None and bpy.data.objects[obj.name].type == "MESH" and "RoMa object" in bpy.data.objects[obj.name].data]
     if len(romaObjs) > 0:
         data = []
-        for obj in romaObjs:
+        for el in romaObjs:
+            obj = bpy.data.objects[el.name]
             option = None
             phase = None
             if "roma_option_attribute" in obj.roma_props.keys():
@@ -155,6 +220,7 @@ def getAttributes(objs):
             if "roma_phase_attribute" in obj.roma_props.keys():
                 phase = obj.roma_props['roma_phase_attribute']
     
+            meshName = obj.name
             mesh = obj.data
             bm = bmesh.new()
             bm.from_mesh(mesh)
@@ -175,13 +241,15 @@ def getAttributes(objs):
             bMesh_void = bm.faces.layers.int["roma_list_void"]
     
             for f in bm.faces:
+                polyId = f.index
                 storeys = f[bMesh_storeys]
                 # get typology name
-                for n in bpy.context.scene.roma_typology_name_list:
-                    if n.id == f[bMesh_typology]:
-                        typologyId = n.id
-                        typologyName = n.name
-                        break
+                if attrType in ("all", "typology"):
+                    for n in bpy.context.scene.roma_typology_name_list:
+                        if n.id == f[bMesh_typology]:
+                            typologyId = n.id
+                            typologyName = n.name
+                            break
                 floor = 0
                 indexList = 1
                 storeyPreviousGroup = 0
@@ -191,24 +259,24 @@ def getAttributes(objs):
                     storey_A = int((f[bMesh_storey_list_A] / 10 ** pos) % 10)
                     storey_B = int((f[bMesh_storey_list_B] / 10 ** pos) % 10)
                     # print(f"{storey_A} {storey_B}  storey {storey_A * 10 + storey_B}")
-
-                    use_A = int((f[bMesh_use_id_list_A] / 10 ** pos) % 10)
-                    use_B = int((f[bMesh_use_id_list_B] / 10 ** pos) % 10)
-                    useId = use_A * 10 + use_B
-                    # get use name
-                    for n in bpy.context.scene.roma_use_name_list:
-                        if n.id == useId:
-                            useName = n.name
-                            break
+                    if attrType in ("all", "use"):
+                        use_A = int((f[bMesh_use_id_list_A] / 10 ** pos) % 10)
+                        use_B = int((f[bMesh_use_id_list_B] / 10 ** pos) % 10)
+                        useId = use_A * 10 + use_B
+                        # get use name
+                        for n in bpy.context.scene.roma_use_name_list:
+                            if n.id == useId:
+                                useName = n.name
+                                break
 
                     # print(f"{use_A} {use_B} {use}")
-
-                    height_A = int((f[bMesh_height_A] / 10 ** pos) % 10)
-                    height_B = int((f[bMesh_height_B] / 10 ** pos) % 10)
-                    height_C = int((f[bMesh_height_C] / 10 ** pos) % 10)
-                    height_D = int((f[bMesh_height_D] / 10 ** pos) % 10)
-                    height_E = int((f[bMesh_height_E] / 10 ** pos) % 10)
-                    height = height_A * 10 + height_B + height_C * 0.1 + height_D * 0.01 + height_E * 0.001
+                    if attrType in ("all", "height"):
+                        height_A = int((f[bMesh_height_A] / 10 ** pos) % 10)
+                        height_B = int((f[bMesh_height_B] / 10 ** pos) % 10)
+                        height_C = int((f[bMesh_height_C] / 10 ** pos) % 10)
+                        height_D = int((f[bMesh_height_D] / 10 ** pos) % 10)
+                        height_E = int((f[bMesh_height_E] / 10 ** pos) % 10)
+                        height = height_A * 10 + height_B + height_C * 0.1 + height_D * 0.01 + height_E * 0.001
 
                     void = int((f[bMesh_void] / 10 ** pos) % 10)
                     
@@ -217,24 +285,48 @@ def getAttributes(objs):
                     if storeyGroup == floor +1:
                         storeyPreviousGroup = storeyGroup
                         indexList += 1
-                        
-                    area = round(f.calc_area(),2)
-                    if void == 1:
-                        area = 0
-                    tmpData = {
-                                "typologyID"    : typologyId,
-                                "typologyName"  : typologyName,
-                                "floor"         : floor,
-                                "area"          : area,
-                                "useID"         : useId,
-                                "useName"       : useName,
-                                "height"        : height,
-                                "void"          : void,
-                                "option"        : option,
-                                "phase"         : phase,
-                    }
+                    
+                    if attrType in ("all", "area"):
+                        area = round(f.calc_area(),2)
+                        if void == 1:
+                            area = 0
+                    
+                    id = f"{meshName}_{polyId}_{floor}"
+                    if attrType == "all":
+                        tmpData = {
+                                    # "meshName"      : meshName,
+                                    # "polyId"        : polyId,
+                                    "id"            : id,
+                                    "typologyId"    : typologyId,
+                                    "typologyName"  : typologyName,
+                                    "floor"         : floor,
+                                    "area"          : area,
+                                    "useId"         : useId,
+                                    "useName"       : useName,
+                                    "height"        : height,
+                                    "void"          : void,
+                                    "option"        : option,
+                                    "phase"         : phase,
+                        }
+                    elif attrType == "area":
+                        tmpData = {
+                                    # "meshName"      : meshName,
+                                    # "polyId"        : polyId,
+                                    "id"            : id,
+                                    # "floor"         : floor,
+                                    "area"          : area,
+                        }
+                    elif attrType == "use":
+                        tmpData = {
+                                    # "meshName"      : meshName,
+                                    # "polyId"        : polyId,
+                                    "id"            : id,
+                                    # "floor"         : floor,
+                                    "useID"         : useId,
+                                    "useName"       : useName,
+                        }
 
-                    data.append([tmpData])
+                    data.append(tmpData)
                     floor += 1
         
             bm.free
@@ -243,33 +335,58 @@ def getAttributes(objs):
     
 # a function to walk the nodes, looking for the source 
 # of the attribute, the source being the RoMa objects
-def walkNodes(links):
-    items = None
-    if len(links) > 0:
-        for link in links:
-            sockets = [x for x in link.to_node.inputs]
-            for socket in sockets:
-                if socket.is_linked:
-                    if socket.rna_type.name == 'RoMa_stringCollection_SocketType':
-                        parent_node = socket.links[0].from_node
-                        if parent_node.bl_idname == "Input RoMa Mesh" or parent_node.bl_idname == "Input RoMa Selected Mesh":
-                            items = parent_node.outputs['RoMa Mesh'].object_items
-                            return(items)
-                    else:
-                        next_node = socket.links[0].to_node
-                        if next_node.outputs:
-                            links = next_node.outputs[0].links
-                            if links:
-                                items = walkNodes(links)
-                                if items:
-                                    return(items)
-        # if items:
-        #     print("ti conosco mascherian")
-        #     return(items)
-    else:
-        return None
+# def walkNodes(links):
+#     items = None
+#     if len(links) > 0:
+#         for link in links:
+#             sockets = [x for x in link.to_node.inputs]
+#             for socket in sockets:
+#                 if socket.is_linked:
+#                     if socket.rna_type.name == 'RoMa_stringCollection_SocketType':
+#                         parent_node = socket.links[0].from_node
+#                         for output in parent_node.outputs:
+#                             if output.name == 'RoMa Mesh':
+#                                 items = output.object_items
+#                                 return(items)
+#                     else:
+#                         next_node = socket.links[0].to_node
+#                         if next_node.outputs:
+#                             links = next_node.outputs[0].links
+#                             if links:
+#                                 items = walkNodes(links)
+#                                 if items:
+#                                     return(items)
+#     else:
+#         return None
 
 
+# a function used to store the order of the children nodes
+# used to run them in the proper order
+def walkBackwards(parentNode, node, depth):
+    depth += 1
+    if node.inputs:
+        inputs = node.inputs
+        for input in inputs:
+            if input.links:
+                links = input.links
+                for link in links:
+                    nextNode = link.from_node
+                    nodeData = { "node" : nextNode,
+                                "depth": depth
+                               }
+                    parentNode.executionOrder.append(nodeData)
+                    walkBackwards(parentNode, nextNode, depth)
+    else: # if there are no inputs, it may be that the node is an attribute node
+        if node.bl_description and node.bl_description == 'Attribute':
+            sourceObjects = parentNode.outputs['RoMa Mesh'].object_items
+            node.objNames.clear()
+            for obj in sourceObjects:
+                item = node.objNames.add()
+                item.name = obj.name
+                print(f"Assegno {item.name}  a {parentNode.name}")
+                
+            # print(f"maskerina {node.name}   {node.objs}")
+    return()
     
 
 # execute the active node tree
@@ -292,8 +409,214 @@ def update_schedule_node_editor(self, context):
         treeName = context.active_node.id_data.name
         nodeIdentifier = f"{treeName}::{nodeName}"
         bpy.ops.node.schedule_viewer(sourceNode = nodeIdentifier)
+        
+# Function to add item to object_items
+def RoMa_attribute_addItem(nodeFingerPrint, socketName, inputOutput):
+    node = readNodeFingerPrint(nodeFingerPrint)
+    if inputOutput == "both":
+        sockets = ['input', 'output']
+    elif inputOutput == "input":
+        sockets = ['input']
+    else:
+        sockets = ['output']
+        
+    for socket in sockets:
+        if socket == "input":
+            collection = node.inputs[socketName].object_items
+        else:
+            collection = node.outputs[socketName].object_items
+        item = collection.items.add()
+        item.name = f"Item {len(collection.items)-1}"
+        collection.active_index = len(collection.items) - 1
+        
+    return {'FINISHED'}
+
+# Function to remove items from object_items
+def RoMa_attribute_removeItem(nodeFingerPrint, socketName ,inputOutput):
+    if inputOutput == "both":
+        sockets = ['input', 'output']
+    elif inputOutput == "input":
+        sockets = ['input']
+    else:
+        sockets = ['output']
+        
+    node = readNodeFingerPrint(nodeFingerPrint)
+    for socket in sockets:
+        if socket == "input":
+            collection = node.inputs[socketName].object_items
+        else:
+            collection = node.outputs[socketName].object_items
+        
+        collectionSize = len(collection.items)
+        while collectionSize > 0:
+            collection.items.remove(collection.active_index)
+            collection.active_index = min(max(0, collection.active_index - 1), len(collection.items) - 1)
+            collectionSize -= 1
+        
+        # if collection.active_index >= 0 and collection.active_index < len(collection.items):
+        #     collection.items.remove(collection.active_index)
+        #     collection.active_index = min(max(0, collection.active_index - 1), len(collection.items) - 1)
+    return {'FINISHED'}
+
+# Function to add a key-value item to an element of the collection
+def RoMa_attribute_addKeyValueItem(**kwargs):
+    params = {
+        'node': None,
+        'item_index': None,
+        'key': None,
+        'valueType': None,
+        'stringValue': None,
+        'floatValue': None,
+        'inputOutput' : None,
+        'socketName' : None
+    }
+    
+    params.update(kwargs)
+    
+    node = readNodeFingerPrint(params['node'])
+    item_index = params['item_index']
+    key = params['key']
+    valueType = params['valueType']
+    stringValue = params['stringValue']
+    floatValue = params['floatValue']
+    inputOutput = params['inputOutput']
+    socketName = params['socketName']
+    
+    if inputOutput == "both":
+        sockets = ['input', 'output']
+    elif inputOutput == "input":
+        sockets = ['input']
+    else:
+        sockets = ['output']
+    
+    for socket in sockets:
+        if socket == "input":
+            collection = node.inputs[socketName].object_items
+        else:
+            collection = node.outputs[socketName].object_items
+    
+        item = collection.items[item_index]
+        kv_item = item.key_value_items.add()
+        kv_item.name = key
+        kv_item.value_type = valueType
+        
+        if valueType == "FLOAT":
+            kv_item.value_float = floatValue
+        else:
+            kv_item.value_type = "STRING"
+            kv_item.value_string = stringValue
+    
+    return {'FINISHED'}
+
+# Function to remove a key-value item from an element of the collection
+# def RoMa_attribute_removeKeyValueItem(self, **kwargs):
+#     params = {
+#         'node': None,
+#         'item_index': None,
+#         'key_value_index': None,
+#         'inputOutput' : None,
+#         'socketName' : None
+#     }
+    
+#     params.update(kwargs)
+    
+#     node = readNodeFingerPrint(params['node'])
+#     item_index = params['item_index']
+#     key_value_index = params['key_value_index']
+#     inputOutput = params['inputOutput']
+#     socketName = params['socketName']
+
+#     if inputOutput == "both":
+#         sockets = ['input', 'output']
+#     elif inputOutput == "input":
+#         sockets = ['input']
+#     else:
+#         sockets = ['output']
+    
+#     for socket in sockets:
+#         if socket == "input":
+#             collection = node.inputs[socketName].object_items
+#         else:
+#             collection = node.outputs[socketName].object_items
+
+#         item = collection.items[item_index]
+#         if key_value_index >= 0 and key_value_index < len(item.key_value_items):
+#             item.key_value_items.remove(self.key_value_index)
+#     return {'FINISHED'}
+
+# a function to copy attributes between sockets
+def copyAttributesToSocket(object_items, nodeFingerPrint, socketName, inputOutput):
+    node = readNodeFingerPrint(nodeFingerPrint)
+    if inputOutput == "both":
+        sockets = ['input', 'output']
+    elif inputOutput == "input":
+        sockets = ['input']
+    else:
+        sockets = ['output']
             
+    for attr in object_items:
+        RoMa_attribute_addItem(nodeFingerPrint, socketName, inputOutput)
+        for socket in sockets:
+            if socket == "input":
+                attributeIndex = node.inputs[socketName].object_items.active_index
+            else:
+                attributeIndex = node.outputs[socketName].object_items.active_index
+        
+            for key in attr['key_value_items']:
+                if key['value_type'] == "FLOAT":
+                    RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+                                                    item_index=attributeIndex,
+                                                    key=key['name'],
+                                                    valueType=key['value_type'],
+                                                    floatValue=key['value_float'],
+                                                    inputOutput=socket,
+                                                    socketName=socketName
+                                                    )
+                else:
+                    RoMa_attribute_addKeyValueItem(node=nodeFingerPrint,
+                                                    item_index=attributeIndex,
+                                                    key=key['name'],
+                                                    valueType=key['value_type'],
+                                                    stringValue=key['value_string'],
+                                                    inputOutput=socket,
+                                                    socketName=socketName
+                                                    )
+    
+    
             
+#############################################################################
+########## Classes to  manage attribute collection  #########################
+#############################################################################                
+
+            
+# Class to store the name of RoMa objects
+# This class is used to define the list in 
+# RoMa_stringCollection_Socket and in the keys
+class RoMa_string_item(PropertyGroup):
+    name: StringProperty(name="Name")
+
+
+# Define a key-value pair used in RoMa_attribute_collectionItem
+class RoMa_keyValueItem(bpy.types.PropertyGroup):
+    # key: bpy.props.StringProperty(name="Key", description="Element's key")
+    value_string: bpy.props.StringProperty(name="String value", description="String value", default="")
+    value_float: bpy.props.FloatProperty(name="Float value", description="Float value", default=-1)
+    value_type: bpy.props.StringProperty( name="Value Type", description="Type value", default='FLOAT')
+
+
+# Define the elemnent of the collection RoMa_attribute_propertyGroup
+# It contains name and a collection of items
+class RoMa_attribute_collectionItem(bpy.types.PropertyGroup):
+    # name: bpy.props.StringProperty(name="Name", description="Collection element name")
+    key_value_items: bpy.props.CollectionProperty(type=RoMa_keyValueItem)
+
+    
+# # Class to store the attributes of RoMa objects
+class RoMa_attribute_propertyGroup(PropertyGroup):
+    items: bpy.props.CollectionProperty(type=RoMa_attribute_collectionItem)
+    active_index: bpy.props.IntProperty()
+
+
 #############################################################################
 ########## RoMa Nodetree   ##################################################
 #############################################################################           
@@ -307,38 +630,7 @@ class RoMaTree(NodeTree):
     
     def execute(self):
         for node in self.nodes:
-            node.execute()
-            
-# Class to store the name of RoMa objects
-# This class is used to define the list in 
-# RoMa_stringCollection_Socket
-class RoMa_string_item(PropertyGroup):
-    name: StringProperty(name="Name")
-
-# Class to store the attributes of RoMa objects
-# This class is used to define the list in 
-# RoMa_attributesCollection_Socket   
-class RoMa_attribute_item(PropertyGroup):
-    meshName : StringProperty(
-            name="meshName",
-            description="Name of the source mesh",
-            default="")
-    
-    polyId : IntProperty(
-            name="polyId",
-            description="Index of the source polygon",
-            default=0)
-    
-    id : StringProperty(
-            name="Id",
-            description="Unique identifier of the floor. Format: meshName_polyId_floor",
-            default="")
-    
-    area : FloatProperty(
-            name="Area",
-            description="Floor area",
-            default=0)
-    
+            node.execute()    
     
 # RoMa custom socket type
 # used to collect mesh names
@@ -348,6 +640,7 @@ class RoMa_stringCollection_Socket(NodeSocket):
     bl_label = "RoMa Mesh Node Socket"
     
     object_items: CollectionProperty(type=RoMa_string_item)
+    # object_items = []
    
     # Optional function for drawing the socket input value
     def draw(self, context, layout, node, text):
@@ -365,11 +658,15 @@ class RoMa_attributesCollection_Socket(NodeSocket):
     bl_idname = 'RoMa_attributeCollection_SocketType'
     bl_label = "RoMa Mesh Node Socket"
     
-    object_items: CollectionProperty(type=RoMa_attribute_item)
+    object_items: PointerProperty(type=RoMa_attribute_propertyGroup)
+    # object_items : bpy.types.RoMaAttributes()
+    # object_items : list = []
+    
    
     # Optional function for drawing the socket input value
     def draw(self, context, layout, node, text):
         layout.label(text=text)
+        
 
     # Socket color
     @classmethod
@@ -415,28 +712,31 @@ class RoMaGroupInput(RoMaTreeNode, Node):
     '''Input node containing all the RoMa meshes existing in the scene'''
     bl_idname = 'Input RoMa Mesh'
     bl_label = 'Group Input - All'
-    # bl_icon = 'NODE'
 
     def init(self, context):
         self.outputs.new('RoMa_stringCollection_SocketType', 'RoMa Mesh')
     
     def update_selected_objects(self):
-        cleanOutputs(self)
-        objs = bpy.context.scene.objects
-        # attributes = getAttributes(objs)
-       
-        romaObjs = []
-        romaObjs = [obj for obj in objs if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data]
-        for obj in romaObjs:
-            item = self.outputs['RoMa Mesh'].object_items.add()
-            item.name = obj.name
-        # print(f"RoMa meshes collected {len(self.outputs['RoMa Mesh'].object_items)}")
+        if self.outputs['RoMa Mesh'].is_linked:
+            cleanOutputs(self)
+            objs = bpy.context.scene.objects
+            # attributes = getAttributes(objs)
+        
+            # romaObjs = []
+            romaObjs = [obj for obj in objs if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data]
+            # romaObjs = [obj.name for obj in objs if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data]
+            # self.outputs['RoMa Mesh'].object_items = romaObjs
+            for obj in romaObjs:
+                item = self.outputs['RoMa Mesh'].object_items.add()
+                item.name = obj.name
+            print(f"RoMa meshes collected {len(self.outputs['RoMa Mesh'].object_items)}")
 
-    # def copy(self, node):
-    #     pass
-
-    # def free(self):
-    #     pass
+    def update(self):
+        self.update_selected_objects()
+        
+    def execute(self):
+        self.update_selected_objects()
+        
 
     
 class RoMaSelectedInput(RoMaTreeNode, Node):
@@ -448,64 +748,173 @@ class RoMaSelectedInput(RoMaTreeNode, Node):
         self.outputs.new('RoMa_stringCollection_SocketType', 'RoMa Mesh')
     
     def update_selected_objects(self):
-        cleanOutputs(self)
-        objs = bpy.context.selected_objects
-        # attributes = getAttributes(objs)
-        # if attributes:
-        #     for a in attributes:
-        #         print(f"{a}")
-        romaObjs = [obj for obj in objs if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data]
-        for obj in romaObjs:
-            item = self.outputs['RoMa Mesh'].object_items.add()
-            item.name = obj.name
+        if self.outputs['RoMa Mesh'].is_linked:
+            cleanOutputs(self)
 
-    # def copy(self, node):
-    #     pass
+            objs = bpy.context.selected_objects
+            romaObjs = [obj for obj in objs if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data]
+            for obj in romaObjs:
+                item = self.outputs['RoMa Mesh'].object_items.add()
+                item.name = obj.name
+            print(f"RoMa meshes collected {len(self.outputs['RoMa Mesh'].object_items)}")
 
-    # def free(self):
-        # pass
+    def update(self):
+        self.update_selected_objects()  
+      
+    def execute(self):
+        self.update_selected_objects()
+
+    
+class RoMaAllAttributes(RoMaTreeNode, Node):
+    '''RoMa All Available Attributes'''
+    bl_idname = 'RoMa All Attributes'
+    bl_label = 'RoMa Attributes'
+    bl_description = 'Attribute'
+    
+    objNames : CollectionProperty(type=RoMa_string_item)
+    
+    def init(self, context):
+        self.outputs.new('RoMa_attributeCollection_SocketType', 'Attributes')
+        self.outputs['Attributes'].display_shape = 'DIAMOND_DOT'
+        
+    def manualExecute(self):
+        print(f"eseguo manualmente all attributes")
+        cleanSocket(self, 'Attributes', 'output')
+
+        nodeFingerPrint = writeNodeFingerPrint(self)
+        attributes = getAttributes(self.objNames, "all")
+        if attributes:
+            for attr in attributes:
+                # add a new entry to allocate parameters
+                RoMa_attribute_addItem(nodeFingerPrint, "Attributes", "output")
+                
+                attributeIndex = self.outputs['Attributes'].object_items.active_index
+                # add keys to the entry
+                for key, value in attr.items():
+                    try:
+                        float(value)
+                        RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+                                                                item_index=attributeIndex,
+                                                                key=key,
+                                                                valueType="FLOAT",
+                                                                floatValue=value,
+                                                                socketName='Attributes'
+                                                                )
+                    except ValueError:
+                        RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+                                                                item_index=attributeIndex,
+                                                                key=key,
+                                                                valueType="STRING",
+                                                                stringValue=value,
+                                                                socketName='Attributes'
+                                                                )
+
+            print("-------------------------------")
+            print(f"stampo gli attributi ottenuti nel nodo {self.name}")
+            items = self.outputs['Attributes'].object_items.items
+            for item in items:
+                print(f"Item name {item.name} has {len(item['key_value_items'])} attributes")
+                for key in item['key_value_items']:
+                    if key['value_type'] == "STRING":
+                        print(f"key {key['name']} has value {key['value_string']} ")
+                    else:
+                        print(f"key {key['name']} has value {key['value_float']}")
+
+            
+    
+    def execute(self):
+        pass
+
+         
     
 class RoMaAreaAttribute(RoMaTreeNode, Node):
     '''RoMa Area Attribute'''
     bl_idname = 'RoMa Area Attribute'
-    bl_label = "RoMa Area"
+    bl_label = 'RoMa Area'
+    bl_description = 'Attribute'
+    
+    objNames : CollectionProperty(type=RoMa_string_item)
     
     def init(self, context):
         self.outputs.new('RoMa_attributeCollection_SocketType', 'Area')
         self.outputs['Area'].display_shape = 'DIAMOND_DOT'
-        
-    # def update(self):
-    #     self.execute()
-        
+
+    def manualExecute(self):
+        cleanSocket(self, 'Area', 'output')
+
+        nodeFingerPrint = writeNodeFingerPrint(self)
+        attributes = getAttributes(self.objNames, "area")
+        if attributes:
+            for attr in attributes:
+                # add a new entry to allocate parameters
+                RoMa_attribute_addItem(nodeFingerPrint, "Area", "output")
+                attributeIndex = self.outputs['Area'].object_items.active_index
+                # add keys to the entry
+                for key, value in attr.items():
+                    try:
+                        float(value)
+                        RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+                                                                item_index=attributeIndex,
+                                                                key=key,
+                                                                valueType="FLOAT",
+                                                                floatValue=value,
+                                                                socketName='Area'
+                                                                )
+                    except ValueError:
+                        RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+                                                                item_index=attributeIndex,
+                                                                key=key,
+                                                                valueType="STRING",
+                                                                stringValue=value,
+                                                                socketName='Area'
+                                                                )
     def execute(self):
-        cleanOutputs(self)
-        links = self.outputs['Area'].links
-        source = walkNodes(links)
-        if source:
-            for s in source:
-                obj = bpy.data.objects[s.name]
-                print(f"Source: {obj.name}")
-        else:
-            print("no source")
-        
-        # if the node is linked at least once
-        # if len(links) > 0:
-        #     for link in links:
-        #         # look for the meshes from which get the data
-        #         # return the meshe name
-        #         source = getAttributeSource(link)
-        #         if len(source) > 0:
-        #             # self.outputs['Area'].object_items.clear()
-        #             for romaMesh in source:
-        #                 obj = bpy.data.objects[romaMesh.name]
-        #                 polygons = obj.data.polygons
-        #                 for poly in polygons:
-        #                     item = self.outputs['Area'].object_items.add()
-        #                     item.meshName = romaMesh.name
-        #                     item.polyId = poly.index
-        #                     item.id = romaMesh.name + "_" + str(poly.index)
-        #                     item.area = poly.area
-       
+        pass
+
+            
+class RoMaUseAttribute(RoMaTreeNode, Node):
+    '''RoMa Use Attribute'''
+    bl_idname = 'RoMa Use Attribute'
+    bl_label = 'RoMa Use'
+    bl_description = 'Attribute'
+    
+    objNames : CollectionProperty(type=RoMa_string_item)
+    
+    def init(self, context):
+        self.outputs.new('RoMa_attributeCollection_SocketType', 'Use')
+        self.outputs['Use'].display_shape = 'DIAMOND_DOT'
+
+    def manualExecute(self):
+        cleanSocket(self, 'Use', 'output')
+
+        nodeFingerPrint = writeNodeFingerPrint(self)
+        attributes = getAttributes(self.objNames, "use")
+        if attributes:
+            for attr in attributes:
+                # add a new entry to allocate parameters
+                RoMa_attribute_addItem(nodeFingerPrint, "Use", "output")
+                attributeIndex = self.outputs['Use'].object_items.active_index
+                # add keys to the entry
+                for key, value in attr.items():
+                    try:
+                        float(value)
+                        RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+                                                                item_index=attributeIndex,
+                                                                key=key,
+                                                                valueType="FLOAT",
+                                                                floatValue=value,
+                                                                socketName='Use'
+                                                                )
+                    except ValueError:
+                        RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+                                                                item_index=attributeIndex,
+                                                                key=key,
+                                                                valueType="STRING",
+                                                                stringValue=value,
+                                                                socketName='Use'
+                                                                )
+    def execute(self):
+        pass
                             
    
 class RoMaCaptureAttribute(RoMaTreeNode, Node):
@@ -513,71 +922,145 @@ class RoMaCaptureAttribute(RoMaTreeNode, Node):
     bl_idname = 'Capture RoMa attribute'
     bl_label = "Capture attribute"
     
-    inputList = ["RoMa Mesh", "Attribute"]
-    outputList = ["RoMa Mesh", "Attribute"]
+    inputList = ["RoMa Mesh", "Attributes"]
+    outputList = ["RoMa Mesh", "Attributes"]
     
-    validated = True
+    # validated = True
+    executionOrder = []
     
     def init(self, context):
         self.inputs.new('RoMa_stringCollection_SocketType', 'RoMa Mesh')
-        self.inputs.new('RoMa_attributeCollection_SocketType', 'Attribute')
-        self.inputs['Attribute'].display_shape = 'DIAMOND_DOT'
-        self.inputs['Attribute'].hide_value = True
+        self.inputs.new('RoMa_attributeCollection_SocketType', 'Attributes')
+        self.inputs['Attributes'].display_shape = 'DIAMOND_DOT'
+        self.inputs['Attributes'].hide_value = True
         
         self.outputs.new('RoMa_stringCollection_SocketType', 'RoMa Mesh')
-        self.outputs.new('RoMa_attributeCollection_SocketType', 'Attribute')
-        self.outputs['Attribute'].display_shape = 'DIAMOND_DOT'
-        
-        # self.internal_links.new(self.inputs['RoMa Mesh'], self.outputs['RoMa Mesh'])
-        # self.internal_links.new(self.inputs['Attribute'], self.outputs['Attribute'])
+        self.outputs.new('RoMa_attributeCollection_SocketType', 'Attributes')
+        self.outputs['Attributes'].display_shape = 'DIAMOND_DOT'
                                                                        
         addKeysToNode(self, inputs=self.inputList, outputs=self.inputList)
         
     def copy(self, node):
         addKeysToNode(self, inputs=self.inputList, outputs=self.inputList)
-        self.validated = True
+        cleanInputs(self)
+        cleanOutputs(self)
+        # self.validated = True
         
     def free(self):
         removeKeyFromNode(self, inputs=self.inputList, outputs=self.inputList)
+        
                 
     # def update(self):
     #     self.validated = checkLink(self)
     #     clearInputs(self)
     def update(self):
-        self.execute()
+        print("capture attribute eseguo dopo update")
+        if checkLink(self):
+            if self.inputs['RoMa Mesh'].is_linked:
+                self.readWrite_RoMa_mesh()
+                if self.inputs['Attributes'].is_linked:
+                    self.readWrite_Attribute()
+            else:
+                cleanSocket(self, 'RoMa Mesh', 'both')
+            
+            if self.inputs['Attributes'].is_linked == False:
+                cleanSocket(self, 'Attributes' , 'both')
+                
+
+    def readWrite_RoMa_mesh(self):
+        cleanSocket(self, 'RoMa Mesh', 'both')
+        object_items = self.inputs['RoMa Mesh'].links[0].from_socket.object_items
+        for obj in object_items:
+            itemIn = self.inputs['RoMa Mesh'].object_items.add()
+            itemOut = self.outputs['RoMa Mesh'].object_items.add()
+            itemIn.name = obj.name
+            itemOut.name = obj.name
+            
+        ob = self.inputs['RoMa Mesh'].object_items
+        print(f"oggetti linkati : {len(ob)}")
+        for o in ob: print(f"{o.name}")
         
-        # if self.inputs['RoMa Mesh'].is_linked:
-        #     pass        
-        # else:
-        #     self.outputs['RoMa Mesh'].object_items.clear()
+    def readWrite_Attribute(self):
+        cleanSocket(self, 'Attributes', 'both')
+        child = self.inputs['Attributes'].links[0].from_node
+        nodeData = {    "node" : child,
+                        "depth": 0
+                    }
+        self.executionOrder = [nodeData]
+        # all the children nodes are searched and found, sorted 
+        # from the deepest, and the run in that order
+        print(f"inizio a camminare al contrario")
+        walkBackwards(self, child, depth = 0)
+        sortedOrder = sorted(self.executionOrder, key=lambda x: x['depth'], reverse=True)
+        for el in sortedOrder:
+            if hasattr(el['node'], "manualExecute"):
+                print(f"Capture attribute esegue: {el}")
+                el['node'].manualExecute()
+        print(f"copio gli attributi in output di capture attribute")                
+        object_items = self.inputs['Attributes'].links[0].from_socket.object_items.items
         
-        # if self.inputs['Attribute'].is_linked:
-        #     pass        
-        # else:
-        #     self.outputs['Attribute'].object_items.clear()
+        nodeFingerPrint = writeNodeFingerPrint(self)
+        copyAttributesToSocket(object_items, nodeFingerPrint, "Attributes", "both")
+        # for attr in object_items:
+        #     RoMa_attribute_addItem(nodeFingerPrint, "both")
+        #     attributeIndex = self.outputs['Attributes'].object_items.active_index
+            
+        #     for key in attr['key_value_items']:
+        #         if key['value_type'] == "FLOAT":
+        #             RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+        #                                             item_index=attributeIndex,
+        #                                             key=key['name'],
+        #                                             valueType=key['value_type'],
+        #                                             floatValue=key['value_float'],
+        #                                             inputOutput="both"
+        #                                             )
+        #         else:
+        #             RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+        #                                             item_index=attributeIndex,
+        #                                             key=key['name'],
+        #                                             valueType=key['value_type'],
+        #                                             stringValue=key['value_string']
+        #                                             inputOutput="both"
+        #                                             )
+            
+            
+        
+        # for obj in object_items:
+        #     itemIn = self.inputs['Attributes'].object_items.add()
+        #     itemOut = self.outputs['Attributes'].object_items.add()
+        #     itemIn.name = obj.name
+        #     itemOut.name = obj.name
+            
+            
+            
+        print(f"gli attributi copiati in capture attribute sono:-------------------------------------")
+        items = self.outputs['Attributes'].object_items.items
+        for item in items:
+            print()
+            print(f"Item name {item.name} has {len(item['key_value_items'])} attributes")
+            for key in item['key_value_items']:
+                if key['value_type'] == "STRING":
+                    print(f"key {key['name']} has value {key['value_string']} ")
+                else:
+                    print(f"key {key['name']} has value {key['value_float']}")
+             
+        
         
         
     def execute(self):
-        # self.update()
-        # self.outputs['RoMa Mesh'].object_items.clear()
-        # self.outputs['Attribute'].object_items.clear()
+        print(f"capture attribute eseguo automatico")
         if checkLink(self):
-            cleanInputs(self)
-            cleanOutputs(self)
             if self.inputs['RoMa Mesh'].is_linked:
-                input_socket = self.inputs['RoMa Mesh'].links[0].from_socket
-                object_items = input_socket.object_items
-                for obj in object_items:
-                    item = self.outputs['RoMa Mesh'].object_items.add()
-                    item.name = obj.name
-                if self.inputs['Attribute'].is_linked:
-                    input_socket = self.inputs['Attribute'].links[0].from_socket
-                    object_items = input_socket.object_items
-                    for obj in object_items:
-                        item = self.outputs['Attribute'].object_items.add()
-                        # duplicate attributes
-                        for prop_name in obj.__annotations__.keys():
-                            setattr(item, prop_name, getattr(obj, prop_name))
+                self.readWrite_RoMa_mesh()
+                if self.inputs['Attributes'].is_linked:
+                    self.readWrite_Attribute()
+                    
+                    
+                    
+                   
+
+                
+                
                             
                         
 
@@ -646,39 +1129,62 @@ class RoMaMathNode(RoMaTreeNode, Node):
         default="Add",
         update=lambda self, context: self.update_socket_visibility()
     )
+
     
+    dropdown_A : EnumProperty(
+        items=lambda self, context : self.getAvailableAttributes("A"),
+        description="Attribute from field A to which apply mathematical function with B"
+    )
+    
+    dropdown_B : EnumProperty(
+        items=lambda self, context: self.getAvailableAttributes("B"),
+        description="Attribute from field B to which apply mathematical function with A"
+    )
+    
+   
     # RoMa_math_node_entries: PointerProperty(type=dropdown_box_maths)
+    # A_list : CollectionProperty(type=RoMa_attribute_item)
+    # A_value : FloatProperty(
+    #             name='A',
+    #             precision=3,)
     
-    output : FloatProperty(
-                name='output',
-                precision=3,)
+    # B_list : CollectionProperty(type=RoMa_attribute_item) 
+    # B_value : FloatProperty(
+    #             name='B',
+    #             precision=3,)
+    # output_list : CollectionProperty(type=RoMa_attribute_item)
+    # output : FloatProperty(
+    #             name='output',
+    #             precision=3,)
+   
     
-    A : FloatProperty(
-                name='A',
-                precision=3,)
-     
-    B : FloatProperty(
-                name='B',
-                precision=3,)
+    
     
     inputList = ["A","B"]
     AB_List = ['Add', 'Subtract', 'Multiply', 'Divide']
     AB_Power = ['Power']
     AB_Log = ["Logarithm"]
     AB_Square = ["Square Root", "Inverse Square Root", "Absolute", "Exponent"]
+    AB_Types_Values = ["int", "float"]
     
     def init(self, context):
-        self.inputs.new('RoMa_attributeCollection_SocketType', 'Value', identifier='A')
-        # self.inputs.new('NodeSocketFloat', 'Value', identifier='A')
+        # self.inputs.new('RoMa_attributeCollection_SocketType', 'Attributes', identifier='A_list')
+        self.inputs.new('NodeSocketFloat', 'A Value', identifier='A')
+        # self.inputs['A_list'].display_shape = 'DIAMOND_DOT'
         self.inputs['A'].display_shape = 'DIAMOND_DOT'
         
-        self.inputs.new('RoMa_attributeCollection_SocketType', 'Value', identifier='B')
-        # self.inputs.new('NodeSocketFloat', 'Value', identifier='B')
+        
+        # self.inputs.new('RoMa_attributeCollection_SocketType', 'Value', identifier='B_list')
+        self.inputs.new('NodeSocketFloat', 'B Value', identifier='B')
+        # self.inputs['B_list'].display_shape = 'DIAMOND_DOT'
         self.inputs['B'].display_shape = 'DIAMOND_DOT'
+        
           
-        self.outputs.new('RoMa_attributeCollection_SocketType', 'Value')
-        # self.outputs.new('NodeSocketFloat', 'Value')
-        self.outputs['Value'].display_shape = 'DIAMOND_DOT'
+        self.outputs.new('RoMa_attributeCollection_SocketType', 'Value', identifier='output_list')
+        self.outputs.new('NodeSocketFloat', 'Value', identifier='output')
+        self.outputs['output_list'].display_shape = 'DIAMOND_DOT'
+        self.outputs['output'].display_shape = 'DIAMOND_DOT'
+        
         
         self.update_socket_visibility()
         
@@ -691,70 +1197,153 @@ class RoMaMathNode(RoMaTreeNode, Node):
     def free(self):
         removeKeyFromNode(self, inputs=self.inputList)
 
-    
+    def manualExecute(self):
+        # print(f"eseguo math {self.name}")
+        pass
+        
+        
     def execute(self):
-        # props = self.RoMa_math_node_entries
+        # if checkLink(self):
         selection = self.dropdown_box_math
-
-
         if (selection in self.AB_List + self.AB_Power + self.AB_Log):
-            pass
-        #     if self.inputs['A'].is_linked:
-        #         self.A = self.inputs['A'].links[0].from_socket.default_value
-        #     else:
-        #         self.A = self.inputs['A'].default_value
+            if self.inputs['A'].is_linked:
+                socket = self.inputs['A'].links[0].from_socket
+                if hasattr(socket, 'object_items'):
+                    A = socket.object_items
+                else:
+                    A = socket.default_value
+            else:
+                A = self.inputs['A'].default_value
             
-        #     if self.inputs['B'].is_linked:
-        #         self.B = self.inputs['B'].links[0].from_socket.default_value
-        #     else:
-        #         self.B = self.inputs['B'].default_value
-        # elif selection in self.AB_Square:
-        #     if self.inputs['A'].is_linked:
-        #         self.A = self.inputs['A'].links[0].from_socket.default_value
-        #     else:
-        #         self.A = self.inputs['A'].default_value
+            if self.inputs['B'].is_linked:
+                socket = self.inputs['B'].links[0].from_socket
+                if hasattr(socket, 'object_items'):
+                    B = socket.object_items
+                else:
+                    B = socket.default_value
+            else:
+                B = self.inputs['B'].default_value
+
+        elif selection in self.AB_Square:
+            if self.inputs['A'].is_linked:
+                socket = self.inputs['A'].links[0].from_socket
+                if hasattr(socket, 'object_items'):
+                    A = socket.object_items
+                else:
+                    A = socket.default_value
+            else:
+                A = self.inputs['A'].default_value
             
+        output = {"type" : None, "value" : 0}
         if selection == "Add":
-            self.output = self.A + self.B
+            if type(A).__name__ in self.AB_Types_Values and type(B).__name__ in  self.AB_Types_Values:
+                output["type"] = "value"
+                output["value"] = A + B
+            elif type(A).__name__ == "bpy_prop_collection_idprop" and type(B).__name__ in  self.AB_Types_Values:
+                output["type"] = "list"
+                for el in A:
+                    print(f"input {el.area}")
+           
         elif selection == "Subtract":
-            self.output = self.A - self.B
+            output = A - B
         elif selection == "Multiply":
-            self.output = self.A * self.B
+            output = A * B
         elif selection == "Divide":
-            self.output = self.A / self.B
+            output = A / B
         elif selection == "Power":
-            self.output = self.A ** self.B
+            output = A ** B
         elif selection == "Logarithm":
-            self.output = math.log(self.A, self.B)
+            output = math.log(A, B)
         elif selection == "Square Root":
-            self.output = math.sqrt(self.A)
+            output = math.sqrt(A)
         elif selection == "Inverse Square Root":
-            self.output = 1/math.sqrt(self.A)
+            output = 1/math.sqrt(A)
         elif selection == "Absolute":
-            self.output = abs(self.A)
+            output = abs(A)
         elif selection == "Exponent":
-            self.output = math.exp(self.A)
+            output = math.exp(A)
             
-        self.outputs['Value'].default_value = self.output
-            
-    def update(self):
-        self.execute()
+       
+        # if output["type"] == "value":
+        #     self.outputs['output'].default_value = output["value"]
+        #     print(f"Output {self.outputs['output'].default_value}")
+        # else:
+        #     # cleanOutputs(self)
+        #     for attr in results:
+        #         item = self.outputs['output_list'].object_items.add()
+        #         for key, value in attr[0].items():
+        #             setattr(item, key, value)
+                    
+        #     for i in self.outputs['output_list'].object_items:
+        #         print(f"Outputs {i.area}")
         
             
     def draw_buttons(self, context, layout):
+        cleanInputs(self)
         layout.prop(self, "dropdown_box_math", text="")
-        # props = self.RoMa_math_node_entries
+        if self.inputs[0].is_linked and self.inputs[0].links:
+            if self.inputs[0].links[0].from_node.outputs:
+                linked_output = self.inputs[0].links[0].from_socket
+                if linked_output.rna_type.name == 'RoMa_attributeCollection_SocketType':
+                    layout.prop(self, "dropdown_A", text="A")
+        if self.inputs[1].is_linked and self.inputs[1].links:
+            if self.inputs[1].links[0].from_node.outputs:
+                linked_output = self.inputs[1].links[0].from_socket
+                if linked_output.rna_type.name == 'RoMa_attributeCollection_SocketType':
+                    layout.prop(self, "dropdown_B", text="B")
         
-        # selection = props.dropdown_box_math
-        # layout.menu(RoMaMathMenu.bl_idname, text=selection)
 
+   
+        
+    def getAvailableAttributes(self, field):
+        attributes=[]
+        objects = []
+        items = []
+        # get the list of available attributes
+        # from the linked node
+        # print(f"field {self} {field}")
+        if field == "A":
+            if self.inputs[0].is_linked and self.inputs[0].links:
+                if self.inputs[0].links[0].from_node.outputs:
+                    linked_output = self.inputs[0].links[0].from_socket
+                    print(f"Node {self.inputs[0].links[0].from_node}")
+                    if linked_output.rna_type.name == 'RoMa_attributeCollection_SocketType':
+                        objects = linked_output.object_items
+                        # get the unique key, sort them alphabetically and remove "id"
+                        items = uniqueKeys(objects, sort=True, remove = ["id"])
+                        print(f"items {linked_output.name} {items}")
+                        for el in items:
+                            newProp = (el, el, el)
+                            attributes.append(newProp)
+                        return(attributes)
+        elif field == "B":
+            if self.inputs[1].is_linked and self.inputs[1].links:
+                if self.inputs[1].links[0].from_node.outputs:
+                    linked_output = self.inputs[1].links[0].from_socket
+                    print(f"Node {self.inputs[1].links[0].from_node}")
+                    if linked_output.rna_type.name == 'RoMa_attributeCollection_SocketType':
+                        objects = linked_output.object_items
+                        items = uniqueKeys(objects, sort=True, remove = ["id"])
+                        print(f"items {linked_output.name} {items}")
+                        for el in items:
+                            newProp = (el, el, el)
+                            attributes.append(newProp)
+                        return(attributes)
+        else: 
+            return()
+        
+    
     def update_socket_visibility(self):
         selection = self.dropdown_box_math
+        # self.inputs['A_list'].hide = True
+        # self.inputs['B_list'].hide = True
+        # self.outputs['output_list'].hide = True
+        
         self.inputs['A'].hide = False
         self.inputs['B'].hide = False
         if selection in self.AB_List:
-            self.inputs['A'].name = "Value"
-            self.inputs['B'].name = "Value"
+            self.inputs['A'].name = "A Value"
+            self.inputs['B'].name = "B Value"
         elif selection in self.AB_Power:
             self.inputs['A'].name = "Base"
             self.inputs['B'].name = "Exponent"
@@ -886,6 +1475,7 @@ class RoMaViewer(RoMaTreeNode, Node):
             # cleanInputs(self)
             if self.inputs['RoMa Mesh'].is_linked:
                 if self.inputs['Attribute'].is_linked:
+                    # print(f"Data: {bpy.data.node_groups['RoMa Schedule'].nodes['Capture attribute'].inputs['Attribute'].links[0].from_socket.object_items}")
                     object_items = self.inputs['Attribute'].links[0].from_socket.object_items
                     # print("----------------------------------")
                     # print(f"{len(object_items)}")
@@ -894,9 +1484,10 @@ class RoMaViewer(RoMaTreeNode, Node):
                     #      print(a.meshName, a.polyId, a.id, a.area, len(object_items))
             
     def draw_buttons(self, context, layout):
-        nodeName = self.name
-        treeName = self.id_data.name
-        nodeIndentifier = f"{treeName}::{nodeName}"
+        # nodeName = self.name
+        # treeName = self.id_data.name
+        # nodeIndentifier = f"{treeName}::{nodeName}"
+        nodeIndentifier = writeNodeFingerPrint(self)
         col = layout.column(align=True)
         col.operator("object.roma_add_column").sourceNode = nodeIndentifier
         col.prop(self, "toggle", text="Show Schedule")
@@ -913,24 +1504,27 @@ class RoMaNodeCategory(NodeCategory):
     
 # all categories in a list
 node_categories = [
-    RoMaNodeCategory('ATTRIBUTE', "Attribute", items=[
-        NodeItem("Capture RoMa attribute", label="Capture RoMa attribute"),
-        NodeItem("RoMa Area Attribute", label="Area"),
-        NodeItem("RoMa Math Node", label="Math"),
-    ]),
     RoMaNodeCategory('INPUT', "Input", items=[
         NodeItem("Input RoMa Mesh", label="All RoMa Meshes"),
         NodeItem("Input RoMa Selected Mesh", label="Selected RoMa Meshes"),
+    ]),
+    RoMaNodeCategory('ATTRIBUTE', "Attribute", items=[
+        NodeItem("Capture RoMa attribute", label="Capture Attribute"),
+        NodeItem("RoMa All Attributes", label="All Attributes"),
+        NodeItem("RoMa Area Attribute", label="Area"),
+        NodeItem("RoMa Use Attribute", label="Use"),
+    ]),
+    RoMaNodeCategory('MATHEMATIC', "Mathematic", items=[
+        NodeItem("RoMa Math Node", label="Math"),
         NodeItem("RoMa Integer", label="Integer"),
         NodeItem("RoMa Value", label="Value"),
-    ]),
-    RoMaNodeCategory('OUTPUT', "Output", items=[
-        NodeItem("RoMa Viewer", label="Viewer"),
     ]),
     RoMaNodeCategory('SCHEDULE', "Schedule", items= [
        NodeItem("RoMa Column from Data", label="Column"),
     ]),
-    
+    RoMaNodeCategory('OUTPUT', "Output", items=[
+        NodeItem("RoMa Viewer", label="Viewer"),
+    ]),
 ]
 
 
@@ -977,10 +1571,11 @@ class NODE_EDITOR_Roma_Draw_Schedule(Operator):
 
 def draw_callback_schedule_overlay(self, context, sourceNode):
     if context.area.ui_type == "RoMaTreeType":
-        path = sourceNode.split("::")
-        treeName = path[0]
-        nodeName = path[1]
-        node = bpy.data.node_groups[treeName].nodes[nodeName]
+        # path = sourceNode.split("::")
+        # treeName = path[0]
+        # nodeName = path[1]
+        # node = bpy.data.node_groups[treeName].nodes[nodeName]
+        node = readNodeFingerPrint(sourceNode)
         
         nodeX, nodeY = node.location
         nodeWidth = node.width
@@ -1027,7 +1622,8 @@ def draw_callback_schedule_overlay(self, context, sourceNode):
                 y = (nodePosY + 10) * ui_scale
                 
             blf.position(font_id, x, y, 0)
-            blf.draw(font_id, f"{round(el.area,2)}")
+            # blf.draw(font_id, f"{round(el.area,2)}")
+            blf.draw(font_id, f"{(el.useName)}")
     else:
         return
 
@@ -1095,7 +1691,8 @@ class RoMaAddColumn(Operator):
         # while index < len(data):
         for index, el in enumerate(data):
             font_curve = bpy.data.curves.new(type="FONT", name="Font Curve")
-            font_curve.body = f"{round(el.area)}"
+            # font_curve.body = f"{round(el.area)}"
+            font_curve.body = f"{el.use}"
             font_obj = bpy.data.objects.new(name="Font Object", object_data=font_curve)
             bpy.context.scene.collection.objects.link(font_obj)
             newPos = mathutils.Vector((0.3, -1.3 - (2 * index), 0.0))
@@ -1108,18 +1705,18 @@ class RoMaAddColumn(Operator):
 ################################################################################################################
 ############### Function to retrieve data for schedules  #######################################################
 ################################################################################################################
-
     
 # collect the data from the source node and return all
 # the elements necessary to draw the column or the row
 def dataForGraphic(sourceNode, posX = 0, posY = 0, cellWidth = 3, cellHeight = 2, orientation="column", scale=1, direction="up"):
     # retrieve data from node
-    path = sourceNode.split("::")
-    treeName = path[0]
-    nodeName = path[1]
-    node = bpy.data.node_groups[treeName].nodes[nodeName]
+    # path = sourceNode.split("::")
+    # treeName = path[0]
+    # nodeName = path[1]
+    # node = bpy.data.node_groups[treeName].nodes[nodeName]
+    node = readNodeFingerPrint(sourceNode)
     data = node.inputs['Attribute'].links[0].from_socket.object_items
-    
+   
     verts = []
     edges = []
     faces = []
