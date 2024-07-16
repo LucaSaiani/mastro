@@ -144,6 +144,7 @@ classes = (
     roma_schedule.RoMa_stringCollection_Socket,
     # roma_schedule.RoMaTreeNode,
     roma_schedule.RoMaInterfaceSocket,
+    roma_schedule.RoMa_attributesCollectionAndFloat_Socket,
     roma_schedule.RoMa_attributesCollection_Socket,
     # roma_schedule.RoMa_attribute_addItemOperator,
     # roma_schedule.RoMa_attribute_removeItemOperator,
