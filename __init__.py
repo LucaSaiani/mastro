@@ -164,7 +164,7 @@ classes = (
     # roma_schedule.RoMaMathSubMenuFunctions,
     # roma_schedule.RoMaMathSubMenuComparisons,
     roma_schedule.RoMaMathNode,
-    roma_schedule.RoMaAddColumn,
+    # roma_schedule.RoMaAddColumn,
     
     # roma_schedule.MyCustomNode,
     # roma_schedule.CustomNodeText,
