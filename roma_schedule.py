@@ -644,8 +644,98 @@ def copyAttributesToSocket(object_items, nodeFingerPrint, socketIdentifier, inpu
                                                     inputOutput=socket,
                                                     socketIdentifier=socketIdentifier
                                                     )
+
+
+# collect the data from the source node and return all
+# the elements necessary to draw the column or the row    
+class dataForGraphic:
+    def __init__(self, sourceNode, posX=0, posY=0, cellWidth=3, cellHeight=2, scale=1):
+        self.sourceNode = sourceNode
+        self.posX = posX
+        self.posY = posY
+        self.cellWidth = cellWidth
+        self.cellHeight = cellHeight
+        self.scale = scale
+
+        self.node = readNodeFingerPrint(self.sourceNode)
+        self.object_items = self.node.inputs['Schedule'].links[0].from_socket.object_items.items
     
-    
+    # Reading data from the input node and store as new list of dictionaries
+    def collect_data(self):
+        data = []
+        item = self.object_items[0]
+        tmp = {'id': 'id'}
+        for key in item['key_value_items']:
+            tmp[key['name']] = key['name']
+        data.append(tmp)
+
+        # Append data to the list
+        for item in self.object_items:
+            tmp = {'id': item.name}
+            for key in item['key_value_items']:
+                if key['value_type'] == "STRING":
+                    tmp[key['name']] = key['value_string']
+                else:
+                    tmp[key['name']] = str(key['value_float'])
+            data.append(tmp)
+        return(data)
+        
+    def define_vertices(self, keyIndex, itemIndex, numberOfItems):
+        tmpVerts = []
+        horizontalIncrement = self.cellWidth * keyIndex
+        verticalIncrement = -1 * self.cellHeight * itemIndex
+
+        x = (horizontalIncrement + self.posX) * self.scale
+        y = (verticalIncrement + self.posY) * self.scale
+        z = 0
+        tmpVerts.append((x, y, z))
+
+        if itemIndex == numberOfItems - 1:
+            verticalIncrement = -1 * self.cellHeight * (itemIndex + 1)
+            x = (horizontalIncrement + self.posX) * self.scale
+            y = (verticalIncrement + self.posY) * self.scale
+            z = 0
+            tmpVerts.append((x, y, z))
+        return tmpVerts
+            
+    def generate_graphics(self, data):
+        verts = []
+        edges = []
+        faces = []
+        numberOfKeys = len(data[0])
+        numberOfItems = len(data)
+
+        for keyIndex in range(numberOfKeys):
+            for itemIndex in range(numberOfItems):
+                verts.extend(self.define_vertices(keyIndex, itemIndex, numberOfItems))
+
+                if itemIndex <= numberOfItems + 1:
+                    A = itemIndex + ((numberOfItems + 1) * keyIndex)
+                    B = A + numberOfItems + 1
+                    # C = B + 1
+                    D = A + 1
+
+                    edges.append((A, B))
+                    edges.append((A, D))
+
+            A = itemIndex + ((numberOfItems + 1) * keyIndex) + 1
+            B = A + numberOfItems + 1
+            edges.append((A, B))
+
+        # extra set of vertices to be added at the end
+        for itemIndex in range(numberOfItems):
+            verts.extend(self.define_vertices(numberOfKeys, itemIndex, numberOfItems))
+
+            A = itemIndex + ((numberOfItems + 1) * numberOfKeys)
+            D = A + 1
+            edges.append((A, D))
+            
+        return verts, edges, faces
+
+    def data_for_graphic(self):
+        data = self.collect_data()
+        verts, edges, faces = self.generate_graphics(data)
+        return data, verts, edges, faces
             
 #############################################################################
 ########## Classes to  manage attribute collection  #########################
@@ -1653,7 +1743,7 @@ class RoMaViewer(RoMaTreeNode, Node):
         # nodeIndentifier = f"{treeName}::{nodeName}"
         nodeIndentifier = writeNodeFingerPrint(self)
         col = layout.column(align=True)
-        col.operator("object.roma_add_column").sourceNode = nodeIndentifier
+        # col.operator("object.roma_add_column").sourceNode = nodeIndentifier
         col.prop(self, "toggle", text="Show Schedule")
 
     
@@ -1732,6 +1822,73 @@ class NODE_EDITOR_Roma_Draw_Schedule(Operator):
     def invoke(self, context, event):
         self.execute(context)
         return {'RUNNING_MODAL'}
+    
+    
+# convert rgb to hsv    
+def rgb_to_hsv(r, g, b):
+    # Compute the maximum and minimum values among r, g, b
+    max_rgb = max(r, g, b)
+    min_rgb = min(r, g, b)
+    chroma = max_rgb - min_rgb  # Difference between max and min
+    
+    # Calculate Hue
+    if chroma == 0:
+        hue = 0  # If chroma is 0, hue is undefined (set to 0)
+    else:
+        if max_rgb == r:
+            hue = ((g - b) / chroma) % 6
+        elif max_rgb == g:
+            hue = ((b - r) / chroma) + 2
+        else:
+            hue = ((r - g) / chroma) + 4
+        hue *= 60  # Convert to degrees
+        if hue < 0:
+            hue += 360
+
+    # Calculate Saturation
+    saturation = 0 if max_rgb == 0 else chroma / max_rgb
+    
+    # Calculate Value
+    value = max_rgb
+    
+    return hue, saturation, value
+
+# convert hsv to rgb
+def hsv_to_rgb(h, s, v):
+    # If saturation is zero, the color is a shade of grey
+    if s == 0:
+        r = g = b = v
+        return r, g, b
+    
+    # Calculate the chroma
+    chroma = v * s
+    h_prime = h / 60.0  # Sector of the color wheel
+    x = chroma * (1 - abs(h_prime % 2 - 1))
+    
+    if 0 <= h_prime < 1:
+        r1, g1, b1 = chroma, x, 0
+    elif 1 <= h_prime < 2:
+        r1, g1, b1 = x, chroma, 0
+    elif 2 <= h_prime < 3:
+        r1, g1, b1 = 0, chroma, x
+    elif 3 <= h_prime < 4:
+        r1, g1, b1 = 0, x, chroma
+    elif 4 <= h_prime < 5:
+        r1, g1, b1 = x, 0, chroma
+    elif 5 <= h_prime < 6:
+        r1, g1, b1 = chroma, 0, x
+    else:
+        r1, g1, b1 = 0, 0, 0  # Should not happen
+    
+    # Match the value by adding the same amount to each component
+    m = v - chroma
+    r = r1 + m
+    g = g1 + m
+    b = b1 + m
+    
+    return r, g, b
+
+
 
 def draw_callback_schedule_overlay(self, context, sourceNode):
     if context.area.ui_type == "RoMaTreeType":
@@ -1767,44 +1924,79 @@ def draw_callback_schedule_overlay(self, context, sourceNode):
         lineColor = (red, green, blue, alpha)
         theme = bpy.context.preferences.themes.items()[0][1]
         paperColor = theme.node_editor.node_backdrop
-        
+
+        input_node = theme.node_editor.input_node
+        hue, saturation, value = rgb_to_hsv(input_node[0], input_node[1], input_node[2])
+        r, g, b = hsv_to_rgb(hue, saturation - 0.17, value - 0.49)
+        headerColor = (r, g, b, 1)
         
         nodePosX = nodeX + nodeWidth + paddingX
         nodePosY = nodeY
         
-        data, verts, edges, faces, boundingBox = dataForGraphic(sourceNode, 
-                                                    posX = nodePosX, 
-                                                    posY = nodePosY, 
-                                                    cellWidth= cellX, 
-                                                    cellHeight=cellY, 
-                                                    scale = ui_scale)
+        graphic_data = dataForGraphic(sourceNode, 
+                                    posX = nodePosX, 
+                                    posY = nodePosY, 
+                                    cellWidth= cellX, 
+                                    cellHeight=cellY, 
+                                    scale = ui_scale)
+        
+        data, verts, edges, faces = graphic_data.data_for_graphic()
+        
+        # data, verts, edges, faces = dataForGraphic(sourceNode, 
+        #                                             posX = nodePosX, 
+        #                                             posY = nodePosY, 
+        #                                             cellWidth= cellX, 
+        #                                             cellHeight=cellY, 
+        #                                             scale = ui_scale)
         
         
                     
         # drawing ###############################################
-        shader = gpu.shader.from_builtin('UNIFORM_COLOR')
+        
                     
         # drawing canvas background
-        Ax, Ay, Az = boundingBox['min']
-        Bx, By, Bz = boundingBox['max']
+        rows = len(data)
+        columns = len(data[0])
+        A = 1
+        D = (rows +1) * (columns +1) -1
+        B = D - rows +1
+        C = A + rows -1
         
         vertices = (
-            (Ax, Ay), (Bx, Ay),
-            (Ax, By), (Bx, By)
+            (verts[A]), (verts[B]),
+            (verts[C]), (verts[D])
         )
-
         indices = (
             (0, 1, 2), (2, 3, 1)
         )
-
-        # shader = gpu.shader.from_builtin('UNIFORM_COLOR')
+        
+        shader = gpu.shader.from_builtin('UNIFORM_COLOR')
         batch = batch_for_shader(shader, 'TRIS', {"pos": vertices}, indices=indices)
         shader.uniform_float("color", paperColor)
         batch.draw(shader)
         
+                
+        # drawing header background
+        A = 0
+        D = (rows +1) * (columns +1) - rows
+        B = D - 1
+        C = A + 1
+        
+        vertices = (
+            (verts[A]), (verts[B]),
+            (verts[C]), (verts[D])
+        )
+        indices = (
+            (0, 1, 2), (2, 3, 1)
+        )
+        shader = gpu.shader.from_builtin('UNIFORM_COLOR')
+        batch = batch_for_shader(shader, 'TRIS', {"pos": vertices}, indices=indices)
+        shader.uniform_float("color", headerColor)
+        batch.draw(shader)
+        
+        
+        
         # drawing cells
-        
-        
         batch = batch_for_shader(shader, 'LINES', {"pos": verts}, indices=edges)
         shader.uniform_float("color", lineColor)
             
@@ -1837,74 +2029,74 @@ def draw_callback_schedule_overlay(self, context, sourceNode):
 ###################################################################################
 ############### 3D schedule #######################################################
 ###################################################################################
-class RoMaAddColumn(Operator):
-    '''Add a column to the schedule'''
-    bl_idname="object.roma_add_column"
-    bl_label="RoMa Column"
-    bl_options = {'REGISTER'}
+# class RoMaAddColumn(Operator):
+#     '''Add a column to the schedule'''
+#     bl_idname="object.roma_add_column"
+#     bl_label="RoMa Column"
+#     bl_options = {'REGISTER'}
     
-    sourceNode : bpy.props.StringProperty(name="Source Node")
+#     sourceNode : bpy.props.StringProperty(name="Source Node")
     
-    # width: FloatProperty(
-    #     name="Width",
-    #     description="Cell Width",
-    #     min=0.01, max=100.0,
-    #     default=3.0,
-    # )
+#     # width: FloatProperty(
+#     #     name="Width",
+#     #     description="Cell Width",
+#     #     min=0.01, max=100.0,
+#     #     default=3.0,
+#     # )
     
-    # height: FloatProperty(
-    #     name="Height",
-    #     description="Cell Height",
-    #     min=0.01, max=100.0,
-    #     default=2.0,
-    # )
+#     # height: FloatProperty(
+#     #     name="Height",
+#     #     description="Cell Height",
+#     #     min=0.01, max=100.0,
+#     #     default=2.0,
+#     # )
     
-    # data : bpy.props.StringProperty(name="Filter type name")
+#     # data : bpy.props.StringProperty(name="Filter type name")
     
-    def execute(self, context):
-        # retrieve data from node
-        # path = self.sourceNode.split("::")
-        # treeName = path[0]
-        # nodeName = path[1]
-        # node = bpy.data.node_groups[treeName].nodes[nodeName]
-        # data = node.inputs['Attribute'].links[0].from_socket.object_items
+#     def execute(self, context):
+#         # retrieve data from node
+#         # path = self.sourceNode.split("::")
+#         # treeName = path[0]
+#         # nodeName = path[1]
+#         # node = bpy.data.node_groups[treeName].nodes[nodeName]
+#         # data = node.inputs['Attribute'].links[0].from_socket.object_items
         
-        # create a column with its cells
-        mesh = bpy.data.meshes.new("RoMa Column")
-        bm = bmesh.new()
-        verts, edges, faces, data = dataForGraphic(self.sourceNode, 
-                                                   posX = 0, 
-                                                   posY = 0, 
-                                                   cellWidth= 3, 
-                                                   cellHeight=2, 
-                                                   scale=1)
-        for vert in verts:
-            bm.verts.new(vert)
-        bm.verts.ensure_lookup_table()
+#         # create a column with its cells
+#         mesh = bpy.data.meshes.new("RoMa Column")
+#         bm = bmesh.new()
+#         verts, edges, faces, data = dataForGraphic(self.sourceNode, 
+#                                                    posX = 0, 
+#                                                    posY = 0, 
+#                                                    cellWidth= 3, 
+#                                                    cellHeight=2, 
+#                                                    scale=1)
+#         for vert in verts:
+#             bm.verts.new(vert)
+#         bm.verts.ensure_lookup_table()
         
-        for e in edges:
-            bm.edges.new([bm.verts[i] for i in e])
+#         for e in edges:
+#             bm.edges.new([bm.verts[i] for i in e])
         
-        bm.to_mesh(mesh)
-        mesh.update()
+#         bm.to_mesh(mesh)
+#         mesh.update()
 
-        column = bpy.data.objects.new(name="Column", object_data=mesh)
-        bpy.context.scene.collection.objects.link(column)
+#         column = bpy.data.objects.new(name="Column", object_data=mesh)
+#         bpy.context.scene.collection.objects.link(column)
         
-        # index = 0
-        # while index < len(data):
-        for index, el in enumerate(data):
-            font_curve = bpy.data.curves.new(type="FONT", name="Font Curve")
-            # font_curve.body = f"{round(el.area)}"
-            font_curve.body = f"{el.use}"
-            font_obj = bpy.data.objects.new(name="Font Object", object_data=font_curve)
-            bpy.context.scene.collection.objects.link(font_obj)
-            newPos = mathutils.Vector((0.3, -1.3 - (2 * index), 0.0))
-            font_obj.location = font_obj.location + newPos
-            # index += 1
-            # parenting
-            font_obj.parent = bpy.data.objects[column.name]
-        return {'FINISHED'}
+#         # index = 0
+#         # while index < len(data):
+#         for index, el in enumerate(data):
+#             font_curve = bpy.data.curves.new(type="FONT", name="Font Curve")
+#             # font_curve.body = f"{round(el.area)}"
+#             font_curve.body = f"{el.use}"
+#             font_obj = bpy.data.objects.new(name="Font Object", object_data=font_curve)
+#             bpy.context.scene.collection.objects.link(font_obj)
+#             newPos = mathutils.Vector((0.3, -1.3 - (2 * index), 0.0))
+#             font_obj.location = font_obj.location + newPos
+#             # index += 1
+#             # parenting
+#             font_obj.parent = bpy.data.objects[column.name]
+#         return {'FINISHED'}
     
 ################################################################################################################
 ############### Function to retrieve data for schedules  #######################################################
@@ -1913,117 +2105,119 @@ class RoMaAddColumn(Operator):
     
 # collect the data from the source node and return all
 # the elements necessary to draw the column or the row
-def dataForGraphic(sourceNode, posX = 0, posY = 0, cellWidth = 3, cellHeight = 2, scale=1):
-    node = readNodeFingerPrint(sourceNode)
-    object_items = node.inputs['Schedule'].links[0].from_socket.object_items.items
+# def dataForGraphic(sourceNode, posX = 0, posY = 0, cellWidth = 3, cellHeight = 2, scale=1):
+#     node = readNodeFingerPrint(sourceNode)
+#     object_items = node.inputs['Schedule'].links[0].from_socket.object_items.items
     
-    verts = []
-    edges = []
-    faces = []
-    data = []
-    boundingBox = {"min" : (0,0,0), "max" : (0,0,0)}
+#     verts = []
+#     edges = []
+#     faces = []
+#     data = []
+#     # boundingBox = {"min" : (0,0,0), "max" : (0,0,0)}
     
    
-    # reading data from the input node and store as new list of dictionaries
-    # add the header
-    item = object_items[0]
-    tmp = {}
-    tmp['id'] = 'id'
-    for key in item['key_value_items']:
-        tmp[key['name']] = key['name'] 
-    data.append(tmp)
+#     # reading data from the input node and store as new list of dictionaries
+#     # add the header
+#     item = object_items[0]
+#     tmp = {}
+#     tmp['id'] = 'id'
+#     for key in item['key_value_items']:
+#         tmp[key['name']] = key['name'] 
+#     data.append(tmp)
     
-    # append data to the list
-    for item in object_items:
-        tmp = {}
-        tmp['id'] = item.name
-        for key in item['key_value_items']:
-            if key['value_type'] == "STRING":
-                tmp[key['name']] = key['value_string'] 
-            else:
-                tmp[key['name']] = str(key['value_float'])
-        data.append(tmp)
+#     # append data to the list
+#     for item in object_items:
+#         tmp = {}
+#         tmp['id'] = item.name
+#         for key in item['key_value_items']:
+#             if key['value_type'] == "STRING":
+#                 tmp[key['name']] = key['value_string'] 
+#             else:
+#                 tmp[key['name']] = str(key['value_float'])
+#         data.append(tmp)
         
-    # print(data)
+#     # print(data)
     
-    numberOfKeys = len(data[0])
-    numberOfItems = len(data)
+#     numberOfKeys = len(data[0])
+#     numberOfItems = len(data)
     
-    for keyIndex in range(numberOfKeys):
-        for itemIndex in range(numberOfItems):
-            horizontalIncrement = cellWidth * keyIndex
-            verticalIncrement = -1 * cellHeight * itemIndex
+#     for keyIndex in range(numberOfKeys):
+#         for itemIndex in range(numberOfItems):
+#             horizontalIncrement = cellWidth * keyIndex
+#             verticalIncrement = -1 * cellHeight * itemIndex
             
-            x = (horizontalIncrement + posX) * scale
-            # x = (+0.0 + posX ) * scale
-            y = (verticalIncrement + posY) * scale
-            z = 0
-            tmpVert = (x, y, z) 
-            verts.append(tmpVert)
+#             x = (horizontalIncrement + posX) * scale
+#             # x = (+0.0 + posX ) * scale
+#             y = (verticalIncrement + posY) * scale
+#             z = 0
+#             tmpVert = (x, y, z) 
+#             verts.append(tmpVert)
                 
-            # latest series of vertices
-            if itemIndex == numberOfItems -1:
-                verticalIncrement = -1 * cellHeight * (itemIndex +1)
-                x = (horizontalIncrement + posX) * scale
-                y = (verticalIncrement + posY) * scale
-                z = 0
-                tmpVert = (x, y, z) 
-                verts.append(tmpVert)
+#             # latest series of vertices
+#             if itemIndex == numberOfItems -1:
+#                 verticalIncrement = -1 * cellHeight * (itemIndex +1)
+#                 x = (horizontalIncrement + posX) * scale
+#                 y = (verticalIncrement + posY) * scale
+#                 z = 0
+#                 tmpVert = (x, y, z) 
+#                 verts.append(tmpVert)
                 
-            if itemIndex <= numberOfItems +1:
-                #   A----B
-                #   |    |
-                #   D----C   
-                A = itemIndex + ((numberOfItems +1) * keyIndex)
-                B = A + numberOfItems +1
-                C = B +1
-                D = A +1
+#             if itemIndex <= numberOfItems +1:
+#                 #   A----B
+#                 #   |    |
+#                 #   D----C   
+#                 A = itemIndex + ((numberOfItems +1) * keyIndex)
+#                 B = A + numberOfItems +1
+#                 C = B +1
+#                 D = A +1
                 
-                tmpEdge = (A, B)
-                edges.append(tmpEdge)
-                tmpEdge = (A, D)
-                edges.append(tmpEdge)
+#                 tmpEdge = (A, B)
+#                 edges.append(tmpEdge)
+#                 tmpEdge = (A, D)
+#                 edges.append(tmpEdge)
                     
-        # the last AB of the column            
-        A = itemIndex + ((numberOfItems +1) * keyIndex) +1
-        B = A + numberOfItems +1        
-        tmpEdge = (A, B)
-        edges.append(tmpEdge)
+#         # the last AB of the column            
+#         A = itemIndex + ((numberOfItems +1) * keyIndex) +1
+#         B = A + numberOfItems +1        
+#         tmpEdge = (A, B)
+#         edges.append(tmpEdge)
                 
 
         
-    # the latest vertical series of vertices
-    for itemIndex in range(numberOfItems):
-        horizontalIncrement = cellWidth * numberOfKeys
-        verticalIncrement = -1 * cellHeight * itemIndex
+#     # the latest vertical series of vertices
+#     for itemIndex in range(numberOfItems):
+#         horizontalIncrement = cellWidth * numberOfKeys
+#         verticalIncrement = -1 * cellHeight * itemIndex
         
-        x = (horizontalIncrement + posX) * scale
-        y = (verticalIncrement + posY) * scale
-        z = 0
-        tmpVert = (x, y, z) 
-        verts.append(tmpVert)
+#         x = (horizontalIncrement + posX) * scale
+#         y = (verticalIncrement + posY) * scale
+#         z = 0
+#         tmpVert = (x, y, z) 
+#         verts.append(tmpVert)
             
-        # latest series of vertices
-        if itemIndex == numberOfItems -1:
-            verticalIncrement = -1 * cellHeight * (itemIndex +1)
-            x = (horizontalIncrement + posX) * scale
-            y = (verticalIncrement + posY) * scale
-            z = 0
-            tmpVert = (x, y, z) 
-            verts.append(tmpVert)
+#         # latest series of vertices
+#         if itemIndex == numberOfItems -1:
+#             verticalIncrement = -1 * cellHeight * (itemIndex +1)
+#             x = (horizontalIncrement + posX) * scale
+#             y = (verticalIncrement + posY) * scale
+#             z = 0
+#             tmpVert = (x, y, z) 
+#             verts.append(tmpVert)
             
-        #   A----B
-        #   |    |
-        #   D----C   
-        A = itemIndex + ((numberOfItems +1) * numberOfKeys)
-        D = A +1
-        tmpEdge = (A, D)
-        edges.append(tmpEdge)
+#         #   A----B
+#         #   |    |
+#         #   D----C   
+#         A = itemIndex + ((numberOfItems +1) * numberOfKeys)
+#         D = A +1
+#         tmpEdge = (A, D)
+#         edges.append(tmpEdge)
     
     
 
-    boundingBox["min"] = verts[0]
-    boundingBox['max'] = verts[len(verts)-1]
+#     # boundingBox["min"] = verts[0]
+#     # boundingBox['max'] = verts[len(verts)-1]
     
-    return data, verts, edges, faces, boundingBox
+#     return data, verts, edges, faces
+
+
     
