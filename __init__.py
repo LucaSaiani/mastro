@@ -143,7 +143,7 @@ classes = (
     roma_schedule.RoMa_attribute_propertyGroup,
     roma_schedule.RoMa_stringCollection_Socket,
     # roma_schedule.RoMaTreeNode,
-    roma_schedule.RoMaInterfaceSocket,
+    # roma_schedule.RoMaInterfaceSocket,
     roma_schedule.RoMa_attributesCollectionAndFloat_Socket,
     roma_schedule.RoMa_attributesCollection_Socket,
     # roma_schedule.RoMa_attribute_addItemOperator,
@@ -527,7 +527,7 @@ def register():
     #                                     name = "Update attributes once faces are selected",
     #                                     default = 0
     #                                     )
-    Scene.keyDictionary = bpy.props.CollectionProperty(type=roma_schedule.RoMa_string_item)
+    Scene.romaKeyDictionary = bpy.props.CollectionProperty(type=roma_schedule.RoMa_string_item)
     Scene.show_selection_overlay_is_active = bpy.props.BoolProperty(
                                         name = "Show selection overlay",
                                         default = False
@@ -687,7 +687,7 @@ def unregister():
     # del bpy.types.WindowManager.toggle_schedule_in_editor
     del bpy.types.Object.roma_props
     
-    del Scene.keyDictionary
+    del Scene.romaKeyDictionary
     # del Scene.updating_mesh_attributes_is_active
     del Scene.attribute_mass_plot_id
     del Scene.attribute_mass_block_id
