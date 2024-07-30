@@ -116,7 +116,7 @@ classes = (
     roma_project_data.TYPOLOGY_USES_LIST_OT_DeleteItem,
     roma_project_data.TYPOLOGY_USES_LIST_OT_MoveItem,
     roma_project_data.OBJECT_OT_update_all_RoMa_meshes_attributes,
-    # roma_project_data.update_typology_uses_OT,
+
     
     roma_project_data.OBJECT_UL_Wall,
     roma_project_data.wall_name_list,
@@ -146,17 +146,21 @@ classes = (
     # roma_schedule.RoMaInterfaceSocket,
     roma_schedule.RoMa_attributesCollectionAndFloat_Socket,
     roma_schedule.RoMa_attributesCollection_Socket,
+    roma_schedule.RoMa_data_collectionItem,
+    roma_schedule.RoMa_data_propertyGroup,
+    roma_schedule.RoMa_dataCollection_Socket,
+    roma_schedule.RoMa_dataOperation_Socket,
     # roma_schedule.RoMa_attribute_addItemOperator,
     # roma_schedule.RoMa_attribute_removeItemOperator,
     # roma_schedule.RoMa_attribute_addKeyValueItemOperator,
     # roma_schedule.RoMa_attribute_removeKeyValueItemOperator,
     # roma_schedule.RoMa_attribute_deleteItemOperator,
-    roma_schedule.RoMaGroupInput,
-    roma_schedule.RoMaSelectedInput,
-    roma_schedule.RoMaCaptureAttribute,
-    roma_schedule.RoMaAllAttributes,
-    roma_schedule.RoMaAreaAttribute,
-    roma_schedule.RoMaUseAttribute,
+    roma_schedule.RoMaGroupInputNode,
+    roma_schedule.RoMaSelectedInputNode,
+    roma_schedule.RoMaCaptureAttributeNode,
+    roma_schedule.RoMaAllAttributesNode,
+    roma_schedule.RoMaAreaAttributeNode,
+    roma_schedule.RoMaUseAttributeNode,
     # roma_schedule.RomaMathSubMenuEntries,
     roma_schedule.RoMaIntegerNode,
     roma_schedule.RoMaFloatNode,
@@ -164,6 +168,18 @@ classes = (
     # roma_schedule.RoMaMathSubMenuFunctions,
     # roma_schedule.RoMaMathSubMenuComparisons,
     roma_schedule.RoMaMathNode,
+    roma_schedule.RoMa_key_name_list,
+    roma_schedule.NODE_UL_key_filter,
+    roma_schedule.NODE_UL_key_filter_NewItem,
+    roma_schedule.NODE_UL_key_filter_DeleteItem,
+    roma_schedule.NODE_UL_key_MoveItem,
+    roma_schedule.RoMaTableNode,
+    # roma_schedule.RoMaTableByNode,
+    roma_schedule.RoMaGetUniqueNode,
+    roma_schedule.RoMaDataNode,
+    roma_schedule.RomaDataMathFunction,
+   
+    
     # roma_schedule.RoMaAddColumn,
     
     # roma_schedule.MyCustomNode,
@@ -171,9 +187,10 @@ classes = (
     # roma_schedule.CustomNodeFloat,
     # roma_schedule.CustomNodeJoin,
     # roma_schedule.CustomNodePrint,
-    roma_schedule.RoMaViewer,
-    roma_schedule.RoMaAttributeToColumn,
+    roma_schedule.RoMaViewerNode,
+    # roma_schedule.RoMaAttributeToColumnNode,
     # roma_schedule.RoMa_Schedule_Panel,
+ 
     roma_schedule.NODE_EDITOR_Roma_Draw_Schedule,
     
     
@@ -200,13 +217,13 @@ classes = (
     roma_wall.VIEW3D_PT_RoMa_Wall,
 )
 
-# RoMaGroupInput = roma_schedule.RoMaGroupInput
-# RoMaViewer = roma_schedule.RoMaViewer
+# RoMaGroupInputNode = roma_schedule.RoMaGroupInputNode
+# RoMaViewerNode = roma_schedule.RoMaViewerNode
 # CustomNodeText = roma_schedule.CustomNodeText
 
 # RoMaNodeInteger = roma_schedule.RoMaIntegerNode
 # RoMaNodeFloat = roma_schedule.RoMaFloatNode
-# RoMaNodeCaptureAttribute = roma_schedule.RoMaCaptureAttribute
+# RoMaNodeCaptureAttribute = roma_schedule.RoMaCaptureAttributeNode
 # RoMaNodeMath = roma_schedule.RoMaMathNode
 # CustomNodeJoin = roma_schedule.CustomNodeJoin
 
@@ -350,10 +367,10 @@ def onFileLoaded(scene):
     bpy.context.scene.previous_selection_face_id = -1
     
     # bpy.msgbus.subscribe_rna(
-    #     key=RoMaNodeCaptureAttribute,
-    #     owner=ROMA_NODE_CAPTURE_ATTRIBUTE_HANDLE,
+    #     key=roma_project_data.OBJECT_UL_Typology,
+    #     owner=ROMA_TYPOLOGY_NAME_LIST_INDEX_KEY,
     #     args = (),
-    #     notify=roma_schedule.execute_active_node_tree,
+    #     notify=roma_project_data.update_uses_uiList,
     #     options={"PERSISTENT",}
     # )
         
@@ -382,6 +399,14 @@ def onFileDefault(scene):
     bpy.context.scene.previous_selection_face_id = -1
     
     # bpy.msgbus.subscribe_rna(
+    #     key=roma_project_data.OBJECT_UL_Typology,
+    #     owner=ROMA_TYPOLOGY_NAME_LIST_INDEX_KEY,
+    #     args = (),
+    #     notify=roma_project_data.update_uses_uiList,
+    #     options={"PERSISTENT",}
+    # )
+    
+    # bpy.msgbus.subscribe_rna(
     #     key=RoMaNodeCaptureAttribute,
     #     owner=ROMA_NODE_CAPTURE_ATTRIBUTE_HANDLE,
     #     args = (),
@@ -405,6 +430,7 @@ def onFileDefault(scene):
     #     options={"PERSISTENT",}
     # )
 
+# ROMA_TYPOLOGY_NAME_LIST_INDEX_KEY = 0
     
 def register():
     bpy.app.handlers.load_post.append(onFileLoaded)
@@ -421,7 +447,14 @@ def register():
     nodeitems_utils.register_node_categories('ROMA_NODES', roma_schedule.node_categories) 
     
     # bpy.msgbus.subscribe_rna(
-    #     key=RoMaGroupInput,
+    #     key=roma_project_data.OBJECT_UL_Typology,
+    #     owner=ROMA_TYPOLOGY_NAME_LIST_INDEX_KEY,
+    #     args = (),
+    #     notify=roma_project_data.update_uses_uiList,
+    #     options={"PERSISTENT",}
+    # )
+    # bpy.msgbus.subscribe_rna(
+    #     key=RoMaGroupInputNode,
     #     owner=ROMA_NODE_GROUP_HANDLE,
     #     args = (),
     #     notify=roma_schedule.execute_active_node_tree,
@@ -429,7 +462,7 @@ def register():
     # )
     
     # bpy.msgbus.subscribe_rna(
-    #     key=RoMaViewer,
+    #     key=RoMaViewerNode,
     #     owner=ROMA_VIEWER_HANDLE,
     #     args = (),
     #     notify=roma_schedule.execute_active_node_tree,
@@ -665,7 +698,7 @@ def unregister():
     # bpy.app.handlers.depsgraph_update_post.remove(roma_modal_operator.update_show_overlay)
     
 
-    # bpy.msgbus.clear_by_owner(ROMA_NODE_CAPTURE_ATTRIBUTE_HANDLE)
+    # bpy.msgbus.clear_by_owner(ROMA_TYPOLOGY_NAME_LIST_INDEX_KEY)
     # bpy.msgbus.clear_by_owner(ROMA_NODE_INTEGER_HANDLE)
     # bpy.msgbus.clear_by_owner(ROMA_NODE_FLOAT_HANDLE)
     

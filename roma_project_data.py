@@ -946,11 +946,10 @@ class VIEW3D_PT_RoMa_mass_typology_data(Panel):
     bl_parent_id = "VIEW3D_PT_RoMa_mass_data"
     bl_options = {'DEFAULT_CLOSED'}
     
-    # if len(bpy.context.scene.roma_typology_uses_name_list) == 0: 
-    #         initRomaLists("romaTypologyUsesName")
-    
     def draw(self, context):
         scene = context.scene
+        
+        
         
         layout = self.layout
         layout.use_property_split = True
@@ -968,22 +967,9 @@ class VIEW3D_PT_RoMa_mass_typology_data(Panel):
         col.separator()
         col.operator("roma_typology_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
         col.operator("roma_typology_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
-        
-        # row = layout.row()
-        # row = layout.row(align=True)
-        
-        # if scene.roma_typology_name_list_index >= 0 and scene.roma_typology_name_list:
-        #     item = scene.roma_typology_name_list[scene.roma_typology_name_list_index]
-        #     row.prop(item, "name", icon_only=True, text="Typology Name")
             
         ########## typology uses ###############
-        #if scene.roma_typology_uses_name_index >= 1:
         row = layout.row()
-        # index = scene.roma_typology_name_list_index
-        # for el in scene.roma_typology_name_list:
-        #     if el.id == index:
-        #         txt = "Uses of " + el.name
-        #         break
         row.label(text="Uses:")
         row = layout.row()
         rows = 3
@@ -1032,7 +1018,6 @@ class VIEW3D_PT_RoMa_mass_typology_data(Panel):
         
             
 class OBJECT_UL_Typology(UIList):
-    
     def draw_item(self, context, layout, data, item, icon, active_data,
                   active_propname, index):
         # global selectedTypology
@@ -1166,17 +1151,13 @@ class TYPOLOGY_LIST_OT_MoveItem(Operator):
 def update_roma_filter_by_typology(self, context):
     bpy.ops.node.update_shader_filter(filter_name="typology")
     return None
-            
 
-    
-
-    
+# show the uses related to the selected typology    
 class OBJECT_UL_Typology_Uses(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data,
                   active_propname, index):
-       
         custom_icon = 'COMMUNITY'
-       
+
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
             id = item.id
             if item.name != "...":
@@ -1321,51 +1302,38 @@ class USE_LIST_OT_NewItem(Operator):
 
 # # when a typology is selected, it is necessary to update the
 # # uses in the UIList using the ones stored in Scene.roma_typology_uses_name_list 
-# def update_typology_uses_UI(context):
-#     # from . import initLists
-#     use_name_list = context.scene.roma_typology_uses_name_list
-#     # print("updating UI")
-
-#     # index = context.scene.roma_typology_uses_name_list_index
-#     # use_name_length = len(use_name_list)
-#     # if use_name_length > 0:
-#         # remove all the entries
-#         # counter = 0
-#         # while counter <= use_name_length:
-   
-#     while len(use_name_list) > 0:
-#         # print("lenght pre", len(use_name_list))
-#         index = context.scene.roma_typology_uses_name_list_index
-#         # bpy.ops.roma_typology_uses_name_list.delete_item()
-#         use_name_list.remove(index)
-#         context.scene.roma_typology_uses_name_list_index = min(max(0, index - 1), len(use_name_list) - 1)
-#         # print("lenght post", len(use_name_list))
-#             # counter +=1
-            
-#     # add the uses stored in the typology to the current typology use UIList        
-#     selected_typology_index = context.scene.roma_typology_name_list_index
-#     # selected_typology_id = context.scene.roma_typology_name_list[selected_typology_index].id
-#     # if  len(context.scene.roma_typology_name_list) == 0: 
-#     #     initLists()
-       
+class UPDATE_USE_LIST_OT(Operator):
+    bl_idname = "ui.roma_update_use_list"
+    bl_label = "Update Use List"
     
-#     # print("len", len(list))
-#     if len(context.scene.roma_typology_name_list) > 0:
-#         list = context.scene.roma_typology_name_list[selected_typology_index].useList    
-#         split_list = list.split(";")
-#         for el in split_list:
-#             context.scene.roma_typology_uses_name_list.add()
-#             temp_list = []    
-#             # for el in context.scene.roma_typology_uses_name_list:
-#             temp_list.append(int(el))
-#             last = len(context.scene.roma_typology_uses_name_list)-1
-#             # context.scene.roma_typology_uses_name_list[last].id = max(temp_list)+1
-#             # look for the correspondent use name in roma_use_name_list
-#             for use in context.scene.roma_use_name_list:
-#                 if int(el) == use.id:
-#                     context.scene.roma_typology_uses_name_list[last].id = use.id
-#                     context.scene.roma_typology_uses_name_list[last].name = use.name 
-#                     break
+    def execute(self, context):
+        scene = context.scene
+        # previous = scene.roma_previous_selected_typology
+        # current = scene.roma_typology_name_list_index
+        # if previous != current:
+        scene.roma_previous_selected_typology = scene.roma_typology_name_list_index
+        use_name_list = scene.roma_typology_uses_name_list
+        while len(use_name_list) > 0:
+            index = scene.roma_typology_uses_name_list_index
+            use_name_list.remove(index)
+            scene.roma_typology_uses_name_list_index = min(max(0, index - 1), len(use_name_list) - 1)
+        # add the uses stored in the typology to the current typology use UIList        
+        selected_typology_index = scene.roma_typology_name_list_index
+        if len(scene.roma_typology_name_list) > 0:
+            list = scene.roma_typology_name_list[selected_typology_index].useList    
+            split_list = list.split(";")
+            for el in split_list:
+                scene.roma_typology_uses_name_list.add()
+                temp_list = []    
+                temp_list.append(int(el))
+                last = len(scene.roma_typology_uses_name_list)-1
+                # look for the correspondent use name in roma_use_name_list
+                for use in scene.roma_use_name_list:
+                    if int(el) == use.id:
+                        scene.roma_typology_uses_name_list[last].id = use.id
+                        scene.roma_typology_uses_name_list[last].name = use.name 
+                        break
+        return{'FINISHED'}
             
         
 # when a use related to the current typology is updated in the UIList,

@@ -25,14 +25,15 @@ import bmesh
 
 import math
 
-from bpy.types import NodeTree, Node, NodeSocket, NodeTreeInterfaceSocket, Operator, PropertyGroup, Menu
+from bpy.types import NodeTree, Node, NodeSocket, NodeTreeInterfaceSocket, Operator, PropertyGroup, Menu, UIList
 from bpy.props import  EnumProperty, StringProperty, PointerProperty, FloatProperty, IntProperty, CollectionProperty
 import mathutils
 # import nodeitems_utils
 from nodeitems_utils import NodeCategory, NodeItem
 from gpu_extras.batch import batch_for_shader
 
-from itertools import chain # to identify unique keys in a list of dictionaries
+# from itertools import chain # to identify unique keys in a list of dictionaries
+from collections import defaultdict # used to count the occurences of uniques
 
 font_info = {
     "font_id": 0,
@@ -92,10 +93,38 @@ def uniqueKeys(arr, **kwargs):
             
     return(result)
 
+# function to add object items to a list
+def addItemsToList(objectList, node, socketName = ""):
+    nodeFingerPrint = writeNodeFingerPrint(node)
+    for object in objectList:
+        RoMa_attribute_addItem(nodeFingerPrint,socketName, "output")
+        attributeIndex = node.outputs[socketName].object_items.active_index
+        for key, value in object.items():
+            try:
+                float(value)
+                RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+                                                item_index=attributeIndex,
+                                                key=key,
+                                                valueType="FLOAT",
+                                                floatValue=value,
+                                                socketIdentifier=socketName
+                                                )
+            except ValueError:
+                RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+                                                item_index=attributeIndex,
+                                                key=key,
+                                                valueType="STRING",
+                                                stringValue=value,
+                                                socketIdentifier=socketName
+                                                )
+        
+        
+    
+
 # function to identify unique values in the attribute list
 # it is possibile to pass extra parameters as to 
 # sort = True to sort the list
-def uniqueValue(arr, **kwargs):
+def uniqueValues(arr, **kwargs):
     params = {
         'sort' : None,
         'key' : None
@@ -116,10 +145,17 @@ def uniqueValue(arr, **kwargs):
                 else:
                     newList.append(itemKey['value_string'])
 
-    result = list(set(chain.from_iterable(sub.keys() for sub in newList)))
+    count_dict = defaultdict(int)
+    for value in newList:
+        count_dict[value] += 1
+        
+    # a tuple with key and the number of occurencies
+    # result = list(count_dict.items())
+    result = [{keyName: key, 'count': value} for key, value in count_dict.items()]
+    # result= list(set(newList))
     
     if sort:
-        result.sort()
+        result.sort(key=lambda x: x[0])
             
     return(result)
 
@@ -411,7 +447,6 @@ def getAttributes(objNames, attrType):
 # a function used to store the order of the children nodes
 # used to run them in the proper order
 def walkBackwards(parentNode, node, depth):
-    # print(f"ciaoooo miao")
     depth += 1
     if node.inputs:
         inputs = node.inputs
@@ -426,16 +461,15 @@ def walkBackwards(parentNode, node, depth):
                     parentNode.executionOrder.append(nodeData)
                     walkBackwards(parentNode, nextNode, depth)
     else: # if there are no inputs, it may be that the node is an attribute node
-        # print(f"ciaoooo")
         if node.outputs[0].name == "Attribute":
             sourceObjects = parentNode.inputs['RoMa Mesh'].object_items
             node.objNames.clear()
             for obj in sourceObjects:
                 item = node.objNames.add()
                 item.name = obj.name
-                # print(f"Assegno {item.name}  a {parentNode.name}")
-                
-            # print(f"maskerina {node.name}   {node.objs}")
+        elif node.outputs[0].name == "Function":
+            print(f"Trovato {node.name}")
+
     return()
     
 
@@ -455,14 +489,52 @@ def execute_active_node_tree():
             # tree.execute(bpy.context)
             
 def update_schedule_node_editor(node):
-        
-        # nodeName = node.name
-        # treeName = node.id_data.name
-        # nodeIdentifier = f"{treeName}::{nodeName}"
-        # print(f"{nodeIdentifier}")
-        # print(f"{writeNodeFingerPrint(node)}")
         bpy.ops.node.schedule_viewer(sourceNode = writeNodeFingerPrint(node))
-        
+
+# read attribute from the specified node
+def readAttributeFromLinkedNode (node, inputId):
+    nodeList = ['RoMa_attributeCollectionAndFloat_SocketType', 'RoMa_attributeCollection_SocketType']
+    attributes = []
+    if node.inputs[inputId].is_linked and node.inputs[inputId].links:
+        if node.inputs[inputId].links[0].from_node.outputs:
+            linked_output = node.inputs[inputId].links[0].from_socket
+            if linked_output.rna_type.name in nodeList:
+                items = linked_output.object_items.items
+                keys = uniqueKeys(items, sort=True, remove = ["id"])
+                for key in keys:
+                    newProp = (key, key, "")
+                    attributes.append(newProp)
+    return(attributes)
+    
+    
+# to get the available attributes (keys) from the linked
+# attribute list
+def getAvailableAttributes(node, **kwargs):
+    params = {
+        'nodeType': None,
+        'inputId' : None,
+    }
+    
+    params.update(kwargs)
+    
+    nodeType = params['nodeType']
+    inputId = params['inputId']
+
+    if nodeType == "Group by":
+        inputId = 0
+
+    if nodeType in ['Group by', 'Math']:
+        attributes = readAttributeFromLinkedNode(node, inputId)
+        return attributes
+    elif nodeType in ['Data']:
+        if node.outputs[0].is_linked and node.outputs[0].links:
+            if node.outputs[0].links[0].from_node.inputs:
+                linkedNode = node.outputs[0].links[0].to_node
+                attributes = readAttributeFromLinkedNode(linkedNode, 0)
+                return attributes
+    else: 
+        return
+
 # Function to add item to object_items
 def RoMa_attribute_addItem(nodeFingerPrint, socketIdentifier, inputOutput):
     node = readNodeFingerPrint(nodeFingerPrint)
@@ -644,7 +716,9 @@ def copyAttributesToSocket(object_items, nodeFingerPrint, socketIdentifier, inpu
                                                     inputOutput=socket,
                                                     socketIdentifier=socketIdentifier
                                                     )
-
+################################################################################################################
+################# Class  to retrieve data for schedules  #######################################################
+################################################################################################################
 
 # collect the data from the source node and return all
 # the elements necessary to draw the column or the row    
@@ -741,7 +815,6 @@ class dataForGraphic:
 ########## Classes to  manage attribute collection  #########################
 #############################################################################                
 
-            
 # Class to store the name of RoMa objects
 # This class is used to define the list in 
 # RoMa_stringCollection_Socket and in the keys
@@ -750,23 +823,35 @@ class RoMa_string_item(PropertyGroup):
 
 
 # Define a key-value pair used in RoMa_attribute_collectionItem
-class RoMa_keyValueItem(bpy.types.PropertyGroup):
+class RoMa_keyValueItem(PropertyGroup):
     # key: bpy.props.StringProperty(name="Key", description="Element's key")
     value_string: bpy.props.StringProperty(name="String value", description="String value", default="")
     value_float: bpy.props.FloatProperty(name="Float value", description="Float value", default=-1)
     value_type: bpy.props.StringProperty( name="Value Type", description="Type value", default='FLOAT')
 
 
-# Define the elemnent of the collection RoMa_attribute_propertyGroup
-# It contains name and a collection of items
-class RoMa_attribute_collectionItem(bpy.types.PropertyGroup):
-    # name: bpy.props.StringProperty(name="Name", description="Collection element name")
+# Define the element of the collection RoMa_attribute_propertyGroup
+class RoMa_attribute_collectionItem(PropertyGroup):
     key_value_items: bpy.props.CollectionProperty(type=RoMa_keyValueItem)
 
     
-# # Class to store the attributes of RoMa objects
+# Class to store the attributes of RoMa objects
 class RoMa_attribute_propertyGroup(PropertyGroup):
     items: bpy.props.CollectionProperty(type=RoMa_attribute_collectionItem)
+    active_index: bpy.props.IntProperty(default=0)
+    
+# Define the elements of the data RoMa_attribute_propertyGroup
+# It contains name and a collection of items (the row values in the schedule)
+# and the operation for the footer
+class RoMa_data_collectionItem(PropertyGroup):
+    key_name : bpy.props.StringProperty(name="Key name")
+    key_value_items: bpy.props.CollectionProperty(type=RoMa_keyValueItem)
+    key_footer_operation : bpy.props.StringProperty(name="Key footer operation")
+
+# Class to store the data of RoMa objects
+# Data is used to define schedules
+class RoMa_data_propertyGroup(PropertyGroup):
+    items: bpy.props.CollectionProperty(type=RoMa_data_collectionItem)
     active_index: bpy.props.IntProperty(default=0)
 
 
@@ -816,7 +901,7 @@ class RoMa_attributesCollectionAndFloat_Socket(NodeSocket):
         if self.is_output:
             layout.label(text=self.identifier)
         else:
-            if self.is_linked:
+            if self.is_linked or self.hide_value:
                 layout.label(text=self.identifier)
             else:
                 layout.prop(self,"default_value",text=self.identifier)
@@ -842,6 +927,38 @@ class RoMa_attributesCollection_Socket(NodeSocket):
     def draw_color_simple(cls):
         return (0.63, 0.63, 0.63, 1)
     
+# RoMa custom socket type
+# used to manage data
+class RoMa_dataCollection_Socket(NodeSocket):
+    """RoMa node socket data collection type"""
+    bl_idname = 'RoMa_dataCollection_SocketType'
+    bl_label = "Data"
+    
+    object_items: PointerProperty(type=RoMa_data_propertyGroup)
+   
+    def draw(self, context, layout, node, text):
+        layout.label(text=self.identifier)
+  
+    @classmethod
+    def draw_color_simple(cls):
+        return (1.0, 0.67, 0.0, 1.0)
+    
+# RoMa custom socket type
+# used to set operation data
+class RoMa_dataOperation_Socket(NodeSocket):
+    """RoMa node socket to operate data"""
+    bl_idname = 'RoMa_dataOperation_SocketType'
+    bl_label = "Data Operation"
+    
+    object_items: PointerProperty(type=RoMa_attribute_propertyGroup)
+    default_value : FloatProperty(default=1.0) 
+   
+    def draw(self, context, layout, node, text):
+        layout.label(text=self.identifier)
+  
+    @classmethod
+    def draw_color_simple(cls):
+        return (0.99, 0.96, 0.54, 1.0)
     
 # Customizable interface properties to generate a socket from.
 # class RoMaInterfaceSocket(NodeTreeInterfaceSocket):
@@ -879,7 +996,7 @@ class RoMaTreeNode:
     def execute(self):
         pass
 
-class RoMaGroupInput(RoMaTreeNode, Node):
+class RoMaGroupInputNode(RoMaTreeNode, Node):
     '''Input node containing all the RoMa meshes existing in the scene'''
     bl_idname = 'Input RoMa Mesh'
     bl_label = 'Group Input - All'
@@ -910,7 +1027,7 @@ class RoMaGroupInput(RoMaTreeNode, Node):
         
 
     
-class RoMaSelectedInput(RoMaTreeNode, Node):
+class RoMaSelectedInputNode(RoMaTreeNode, Node):
     '''Input node containing the selected RoMa meshes'''
     bl_idname = 'Input RoMa Selected Mesh'
     bl_label = 'Group Input - Selected'
@@ -936,10 +1053,10 @@ class RoMaSelectedInput(RoMaTreeNode, Node):
         self.update_selected_objects()
 
     
-class RoMaAllAttributes(RoMaTreeNode, Node):
+class RoMaAllAttributesNode(RoMaTreeNode, Node):
     '''RoMa All Available Attributes'''
     bl_idname = 'RoMa All Attributes'
-    bl_label = 'RoMa All Attributes'
+    bl_label = 'All Attributes'
     # bl_description = 'Attribute'
     
     objNames : CollectionProperty(type=RoMa_string_item)
@@ -998,10 +1115,10 @@ class RoMaAllAttributes(RoMaTreeNode, Node):
 
          
     
-class RoMaAreaAttribute(RoMaTreeNode, Node):
+class RoMaAreaAttributeNode(RoMaTreeNode, Node):
     '''RoMa Area Attribute'''
     bl_idname = 'RoMa Area Attribute'
-    bl_label = 'RoMa Area'
+    bl_label = 'Area'
     # bl_description = 'Attribute'
     
     objNames : CollectionProperty(type=RoMa_string_item)
@@ -1043,10 +1160,10 @@ class RoMaAreaAttribute(RoMaTreeNode, Node):
         pass
 
             
-class RoMaUseAttribute(RoMaTreeNode, Node):
+class RoMaUseAttributeNode(RoMaTreeNode, Node):
     '''RoMa Use Attribute'''
     bl_idname = 'RoMa Use Attribute'
-    bl_label = 'RoMa Use'
+    bl_label = 'Use'
     # bl_description = 'Attribute'
     
     objNames : CollectionProperty(type=RoMa_string_item)
@@ -1086,11 +1203,88 @@ class RoMaUseAttribute(RoMaTreeNode, Node):
                                                                 )
     def execute(self):
         pass
-                            
-   
-class RoMaCaptureAttribute(RoMaTreeNode, Node):
+                     
+class RomaDataMathFunction(RoMaTreeNode, Node):
+    '''Define the operation to be done with the data, both in every data entry and with the footer'''
+    bl_idname = "RoMa Table Function"
+    bl_label = "Table Function"
+    
+     # EnumProperty for dropdown box math
+    dropdown: EnumProperty(
+        items=(
+            ("Sum", "Sum", ""),
+            ("Average", "Average", "A"),
+            ("Min", "Min", ""),
+            ("Max", "Max", ""),
+            ("Count", "Count", ""),
+            ("Compare", "Compare", ""),
+        ),
+        name="Table Functions",
+        default="Sum",
+        update=lambda self, context: self.update_socket_visibility()
+    )
+    
+    def init(self, context):
+        self.outputs.new('RoMa_dataOperation_SocketType', name='Function', identifier='Function')
+        
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "dropdown", text="")
+    
+    def manualExecute(self):
+        cleanSocket(self, 'Function', 'output')
+        print("pulisco")
+        
+    # def update_socket_visibility(self):
+    #     selection = self.dropdown_box_math
+        # # self.inputs['A_list'].hide = True
+        # # self.inputs['B_list'].hide = True
+        # # self.outputs['output_list'].hide = True
+        
+        # self.inputs['A'].hide = False
+        # self.inputs['B'].hide = False
+        # if selection in self.AB_List:
+        #     self.inputs['A'].name = "A Value"
+        #     self.inputs['B'].name = "B Value"
+        # elif selection in self.AB_Power:
+        #     self.inputs['A'].name = "Base"
+        #     self.inputs['B'].name = "Exponent"
+        # elif selection in self.AB_Log:
+        #     self.inputs['A'].name = "Value"
+        #     self.inputs['B'].name = "Base"
+        # elif selection in self.AB_Square:
+        #     self.inputs['A'].name = "Value"
+        #     self.inputs['B'].hide = True
+            
+        # else:
+        #     self.inputs['A'].hide = True
+        #     self.inputs['B'].hide = True
+        
+        # self.update()
+    
+    
+class RoMaDataNode(RoMaTreeNode, Node):
+    '''Define the column data to be shown in the schedule'''
+    bl_idname = 'RoMa Table Data'
+    bl_label = "Table Data"
+    
+    dropdown : EnumProperty(
+        items=lambda self, context : getAvailableAttributes(self, nodeType="Data"),
+        description="Attribute to use as filter")
+    
+    def init(self, context):
+        self.inputs.new('RoMa_dataOperation_SocketType', name='Row', identifier='Row')
+        self.inputs.new('RoMa_dataOperation_SocketType', name='Footer', identifier='Footer')
+        # self.inputs['Attribute'].hide_value = True
+        
+        self.outputs.new('RoMa_dataCollection_SocketType', name='Data', identifier='Data')
+        
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "dropdown", text="Key")
+        
+    
+class RoMaCaptureAttributeNode(RoMaTreeNode, Node):
     '''Read RoMa attributes'''
-    bl_idname = 'Capture RoMa attribute'
+    bl_idname = 'Capture RoMa Attribute'
     bl_label = "Capture attribute"
     
     # inputList = ["RoMa Mesh", 'Attribute']
@@ -1135,7 +1329,7 @@ class RoMaCaptureAttribute(RoMaTreeNode, Node):
             else:
                 cleanSocket(self, 'RoMa Mesh', 'input')
             
-            if self.inputs['Attribute'].is_linked == False:
+            if self.inputs['Attribute'] and self.inputs['Attribute'].is_linked == False:
                 cleanSocket(self, 'Attribute' , 'both')
                 
 
@@ -1173,37 +1367,6 @@ class RoMaCaptureAttribute(RoMaTreeNode, Node):
         
         nodeFingerPrint = writeNodeFingerPrint(self)
         copyAttributesToSocket(object_items, nodeFingerPrint, 'Attribute', "output")
-        # for attr in object_items:
-        #     RoMa_attribute_addItem(nodeFingerPrint, "both")
-        #     attributeIndex = self.outputs['Attribute'].object_items.active_index
-            
-        #     for key in attr['key_value_items']:
-        #         if key['value_type'] == "FLOAT":
-        #             RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
-        #                                             item_index=attributeIndex,
-        #                                             key=key['name'],
-        #                                             valueType=key['value_type'],
-        #                                             floatValue=key['value_float'],
-        #                                             inputOutput="both"
-        #                                             )
-        #         else:
-        #             RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
-        #                                             item_index=attributeIndex,
-        #                                             key=key['name'],
-        #                                             valueType=key['value_type'],
-        #                                             stringValue=key['value_string']
-        #                                             inputOutput="both"
-        #                                             )
-            
-            
-        
-        # for obj in object_items:
-        #     itemIn = self.inputs['Attribute'].object_items.add()
-        #     itemOut = self.outputs['Attribute'].object_items.add()
-        #     itemIn.name = obj.name
-        #     itemOut.name = obj.name
-            
-            
             
         # print(f"gli attributi copiati in capture attribute sono:-------------------------------------")
         # items = self.outputs['Attribute'].object_items.items
@@ -1267,12 +1430,327 @@ class RoMaCaptureAttribute(RoMaTreeNode, Node):
 #         col.label(text="Rounding")
 #         for item in set3:
 #             col.prop_enum(props, "dropdown_box_math",item.name, icon='BLANK1')
+
+
+
+class RoMa_key_name_list(PropertyGroup):
+    id: IntProperty(
+           name="Id",
+           default = 0)
+    
+    name: StringProperty(
+           name="Name",
+           default="")
+        #    update=update_roma_filter_by_typology)
+        
+class RoMaGetUniqueNode(RoMaTreeNode, Node):
+    '''Get the list of unique values of a given key '''
+    bl_idname = 'RoMa Unique Values'
+    bl_label = "Unique values"     
+  
+    
+    dropdown : EnumProperty(
+        items=lambda self, context : getAvailableAttributes(self, nodeType="Group by"),
+        description="Attribute to use as filter"
+    )
+    
+    # key_list : CollectionProperty(type=RoMa_key_name_list)
+        
+    # key_list_index : IntProperty(name = "Key list index",
+    #                             default = 0)
+    # executionOrder = []
+    
+    def init(self, context):
+        self.inputs.new('RoMa_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Attribute')
+        # self.inputs.new('RoMa_dataCollection_SocketType', name='Data', identifier='Data', use_multi_input=True)
+        self.inputs['Attribute'].display_shape = 'DIAMOND_DOT'
+        self.inputs['Attribute'].hide_value = True
+        
+        self.outputs.new('RoMa_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Attribute')
+        self.outputs['Attribute'].display_shape = 'DIAMOND_DOT'
+        
+    def copy(self, node):
+        # addKeysToNode(self, inputs=self.inputList, outputs=self.outputList)
+        cleanInputs(self)
+        cleanOutputs(self)
+        # self.validated = True
+        
+    def free(self):
+        # removeKeyFromNode(self, inputs=self.inputList, outputs=self.outputList)
+        pass
+        
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "dropdown", text="Key")
+        
+    def manualExecute(self):
+        cleanSocket(self, 'Attribute', 'output')
+        object_items = self.inputs['Attribute'].links[0].from_socket.object_items.items
+        uniqueList = uniqueValues(object_items, key=self.dropdown )
+        addItemsToList(uniqueList, self, 'Attribute')
+        # nodeFingerPrint = writeNodeFingerPrint(self)
+        # for unique in uniqueList:
+        #     RoMa_attribute_addItem(nodeFingerPrint,"Attribute", "output")
+        #     attributeIndex = self.outputs['Attribute'].object_items.active_index
+        #     for key, value in unique.items():
+        #         try:
+        #             float(value)
+        #             RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+        #                                             item_index=attributeIndex,
+        #                                             key=key,
+        #                                             valueType="FLOAT",
+        #                                             floatValue=value,
+        #                                             socketIdentifier='Attribute'
+        #                                             )
+        #         except ValueError:
+        #             RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+        #                                             item_index=attributeIndex,
+        #                                             key=key,
+        #                                             valueType="STRING",
+        #                                             stringValue=value,
+        #                                             socketIdentifier='Attribute'
+        #                                             )
+        
+    
+    def update(self):
+        self.manualExecute()
+        
+    def execute(self):
+        self.manualExecute()
         
         
+
+
+    
+    
+class RoMaTableNode(RoMaTreeNode, Node):
+    '''Group attributes in a table following on a selected criterion '''
+    bl_idname = 'Table by RoMa Attribute'
+    bl_label = "Table Group By"     
+  
+    
+    dropdown : EnumProperty(
+        items=lambda self, context : getAvailableAttributes(self, nodeType="Group by"),
+        description="Attribute to use as filter",
+        update=lambda self, context: self.updateKeyName()
+    )
+    
+    key_list : CollectionProperty(type=RoMa_key_name_list)
+        
+    key_list_index : IntProperty(name = "Key list index",
+                                default = 0)
+    executionOrder = []
+    
+    def init(self, context):
+        self.inputs.new('RoMa_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Attribute')
+        self.inputs.new('RoMa_dataCollection_SocketType', name='Data', identifier='Data', use_multi_input=True)
+        self.inputs['Attribute'].display_shape = 'DIAMOND_DOT'
+        self.inputs['Attribute'].hide_value = True
+        
+        self.outputs.new('RoMa_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Table')
+        # self.outputs['Value'].display_shape = 'DIAMOND_DOT'
+        
+    def copy(self, node):
+        # addKeysToNode(self, inputs=self.inputList, outputs=self.outputList)
+        cleanInputs(self)
+        cleanOutputs(self)
+        # self.validated = True
+        
+    def free(self):
+        # removeKeyFromNode(self, inputs=self.inputList, outputs=self.outputList)
+        pass
+        
+    def draw_buttons(self, context, layout):
+        # scene = context.scene
+        row = layout.row()
+        row.label(text="Group by:")
+        row = layout.row()
+        rows = 3
+        
+        node_id = writeNodeFingerPrint(self)
+        row.template_list("NODE_UL_key_filter", node_id, self,
+                        "key_list", self, "key_list_index", rows = rows)
+        
+        
+        col = row.column(align=True)
+        col.operator("roma_key.new_item", icon='ADD', text="").nodeFingerprint = writeNodeFingerPrint(self)
+        sub = col.row()
+        sub.operator("roma_key.delete_item", icon='REMOVE', text="").nodeFingerprint = writeNodeFingerPrint(self)
+        if len(self.key_list) < 2:
+            sub.enabled = False
+        else:
+            sub.enabled = True
+        col.separator()
+        op = col.operator("roma_key.move_item", icon='TRIA_UP', text="")
+        op.direction = 'UP'
+        op.nodeFingerprint = writeNodeFingerPrint(self)
+        
+        op=col.operator("roma_key.move_item", icon='TRIA_DOWN', text="")
+        op.direction = 'DOWN'
+        op.nodeFingerprint = writeNodeFingerPrint(self)
+        
+        layout.prop(self, "dropdown", text="Key")
+        
+    def update(self):
+        if self.inputs[0].is_linked and self.inputs[1].is_linked:
+            dataLinks = self.inputs[1].links
+            print(f"Links {len(dataLinks)}")
+            dataColumn = []
+
+            for i, link in enumerate(dataLinks):
+                child = self.inputs['Data'].links[i].from_node
+                nodeData = {    "node" : child,
+                    "depth": 0
+                }
+                self.executionOrder = [nodeData]
+                walkBackwards(self, child, depth = 0)
+                # sortedOrder = sorted(self.executionOrder, key=lambda x: x['depth'], reverse=True)
+                # for el in sortedOrder:
+                #     if hasattr(el['node'], "manualExecute"):
+                #     # print(f"Capture attribute esegue: {el}")
+                #     el['node'].manualExecute()
+                
+                
+                
+                
+
+
+    # update the key name and id in the key list
+    def updateKeyName(self):
+        currentId = self.key_list_index
+        selectedName = self.dropdown
+        self.key_list[currentId].name = selectedName
+
+# class RoMaTableNode(RoMaTreeNode, Node):
+#     '''Create a table from attributes'''
+#     bl_idname = 'Table RoMa Attribute'
+#     bl_label = "Table"     
+    
+#     def init(self, context):
+#         self.inputs.new('RoMa_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Attribute')
+#         self.inputs.new('RoMa_dataCollection_SocketType', name='Data', identifier='Data', use_multi_input=True)
+#         self.inputs['Attribute'].display_shape = 'DIAMOND_DOT'
+#         self.inputs['Attribute'].hide_value = True
+        
+#         self.outputs.new('RoMa_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Table')
+        
+    # def update(self):
+    #     if self.inputs[0].is_linked and self.inputs[0].links:
+    #         if self.inputs[0].links[0].from_node.outputs:
+    #             linked_output = self.inputs[0].links[0].from_socket
+    #             if linked_output.rna_type.name in ['RoMa_attributeCollectionAndFloat_SocketType', 'RoMa_attributeCollection_SocketType']:
+    #                 items = linked_output.object_items.items
+    #                 keys = uniqueKeys(items, sort=True, remove = ["id"])
+                    
+    #                 # empty the list of keys
+    #                 collectionSize = len(self.key_list)
+    #                 while collectionSize > 0:
+    #                     collectionSize -= 1
+    #                     self.key_list.remove(collectionSize)
+
+    # update the key name and id in the key list
+    # def updateKeyName(self):
+    #     currentId = self.key_list_index
+    #     selectedName = self.dropdown
+    #     self.key_list[currentId].name = selectedName
+
+class NODE_UL_key_filter(UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data,
+                  active_propname, index):
+        if self.layout_type in {'DEFAULT', 'COMPACT'}:
+            layout.label(text= f"{item.name}") 
+
+    def filter_items(self, context, data, propname):
+        filtered = []
+        ordered = []
+        items = getattr(data, propname)
+        filtered = [self.bitflag_filter_item] * len(items)
+        return filtered, ordered
+
+    def draw_filter(self, context, layout):
+        pass
+    
+class NODE_UL_key_filter_NewItem(Operator):
+    '''Add a new key filter'''
+    bl_idname = "roma_key.new_item"
+    bl_label = "Add"
+    
+    nodeFingerprint: StringProperty(name="Node Name")
+
+    def execute(self, context): 
+        node = readNodeFingerPrint(self.nodeFingerprint)
+        node.key_list.add()
+        temp_list = []
+        for el in node.key_list:
+            temp_list.append(el.id)
+        last = len(node.key_list)-1
+        node.key_list[last].id = max(temp_list)+1
+        
+        selectedName = node.dropdown
+        node.key_list[last].name = selectedName
+        return{'FINISHED'}
+    
+
+class NODE_UL_key_filter_DeleteItem(Operator):
+    '''Remove a key filter'''
+    bl_idname = "roma_key.delete_item"
+    bl_label = "Remove"
+    
+    nodeFingerprint: StringProperty(name="Node Name")
+    
+    # @classmethod
+    # def poll(self, cls, context):
+    #     node = readNodeFingerPrint(self.nodeFingerprint)
+    #     return node.key_list
+        
+    def execute(self, context):
+        node = readNodeFingerPrint(self.nodeFingerprint)
+        my_list = node.key_list
+        index =  node.key_list_index
+
+        my_list.remove(index)
+        node.key_list_index = min(max(0, index - 1), len(my_list) - 1)
+        
+        return{'FINISHED'}
+    
+class NODE_UL_key_MoveItem(Operator):
+    '''Move the filter. Filter on top have priority'''
+    bl_idname = "roma_key.move_item"
+    bl_label = "Move key"
+
+    direction: bpy.props.EnumProperty(items=(('UP', 'Up', ""),
+                                              ('DOWN', 'Down', ""),))
+    
+    nodeFingerprint: StringProperty(name="Node Name")
+
+    # @classmethod
+    # def poll(cls, context):
+    #     return context.scene.roma_typology_uses_name_list
+
+    def move_index(self):
+        node = readNodeFingerPrint(self.nodeFingerprint)
+        index = node.key_list_index
+        list_length = len(node.key_list) - 1 
+        new_index = index + (-1 if self.direction == 'UP' else 1)
+
+        node.key_list_index = max(0, min(new_index, list_length))
+
+    def execute(self, context):
+        node = readNodeFingerPrint(self.nodeFingerprint)
+        my_list = node.key_list
+        index =  node.key_list_index
+
+        neighbor = index + (-1 if self.direction == 'UP' else 1)
+        my_list.move(neighbor, index)
+        self.move_index()
+        
+        return{'FINISHED'}
+        
+        
+    
 class RoMaMathNode(RoMaTreeNode, Node):
     '''Read RoMa attributes'''
     bl_idname = 'RoMa Math Node'
-    bl_label = "Math Node"
+    bl_label = "Math"
     
     # EnumProperty for dropdown box math
     dropdown_box_math: EnumProperty(
@@ -1304,12 +1782,12 @@ class RoMaMathNode(RoMaTreeNode, Node):
 
     
     dropdown_A : EnumProperty(
-        items=lambda self, context : self.getAvailableAttributes("A"),
+        items=lambda self, context : getAvailableAttributes(self, nodeType="Math", inputId=0),
         description="Attribute to use in field A"
     )
     
     dropdown_B : EnumProperty(
-        items=lambda self, context: self.getAvailableAttributes("B"),
+        items=lambda self, context: getAvailableAttributes(self, nodeType="Math", inputId=1),
         description="Attribute to use in field B"
     )
     
@@ -1524,44 +2002,6 @@ class RoMaMathNode(RoMaTreeNode, Node):
                 linked_output = self.inputs[1].links[0].from_socket
                 if linked_output.rna_type.name == 'RoMa_attributeCollection_SocketType':
                     layout.prop(self, "dropdown_B", text="B")
-        
-
-   
-        
-    def getAvailableAttributes(self, field):
-        attributes=[]
-        # objects = []
-        # items = []
-        # get the list of available attributes
-        # from the linked node
-        # print(f"field {self} {field}")
-        if field == "A":
-            if self.inputs[0].is_linked and self.inputs[0].links:
-                if self.inputs[0].links[0].from_node.outputs:
-                    linked_output = self.inputs[0].links[0].from_socket
-                    if linked_output.rna_type.name == 'RoMa_attributeCollection_SocketType':
-                        items = linked_output.object_items.items
-                        # get the unique key, sort them alphabetically and remove "id"
-                        keys = uniqueKeys(items, sort=True, remove = ["id"])
-                        for key in keys:
-                            newProp = (key, key, key)
-                           
-                            attributes.append(newProp)
-                        return(attributes)
-        elif field == "B":
-            if self.inputs[1].is_linked and self.inputs[1].links:
-                if self.inputs[1].links[0].from_node.outputs:
-                    linked_output = self.inputs[1].links[0].from_socket
-                    if linked_output.rna_type.name == 'RoMa_attributeCollection_SocketType':
-                        items = linked_output.object_items.items
-                        keys = uniqueKeys(items, sort=True, remove = ["id"])
-                        for key in keys:
-                            newProp = (key, key, key)
-                            attributes.append(newProp)
-                        return(attributes)
-        else: 
-            return()
-        
     
     def update_socket_visibility(self):
         selection = self.dropdown_box_math
@@ -1594,14 +2034,13 @@ class RoMaMathNode(RoMaTreeNode, Node):
 class RoMaFloatNode(RoMaTreeNode, Node):
     bl_label = 'Value'
     bl_idname = 'RoMa Value'
-    bl_label = 'Attribute'
 
     float : FloatProperty(
                 name='',
                 precision=3,)
 
     def init(self, context):
-        self.outputs.new('NodeSocketFloat', name='Attribute', identifier='Value')
+        self.outputs.new('NodeSocketFloat', name='Value', identifier='Value')
         addKeysToNode(self, key="")
     
     def copy(self, node):
@@ -1623,7 +2062,6 @@ class RoMaFloatNode(RoMaTreeNode, Node):
 class RoMaIntegerNode(RoMaTreeNode, Node):
     bl_label = 'Integer'
     bl_idname = 'RoMa Integer'
-    bl_label = 'Attribute'
 
     integer : IntProperty(
                 name='',)
@@ -1648,28 +2086,28 @@ class RoMaIntegerNode(RoMaTreeNode, Node):
         self.outputs['Integer'].default_value = self.integer
        
 
-class RoMaAttributeToColumn(RoMaTreeNode, Node):
-    '''Create a column with the attribute data'''
-    bl_idname = 'RoMa Column from Data'
-    bl_label = "Column from Data"
+# class RoMaAttributeToColumnNode(RoMaTreeNode, Node):
+#     '''Create a column with the attribute data'''
+#     bl_idname = 'RoMa Column from Data'
+#     bl_label = "Data to Column"
     
-    validated = True
+#     validated = True
     
-    def init(self, context):
-        self.inputs.new('RoMa_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Attribute')
-        self.inputs['Attribute'].display_shape = 'DIAMOND_DOT'
+#     def init(self, context):
+#         self.inputs.new('RoMa_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Attribute')
+#         self.inputs['Attribute'].display_shape = 'DIAMOND_DOT'
         
-        self.outputs.new('RoMa_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Attribute')
-        self.outputs['Attribute'].display_shape = 'DIAMOND_DOT'
+#         self.outputs.new('RoMa_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Attribute')
+#         self.outputs['Attribute'].display_shape = 'DIAMOND_DOT'
         
-    def manualExecute(self):
-        pass    
+#     def manualExecute(self):
+#         pass    
         
-    def update(self):
-        self.manualExecute()
+#     def update(self):
+#         self.manualExecute()
     
-    def execute(self):
-        self.manualExecute()
+#     def execute(self):
+#         self.manualExecute()
         # if self.validated:
         #     cleanInputs(self)
         #     cleanOutputs(self)
@@ -1684,16 +2122,16 @@ class RoMaAttributeToColumn(RoMaTreeNode, Node):
 
 
         
-class RoMaViewer(RoMaTreeNode, Node):
+class RoMaViewerNode(RoMaTreeNode, Node):
     '''Add a viewer node'''
     bl_idname = 'RoMa Viewer'
-    bl_label = 'RoMa Viewer'
+    bl_label = 'Viewer'
     
     def data_to_update_schedule_node_editor(self, context):
         update_schedule_node_editor(self)
     
     toggle : bpy.props.BoolProperty(
-            name = "Show Schedule",
+            name = "Show Table",
             default = False,
             update = data_to_update_schedule_node_editor)
 
@@ -1701,7 +2139,7 @@ class RoMaViewer(RoMaTreeNode, Node):
     def init(self, context):
         # self.outputs.new('RoMa_stringCollection_SocketType', 'RoMa Mesh')
         # self.inputs.new('RoMa_stringCollection_SocketType', 'RoMa Mesh')
-        self.inputs.new('RoMa_attributeCollection_SocketType', name="Schedule", identifier='Schedule')
+        self.inputs.new('RoMa_attributeCollection_SocketType', name="Table", identifier='Schedule')
         self.inputs['Schedule'].hide_value = True
         self.inputs['Schedule'].display_shape = 'DIAMOND_DOT'
         
@@ -1744,7 +2182,7 @@ class RoMaViewer(RoMaTreeNode, Node):
         nodeIndentifier = writeNodeFingerPrint(self)
         col = layout.column(align=True)
         # col.operator("object.roma_add_column").sourceNode = nodeIndentifier
-        col.prop(self, "toggle", text="Show Schedule")
+        col.prop(self, "toggle", text="Show Table")
 
     
 #############################################################################
@@ -1763,7 +2201,7 @@ node_categories = [
         NodeItem("Input RoMa Selected Mesh", label="Selected RoMa Meshes"),
     ]),
     RoMaNodeCategory('ATTRIBUTE', "Attribute", items=[
-        NodeItem("Capture RoMa attribute", label="Capture Attribute"),
+        NodeItem("Capture RoMa Attribute", label="Capture Attribute"),
         NodeItem("RoMa All Attributes", label="All Attributes"),
         NodeItem("RoMa Area Attribute", label="Area"),
         NodeItem("RoMa Use Attribute", label="Use"),
@@ -1773,8 +2211,11 @@ node_categories = [
         NodeItem("RoMa Integer", label="Integer"),
         NodeItem("RoMa Value", label="Value"),
     ]),
-    RoMaNodeCategory('SCHEDULE', "Schedule", items= [
-       NodeItem("RoMa Column from Data", label="Column"),
+    RoMaNodeCategory('TABLE', "Table", items= [
+        NodeItem("Table by RoMa Attribute", label="Table"),
+        NodeItem("RoMa Table Data", label="Table Data"),
+        NodeItem("RoMa Table Function", label="Table Function"),
+        NodeItem("RoMa Unique Values", label="Unique Values")
     ]),
     RoMaNodeCategory('OUTPUT', "Output", items=[
         NodeItem("RoMa Viewer", label="Viewer"),
@@ -2098,126 +2539,5 @@ def draw_callback_schedule_overlay(self, context, sourceNode):
 #             font_obj.parent = bpy.data.objects[column.name]
 #         return {'FINISHED'}
     
-################################################################################################################
-############### Function to retrieve data for schedules  #######################################################
-################################################################################################################
-    
-    
-# collect the data from the source node and return all
-# the elements necessary to draw the column or the row
-# def dataForGraphic(sourceNode, posX = 0, posY = 0, cellWidth = 3, cellHeight = 2, scale=1):
-#     node = readNodeFingerPrint(sourceNode)
-#     object_items = node.inputs['Schedule'].links[0].from_socket.object_items.items
-    
-#     verts = []
-#     edges = []
-#     faces = []
-#     data = []
-#     # boundingBox = {"min" : (0,0,0), "max" : (0,0,0)}
-    
-   
-#     # reading data from the input node and store as new list of dictionaries
-#     # add the header
-#     item = object_items[0]
-#     tmp = {}
-#     tmp['id'] = 'id'
-#     for key in item['key_value_items']:
-#         tmp[key['name']] = key['name'] 
-#     data.append(tmp)
-    
-#     # append data to the list
-#     for item in object_items:
-#         tmp = {}
-#         tmp['id'] = item.name
-#         for key in item['key_value_items']:
-#             if key['value_type'] == "STRING":
-#                 tmp[key['name']] = key['value_string'] 
-#             else:
-#                 tmp[key['name']] = str(key['value_float'])
-#         data.append(tmp)
-        
-#     # print(data)
-    
-#     numberOfKeys = len(data[0])
-#     numberOfItems = len(data)
-    
-#     for keyIndex in range(numberOfKeys):
-#         for itemIndex in range(numberOfItems):
-#             horizontalIncrement = cellWidth * keyIndex
-#             verticalIncrement = -1 * cellHeight * itemIndex
-            
-#             x = (horizontalIncrement + posX) * scale
-#             # x = (+0.0 + posX ) * scale
-#             y = (verticalIncrement + posY) * scale
-#             z = 0
-#             tmpVert = (x, y, z) 
-#             verts.append(tmpVert)
-                
-#             # latest series of vertices
-#             if itemIndex == numberOfItems -1:
-#                 verticalIncrement = -1 * cellHeight * (itemIndex +1)
-#                 x = (horizontalIncrement + posX) * scale
-#                 y = (verticalIncrement + posY) * scale
-#                 z = 0
-#                 tmpVert = (x, y, z) 
-#                 verts.append(tmpVert)
-                
-#             if itemIndex <= numberOfItems +1:
-#                 #   A----B
-#                 #   |    |
-#                 #   D----C   
-#                 A = itemIndex + ((numberOfItems +1) * keyIndex)
-#                 B = A + numberOfItems +1
-#                 C = B +1
-#                 D = A +1
-                
-#                 tmpEdge = (A, B)
-#                 edges.append(tmpEdge)
-#                 tmpEdge = (A, D)
-#                 edges.append(tmpEdge)
-                    
-#         # the last AB of the column            
-#         A = itemIndex + ((numberOfItems +1) * keyIndex) +1
-#         B = A + numberOfItems +1        
-#         tmpEdge = (A, B)
-#         edges.append(tmpEdge)
-                
 
-        
-#     # the latest vertical series of vertices
-#     for itemIndex in range(numberOfItems):
-#         horizontalIncrement = cellWidth * numberOfKeys
-#         verticalIncrement = -1 * cellHeight * itemIndex
-        
-#         x = (horizontalIncrement + posX) * scale
-#         y = (verticalIncrement + posY) * scale
-#         z = 0
-#         tmpVert = (x, y, z) 
-#         verts.append(tmpVert)
-            
-#         # latest series of vertices
-#         if itemIndex == numberOfItems -1:
-#             verticalIncrement = -1 * cellHeight * (itemIndex +1)
-#             x = (horizontalIncrement + posX) * scale
-#             y = (verticalIncrement + posY) * scale
-#             z = 0
-#             tmpVert = (x, y, z) 
-#             verts.append(tmpVert)
-            
-#         #   A----B
-#         #   |    |
-#         #   D----C   
-#         A = itemIndex + ((numberOfItems +1) * numberOfKeys)
-#         D = A +1
-#         tmpEdge = (A, D)
-#         edges.append(tmpEdge)
-    
-    
-
-#     # boundingBox["min"] = verts[0]
-#     # boundingBox['max'] = verts[len(verts)-1]
-    
-#     return data, verts, edges, faces
-
-
-    
+ 
