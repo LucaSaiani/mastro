@@ -567,34 +567,33 @@ def updates(scene, depsgraph):
     # when a typology is selected, it is necessary to update the #######################################
     # uses in the UIList using the ones stored in scene.roma_typology_uses_name_list ###################
     ####################################################################################################
-    if bpy.context.area:
-        if bpy.context.area.type == 'PROPERTIES':
-            previous = scene.roma_previous_selected_typology
-            current = scene.roma_typology_name_list_index
-            if previous != current:
-                scene.roma_previous_selected_typology = current
-                use_name_list = scene.roma_typology_uses_name_list
-                while len(use_name_list) > 0:
-                    index = scene.roma_typology_uses_name_list_index
-                    use_name_list.remove(index)
-                    scene.roma_typology_uses_name_list_index = min(max(0, index - 1), len(use_name_list) - 1)
-                # add the uses stored in the typology to the current typology use UIList        
-                selected_typology_index = scene.roma_typology_name_list_index
-                if len(scene.roma_typology_name_list) > 0:
-                    list = scene.roma_typology_name_list[selected_typology_index].useList    
-                    split_list = list.split(";")
-                    for el in split_list:
-                        scene.roma_typology_uses_name_list.add()
-                        temp_list = []    
-                        temp_list.append(int(el))
-                        last = len(scene.roma_typology_uses_name_list)-1
-                        # look for the correspondent use name in roma_use_name_list
-                        for use in scene.roma_use_name_list:
-                            if int(el) == use.id:
-                                scene.roma_typology_uses_name_list[last].id = use.id
-                                scene.roma_typology_uses_name_list[last].name = use.name 
-                                break
-    
+    if hasattr(scene, "roma_typology_name_list_index"):
+        previous = scene.roma_previous_selected_typology
+        current = scene.roma_typology_name_list_index
+        if previous != current:
+            scene.roma_previous_selected_typology = current
+            use_name_list = scene.roma_typology_uses_name_list
+            while len(use_name_list) > 0:
+                index = scene.roma_typology_uses_name_list_index
+                use_name_list.remove(index)
+                scene.roma_typology_uses_name_list_index = min(max(0, index - 1), len(use_name_list) - 1)
+            # add the uses stored in the typology to the current typology use UIList        
+            selected_typology_index = scene.roma_typology_name_list_index
+            if len(scene.roma_typology_name_list) > 0:
+                list = scene.roma_typology_name_list[selected_typology_index].useList    
+                split_list = list.split(";")
+                for el in split_list:
+                    scene.roma_typology_uses_name_list.add()
+                    temp_list = []    
+                    temp_list.append(int(el))
+                    last = len(scene.roma_typology_uses_name_list)-1
+                    # look for the correspondent use name in roma_use_name_list
+                    for use in scene.roma_use_name_list:
+                        if int(el) == use.id:
+                            scene.roma_typology_uses_name_list[last].id = use.id
+                            scene.roma_typology_uses_name_list[last].name = use.name 
+                            break
+
     #############################################################################################
     # is the selection has changed, some  data in the RoMa schedule need to be updated ##########
     #############################################################################################
