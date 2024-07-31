@@ -36,6 +36,7 @@ from .roma_schedule import RoMaMathNode, execute_active_node_tree
 
 previous_selection = {}
 
+# show the faces of a roma object as overlay
 class VIEW_3D_OT_show_roma_overlay(Operator):
     bl_idname = "wm.show_roma_overlay"
     bl_label = "Show RoMa selection"
@@ -160,6 +161,7 @@ def draw_callback_selection_overlay(self, context):
         
 #         return {'FINISHED'}
 
+# show the overlayed attributes (type, number of storeys, etc...)
 class VIEW_3D_OT_show_roma_attributes(Operator):
     bl_idname = "wm.show_roma_attributes"
     bl_label = "Show RoMa attributes"
@@ -490,6 +492,16 @@ def updates(scene, depsgraph):
         if scene.previous_selection_object_name != obj.name:
             scene.previous_selection_object_name = obj.name
             scene.previous_selection_face_id = -1
+            if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data:
+                if obj.mode == "OBJECT":
+                    blockId = obj.roma_props['roma_block_attribute']
+                    plotId = obj.roma_props['roma_plot_attribute']
+                    
+                    block = scene.roma_block_name_list[blockId].name
+                    plot = scene.roma_plot_name_list[plotId].name
+                    
+                    scene.roma_block_name_current[0].name = block
+                    scene.roma_plot_name_current[0].name = plot
         else:
             if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data and obj.mode == 'EDIT':
                 bm = bmesh.from_edit_mesh(obj.data)
@@ -554,6 +566,7 @@ def updates(scene, depsgraph):
                                 usesUiList[enum].storeys = int(storeys)
                                 break
                 bm.free
+                
     ###############################################################################
     # show graphic overlays #######################################################
     ###############################################################################
