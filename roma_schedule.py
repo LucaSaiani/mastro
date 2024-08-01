@@ -32,8 +32,9 @@ import mathutils
 from nodeitems_utils import NodeCategory, NodeItem
 from gpu_extras.batch import batch_for_shader
 
-# from itertools import chain # to identify unique keys in a list of dictionaries
+from itertools import product # to generate all the combinations from a given list of lists
 from collections import defaultdict # used to count the occurences of uniques
+
 
 font_info = {
     "font_id": 0,
@@ -127,13 +128,15 @@ def addItemsToList(objectList, node, socketName = ""):
 def uniqueValues(arr, **kwargs):
     params = {
         'sort' : None,
-        'key' : None
+        'key' : None,
+        'count' : None,
     }
     
     params.update(kwargs)
     
     sort = params['sort']
     keyName = params['key']
+    keyCount = params['count']
     newList = []
     
     for a in arr:
@@ -145,14 +148,16 @@ def uniqueValues(arr, **kwargs):
                 else:
                     newList.append(itemKey['value_string'])
 
-    count_dict = defaultdict(int)
-    for value in newList:
-        count_dict[value] += 1
+    if keyCount == True: # count the instances for each unique
+        count_dict = defaultdict(int)
+        for value in newList:
+            count_dict[value] += 1
+        # a tuple with key and the number of occurencies
+        # result = list(count_dict.items())
+        result = [{keyName: key, 'count': value} for key, value in count_dict.items()]
         
-    # a tuple with key and the number of occurencies
-    # result = list(count_dict.items())
-    result = [{keyName: key, 'count': value} for key, value in count_dict.items()]
-    # result= list(set(newList))
+    else: # return only the unique list
+        result = [{keyName: key} for key in set(newList)]
     
     if sort:
         result.sort(key=lambda x: x[0])
@@ -297,12 +302,11 @@ def getAttributes(objNames, attrType):
         data = []
         for el in romaObjs:
             obj = bpy.data.objects[el.name]
-            option = None
-            phase = None
-            if "roma_option_attribute" in obj.roma_props.keys():
-                option = obj.roma_props['roma_option_attribute']
-            if "roma_phase_attribute" in obj.roma_props.keys():
-                phase = obj.roma_props['roma_phase_attribute']
+          
+            option = obj.roma_props['roma_option_attribute']
+            phase = obj.roma_props['roma_phase_attribute']
+            plot = obj.roma_props['roma_plot_attribute']
+            block = obj.roma_props['roma_block_attribute']
     
             meshName = obj.name
             mesh = obj.data
@@ -382,15 +386,17 @@ def getAttributes(objNames, attrType):
                                     # "polyId"        : polyId,
                                     "id"            : id,
                                     "typologyId"    : typologyId,
-                                    "typologyName"  : typologyName,
+                                    # "typologyName"  : typologyName,
                                     "floor"         : floor,
                                     "area"          : area,
                                     "useId"         : useId,
-                                    "useName"       : useName,
+                                    # "useName"       : useName,
                                     "height"        : height,
                                     "void"          : void,
                                     "option"        : option,
                                     "phase"         : phase,
+                                    "block"         : block,
+                                    "plot"          : plot
                         }
                     elif attrType == "area":
                         tmpData = {
@@ -407,7 +413,7 @@ def getAttributes(objNames, attrType):
                                     "id"            : id,
                                     # "floor"         : floor,
                                     "useID"         : useId,
-                                    "useName"       : useName,
+                                    # "useName"       : useName,
                         }
 
                     data.append(tmpData)
@@ -1597,7 +1603,7 @@ class RoMaTableNode(RoMaTreeNode, Node):
             dataColumn = []
 
             for i, link in enumerate(dataLinks):
-                child = self.inputs['Data'].links[i].from_node
+                child = link.from_node
                 nodeData = {    "node" : child,
                     "depth": 0
                 }
@@ -1611,7 +1617,7 @@ class RoMaTableNode(RoMaTreeNode, Node):
                 
                 
                 
-                
+
 
 
     # update the key name and id in the key list
@@ -1619,6 +1625,8 @@ class RoMaTableNode(RoMaTreeNode, Node):
         currentId = self.key_list_index
         selectedName = self.dropdown
         self.key_list[currentId].name = selectedName
+        nodeFingerPrint = writeNodeFingerPrint(self)
+        updateGroupByCombination(nodeFingerPrint)
 
 # class RoMaTableNode(RoMaTreeNode, Node):
 #     '''Create a table from attributes'''
@@ -1653,6 +1661,173 @@ class RoMaTableNode(RoMaTreeNode, Node):
     #     selectedName = self.dropdown
     #     self.key_list[currentId].name = selectedName
 
+
+# This class is to group the attributes accordingly with the a series of given keys
+# It is used in the Group by node and called by updateGroupByCombination
+# class ItemGrouper:
+#     def __init__(self, itemList, combinations):
+#         """
+#         Initializes the ItemGrouper class with item list and combinations.
+        
+#         :param itemList: List of dictionaries where each dictionary represents an item.
+#         :param combinations: List of tuples where each tuple contains two dictionaries representing key combinations.
+#         """
+#         self.itemList = itemList
+#         self.combinations = combinations
+#         self.grouped_dict = defaultdict(list)  # Dictionary to store grouped items
+    
+#     def create_hashable_key(self, d):
+#         """
+#         Creates a hashable key from a dictionary by converting it to a frozenset.
+        
+#         :param d: Dictionary to be converted to a hashable key.
+#         :return: frozenset representing the hashable key.
+#         """
+#         return frozenset(d.items())
+    
+#     def create_key(self, item, combo_dict):
+#         """
+#         Creates a key from an item based on the given combination dictionary.
+        
+#         :param item: Dictionary representing an item.
+#         :param combo_dict: Dictionary representing the combination to match.
+#         :return: frozenset representing the key for the item based on the combination.
+#         """
+#         return frozenset((key, item[key]) for key in combo_dict if key in item)
+    
+#     def merge_dicts(self, dict_list):
+#         """
+#         Merges a list of dictionaries into a single dictionary.
+        
+#         :param dict_list: List of dictionaries to be merged.
+#         :return: A single dictionary containing all key-value pairs from the input dictionaries.
+#         """
+#         result = {}
+#         for d in dict_list:
+#             result.update(d)
+#         return result
+    
+#     def group_by_combination(self):
+#         """
+#         Groups items by the combinations of keys specified.
+#         """
+#         for item in self.itemList:
+#             for combo in self.combinations:
+#                 # Merge the two dictionaries in the combination tuple
+#                 combo_dicts = [dict(part) for part in combo]
+#                 combo_dict = self.merge_dicts(combo_dicts)
+                
+#                 # Create a hashable key for the combination dictionary
+#                 combo_key = self.create_hashable_key(combo_dict)
+                
+#                 # Create a key for the item based on the combination
+#                 item_key = self.create_key(item, combo_dict)
+                
+#                 # Check if the item matches the combination and group it
+#                 if item_key == self.create_hashable_key(combo_dict):
+#                     self.grouped_dict[combo_key].append(item)
+#                     break
+
+                
+# Update the combination used in the node Group by to determine
+# the data in the created table
+def updateGroupByCombination(nodeFingerPrint):
+    node = readNodeFingerPrint(nodeFingerPrint)
+    object_items = node.inputs['Attribute'].links[0].from_socket.object_items.items
+    
+    # get the keys selected in the linked table data nodes
+    dataLinks = node.inputs['Data'].links
+    keys_to_keep = []
+    if len(dataLinks)>0:
+        for i, link in enumerate(dataLinks):
+            child = link.from_node
+            keyName = child.dropdown
+            keys_to_keep.append(keyName)
+    
+    # Get the unique values based on the keys added to the UIList
+    # and after that calculte all the possible combinations
+    listOfList = []
+    for i, key in enumerate(node.key_list): 
+        tmpList = uniqueValues(object_items, key=key.name)
+        listOfList.append(tmpList)
+        keys_to_keep.append(key.name) # Add the key listed in the UIList to the list to keys to keep
+    combinations = list(product(*listOfList))
+    
+    # Remove duplicates by converting to a set and then back to a list
+    keys_to_keep = list(set(keys_to_keep))
+    
+    itemList = []
+    for item in object_items:
+        tmpItem = {}
+        for key in item['key_value_items']:
+            if key['value_type'] == "STRING":
+                tmpItem[f"{key['name']}"] = key['value_string']
+            else:
+                tmpItem[f"{key['name']}"] = key['value_float']
+        itemList.append(tmpItem)
+   
+    # Keep only specified keys in each dictionary in the list.
+    
+    # :param item_list: List of dictionaries to process.
+    # :param keys_to_keep: List of keys to keep in each dictionary.
+    # :return: Modified list of dictionaries with only specified keys.
+    
+    for item in itemList:
+        # Create a new dictionary with only the keys specified in keys_to_keep
+        filtered_item = {key: item[key] for key in keys_to_keep if key in item}
+        # Update the item in the list with the filtered dictionary
+        item.clear()  # Clear the original dictionary
+        item.update(filtered_item)  # Update with the filtered dictionary
+
+    # Instantiate the ItemGrouper class and use it
+    # grouper = ItemGrouper(itemList, combinations)
+    # grouper.group_by_combination()
+    
+    grouped_dict = defaultdict(list)
+    
+    #  Groups items by the combinations of keys specified.
+    for item in itemList:
+        for combo in combinations:
+            # Merge the two dictionaries in the combination tuple
+            combo_dicts = [dict(part) for part in combo]
+            
+            # Merges a list of dictionaries into a single dictionary.
+            # :param dict_list: List of dictionaries to be merged.
+            # :result: A single dictionary containing all key-value pairs from the input dictionaries.
+            result = {}
+            for d in combo_dicts:
+                result.update(d)
+            combo_dict = result
+            
+            # Create a hashable key for the combination dictionary
+            combo_key = {}
+            # Creates a hashable key from a dictionary by converting it to a frozenset.
+            # :combo_dict: Dictionary to be converted to a hashable key.
+            # :return: frozenset representing the hashable key.
+            combo_key = frozenset(combo_dict.items())
+            
+            # Create a key for the item based on the combination
+            # Creates a key from an item based on the given combination dictionary.
+            # :param item: Dictionary representing an item.
+            # :param combo_dict: Dictionary representing the combination to match.
+            # :return: frozenset representing the key for the item based on the combination.
+            item_key = frozenset((key, item[key]) for key in combo_dict if key in item)
+            
+            # Check if the item matches the combination and group it
+            if item_key == frozenset(combo_dict.items()):
+                grouped_dict[combo_key].append(item)
+                break
+    
+    
+    print()
+    print()
+    for combo_key, items in grouped_dict.items():
+        print(f"Combination: {dict(combo_key)}")
+        for item in items:
+            print(f"  {item}")
+
+
+            
 class NODE_UL_key_filter(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data,
                   active_propname, index):
@@ -1687,6 +1862,8 @@ class NODE_UL_key_filter_NewItem(Operator):
         
         selectedName = node.dropdown
         node.key_list[last].name = selectedName
+        
+        updateGroupByCombination(self.nodeFingerprint)
         return{'FINISHED'}
     
 
@@ -1710,6 +1887,7 @@ class NODE_UL_key_filter_DeleteItem(Operator):
         my_list.remove(index)
         node.key_list_index = min(max(0, index - 1), len(my_list) - 1)
         
+        updateGroupByCombination(self.nodeFingerprint)
         return{'FINISHED'}
     
 class NODE_UL_key_MoveItem(Operator):
@@ -1742,6 +1920,8 @@ class NODE_UL_key_MoveItem(Operator):
         neighbor = index + (-1 if self.direction == 'UP' else 1)
         my_list.move(neighbor, index)
         self.move_index()
+        
+        updateGroupByCombination(self.nodeFingerprint)
         
         return{'FINISHED'}
         
