@@ -149,7 +149,7 @@ classes = (
     roma_schedule.RoMa_data_collectionItem,
     roma_schedule.RoMa_data_propertyGroup,
     roma_schedule.RoMa_dataCollection_Socket,
-    roma_schedule.RoMa_dataOperation_Socket,
+    # roma_schedule.RoMa_dataOperation_Socket,
     # roma_schedule.RoMa_attribute_addItemOperator,
     # roma_schedule.RoMa_attribute_removeItemOperator,
     # roma_schedule.RoMa_attribute_addKeyValueItemOperator,
