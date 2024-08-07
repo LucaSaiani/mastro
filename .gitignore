@@ -52,12 +52,10 @@ coverage.xml
 docs/_build/
 
 
-roma.blend1
-roma_alternative duplicate.blend1
-roma_alternative duplicate.blend
+*.blend1
+*.blend2
+*.blend3
+*.blend4
+*.blend5
 blender_assets.cats.txt~
 blender_assets.cats.txt
-roma.blend5
-roma.blend3
-roma.blend4
-roma.blend2
