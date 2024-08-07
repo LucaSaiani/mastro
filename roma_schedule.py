@@ -258,6 +258,7 @@ def cleanSocket(link, socketIdentifier, inputOutput):
             # l.pop('object_items', None)
             nodeFingerPrint = writeNodeFingerPrint(link)
             RoMa_attribute_removeItem(nodeFingerPrint, socketIdentifier, inOut)
+   
             
     
 def cleanInputs(self):
@@ -452,7 +453,7 @@ def getAttributes(objNames, attrType):
 
 # a function used to store the order of the children nodes
 # used to run them in the proper order
-def walkBackwards(parentNode, node, depth):
+def walkBackwards(parentNode, inputId, node, depth):
     depth += 1
     if node.inputs:
         inputs = node.inputs
@@ -464,17 +465,23 @@ def walkBackwards(parentNode, node, depth):
                     nodeData = { "node" : nextNode,
                                 "depth": depth
                                }
-                    parentNode.executionOrder.append(nodeData)
-                    walkBackwards(parentNode, nextNode, depth)
-    else: # if there are no inputs, it may be that the node is an attribute node
-        if node.outputs[0].name == "Attribute":
-            sourceObjects = parentNode.inputs['RoMa Mesh'].object_items
-            node.objNames.clear()
-            for obj in sourceObjects:
-                item = node.objNames.add()
-                item.name = obj.name
-        elif node.outputs[0].name == "Function":
-            print(f"Trovato {node.name}")
+                    # try:
+                    #     parentNode.executionOrder[inputId]
+                    # except IndexError:
+                    #     parentNode.executionOrder.append([])
+                    parentNode.executionOrder[inputId].append(nodeData)
+                    # print(f"aggiungo {nodeData} a {inputId}")
+                    walkBackwards(parentNode, inputId, nextNode, depth)
+    # else: # if there are no inputs, it may be that the node is an attribute node
+    #     if node.outputs[0].name == "Attribute":
+    #         sourceObjects = parentNode.inputs['RoMa Mesh'].object_items
+    #         node.objNames.clear()
+    #         for obj in sourceObjects:
+    #             item = node.objNames.add()
+    #             item.name = obj.name
+    #     elif node.outputs[0].name == "Function":
+    #         print(f"Trovato {node.name}")
+           
 
     return()
     
@@ -585,6 +592,7 @@ def RoMa_attribute_removeItem(nodeFingerPrint, socketIdentifier ,inputOutput):
             try:
                 collection.items.remove(collectionSize)
             except AttributeError as e:
+                print(F"Error in Roma_attribute_removeItem {e}")
                 # this is to handle the sockets that have both default_value
                 # and item
                 pass                
@@ -722,6 +730,76 @@ def copyAttributesToSocket(object_items, nodeFingerPrint, socketIdentifier, inpu
                                                     inputOutput=socket,
                                                     socketIdentifier=socketIdentifier
                                                     )
+                    
+# a function to copy and merge attributes between sockets             
+def copyAndMergeAttributeToSocket(object_items, nodeFingerPrint, socketIdentifier, inputOutput):
+    node = readNodeFingerPrint(nodeFingerPrint)
+    if inputOutput == "both":
+        sockets = ['input', 'output']
+    elif inputOutput == "input":
+        sockets = ['input']
+    else:
+        sockets = ['output']
+            
+    node = readNodeFingerPrint(nodeFingerPrint)
+    
+    for attr in object_items:
+        # RoMa_attribute_addItem(nodeFingerPrint, socketIdentifier, inputOutput)
+        for socket in sockets:
+            if socket == "input":
+                attributeIndex = node.inputs[socketIdentifier].object_items.active_index
+                if len(node.inputs[socketIdentifier].object_items.items) == 0:
+                    newData = True
+                else:
+                    newData = False
+            else:
+                attributeIndex = node.outputs[socketIdentifier].object_items.active_index
+                if len(node.outputs[socketIdentifier].object_items.items) == 0:
+                    newData = True
+                else:
+                    newData = False
+            
+            # In case the socket is empty, the first batch of data is copied
+            # else data is merged
+            if newData:
+                copyAttributesToSocket(object_items, nodeFingerPrint, socketIdentifier, inputOutput)
+                return()
+            else:
+                object_items = node.outputs[0].object_items.items
+                for keys in attr['key_value_items']:
+                    if keys['name'] == 'id':
+                        id = keys['value_string']
+                    else:
+                        keyName = keys['name']
+                        valueType = keys['value_type']
+                        if valueType == "FLOAT":
+                            value = keys['value_float']
+                        else:
+                            value = keys['value_string']
+                        
+                for attributeIndex, attr in enumerate(object_items):
+                    for keys in attr['key_value_items']:
+                        if keys['name'] == 'id' and keys['value_string'] == id:
+                            if valueType == "FLOAT":
+                                RoMa_attribute_addKeyValueItem(node=nodeFingerPrint,
+                                                            item_index=attributeIndex,
+                                                            key=keyName,
+                                                            valueType="FLOAT",
+                                                            floatValue=value,
+                                                            socketIdentifier=socketIdentifier
+                                                            )
+                            else:
+                                RoMa_attribute_addKeyValueItem(node=nodeFingerPrint,
+                                                            item_index=attributeIndex,
+                                                            key=keyName,
+                                                            valueType="STRING",
+                                                            stringValue=value,
+                                                            socketIdentifier=socketIdentifier
+                                                            )
+                            break
+    return()
+                            
+               
 ################################################################################################################
 ################# Class  to retrieve data for schedules  #######################################################
 ################################################################################################################
@@ -951,20 +1029,20 @@ class RoMa_dataCollection_Socket(NodeSocket):
     
 # RoMa custom socket type
 # used to set operation data
-class RoMa_dataOperation_Socket(NodeSocket):
-    """RoMa node socket to operate data"""
-    bl_idname = 'RoMa_dataOperation_SocketType'
-    bl_label = "Data Operation"
+# class RoMa_dataOperation_Socket(NodeSocket):
+#     """RoMa node socket to operate data"""
+#     bl_idname = 'RoMa_dataOperation_SocketType'
+#     bl_label = "Data Operation"
     
-    object_items: PointerProperty(type=RoMa_attribute_propertyGroup)
-    default_value : FloatProperty(default=1.0) 
+#     object_items: PointerProperty(type=RoMa_attribute_propertyGroup)
+#     default_value : FloatProperty(default=1.0) 
    
-    def draw(self, context, layout, node, text):
-        layout.label(text=self.identifier)
+#     def draw(self, context, layout, node, text):
+#         layout.label(text=self.identifier)
   
-    @classmethod
-    def draw_color_simple(cls):
-        return (0.99, 0.96, 0.54, 1.0)
+#     @classmethod
+#     def draw_color_simple(cls):
+#         return (0.99, 0.96, 0.54, 1.0)
     
 # Customizable interface properties to generate a socket from.
 # class RoMaInterfaceSocket(NodeTreeInterfaceSocket):
@@ -1231,41 +1309,76 @@ class RomaDataMathFunction(RoMaTreeNode, Node):
     )
     
     def init(self, context):
-        self.outputs.new('RoMa_dataOperation_SocketType', name='Function', identifier='Function')
+        # self.outputs.new('RoMa_dataOperation_SocketType', name='Function', identifier='Function')
+        self.outputs.new('RoMa_attributeCollection_SocketType', name='Function', identifier='Function')
         
     def draw_buttons(self, context, layout):
         layout.prop(self, "dropdown", text="")
     
-    def manualExecute(self):
+    def cleanSocket(self):
         cleanSocket(self, 'Function', 'output')
-        print("pulisco")
+        # print(f"pulisco")
+        items = self.outputs[0].object_items.items
+        # print(len(items))
+         
         
-    # def update_socket_visibility(self):
-    #     selection = self.dropdown_box_math
-        # # self.inputs['A_list'].hide = True
-        # # self.inputs['B_list'].hide = True
-        # # self.outputs['output_list'].hide = True
+    def manualExecute(self, combo_key, items, keyName):
+        result = 0
+        operation = self.dropdown
+       
+        for item in items:
+            if operation == "Sum":
+                result = result + item[f"{keyName}"]
         
-        # self.inputs['A'].hide = False
-        # self.inputs['B'].hide = False
-        # if selection in self.AB_List:
-        #     self.inputs['A'].name = "A Value"
-        #     self.inputs['B'].name = "B Value"
-        # elif selection in self.AB_Power:
-        #     self.inputs['A'].name = "Base"
-        #     self.inputs['B'].name = "Exponent"
-        # elif selection in self.AB_Log:
-        #     self.inputs['A'].name = "Value"
-        #     self.inputs['B'].name = "Base"
-        # elif selection in self.AB_Square:
-        #     self.inputs['A'].name = "Value"
-        #     self.inputs['B'].hide = True
-            
-        # else:
-        #     self.inputs['A'].hide = True
-        #     self.inputs['B'].hide = True
+        # set up the ID
+        keys = []
+        for key, value in combo_key.items():
+            keys.append(key)
+            if value.is_integer():
+                value = int(value)
+            keys.append(str(value))
+        # keys = combo_key.keys()
+        id = "_".join(keys)
+        # id = "keys_" + id
         
-        # self.update()
+        nodeFingerPrint = writeNodeFingerPrint(self)
+        RoMa_attribute_addItem(nodeFingerPrint, "Function", "output")
+        attributeIndex = self.outputs['Function'].object_items.active_index
+        # add the id to the attributes
+        RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+                                        item_index=attributeIndex,
+                                        key='id',
+                                        valueType="STRING",
+                                        stringValue=id,
+                                        socketIdentifier='Function'
+                                        )
+        
+        # add result to the attributes
+        RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+                                        item_index=attributeIndex,
+                                        key=keyName,
+                                        valueType="FLOAT",
+                                        floatValue=result,
+                                        socketIdentifier='Function'
+                                        )
+        
+        
+        
+        # print(f"risultato = {result}")
+
+
+        # items = self.outputs[0].object_items.items
+        # print("--------------------------------------##########################")
+        # for item in items:
+        #     print(item.name)
+        #     print(f"Item name {item.name} is {(item['key_value_items'])}")
+        #     for key in item['key_value_items']:
+        #         if key['value_type'] == "STRING":
+        #             print(f"key {key['name']} has value {key['value_string']} ")
+        #         else:
+        #             print(f"key {key['name']} has value {key['value_float']}")
+        
+   
     
     
 class RoMaDataNode(RoMaTreeNode, Node):
@@ -1278,8 +1391,8 @@ class RoMaDataNode(RoMaTreeNode, Node):
         description="Attribute to use as filter")
     
     def init(self, context):
-        self.inputs.new('RoMa_dataOperation_SocketType', name='Row', identifier='Row')
-        self.inputs.new('RoMa_dataOperation_SocketType', name='Footer', identifier='Footer')
+        self.inputs.new('RoMa_attributeCollection_SocketType', name='Row', identifier='Row')
+        self.inputs.new('RoMa_attributeCollection_SocketType', name='Footer', identifier='Footer')
         # self.inputs['Attribute'].hide_value = True
         
         self.outputs.new('RoMa_dataCollection_SocketType', name='Data', identifier='Data')
@@ -1358,12 +1471,16 @@ class RoMaCaptureAttributeNode(RoMaTreeNode, Node):
         nodeData = {    "node" : child,
                         "depth": 0
                     }
-        self.executionOrder = [nodeData]
+        try:
+            self.executionOrder[0]
+        except IndexError:
+            self.executionOrder.append([])
+        self.executionOrder[0] = [nodeData]
         # all the children nodes are searched and found, sorted 
         # from the deepest, and the run in that order
         # print(f"inizio a camminare al contrario")
-        walkBackwards(self, child, depth = 0)
-        sortedOrder = sorted(self.executionOrder, key=lambda x: x['depth'], reverse=True)
+        walkBackwards(self, 0, child, depth = 0)
+        sortedOrder = sorted(self.executionOrder[0], key=lambda x: x['depth'], reverse=True)
         for el in sortedOrder:
             if hasattr(el['node'], "manualExecute"):
                 # print(f"Capture attribute esegue: {el}")
@@ -1547,12 +1664,12 @@ class RoMaTableNode(RoMaTreeNode, Node):
     executionOrder = []
     
     def init(self, context):
-        self.inputs.new('RoMa_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Attribute')
+        self.inputs.new('RoMa_attributeCollection_SocketType', name = 'Attribute', identifier='Attribute')
         self.inputs.new('RoMa_dataCollection_SocketType', name='Data', identifier='Data', use_multi_input=True)
         self.inputs['Attribute'].display_shape = 'DIAMOND_DOT'
         self.inputs['Attribute'].hide_value = True
         
-        self.outputs.new('RoMa_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Table')
+        self.outputs.new('RoMa_attributeCollection_SocketType', name = 'Attribute', identifier='Table')
         # self.outputs['Value'].display_shape = 'DIAMOND_DOT'
         
     def copy(self, node):
@@ -1597,28 +1714,25 @@ class RoMaTableNode(RoMaTreeNode, Node):
         layout.prop(self, "dropdown", text="Key")
         
     def update(self):
-        if self.inputs[0].is_linked and self.inputs[1].is_linked:
-            dataLinks = self.inputs[1].links
-            print(f"Links {len(dataLinks)}")
-            dataColumn = []
+        pass
+    
+        # if self.inputs[0].is_linked and self.inputs[1].is_linked:
+        #     dataLinks = self.inputs[1].links
+        #     print(f"Links {len(dataLinks)}")
+        #     dataColumn = []
 
-            for i, link in enumerate(dataLinks):
-                child = link.from_node
-                nodeData = {    "node" : child,
-                    "depth": 0
-                }
-                self.executionOrder = [nodeData]
-                walkBackwards(self, child, depth = 0)
+        #     for linkId, link in enumerate(dataLinks):
+        #         child = link.from_node
+        #         nodeData = {    "node" : child,
+        #             "depth": 0
+        #         }
+        #         self.executionOrder = [nodeData]
+        #         walkBackwards(self, linkId, child, depth = 0)
                 # sortedOrder = sorted(self.executionOrder, key=lambda x: x['depth'], reverse=True)
                 # for el in sortedOrder:
                 #     if hasattr(el['node'], "manualExecute"):
                 #     # print(f"Capture attribute esegue: {el}")
                 #     el['node'].manualExecute()
-                
-                
-                
-
-
 
     # update the key name and id in the key list
     def updateKeyName(self):
@@ -1628,106 +1742,6 @@ class RoMaTableNode(RoMaTreeNode, Node):
         nodeFingerPrint = writeNodeFingerPrint(self)
         updateGroupByCombination(nodeFingerPrint)
 
-# class RoMaTableNode(RoMaTreeNode, Node):
-#     '''Create a table from attributes'''
-#     bl_idname = 'Table RoMa Attribute'
-#     bl_label = "Table"     
-    
-#     def init(self, context):
-#         self.inputs.new('RoMa_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Attribute')
-#         self.inputs.new('RoMa_dataCollection_SocketType', name='Data', identifier='Data', use_multi_input=True)
-#         self.inputs['Attribute'].display_shape = 'DIAMOND_DOT'
-#         self.inputs['Attribute'].hide_value = True
-        
-#         self.outputs.new('RoMa_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Table')
-        
-    # def update(self):
-    #     if self.inputs[0].is_linked and self.inputs[0].links:
-    #         if self.inputs[0].links[0].from_node.outputs:
-    #             linked_output = self.inputs[0].links[0].from_socket
-    #             if linked_output.rna_type.name in ['RoMa_attributeCollectionAndFloat_SocketType', 'RoMa_attributeCollection_SocketType']:
-    #                 items = linked_output.object_items.items
-    #                 keys = uniqueKeys(items, sort=True, remove = ["id"])
-                    
-    #                 # empty the list of keys
-    #                 collectionSize = len(self.key_list)
-    #                 while collectionSize > 0:
-    #                     collectionSize -= 1
-    #                     self.key_list.remove(collectionSize)
-
-    # update the key name and id in the key list
-    # def updateKeyName(self):
-    #     currentId = self.key_list_index
-    #     selectedName = self.dropdown
-    #     self.key_list[currentId].name = selectedName
-
-
-# This class is to group the attributes accordingly with the a series of given keys
-# It is used in the Group by node and called by updateGroupByCombination
-# class ItemGrouper:
-#     def __init__(self, itemList, combinations):
-#         """
-#         Initializes the ItemGrouper class with item list and combinations.
-        
-#         :param itemList: List of dictionaries where each dictionary represents an item.
-#         :param combinations: List of tuples where each tuple contains two dictionaries representing key combinations.
-#         """
-#         self.itemList = itemList
-#         self.combinations = combinations
-#         self.grouped_dict = defaultdict(list)  # Dictionary to store grouped items
-    
-#     def create_hashable_key(self, d):
-#         """
-#         Creates a hashable key from a dictionary by converting it to a frozenset.
-        
-#         :param d: Dictionary to be converted to a hashable key.
-#         :return: frozenset representing the hashable key.
-#         """
-#         return frozenset(d.items())
-    
-#     def create_key(self, item, combo_dict):
-#         """
-#         Creates a key from an item based on the given combination dictionary.
-        
-#         :param item: Dictionary representing an item.
-#         :param combo_dict: Dictionary representing the combination to match.
-#         :return: frozenset representing the key for the item based on the combination.
-#         """
-#         return frozenset((key, item[key]) for key in combo_dict if key in item)
-    
-#     def merge_dicts(self, dict_list):
-#         """
-#         Merges a list of dictionaries into a single dictionary.
-        
-#         :param dict_list: List of dictionaries to be merged.
-#         :return: A single dictionary containing all key-value pairs from the input dictionaries.
-#         """
-#         result = {}
-#         for d in dict_list:
-#             result.update(d)
-#         return result
-    
-#     def group_by_combination(self):
-#         """
-#         Groups items by the combinations of keys specified.
-#         """
-#         for item in self.itemList:
-#             for combo in self.combinations:
-#                 # Merge the two dictionaries in the combination tuple
-#                 combo_dicts = [dict(part) for part in combo]
-#                 combo_dict = self.merge_dicts(combo_dicts)
-                
-#                 # Create a hashable key for the combination dictionary
-#                 combo_key = self.create_hashable_key(combo_dict)
-                
-#                 # Create a key for the item based on the combination
-#                 item_key = self.create_key(item, combo_dict)
-                
-#                 # Check if the item matches the combination and group it
-#                 if item_key == self.create_hashable_key(combo_dict):
-#                     self.grouped_dict[combo_key].append(item)
-#                     break
-
                 
 # Update the combination used in the node Group by to determine
 # the data in the created table
@@ -1735,14 +1749,35 @@ def updateGroupByCombination(nodeFingerPrint):
     node = readNodeFingerPrint(nodeFingerPrint)
     object_items = node.inputs['Attribute'].links[0].from_socket.object_items.items
     
+    
     # get the keys selected in the linked table data nodes
+    # and store the sort order of the linked nodes
     dataLinks = node.inputs['Data'].links
     keys_to_keep = []
+    # executionOrder = [] 
     if len(dataLinks)>0:
-        for i, link in enumerate(dataLinks):
+        for linkId, link in enumerate(dataLinks):
             child = link.from_node
+            # get the linked keys
             keyName = child.dropdown
             keys_to_keep.append(keyName)
+            
+            # walk backwards to store the execution order
+            nodeData = {"node" : child,
+                        "depth": 0
+            }
+            try:
+                node.executionOrder[linkId]
+            except IndexError:
+                node.executionOrder.append([])
+            node.executionOrder[linkId] = [nodeData]
+            print(f"aggiunto {nodeData} a {linkId}")
+            walkBackwards(node, linkId, child, depth = 0)
+            sortedExecutionOrder = [sorted(sublist, key=lambda x: x['depth'], reverse=True) for sublist in node.executionOrder]
+
+ 
+        
+        
     
     # Get the unique values based on the keys added to the UIList
     # and after that calculte all the possible combinations
@@ -1818,14 +1853,70 @@ def updateGroupByCombination(nodeFingerPrint):
                 grouped_dict[combo_key].append(item)
                 break
     
+    # dataToTable = []
+    # for combo_key, items in grouped_dict.items():
+    #     print()
+    #     print(f"Combo = {dict(combo_key)}")
+    #     keys = dict(combo_dict)
+    #     for item in items:
+    #         tmp = keys.copy()
+    #         tmp.update(item)            
+    #         print(f"        item {tmp}")
+    #         dataToTable.append(tmp)
+            
+    # for d in dataToTable: print(d)
+            
+    print("-------------")
+    for linkedNodes in sortedExecutionOrder:
+        print(f"{linkedNodes}")
     
-    print()
-    print()
-    for combo_key, items in grouped_dict.items():
-        print(f"Combination: {dict(combo_key)}")
-        for item in items:
-            print(f"  {item}")
+    print("----------------------------------------")
+    cleanSocket(node, 'Table', 'output')
+    for linkedNodes in sortedExecutionOrder:
+        tableDataNode = linkedNodes[len(linkedNodes)-1]['node']
+       
+        key = tableDataNode.dropdown
+        # print(f"{linkedNodes} {tableDataNode} {key}")
 
+        # all the child nodes are executed        
+        for linkedNode in linkedNodes:
+            node = linkedNode['node']
+            # print(f"node {node}")
+            if linkedNode['depth'] > 0:
+                
+                node.cleanSocket()
+                # print(f"eseguo el {node}")
+                for combo_key, items in grouped_dict.items():
+                    node.manualExecute(dict(combo_key), items, key)
+            # when depth = 0 it means a table data is passed 
+            # In this case the data from the child of table data is copied in the 
+            # node output socket
+            else:
+                # if (linkEnum-1):
+                if node.inputs[0].is_linked:
+                    # source = linkedNodes[linkEnum-1]
+                    object_items = node.inputs[0].links[0].from_socket.object_items.items
+                    copyAndMergeAttributeToSocket(object_items, nodeFingerPrint, 'Table', 'output')
+                    print(f"done link 0 of {node}")
+                if node.inputs[1].is_linked:
+                    # source = linkedNodes[linkEnum-1]
+                    object_items = node.inputs[1].links[0].from_socket.object_items.items
+                    copyAndMergeAttributeToSocket(object_items, nodeFingerPrint, 'Table', 'output')
+                    print(f"done link 1 of {node}")
+                    
+
+
+    print("--------------------------------------##########################")
+    node = readNodeFingerPrint(nodeFingerPrint)
+    items = node.outputs[0].object_items.items
+    for item in items:
+        print(item.name)
+        print(f"Item name {item.name} is {(item['key_value_items'])}")
+        for key in item['key_value_items']:
+            if key['value_type'] == "STRING":
+                print(f"key {key['name']} has value {key['value_string']} ")
+            else:
+                print(f"key {key['name']} has value {key['value_float']}")
 
             
 class NODE_UL_key_filter(UIList):
