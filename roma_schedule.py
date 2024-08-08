@@ -339,10 +339,10 @@ def getAttributes(objNames, attrType):
                             typologyId = n.id
                             typologyName = n.name
                             break
-                floor = 0
+                level = 0
                 indexList = 1
                 storeyPreviousGroup = 0
-                while floor < storeys:
+                while level < storeys:
                     length = int(math.log10(f[bMesh_storey_list_A])) +1
                     pos = length - indexList -1
                     storey_A = int((f[bMesh_storey_list_A] / 10 ** pos) % 10)
@@ -371,7 +371,7 @@ def getAttributes(objNames, attrType):
                     
                     storeyGroup = (storey_A * 10 + storey_B) + storeyPreviousGroup
                     # print(f"Storeygroup {storeyGroup}       storey {storey}")
-                    if storeyGroup == floor +1:
+                    if storeyGroup == level +1:
                         storeyPreviousGroup = storeyGroup
                         indexList += 1
                     
@@ -380,18 +380,14 @@ def getAttributes(objNames, attrType):
                         if void == 1:
                             area = 0
                     
-                    id = f"{meshName}_{polyId}_{floor}"
+                    id = f"{meshName}_{polyId}_{level}"
                     if attrType == "all":
                         tmpData = {
-                                    # "meshName"      : meshName,
-                                    # "polyId"        : polyId,
                                     "id"            : id,
                                     "typologyId"    : typologyId,
-                                    # "typologyName"  : typologyName,
-                                    "floor"         : floor,
+                                    "level"         : level,
                                     "area"          : area,
                                     "useId"         : useId,
-                                    # "useName"       : useName,
                                     "height"        : height,
                                     "void"          : void,
                                     "option"        : option,
@@ -401,24 +397,17 @@ def getAttributes(objNames, attrType):
                         }
                     elif attrType == "area":
                         tmpData = {
-                                    # "meshName"      : meshName,
-                                    # "polyId"        : polyId,
                                     "id"            : id,
-                                    # "floor"         : floor,
                                     "area"          : area,
                         }
                     elif attrType == "use":
                         tmpData = {
-                                    # "meshName"      : meshName,
-                                    # "polyId"        : polyId,
                                     "id"            : id,
-                                    # "floor"         : floor,
                                     "useID"         : useId,
-                                    # "useName"       : useName,
                         }
 
                     data.append(tmpData)
-                    floor += 1
+                    level += 1
         
             bm.free
         return(data)
@@ -655,6 +644,20 @@ def RoMa_attribute_addKeyValueItem(**kwargs):
             kv_item.value_type = "STRING"
             kv_item.value_string = stringValue
     
+    return {'FINISHED'}
+
+# Function to rearrange elements in a list
+def rearrangeElements(node, keyName, newPosition):
+    items = node.outputs[0].object_items.items
+    for item in items:
+        for i, key in enumerate(item['key_value_items']):
+            if key['name'] == keyName:
+                startingPosition = i
+                break
+        if startingPosition != newPosition:
+            neighbor = startingPosition + (-1 if startingPosition > newPosition else 1)
+            item.key_value_items.move(neighbor, startingPosition)
+            
     return {'FINISHED'}
 
 # Function to remove a key-value item from an element of the collection
@@ -1322,7 +1325,7 @@ class RomaDataMathFunction(RoMaTreeNode, Node):
         # print(len(items))
          
         
-    def manualExecute(self, combo_key, items, keyName):
+    def manualExecute(self, combo_key, items, keyName, filterKeys):
         result = 0
         operation = self.dropdown
        
@@ -1352,6 +1355,27 @@ class RomaDataMathFunction(RoMaTreeNode, Node):
                                         stringValue=id,
                                         socketIdentifier='Function'
                                         )
+        # add the keys to the attributes
+        for kName, value in combo_key.items():
+            try:
+                float(value)
+                RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+                                        item_index=attributeIndex,
+                                        key=kName,
+                                        valueType="FLOAT",
+                                        floatValue=value,
+                                        socketIdentifier='Function'
+                                        )
+            except ValueError:
+                RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+                                        item_index=attributeIndex,
+                                        key=kName,
+                                        valueType="STRING",
+                                        floatValue=value,
+                                        socketIdentifier='Function'
+                                        )
+                
+            
         
         # add result to the attributes
         RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
@@ -1362,7 +1386,21 @@ class RomaDataMathFunction(RoMaTreeNode, Node):
                                         socketIdentifier='Function'
                                         )
         
+        # Key filters need to have the same order as in the UI List
+        # index 0 is id, so we need to start changing from 1
         
+        node = readNodeFingerPrint(nodeFingerPrint)
+        for i, keyName in enumerate(filterKeys):
+            newPosition = i + 1
+            rearrangeElements(node, keyName, newPosition)
+            
+            
+            
+            
+
+        
+        
+            
         
         # print(f"risultato = {result}")
 
@@ -1370,13 +1408,14 @@ class RomaDataMathFunction(RoMaTreeNode, Node):
         # items = self.outputs[0].object_items.items
         # print("--------------------------------------##########################")
         # for item in items:
-        #     print(item.name)
+        #     # print(item.name)
         #     print(f"Item name {item.name} is {(item['key_value_items'])}")
+        #     i = "miao"
         #     for key in item['key_value_items']:
         #         if key['value_type'] == "STRING":
-        #             print(f"key {key['name']} has value {key['value_string']} ")
+        #             print(f"{i} key {key['name']} has value {key['value_string']} ")
         #         else:
-        #             print(f"key {key['name']} has value {key['value_float']}")
+        #             print(f"{i} key {key['name']} has value {key['value_float']}")
         
    
     
@@ -1782,7 +1821,7 @@ def updateGroupByCombination(nodeFingerPrint):
     # Get the unique values based on the keys added to the UIList
     # and after that calculte all the possible combinations
     listOfList = []
-    for i, key in enumerate(node.key_list): 
+    for key in node.key_list: 
         tmpList = uniqueValues(object_items, key=key.name)
         listOfList.append(tmpList)
         keys_to_keep.append(key.name) # Add the key listed in the UIList to the list to keys to keep
@@ -1866,57 +1905,52 @@ def updateGroupByCombination(nodeFingerPrint):
             
     # for d in dataToTable: print(d)
             
-    print("-------------")
-    for linkedNodes in sortedExecutionOrder:
-        print(f"{linkedNodes}")
+    # print("-------------")
+    # for linkedNodes in sortedExecutionOrder:
+    #     print(f"{linkedNodes}")
     
-    print("----------------------------------------")
+    # print("----------------------------------------")
+    # print(node.key_list)
+    filterKeys = []
+    for k in node.key_list:
+        filterKeys.append(k.name)
     cleanSocket(node, 'Table', 'output')
+    
     for linkedNodes in sortedExecutionOrder:
         tableDataNode = linkedNodes[len(linkedNodes)-1]['node']
        
         key = tableDataNode.dropdown
-        # print(f"{linkedNodes} {tableDataNode} {key}")
-
         # all the child nodes are executed        
         for linkedNode in linkedNodes:
             node = linkedNode['node']
-            # print(f"node {node}")
             if linkedNode['depth'] > 0:
-                
                 node.cleanSocket()
-                # print(f"eseguo el {node}")
                 for combo_key, items in grouped_dict.items():
-                    node.manualExecute(dict(combo_key), items, key)
-            # when depth = 0 it means a table data is passed 
+                    node.manualExecute(dict(combo_key), items, key, filterKeys)
+            # When depth = 0 it means a table data is passed 
             # In this case the data from the child of table data is copied in the 
             # node output socket
             else:
-                # if (linkEnum-1):
                 if node.inputs[0].is_linked:
-                    # source = linkedNodes[linkEnum-1]
                     object_items = node.inputs[0].links[0].from_socket.object_items.items
                     copyAndMergeAttributeToSocket(object_items, nodeFingerPrint, 'Table', 'output')
-                    print(f"done link 0 of {node}")
                 if node.inputs[1].is_linked:
-                    # source = linkedNodes[linkEnum-1]
                     object_items = node.inputs[1].links[0].from_socket.object_items.items
                     copyAndMergeAttributeToSocket(object_items, nodeFingerPrint, 'Table', 'output')
-                    print(f"done link 1 of {node}")
                     
 
 
-    print("--------------------------------------##########################")
-    node = readNodeFingerPrint(nodeFingerPrint)
-    items = node.outputs[0].object_items.items
-    for item in items:
-        print(item.name)
-        print(f"Item name {item.name} is {(item['key_value_items'])}")
-        for key in item['key_value_items']:
-            if key['value_type'] == "STRING":
-                print(f"key {key['name']} has value {key['value_string']} ")
-            else:
-                print(f"key {key['name']} has value {key['value_float']}")
+    # print("--------------------------------------##########################")
+    # node = readNodeFingerPrint(nodeFingerPrint)
+    # items = node.outputs[0].object_items.items
+    # for item in items:
+    #     # print(item.name)
+    #     print(f"Item name {item.name} is {(item['key_value_items'])}")
+    #     for i, key in enumerate(item['key_value_items']):
+    #         if key['value_type'] == "STRING":
+    #             print(f"{i} key {key['name']} has value {key['value_string']} ")
+    #         else:
+    #             print(f"{i} key {key['name']} has value {key['value_float']}")
 
             
 class NODE_UL_key_filter(UIList):
