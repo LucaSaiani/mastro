@@ -1146,18 +1146,19 @@ class RoMaAllAttributesNode(RoMaTreeNode, Node):
     bl_label = 'All Attributes'
     # bl_description = 'Attribute'
     
-    objNames : CollectionProperty(type=RoMa_string_item)
+    # objNames : CollectionProperty(type=RoMa_string_item)
     
     def init(self, context):
         self.outputs.new('RoMa_attributeCollection_SocketType', name='Attribute', identifier = 'All Attributes')
         self.outputs['All Attributes'].display_shape = 'DIAMOND_DOT'
         
-    def manualExecute(self):
+    def manualExecute(self, objNames):
         # print(f"eseguo manualmente all attributes")
         cleanSocket(self, 'All Attributes', 'output')
 
         nodeFingerPrint = writeNodeFingerPrint(self)
-        attributes = getAttributes(self.objNames, "all")
+        # for name in objNames: print(name)
+        attributes = getAttributes(objNames, "all")
         if attributes:
             for attr in attributes:
                 # add a new entry to allocate parameters
@@ -1208,17 +1209,17 @@ class RoMaAreaAttributeNode(RoMaTreeNode, Node):
     bl_label = 'Area'
     # bl_description = 'Attribute'
     
-    objNames : CollectionProperty(type=RoMa_string_item)
+    # objNames : CollectionProperty(type=RoMa_string_item)
     
     def init(self, context):
         self.outputs.new('RoMa_attributeCollection_SocketType', name='Attribute', identifier="Area")
         self.outputs['Area'].display_shape = 'DIAMOND_DOT'
 
-    def manualExecute(self):
+    def manualExecute(self, objNames):
         cleanSocket(self, 'Area', 'output')
 
         nodeFingerPrint = writeNodeFingerPrint(self)
-        attributes = getAttributes(self.objNames, "area")
+        attributes = getAttributes(objNames, "area")
         if attributes:
             for attr in attributes:
                 # add a new entry to allocate parameters
@@ -1253,17 +1254,17 @@ class RoMaUseAttributeNode(RoMaTreeNode, Node):
     bl_label = 'Use'
     # bl_description = 'Attribute'
     
-    objNames : CollectionProperty(type=RoMa_string_item)
+    # objNames : CollectionProperty(type=RoMa_string_item)
     
     def init(self, context):
         self.outputs.new('RoMa_attributeCollection_SocketType', name='Attribute', identifier="Use")
         self.outputs['Use'].display_shape = 'DIAMOND_DOT'
 
-    def manualExecute(self):
+    def manualExecute(self, objNames):
         cleanSocket(self, 'Use', 'output')
 
         nodeFingerPrint = writeNodeFingerPrint(self)
-        attributes = getAttributes(self.objNames, "use")
+        attributes = getAttributes(objNames, "use")
         if attributes:
             for attr in attributes:
                 # add a new entry to allocate parameters
@@ -1324,14 +1325,34 @@ class RomaDataMathFunction(RoMaTreeNode, Node):
         items = self.outputs[0].object_items.items
         # print(len(items))
          
+    def sum(self, items, keyName):
+        total = 0
+        for item in items:
+            total = total + item[f"{keyName}"]
+        return(total)
+    
+    def count(self, items, keyName):
+        newList = []
+        for item in items:
+            newList.append(item[f"{keyName}"])
+            # print(item)
+        # counted = len(items)
+        uniques = set(newList)
+        
+        return(len(uniques))
+        
         
     def manualExecute(self, combo_key, items, keyName, filterKeys):
-        result = 0
+        
         operation = self.dropdown
        
-        for item in items:
-            if operation == "Sum":
-                result = result + item[f"{keyName}"]
+        if operation == "Sum":
+            result = self.sum(items, keyName)
+        elif operation == "Count":
+            result = self.count(items, keyName)
+        else:
+            result = -1
+       
         
         # set up the ID
         keys = []
@@ -1481,28 +1502,25 @@ class RoMaCaptureAttributeNode(RoMaTreeNode, Node):
         # print("capture attribute eseguo dopo update")
         if checkLink(self):
             if self.inputs['RoMa Mesh'].is_linked:
-                self.readWrite_RoMa_mesh()
+                # self.readWrite_RoMa_mesh()
                 if self.inputs['Attribute'].is_linked and self.outputs['Attribute'].is_linked:
                     self.readWrite_Attribute()
             else:
-                cleanSocket(self, 'RoMa Mesh', 'input')
+                # cleanSocket(self, 'RoMa Mesh', 'input')
+                pass
             
             if self.inputs['Attribute'] and self.inputs['Attribute'].is_linked == False:
                 cleanSocket(self, 'Attribute' , 'both')
                 
 
-    def readWrite_RoMa_mesh(self):
-        cleanSocket(self, 'RoMa Mesh', 'input')
-        object_items = self.inputs['RoMa Mesh'].links[0].from_socket.object_items
-        for obj in object_items:
-            itemIn = self.inputs['RoMa Mesh'].object_items.add()
-            # itemOut = self.outputs['RoMa Mesh'].object_items.add()
-            itemIn.name = obj.name
-            # itemOut.name = obj.name
+    # def readWrite_RoMa_mesh(self):
+    #     cleanSocket(self, 'RoMa Mesh', 'input')
+    #     object_items = self.inputs['RoMa Mesh'].links[0].from_socket.object_items
+    #     for obj in object_items:
+    #         itemIn = self.inputs['RoMa Mesh'].object_items.add()
+    #         itemIn.name = obj.name
             
-        # ob = self.inputs['RoMa Mesh'].object_items
-        # # print(f"oggetti linkati : {len(ob)}")
-        # for o in ob: print(f"{o.name}")
+      
         
     def readWrite_Attribute(self):
         cleanSocket(self, 'Attribute', 'both')
@@ -1522,8 +1540,14 @@ class RoMaCaptureAttributeNode(RoMaTreeNode, Node):
         sortedOrder = sorted(self.executionOrder[0], key=lambda x: x['depth'], reverse=True)
         for el in sortedOrder:
             if hasattr(el['node'], "manualExecute"):
-                # print(f"Capture attribute esegue: {el}")
-                el['node'].manualExecute()
+                node = el['node']
+                # in case the node is attribute related, it is necessary to run manualexecute with
+                # the names of the meshes
+                if node.outputs[0].name == 'Attribute':
+                    meshNames = self.inputs['RoMa Mesh'].links[0].from_socket.object_items
+                    node.manualExecute(meshNames)
+                else:
+                    node.manualExecute()
         # print(f"copio gli attributi in output di capture attribute")                
         object_items = self.inputs['Attribute'].links[0].from_socket.object_items.items
         
@@ -1548,7 +1572,7 @@ class RoMaCaptureAttributeNode(RoMaTreeNode, Node):
         # print(f"capture attribute eseguo automatico")
         if checkLink(self):
             if self.inputs['RoMa Mesh'].is_linked:
-                self.readWrite_RoMa_mesh()
+                # self.readWrite_RoMa_mesh()
                 if self.inputs['Attribute'].is_linked and self.outputs['Attribute'].is_linked:
                     self.readWrite_Attribute()
                     
@@ -1810,7 +1834,7 @@ def updateGroupByCombination(nodeFingerPrint):
             except IndexError:
                 node.executionOrder.append([])
             node.executionOrder[linkId] = [nodeData]
-            print(f"aggiunto {nodeData} a {linkId}")
+            # print(f"aggiunto {nodeData} a {linkId}")
             walkBackwards(node, linkId, child, depth = 0)
             sortedExecutionOrder = [sorted(sublist, key=lambda x: x['depth'], reverse=True) for sublist in node.executionOrder]
 
@@ -1926,6 +1950,7 @@ def updateGroupByCombination(nodeFingerPrint):
             if linkedNode['depth'] > 0:
                 node.cleanSocket()
                 for combo_key, items in grouped_dict.items():
+                    # print(f"Eseguo nodo {node.name} {key}")
                     node.manualExecute(dict(combo_key), items, key, filterKeys)
             # When depth = 0 it means a table data is passed 
             # In this case the data from the child of table data is copied in the 
