@@ -153,7 +153,87 @@ from .roma_massing import update_mesh_attributes_uses, update_mesh_attributes_st
 #         bpy.context.scene.roma_typology_uses_name_list[0].id = 0
 #         bpy.context.scene.roma_typology_uses_name_list[0].name = bpy.context.scene.roma_use_name_list[0].name
        
+# class separate_geometry_by_factor_OT(Operator):
+#     '''Separate geometry in geometry node by factor'''
+#     bl_idname = "node.separate_geometry_by_factor"
+#     bl_label = "Separate geometry by factor"
+    
+#     def newGroup (self, groupName):
+#         group = bpy.data.node_groups.new(groupName,'GeometryNodeTree')
+#         group.interface.new_socket(name='Geometry', description='', in_out = 'INPUT', socket_type='NodeSocketGeometry')
+        
+#         group.interface.new_socket(name='Subdivisions', description='The number of subdivisions', in_out = 'INPUT', socket_type='NodeSocketInt')
+#         group.interface.items_tree[1].default_value = 1
+#         group.interface.items_tree[1].min_value = 1
+#         group.interface.items_tree[1].force_non_field = True
+        
+#         group.interface.new_socket(name='Value', description='', in_out = 'INPUT', socket_type='NodeSocketFloat')
+#         group.interface.items_tree[2].hide_value = True
+        
+#         group.interface.new_socket(name='Ratio', description='The number of subdivisions', in_out = 'INPUT', socket_type='NodeSocketInt')
+#         group.interface.items_tree[3].default_value = 50
+#         group.interface.items_tree[3].min_value = 0
+#         group.interface.items_tree[3].max_value = 100
+#         group.interface.items_tree[3].force_non_field = True
+#         group.interface.items_tree[3].subtype = 'PERCENTAGE'
+        
+#         group.interface.new_socket(name='Geometry', description='', in_out = 'OUTPUT', socket_type='NodeSocketGeometry')
+       
+#         group_input = group.nodes.new('NodeGroupInput')
+       
+        
+#         group_output = group.nodes.new('NodeGroupOutput')
+#         group_output.location = (600, 0)
+        
+#         less_than_node = group.nodes.new(type='FunctionNodeCompare')
+#         less_than_node.operation = 'LESS_EQUAL'
+#         less_than_node.location = (300, 0)
+        
 
+#         separate_geometry_node = group.nodes.new(type='GeometryNodeSeparateGeometry')
+#         separate_geometry_node.domain = 'EDGE'
+#         separate_geometry_node.location = (300, 200)
+        
+#         group.links.new(group_input.outputs['Geometry'], separate_geometry_node.inputs['Geometry'])
+#         group.links.new(group_input.outputs['Value'], less_than_node.inputs[0])
+#         group.links.new(group_input.outputs['Ratio'], less_than_node.inputs[1])
+        
+#         group.links.new(less_than_node.outputs[0], separate_geometry_node.inputs[1])
+        
+#         group.links.new(separate_geometry_node.outputs[0], group_output.inputs[0])
+      
+
+#         return(group)
+    
+   
+    
+    
+#     def interface_update(self):
+#         print(f'CiAAAO MIAOOOOOOOOOOO {bpy.data.node_groups["Geometry Nodes"].nodes["Group"].inputs[1].default_value}')
+    
+#     def execute(self, context):
+#         name = "RoMa Separate Geometry by Factor"
+        
+       
+#         if name not in bpy.data.node_groups:
+#             separate_by_factor = self.newGroup(name)
+#         else:
+#             separate_by_factor = bpy.data.node_groups[name]
+#         # node_tree = 
+#         print(f'CiAAAO {bpy.data.node_groups["Geometry Nodes"].nodes["Group"].inputs[1].default_value}')
+#             # t.nodes['ciccio'].node_tree.name
+#         # nodes = separate_by_factor.nodes
+        
+#         # print(f"NDOes {nodes}")
+#         # group_input = nodes["Group Input"]
+#         # group_output = nodes["Group Output"]
+        
+#         # less_than = nodes["Compare"]
+#         # separate_geometry = nodes["Separate Geometry"]
+        
+#         # print(f"subs {group_input}")
+#         return {'FINISHED'}
+    
 class update_GN_Filter_OT(Operator):
     """Update the GN node Filter by Use"""
     bl_idname = "node.update_gn_filter"
@@ -173,7 +253,6 @@ class update_GN_Filter_OT(Operator):
         
         #Add Group Output
         group_output = group.nodes.new('NodeGroupOutput')
-        # Add named attribute
         named_attribute_node = group.nodes.new(type="GeometryNodeInputNamedAttribute")
         named_attribute_node.data_type = 'INT'
         named_attribute_node.inputs[0].default_value = attributeName
