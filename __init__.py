@@ -75,6 +75,7 @@ classes = (
     
     roma_project_data.update_GN_Filter_OT,
     roma_project_data.update_Shader_Filter_OT,
+    # roma_project_data.separate_geometry_by_factor_OT,
     
     roma_project_data.VIEW3D_PT_RoMa_project_data,
     roma_project_data.VIEW3D_PT_RoMa_show_data,
@@ -233,6 +234,7 @@ classes = (
 # ROMA_NODE_FLOAT_HANDLE = 2
 
 def initNodes():
+    # bpy.ops.node.separate_geometry_by_factor()
     bpy.ops.node.update_gn_filter()
     bpy.ops.node.update_shader_filter(filter_name="plot")
     bpy.ops.node.update_shader_filter(filter_name="block")
