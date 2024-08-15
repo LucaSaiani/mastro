@@ -48,6 +48,7 @@ if "bpy" in locals():
     importlib.reload(roma_massing),
     importlib.reload(roma_schedule)
     importlib.reload(roma_modal_operator)
+    importlib.reload(roma_geometryNodes)
 else:
     from . import roma_preferences
     from . import roma_project_data
@@ -57,6 +58,7 @@ else:
     from . import roma_massing
     from . import roma_schedule
     from . import roma_modal_operator
+    from . import roma_geometryNodes
     
 import bpy
 # import bmesh
@@ -72,6 +74,9 @@ from bpy.app.handlers import persistent
 
 classes = (
     roma_preferences.roma_addon_preferences,
+    
+    roma_geometryNodes.VIEW_PT_RoMa_GN_Panel,
+    roma_geometryNodes.separate_geometry_by_factor_OT,
     
     roma_project_data.update_GN_Filter_OT,
     roma_project_data.update_Shader_Filter_OT,
@@ -234,7 +239,7 @@ classes = (
 # ROMA_NODE_FLOAT_HANDLE = 2
 
 def initNodes():
-    # bpy.ops.node.separate_geometry_by_factor()
+    bpy.ops.node.separate_geometry_by_factor()
     bpy.ops.node.update_gn_filter()
     bpy.ops.node.update_shader_filter(filter_name="plot")
     bpy.ops.node.update_shader_filter(filter_name="block")
@@ -614,6 +619,21 @@ def register():
     #                                     name="Building phase",
     #                                     min=1, 
     #                                     default=1,
+    
+    Scene.geometryMenuSwitch  = bpy.props.EnumProperty(
+                                                items = (
+                                                        ("POINT", "Point", ""),
+                                                        ("EDGE", "Edge", ""),
+                                                        ("FACE", "Face", ""),
+                                                        ),
+                                                default = "EDGE",
+                                                update=roma_geometryNodes.updateGroup)
+    
+    Scene.roma_group_node_number_of_split = bpy.props.IntProperty(name = "Number of split",
+                                             default = 1,
+                                             min = 1,
+                                             update=roma_geometryNodes.updateGroup)
+    
     Scene.previous_selection_object_name = bpy.props.StringProperty(
                                     name="Previously selected object name",
                                     default = "",
@@ -736,6 +756,8 @@ def unregister():
     # del Scene.roma_attribute_collection
     # del Scene.update_attributes
     # del Scene.mouse_keyboard_event
+    
+    del Scene.geometryMenuSwitch
 
     del Scene.previous_selection_object_name
     del Scene.previous_selection_face_id
@@ -768,6 +790,8 @@ def unregister():
     del Scene.roma_floor_names
     
     del Scene.roma_previous_selected_typology
+    
+    del Scene.roma_group_node_number_of_split
     
     from bpy.utils import unregister_class
     for cls in reversed(classes):
