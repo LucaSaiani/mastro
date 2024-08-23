@@ -1405,37 +1405,81 @@ class OBJECT_OT_update_all_RoMa_meshes_attributes(Operator):
             
         for obj in objs:
             if obj is not None and obj.type == 'MESH' and "RoMa object" in obj.data:
-                bpy.context.view_layer.objects.active = obj
-                mesh = obj.data
-                objMode = obj.mode
-                bpy.ops.object.mode_set(mode='OBJECT')
-                faces = context.active_object.data.polygons
-                for face in faces:
-                    faceIndex = face.index
-                    if [i for i in ["all", "floorToFloor", "void"] if i in self.attributeToUpdate]:
-                        typology = mesh.attributes["roma_typology_id"].data[faceIndex].value
-                        data = update_mesh_attributes_uses(context, mesh, faceIndex, typologySet = typology)
-                        if [i for i in ["all"] if i in self.attributeToUpdate]:
-                            # mesh.attributes["roma_typology_id"].data[faceIndex].value = data["typology_id"]
-                            mesh.attributes["roma_list_use_id_A"].data[faceIndex].value = data["use_id_list_A"]
-                            mesh.attributes["roma_list_use_id_B"].data[faceIndex].value = data["use_id_list_B"]
-                        if [i for i in ["all", "floorToFloor"] if i in self.attributeToUpdate]:
-                            mesh.attributes["roma_list_height_A"].data[faceIndex].value = data["height_A"]
-                            mesh.attributes["roma_list_height_B"].data[faceIndex].value = data["height_B"]
-                            mesh.attributes["roma_list_height_C"].data[faceIndex].value = data["height_C"]
-                            mesh.attributes["roma_list_height_D"].data[faceIndex].value = data["height_D"]
-                            mesh.attributes["roma_list_height_E"].data[faceIndex].value = data["height_E"]
-                        if [i for i in ["all", "void"] if i in self.attributeToUpdate]:
-                            mesh.attributes["roma_list_void"].data[faceIndex].value = data["void"]
-                            
-                    if [i for i in ["all", "numberOfStoreys"] if i in self.attributeToUpdate]:
-                        storeys = mesh.attributes["roma_number_of_storeys"].data[faceIndex].value
-                        data = update_mesh_attributes_storeys(context, mesh, faceIndex, storeysSet = storeys)
+                # it is necessary to set the object to visibile in order to make it active
+                if obj.visible_get():
+                    alreadyVisible = True
+                else:
+                    alreadyVisible = False
+                    obj.hide_set(False)
+                
+                # check if the collection is visible or not
+                collections = obj.users_collection
+                used_collection = False
+                alreadyVisibleCollection = False
+                for collection in collections:
+                    if not collection.hide_viewport:
+                        used_collection = True
+                        alreadyVisibleCollection = True
+                        break
+                    else:
+                        collection.hide_viewport = False
+                        layer_collection = bpy.context.view_layer.layer_collection.children.get(collection.name)
+                        if hasattr(layer_collection, "exclude"):
+                            layer_collection.exclude = False
+                            used_collection = True
+                            break
+                # Only the linked objects are updated
+                if used_collection == True:
+                    # bpy.context.scene.collection.children.link(collection)
+                    # print(f"Touching {obj.name}")
+                    bpy.context.view_layer.objects.active = obj
+                    mesh = obj.data
+                    objMode = obj.mode
+                    bpy.ops.object.mode_set(mode='OBJECT')
+                    faces = context.active_object.data.polygons
+                    for face in faces:
+                        # print(f"Object {obj.name} face {face.index}")
+                        faceIndex = face.index
+                        if [i for i in ["all", "floorToFloor", "void"] if i in self.attributeToUpdate]:
+                            typology = mesh.attributes["roma_typology_id"].data[faceIndex].value
+                            data = update_mesh_attributes_uses(context, mesh, faceIndex, typologySet = typology)
+                            if [i for i in ["all"] if i in self.attributeToUpdate]:
+                                # mesh.attributes["roma_typology_id"].data[faceIndex].value = data["typology_id"]
+                                mesh.attributes["roma_list_use_id_A"].data[faceIndex].value = data["use_id_list_A"]
+                                mesh.attributes["roma_list_use_id_B"].data[faceIndex].value = data["use_id_list_B"]
+                            if [i for i in ["all", "floorToFloor"] if i in self.attributeToUpdate]:
+                                mesh.attributes["roma_list_height_A"].data[faceIndex].value = data["height_A"]
+                                mesh.attributes["roma_list_height_B"].data[faceIndex].value = data["height_B"]
+                                mesh.attributes["roma_list_height_C"].data[faceIndex].value = data["height_C"]
+                                mesh.attributes["roma_list_height_D"].data[faceIndex].value = data["height_D"]
+                                mesh.attributes["roma_list_height_E"].data[faceIndex].value = data["height_E"]
+                            if [i for i in ["all", "void"] if i in self.attributeToUpdate]:
+                                mesh.attributes["roma_list_void"].data[faceIndex].value = data["void"]
+                                
                         if [i for i in ["all", "numberOfStoreys"] if i in self.attributeToUpdate]:
-                            mesh.attributes["roma_number_of_storeys"].data[faceIndex].value = data["numberOfStoreys"]
-                            mesh.attributes["roma_list_storey_A"].data[faceIndex].value = data["storey_list_A"]
-                            mesh.attributes["roma_list_storey_B"].data[faceIndex].value = data["storey_list_B"]
-                bpy.ops.object.mode_set(mode=objMode)
+                            storeys = mesh.attributes["roma_number_of_storeys"].data[faceIndex].value
+                            data = update_mesh_attributes_storeys(context, mesh, faceIndex, storeysSet = storeys)
+                            if [i for i in ["all", "numberOfStoreys"] if i in self.attributeToUpdate]:
+                                mesh.attributes["roma_number_of_storeys"].data[faceIndex].value = data["numberOfStoreys"]
+                                mesh.attributes["roma_list_storey_A"].data[faceIndex].value = data["storey_list_A"]
+                                mesh.attributes["roma_list_storey_B"].data[faceIndex].value = data["storey_list_B"]
+                        # print(f"Done face {face.index}")
+                    bpy.ops.object.mode_set(mode=objMode)
+                    
+                    # If the object was hidden, it is set to hidden again
+                    # Also the collection is set to the previous status
+                    # In case it has changed
+                    if alreadyVisible == False:
+                        obj.hide_set(True)
+                    if alreadyVisibleCollection == False:
+                        collection.hide_viewport = True
+                        layer_collection = bpy.context.view_layer.layer_collection.children.get(collection.name)
+                        # if hasattr(layer_collection, "exclude"):
+                        layer_collection.exclude = True
+                        # if used_collection == False:
+                        #     bpy.context.scene.collection.children.unlink(collection)
+                    
+                   
 
         # return the focus to the current active object
         if hasattr(activeObj, "type"):
