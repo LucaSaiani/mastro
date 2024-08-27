@@ -500,6 +500,9 @@ def updates(scene, depsgraph):
                     typology = bm.faces[scene.previous_selection_face_id][bMesh_typology]
                     
                     # number of storeys
+                    if storeys == 0: # in case a new face is created in edit mode, the number of set storeys is 1
+                        storeys = 1
+                        bpy.ops.object.set_mesh_attribute_storeys
                     scene["attribute_mass_storeys"] = storeys
                     
                     # typology name
@@ -531,8 +534,14 @@ def updates(scene, depsgraph):
                             if id == use.id:
                                 usesUiList[enum].name = use.name
                                 usesUiList[enum].nameId = use.id
-                                storeys = list_storey_A[enum] + list_storey_B[enum]
-                                usesUiList[enum].storeys = int(storeys)
+                                # when a new face is added in edit mode
+                                # no storeys are assigned to the newly created face
+                                # therefore the system returns an indexError
+                                try:
+                                    storeys = list_storey_A[enum] + list_storey_B[enum]
+                                except IndexError:
+                                    storeys = 1
+                                usesUiList[enum].storeys = int(storeys)     
                                 break
                 bm.free
                 
