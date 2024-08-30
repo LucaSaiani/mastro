@@ -100,40 +100,48 @@ class separate_geometry_by_factor_OT(Operator):
         less_than_node.operation = 'LESS_EQUAL'
         less_than_node.location = (400, 0)
 
-        not_node = group.nodes.new(type='FunctionNodeBooleanMath')
-        not_node.operation = 'NOT'
-        not_node.name = "Boolean not 0"
-        not_node.location = (400, 150)
+        # not_node = group.nodes.new(type='FunctionNodeBooleanMath')
+        # not_node.operation = 'NOT'
+        # not_node.name = "Boolean not 0"
+        # not_node.location = (400, 150)
 
-        delete_geometry_node = group.nodes.new(type='GeometryNodeDeleteGeometry')
-        delete_geometry_node.name = "Separate 0"
-        delete_geometry_node.domain = 'EDGE'
-        # delete_geometry_node.mode = 'EDGE_FACE'
-        delete_geometry_node.location = (400, 300)
+        separate_geometry_node = group.nodes.new(type='GeometryNodeSeparateGeometry')
+        separate_geometry_node.name = "Separate 0"
+        separate_geometry_node.domain = 'EDGE'
+        separate_geometry_node.location = (400, 150)
+
+        # delete_geometry_node = group.nodes.new(type='GeometryNodeDeleteGeometry')
+        # delete_geometry_node.name = "Separate 0"
+        # delete_geometry_node.domain = 'EDGE'
+        # delete_geometry_node.location = (400, 300)
         
         merge_node = group.nodes.new(type='GeometryNodeMergeByDistance')
         merge_node.name = "Merge 0"
-        merge_node.location = (400, 450)
+        merge_node.location = (400, 300)
         
         leftover_greater_than_node = group.nodes.new(type='FunctionNodeCompare')
         leftover_greater_than_node.name = "Leftover compare"
         leftover_greater_than_node.operation = 'GREATER_THAN'
         leftover_greater_than_node.location = (600, 0)
         
-        leftover_not_node = group.nodes.new(type='FunctionNodeBooleanMath')
-        leftover_not_node.operation = 'NOT'
-        leftover_not_node.name = "Leftover not"
-        leftover_not_node.location = (600, 150)
+        # leftover_not_node = group.nodes.new(type='FunctionNodeBooleanMath')
+        # leftover_not_node.operation = 'NOT'
+        # leftover_not_node.name = "Leftover not"
+        # leftover_not_node.location = (600, 150)
         
-        leftover_delete_geometry_node = group.nodes.new(type='GeometryNodeDeleteGeometry')
-        leftover_delete_geometry_node.name = "Leftover"
-        leftover_delete_geometry_node.domain = 'EDGE'
-        # leftover_delete_geometry_node.mode = 'EDGE_FACE'
-        leftover_delete_geometry_node.location = (600, 300)
+        leftover_separate_geometry_node = group.nodes.new(type='GeometryNodeSeparateGeometry')
+        leftover_separate_geometry_node.name = "Leftover"
+        leftover_separate_geometry_node.domain = 'EDGE'
+        leftover_separate_geometry_node.location = (600, 150)
+        
+        # leftover_delete_geometry_node = group.nodes.new(type='GeometryNodeDeleteGeometry')
+        # leftover_delete_geometry_node.name = "Leftover"
+        # leftover_delete_geometry_node.domain = 'EDGE'
+        # leftover_delete_geometry_node.location = (600, 300)
         
         leftover_merge_node = group.nodes.new(type='GeometryNodeMergeByDistance')
         leftover_merge_node.name = "Leftover merge"
-        leftover_merge_node.location = (400, 450)
+        leftover_merge_node.location = (600, 300)
         
         # group input links
         group.links.new(group_input.outputs['Geometry'], capture_attribute.inputs['Geometry'])
@@ -150,29 +158,30 @@ class separate_geometry_by_factor_OT(Operator):
         group.links.new(capture_attribute.outputs['RND'], leftover_greater_than_node.inputs[0])
         
         # split edges links
-        group.links.new(split_edges.outputs['Mesh'], delete_geometry_node.inputs['Geometry'])
-        group.links.new(split_edges.outputs['Mesh'], leftover_delete_geometry_node.inputs['Geometry'])
+        group.links.new(split_edges.outputs['Mesh'], separate_geometry_node.inputs['Geometry'])
+        # group.links.new(split_edges.outputs['Mesh'], leftover_separate_geometry_node.inputs['Geometry'])
         
         # less than links
-        group.links.new(less_than_node.outputs[0], not_node.inputs[0])
+        group.links.new(less_than_node.outputs[0], separate_geometry_node.inputs[1])
         
         # not links
-        group.links.new(not_node.outputs[0], delete_geometry_node.inputs[1])
+        # group.links.new(not_node.outputs[0], delete_geometry_node.inputs[1])
         
         # separate geometry links
-        group.links.new(delete_geometry_node.outputs[0], merge_node.inputs[0])
+        group.links.new(separate_geometry_node.outputs[0], merge_node.inputs[0])
+        group.links.new(separate_geometry_node.outputs[1], leftover_separate_geometry_node.inputs[0])
         
         # merge links
         group.links.new(merge_node.outputs[0], group_output.inputs[0])
         
         # leftover more than links
-        group.links.new(leftover_greater_than_node.outputs[0], leftover_not_node.inputs[0])
+        group.links.new(leftover_greater_than_node.outputs[0], leftover_separate_geometry_node.inputs[1])
         
         # leftover not links
-        group.links.new(leftover_not_node.outputs[0], leftover_delete_geometry_node.inputs[1])
+        # group.links.new(leftover_not_node.outputs[0], leftover_delete_geometry_node.inputs[1])
         
         # leftover geometry links
-        group.links.new(leftover_delete_geometry_node.outputs[0], leftover_merge_node.inputs[0])
+        group.links.new(leftover_separate_geometry_node.outputs[0], leftover_merge_node.inputs[0])
         
         # leftover merge links
         group.links.new(leftover_merge_node.outputs[0], group_output.inputs["Remaining"])
@@ -234,23 +243,28 @@ class separate_geometry_by_factor_OT(Operator):
                             and_node.name = f"Boolean and {nameIndex}"
                             and_node.location = (400 + 150 * nameIndex, 0)
                             
-                            not_node = group.nodes.new(type='FunctionNodeBooleanMath')
-                            not_node.operation = 'NOT'
-                            not_node.name = f"Boolean not {nameIndex}"
-                            not_node.location = (400 + 150 * nameIndex, 150)
+                            # not_node = group.nodes.new(type='FunctionNodeBooleanMath')
+                            # not_node.operation = 'NOT'
+                            # not_node.name = f"Boolean not {nameIndex}"
+                            # not_node.location = (400 + 150 * nameIndex, 150)
                             
                             math_node = group.nodes.new(type='ShaderNodeMath')
                             math_node.name = f"Math {nameIndex}"
                             math_node.location = (400 + 150 * nameIndex, -450)
                             
-                            delete_geometry_node = group.nodes.new(type='GeometryNodeDeleteGeometry')
-                            delete_geometry_node.name = f"Separate {nameIndex}"
-                            delete_geometry_node.domain = 'EDGE'
-                            delete_geometry_node.location = (400 + 150 * nameIndex, 300)
+                            separate_geometry_node = group.nodes.new(type='GeometryNodeSeparateGeometry')
+                            separate_geometry_node.name = f"Separate {nameIndex}"
+                            separate_geometry_node.domain = 'EDGE'
+                            separate_geometry_node.location = (400 + 150 * nameIndex, 150)
+                            
+                            # delete_geometry_node = group.nodes.new(type='GeometryNodeDeleteGeometry')
+                            # delete_geometry_node.name = f"Separate {nameIndex}"
+                            # delete_geometry_node.domain = 'EDGE'
+                            # delete_geometry_node.location = (400 + 150 * nameIndex, 300)
                             
                             merge_node = group.nodes.new(type='GeometryNodeMergeByDistance')
                             merge_node.name = f"Merge {nameIndex}"
-                            merge_node.location = (400 + 150 * nameIndex, 450)
+                            merge_node.location = (400 + 150 * nameIndex, 300)
     
                             group.interface.new_socket(name=f'Selection {nameIndex}', description='', in_out = 'OUTPUT', socket_type='NodeSocketGeometry')
                            
@@ -270,7 +284,7 @@ class separate_geometry_by_factor_OT(Operator):
                             group.links.new(capture_node.outputs['RND'], less_than_node.inputs[0])
                             
                             # Split edges links
-                            group.links.new(group.nodes['Split Edges'].outputs[0], delete_geometry_node.inputs['Geometry'])
+                            # group.links.new(group.nodes['Split Edges'].outputs[0], delete_geometry_node.inputs['Geometry'])
                             
                             # math node links
                             group.links.new(math_node.outputs[0], less_than_node.inputs[1])
@@ -280,13 +294,14 @@ class separate_geometry_by_factor_OT(Operator):
                             group.links.new(less_than_node.outputs[0], and_node.inputs[1])
                             
                             # and node links
-                            group.links.new(and_node.outputs[0], not_node.inputs[0])
+                            group.links.new(and_node.outputs[0], separate_geometry_node.inputs[1])
                             
-                            # not node links
-                            group.links.new(not_node.outputs[0], delete_geometry_node.inputs[1])
+                            # # not node links
+                            # group.links.new(not_node.outputs[0], delete_geometry_node.inputs[1])
                             
-                            # delete geometry to merge links
-                            group.links.new(delete_geometry_node.outputs[0], merge_node.inputs[0])
+                            # separate geometry to merge links
+                            group.links.new(groupNodes[f'Separate {nameIndex -1}'].outputs[1], separate_geometry_node.inputs[0])
+                            group.links.new(separate_geometry_node.outputs[0], merge_node.inputs[0])
                             
                             # merge to group output links
                             group.links.new(merge_node.outputs[0], group_output.inputs[nameIndex])
@@ -299,6 +314,7 @@ class separate_geometry_by_factor_OT(Operator):
                         # and moves the delete geometry output to the last group output inputs
                         lastSocket = len(group_output.inputs) -2
                         group.links.new(groupNodes[f"Math {nameIndex-1}"].outputs[0], groupNodes["Leftover compare"].inputs[1])
+                        group.links.new(groupNodes[f'Separate {nameIndex -1}'].outputs[1], groupNodes["Leftover"].inputs[0])
                         group.links.new(groupNodes["Leftover merge"].outputs[0], group_output.inputs[lastSocket])
                             
                             
@@ -335,9 +351,9 @@ class separate_geometry_by_factor_OT(Operator):
                         #         break
                             
                     group_output.location = (800 + 150 * subdivision, 500)
-                    groupNodes["Leftover merge"].location = (600 + 150 * subdivision, 450)
-                    groupNodes["Leftover"].location = (600 + 150 * subdivision, 300)
-                    groupNodes["Leftover not"].location = (600 + 150 * subdivision, 100)
+                    groupNodes["Leftover merge"].location = (600 + 150 * subdivision, 300)
+                    groupNodes["Leftover"].location = (600 + 150 * subdivision, 150)
+                    # groupNodes["Leftover not"].location = (600 + 150 * subdivision, 100)
                     groupNodes["Leftover compare"].location = (600 + 150 * subdivision, 0)
                     
                     
@@ -355,8 +371,9 @@ class separate_geometry_by_factor_OT(Operator):
                     groupNodes = group.nodes
                     selection = bpy.context.scene.geometryMenuSwitch
                     for node in groupNodes:
-                        if "Separate" in node.name or "Capture" in node.name:
+                        if "Separate" in node.name or "Capture" in node.name or node.name == "Leftover":
                             node.domain = selection
+                    group.links.new(groupNodes[f'Separate {i -2}'].outputs[1], groupNodes["Leftover"].inputs[0])
                     # if selection == "FACE":
                     #     groupNodes['Split Edges'].mute = True
                     # else:
