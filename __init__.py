@@ -150,7 +150,7 @@ classes = (
     roma_schedule.RoMa_stringCollection_Socket,
     # roma_schedule.RoMaTreeNode,
     # roma_schedule.RoMaInterfaceSocket,
-    roma_schedule.RoMa_attributesCollectionAndFloat_Socket,
+    # roma_schedule.RoMa_attributesCollectionAndFloat_Socket,
     roma_schedule.RoMa_attributesCollection_Socket,
     roma_schedule.RoMa_data_collectionItem,
     roma_schedule.RoMa_data_propertyGroup,
@@ -181,7 +181,7 @@ classes = (
     roma_schedule.NODE_UL_key_MoveItem,
     roma_schedule.RoMaTableNode,
     # roma_schedule.RoMaTableByNode,
-    roma_schedule.RoMaGetUniqueNode,
+    # roma_schedule.RoMaGetUniqueNode,
     roma_schedule.RoMaDataNode,
     roma_schedule.RomaDataMathFunction,
    
