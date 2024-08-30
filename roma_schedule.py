@@ -254,7 +254,7 @@ def cleanSocket(link, socketIdentifier, inputOutput):
     
         if l.bl_rna.name == 'RoMa_stringCollection_SocketType':
             l.object_items.clear()
-        elif l.bl_rna.name in ['RoMa_attributeCollection_SocketType', 'RoMa_attributeCollectionAndFloat_SocketType']:
+        elif l.bl_rna.name in ['RoMa_attributeCollection_SocketType']:
             # l.pop('object_items', None)
             nodeFingerPrint = writeNodeFingerPrint(link)
             RoMa_attribute_removeItem(nodeFingerPrint, socketIdentifier, inOut)
@@ -495,7 +495,7 @@ def update_schedule_node_editor(node):
 
 # read attribute from the specified node
 def readAttributeFromLinkedNode (node, inputId):
-    nodeList = ['RoMa_attributeCollectionAndFloat_SocketType', 'RoMa_attributeCollection_SocketType']
+    nodeList = ['RoMa_attributeCollection_SocketType']
     attributes = []
     if node.inputs[inputId].is_linked and node.inputs[inputId].links:
         if node.inputs[inputId].links[0].from_node.outputs:
@@ -976,9 +976,33 @@ class RoMa_stringCollection_Socket(NodeSocket):
     
 # RoMa custom socket type
 # used in the math node
-class RoMa_attributesCollectionAndFloat_Socket(NodeSocket):
-    """RoMa node socket attribute collection and float type"""
-    bl_idname = 'RoMa_attributeCollectionAndFloat_SocketType'
+# class RoMa_attributesCollectionAndFloat_Socket(NodeSocket):
+#     """RoMa node socket attribute collection and float type"""
+#     bl_idname = 'RoMa_attributeCollectionAndFloat_SocketType'
+#     bl_label = "Attribute"
+    
+#     object_items: PointerProperty(type=RoMa_attribute_propertyGroup)
+#     default_value : FloatProperty(default=1.0) 
+   
+#     def draw(self, context, layout, node, text):
+#         if self.is_output:
+#             layout.label(text=self.identifier)
+#         else:
+#             if self.is_linked or self.hide_value:
+#                 layout.label(text=self.identifier)
+#             else:
+#                 layout.prop(self,"default_value",text=self.identifier)
+  
+#     @classmethod
+#     def draw_color_simple(cls):
+#         return (0.63, 0.63, 0.63, 1)
+
+    
+# RoMa custom socket type
+# used to collect attributes
+class RoMa_attributesCollection_Socket(NodeSocket):
+    """RoMa node socket attribute collection type"""
+    bl_idname = 'RoMa_attributeCollection_SocketType'
     bl_label = "Attribute"
     
     object_items: PointerProperty(type=RoMa_attribute_propertyGroup)
@@ -992,23 +1016,6 @@ class RoMa_attributesCollectionAndFloat_Socket(NodeSocket):
                 layout.label(text=self.identifier)
             else:
                 layout.prop(self,"default_value",text=self.identifier)
-  
-    @classmethod
-    def draw_color_simple(cls):
-        return (0.63, 0.63, 0.63, 1)
-
-    
-# RoMa custom socket type
-# used to collect attributes
-class RoMa_attributesCollection_Socket(NodeSocket):
-    """RoMa node socket attribute collection type"""
-    bl_idname = 'RoMa_attributeCollection_SocketType'
-    bl_label = "Attribute"
-    
-    object_items: PointerProperty(type=RoMa_attribute_propertyGroup)
-   
-    def draw(self, context, layout, node, text):
-        layout.label(text=self.identifier)
   
     @classmethod
     def draw_color_simple(cls):
@@ -1453,7 +1460,8 @@ class RoMaDataNode(RoMaTreeNode, Node):
     def init(self, context):
         self.inputs.new('RoMa_attributeCollection_SocketType', name='Row', identifier='Row')
         self.inputs.new('RoMa_attributeCollection_SocketType', name='Footer', identifier='Footer')
-        # self.inputs['Attribute'].hide_value = True
+        self.inputs['Row'].hide_value = True
+        self.inputs['Footer'].hide_value = True
         
         self.outputs.new('RoMa_dataCollection_SocketType', name='Data', identifier='Data')
         
@@ -1629,79 +1637,79 @@ class RoMa_key_name_list(PropertyGroup):
            default="")
         #    update=update_roma_filter_by_typology)
         
-class RoMaGetUniqueNode(RoMaTreeNode, Node):
-    '''Get the list of unique values of a given key '''
-    bl_idname = 'RoMa Unique Values'
-    bl_label = "Unique values"     
+# class RoMaGetUniqueNode(RoMaTreeNode, Node):
+#     '''Get the list of unique values of a given key '''
+#     bl_idname = 'RoMa Unique Values'
+#     bl_label = "Unique values"     
   
     
-    dropdown : EnumProperty(
-        items=lambda self, context : getAvailableAttributes(self, nodeType="Group by"),
-        description="Attribute to use as filter"
-    )
+#     dropdown : EnumProperty(
+#         items=lambda self, context : getAvailableAttributes(self, nodeType="Group by"),
+#         description="Attribute to use as filter"
+#     )
     
-    # key_list : CollectionProperty(type=RoMa_key_name_list)
+#     # key_list : CollectionProperty(type=RoMa_key_name_list)
         
-    # key_list_index : IntProperty(name = "Key list index",
-    #                             default = 0)
-    # executionOrder = []
+#     # key_list_index : IntProperty(name = "Key list index",
+#     #                             default = 0)
+#     # executionOrder = []
     
-    def init(self, context):
-        self.inputs.new('RoMa_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Attribute')
-        # self.inputs.new('RoMa_dataCollection_SocketType', name='Data', identifier='Data', use_multi_input=True)
-        self.inputs['Attribute'].display_shape = 'DIAMOND_DOT'
-        self.inputs['Attribute'].hide_value = True
+#     def init(self, context):
+#         self.inputs.new('RoMa_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Attribute')
+#         # self.inputs.new('RoMa_dataCollection_SocketType', name='Data', identifier='Data', use_multi_input=True)
+#         self.inputs['Attribute'].display_shape = 'DIAMOND_DOT'
+#         self.inputs['Attribute'].hide_value = True
         
-        self.outputs.new('RoMa_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Attribute')
-        self.outputs['Attribute'].display_shape = 'DIAMOND_DOT'
+#         self.outputs.new('RoMa_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Attribute')
+#         self.outputs['Attribute'].display_shape = 'DIAMOND_DOT'
         
-    def copy(self, node):
-        # addKeysToNode(self, inputs=self.inputList, outputs=self.outputList)
-        cleanInputs(self)
-        cleanOutputs(self)
-        # self.validated = True
+#     def copy(self, node):
+#         # addKeysToNode(self, inputs=self.inputList, outputs=self.outputList)
+#         cleanInputs(self)
+#         cleanOutputs(self)
+#         # self.validated = True
         
-    def free(self):
-        # removeKeyFromNode(self, inputs=self.inputList, outputs=self.outputList)
-        pass
+#     def free(self):
+#         # removeKeyFromNode(self, inputs=self.inputList, outputs=self.outputList)
+#         pass
         
-    def draw_buttons(self, context, layout):
-        layout.prop(self, "dropdown", text="Key")
+#     def draw_buttons(self, context, layout):
+#         layout.prop(self, "dropdown", text="Key")
         
-    def manualExecute(self):
-        cleanSocket(self, 'Attribute', 'output')
-        object_items = self.inputs['Attribute'].links[0].from_socket.object_items.items
-        uniqueList = uniqueValues(object_items, key=self.dropdown )
-        addItemsToList(uniqueList, self, 'Attribute')
-        # nodeFingerPrint = writeNodeFingerPrint(self)
-        # for unique in uniqueList:
-        #     RoMa_attribute_addItem(nodeFingerPrint,"Attribute", "output")
-        #     attributeIndex = self.outputs['Attribute'].object_items.active_index
-        #     for key, value in unique.items():
-        #         try:
-        #             float(value)
-        #             RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
-        #                                             item_index=attributeIndex,
-        #                                             key=key,
-        #                                             valueType="FLOAT",
-        #                                             floatValue=value,
-        #                                             socketIdentifier='Attribute'
-        #                                             )
-        #         except ValueError:
-        #             RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
-        #                                             item_index=attributeIndex,
-        #                                             key=key,
-        #                                             valueType="STRING",
-        #                                             stringValue=value,
-        #                                             socketIdentifier='Attribute'
-        #                                             )
+#     def manualExecute(self):
+#         cleanSocket(self, 'Attribute', 'output')
+#         object_items = self.inputs['Attribute'].links[0].from_socket.object_items.items
+#         uniqueList = uniqueValues(object_items, key=self.dropdown )
+#         addItemsToList(uniqueList, self, 'Attribute')
+#         # nodeFingerPrint = writeNodeFingerPrint(self)
+#         # for unique in uniqueList:
+#         #     RoMa_attribute_addItem(nodeFingerPrint,"Attribute", "output")
+#         #     attributeIndex = self.outputs['Attribute'].object_items.active_index
+#         #     for key, value in unique.items():
+#         #         try:
+#         #             float(value)
+#         #             RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+#         #                                             item_index=attributeIndex,
+#         #                                             key=key,
+#         #                                             valueType="FLOAT",
+#         #                                             floatValue=value,
+#         #                                             socketIdentifier='Attribute'
+#         #                                             )
+#         #         except ValueError:
+#         #             RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+#         #                                             item_index=attributeIndex,
+#         #                                             key=key,
+#         #                                             valueType="STRING",
+#         #                                             stringValue=value,
+#         #                                             socketIdentifier='Attribute'
+#         #                                             )
         
     
-    def update(self):
-        self.manualExecute()
+#     def update(self):
+#         self.manualExecute()
         
-    def execute(self):
-        self.manualExecute()
+#     def execute(self):
+#         self.manualExecute()
         
         
 
@@ -2121,23 +2129,6 @@ class RoMaMathNode(RoMaTreeNode, Node):
         description="Attribute to use in field B"
     )
     
-   
-    # RoMa_math_node_entries: PointerProperty(type=dropdown_box_maths)
-    # A_list : CollectionProperty(type=RoMa_attribute_item)
-    # A_value : FloatProperty(
-    #             name='A',
-    #             precision=3,)
-    
-    # B_list : CollectionProperty(type=RoMa_attribute_item) 
-    # B_value : FloatProperty(
-    #             name='B',
-    #             precision=3,)
-    # output_list : CollectionProperty(type=RoMa_attribute_item)
-    # output : FloatProperty(
-    #             name='output',
-    #             precision=3,)
-   
-    
     
     
     inputList = ["A", "B"]
@@ -2149,29 +2140,29 @@ class RoMaMathNode(RoMaTreeNode, Node):
     
     def init(self, context):
         # self.inputs.new('NodeSocketFloat', 'A Value', identifier='A')
-        self.inputs.new('RoMa_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='A')
+        self.inputs.new('RoMa_attributeCollection_SocketType', name = 'Attribute', identifier='A')
         # self.inputs['A_list'].display_shape = 'DIAMOND_DOT'
         self.inputs['A'].display_shape = 'DIAMOND_DOT'
         
         # self.inputs.new('NodeSocketFloat', 'B Value', identifier='B')
-        self.inputs.new('RoMa_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='B')
+        self.inputs.new('RoMa_attributeCollection_SocketType', name = 'Attribute', identifier='B')
         # self.inputs['B_list'].display_shape = 'DIAMOND_DOT'
         self.inputs['B'].display_shape = 'DIAMOND_DOT'
         
         # self.outputs.new('NodeSocketFloat', 'Value', identifier='output')
-        self.outputs.new('RoMa_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Value')
+        self.outputs.new('RoMa_attributeCollection_SocketType', name = 'Attribute', identifier='Value')
         self.outputs['Value'].display_shape = 'DIAMOND_DOT'
         
         self.update_socket_visibility()
         
         addKeysToNode(self, inputs=self.inputList)
         
-    def copy(self, node):
-        addKeysToNode(self, inputs=self.inputList)
-        self.update_socket_visibility()
+    # def copy(self, node):
+    #     addKeysToNode(self, inputs=self.inputList)
+    #     self.update_socket_visibility()
         
-    def free(self):
-        removeKeyFromNode(self, inputs=self.inputList)
+    # def free(self):
+    #     removeKeyFromNode(self, inputs=self.inputList)
         
     def assignValueToInput(self, inputName):
         # node = readNodeFingerPrint(sourceNode)
@@ -2545,7 +2536,7 @@ node_categories = [
         NodeItem("Table by RoMa Attribute", label="Table"),
         NodeItem("RoMa Table Data", label="Table Data"),
         NodeItem("RoMa Table Function", label="Table Function"),
-        NodeItem("RoMa Unique Values", label="Unique Values")
+        # NodeItem("RoMa Unique Values", label="Unique Values")
     ]),
     RoMaNodeCategory('OUTPUT', "Output", items=[
         NodeItem("RoMa Viewer", label="Viewer"),
