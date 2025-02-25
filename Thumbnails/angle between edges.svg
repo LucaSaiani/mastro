@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="128"
+   height="128"
+   viewBox="0 0 128 128"
+   version="1.1"
+   id="svg1"
+   inkscape:export-filename="angle between edges.png"
+   inkscape:export-xdpi="192"
+   inkscape:export-ydpi="192"
+   inkscape:version="1.4 (e7c3feb100, 2024-10-09)"
+   sodipodi:docname="angle between edges.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#414141"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     inkscape:zoom="3.9559173"
+     inkscape:cx="13.018472"
+     inkscape:cy="82.787373"
+     inkscape:window-width="2179"
+     inkscape:window-height="1229"
+     inkscape:window-x="497"
+     inkscape:window-y="229"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer3"
+     inkscape:clip-to-page="false"
+     inkscape:antialias-rendering="true" />
+  <defs
+     id="defs1">
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath2">
+      <path
+         d="M 40,0 V 950 H 970 V 0 Z"
+         transform="translate(0,-2.5000001e-5)"
+         id="path2" />
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath4">
+      <path
+         d="M 40,0 V 950 H 970 V 0 Z"
+         transform="translate(0,-2.5000001e-5)"
+         id="path4" />
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath6">
+      <path
+         d="M 40,0 V 950 H 970 V 0 Z"
+         transform="translate(0,-2.5000001e-5)"
+         id="path6" />
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath8">
+      <path
+         d="M 40,0 V 950 H 970 V 0 Z"
+         transform="matrix(0.1,0,0,-0.1,-37.664501,4.1082026)"
+         id="path8" />
+    </clipPath>
+  </defs>
+  <g
+     inkscape:label="Corner"
+     inkscape:groupmode="layer"
+     id="layer1"
+     style="display:inline"
+     sodipodi:insensitive="true">
+    <path
+       style="fill:#3485fd;fill-opacity:1;stroke:#ffffff;stroke-width:0.515428;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
+       d="m 127.74231,113.89387 c -7.20021,7.20021 1.47054,-1.46749 -13.84538,13.84842 7.58574,0 13.80605,-0.0424 13.80605,-0.0424 0,0 0.0393,-3.57019 0.0393,-13.80603 z"
+       id="path7"
+       sodipodi:nodetypes="cccc" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="Corner 1">
+    <path
+       id="path3"
+       d="M 282.93,560.039 C 406.52,657.93 563.199,631.68 665.391,495.98"
+       style="fill:none;stroke:#5a9cfe;stroke-width:22.50000056;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1;stroke-dasharray:67.49989376,67.49989376;stroke-dashoffset:0;stroke-opacity:1"
+       transform="matrix(0.13333333,0,0,-0.13333333,-1.3720592,128.20988)"
+       clip-path="url(#clipPath4)" />
+    <path
+       id="path5"
+       d="M 175.621,798.75 446.211,209.262 782.40041,650.37293 873.398,769.77"
+       style="fill:none;stroke:#0d6efd;stroke-width:37.5;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       transform="matrix(0.13333333,0,0,-0.13333333,-1.3720592,128.20988)"
+       clip-path="url(#clipPath6)"
+       sodipodi:nodetypes="cccc" />
+    <text
+       xml:space="preserve"
+       style="font-size:15px;line-height:1.25;font-family:sans-serif;fill:#ffffff;fill-opacity:1"
+       x="14.408797"
+       y="17.442226"
+       id="text14"><tspan
+         sodipodi:role="line"
+         id="tspan14"
+         x="14.408797"
+         y="17.442226"
+         style="font-size:15px;fill:#ffffff;fill-opacity:1">A</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:15px;line-height:1.25;font-family:sans-serif;fill:#ffffff;fill-opacity:1"
+       x="113.83764"
+       y="19.593124"
+       id="text14-6"><tspan
+         sodipodi:role="line"
+         id="tspan14-8"
+         x="113.83764"
+         y="19.593124"
+         style="font-size:15px;fill:#ffffff;fill-opacity:1">B</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:15px;line-height:1.25;font-family:sans-serif;fill:#ffffff;fill-opacity:1"
+       x="51.375935"
+       y="120.24648"
+       id="text14-6-6"><tspan
+         sodipodi:role="line"
+         id="tspan14-8-4"
+         x="51.375935"
+         y="120.24648"
+         style="font-size:15px;fill:#ffffff;fill-opacity:1">O</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:15px;line-height:1.25;font-family:sans-serif;fill:#ffffff;fill-opacity:1"
+       x="56.18"
+       y="40.780334"
+       id="text14-6-6-4"><tspan
+         sodipodi:role="line"
+         id="tspan14-8-4-8"
+         x="56.18"
+         y="40.780334"
+         style="font-size:15px;fill:#ffffff;fill-opacity:1">37°</tspan></text>
+  </g>
+</svg>
