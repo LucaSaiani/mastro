@@ -1,34 +1,16 @@
 <?xml version="1.0"?>
 <data>
     <streets>
-        <street type="Canal 1">
-            <segment id="0">
-                <width>25</width>
-                <radius>3</radius>
-            </segment>
-        </street>
-        <street type="Canal 2">
-            <segment id="0">
-                <width>50</width>
-                <radius>3</radius>
-            </segment>
-        </street>
-        <street type="Primary">
-            <segment id="0">
-                <width>32</width>
-                <radius>32</radius>
-            </segment>
-        </street>
-        <street type="Secondary">
-            <segment id="0">
-                <width>16</width>
-                <radius>16</radius>
-            </segment>
-        </street>
-        <street type="Green">
+        <street type="A">
             <segment id="0">
                 <width>5</width>
-                <radius>5</radius>
+                <radius>2</radius>
+            </segment>
+        </street>
+        <street type="B">
+            <segment id="0">
+                <width>3</width>
+                <radius>1</radius>
             </segment>
         </street>
     </streets>
