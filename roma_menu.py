@@ -20,18 +20,17 @@
 
 import bpy
 import bmesh 
-from bpy.types import Menu, Operator
+from bpy.types import Menu, Operator, Panel
 from bpy_extras.io_utils import ExportHelper
 from bpy_extras.object_utils import AddObjectHelper
 from bpy.props import StringProperty
 
-import random
+
 # import decimal
+import random, math, mathutils, csv
+
 from decimal import Decimal #, ROUND_HALF_DOWN
 from datetime import datetime
-import math
-
-import csv #, os
 from bpy.utils import resource_path
 from pathlib import Path
 
@@ -250,8 +249,8 @@ class RoMa_Menu(Menu):
         printGranular = layout.operator(RoMa_MenuOperator_PrintData.bl_idname, text="Print the data of the mass in extended form")
         printGranular.text = "granular"
         layout.operator(RoMa_MenuOperator_ExportCSV.bl_idname)
-        layout.separator()
-        layout.operator(RoMa_Operator_transformation_orientation.bl_idname)
+        # layout.separator()
+        # layout.operator(RoMa_Operator_transformation_orientation.bl_idname)
 
 class RoMa_MenuOperator_add_RoMa_mass(Operator, AddObjectHelper):
     """Add a RoMa mass"""
@@ -348,7 +347,7 @@ def add_roma_mass(width, depth):
 
     return verts, faces
 
-# add the entri to the add menu
+# add the entry to the add menu
 def roma_add_menu_func(self, context):
     self.layout.operator(RoMa_MenuOperator_add_RoMa_mass.bl_idname, icon='MESH_CUBE')
     
@@ -424,7 +423,7 @@ def addAttributes(obj):
                     storeys = str(use.storeys)
                     if use.storeys < 10:
                         storeys = "0" + storeys
-                        
+
                 storey_list_A += storeys[0]
                 storey_list_B += storeys[1]
                 
@@ -638,18 +637,174 @@ class RoMa_MenuOperator_ExportCSV(Operator, ExportHelper):
         return writeCSV(context, self.filepath)
 
 class RoMa_Operator_transformation_orientation(Operator):
-    """Create transformation orientation from selection"""
-    bl_idname = "object.roma_transformation_orientation"
-    bl_label = "Create transformation orientation from selection"
+    """Create transformation orientation from the selected edge"""
+    bl_idname = "transform.set_orientation_from_edge"
+    bl_label = "Edge"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    # @classmethod
+    # def poll(cls, context):
+    #     return context.mode == 'EDIT' and context.object is not None and context.object.type == 'MESH'
+
+
     
     def execute(self, context):
-        try:
-            bpy.ops.transform.delete_orientation()
-        except:
-            pass
-        bpy.ops.transform.create_orientation(use=True)
-        return {'FINISHED'} 
+        obj = context.object
+        if obj is None or obj.type != 'MESH':
+            self.report({'ERROR'}, "Select a mesh object")
+            return {'CANCELLED'}
+
+        # Switch to Object Mode and get selected vertices
+        bpy.ops.object.mode_set(mode='OBJECT')
+        mesh = obj.data
+        selected_verts = [v.co for v in mesh.vertices if v.select]
+
+        if len(selected_verts) != 2:
+            self.report({'ERROR'}, "Select exactly two vertices forming an edge")
+            return {'CANCELLED'}
+
+        # Compute the tangent as a normalized vector
+        p1, p2 = selected_verts
+        tangent = (p2 - p1).normalized()
+
+        # Define the other axes to form an orthonormal basis
+        x_axis = tangent
+        y_axis = mathutils.Vector((0, 0, 1)).cross(x_axis)  # Perpendicular vector
+        if y_axis.length == 0:
+            y_axis = mathutils.Vector((0, 1, 0))
+        z_axis = x_axis.cross(y_axis)
+
+        # Normalize the axes
+        x_axis.normalize()
+        y_axis.normalize()
+        z_axis.normalize()
+
+        # Create the 3x3 transformation matrix
+        matrix = mathutils.Matrix((x_axis, y_axis, z_axis)).transposed()
+
+        # Create a new transform orientation in Blender
+        bpy.ops.transform.create_orientation(name="Edge", use=True, overwrite=True)
+        orientation = context.scene.transform_orientation_slots[0]
+        orientation.custom_orientation.matrix = matrix
         
+        # Set the new orientation as active
+        context.scene.transform_orientation_slots[0].type = 'Edge'
+        
+        # Switch back to Edit Mode
+        bpy.ops.object.mode_set(mode='EDIT')
+        
+        # self.report({'INFO'}, "Transform Orientation Set from Edge Tangent")
+        return {'FINISHED'}
+
+# Replace the existing Orientations pie menu, adding custom orientations
+class VIEW3D_MT_orientations_pie(Menu):
+    bl_label = "Orientation"
+
+    # def draw(self, context):
+    #     layout = self.layout
+    #     pie = layout.menu_pie()
+    #     scene = context.scene
+
+    #     pie.prop(scene.transform_orientation_slots[0], "type", expand=True)
+    #     pie.prop(scene.transform_orientation_slots[0], "type", text="Custom", expand=False)
+    
+    def draw(self, context):
+        obj = context.object
+        
+        layout = self.layout
+        pie = layout.menu_pie()
+        scene = context.scene
+
+        pie.prop(scene.transform_orientation_slots[0], "type", expand=True)
+        
+        custom = pie.column()
+        gap = custom.column()
+        gap.separator()
+        gap.scale_y = 25
+        custom_menu = custom.box().column()
+        # custom_menu.scale_y=1.3
+        # custom_menu.label(text="Custom:")
+       
+        custom_menu.operator("transform.create_orientation", text="New", icon='ADD', emboss=False).use = True
+        if obj.mode == 'EDIT' and obj is not None and obj.type == 'MESH':
+            custom_menu.operator("transform.set_orientation_from_edge", text="New from Edge", icon='EDGESEL', emboss=False)
+        # custom_menu.prop(scene.transform_orientation_slots[0], "type", expand=True)
+        # orient_slot = scene.transform_orientation_slots[0]
+        # orientation = orient_slot.custom_orientation
+        # custom_menu.prop(orient_slot, "type", expand=True)
+        custom_orientations = bpy.context.scene.transform_orientation_slots[0]
+        custom_names = [ori.name for ori in custom_orientations]
+        
+        print(custom_names)
+        # list the custom orientations
+        # scene = context.scene
+        # transform_slots = context.scene.transform_orientation_slots
+        # builtin_transforms = [i.identifier for i in bpy.types.TransformOrientationSlot.bl_rna.properties['type'].enum_items]
+        # orient_slot = scene.transform_orientation_slots[0]        
+        
+        # hacky (but the only way) to get the all available transforms
+        # try:
+        #     context.scene.transform_orientation_slots[0].type = ""
+        # except Exception as inst:
+        #     # transforms = str(inst).split("'")[1::2]
+        #     print("ciao", inst)
+
+        # for transform in transforms:
+        #     print(transform)
+        #     if transform in builtin_transforms:
+        #         continue
+                
+        #     # custom_menu.operator("transform.select_orientation", text=transform, icon=None, emboss=False)
+        #     print(transform)
+            # transform_slots[0].type = transform
+            # bpy.ops.transform.delete_orientation()
+       
+
+        
+# Replace the existing Transform Orientations panel in the UI, adding "orientation from edge"
+class VIEW3D_PT_transform_orientations(Panel):
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'HEADER'
+    bl_label = "Transform Orientations"
+    bl_ui_units_x = 8
+
+    def draw(self, context):
+        
+        obj = context.object
+        # if obj is None or obj.type != 'MESH':
+        #     self.report({'ERROR'}, "Select a mesh object")
+        #     return {'CANCELLED'}
+        
+        layout = self.layout
+        layout.label(text="Transform Orientations")
+        
+        scene = context.scene
+        orient_slot = scene.transform_orientation_slots[0]
+        orientation = orient_slot.custom_orientation
+      
+
+        row = layout.row()
+        col = row.column(align=True)
+        
+        col = row.column(align=True)
+        col.prop(orient_slot, "type", expand=True)
+        
+        col_operators = row.column(align=True)
+        col_operators.operator("transform.create_orientation", text="", icon='ADD', emboss=False).use = True
+        # this creates a new orientation from the selected edge
+        if obj.mode == 'EDIT' and obj is not None and obj.type == 'MESH':
+            col_operators.operator("transform.set_orientation_from_edge", text="", icon="EDGESEL", emboss=False)
+
+        
+        if orientation:
+            row = layout.row(align=False)
+            row.prop(orientation, "name", text="", icon='OBJECT_ORIGIN')
+            row.operator("transform.delete_orientation", text="", icon='X', emboss=False)
+
+# # Extend the existing Transform Orientations panel in the UI
+# def extend_transform_operation_panel(self, context):
+#     layout = self.layout
+#     layout.operator("transform.set_orientation_from_edge", text="Set Orientation from Edge")
         
 def aggregateData(roughData):
     roughData = sorted(roughData, key=lambda x:(x[0], x[1], x[2], x[3], x[4]))
