@@ -139,6 +139,8 @@ classes = (
     roma_menu.RoMa_MenuOperator_PrintData,
     roma_menu.RoMa_MenuOperator_ExportCSV,
     roma_menu.RoMa_Operator_transformation_orientation,
+    roma_menu.VIEW3D_PT_transform_orientations,
+    roma_menu.VIEW3D_MT_orientations_pie,
     roma_menu.RoMa_Menu,
     roma_menu.romaAddonProperties,
     
@@ -524,6 +526,7 @@ def register():
     # )
     # bpy.types.Scene.RoMa_math_node_entries = bpy.props.PointerProperty(type=roma_schedule.RomaMathSubMenuEntries)
     
+    # bpy.types.VIEW3D_PT_transform_orientations.append(roma_menu.extend_transform_operation_panel)
     bpy.types.VIEW3D_MT_editor_menus.append(roma_menu.roma_menu)
     bpy.types.VIEW3D_MT_mesh_add.append(roma_menu.roma_add_menu_func)
     bpy.types.WindowManager.toggle_show_data = bpy.props.BoolProperty(
@@ -550,6 +553,9 @@ def register():
     bpy.types.WindowManager.toggle_storey_number = bpy.props.BoolProperty(
                                             name = "Number of Storeys",
                                             default = False)
+    bpy.types.WindowManager.toggle_auto_update_mass_data = bpy.props.BoolProperty(
+                                            name = "Auto Update Mass Data",
+                                            default = True)
     # bpy.types.WindowManager.toggle_schedule_in_editor = bpy.props.BoolProperty(
     #                                         name = "Show Schedule",
     #                                         default = False,
@@ -726,6 +732,7 @@ def unregister():
     
     nodeitems_utils.unregister_node_categories('ROMA_NODES')
 
+    # bpy.types.VIEW3D_PT_transform_orientations.remove(roma_menu.extend_transform_operation_panel)
     bpy.types.VIEW3D_MT_editor_menus.remove(roma_menu.roma_menu)
     bpy.types.VIEW3D_MT_mesh_add.remove(roma_menu.roma_add_menu_func)
     
@@ -739,6 +746,7 @@ def unregister():
     del bpy.types.WindowManager.toggle_wall_name
     del bpy.types.WindowManager.toggle_wall_normal
     del bpy.types.WindowManager.toggle_floor_name
+    del bpy.types.WindowManager.toggle_auto_update_mass_data
     # del bpy.types.WindowManager.toggle_schedule_in_editor
     del bpy.types.Object.roma_props
     

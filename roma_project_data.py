@@ -502,7 +502,7 @@ class VIEW3D_PT_RoMa_mass_data(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     # bl_category = "RoMa"
-    bl_label = "Mass Data"
+    bl_label = ""
     bl_parent_id = "VIEW3D_PT_RoMa_project_data"
     # bl_context = "scene"
     bl_options = {'DEFAULT_CLOSED'}
@@ -511,6 +511,14 @@ class VIEW3D_PT_RoMa_mass_data(Panel):
     # def poll(cls, context):
     #     return (context.object is not None)
     
+    def draw_header(self, context):
+        layout = self.layout
+        # split = layout.split(factor=.9)
+        row = layout.row()
+        row.label(text="Mass Data")
+        row.prop(context.window_manager, "toggle_auto_update_mass_data", text="", icon="FILE_REFRESH")
+        
+        
     def draw(self, context):
         pass
       
@@ -1015,7 +1023,11 @@ class VIEW3D_PT_RoMa_mass_typology_data(Panel):
         else:
             sub.enabled = True
         layout.prop(context.scene.roma_use_name_list[index],"void", text="Void")
-        
+        sub = layout.row()
+        sub.active = not(context.window_manager.toggle_auto_update_mass_data)
+        # sub.prop(context.scene.roma_use_name_list[index],"void", text="Update")
+        sub.operator("object.update_all_roma_meshes_attributes").attributeToUpdate="all"
+            
             
 class OBJECT_UL_Typology(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data,
@@ -1369,29 +1381,34 @@ def update_typology_uses_name_label(self, context):
 # to update all the existing RoMa meshes with the updated data
 # this is for useList
 def update_all_roma_meshes_useList(self, context):
-    updates = "all"
-    bpy.ops.object.update_all_roma_meshes_attributes(attributeToUpdate=updates)
+    if context.window_manager.toggle_auto_update_mass_data:
+        updates = "all"
+        bpy.ops.object.update_all_roma_meshes_attributes(attributeToUpdate=updates)
 
 # this is for the floor to floor height
 def update_all_roma_meshes_floorToFloor(self, context):
-    updates = "floorToFloor"
-    bpy.ops.object.update_all_roma_meshes_attributes(attributeToUpdate=updates)
+    if context.window_manager.toggle_auto_update_mass_data:
+        updates = "floorToFloor"
+        bpy.ops.object.update_all_roma_meshes_attributes(attributeToUpdate=updates)
     
 # this is for the number of storeys
 def update_all_roma_meshes_numberOfStoreys(self, context):
-    updates = "numberOfStoreys"
-    bpy.ops.object.update_all_roma_meshes_attributes(attributeToUpdate=updates)
+    if context.window_manager.toggle_auto_update_mass_data:
+        updates = "numberOfStoreys"
+        bpy.ops.object.update_all_roma_meshes_attributes(attributeToUpdate=updates)
     
 # this is for the void
 def update_all_roma_meshes_void(self, context):
-    updates = "void"
-    bpy.ops.object.update_all_roma_meshes_attributes(attributeToUpdate=updates)
+    if context.window_manager.toggle_auto_update_mass_data:
+        updates = "void"
+        bpy.ops.object.update_all_roma_meshes_attributes(attributeToUpdate=updates)
 
         
 # Operator to update the attributes of all the RoMa meshes in the scene        
 class OBJECT_OT_update_all_RoMa_meshes_attributes(Operator):
     bl_idname = "object.update_all_roma_meshes_attributes"
-    bl_label = "Update the attributes of all the RoMa meshes in the scene"
+    # bl_label = "Update the attributes of all the RoMa meshes in the scene"
+    bl_label = "Update"
     bl_options = {'REGISTER', 'UNDO'}
     
     attributeToUpdate: bpy.props.StringProperty(name="Attribute to update")
