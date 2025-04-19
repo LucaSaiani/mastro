@@ -45,6 +45,7 @@ if "bpy" in locals():
     importlib.reload(roma_menu),
     # importlib.reload(roma_vertex),
     importlib.reload(roma_wall),
+    importlib.reload(roma_road),
     importlib.reload(roma_massing),
     importlib.reload(roma_schedule)
     importlib.reload(roma_modal_operator)
@@ -55,6 +56,7 @@ else:
     from . import roma_menu
     # from . import roma_vertex
     from . import roma_wall
+    from . import roma_road
     from . import roma_massing
     from . import roma_schedule
     from . import roma_modal_operator
@@ -89,6 +91,8 @@ classes = (
     roma_project_data.VIEW3D_PT_RoMa_mass_block_data,
     # roma_project_data.VIEW3D_PT_RoMa_mass_use_data,
     roma_project_data.VIEW3D_PT_RoMa_mass_typology_data,
+    roma_project_data.VIEW3D_PT_RoMa_road_data,
+    
     roma_project_data.VIEW3D_PT_RoMa_building_data,
     roma_project_data.VIEW3D_PT_RoMa_building_wall_data,
     roma_project_data.VIEW3D_PT_RoMa_building_floor_data,
@@ -122,7 +126,12 @@ classes = (
     roma_project_data.TYPOLOGY_USES_LIST_OT_DeleteItem,
     roma_project_data.TYPOLOGY_USES_LIST_OT_MoveItem,
     roma_project_data.OBJECT_OT_update_all_RoMa_meshes_attributes,
+    roma_project_data.OBJECT_OT_update_all_RoMa_road_attributes,
 
+    roma_project_data.OBJECT_UL_Road,
+    roma_project_data.road_name_list,
+    roma_project_data.ROAD_LIST_OT_NewItem,
+    roma_project_data.ROAD_LIST_OT_MoveItem,
     
     roma_project_data.OBJECT_UL_Wall,
     roma_project_data.wall_name_list,
@@ -135,13 +144,15 @@ classes = (
     roma_project_data.FLOOR_LIST_OT_MoveItem,
     
     roma_menu.RoMa_MenuOperator_add_RoMa_mass,
+    roma_menu.RoMa_MenuOperator_add_RoMa_road,
     roma_menu.RoMa_MenuOperator_convert_to_RoMa_mass,
-    roma_menu.RoMa_MenuOperator_PrintData,
-    roma_menu.RoMa_MenuOperator_ExportCSV,
+    # roma_menu.RoMa_MenuOperator_PrintData,
+    # roma_menu.RoMa_MenuOperator_ExportCSV,
     roma_menu.RoMa_Operator_transformation_orientation,
     roma_menu.VIEW3D_PT_transform_orientations,
     roma_menu.VIEW3D_MT_orientations_pie,
-    roma_menu.RoMa_Menu,
+    # roma_menu.RoMa_Menu,
+    roma_menu.VIEW3D_PT_RoMa_Panel,
     roma_menu.romaAddonProperties,
     
     roma_schedule.RoMaTree,
@@ -205,7 +216,7 @@ classes = (
     # roma_vertex.OBJECT_OT_SetVertexAttribute,
     # roma_vertex.VIEW3D_PT_RoMa_vertex,
     
-    roma_massing.OBJECT_OT_SetTypologyId,
+    # roma_massing.OBJECT_OT_SetTypologyId,
     roma_massing.OBJECT_UL_OBJ_Typology_Uses,
     roma_massing.OBJECT_OT_Set_Face_Attribute_Storeys,
     roma_massing.OBJECT_OT_Set_Face_Attribute_Uses,
@@ -218,7 +229,9 @@ classes = (
     # roma_modal_operator.VIEW_3D_OT_update_all_meshes_attributes,
     # roma_modal_operator.EventReporter,
 
-
+    roma_road.VIEW3D_PT_RoMa_Road,
+    roma_road.OBJECT_OT_SetRoadId,
+    
     roma_wall.OBJECT_OT_SetWallId,
     roma_wall.OBJECT_OT_SetWallNormal,
     roma_wall.OBJECT_OT_SetFloorId,
@@ -281,6 +294,12 @@ def initLists():
         bpy.context.scene.roma_obj_typology_uses_name_list.add()
         bpy.context.scene.roma_obj_typology_uses_name_list[0].id = 0
         bpy.context.scene.roma_obj_typology_uses_name_list[0].name =  bpy.context.scene.roma_use_name_list[0].name
+        
+    if len(bpy.context.scene.roma_road_name_list) == 0:
+        bpy.context.scene.roma_road_name_list.add()
+        bpy.context.scene.roma_road_name_list[0].id = 0
+        bpy.context.scene.roma_road_name_list[0].name = "Road type... "
+        bpy.context.scene.roma_road_name_list[0].normal = 0
     
     if len(bpy.context.scene.roma_wall_name_list) == 0:
         bpy.context.scene.roma_wall_name_list.add()
@@ -308,6 +327,11 @@ def initLists():
         bpy.context.scene.roma_typology_name_current[0].id = 0
         bpy.context.scene.roma_typology_name_current[0].name = bpy.context.scene.roma_typology_name_list[0].name
         
+    if len(bpy.context.scene.roma_road_name_current) == 0:
+        bpy.context.scene.roma_road_name_current.add()
+        bpy.context.scene.roma_road_name_current[0].id = 0
+        bpy.context.scene.roma_road_name_current[0].name = bpy.context.scene.roma_road_name_list[0].name
+   
     if len(bpy.context.scene.roma_wall_name_current) == 0:
         bpy.context.scene.roma_wall_name_current.add()
         bpy.context.scene.roma_wall_name_current[0].id = 0
@@ -349,6 +373,13 @@ def get_typology_names_from_list(scene, context):
         newProp = (el.name, el.name, "")
         items.append(newProp)
     # items.sort()
+    return items
+
+def get_road_names_from_list(scene, context):
+    items = []
+    for el in scene.roma_road_name_list:
+        newProp = (el.name, el.name, "")
+        items.append(newProp)
     return items
 
 def get_wall_names_from_list(scene, context):
@@ -527,7 +558,7 @@ def register():
     # bpy.types.Scene.RoMa_math_node_entries = bpy.props.PointerProperty(type=roma_schedule.RomaMathSubMenuEntries)
     
     # bpy.types.VIEW3D_PT_transform_orientations.append(roma_menu.extend_transform_operation_panel)
-    bpy.types.VIEW3D_MT_editor_menus.append(roma_menu.roma_menu)
+    # bpy.types.VIEW3D_MT_editor_menus.append(roma_menu.roma_menu)
     bpy.types.VIEW3D_MT_mesh_add.append(roma_menu.roma_add_menu_func)
     bpy.types.WindowManager.toggle_show_data = bpy.props.BoolProperty(
                                             default = False,
@@ -556,6 +587,8 @@ def register():
     bpy.types.WindowManager.toggle_auto_update_mass_data = bpy.props.BoolProperty(
                                             name = "Auto Update Mass Data",
                                             default = True)
+                                            # update = roma_project_data.update_all_roma_meshes_useList)
+                                            
     # bpy.types.WindowManager.toggle_schedule_in_editor = bpy.props.BoolProperty(
     #                                         name = "Show Schedule",
     #                                         default = False,
@@ -588,6 +621,21 @@ def register():
                                         name="Typology Id",
                                         default=0)
                                         # update = roma_massing.update_attributes_roma_mesh)
+    Scene.attribute_road_id = bpy.props.IntProperty(
+                                        name="Road Id",
+                                        default=0,
+                                        #update = roma_road.update_attribute_road_id
+                                        )
+    Scene.attribute_road_width = bpy.props.FloatProperty(
+                                        name = "Road width",
+                                        default=8,
+                                        precision=3
+                                        )
+    Scene.attribute_road_radius = bpy.props.FloatProperty(
+                                        name = "Road radius",
+                                        default=18,
+                                        precision=3
+                                        )
     Scene.attribute_wall_id = bpy.props.IntProperty(
                                         name="Wall Id",
                                         default=0,
@@ -694,6 +742,18 @@ def register():
     Scene.roma_obj_typology_uses_name_list = bpy.props.CollectionProperty(type = roma_massing.obj_typology_uses_name_list)
     Scene.roma_obj_typology_uses_name_list_index = bpy.props.IntProperty(name = "Typology Use Name of the selected object",
                                              default = 0)
+    
+    Scene.roma_road_name_list = bpy.props.CollectionProperty(type = roma_project_data.road_name_list)
+    Scene.roma_road_name_current = bpy.props.CollectionProperty(type =roma_project_data.name_with_id)
+    Scene.roma_road_name_list_index = bpy.props.IntProperty(name = "Road Name",
+                                             default = 0)
+    Scene.roma_road_names = bpy.props.EnumProperty(
+                                        name="Road List",
+                                        description="",
+                                        items=get_road_names_from_list,
+                                        update=roma_road.update_attributes_road
+                                        )
+    
     Scene.roma_wall_name_list = bpy.props.CollectionProperty(type = roma_project_data.wall_name_list)
     Scene.roma_wall_name_current = bpy.props.CollectionProperty(type =roma_project_data.name_with_id)
     Scene.roma_wall_name_list_index = bpy.props.IntProperty(name = "Wall Name",
@@ -702,7 +762,9 @@ def register():
                                         name="Wall List",
                                         description="",
                                         items=get_wall_names_from_list,
-                                        update=roma_wall.update_wall_name_label)
+                                        # update=roma_wall.update_wall_name_label
+                                        )
+    
     Scene.roma_floor_name_list = bpy.props.CollectionProperty(type = roma_project_data.floor_name_list)
     Scene.roma_floor_name_current = bpy.props.CollectionProperty(type =roma_project_data.name_with_id)
     Scene.roma_floor_name_list_index = bpy.props.IntProperty(name = "Floor Name",
@@ -711,7 +773,8 @@ def register():
                                         name="Floor List",
                                         description="",
                                         items=get_floor_names_from_list,
-                                        update=roma_wall.update_floor_name_label)
+                                        # update=roma_wall.update_floor_name_label
+                                        )
     
     bpy.app.timers.register(initLists, first_interval=.1)
     bpy.app.timers.register(initNodes, first_interval=.1)
@@ -733,7 +796,7 @@ def unregister():
     nodeitems_utils.unregister_node_categories('ROMA_NODES')
 
     # bpy.types.VIEW3D_PT_transform_orientations.remove(roma_menu.extend_transform_operation_panel)
-    bpy.types.VIEW3D_MT_editor_menus.remove(roma_menu.roma_menu)
+    # bpy.types.VIEW3D_MT_editor_menus.remove(roma_menu.roma_menu)
     bpy.types.VIEW3D_MT_mesh_add.remove(roma_menu.roma_add_menu_func)
     
     # del bpy.types.Scene.RoMa_math_node_entries
