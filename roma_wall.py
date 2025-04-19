@@ -25,20 +25,21 @@ class VIEW3D_PT_RoMa_Wall(Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "RoMa"
-    bl_label = "Room"
+    bl_label = "Architecture"
     
     @classmethod
     def poll(cls, context):
         return (context.object is not None and 
                 context.object.type == "MESH" and 
                 context.object.mode == "EDIT" and
-                "RoMa object" in context.object.data)
+                "RoMa object" in context.object.data and
+                "RoMa mass" in context.object.data)
     
     def draw(self, context):
         obj = context.active_object 
         if obj is not None and obj.type == "MESH":
             mode = obj.mode
-            if mode == "EDIT" and "RoMa object" in obj.data:
+            if mode == "EDIT":
                 scene = context.scene
                 layout = self.layout
                 layout.use_property_split = True    

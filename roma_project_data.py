@@ -29,8 +29,8 @@ from bpy.props import StringProperty, IntProperty, FloatProperty, BoolProperty
 from bpy.types import PropertyGroup, UIList, Operator, Panel
 # from bpy.app.handlers import persistent
 
-from .roma_massing import update_mesh_attributes_uses, update_mesh_attributes_storeys
-
+from .roma_massing import read_mesh_attributes_uses, update_mesh_attributes_storeys
+from .roma_road import read_mesh_attributes_roads
 
 # import random
 # import decimal
@@ -445,7 +445,7 @@ class VIEW3D_PT_RoMa_project_data(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     # bl_category = "RoMa"
-    bl_label = "RoMa Project Data"
+    bl_label = "RoMa"
     bl_context = "scene"
     bl_options = {'DEFAULT_CLOSED'}
     
@@ -466,6 +466,7 @@ class VIEW3D_PT_RoMa_show_data(Panel):
     bl_parent_id = "VIEW3D_PT_RoMa_project_data"
     # bl_context = "scene"
     bl_options = {'DEFAULT_CLOSED'}
+    bl_order = 0
     
     def draw_header(self, context):
         self.layout.prop(context.window_manager, "toggle_show_data", text="")
@@ -506,6 +507,8 @@ class VIEW3D_PT_RoMa_mass_data(Panel):
     bl_parent_id = "VIEW3D_PT_RoMa_project_data"
     # bl_context = "scene"
     bl_options = {'DEFAULT_CLOSED'}
+    bl_order = 1
+
     
     # @classmethod
     # def poll(cls, context):
@@ -515,8 +518,8 @@ class VIEW3D_PT_RoMa_mass_data(Panel):
         layout = self.layout
         # split = layout.split(factor=.9)
         row = layout.row()
-        row.label(text="Mass Data")
-        row.prop(context.window_manager, "toggle_auto_update_mass_data", text="", icon="FILE_REFRESH")
+        row.label(text="Mass")
+        # row.prop(context.window_manager, "toggle_auto_update_mass_data", text="", icon="FILE_REFRESH")
         
         
     def draw(self, context):
@@ -568,8 +571,7 @@ class VIEW3D_PT_RoMa_mass_plot_data(Panel):
         # row.prop(item, "index")
         
 class OBJECT_UL_Plot(UIList):
-   
-    """Wall type UIList."""
+    """Plot name UIList."""
     def draw_item(self, context, layout, data, item, icon, active_data,
                   active_propname, index):
        
@@ -1023,10 +1025,15 @@ class VIEW3D_PT_RoMa_mass_typology_data(Panel):
         else:
             sub.enabled = True
         layout.prop(context.scene.roma_use_name_list[index],"void", text="Void")
-        sub = layout.row()
-        sub.active = not(context.window_manager.toggle_auto_update_mass_data)
+        # sub = layout.row()
+        # sub.active = not(context.window_manager.toggle_auto_update_mass_data)
         # sub.prop(context.scene.roma_use_name_list[index],"void", text="Update")
-        sub.operator("object.update_all_roma_meshes_attributes").attributeToUpdate="all"
+        # sub.operator("object.update_all_roma_meshes_attributes").attributeToUpdate="all"
+        row = layout.row(align=True)
+        
+        row.operator("object.update_all_roma_meshes_attributes").attributeToUpdate="all"
+        row.prop(context.window_manager, "toggle_auto_update_mass_data", text="", icon="FILE_REFRESH")
+        
             
             
 class OBJECT_UL_Typology(UIList):
@@ -1421,7 +1428,7 @@ class OBJECT_OT_update_all_RoMa_meshes_attributes(Operator):
             activeObjMode = activeObj.mode
             
         for obj in objs:
-            if obj is not None and obj.type == 'MESH' and "RoMa object" in obj.data:
+            if obj is not None and obj.type == 'MESH' and "RoMa object" in obj.data and "RoMa mass" in obj.data:
                 # it is necessary to set the object to visibile in order to make it active
                 if obj.visible_get():
                     alreadyVisible = True
@@ -1459,7 +1466,7 @@ class OBJECT_OT_update_all_RoMa_meshes_attributes(Operator):
                         faceIndex = face.index
                         if [i for i in ["all", "floorToFloor", "void"] if i in self.attributeToUpdate]:
                             typology = mesh.attributes["roma_typology_id"].data[faceIndex].value
-                            data = update_mesh_attributes_uses(context, mesh, faceIndex, typologySet = typology)
+                            data = read_mesh_attributes_uses(context, mesh, faceIndex, typologySet = typology)
                             if [i for i in ["all"] if i in self.attributeToUpdate]:
                                 # mesh.attributes["roma_typology_id"].data[faceIndex].value = data["typology_id"]
                                 mesh.attributes["roma_list_use_id_A"].data[faceIndex].value = data["use_id_list_A"]
@@ -1585,20 +1592,23 @@ class typology_uses_name_list(PropertyGroup):
     #        name="Use position",
     #        description="Position of the use in the typology (bottom, center, top)",
     #        default = 1)
+
     
-############################            ############################
-############################ ROOM       ############################
-############################            ############################
+        
+############################                ############################
+############################ ARCHITECURE    ############################
+############################                ############################
         
         
 class VIEW3D_PT_RoMa_building_data(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     # bl_category = "RoMa"
-    bl_label = "Architecture Data"
+    bl_label = "Architecture"
     bl_parent_id = "VIEW3D_PT_RoMa_project_data"
     # bl_context = "scene"
     bl_options = {'DEFAULT_CLOSED'}
+    bl_order = 2
     
     def draw(self, context):
         pass
@@ -1920,7 +1930,247 @@ class floor_name_list(PropertyGroup):
     #        description="Invert the normal of the wall",
     #        default = 0) 
         
+############################        ############################
+############################ ROAD   ############################
+############################        ############################
+        
+        
+class VIEW3D_PT_RoMa_road_data(Panel):
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    # bl_category = "RoMa"
+    bl_label = "Road"
+    bl_parent_id = "VIEW3D_PT_RoMa_project_data"
+    # bl_context = "scene"
+    bl_options = {'DEFAULT_CLOSED'}
+    bl_order = 3
+    
+    def draw(self, context):
+        scene = context.scene
+        layout = self.layout
+        layout.use_property_split = True
+        layout.use_property_decorate = False  # No animation.  
+        
+        row = layout.row()
+        
+        # is_sortable = len(scene.roma_use_name_list) > 1
+        rows = 3
+        # if is_sortable:
+        #     rows = 5
+            
+        row = layout.row()
+        row.template_list("OBJECT_UL_Road", "road_list", scene,
+                        "roma_road_name_list", scene, "roma_road_name_list_index", rows = rows)
+        
+        
+        col = row.column(align=True)
+        col.operator("roma_road_name_list.new_item", icon='ADD', text="")
+        col.separator()
+        col.operator("roma_road_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
+        col.operator("roma_road_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
+        
+        index = context.scene.roma_road_name_list_index
+        layout.prop(context.scene.roma_road_name_list[index], "roadWidth", text="Width")
+        layout.prop(context.scene.roma_road_name_list[index], "roadRadius", text="Radius")
+       
+class OBJECT_UL_Road(UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data,
+                  active_propname, index):
+       
+        custom_icon = 'NODE_TEXTURE'
 
+        if self.layout_type in {'DEFAULT', 'COMPACT'}:
+            split = layout.split(factor=0.5)
+            split.label(text="Id: %d" % (item.id)) 
+            # split.label(text=item.name, icon=custom_icon) 
+            split.prop(context.scene.roma_road_name_list[index],
+                       "name",
+                       icon_only=True,
+                       icon = custom_icon)
+        elif self.layout_type in {'GRID'}:
+            layout.alignment = 'CENTER'
+            layout.label(text="", icon = custom_icon)
+
+    def filter_items(self, context, data, propname):
+        filtered = []
+        ordered = []
+        items = getattr(data, propname)
+        filtered = [self.bitflag_filter_item] * len(items)
+        
+        # for i, item in enumerate(items):
+        #     if item.id == 0:
+        #         filtered[i] &= ~self.bitflag_filter_item
+        return filtered, ordered
+
+    def draw_filter(self, context, layout):
+        pass
+    
+class ROAD_LIST_OT_NewItem(Operator):
+    bl_idname = "roma_road_name_list.new_item"
+    bl_label = "Add a new road type"
+
+    def execute(self, context): 
+        context.scene.roma_road_name_list.add()
+        # last = len(context.scene.roma_use_name_list)-1
+        # if last == 0:
+        #     context.scene.roma_use_name_list[0].id = 0
+        #     context.scene.roma_use_name_list[0].name = ""
+        #     random.seed(datetime.now().timestamp())
+        #     rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
+        #     context.scene.roma_use_name_list[0].RND = rndNumber
+        #     context.scene.roma_use_name_list.add()
+        temp_list = []    
+        for el in context.scene.roma_road_name_list:
+            temp_list.append(el.id)
+        last = len(context.scene.roma_road_name_list)-1
+        
+        context.scene.roma_road_name_list[last].id = max(temp_list)+1
+        # rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
+        # context.scene.roma_use_name_list[last].RND = rndNumber
+            
+        return{'FINISHED'}
+    
+class ROAD_LIST_OT_MoveItem(Operator):
+    bl_idname = "roma_road_name_list.move_item"
+    bl_label = "Move an item in the list"
+
+    direction: bpy.props.EnumProperty(items=(('UP', 'Up', ""),
+                                              ('DOWN', 'Down', ""),))
+
+    @classmethod
+    def poll(cls, context):
+        return context.scene.roma_road_name_list
+
+    def move_index(self):
+        index = bpy.context.scene.roma_road_name_list_index
+        list_length = len(bpy.context.scene.roma_road_name_list) - 1 
+        new_index = index + (-1 if self.direction == 'UP' else 1)
+
+        bpy.context.scene.roma_road_name_list_index = max(0, min(new_index, list_length))
+
+    def execute(self, context):
+        roma_road_name_list = context.scene.roma_road_name_list
+        index = context.scene.roma_road_name_list_index
+
+        neighbor = index + (-1 if self.direction == 'UP' else 1)
+        roma_road_name_list.move(neighbor, index)
+        self.move_index()
+
+        return{'FINISHED'}
+    
+def update_all_roma_road_width(self, context):
+    updates = "width"
+    bpy.ops.object.update_all_roma_road_attributes(attributeToUpdate=updates)
+    
+def update_all_roma_road_radius(self, context):
+    updates = "radius"
+    bpy.ops.object.update_all_roma_road_attributes(attributeToUpdate=updates)
+    
+# Operator to update the attributes of all the RoMa roads in the scene        
+class OBJECT_OT_update_all_RoMa_road_attributes(Operator):
+    bl_idname = "object.update_all_roma_road_attributes"
+    bl_label = "Update"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    attributeToUpdate: bpy.props.StringProperty(name="Attribute to update")
+    
+    def execute(self, context):
+        objs = bpy.data.objects
+        # get the current active object
+        activeObj = bpy.context.active_object
+        if hasattr(activeObj, "type"):
+            activeObjMode = activeObj.mode
+            
+        for obj in objs:
+            if obj is not None and obj.type == 'MESH' and "RoMa object" in obj.data and "RoMa road" in obj.data:
+                # it is necessary to set the object to visibile in order to make it active
+                if obj.visible_get():
+                    alreadyVisible = True
+                else:
+                    alreadyVisible = False
+                    obj.hide_set(False)
+                
+                # check if the collection is visible or not
+                collections = obj.users_collection
+                used_collection = False
+                alreadyVisibleCollection = False
+                for collection in collections:
+                    if not collection.hide_viewport:
+                        used_collection = True
+                        alreadyVisibleCollection = True
+                        break
+                    else:
+                        collection.hide_viewport = False
+                        layer_collection = bpy.context.view_layer.layer_collection.children.get(collection.name)
+                        if hasattr(layer_collection, "exclude"):
+                            layer_collection.exclude = False
+                            used_collection = True
+                            break
+                # Only the linked objects are updated
+                if used_collection == True:
+                    bpy.context.view_layer.objects.active = obj
+                    mesh = obj.data
+                    objMode = obj.mode
+                    bpy.ops.object.mode_set(mode='OBJECT')
+                    edges = context.active_object.data.edges
+                    for edge in edges:
+                        edgeIndex = edge.index
+                        road_id = mesh.attributes["roma_road_id"].data[edgeIndex].value
+                        data = read_mesh_attributes_roads(context, mesh, edgeIndex, roadSet = road_id)
+                        if [i for i in ["width"] if i in self.attributeToUpdate]:
+                            mesh.attributes["roma_road_width"].data[edgeIndex].value = data["width"]
+                        elif [i for i in ["radius"] if i in self.attributeToUpdate]:
+                            mesh.attributes["roma_road_radius"].data[edgeIndex].value = data["radius"]
+                    bpy.ops.object.mode_set(mode=objMode)
+                    
+                    # If the object was hidden, it is set to hidden again
+                    # Also the collection is set to the previous status
+                    # In case it has changed
+                    if alreadyVisible == False:
+                        obj.hide_set(True)
+                    if alreadyVisibleCollection == False:
+                        collection.hide_viewport = True
+                        layer_collection = bpy.context.view_layer.layer_collection.children.get(collection.name)
+                        layer_collection.exclude = True
+
+        # return the focus to the current active object
+        if hasattr(activeObj, "type"):
+            bpy.context.view_layer.objects.active = activeObj
+            bpy.ops.object.mode_set(mode=activeObjMode)
+        return {'FINISHED'}
+        
+
+class road_name_list(PropertyGroup):
+    id: IntProperty(
+           name="Id",
+           description="Road name id",
+           default = 0)
+    
+    name: StringProperty(
+           name="Road type Name",
+           description="The type name of the road",
+           default="Road type...")
+    
+    
+    roadWidth: FloatProperty(
+        name="Road width",
+        description="The width of the road",
+        min=0,
+        #max=99,
+        precision=3,
+        default = 8,
+        update=update_all_roma_road_width)
+        
+    
+    roadRadius: FloatProperty(
+        name="Road radius",
+        description="The radius of the road",
+        min=0,
+        #max=99,
+        precision=3,
+        default = 16,
+        update=update_all_roma_road_radius)
+        
 
 ##############################              #############################
 ############################## other stuff  #############################

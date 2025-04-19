@@ -41,7 +41,11 @@ class VIEW3D_PT_RoMa_Mass(Panel):
     
     @classmethod
     def poll(cls, context):
-        return (context.object is not None and context.object.type == "MESH" and "RoMa object" in context.object.data)
+        return  (context.object is not None and 
+                context.selected_objects != [] and
+                context.object.type == "MESH" and 
+                "RoMa object" in context.object.data and
+                "RoMa mass" in context.object.data)
     
     def draw(self, context):
         # obj = context.active_object 
@@ -49,7 +53,7 @@ class VIEW3D_PT_RoMa_Mass(Panel):
         if obj is not None and obj.type == "MESH":
         
             mode = obj.mode
-            if mode == "OBJECT" and "RoMa object" in obj.data:
+            if mode == "OBJECT":
                 scene = context.scene
                 
                 layout = self.layout
@@ -72,7 +76,7 @@ class VIEW3D_PT_RoMa_Mass(Panel):
                     row.label(text = scene.roma_block_name_current[0].name)
                 
                     
-            elif mode == "EDIT" and "RoMa object" in obj.data:
+            elif mode == "EDIT":      
                 scene = context.scene
                 
                 layout = self.layout
@@ -159,43 +163,44 @@ class OBJECT_UL_OBJ_Typology_Uses(UIList):
         pass
     
     
-class OBJECT_OT_SetTypologyId(Operator):
-    """Set Face Attribute as typology of the block"""
-    bl_idname = "object.set_attribute_mass_typology_id"
-    bl_label = "Set Face Attribute as Typology of the Block"
-    bl_options = {'REGISTER', 'UNDO'}
+# class OBJECT_OT_SetTypologyId(Operator):
+#     """Set Face Attribute as typology of the block"""
+#     bl_idname = "object.set_attribute_mass_typology_id"
+#     bl_label = "Set Face Attribute as Typology of the Block"
+#     bl_options = {'REGISTER', 'UNDO'}
     
-    def execute(self, context):
-        obj = context.active_object
-        mesh = obj.data
-
-        # attribute_mass_typology_id = context.scene.attribute_mass_typology_id
+#     def execute(self, context):
         
-        try:
-            mesh.attributes["roma_typology_id"]
-            # attribute_mass_typology_id = context.scene.attribute_mass_typology_id
+        # obj = context.active_object
+        # mesh = obj.data
 
-            mode = obj.mode
-            bpy.ops.object.mode_set(mode='OBJECT')
+        # # attribute_mass_typology_id = context.scene.attribute_mass_typology_id
+        
+        # try:
+        #     mesh.attributes["roma_typology_id"]
+        #     # attribute_mass_typology_id = context.scene.attribute_mass_typology_id
+
+        #     mode = obj.mode
+        #     bpy.ops.object.mode_set(mode='OBJECT')
            
-            selected_faces = [p for p in bpy.context.active_object.data.polygons if p.select]
-            mesh_attributes = mesh.attributes["roma_typology_id"].data.items()
+        #     selected_faces = [p for p in bpy.context.active_object.data.polygons if p.select]
+        #     mesh_attributes = mesh.attributes["roma_typology_id"].data.items()
 
             
-            for face in selected_faces:
-                index = face.index
-                for mesh_attribute in mesh_attributes:
-                    if mesh_attribute[0] == index:
-                        mesh_attribute[1].value = context.scene.attribute_mass_typology_id
-                        break
+        #     for face in selected_faces:
+        #         index = face.index
+        #         for mesh_attribute in mesh_attributes:
+        #             if mesh_attribute[0] == index:
+        #                 mesh_attribute[1].value = context.scene.attribute_mass_typology_id
+        #                 break
                
            
-            bpy.ops.object.mode_set(mode=mode)
+        #     bpy.ops.object.mode_set(mode=mode)
                     
-            # self.report({'INFO'}, "Attribute set to face, use: "+str(attribute_mass_use_id))
-            return {'FINISHED'}
-        except:
-            return {'FINISHED'}
+        #     # self.report({'INFO'}, "Attribute set to face, use: "+str(attribute_mass_use_id))
+        #     return {'FINISHED'}
+        # except:
+        #     return {'FINISHED'}
         
 
 '''Set the number of storeys of the selected face attribute of the RoMa mesh'''
@@ -327,7 +332,7 @@ class OBJECT_OT_Set_Face_Attribute_Uses(Operator):
         selected_faces = [p for p in context.active_object.data.polygons if p.select]
         for face in selected_faces:
             faceIndex = face.index
-            data = update_mesh_attributes_uses(context, mesh, faceIndex)
+            data = read_mesh_attributes_uses(context, mesh, faceIndex)
             mesh.attributes["roma_typology_id"].data[faceIndex].value = data["typology_id"]
             mesh.attributes["roma_list_use_id_A"].data[faceIndex].value = data["use_id_list_A"]
             mesh.attributes["roma_list_use_id_B"].data[faceIndex].value = data["use_id_list_B"]
@@ -351,7 +356,7 @@ class OBJECT_OT_Set_Face_Attribute_Uses(Operator):
 # if the function is run by the user when in edit mode the typologyId is read from 
 # context.scene.attribute_mass_typology_id, else the typology is updated from the
 # typology panel and the typologyId used is the one stored in the face
-def update_mesh_attributes_uses(context, mesh, faceIndex, typologySet=None):
+def read_mesh_attributes_uses(context, mesh, faceIndex, typologySet=None):
     if typologySet == None:
         typology_id = context.scene.attribute_mass_typology_id
     else:
@@ -489,7 +494,7 @@ def update_block_name_id(self, context):
             obj.roma_props['roma_block_attribute'] = n.id
             break   
     
-'''Update the typology label in the UI and all the relative data in the selected faces'''        
+#Update the typology label in the UI and all the relative data in the selected faces
 def update_attributes_roma_mesh_typology(self, context):
     # update the label
     scene = context.scene
