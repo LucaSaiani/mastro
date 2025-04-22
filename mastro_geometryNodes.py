@@ -16,11 +16,11 @@ def get_active_node(self):
 def updateGroup(self, context):
     bpy.ops.node.separate_geometry_by_factor()
 
-class VIEW_PT_RoMa_GN_Panel(Panel):
+class VIEW_PT_MaStro_GN_Panel(Panel):
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = "UI"
     bl_category = "Node"
-    bl_label = "RoMa"
+    bl_label = "MaStro"
     
     
   
@@ -34,14 +34,14 @@ class VIEW_PT_RoMa_GN_Panel(Panel):
         
         activeNode = get_active_node(self)
         if activeNode and hasattr(activeNode, "node_tree"):
-            if activeNode.node_tree.bl_description == "RoMa Geometry By Factor":
+            if activeNode.node_tree.bl_description == "MaStro Geometry By Factor":
                 layout.label(text="Subdivision:")
                 row = layout.row()
                 row.label(text="Subdivide by:")
                 row.prop(scene, "geometryMenuSwitch", text="")
                 row = layout.row()
                 row.label(text="Number of subdivision:")
-                row.prop(context.scene, "roma_group_node_number_of_split", text="")
+                row.prop(context.scene, "mastro_group_node_number_of_split", text="")
                 
        
 
@@ -52,14 +52,14 @@ class separate_geometry_by_factor_OT(Operator):
 
     def newGroup (self, groupName):
         group = bpy.data.node_groups.new(groupName,'GeometryNodeTree')
-        group.bl_description = "RoMa Geometry By Factor"
+        group.bl_description = "MaStro Geometry By Factor"
         
         group.interface.new_socket(name='Geometry', description='', in_out = 'INPUT', socket_type='NodeSocketGeometry')
         
         group.interface.new_socket(name='Seed', description='Seed for the random value', in_out = 'INPUT', socket_type='NodeSocketInt')
         
-        group.interface.new_socket(name='Subdivisions', description='The number of subdivisions. This is used only to store data. To plug the socket does nothing. If you want to change the number of subdivisions use the panel Node->RoMa', in_out = 'INPUT', socket_type='NodeSocketInt')
-        group.interface.items_tree[2].default_value = bpy.context.scene.roma_group_node_number_of_split
+        group.interface.new_socket(name='Subdivisions', description='The number of subdivisions. This is used only to store data. To plug the socket does nothing. If you want to change the number of subdivisions use the panel Node->MaStro', in_out = 'INPUT', socket_type='NodeSocketInt')
+        group.interface.items_tree[2].default_value = bpy.context.scene.mastro_group_node_number_of_split
         group.interface.items_tree[2].min_value = 2
         group.interface.items_tree[2].force_non_field = True
         group.interface.items_tree[2].hide_value = True
@@ -190,17 +190,17 @@ class separate_geometry_by_factor_OT(Operator):
         return(group)
     
     def execute(self, context):
-        name = "RoMa Separate Geometry by Factor"
+        name = "MaStro Separate Geometry by Factor"
         if name not in bpy.data.node_groups:
             group = self.newGroup(name)
             
         else:
-            subdivision = bpy.context.scene.roma_group_node_number_of_split
+            subdivision = bpy.context.scene.mastro_group_node_number_of_split
         
             activeNode = get_active_node(self)
             try:
                 activeNode.node_tree
-                if activeNode.node_tree.bl_description == "RoMa Geometry By Factor":
+                if activeNode.node_tree.bl_description == "MaStro Geometry By Factor":
                     group = activeNode.node_tree
                     previousSubdivision =  activeNode.inputs[1].default_value
                     groupNodes = group.nodes

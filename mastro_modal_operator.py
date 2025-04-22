@@ -3,7 +3,7 @@
 # luca.saiani@gmail.com
 
 # Created by Luca Saiani
-# This is part of RoMa addon for Blender
+# This is part of MaStro addon for Blender
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,34 +30,34 @@ from bpy.types import Operator
 
 from mathutils import Vector
 
-from .mastro_schedule import RoMaMathNode, execute_active_node_tree
+from .mastro_schedule import MaStro_MathNode, execute_active_node_tree
 # from datetime import datetime
 # import math
 
 previous_selection = {}
 
-# show the faces of a RoMa object as overlay
-class VIEW_3D_OT_show_roma_overlay(Operator):
-    bl_idname = "wm.show_roma_overlay"
-    bl_label = "Show RoMa selection"
+# show the faces of a MaStro object as overlay
+class VIEW_3D_OT_show_mastro_overlay(Operator):
+    bl_idname = "wm.show_mastro_overlay"
+    bl_label = "Show MaStro selection"
     
     _handle = None
     
     @staticmethod
     def handle_add(self, context):
-        if VIEW_3D_OT_show_roma_overlay._handle is None:
-            VIEW_3D_OT_show_roma_overlay._handle =bpy.types.SpaceView3D.draw_handler_add(draw_callback_selection_overlay,
+        if VIEW_3D_OT_show_mastro_overlay._handle is None:
+            VIEW_3D_OT_show_mastro_overlay._handle =bpy.types.SpaceView3D.draw_handler_add(draw_callback_selection_overlay,
                                                                                            (self, context),
                                                                                            'WINDOW',
                                                                                            'POST_VIEW')
             
     @staticmethod
     def handle_remove(self, context):
-        bpy.types.SpaceView3D.draw_handler_remove(VIEW_3D_OT_show_roma_overlay._handle, 'WINDOW')
-        VIEW_3D_OT_show_roma_overlay._handle = None
+        bpy.types.SpaceView3D.draw_handler_remove(VIEW_3D_OT_show_mastro_overlay._handle, 'WINDOW')
+        VIEW_3D_OT_show_mastro_overlay._handle = None
     
     def execute(self, context):
-        if bpy.context.preferences.addons['roma'].preferences.toggleSelectionOverlay:    
+        if bpy.context.preferences.addons['mastro'].preferences.toggleSelectionOverlay:    
             self.handle_add(self, context)
         else:
             self.handle_remove(self, context)
@@ -71,7 +71,7 @@ class VIEW_3D_OT_show_roma_overlay(Operator):
 
 def draw_selection_overlay(context):
     obj = bpy.context.active_object
-    if hasattr(obj, "data") and "RoMa object" in obj.data:
+    if hasattr(obj, "data") and "MaStro object" in obj.data:
         coords = []
         edgeIndices = []
         shader = gpu.shader.from_builtin('UNIFORM_COLOR')
@@ -96,10 +96,10 @@ def draw_selection_overlay(context):
                 
             
             batch = batch_for_shader(shader, 'LINES', {"pos": coords}, indices=edgeIndices)
-            r, g, b, a = [c for c in bpy.context.preferences.addons['roma'].preferences.edgeColor]
+            r, g, b, a = [c for c in bpy.context.preferences.addons['mastro'].preferences.edgeColor]
             shader.uniform_float("color", (r, g, b, a))
         
-            gpu.state.line_width_set(bpy.context.preferences.addons['roma'].preferences.edgeSize)
+            gpu.state.line_width_set(bpy.context.preferences.addons['mastro'].preferences.edgeSize)
             gpu.state.blend_set("ALPHA")
             batch.draw(shader)
             
@@ -117,7 +117,7 @@ def draw_selection_overlay(context):
             dFaceindices = [(loop.vert.index for loop in looptris) for looptris in dbm.calc_loop_triangles()]
             # dEdgeindices = [(v.index for v in e.verts) for e in dbm.edges]
             batch = batch_for_shader(shader, 'TRIS', {"pos": dVertices}, indices=dFaceindices)
-            r, g, b, a = [c for c in bpy.context.preferences.addons['roma'].preferences.faceColor]
+            r, g, b, a = [c for c in bpy.context.preferences.addons['mastro'].preferences.faceColor]
             shader.uniform_float("color", (r, g, b, a))       
             # gpu.state.blend_set("NONE")
             batch.draw(shader)
@@ -128,14 +128,14 @@ def draw_selection_overlay(context):
 def draw_callback_selection_overlay(self, context):
     draw_selection_overlay(context)
 
-# def roma_selection_overlay(self, context):
-#     bpy.ops.wm.show_roma_overlay()
+# def mastro_selection_overlay(self, context):
+#     bpy.ops.wm.show_mastro_overlay()
     
 # @persistent
 # def update_show_overlay(scene, context):
-#     if scene.show_selection_overlay_is_active != bpy.context.preferences.addons['roma'].preferences.toggleSelectionOverlay:
-#         scene.show_selection_overlay_is_active = bpy.context.preferences.addons['roma'].preferences.toggleSelectionOverlay
-#         bpy.ops.wm.show_roma_overlay('INVOKE_DEFAULT')
+#     if scene.show_selection_overlay_is_active != bpy.context.preferences.addons['mastro'].preferences.toggleSelectionOverlay:
+#         scene.show_selection_overlay_is_active = bpy.context.preferences.addons['mastro'].preferences.toggleSelectionOverlay
+#         bpy.ops.wm.show_mastro_overlay('INVOKE_DEFAULT')
     
 # @persistent
 # def reportEvent():
@@ -149,11 +149,11 @@ def draw_callback_selection_overlay(self, context):
 #     @classmethod
 #     def poll(cls, context):
 #         return (context.object is not None)
-#     #  and "RoMa object" in context.object.data
+#     #  and "MaStro object" in context.object.data
 #     # and context.object.type == 'MESH'
 #     def invoke(self, context, event):
 #         # obj = bpy.context.active_object
-#         # if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data:
+#         # if obj is not None and obj.type == "MESH" and "MaStro object" in obj.data:
 #         #     # if event.mouse_
 #         #     # context.scene.mouse_event = event
 #         if event.type != "":
@@ -162,27 +162,27 @@ def draw_callback_selection_overlay(self, context):
 #         return {'FINISHED'}
 
 # show the overlayed attributes (type, number of storeys, etc...)
-class VIEW_3D_OT_show_roma_attributes(Operator):
-    bl_idname = "wm.show_roma_attributes"
-    bl_label = "Show RoMa attributes"
+class VIEW_3D_OT_show_mastro_attributes(Operator):
+    bl_idname = "wm.show_mastro_attributes"
+    bl_label = "Show MaStro attributes"
     
     _handle = None  # keep function handler
     
     @staticmethod
     def handle_add(self, context):
-        if VIEW_3D_OT_show_roma_attributes._handle is None:
-            VIEW_3D_OT_show_roma_attributes._handle = bpy.types.SpaceView3D.draw_handler_add(draw_callback_px_show_attributes, (self, context),
+        if VIEW_3D_OT_show_mastro_attributes._handle is None:
+            VIEW_3D_OT_show_mastro_attributes._handle = bpy.types.SpaceView3D.draw_handler_add(draw_callback_px_show_attributes, (self, context),
                                                                         'WINDOW',
                                                                         'POST_PIXEL')
 
     @staticmethod
     def handle_remove(self, context):
-        if VIEW_3D_OT_show_roma_attributes._handle is not None:
-            bpy.types.SpaceView3D.draw_handler_remove(VIEW_3D_OT_show_roma_attributes._handle, 'WINDOW')
-        VIEW_3D_OT_show_roma_attributes._handle = None
+        if VIEW_3D_OT_show_mastro_attributes._handle is not None:
+            bpy.types.SpaceView3D.draw_handler_remove(VIEW_3D_OT_show_mastro_attributes._handle, 'WINDOW')
+        VIEW_3D_OT_show_mastro_attributes._handle = None
     
     def execute(self, context):
-        if VIEW_3D_OT_show_roma_attributes._handle is None:
+        if VIEW_3D_OT_show_mastro_attributes._handle is None:
             self.handle_add(self, context)
             context.area.tag_redraw()
         else:
@@ -192,7 +192,7 @@ class VIEW_3D_OT_show_roma_attributes(Operator):
     
 def draw_main_show_attributes(context):
     obj = bpy.context.active_object
-    if hasattr(obj, "data") and "RoMa object" in obj.data:
+    if hasattr(obj, "data") and "MaStro object" in obj.data:
         # obj.update_from_editmode()
         scene = context.scene
             
@@ -209,14 +209,14 @@ def draw_main_show_attributes(context):
         bm.edges.ensure_lookup_table()    
         bm.faces.ensure_lookup_table()      
         
-        bMesh_wall = bm.edges.layers.int["roma_wall_id"]
-        bMesh_normal = bm.edges.layers.int["roma_inverted_normal"]
+        bMesh_wall = bm.edges.layers.int["mastro_wall_id"]
+        bMesh_normal = bm.edges.layers.int["mastro_inverted_normal"]
        
-        # bMesh_plot = bm.faces.layers.int["roma_plot_id"]
-        # bMesh_block = bm.faces.layers.int["roma_block_id"]
-        bMesh_typology = bm.faces.layers.int["roma_typology_id"]
-        bMesh_storey = bm.faces.layers.int["roma_number_of_storeys"]
-        bMesh_floor = bm.faces.layers.int["roma_floor_id"]
+        # bMesh_plot = bm.faces.layers.int["mastro_plot_id"]
+        # bMesh_block = bm.faces.layers.int["mastro_block_id"]
+        bMesh_typology = bm.faces.layers.int["mastro_typology_id"]
+        bMesh_storey = bm.faces.layers.int["mastro_number_of_storeys"]
+        bMesh_floor = bm.faces.layers.int["mastro_floor_id"]
     
         region = bpy.context.region
      
@@ -253,9 +253,9 @@ def draw_main_show_attributes(context):
         
         font_id = font_info["font_id"]
         # blf.position(font_id, coord.x, coord.y, 0)
-        r, g, b, a = [c for c in bpy.context.preferences.addons['roma'].preferences.fontColor]
+        r, g, b, a = [c for c in bpy.context.preferences.addons['mastro'].preferences.fontColor]
         blf.color(font_id, r, g, b, a)
-        font_size =  bpy.context.preferences.addons['roma'].preferences.fontSize
+        font_size =  bpy.context.preferences.addons['mastro'].preferences.fontSize
         blf.size(font_id, font_size)
         
         # multi line text
@@ -286,7 +286,7 @@ def draw_main_show_attributes(context):
             text_normal = ""
             
             if bpy.context.window_manager.toggle_wall_name:   
-                for n in bpy.context.scene.roma_wall_name_list:
+                for n in bpy.context.scene.mastro_wall_name_list:
                     if n.id == idWall:
                         text_edge = (n.name, 0)
                         line_width = blf.dimensions(font_id, n.name)[0]
@@ -350,8 +350,8 @@ def draw_main_show_attributes(context):
             
             # plotId
             if bpy.context.window_manager.toggle_plot_name:   
-                plotId = obj.roma_props['roma_plot_attribute']
-                for n in scene.roma_plot_name_list:
+                plotId = obj.mastro_props['mastro_plot_attribute']
+                for n in scene.mastro_plot_name_list:
                     if n.id == plotId:
                         if n.name != "":
                             text_plot = (("Plot: " + n.name), 0)
@@ -363,8 +363,8 @@ def draw_main_show_attributes(context):
                 
             # blockId
             if bpy.context.window_manager.toggle_block_name:   
-                blockId = obj.roma_props['roma_block_attribute']
-                for n in scene.roma_block_name_list:
+                blockId = obj.mastro_props['mastro_block_attribute']
+                for n in scene.mastro_block_name_list:
                     if n.id == blockId:
                         if n.name != "":
                             text_block = (("Block: " + n.name), 0)
@@ -376,7 +376,7 @@ def draw_main_show_attributes(context):
                         break
                 
             # if bpy.context.window_manager.toggle_plot_name:   
-            #     for n in bpy.context.scene.roma_plot_name_list:
+            #     for n in bpy.context.scene.mastro_plot_name_list:
             #         if n.id == idPlot:
             #             text_plot = (("Plot: " + n.name), 0)
             #             line_width = blf.dimensions(font_id, text_plot[0])[0]
@@ -385,7 +385,7 @@ def draw_main_show_attributes(context):
             #             text.append(cr)
             #             break
             # if bpy.context.window_manager.toggle_block_name:   
-            #     for n in bpy.context.scene.roma_block_name_list:
+            #     for n in bpy.context.scene.mastro_block_name_list:
             #         if n.id == idBlock:
             #             text_block = (("Block: " + n.name), 0)
             #             if blf.dimensions(font_id, text_block[0])[0] > line_width:
@@ -395,7 +395,7 @@ def draw_main_show_attributes(context):
             #             text.append(cr)
             #             break
             if bpy.context.window_manager.toggle_typology_name:   
-                for n in scene.roma_typology_name_list:
+                for n in scene.mastro_typology_name_list:
                     if n.id == idUse:
                         if n.name != "":
                             text_typology = (("Typology: " + n.name), 0)
@@ -406,7 +406,7 @@ def draw_main_show_attributes(context):
                             text_face.append(cr)           
                             break
             if bpy.context.window_manager.toggle_floor_name:   
-                for n in scene.roma_floor_name_list:
+                for n in scene.mastro_floor_name_list:
                     if n.id == idFloor:
                         text_floor = (("Floor: " + n.name), 0)
                         if blf.dimensions(font_id, text_floor[0])[0] > line_width:
@@ -448,7 +448,7 @@ def draw_callback_px_show_attributes(self, context):
     
         
 def update_show_attributes(self, context):
-    bpy.ops.wm.show_roma_attributes()
+    bpy.ops.wm.show_mastro_attributes()
     
 # Manage all the required updates fired by depsgraph_update  
 @persistent
@@ -458,28 +458,28 @@ def updates(scene, depsgraph):
     ###############################################################################
     obj = bpy.context.active_object
     if obj:
-        if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data and "RoMa mass" in obj.data:
+        if obj is not None and obj.type == "MESH" and "MaStro object" in obj.data and "MaStro mass" in obj.data:
             if scene.previous_selection_object_name != obj.name:
                 scene.previous_selection_object_name = obj.name
                 scene.previous_selection_face_id = -1
-                # if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data and "RoMa mass" in obj.data:
+                # if obj is not None and obj.type == "MESH" and "MaStro object" in obj.data and "MaStro mass" in obj.data:
                 if obj.mode == "OBJECT":
-                    blockId = obj.roma_props['roma_block_attribute']
-                    plotId = obj.roma_props['roma_plot_attribute']
+                    blockId = obj.mastro_props['mastro_block_attribute']
+                    plotId = obj.mastro_props['mastro_plot_attribute']
                     
-                    block = scene.roma_block_name_list[blockId].name
-                    plot = scene.roma_plot_name_list[plotId].name
+                    block = scene.mastro_block_name_list[blockId].name
+                    plot = scene.mastro_plot_name_list[plotId].name
                     
-                    scene.roma_block_name_current[0].name = block
-                    scene.roma_plot_name_current[0].name = plot
+                    scene.mastro_block_name_current[0].name = block
+                    scene.mastro_plot_name_current[0].name = plot
             else:
-                # if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data and obj.mode == 'EDIT':
+                # if obj is not None and obj.type == "MESH" and "MaStro object" in obj.data and obj.mode == 'EDIT':
                 if obj.mode == 'EDIT':
                     bm = bmesh.from_edit_mesh(obj.data)
-                    bMesh_storeys = bm.faces.layers.int["roma_number_of_storeys"]
-                    bMesh_storey_list_A = bm.faces.layers.int["roma_list_storey_A"]
-                    bMesh_storey_list_B = bm.faces.layers.int["roma_list_storey_B"]
-                    bMesh_typology = bm.faces.layers.int["roma_typology_id"]
+                    bMesh_storeys = bm.faces.layers.int["mastro_number_of_storeys"]
+                    bMesh_storey_list_A = bm.faces.layers.int["mastro_list_storey_A"]
+                    bMesh_storey_list_B = bm.faces.layers.int["mastro_list_storey_B"]
+                    bMesh_typology = bm.faces.layers.int["mastro_typology_id"]
                 
                     # check if there is an active face
                     if isinstance(bm.select_history.active, bmesh.types.BMFace):
@@ -510,16 +510,16 @@ def updates(scene, depsgraph):
                         # typology name
                         # since it is possible to sort typologies in the ui, it can be that the index of the element
                         # in the list doesn't correspond to typology_id. Therefore it is necessary to find elements
-                        # in the way below and not with use_list = bpy.context.scene.roma_typology_name_list[typology_id].useList
-                        item = next(i for i in scene.roma_typology_name_list if i["id"] == typology)
-                        scene.roma_typology_name_current[0].name = item.name
+                        # in the way below and not with use_list = bpy.context.scene.mastro_typology_name_list[typology_id].useList
+                        item = next(i for i in scene.mastro_typology_name_list if i["id"] == typology)
+                        scene.mastro_typology_name_current[0].name = item.name
                         # uses related to the typology
-                        usesUiList = bpy.context.scene.roma_obj_typology_uses_name_list 
+                        usesUiList = bpy.context.scene.mastro_obj_typology_uses_name_list 
                         # clean the list
                         while len(usesUiList) > 0:
-                            index = scene.roma_obj_typology_uses_name_list_index
+                            index = scene.mastro_obj_typology_uses_name_list_index
                             usesUiList.remove(index)
-                            scene.roma_obj_typology_uses_name_list_index = min(max(0, index - 1), len(usesUiList) - 1)
+                            scene.mastro_obj_typology_uses_name_list_index = min(max(0, index - 1), len(usesUiList) - 1)
                         # populate the list of uses
                         use_list = item.useList
                         list_storey_A = str(list_storey_A)[1:]
@@ -532,7 +532,7 @@ def updates(scene, depsgraph):
                             id = int(el)
                             usesUiList.add()
                             usesUiList[enum].id = enum + 1
-                            for use in scene.roma_use_name_list:
+                            for use in scene.mastro_use_name_list:
                                 if id == use.id:
                                     usesUiList[enum].name = use.name
                                     usesUiList[enum].nameId = use.id
@@ -551,44 +551,44 @@ def updates(scene, depsgraph):
     # show graphic overlays #######################################################
     ###############################################################################
 
-    if scene.show_selection_overlay_is_active != bpy.context.preferences.addons['roma'].preferences.toggleSelectionOverlay:
-        scene.show_selection_overlay_is_active = bpy.context.preferences.addons['roma'].preferences.toggleSelectionOverlay
-        bpy.ops.wm.show_roma_overlay('INVOKE_DEFAULT')
+    if scene.show_selection_overlay_is_active != bpy.context.preferences.addons['mastro'].preferences.toggleSelectionOverlay:
+        scene.show_selection_overlay_is_active = bpy.context.preferences.addons['mastro'].preferences.toggleSelectionOverlay
+        bpy.ops.wm.show_mastro_overlay('INVOKE_DEFAULT')
      
         
     ####################################################################################################
     # when a typology is selected, it is necessary to update the #######################################
-    # uses in the UIList using the ones stored in scene.roma_typology_uses_name_list ###################
+    # uses in the UIList using the ones stored in scene.mastro_typology_uses_name_list ###################
     ####################################################################################################
-    if hasattr(scene, "roma_typology_name_list_index"):
-        previous = scene.roma_previous_selected_typology
-        current = scene.roma_typology_name_list_index
+    if hasattr(scene, "mastro_typology_name_list_index"):
+        previous = scene.mastro_previous_selected_typology
+        current = scene.mastro_typology_name_list_index
         if previous != current:
-            scene.roma_previous_selected_typology = current
-            use_name_list = scene.roma_typology_uses_name_list
+            scene.mastro_previous_selected_typology = current
+            use_name_list = scene.mastro_typology_uses_name_list
             while len(use_name_list) > 0:
-                index = scene.roma_typology_uses_name_list_index
+                index = scene.mastro_typology_uses_name_list_index
                 use_name_list.remove(index)
-                scene.roma_typology_uses_name_list_index = min(max(0, index - 1), len(use_name_list) - 1)
+                scene.mastro_typology_uses_name_list_index = min(max(0, index - 1), len(use_name_list) - 1)
             # add the uses stored in the typology to the current typology use UIList        
-            selected_typology_index = scene.roma_typology_name_list_index
-            if len(scene.roma_typology_name_list) > 0:
-                list = scene.roma_typology_name_list[selected_typology_index].useList    
+            selected_typology_index = scene.mastro_typology_name_list_index
+            if len(scene.mastro_typology_name_list) > 0:
+                list = scene.mastro_typology_name_list[selected_typology_index].useList    
                 split_list = list.split(";")
                 for el in split_list:
-                    scene.roma_typology_uses_name_list.add()
+                    scene.mastro_typology_uses_name_list.add()
                     temp_list = []    
                     temp_list.append(int(el))
-                    last = len(scene.roma_typology_uses_name_list)-1
-                    # look for the correspondent use name in roma_use_name_list
-                    for use in scene.roma_use_name_list:
+                    last = len(scene.mastro_typology_uses_name_list)-1
+                    # look for the correspondent use name in mastro_use_name_list
+                    for use in scene.mastro_use_name_list:
                         if int(el) == use.id:
-                            scene.roma_typology_uses_name_list[last].id = use.id
-                            scene.roma_typology_uses_name_list[last].name = use.name 
+                            scene.mastro_typology_uses_name_list[last].id = use.id
+                            scene.mastro_typology_uses_name_list[last].name = use.name 
                             break
 
     #############################################################################################
-    # is the selection has changed, some  data in the RoMa schedule need to be updated ##########
+    # is the selection has changed, some  data in the MaStro schedule need to be updated ##########
     #############################################################################################
     # Detect selection changes or added or remove objects
     global previous_selection
@@ -597,7 +597,7 @@ def updates(scene, depsgraph):
     if current_selection != previous_selection:
         for obj in current_selection: 
             mesh = bpy.data.objects[obj].data
-            if "RoMa object" in mesh:
+            if "MaStro object" in mesh:
                 newSelection = True
                 break
     previous_selection = current_selection
@@ -612,13 +612,13 @@ def updates(scene, depsgraph):
     if newSelection:          
         newSelection = False  
         
-        # list of RoMaTreeType
-        trees = [x for x in bpy.data.node_groups if x.bl_idname == "RoMaTreeType"]
+        # list of MaStroTreeType
+        trees = [x for x in bpy.data.node_groups if x.bl_idname == "MaStroTreeType"]
         if trees:
             for tree in trees:
                 nodes = tree.nodes
                 if nodes:
-                    groupInput = [x for x in nodes if x.bl_idname == "Input RoMa Mesh" or x.bl_idname == "Input RoMa Selected Mesh"]
+                    groupInput = [x for x in nodes if x.bl_idname == "Input MaStro Mesh" or x.bl_idname == "Input MaStro Selected Mesh"]
                     if groupInput:
                         for group in groupInput:
                             group.update_selected_objects()

@@ -3,7 +3,7 @@
 # luca.saiani@gmail.com
 
 # Created by Luca Saiani
-# This is part of RoMa addon for Blender
+# This is part of MaStro addon for Blender
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ from bpy.types import Operator, AddonPreferences
     
 # from bpy.props import IntProperty, FloatVectorProperty #StringProperty, FloatProperty, BoolProperty
 
-class roma_addon_preferences(AddonPreferences):
+class mastro_addon_preferences(AddonPreferences):
     # this must match the add-on name, use '__package__'
     # when defining this in a submodule of a python package.
     # bl_idname = __name__
@@ -82,13 +82,13 @@ class roma_addon_preferences(AddonPreferences):
     toggleSelectionOverlay: bpy.props.BoolProperty(
                 name = "Selection overlay",
                 default = True,
-                description = "Show selection overlay when the RoMa mass is in edit mode"
+                description = "Show selection overlay when the MaStro mass is in edit mode"
                 )
 
 
     def draw(self, context):
         layout = self.layout
-        # layout.label(text="RoMa addon preferences")
+        # layout.label(text="MaStro addon preferences")
         # layout.prop(self, "filepath")
         # layout.prop(self, "number")
         # layout.prop(self, "boolean")
@@ -118,10 +118,10 @@ class roma_addon_preferences(AddonPreferences):
        
         
 
-# class OBJECT_OT_roma_addon_prefs(Operator):
+# class OBJECT_OT_mastro_addon_prefs(Operator):
 #     """Display example preferences"""
-#     bl_idname = "object.roma_addon_prefs"
-#     bl_label = "RoMa add-on Preferences"
+#     bl_idname = "object.mastro_addon_prefs"
+#     bl_label = "MaStro add-on Preferences"
 #     bl_options = {'REGISTER', 'UNDO'}
 
 #     def execute(self, context):

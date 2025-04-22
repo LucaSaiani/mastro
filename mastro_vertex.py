@@ -3,7 +3,7 @@
 # luca.saiani@gmail.com
 
 # Created by Luca Saiani
-# This is part of RoMa addon for Blender
+# This is part of MaStro addon for Blender
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,10 +23,10 @@ import bpy
 
 from bpy.types import Operator, Panel
         
-class VIEW3D_PT_RoMa_vertex(Panel):
+class VIEW3D_PT_MaStro_vertex(Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "RoMa"
+    bl_category = "MaStro"
     bl_label = "Vertex"
     
     def draw(self, context):
@@ -34,16 +34,16 @@ class VIEW3D_PT_RoMa_vertex(Panel):
         mesh = obj.data
         if obj.mode == 'EDIT':
             try:
-                mesh.attributes["roma_vertex_custom_attribute"]
+                mesh.attributes["mastro_vertex_custom_attribute"]
             except:
-                mesh.attributes.new(name="roma_vertex_custom_attribute", type="INT", domain="POINT")
+                mesh.attributes.new(name="mastro_vertex_custom_attribute", type="INT", domain="POINT")
         layout = self.layout
         layout.use_property_split = True
         layout.use_property_decorate = False  # No animation.
         
         layout.prop(context.scene, "attribute_vertex", text="Custom Attribute")
     
-#class OPERATOR_update_RoMa_wall_attribute(bpy.types.Operator):
+#class OPERATOR_update_MaStro_wall_attribute(bpy.types.Operator):
 class OBJECT_OT_SetVertexAttribute(Operator):
     """Assign a wall type to the selected edge"""
     bl_idname = "object.set_attribute_vertex"
@@ -56,7 +56,7 @@ class OBJECT_OT_SetVertexAttribute(Operator):
         
         attribute_vertex = bpy.context.scene.attribute_vertex
         try:
-            mesh.attributes["roma_vertex_custom_attribute"]
+            mesh.attributes["mastro_vertex_custom_attribute"]
             
             # we need to switch from Edit mode to Object mode so the selection gets updated
             mode = obj.mode
@@ -64,7 +64,7 @@ class OBJECT_OT_SetVertexAttribute(Operator):
 
             selected_vertices = [v for v in bpy.context.active_object.data.vertices if v.select]
 
-            mesh_attributes = mesh.attributes["roma_vertex_custom_attribute"].data.items()
+            mesh_attributes = mesh.attributes["mastro_vertex_custom_attribute"].data.items()
 
             for vertex in selected_vertices:
                 index = vertex.index
@@ -81,7 +81,7 @@ class OBJECT_OT_SetVertexAttribute(Operator):
             return {'FINISHED'}    
     
     
-# def add_RoMa_wall(self, context):
+# def add_MaStro_wall(self, context):
 #     scale_x = self.scale.x
 #     # scale_y = self.scale.y
 
@@ -93,18 +93,18 @@ class OBJECT_OT_SetVertexAttribute(Operator):
 #     edges = [[0,1]]
 #     faces = []
 
-#     mesh = bpy.data.meshes.new(name="RoMa wall")
+#     mesh = bpy.data.meshes.new(name="MaStro wall")
 #     mesh.from_pydata(verts, edges, faces)
 #     # useful for development when the mesh may be invalid.
 #     # mesh.validate(verbose=True)
 #     object_data_add(context, mesh, operator=self)
-#     mesh.attributes.new(name="roma_wall_type", type="INT", domain="EDGE")
-#     mesh.attributes.new(name="roma_plot_name", type="STRING", domain="FACE")
+#     mesh.attributes.new(name="mastro_wall_type", type="INT", domain="EDGE")
+#     mesh.attributes.new(name="mastro_plot_name", type="STRING", domain="FACE")
     
-# def add_RoMa_wall_button(self, context):
+# def add_MaStro_wall_button(self, context):
 #     self.layout.operator(
-#         OBJECT_OT_add_RoMa_wall.bl_idname,
-#         text="RoMa Wall",
+#         OBJECT_OT_add_MaStro_wall.bl_idname,
+#         text="MaStro Wall",
 #         icon='PLUGIN')
     
 

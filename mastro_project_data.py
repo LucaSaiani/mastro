@@ -3,7 +3,7 @@
 # luca.saiani@gmail.com
 
 # Created by Luca Saiani
-# This is part of RoMa addon for Blender
+# This is part of MaStro addon for Blender
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ from bpy.types import PropertyGroup, UIList, Operator, Panel
 # from bpy.app.handlers import persistent
 
 from .mastro_massing import read_mesh_attributes_uses, update_mesh_attributes_storeys
-from .mastro_street import read_mesh_attributes_roads
+from .mastro_street import read_mesh_attributes_streets
 
 # import random
 # import decimal
@@ -142,16 +142,16 @@ from .mastro_street import read_mesh_attributes_roads
 #     batch.draw(shader)
 
 
-# def initRomaLists(listName):
-#     if listName == "romaTypologyName":
-#         bpy.context.scene.roma_typology_name_list.add()
-#         bpy.context.scene.roma_typology_name_list[0].id = 0
-#         bpy.context.scene.roma_typology_name_list[0].name = "Typology name... "
-#         bpy.context.scene.roma_typology_name_list[0].useList = "0"
-#     elif listName == "romaTypologyUsesName":
+# def initMastroLists(listName):
+#     if listName == "mastroTypologyName":
+#         bpy.context.scene.mastro_typology_name_list.add()
+#         bpy.context.scene.mastro_typology_name_list[0].id = 0
+#         bpy.context.scene.mastro_typology_name_list[0].name = "Typology name... "
+#         bpy.context.scene.mastro_typology_name_list[0].useList = "0"
+#     elif listName == "mastroTypologyUsesName":
 #         bpy.context.scene.oma_typology_uses_name_list.add()
-#         bpy.context.scene.roma_typology_uses_name_list[0].id = 0
-#         bpy.context.scene.roma_typology_uses_name_list[0].name = bpy.context.scene.roma_use_name_list[0].name
+#         bpy.context.scene.mastro_typology_uses_name_list[0].id = 0
+#         bpy.context.scene.mastro_typology_uses_name_list[0].name = bpy.context.scene.mastro_use_name_list[0].name
        
 
     
@@ -164,9 +164,9 @@ class update_GN_Filter_OT(Operator):
         
     #     return node_obj, node_x_location
     def newGroup (self, groupName, type):
-        attributeName = "roma_use"
-        # if self.filter_name == "use": attributeName = "RoMa_Use"
-        # elif self.filter_name == "typology": attributeName = "roma_typology_id"
+        attributeName = "mastro_use"
+        # if self.filter_name == "use": attributeName = "MaStro_Use"
+        # elif self.filter_name == "typology": attributeName = "mastro_typology_id"
         
          # geometry nodes group
         # if type == "GN":
@@ -198,9 +198,9 @@ class update_GN_Filter_OT(Operator):
         
         #Create NodeGroup
         # for type in groupTypes:
-        name = "RoMa Geometry Filter by Use"
-            # if type == "GN": name = "RoMa Geometry Filter by " + self.filter_name
-            # else: name = "RoMa Shader Filter by " + self.filter_name
+        name = "MaStro Geometry Filter by Use"
+            # if type == "GN": name = "MaStro Geometry Filter by " + self.filter_name
+            # else: name = "MaStro Shader Filter by " + self.filter_name
             
         if name not in bpy.data.node_groups:
             filterBy_Group = self.newGroup(name, "GN")
@@ -233,9 +233,9 @@ class update_GN_Filter_OT(Operator):
             lastId = max(filterNodeIds)
             # print(lastId, len(nodes))
                 
-            # if self.filter_name == "use": listToLoop = bpy.context.scene.roma_use_name_list
-            # elif self.filter_name == "typology": listToLoop = bpy.context.scene.roma_typology_name_list
-        listToLoop = bpy.context.scene.roma_use_name_list
+            # if self.filter_name == "use": listToLoop = bpy.context.scene.mastro_use_name_list
+            # elif self.filter_name == "typology": listToLoop = bpy.context.scene.mastro_typology_name_list
+        listToLoop = bpy.context.scene.mastro_use_name_list
         for el in listToLoop:
             if hasattr(el, "id"):
                 #a new name has been added
@@ -301,10 +301,10 @@ class update_Shader_Filter_OT(Operator):
         
     #     return node_obj, node_x_location
     def newGroup (self, groupName, type):
-        if self.filter_name == "plot": attributeName = "roma_plot_id"
-        elif self.filter_name == "block": attributeName = "roma_block_id"
-        elif self.filter_name == "use": attributeName = "roma_use"
-        elif self.filter_name == "typology": attributeName = "roma_typology_id"
+        if self.filter_name == "plot": attributeName = "mastro_plot_id"
+        elif self.filter_name == "block": attributeName = "mastro_block_id"
+        elif self.filter_name == "use": attributeName = "mastro_use"
+        elif self.filter_name == "typology": attributeName = "mastro_typology_id"
         
          # geometry nodes group
         # if type == "GN":
@@ -344,9 +344,9 @@ class update_Shader_Filter_OT(Operator):
         
         #Create NodeGroup
         # for type in groupTypes:
-        #     if type == "GN": name = "RoMa Geometry Filter by " + self.filter_name
-        #     else: name = "RoMa Shader Filter by " + self.filter_name
-        name = "RoMa Shader Filter by " + self.filter_name
+        #     if type == "GN": name = "MaStro Geometry Filter by " + self.filter_name
+        #     else: name = "MaStro Shader Filter by " + self.filter_name
+        name = "MaStro Shader Filter by " + self.filter_name
         
         if name not in bpy.data.node_groups:
             # if type == "GN": filterBy_Group = self.newGroup(name, "GN")
@@ -381,10 +381,10 @@ class update_Shader_Filter_OT(Operator):
             lastId = max(filterNodeIds)
             # print(lastId, len(nodes))
             
-        if self.filter_name == "plot": listToLoop = bpy.context.scene.roma_plot_name_list
-        elif self.filter_name == "block": listToLoop = bpy.context.scene.roma_block_name_list
-        elif self.filter_name == "use": listToLoop = bpy.context.scene.roma_use_name_list
-        elif self.filter_name == "typology": listToLoop = bpy.context.scene.roma_typology_name_list
+        if self.filter_name == "plot": listToLoop = bpy.context.scene.mastro_plot_name_list
+        elif self.filter_name == "block": listToLoop = bpy.context.scene.mastro_block_name_list
+        elif self.filter_name == "use": listToLoop = bpy.context.scene.mastro_use_name_list
+        elif self.filter_name == "typology": listToLoop = bpy.context.scene.mastro_typology_name_list
         
         # filterBy_Group.links.new(named_attribute_node.outputs[2], group_output.inputs[0])
         # filterBy_Group.links.new(value_attribute_node.outputs[0], group_output.inputs[1])
@@ -441,11 +441,11 @@ class update_Shader_Filter_OT(Operator):
         return {'FINISHED'}
     
 
-class VIEW3D_PT_RoMa_project_data(Panel):
+class VIEW3D_PT_MaStro_project_data(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
-    # bl_category = "RoMa"
-    bl_label = "RoMa"
+    # bl_category = "MaStro"
+    bl_label = "MaStro"
     bl_context = "scene"
     bl_options = {'DEFAULT_CLOSED'}
     
@@ -458,12 +458,12 @@ class VIEW3D_PT_RoMa_project_data(Panel):
         # layout.separator()
 
 
-class VIEW3D_PT_RoMa_show_data(Panel):
+class VIEW3D_PT_MaStro_show_data(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
-    # bl_category = "RoMa"
+    # bl_category = "MaStro"
     bl_label = "Show Data"
-    bl_parent_id = "VIEW3D_PT_RoMa_project_data"
+    bl_parent_id = "VIEW3D_PT_MaStro_project_data"
     # bl_context = "scene"
     bl_options = {'DEFAULT_CLOSED'}
     bl_order = 0
@@ -499,12 +499,12 @@ class VIEW3D_PT_RoMa_show_data(Panel):
 ############################ MASS ############################
 ############################      ############################
            
-class VIEW3D_PT_RoMa_mass_data(Panel):
+class VIEW3D_PT_MaStro_mass_data(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
-    # bl_category = "RoMa"
+    # bl_category = "MaStro"
     bl_label = ""
-    bl_parent_id = "VIEW3D_PT_RoMa_project_data"
+    bl_parent_id = "VIEW3D_PT_MaStro_project_data"
     # bl_context = "scene"
     bl_options = {'DEFAULT_CLOSED'}
     bl_order = 1
@@ -529,11 +529,11 @@ class VIEW3D_PT_RoMa_mass_data(Panel):
 ############################ PLOT   ############################
 ############################        ############################ 
             
-class VIEW3D_PT_RoMa_mass_plot_data(Panel):
+class VIEW3D_PT_MaStro_mass_plot_data(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_label = "Plot"
-    bl_parent_id = "VIEW3D_PT_RoMa_mass_data"
+    bl_parent_id = "VIEW3D_PT_MaStro_mass_data"
     bl_options = {'DEFAULT_CLOSED'}
     
     def draw(self, context):
@@ -549,23 +549,23 @@ class VIEW3D_PT_RoMa_mass_plot_data(Panel):
         
         row = layout.row()
         row.template_list("OBJECT_UL_Plot", "plot_list", scene,
-                        "roma_plot_name_list", scene, "roma_plot_name_list_index", rows = rows)
+                        "mastro_plot_name_list", scene, "mastro_plot_name_list_index", rows = rows)
         
         
         col = row.column(align=True)
-        col.operator("roma_plot_name_list.new_item", icon='ADD', text="")
-        # col.operator("roma_wall_type_list.delete_item", icon='REMOVE', text="")
+        col.operator("mastro_plot_name_list.new_item", icon='ADD', text="")
+        # col.operator("mastro_wall_type_list.delete_item", icon='REMOVE', text="")
         col.separator()
-        col.operator("roma_plot_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
-        col.operator("roma_plot_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
+        col.operator("mastro_plot_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
+        col.operator("mastro_plot_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
         
         # row = layout.row()
         # row = layout.row(align=True)
-        # row.prop(context.scene, "roma_plot_names", icon="MOD_BOOLEAN", icon_only=True, text="")
+        # row.prop(context.scene, "mastro_plot_names", icon="MOD_BOOLEAN", icon_only=True, text="")
         # row.operator("scene.add_plot_name", icon="ADD", text="New")
         
-        # if scene.roma_plot_name_list_index >= 0 and scene.roma_plot_name_list:
-        #     item = scene.roma_plot_name_list[scene.roma_plot_name_list_index]
+        # if scene.mastro_plot_name_list_index >= 0 and scene.mastro_plot_name_list:
+        #     item = scene.mastro_plot_name_list[scene.mastro_plot_name_list_index]
         #     row.prop(item, "name", icon_only=True, text="Plot Name")
             
         # row.prop(item, "index")
@@ -586,7 +586,7 @@ class OBJECT_UL_Plot(UIList):
             split = layout.split(factor=0.3)
             split.label(text="Id: %d" % (item.id)) 
             # split.label(text=item.name, icon=custom_icon) 
-            split.prop(context.scene.roma_plot_name_list[index],
+            split.prop(context.scene.mastro_plot_name_list[index],
                        "name",
                        icon_only=True,
                        icon = custom_icon)
@@ -599,7 +599,7 @@ class OBJECT_UL_Plot(UIList):
             layout.alignment = 'CENTER'
             layout.label(text="", icon = custom_icon)
 
-        # self.filter_zero_id(context, data, "roma_plot_name_list")
+        # self.filter_zero_id(context, data, "mastro_plot_name_list")
 
 
     def filter_items(self, context, data, propname):
@@ -624,32 +624,32 @@ class OBJECT_UL_Plot(UIList):
         pass
     
 class PLOT_LIST_OT_NewItem(Operator):
-    bl_idname = "roma_plot_name_list.new_item"
+    bl_idname = "mastro_plot_name_list.new_item"
     bl_label = "Add a new plot"
 
     def execute(self, context): 
-        context.scene.roma_plot_name_list.add()
-        # last = len(context.scene.roma_plot_name_list)-1
+        context.scene.mastro_plot_name_list.add()
+        # last = len(context.scene.mastro_plot_name_list)-1
         # if last == 0:
-        #     context.scene.roma_plot_name_list[0].id = 0
-        #     context.scene.roma_plot_name_list[0].name = ""
+        #     context.scene.mastro_plot_name_list[0].id = 0
+        #     context.scene.mastro_plot_name_list[0].name = ""
         #     random.seed(datetime.now().timestamp())
         #     rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
-        #     context.scene.roma_plot_name_list[0].RND = rndNumber
-        #     context.scene.roma_plot_name_list.add()
+        #     context.scene.mastro_plot_name_list[0].RND = rndNumber
+        #     context.scene.mastro_plot_name_list.add()
         temp_list = []    
-        for el in context.scene.roma_plot_name_list:
+        for el in context.scene.mastro_plot_name_list:
             temp_list.append(el.id)
-        last = len(context.scene.roma_plot_name_list)-1
+        last = len(context.scene.mastro_plot_name_list)-1
         
-        context.scene.roma_plot_name_list[last].id = max(temp_list)+1
+        context.scene.mastro_plot_name_list[last].id = max(temp_list)+1
         # rndNumber = float(decimal.Decimal(random.randrange(0,1000))/1000)
-        # context.scene.roma_plot_name_list[last].RND = rndNumber
+        # context.scene.mastro_plot_name_list[last].RND = rndNumber
         bpy.ops.node.update_shader_filter(filter_name="plot")   
         return{'FINISHED'}
     
 class PLOT_LIST_OT_MoveItem(Operator):
-    bl_idname = "roma_plot_name_list.move_item"
+    bl_idname = "mastro_plot_name_list.move_item"
     bl_label = "Move an item in the list"
 
     direction: bpy.props.EnumProperty(items=(('UP', 'Up', ""),
@@ -657,28 +657,28 @@ class PLOT_LIST_OT_MoveItem(Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.scene.roma_plot_name_list
+        return context.scene.mastro_plot_name_list
 
     def move_index(self):
-        index = bpy.context.scene.roma_plot_name_list_index
-        list_length = len(bpy.context.scene.roma_plot_name_list) - 1 
+        index = bpy.context.scene.mastro_plot_name_list_index
+        list_length = len(bpy.context.scene.mastro_plot_name_list) - 1 
         new_index = index + (-1 if self.direction == 'UP' else 1)
 
-        bpy.context.scene.roma_plot_name_list_index = max(0, min(new_index, list_length))
+        bpy.context.scene.mastro_plot_name_list_index = max(0, min(new_index, list_length))
 
     def execute(self, context):
-        roma_plot_name_list = context.scene.roma_plot_name_list
-        index = context.scene.roma_plot_name_list_index
+        mastro_plot_name_list = context.scene.mastro_plot_name_list
+        index = context.scene.mastro_plot_name_list_index
 
         neighbor = index + (-1 if self.direction == 'UP' else 1)
-        roma_plot_name_list.move(neighbor, index)
+        mastro_plot_name_list.move(neighbor, index)
         self.move_index()
 
         return{'FINISHED'}
     
 # update the node "filter by plot" if a new plot is added or
 # a plot name has changed
-def update_roma_filter_by_plot(self, context):
+def update_mastro_filter_by_plot(self, context):
     bpy.ops.node.update_shader_filter(filter_name="plot")
     return None
             
@@ -692,7 +692,7 @@ class plot_name_list(PropertyGroup):
            name="Plot Name",
            description="The name of the plot",
            default="Plot name...",
-           update=update_roma_filter_by_plot)
+           update=update_mastro_filter_by_plot)
     
     # RND: FloatProperty(
     #        name="Random Value per Plot",
@@ -704,11 +704,11 @@ class plot_name_list(PropertyGroup):
 ############################        ############################
 
     
-class VIEW3D_PT_RoMa_mass_block_data(Panel):
+class VIEW3D_PT_MaStro_mass_block_data(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_label = "Block"
-    bl_parent_id = "VIEW3D_PT_RoMa_mass_data"
+    bl_parent_id = "VIEW3D_PT_MaStro_mass_data"
     bl_options = {'DEFAULT_CLOSED'}
     
     def draw(self, context):
@@ -723,27 +723,27 @@ class VIEW3D_PT_RoMa_mass_block_data(Panel):
         #row.label(text="Block")
         # row.prop(context.window_manager, 'toggle_block_name', toggle=True, icon="HIDE_OFF", icon_only=True)
         
-        # is_sortable = len(scene.roma_block_name_list) > 1
+        # is_sortable = len(scene.mastro_block_name_list) > 1
         rows = 3
         # if is_sortable:
         #     rows = 5
             
         row = layout.row()
         row.template_list("OBJECT_UL_Block", "block_list", scene,
-                        "roma_block_name_list", scene, "roma_block_name_list_index", rows = rows)
+                        "mastro_block_name_list", scene, "mastro_block_name_list_index", rows = rows)
         
         
         col = row.column(align=True)
-        col.operator("roma_block_name_list.new_item", icon='ADD', text="")
+        col.operator("mastro_block_name_list.new_item", icon='ADD', text="")
         col.separator()
-        col.operator("roma_block_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
-        col.operator("roma_block_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
+        col.operator("mastro_block_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
+        col.operator("mastro_block_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
         
         # row = layout.row()
         # row = layout.row(align=True)
         
-        # if scene.roma_block_name_list_index >= 0 and scene.roma_block_name_list:
-        #     item = scene.roma_block_name_list[scene.roma_block_name_list_index]
+        # if scene.mastro_block_name_list_index >= 0 and scene.mastro_block_name_list:
+        #     item = scene.mastro_block_name_list[scene.mastro_block_name_list_index]
         #     row.prop(item, "name", icon_only=True, text="Block Name")
             
             
@@ -757,7 +757,7 @@ class OBJECT_UL_Block(UIList):
             split = layout.split(factor=0.5)
             split.label(text="Id: %d" % (item.id)) 
             # split.label(text=item.name, icon=custom_icon) 
-            split.prop(context.scene.roma_block_name_list[index],
+            split.prop(context.scene.mastro_block_name_list[index],
                        "name",
                        icon_only=True,
                        icon = custom_icon)
@@ -780,32 +780,32 @@ class OBJECT_UL_Block(UIList):
         pass
     
 class BLOCK_LIST_OT_NewItem(Operator):
-    bl_idname = "roma_block_name_list.new_item"
+    bl_idname = "mastro_block_name_list.new_item"
     bl_label = "Add a new block"
 
     def execute(self, context): 
-        context.scene.roma_block_name_list.add()
-        # last = len(context.scene.roma_block_name_list)-1
+        context.scene.mastro_block_name_list.add()
+        # last = len(context.scene.mastro_block_name_list)-1
         # if last == 0:
-        #     context.scene.roma_block_name_list[0].id = 0
-        #     context.scene.roma_block_name_list[0].name = ""
+        #     context.scene.mastro_block_name_list[0].id = 0
+        #     context.scene.mastro_block_name_list[0].name = ""
         #     random.seed(datetime.now().timestamp())
         #     rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
-        #     context.scene.roma_block_name_list[0].RND = rndNumber
-        #     context.scene.roma_block_name_list.add()
+        #     context.scene.mastro_block_name_list[0].RND = rndNumber
+        #     context.scene.mastro_block_name_list.add()
         temp_list = []    
-        for el in context.scene.roma_block_name_list:
+        for el in context.scene.mastro_block_name_list:
             temp_list.append(el.id)
-        last = len(context.scene.roma_block_name_list)-1
+        last = len(context.scene.mastro_block_name_list)-1
         
-        context.scene.roma_block_name_list[last].id = max(temp_list)+1
+        context.scene.mastro_block_name_list[last].id = max(temp_list)+1
         # rndNumber = float(decimal.Decimal(random.randrange(0,1000))/1000)
-        # context.scene.roma_block_name_list[last].RND = rndNumber
+        # context.scene.mastro_block_name_list[last].RND = rndNumber
         bpy.ops.node.update_shader_filter(filter_name="block")
         return{'FINISHED'}
     
 class BLOCK_LIST_OT_MoveItem(Operator):
-    bl_idname = "roma_block_name_list.move_item"
+    bl_idname = "mastro_block_name_list.move_item"
     bl_label = "Move an item in the list"
 
     direction: bpy.props.EnumProperty(items=(('UP', 'Up', ""),
@@ -813,28 +813,28 @@ class BLOCK_LIST_OT_MoveItem(Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.scene.roma_block_name_list
+        return context.scene.mastro_block_name_list
 
     def move_index(self):
-        index = bpy.context.scene.roma_block_name_list_index
-        list_length = len(bpy.context.scene.roma_block_name_list) - 1 
+        index = bpy.context.scene.mastro_block_name_list_index
+        list_length = len(bpy.context.scene.mastro_block_name_list) - 1 
         new_index = index + (-1 if self.direction == 'UP' else 1)
 
-        bpy.context.scene.roma_block_name_list_index = max(0, min(new_index, list_length))
+        bpy.context.scene.mastro_block_name_list_index = max(0, min(new_index, list_length))
 
     def execute(self, context):
-        roma_block_name_list = context.scene.roma_block_name_list
-        index = context.scene.roma_block_name_list_index
+        mastro_block_name_list = context.scene.mastro_block_name_list
+        index = context.scene.mastro_block_name_list_index
 
         neighbor = index + (-1 if self.direction == 'UP' else 1)
-        roma_block_name_list.move(neighbor, index)
+        mastro_block_name_list.move(neighbor, index)
         self.move_index()
 
         return{'FINISHED'}
     
 # update the node "filter by block" if a new block is added or
 # a block name has changed
-def update_roma_filter_by_block(self, context):
+def update_mastro_filter_by_block(self, context):
     bpy.ops.node.update_shader_filter(filter_name="block")
     return None
             
@@ -848,14 +848,14 @@ class block_name_list(PropertyGroup):
            name="Block Name",
            description="The name of the block",
            default="Block name...",
-           update=update_roma_filter_by_block)
+           update=update_mastro_filter_by_block)
     
 
     
 
     
 # class USE_LIST_OT_MoveItem(Operator):
-#     bl_idname = "roma_use_name_list.move_item"
+#     bl_idname = "mastro_use_name_list.move_item"
 #     bl_label = "Move an item in the list"
 
 #     direction: bpy.props.EnumProperty(items=(('UP', 'Up', ""),
@@ -863,21 +863,21 @@ class block_name_list(PropertyGroup):
 
 #     @classmethod
 #     def poll(cls, context):
-#         return context.scene.roma_use_name_list
+#         return context.scene.mastro_use_name_list
 
 #     def move_index(self):
-#         index = bpy.context.scene.roma_use_name_list_index
-#         list_length = len(bpy.context.scene.roma_use_name_list) - 1 
+#         index = bpy.context.scene.mastro_use_name_list_index
+#         list_length = len(bpy.context.scene.mastro_use_name_list) - 1 
 #         new_index = index + (-1 if self.direction == 'UP' else 1)
 
-#         bpy.context.scene.roma_use_name_list_index = max(0, min(new_index, list_length))
+#         bpy.context.scene.mastro_use_name_list_index = max(0, min(new_index, list_length))
 
 #     def execute(self, context):
-#         roma_use_name_list = context.scene.roma_use_name_list
-#         index = context.scene.roma_use_name_list_index
+#         mastro_use_name_list = context.scene.mastro_use_name_list
+#         index = context.scene.mastro_use_name_list_index
 
 #         neighbor = index + (-1 if self.direction == 'UP' else 1)
-#         roma_use_name_list.move(neighbor, index)
+#         mastro_use_name_list.move(neighbor, index)
 #         self.move_index()
 
 #         return{'FINISHED'}
@@ -886,24 +886,24 @@ class block_name_list(PropertyGroup):
 
 # update the node "filter by use" if a new use is added or
 # a use name has changed
-# also updates the names of roma_typology_uses_name_list_index  
-def update_roma_filter_by_use(self, context):
+# also updates the names of mastro_typology_uses_name_list_index  
+def update_mastro_filter_by_use(self, context):
     from . import initLists
     bpy.ops.node.update_gn_filter()
     bpy.ops.node.update_shader_filter(filter_name="use")
-    # updating roma_typology_uses_name_list_index
-    current_list = context.scene.roma_typology_uses_name_list
+    # updating mastro_typology_uses_name_list_index
+    current_list = context.scene.mastro_typology_uses_name_list
     for i, el in enumerate(current_list):
-        name = context.scene.roma_use_name_list[el.id].name
-        context.scene.roma_typology_uses_name_list[i].name = name
-    # updating the names in bpy.context.scene.roma_obj_typology_uses_name_list
-    # if they are shown in the RoMa panel in the 3dView
-    usesUiList = context.scene.roma_obj_typology_uses_name_list
-    subIndex = context.scene.roma_typology_uses_name_list_index
-    if  len(context.scene.roma_typology_uses_name_list) == 0: 
+        name = context.scene.mastro_use_name_list[el.id].name
+        context.scene.mastro_typology_uses_name_list[i].name = name
+    # updating the names in bpy.context.scene.mastro_obj_typology_uses_name_list
+    # if they are shown in the MaStro panel in the 3dView
+    usesUiList = context.scene.mastro_obj_typology_uses_name_list
+    subIndex = context.scene.mastro_typology_uses_name_list_index
+    if  len(context.scene.mastro_typology_uses_name_list) == 0: 
         initLists()
-    subName = context.scene.roma_typology_uses_name_list[subIndex].name
-    useIndex = context.scene.roma_use_name_list.find(subName)
+    subName = context.scene.mastro_typology_uses_name_list[subIndex].name
+    useIndex = context.scene.mastro_use_name_list.find(subName)
     for use in usesUiList:
         if use.nameId == useIndex:
             use.name = subName
@@ -920,7 +920,7 @@ def update_roma_filter_by_use(self, context):
 #            name="Use Name",
 #            description="The use of the block",
 #            default = "Use name...",
-#            update=update_roma_filter_by_use)
+#            update=update_mastro_filter_by_use)
     
 #     floorToFloor: FloatProperty(
 #         name="Floor to floor",
@@ -929,7 +929,7 @@ def update_roma_filter_by_use(self, context):
 #         max=99,
 #         precision=3,
 #         default = 3.150,
-#         update=update_roma_masses_data)
+#         update=update_mastro_masses_data)
 
 #     storeys:IntProperty(
 #         name="Number of storeys",
@@ -937,23 +937,23 @@ def update_roma_filter_by_use(self, context):
 #         min=1,
 #         max=99,
 #         default = 1,
-#         update=update_roma_masses_data)
+#         update=update_mastro_masses_data)
     
 #     liquid: BoolProperty(
 #             name = "Liquid number of storeys",
 #             description = "It indicates whether the number of storeys is fixed or variable",
 #             default = False,
-#             update=update_roma_masses_data)
+#             update=update_mastro_masses_data)
     
 ############################            ############################
 ############################ TYPOLOGY   ############################
 ############################            ############################
 
-class VIEW3D_PT_RoMa_mass_typology_data(Panel):
+class VIEW3D_PT_MaStro_mass_typology_data(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_label = "Typology"
-    bl_parent_id = "VIEW3D_PT_RoMa_mass_data"
+    bl_parent_id = "VIEW3D_PT_MaStro_mass_data"
     bl_options = {'DEFAULT_CLOSED'}
     
     def draw(self, context):
@@ -968,15 +968,15 @@ class VIEW3D_PT_RoMa_mass_typology_data(Panel):
         row = layout.row()
         rows = 3
         row.template_list("OBJECT_UL_Typology", "typology_list", scene,
-                        "roma_typology_name_list", scene, "roma_typology_name_list_index", rows = rows)
+                        "mastro_typology_name_list", scene, "mastro_typology_name_list_index", rows = rows)
         
         
         col = row.column(align=True)
-        col.operator("roma_typology_name_list.new_item", icon='ADD', text="")
-        col.operator("roma_typology_name_list.duplicate_item", icon='COPYDOWN', text="")
+        col.operator("mastro_typology_name_list.new_item", icon='ADD', text="")
+        col.operator("mastro_typology_name_list.duplicate_item", icon='COPYDOWN', text="")
         col.separator()
-        col.operator("roma_typology_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
-        col.operator("roma_typology_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
+        col.operator("mastro_typology_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
+        col.operator("mastro_typology_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
             
         ########## typology uses ###############
         row = layout.row()
@@ -985,53 +985,53 @@ class VIEW3D_PT_RoMa_mass_typology_data(Panel):
         rows = 3
         row = layout.row()
         row.template_list("OBJECT_UL_Typology_Uses", "typology_uses_list", scene,
-                        "roma_typology_uses_name_list", scene, "roma_typology_uses_name_list_index", rows = rows)
+                        "mastro_typology_uses_name_list", scene, "mastro_typology_uses_name_list_index", rows = rows)
         
         
         col = row.column(align=True)
-        col.operator("roma_typology_uses_name_list.new_item", icon='ADD', text="")
+        col.operator("mastro_typology_uses_name_list.new_item", icon='ADD', text="")
         sub = col.row()
-        sub.operator("roma_typology_uses_name_list.delete_item", icon='REMOVE', text="")
-        if len(scene.roma_typology_uses_name_list) < 2:
+        sub.operator("mastro_typology_uses_name_list.delete_item", icon='REMOVE', text="")
+        if len(scene.mastro_typology_uses_name_list) < 2:
             sub.enabled = False
         else:
             sub.enabled = True
             
         
         col.separator()
-        col.operator("roma_typology_uses_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
+        col.operator("mastro_typology_uses_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
         
-        col.operator("roma_typology_uses_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
+        col.operator("mastro_typology_uses_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
 
         # use editor        
         row = layout.row(align=True)
-        subIndex = context.scene.roma_typology_uses_name_list_index
-        subName = context.scene.roma_typology_uses_name_list[subIndex].name
-        index = context.scene.roma_use_name_list.find(subName)
+        subIndex = context.scene.mastro_typology_uses_name_list_index
+        subName = context.scene.mastro_typology_uses_name_list[subIndex].name
+        index = context.scene.mastro_use_name_list.find(subName)
         col = layout.column(align=True)
         
         row = col.row(align=True)
-        row.prop(context.scene, "roma_typology_uses_name", icon="COMMUNITY", icon_only=True, text="")
-        row.prop(context.scene.roma_use_name_list[index],"name", text="")
-        row.operator("roma_use_name_list.new_item", icon='ADD', text="")
+        row.prop(context.scene, "mastro_typology_uses_name", icon="COMMUNITY", icon_only=True, text="")
+        row.prop(context.scene.mastro_use_name_list[index],"name", text="")
+        row.operator("mastro_use_name_list.new_item", icon='ADD', text="")
         
-        layout.prop(context.scene.roma_use_name_list[index],"floorToFloor", text="Floor to floor height")
+        layout.prop(context.scene.mastro_use_name_list[index],"floorToFloor", text="Floor to floor height")
         row = layout.row(align=True)
         sub = row.row()
-        sub.prop(context.scene.roma_use_name_list[index],"storeys", text="Number of storeys")
-        layout.prop(context.scene.roma_use_name_list[index],"liquid", text="Variable number of storeys")
-        if context.scene.roma_use_name_list[index].liquid:
+        sub.prop(context.scene.mastro_use_name_list[index],"storeys", text="Number of storeys")
+        layout.prop(context.scene.mastro_use_name_list[index],"liquid", text="Variable number of storeys")
+        if context.scene.mastro_use_name_list[index].liquid:
             sub.enabled = False
         else:
             sub.enabled = True
-        layout.prop(context.scene.roma_use_name_list[index],"void", text="Void")
+        layout.prop(context.scene.mastro_use_name_list[index],"void", text="Void")
         # sub = layout.row()
         # sub.active = not(context.window_manager.toggle_auto_update_mass_data)
-        # sub.prop(context.scene.roma_use_name_list[index],"void", text="Update")
-        # sub.operator("object.update_all_roma_meshes_attributes").attributeToUpdate="all"
+        # sub.prop(context.scene.mastro_use_name_list[index],"void", text="Update")
+        # sub.operator("object.update_all_mastro_meshes_attributes").attributeToUpdate="all"
         row = layout.row(align=True)
         
-        row.operator("object.update_all_roma_meshes_attributes").attributeToUpdate="all"
+        row.operator("object.update_all_mastro_meshes_attributes").attributeToUpdate="all"
         row.prop(context.window_manager, "toggle_auto_update_mass_data", text="", icon="FILE_REFRESH")
         
             
@@ -1045,29 +1045,29 @@ class OBJECT_UL_Typology(UIList):
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
             #update the uses list for the current typology
             
-            # selected_typology_index = context.scene.roma_typology_name_list_index
-            # selected_typology_id = context.scene.roma_typology_name_list[selected_typology_index].id
+            # selected_typology_index = context.scene.mastro_typology_name_list_index
+            # selected_typology_id = context.scene.mastro_typology_name_list[selected_typology_index].id
             # if selectedTypology != selected_typology_id:
             #     selectedTypology = selected_typology_id
-            #     use_name_list = context.scene.roma_typology_uses_name_list
-            #     index = context.scene.roma_typology_uses_name_list_index
+            #     use_name_list = context.scene.mastro_typology_uses_name_list
+            #     index = context.scene.mastro_typology_uses_name_list_index
             #     # use_name_list.remove(index)
                 # use_name_length = len(use_name_list)
                 # counter = 0
                 # while counter < use_name_length:
-                #     bpy.ops.roma_typology_uses_name_list.delete_item()
+                #     bpy.ops.mastro_typology_uses_name_list.delete_item()
                 #     counter +=1
                 
                 # print("selected one", selectedTypology, index)
-                # context.scene.roma_typology_uses_name_list[index].name = "cappero"
-            #print("selected typology: ", context.scene.roma_typology_name_list[selected_typology_index].id)
+                # context.scene.mastro_typology_uses_name_list[index].name = "cappero"
+            #print("selected typology: ", context.scene.mastro_typology_name_list[selected_typology_index].id)
             
             
             split = layout.split(factor=0.5)
             split.label(text="Id: %d" % (item.id)) 
             # split.label(text=item.name, icon=custom_icon) 
-            # item = context.scene.roma_typology_name_list[context.scene.roma_typology_name_list_index]
-            split.prop(context.scene.roma_typology_name_list[index],
+            # item = context.scene.mastro_typology_name_list[context.scene.mastro_typology_name_list_index]
+            split.prop(context.scene.mastro_typology_name_list[index],
                        "name",
                        icon_only=True,
                        icon = custom_icon)
@@ -1093,16 +1093,16 @@ class OBJECT_UL_Typology(UIList):
     
 class TYPOLOGY_LIST_OT_NewItem(Operator):
     '''Add a new typology'''
-    bl_idname = "roma_typology_name_list.new_item"
+    bl_idname = "mastro_typology_name_list.new_item"
     bl_label = "New typology"
 
     def execute(self, context): 
-        context.scene.roma_typology_name_list.add()
+        context.scene.mastro_typology_name_list.add()
         temp_list = []    
-        for el in context.scene.roma_typology_name_list:
+        for el in context.scene.mastro_typology_name_list:
             temp_list.append(el.id)
-        last = len(context.scene.roma_typology_name_list)-1
-        context.scene.roma_typology_name_list[last].id = max(temp_list)+1
+        last = len(context.scene.mastro_typology_name_list)-1
+        context.scene.mastro_typology_name_list[last].id = max(temp_list)+1
         bpy.ops.node.update_shader_filter(filter_name="typology")
         # update the filter shader
         return{'FINISHED'}
@@ -1110,31 +1110,31 @@ class TYPOLOGY_LIST_OT_NewItem(Operator):
 
 class TYPOLOGY_LIST_OT_DuplicateItem(Operator):
     '''Make a duplicate of the current typology and its uses'''
-    bl_idname = "roma_typology_name_list.duplicate_item"
+    bl_idname = "mastro_typology_name_list.duplicate_item"
     bl_label = "Duplicate typology"
 
     def execute(self, context): 
         # get the index of the current element
-        index = context.scene.roma_typology_name_list_index
-        nameToCopy = context.scene.roma_typology_name_list[index].name
-        usesToCopy = context.scene.roma_typology_name_list[index].useList
+        index = context.scene.mastro_typology_name_list_index
+        nameToCopy = context.scene.mastro_typology_name_list[index].name
+        usesToCopy = context.scene.mastro_typology_name_list[index].useList
         # create a new entry
-        context.scene.roma_typology_name_list.add()
+        context.scene.mastro_typology_name_list.add()
         temp_list = []    
-        for el in context.scene.roma_typology_name_list:
+        for el in context.scene.mastro_typology_name_list:
             temp_list.append(el.id)
-        last = len(context.scene.roma_typology_name_list)-1
-        context.scene.roma_typology_name_list[last].id = max(temp_list)+1
+        last = len(context.scene.mastro_typology_name_list)-1
+        context.scene.mastro_typology_name_list[last].id = max(temp_list)+1
         # copy data to the new entry
-        context.scene.roma_typology_name_list[last].name = nameToCopy + " copy"
-        context.scene.roma_typology_name_list[last].useList = usesToCopy
+        context.scene.mastro_typology_name_list[last].name = nameToCopy + " copy"
+        context.scene.mastro_typology_name_list[last].useList = usesToCopy
         # update the filter shader
         bpy.ops.node.update_shader_filter(filter_name="typology")
         return{'FINISHED'}
     
 class TYPOLOGY_LIST_OT_MoveItem(Operator):
     '''Move the selected typology up or down in the list'''
-    bl_idname = "roma_typology_name_list.move_item"
+    bl_idname = "mastro_typology_name_list.move_item"
     bl_label = "Move typology"
 
     direction: bpy.props.EnumProperty(items=(('UP', 'Up', ""),
@@ -1142,32 +1142,32 @@ class TYPOLOGY_LIST_OT_MoveItem(Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.scene.roma_typology_name_list
+        return context.scene.mastro_typology_name_list
 
     def move_index(self):
-        index = bpy.context.scene.roma_typology_name_list_index
-        list_length = len(bpy.context.scene.roma_typology_name_list) - 1 
+        index = bpy.context.scene.mastro_typology_name_list_index
+        list_length = len(bpy.context.scene.mastro_typology_name_list) - 1 
         new_index = index + (-1 if self.direction == 'UP' else 1)
 
-        bpy.context.scene.roma_typology_name_list_index = max(0, min(new_index, list_length))
+        bpy.context.scene.mastro_typology_name_list_index = max(0, min(new_index, list_length))
 
     def execute(self, context):
-        roma_typology_name_list = context.scene.roma_typology_name_list
-        index = context.scene.roma_typology_name_list_index
+        mastro_typology_name_list = context.scene.mastro_typology_name_list
+        index = context.scene.mastro_typology_name_list_index
 
         neighbor = index + (-1 if self.direction == 'UP' else 1)
-        roma_typology_name_list.move(neighbor, index)
+        mastro_typology_name_list.move(neighbor, index)
         self.move_index()
         
         # this is because moving up and down values, 
         # doesn't trigger update_typology_uses_function
-        context.scene.roma_previous_selected_typology = -1
+        context.scene.mastro_previous_selected_typology = -1
 
         return{'FINISHED'}
 
 # update the node "filter by typology" if a new typology is added or
 # a typology name has changed
-def update_roma_filter_by_typology(self, context):
+def update_mastro_filter_by_typology(self, context):
     bpy.ops.node.update_shader_filter(filter_name="typology")
     return None
 
@@ -1180,7 +1180,7 @@ class OBJECT_UL_Typology_Uses(UIList):
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
             id = item.id
             if item.name != "...":
-                for el in context.scene.roma_use_name_list:
+                for el in context.scene.mastro_use_name_list:
                     if id == el.id:
                         # floorToFloor = round(el.floorToFloor,3)
                         storeys = el.storeys
@@ -1229,45 +1229,45 @@ class OBJECT_UL_Typology_Uses(UIList):
 # Add a new use to the list of uses of the selected typology. 
 # Uses are limited to seven uses for each typology
 class TYPOLOGY_USES_LIST_OT_NewItem(Operator):
-    bl_idname = "roma_typology_uses_name_list.new_item"
+    bl_idname = "mastro_typology_uses_name_list.new_item"
     bl_label = "Add use"
     
     @classmethod
     def poll(cls, context):
-        return len(context.scene.roma_typology_uses_name_list) <7
+        return len(context.scene.mastro_typology_uses_name_list) <7
 
     def execute(self, context): 
-        context.scene.roma_typology_uses_name_list.add()
+        context.scene.mastro_typology_uses_name_list.add()
         temp_list = []    
-        for el in context.scene.roma_typology_uses_name_list:
+        for el in context.scene.mastro_typology_uses_name_list:
             temp_list.append(el.id)
-        last = len(context.scene.roma_typology_uses_name_list)-1
+        last = len(context.scene.mastro_typology_uses_name_list)-1
         
-        context.scene.roma_typology_uses_name_list[last].id = max(temp_list)+1
+        context.scene.mastro_typology_uses_name_list[last].id = max(temp_list)+1
         return{'FINISHED'}
 
 # Remove the selected use from the current typology
 class TYPOLOGY_USES_LIST_OT_DeleteItem(Operator):
-    bl_idname = "roma_typology_uses_name_list.delete_item"
+    bl_idname = "mastro_typology_uses_name_list.delete_item"
     bl_label = "Remove"
     
     @classmethod
     def poll(cls, context):
-        return context.scene.roma_typology_uses_name_list
+        return context.scene.mastro_typology_uses_name_list
         
     def execute(self, context):
-        my_list = context.scene.roma_typology_uses_name_list
-        index = context.scene.roma_typology_uses_name_list_index
+        my_list = context.scene.mastro_typology_uses_name_list
+        index = context.scene.mastro_typology_uses_name_list_index
 
         my_list.remove(index)
-        context.scene.roma_typology_uses_name_list_index = min(max(0, index - 1), len(my_list) - 1)
+        context.scene.mastro_typology_uses_name_list_index = min(max(0, index - 1), len(my_list) - 1)
         
         update_typology_uses_list(context)
         return{'FINISHED'}
     
 # Move the selected use up or down in the list
 class TYPOLOGY_USES_LIST_OT_MoveItem(Operator):
-    bl_idname = "roma_typology_uses_name_list.move_item"
+    bl_idname = "mastro_typology_uses_name_list.move_item"
     bl_label = "Move use"
 
     direction: bpy.props.EnumProperty(items=(('UP', 'Up', ""),
@@ -1275,21 +1275,21 @@ class TYPOLOGY_USES_LIST_OT_MoveItem(Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.scene.roma_typology_uses_name_list
+        return context.scene.mastro_typology_uses_name_list
 
     def move_index(self):
-        index = bpy.context.scene.roma_typology_uses_name_list_index
-        list_length = len(bpy.context.scene.roma_typology_uses_name_list) - 1 
+        index = bpy.context.scene.mastro_typology_uses_name_list_index
+        list_length = len(bpy.context.scene.mastro_typology_uses_name_list) - 1 
         new_index = index + (-1 if self.direction == 'UP' else 1)
 
-        bpy.context.scene.roma_typology_uses_name_list_index = max(0, min(new_index, list_length))
+        bpy.context.scene.mastro_typology_uses_name_list_index = max(0, min(new_index, list_length))
 
     def execute(self, context):
-        roma_typology_uses_name_list = context.scene.roma_typology_uses_name_list
-        index = context.scene.roma_typology_uses_name_list_index
+        mastro_typology_uses_name_list = context.scene.mastro_typology_uses_name_list
+        index = context.scene.mastro_typology_uses_name_list_index
 
         neighbor = index + (-1 if self.direction == 'UP' else 1)
-        roma_typology_uses_name_list.move(neighbor, index)
+        mastro_typology_uses_name_list.move(neighbor, index)
         self.move_index()
         
         update_typology_uses_list(context)
@@ -1297,22 +1297,22 @@ class TYPOLOGY_USES_LIST_OT_MoveItem(Operator):
 
 # Add a new use to the list of the uses for the current project
 class USE_LIST_OT_NewItem(Operator):
-    bl_idname = "roma_use_name_list.new_item"
+    bl_idname = "mastro_use_name_list.new_item"
     bl_label = "New use"
 
     def execute(self, context): 
-        context.scene.roma_use_name_list.add()
+        context.scene.mastro_use_name_list.add()
         temp_list = []    
-        for el in context.scene.roma_use_name_list:
+        for el in context.scene.mastro_use_name_list:
             temp_list.append(el.id)
-        last = len(context.scene.roma_use_name_list)-1
+        last = len(context.scene.mastro_use_name_list)-1
         
         id = max(temp_list)+1
-        context.scene.roma_use_name_list[last].id = id
+        context.scene.mastro_use_name_list[last].id = id
         
-        subIndex = context.scene.roma_typology_uses_name_list_index
-        context.scene.roma_typology_uses_name_list[subIndex].name = context.scene.roma_use_name_list[last].name
-        context.scene.roma_typology_uses_name_list[subIndex].id = id
+        subIndex = context.scene.mastro_typology_uses_name_list_index
+        context.scene.mastro_typology_uses_name_list[subIndex].name = context.scene.mastro_use_name_list[last].name
+        context.scene.mastro_typology_uses_name_list[subIndex].id = id
         update_typology_uses_list(context)
         
         bpy.ops.node.update_gn_filter()
@@ -1320,101 +1320,101 @@ class USE_LIST_OT_NewItem(Operator):
         return{'FINISHED'}
 
 # # when a typology is selected, it is necessary to update the
-# # uses in the UIList using the ones stored in Scene.roma_typology_uses_name_list 
+# # uses in the UIList using the ones stored in Scene.mastro_typology_uses_name_list 
 class UPDATE_USE_LIST_OT(Operator):
-    bl_idname = "ui.roma_update_use_list"
+    bl_idname = "ui.mastro_update_use_list"
     bl_label = "Update Use List"
     
     def execute(self, context):
         scene = context.scene
-        # previous = scene.roma_previous_selected_typology
-        # current = scene.roma_typology_name_list_index
+        # previous = scene.mastro_previous_selected_typology
+        # current = scene.mastro_typology_name_list_index
         # if previous != current:
-        scene.roma_previous_selected_typology = scene.roma_typology_name_list_index
-        use_name_list = scene.roma_typology_uses_name_list
+        scene.mastro_previous_selected_typology = scene.mastro_typology_name_list_index
+        use_name_list = scene.mastro_typology_uses_name_list
         while len(use_name_list) > 0:
-            index = scene.roma_typology_uses_name_list_index
+            index = scene.mastro_typology_uses_name_list_index
             use_name_list.remove(index)
-            scene.roma_typology_uses_name_list_index = min(max(0, index - 1), len(use_name_list) - 1)
+            scene.mastro_typology_uses_name_list_index = min(max(0, index - 1), len(use_name_list) - 1)
         # add the uses stored in the typology to the current typology use UIList        
-        selected_typology_index = scene.roma_typology_name_list_index
-        if len(scene.roma_typology_name_list) > 0:
-            list = scene.roma_typology_name_list[selected_typology_index].useList    
+        selected_typology_index = scene.mastro_typology_name_list_index
+        if len(scene.mastro_typology_name_list) > 0:
+            list = scene.mastro_typology_name_list[selected_typology_index].useList    
             split_list = list.split(";")
             for el in split_list:
-                scene.roma_typology_uses_name_list.add()
+                scene.mastro_typology_uses_name_list.add()
                 temp_list = []    
                 temp_list.append(int(el))
-                last = len(scene.roma_typology_uses_name_list)-1
-                # look for the correspondent use name in roma_use_name_list
-                for use in scene.roma_use_name_list:
+                last = len(scene.mastro_typology_uses_name_list)-1
+                # look for the correspondent use name in mastro_use_name_list
+                for use in scene.mastro_use_name_list:
                     if int(el) == use.id:
-                        scene.roma_typology_uses_name_list[last].id = use.id
-                        scene.roma_typology_uses_name_list[last].name = use.name 
+                        scene.mastro_typology_uses_name_list[last].id = use.id
+                        scene.mastro_typology_uses_name_list[last].name = use.name 
                         break
         return{'FINISHED'}
             
         
 # when a use related to the current typology is updated in the UIList,
-# it is necessary to update the relative list in Scene.roma_typology_uses_name_list
+# it is necessary to update the relative list in Scene.mastro_typology_uses_name_list
 def update_typology_uses_list(context):
-    selected_typology_index = context.scene.roma_typology_name_list_index
+    selected_typology_index = context.scene.mastro_typology_name_list_index
     # the exististing list is replaced with what is in the UiList
     # the format of the list is 2;5;1 with numbers indicating the Id of the use
     tmp = ""
-    for el in context.scene.roma_typology_uses_name_list:
+    for el in context.scene.mastro_typology_uses_name_list:
         tmp += str(el.id) + ";"
     # remove the last ";" in the string
     tmp = tmp[:-1]
-    context.scene.roma_typology_name_list[selected_typology_index].useList = tmp
+    context.scene.mastro_typology_name_list[selected_typology_index].useList = tmp
         
 # update the typology use in the UIList with the name selected
 # in the drop down menu in the Typology Uses UI
 def update_typology_uses_name_label(self, context):
     scene = context.scene
-    name = scene.roma_typology_uses_name
+    name = scene.mastro_typology_uses_name
     # if the typology is newly created, the index is equal to -1 and 
     # therefore there is an out of range error
     # Also, in this case, there are no values to update
-    if scene.roma_typology_uses_name_list_index > -1:
-        scene.roma_typology_uses_name_list[scene.roma_typology_uses_name_list_index].name = name
-        for n in scene.roma_use_name_list:
+    if scene.mastro_typology_uses_name_list_index > -1:
+        scene.mastro_typology_uses_name_list[scene.mastro_typology_uses_name_list_index].name = name
+        for n in scene.mastro_use_name_list:
             if n.name == name:
-                scene.roma_typology_uses_name_list[scene.roma_typology_uses_name_list_index].id = n.id
+                scene.mastro_typology_uses_name_list[scene.mastro_typology_uses_name_list_index].id = n.id
                 update_typology_uses_list(context)
                 break
             
 # When typology or use is edited/changed in the UI, it is necessary
-# to update all the existing RoMa meshes with the updated data
+# to update all the existing MaStro meshes with the updated data
 # this is for useList
-def update_all_roma_meshes_useList(self, context):
+def update_all_mastro_meshes_useList(self, context):
     if context.window_manager.toggle_auto_update_mass_data:
         updates = "all"
-        bpy.ops.object.update_all_roma_meshes_attributes(attributeToUpdate=updates)
+        bpy.ops.object.update_all_mastro_meshes_attributes(attributeToUpdate=updates)
 
 # this is for the floor to floor height
-def update_all_roma_meshes_floorToFloor(self, context):
+def update_all_mastro_meshes_floorToFloor(self, context):
     if context.window_manager.toggle_auto_update_mass_data:
         updates = "floorToFloor"
-        bpy.ops.object.update_all_roma_meshes_attributes(attributeToUpdate=updates)
+        bpy.ops.object.update_all_mastro_meshes_attributes(attributeToUpdate=updates)
     
 # this is for the number of storeys
-def update_all_roma_meshes_numberOfStoreys(self, context):
+def update_all_mastro_meshes_numberOfStoreys(self, context):
     if context.window_manager.toggle_auto_update_mass_data:
         updates = "numberOfStoreys"
-        bpy.ops.object.update_all_roma_meshes_attributes(attributeToUpdate=updates)
+        bpy.ops.object.update_all_mastro_meshes_attributes(attributeToUpdate=updates)
     
 # this is for the void
-def update_all_roma_meshes_void(self, context):
+def update_all_mastro_meshes_void(self, context):
     if context.window_manager.toggle_auto_update_mass_data:
         updates = "void"
-        bpy.ops.object.update_all_roma_meshes_attributes(attributeToUpdate=updates)
+        bpy.ops.object.update_all_mastro_meshes_attributes(attributeToUpdate=updates)
 
         
-# Operator to update the attributes of all the RoMa meshes in the scene        
-class OBJECT_OT_update_all_RoMa_meshes_attributes(Operator):
-    bl_idname = "object.update_all_roma_meshes_attributes"
-    # bl_label = "Update the attributes of all the RoMa meshes in the scene"
+# Operator to update the attributes of all the MaStro meshes in the scene        
+class OBJECT_OT_update_all_MaStro_meshes_attributes(Operator):
+    bl_idname = "object.update_all_mastro_meshes_attributes"
+    # bl_label = "Update the attributes of all the MaStro meshes in the scene"
     bl_label = "Update"
     bl_options = {'REGISTER', 'UNDO'}
     
@@ -1428,7 +1428,7 @@ class OBJECT_OT_update_all_RoMa_meshes_attributes(Operator):
             activeObjMode = activeObj.mode
             
         for obj in objs:
-            if obj is not None and obj.type == 'MESH' and "RoMa object" in obj.data and "RoMa mass" in obj.data:
+            if obj is not None and obj.type == 'MESH' and "MaStro object" in obj.data and "MaStro mass" in obj.data:
                 # it is necessary to set the object to visibile in order to make it active
                 if obj.visible_get():
                     alreadyVisible = True
@@ -1465,28 +1465,28 @@ class OBJECT_OT_update_all_RoMa_meshes_attributes(Operator):
                         # print(f"Object {obj.name} face {face.index}")
                         faceIndex = face.index
                         if [i for i in ["all", "floorToFloor", "void"] if i in self.attributeToUpdate]:
-                            typology = mesh.attributes["roma_typology_id"].data[faceIndex].value
+                            typology = mesh.attributes["mastro_typology_id"].data[faceIndex].value
                             data = read_mesh_attributes_uses(context, mesh, faceIndex, typologySet = typology)
                             if [i for i in ["all"] if i in self.attributeToUpdate]:
-                                # mesh.attributes["roma_typology_id"].data[faceIndex].value = data["typology_id"]
-                                mesh.attributes["roma_list_use_id_A"].data[faceIndex].value = data["use_id_list_A"]
-                                mesh.attributes["roma_list_use_id_B"].data[faceIndex].value = data["use_id_list_B"]
+                                # mesh.attributes["mastro_typology_id"].data[faceIndex].value = data["typology_id"]
+                                mesh.attributes["mastro_list_use_id_A"].data[faceIndex].value = data["use_id_list_A"]
+                                mesh.attributes["mastro_list_use_id_B"].data[faceIndex].value = data["use_id_list_B"]
                             if [i for i in ["all", "floorToFloor"] if i in self.attributeToUpdate]:
-                                mesh.attributes["roma_list_height_A"].data[faceIndex].value = data["height_A"]
-                                mesh.attributes["roma_list_height_B"].data[faceIndex].value = data["height_B"]
-                                mesh.attributes["roma_list_height_C"].data[faceIndex].value = data["height_C"]
-                                mesh.attributes["roma_list_height_D"].data[faceIndex].value = data["height_D"]
-                                mesh.attributes["roma_list_height_E"].data[faceIndex].value = data["height_E"]
+                                mesh.attributes["mastro_list_height_A"].data[faceIndex].value = data["height_A"]
+                                mesh.attributes["mastro_list_height_B"].data[faceIndex].value = data["height_B"]
+                                mesh.attributes["mastro_list_height_C"].data[faceIndex].value = data["height_C"]
+                                mesh.attributes["mastro_list_height_D"].data[faceIndex].value = data["height_D"]
+                                mesh.attributes["mastro_list_height_E"].data[faceIndex].value = data["height_E"]
                             if [i for i in ["all", "void"] if i in self.attributeToUpdate]:
-                                mesh.attributes["roma_list_void"].data[faceIndex].value = data["void"]
+                                mesh.attributes["mastro_list_void"].data[faceIndex].value = data["void"]
                                 
                         if [i for i in ["all", "numberOfStoreys"] if i in self.attributeToUpdate]:
-                            storeys = mesh.attributes["roma_number_of_storeys"].data[faceIndex].value
+                            storeys = mesh.attributes["mastro_number_of_storeys"].data[faceIndex].value
                             data = update_mesh_attributes_storeys(context, mesh, faceIndex, storeysSet = storeys)
                             if [i for i in ["all", "numberOfStoreys"] if i in self.attributeToUpdate]:
-                                mesh.attributes["roma_number_of_storeys"].data[faceIndex].value = data["numberOfStoreys"]
-                                mesh.attributes["roma_list_storey_A"].data[faceIndex].value = data["storey_list_A"]
-                                mesh.attributes["roma_list_storey_B"].data[faceIndex].value = data["storey_list_B"]
+                                mesh.attributes["mastro_number_of_storeys"].data[faceIndex].value = data["numberOfStoreys"]
+                                mesh.attributes["mastro_list_storey_A"].data[faceIndex].value = data["storey_list_A"]
+                                mesh.attributes["mastro_list_storey_B"].data[faceIndex].value = data["storey_list_B"]
                         # print(f"Done face {face.index}")
                     bpy.ops.object.mode_set(mode=objMode)
                     
@@ -1525,13 +1525,13 @@ class typology_name_list(PropertyGroup):
            name="Name",
            description="The name of the typology",
            default="Typology name...",
-           update=update_roma_filter_by_typology)
+           update=update_mastro_filter_by_typology)
     
     useList: StringProperty(
             name="Use",
             description="The uses for the typology",
             default="",
-            update=update_all_roma_meshes_useList)
+            update=update_all_mastro_meshes_useList)
             
 class use_name_list(PropertyGroup):
     id: IntProperty(
@@ -1543,7 +1543,7 @@ class use_name_list(PropertyGroup):
            name="Name",
            description="The name of the use",
            default = "Use name...",
-           update=update_roma_filter_by_use)
+           update=update_mastro_filter_by_use)
     
     floorToFloor: FloatProperty(
         name="Height",
@@ -1552,7 +1552,7 @@ class use_name_list(PropertyGroup):
         max=99,
         precision=3,
         default = 3.150,
-        update=update_all_roma_meshes_floorToFloor)
+        update=update_all_mastro_meshes_floorToFloor)
 
     storeys:IntProperty(
         name="Storeys",
@@ -1560,19 +1560,19 @@ class use_name_list(PropertyGroup):
         min=1,
         max=99,
         default = 1,
-        update=update_all_roma_meshes_numberOfStoreys)
+        update=update_all_mastro_meshes_numberOfStoreys)
     
     liquid: BoolProperty(
             name = "Liquid number of storeys",
             description = "It indicates whether the number of storeys is fixed or variable\nIf selected it has the priority on \"Number of storeys\"",
             default = False,
-            update=update_all_roma_meshes_numberOfStoreys)
+            update=update_all_mastro_meshes_numberOfStoreys)
     
     void: BoolProperty(
             name = "Void",
             description = "It indicates whether the use is considered to be a void volume in the mass, or not",
             default = False,
-            update=update_all_roma_meshes_void)
+            update=update_all_mastro_meshes_void)
             
 class typology_uses_name_list(PropertyGroup):
     id: IntProperty(
@@ -1584,7 +1584,7 @@ class typology_uses_name_list(PropertyGroup):
            name="Name",
            description="The typology use name",
            default="...")
-        #    update=update_roma_masses_data)
+        #    update=update_mastro_masses_data)
           
     
     
@@ -1600,12 +1600,12 @@ class typology_uses_name_list(PropertyGroup):
 ############################                ############################
         
         
-class VIEW3D_PT_RoMa_building_data(Panel):
+class VIEW3D_PT_MaStro_building_data(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
-    # bl_category = "RoMa"
+    # bl_category = "MaStro"
     bl_label = "Architecture"
-    bl_parent_id = "VIEW3D_PT_RoMa_project_data"
+    bl_parent_id = "VIEW3D_PT_MaStro_project_data"
     # bl_context = "scene"
     bl_options = {'DEFAULT_CLOSED'}
     bl_order = 2
@@ -1617,11 +1617,11 @@ class VIEW3D_PT_RoMa_building_data(Panel):
 ############################ WALL   ############################
 ############################        ############################
         
-class VIEW3D_PT_RoMa_building_wall_data(Panel):
+class VIEW3D_PT_MaStro_building_wall_data(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_label = "Wall"
-    bl_parent_id = "VIEW3D_PT_RoMa_building_data"
+    bl_parent_id = "VIEW3D_PT_MaStro_building_data"
     bl_options = {'DEFAULT_CLOSED'}      
     
     def draw(self, context):
@@ -1634,36 +1634,36 @@ class VIEW3D_PT_RoMa_building_wall_data(Panel):
         row = layout.row()
        # row.label(text="Wall")
         
-        # is_sortable = len(scene.roma_use_name_list) > 1
+        # is_sortable = len(scene.mastro_use_name_list) > 1
         rows = 3
         # if is_sortable:
         #     rows = 5
             
         row = layout.row()
         row.template_list("OBJECT_UL_Wall", "wall_list", scene,
-                        "roma_wall_name_list", scene, "roma_wall_name_list_index", rows = rows)
+                        "mastro_wall_name_list", scene, "mastro_wall_name_list_index", rows = rows)
         
         
         col = row.column(align=True)
-        col.operator("roma_wall_name_list.new_item", icon='ADD', text="")
+        col.operator("mastro_wall_name_list.new_item", icon='ADD', text="")
         col.separator()
-        col.operator("roma_wall_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
-        col.operator("roma_wall_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
+        col.operator("mastro_wall_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
+        col.operator("mastro_wall_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
         
         # row = layout.row()
         # row = layout.row(align=True)
-        # layout.prop(context.scene, "roma_typology_uses_name", icon="COMMUNITY", icon_only=False, text="Type:")
-        index = context.scene.roma_wall_name_list_index
-        layout.prop(context.scene.roma_wall_name_list[index], "shortName", text="Short name")
-        layout.prop(context.scene.roma_wall_name_list[index], "wallThickness", text="Thickness")
-        layout.prop(context.scene.roma_wall_name_list[index], "wallOffset", text="Offset")
+        # layout.prop(context.scene, "mastro_typology_uses_name", icon="COMMUNITY", icon_only=False, text="Type:")
+        index = context.scene.mastro_wall_name_list_index
+        layout.prop(context.scene.mastro_wall_name_list[index], "shortName", text="Short name")
+        layout.prop(context.scene.mastro_wall_name_list[index], "wallThickness", text="Thickness")
+        layout.prop(context.scene.mastro_wall_name_list[index], "wallOffset", text="Offset")
        
        
        
        
         
-        # if scene.roma_wall_name_list_index >= 0 and scene.roma_wall_name_list:
-        #     item = scene.roma_wall_name_list[scene.roma_wall_name_list_index]
+        # if scene.mastro_wall_name_list_index >= 0 and scene.mastro_wall_name_list:
+        #     item = scene.mastro_wall_name_list[scene.mastro_wall_name_list_index]
         #     row.prop(item, "name", icon_only=True, text="Element Name")
             
             
@@ -1677,7 +1677,7 @@ class OBJECT_UL_Wall(UIList):
             split = layout.split(factor=0.5)
             split.label(text="Id: %d" % (item.id)) 
             # split.label(text=item.name, icon=custom_icon) 
-            split.prop(context.scene.roma_wall_name_list[index],
+            split.prop(context.scene.mastro_wall_name_list[index],
                        "name",
                        icon_only=True,
                        icon = custom_icon)
@@ -1700,32 +1700,32 @@ class OBJECT_UL_Wall(UIList):
         pass
     
 class WALL_LIST_OT_NewItem(Operator):
-    bl_idname = "roma_wall_name_list.new_item"
+    bl_idname = "mastro_wall_name_list.new_item"
     bl_label = "Add a new wall type"
 
     def execute(self, context): 
-        context.scene.roma_wall_name_list.add()
-        # last = len(context.scene.roma_use_name_list)-1
+        context.scene.mastro_wall_name_list.add()
+        # last = len(context.scene.mastro_use_name_list)-1
         # if last == 0:
-        #     context.scene.roma_use_name_list[0].id = 0
-        #     context.scene.roma_use_name_list[0].name = ""
+        #     context.scene.mastro_use_name_list[0].id = 0
+        #     context.scene.mastro_use_name_list[0].name = ""
         #     random.seed(datetime.now().timestamp())
         #     rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
-        #     context.scene.roma_use_name_list[0].RND = rndNumber
-        #     context.scene.roma_use_name_list.add()
+        #     context.scene.mastro_use_name_list[0].RND = rndNumber
+        #     context.scene.mastro_use_name_list.add()
         temp_list = []    
-        for el in context.scene.roma_wall_name_list:
+        for el in context.scene.mastro_wall_name_list:
             temp_list.append(el.id)
-        last = len(context.scene.roma_wall_name_list)-1
+        last = len(context.scene.mastro_wall_name_list)-1
         
-        context.scene.roma_wall_name_list[last].id = max(temp_list)+1
+        context.scene.mastro_wall_name_list[last].id = max(temp_list)+1
         # rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
-        # context.scene.roma_use_name_list[last].RND = rndNumber
+        # context.scene.mastro_use_name_list[last].RND = rndNumber
             
         return{'FINISHED'}
     
 class WALL_LIST_OT_MoveItem(Operator):
-    bl_idname = "roma_wall_name_list.move_item"
+    bl_idname = "mastro_wall_name_list.move_item"
     bl_label = "Move an item in the list"
 
     direction: bpy.props.EnumProperty(items=(('UP', 'Up', ""),
@@ -1733,21 +1733,21 @@ class WALL_LIST_OT_MoveItem(Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.scene.roma_wall_name_list
+        return context.scene.mastro_wall_name_list
 
     def move_index(self):
-        index = bpy.context.scene.roma_wall_name_list_index
-        list_length = len(bpy.context.scene.roma_wall_name_list) - 1 
+        index = bpy.context.scene.mastro_wall_name_list_index
+        list_length = len(bpy.context.scene.mastro_wall_name_list) - 1 
         new_index = index + (-1 if self.direction == 'UP' else 1)
 
-        bpy.context.scene.roma_wall_name_list_index = max(0, min(new_index, list_length))
+        bpy.context.scene.mastro_wall_name_list_index = max(0, min(new_index, list_length))
 
     def execute(self, context):
-        roma_wall_name_list = context.scene.roma_wall_name_list
-        index = context.scene.roma_wall_name_list_index
+        mastro_wall_name_list = context.scene.mastro_wall_name_list
+        index = context.scene.mastro_wall_name_list_index
 
         neighbor = index + (-1 if self.direction == 'UP' else 1)
-        roma_wall_name_list.move(neighbor, index)
+        mastro_wall_name_list.move(neighbor, index)
         self.move_index()
 
         return{'FINISHED'}
@@ -1775,7 +1775,7 @@ class wall_name_list(PropertyGroup):
         #max=99,
         precision=3,
         default = 0.300,
-        # update=update_roma_masses_data
+        # update=update_mastro_masses_data
         )
     
     wallOffset: FloatProperty(
@@ -1785,7 +1785,7 @@ class wall_name_list(PropertyGroup):
         #max=99,
         precision=3,
         default = 0,
-        # update=update_roma_masses_data
+        # update=update_mastro_masses_data
         )
     
     normal: IntProperty(
@@ -1798,11 +1798,11 @@ class wall_name_list(PropertyGroup):
 ############################        ############################
             
 
-class VIEW3D_PT_RoMa_building_floor_data(Panel):
+class VIEW3D_PT_MaStro_building_floor_data(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_label = "Floor"
-    bl_parent_id = "VIEW3D_PT_RoMa_building_data"
+    bl_parent_id = "VIEW3D_PT_MaStro_building_data"
     bl_options = {'DEFAULT_CLOSED'}      
     
     def draw(self, context):
@@ -1815,27 +1815,27 @@ class VIEW3D_PT_RoMa_building_floor_data(Panel):
         row = layout.row()
         #row.label(text="Floor")
         
-        # is_sortable = len(scene.roma_use_name_list) > 1
+        # is_sortable = len(scene.mastro_use_name_list) > 1
         rows = 3
         # if is_sortable:
         #     rows = 5
             
         row = layout.row()
         row.template_list("OBJECT_UL_Floor", "floor_list", scene,
-                        "roma_floor_name_list", scene, "roma_floor_name_list_index", rows = rows)
+                        "mastro_floor_name_list", scene, "mastro_floor_name_list_index", rows = rows)
         
         
         col = row.column(align=True)
-        col.operator("roma_floor_name_list.new_item", icon='ADD', text="")
+        col.operator("mastro_floor_name_list.new_item", icon='ADD', text="")
         col.separator()
-        col.operator("roma_floor_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
-        col.operator("roma_floor_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
+        col.operator("mastro_floor_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
+        col.operator("mastro_floor_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
         
         row = layout.row()
         row = layout.row(align=True)
         
-        # if scene.roma_floor_name_list_index >= 0 and scene.roma_floor_name_list:
-        #     item = scene.roma_floor_name_list[scene.roma_floor_name_list_index]
+        # if scene.mastro_floor_name_list_index >= 0 and scene.mastro_floor_name_list:
+        #     item = scene.mastro_floor_name_list[scene.mastro_floor_name_list_index]
         #     row.prop(item, "name", icon_only=True, text="Floor Name")
             
           
@@ -1849,7 +1849,7 @@ class OBJECT_UL_Floor(UIList):
             split = layout.split(factor=0.5)
             split.label(text="Id: %d" % (item.id)) 
             # split.label(text=item.name, icon=custom_icon) 
-            split.prop(context.scene.roma_floor_name_list[index],
+            split.prop(context.scene.mastro_floor_name_list[index],
                        "name",
                        icon_only=True,
                        icon = custom_icon)
@@ -1872,22 +1872,22 @@ class OBJECT_UL_Floor(UIList):
         pass
     
 class FLOOR_LIST_OT_NewItem(Operator):
-    bl_idname = "roma_floor_name_list.new_item"
+    bl_idname = "mastro_floor_name_list.new_item"
     bl_label = "Add a new floor type"
 
     def execute(self, context): 
-        context.scene.roma_floor_name_list.add()
+        context.scene.mastro_floor_name_list.add()
         temp_list = []    
-        for el in context.scene.roma_floor_name_list:
+        for el in context.scene.mastro_floor_name_list:
             temp_list.append(el.id)
-        last = len(context.scene.roma_floor_name_list)-1
+        last = len(context.scene.mastro_floor_name_list)-1
         
-        context.scene.roma_floor_name_list[last].id = max(temp_list)+1
+        context.scene.mastro_floor_name_list[last].id = max(temp_list)+1
             
         return{'FINISHED'}
     
 class FLOOR_LIST_OT_MoveItem(Operator):
-    bl_idname = "roma_floor_name_list.move_item"
+    bl_idname = "mastro_floor_name_list.move_item"
     bl_label = "Move an item in the list"
 
     direction: bpy.props.EnumProperty(items=(('UP', 'Up', ""),
@@ -1895,21 +1895,21 @@ class FLOOR_LIST_OT_MoveItem(Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.scene.roma_floor_name_list
+        return context.scene.mastro_floor_name_list
 
     def move_index(self):
-        index = bpy.context.scene.roma_floor_name_list_index
-        list_length = len(bpy.context.scene.roma_floor_name_list) - 1 
+        index = bpy.context.scene.mastro_floor_name_list_index
+        list_length = len(bpy.context.scene.mastro_floor_name_list) - 1 
         new_index = index + (-1 if self.direction == 'UP' else 1)
 
-        bpy.context.scene.roma_floor_name_list_index = max(0, min(new_index, list_length))
+        bpy.context.scene.mastro_floor_name_list_index = max(0, min(new_index, list_length))
 
     def execute(self, context):
-        roma_floor_name_list = context.scene.roma_floor_name_list
-        index = context.scene.roma_floor_name_list_index
+        mastro_floor_name_list = context.scene.mastro_floor_name_list
+        index = context.scene.mastro_floor_name_list_index
 
         neighbor = index + (-1 if self.direction == 'UP' else 1)
-        roma_floor_name_list.move(neighbor, index)
+        mastro_floor_name_list.move(neighbor, index)
         self.move_index()
 
         return{'FINISHED'}
@@ -1931,16 +1931,16 @@ class floor_name_list(PropertyGroup):
     #        default = 0) 
         
 ############################        ############################
-############################ ROAD   ############################
+############################ STREET   ############################
 ############################        ############################
         
         
-class VIEW3D_PT_RoMa_road_data(Panel):
+class VIEW3D_PT_MaStro_street_data(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
-    # bl_category = "RoMa"
-    bl_label = "Road"
-    bl_parent_id = "VIEW3D_PT_RoMa_project_data"
+    # bl_category = "MaStro"
+    bl_label = "Street"
+    bl_parent_id = "VIEW3D_PT_MaStro_project_data"
     # bl_context = "scene"
     bl_options = {'DEFAULT_CLOSED'}
     bl_order = 3
@@ -1953,27 +1953,27 @@ class VIEW3D_PT_RoMa_road_data(Panel):
         
         row = layout.row()
         
-        # is_sortable = len(scene.roma_use_name_list) > 1
+        # is_sortable = len(scene.mastro_use_name_list) > 1
         rows = 3
         # if is_sortable:
         #     rows = 5
             
         row = layout.row()
-        row.template_list("OBJECT_UL_Road", "road_list", scene,
-                        "roma_road_name_list", scene, "roma_road_name_list_index", rows = rows)
+        row.template_list("OBJECT_UL_Street", "street_list", scene,
+                        "mastro_street_name_list", scene, "mastro_street_name_list_index", rows = rows)
         
         
         col = row.column(align=True)
-        col.operator("roma_road_name_list.new_item", icon='ADD', text="")
+        col.operator("mastro_street_name_list.new_item", icon='ADD', text="")
         col.separator()
-        col.operator("roma_road_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
-        col.operator("roma_road_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
+        col.operator("mastro_street_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
+        col.operator("mastro_street_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
         
-        index = context.scene.roma_road_name_list_index
-        layout.prop(context.scene.roma_road_name_list[index], "roadWidth", text="Width")
-        layout.prop(context.scene.roma_road_name_list[index], "roadRadius", text="Radius")
+        index = context.scene.mastro_street_name_list_index
+        layout.prop(context.scene.mastro_street_name_list[index], "streetWidth", text="Width")
+        layout.prop(context.scene.mastro_street_name_list[index], "streetRadius", text="Radius")
        
-class OBJECT_UL_Road(UIList):
+class OBJECT_UL_Street(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data,
                   active_propname, index):
        
@@ -1983,7 +1983,7 @@ class OBJECT_UL_Road(UIList):
             split = layout.split(factor=0.5)
             split.label(text="Id: %d" % (item.id)) 
             # split.label(text=item.name, icon=custom_icon) 
-            split.prop(context.scene.roma_road_name_list[index],
+            split.prop(context.scene.mastro_street_name_list[index],
                        "name",
                        icon_only=True,
                        icon = custom_icon)
@@ -2005,33 +2005,33 @@ class OBJECT_UL_Road(UIList):
     def draw_filter(self, context, layout):
         pass
     
-class ROAD_LIST_OT_NewItem(Operator):
-    bl_idname = "roma_road_name_list.new_item"
-    bl_label = "Add a new road type"
+class STREET_LIST_OT_NewItem(Operator):
+    bl_idname = "mastro_street_name_list.new_item"
+    bl_label = "Add a new street type"
 
     def execute(self, context): 
-        context.scene.roma_road_name_list.add()
-        # last = len(context.scene.roma_use_name_list)-1
+        context.scene.mastro_street_name_list.add()
+        # last = len(context.scene.mastro_use_name_list)-1
         # if last == 0:
-        #     context.scene.roma_use_name_list[0].id = 0
-        #     context.scene.roma_use_name_list[0].name = ""
+        #     context.scene.mastro_use_name_list[0].id = 0
+        #     context.scene.mastro_use_name_list[0].name = ""
         #     random.seed(datetime.now().timestamp())
         #     rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
-        #     context.scene.roma_use_name_list[0].RND = rndNumber
-        #     context.scene.roma_use_name_list.add()
+        #     context.scene.mastro_use_name_list[0].RND = rndNumber
+        #     context.scene.mastro_use_name_list.add()
         temp_list = []    
-        for el in context.scene.roma_road_name_list:
+        for el in context.scene.mastro_street_name_list:
             temp_list.append(el.id)
-        last = len(context.scene.roma_road_name_list)-1
+        last = len(context.scene.mastro_street_name_list)-1
         
-        context.scene.roma_road_name_list[last].id = max(temp_list)+1
+        context.scene.mastro_street_name_list[last].id = max(temp_list)+1
         # rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
-        # context.scene.roma_use_name_list[last].RND = rndNumber
+        # context.scene.mastro_use_name_list[last].RND = rndNumber
             
         return{'FINISHED'}
     
-class ROAD_LIST_OT_MoveItem(Operator):
-    bl_idname = "roma_road_name_list.move_item"
+class STREET_LIST_OT_MoveItem(Operator):
+    bl_idname = "mastro_street_name_list.move_item"
     bl_label = "Move an item in the list"
 
     direction: bpy.props.EnumProperty(items=(('UP', 'Up', ""),
@@ -2039,36 +2039,36 @@ class ROAD_LIST_OT_MoveItem(Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.scene.roma_road_name_list
+        return context.scene.mastro_street_name_list
 
     def move_index(self):
-        index = bpy.context.scene.roma_road_name_list_index
-        list_length = len(bpy.context.scene.roma_road_name_list) - 1 
+        index = bpy.context.scene.mastro_street_name_list_index
+        list_length = len(bpy.context.scene.mastro_street_name_list) - 1 
         new_index = index + (-1 if self.direction == 'UP' else 1)
 
-        bpy.context.scene.roma_road_name_list_index = max(0, min(new_index, list_length))
+        bpy.context.scene.mastro_street_name_list_index = max(0, min(new_index, list_length))
 
     def execute(self, context):
-        roma_road_name_list = context.scene.roma_road_name_list
-        index = context.scene.roma_road_name_list_index
+        mastro_street_name_list = context.scene.mastro_street_name_list
+        index = context.scene.mastro_street_name_list_index
 
         neighbor = index + (-1 if self.direction == 'UP' else 1)
-        roma_road_name_list.move(neighbor, index)
+        mastro_street_name_list.move(neighbor, index)
         self.move_index()
 
         return{'FINISHED'}
     
-def update_all_roma_road_width(self, context):
+def update_all_mastro_street_width(self, context):
     updates = "width"
-    bpy.ops.object.update_all_roma_road_attributes(attributeToUpdate=updates)
+    bpy.ops.object.update_all_mastro_street_attributes(attributeToUpdate=updates)
     
-def update_all_roma_road_radius(self, context):
+def update_all_mastro_street_radius(self, context):
     updates = "radius"
-    bpy.ops.object.update_all_roma_road_attributes(attributeToUpdate=updates)
+    bpy.ops.object.update_all_mastro_street_attributes(attributeToUpdate=updates)
     
-# Operator to update the attributes of all the RoMa roads in the scene        
-class OBJECT_OT_update_all_RoMa_road_attributes(Operator):
-    bl_idname = "object.update_all_roma_road_attributes"
+# Operator to update the attributes of all the MaStro streets in the scene        
+class OBJECT_OT_update_all_MaStro_street_attributes(Operator):
+    bl_idname = "object.update_all_mastro_street_attributes"
     bl_label = "Update"
     bl_options = {'REGISTER', 'UNDO'}
     
@@ -2082,7 +2082,7 @@ class OBJECT_OT_update_all_RoMa_road_attributes(Operator):
             activeObjMode = activeObj.mode
             
         for obj in objs:
-            if obj is not None and obj.type == 'MESH' and "RoMa object" in obj.data and "RoMa road" in obj.data:
+            if obj is not None and obj.type == 'MESH' and "MaStro object" in obj.data and "MaStro street" in obj.data:
                 # it is necessary to set the object to visibile in order to make it active
                 if obj.visible_get():
                     alreadyVisible = True
@@ -2115,12 +2115,12 @@ class OBJECT_OT_update_all_RoMa_road_attributes(Operator):
                     edges = context.active_object.data.edges
                     for edge in edges:
                         edgeIndex = edge.index
-                        road_id = mesh.attributes["roma_road_id"].data[edgeIndex].value
-                        data = read_mesh_attributes_roads(context, mesh, edgeIndex, roadSet = road_id)
+                        street_id = mesh.attributes["mastro_street_id"].data[edgeIndex].value
+                        data = read_mesh_attributes_streets(context, mesh, edgeIndex, streetSet = street_id)
                         if [i for i in ["width"] if i in self.attributeToUpdate]:
-                            mesh.attributes["roma_road_width"].data[edgeIndex].value = data["width"]
+                            mesh.attributes["mastro_street_width"].data[edgeIndex].value = data["width"]
                         elif [i for i in ["radius"] if i in self.attributeToUpdate]:
-                            mesh.attributes["roma_road_radius"].data[edgeIndex].value = data["radius"]
+                            mesh.attributes["mastro_street_radius"].data[edgeIndex].value = data["radius"]
                     bpy.ops.object.mode_set(mode=objMode)
                     
                     # If the object was hidden, it is set to hidden again
@@ -2140,36 +2140,36 @@ class OBJECT_OT_update_all_RoMa_road_attributes(Operator):
         return {'FINISHED'}
         
 
-class road_name_list(PropertyGroup):
+class street_name_list(PropertyGroup):
     id: IntProperty(
            name="Id",
-           description="Road name id",
+           description="Street name id",
            default = 0)
     
     name: StringProperty(
-           name="Road type Name",
-           description="The type name of the road",
-           default="Road type...")
+           name="Street type Name",
+           description="The type name of the street",
+           default="Street type...")
     
     
-    roadWidth: FloatProperty(
-        name="Road width",
-        description="The width of the road",
+    streetWidth: FloatProperty(
+        name="Street width",
+        description="The width of the street",
         min=0,
         #max=99,
         precision=3,
         default = 8,
-        update=update_all_roma_road_width)
+        update=update_all_mastro_street_width)
         
     
-    roadRadius: FloatProperty(
-        name="Road radius",
-        description="The radius of the road",
+    streetRadius: FloatProperty(
+        name="Street radius",
+        description="The radius of the street",
         min=0,
         #max=99,
         precision=3,
         default = 16,
-        update=update_all_roma_road_radius)
+        update=update_all_mastro_street_radius)
         
 
 ##############################              #############################
