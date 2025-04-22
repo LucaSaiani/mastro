@@ -3,7 +3,7 @@
 # luca.saiani@gmail.com
 
 # Created by Luca Saiani
-# This is part of RoMa addon for Blender
+# This is part of MaStro addon for Blender
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -42,171 +42,171 @@ from pathlib import Path
 mass_attribute_set = [
 
             # {
-            # "attr" : "roma_vertex_custom_attribute",
+            # "attr" : "mastro_vertex_custom_attribute",
             # "attr_type" :  "INT",
             # "attr_domain" :  "POINT",
             # "attr_default" : 0
             # },
             {
-            "attr" :  "roma_wall_id",
+            "attr" :  "mastro_wall_id",
             "attr_type" :  "INT",
             "attr_domain" :  "EDGE",
             "attr_default" : 0
             },
             {
-            "attr" :  "roma_wall_thickness",
+            "attr" :  "mastro_wall_thickness",
             "attr_type" :  "FLOAT",
             "attr_domain" :  "EDGE",
             "attr_default" : 0.300
             },
             {
-            "attr" :  "roma_wall_offset",
+            "attr" :  "mastro_wall_offset",
             "attr_type" :  "FLOAT",
             "attr_domain" :  "EDGE",
             "attr_default" : 0
             },
             {
-            "attr" :  "roma_inverted_normal",
+            "attr" :  "mastro_inverted_normal",
             "attr_type" :  "INT",
             "attr_domain" :  "EDGE",
             "attr_default" : 1
             },
             # {
-            # "attr" :  "roma_number_of_storeys_per_face",
+            # "attr" :  "mastro_number_of_storeys_per_face",
             # "attr_type" :  "INT",
             # "attr_domain" :  "EDGE"
             # },
             # {
-            # "attr" :  "roma_plot_id",
+            # "attr" :  "mastro_plot_id",
             # "attr_type" :  "INT",
             # "attr_domain" :  "FACE",
             # "attr_default" : 0
             # },
             # {
-            # "attr" :  "roma_plot_RND",
+            # "attr" :  "mastro_plot_RND",
             # "attr_type" :  "FLOAT",
             # "attr_domain" :  "FACE",
             # "attr_default" : 0
             # },
             # {
-            # "attr" :  "roma_block_id",
+            # "attr" :  "mastro_block_id",
             # "attr_type" :  "INT",
             # "attr_domain" :  "FACE",
             # "attr_default" : 0
             # },
             # {
-            # "attr" :  "roma_block_RND",
+            # "attr" :  "mastro_block_RND",
             # "attr_type" :  "FLOAT",
             # "attr_domain" :  "FACE",
             # "attr_default" : 0
             # },
             # {
-            # "attr" :  "roma_use_id",
+            # "attr" :  "mastro_use_id",
             # "attr_type" :  "INT",
             # "attr_domain" :  "FACE",
             # "attr_default" : 0
             # },
             # {
-            # "attr" :  "roma_use_RND",
+            # "attr" :  "mastro_use_RND",
             # "attr_type" :  "FLOAT",
             # "attr_domain" :  "FACE",
             # "attr_default" : 0
             # },
             {
-            "attr" :  "roma_typology_id",
+            "attr" :  "mastro_typology_id",
             "attr_type" :  "INT",
             "attr_domain" :  "FACE",
             # "attr_default" : "typology id"
             },
             {
-            "attr" :  "roma_list_use_id_A",
+            "attr" :  "mastro_list_use_id_A",
             "attr_type" :  "INT",
             "attr_domain" :  "FACE",
             # "attr_default" : 0
             },
              {
-            "attr" :  "roma_list_use_id_B",
+            "attr" :  "mastro_list_use_id_B",
             "attr_type" :  "INT",
             "attr_domain" :  "FACE",
             # "attr_default" : 0
             },
             {
-            "attr" :  "roma_list_storey_A",
+            "attr" :  "mastro_list_storey_A",
             "attr_type" :  "INT",
             "attr_domain" :  "FACE",
             # "attr_default" : 0
             },
             {
-            "attr" :  "roma_list_storey_B",
+            "attr" :  "mastro_list_storey_B",
             "attr_type" :  "INT",
             "attr_domain" :  "FACE",
             # "attr_default" : 0
             },
             {
-            "attr" :  "roma_list_height_A",
+            "attr" :  "mastro_list_height_A",
             "attr_type" :  "INT",
             "attr_domain" :  "FACE",
             # "attr_default" : 0
             },
             {
-            "attr" :  "roma_list_height_B",
+            "attr" :  "mastro_list_height_B",
             "attr_type" :  "INT",
             "attr_domain" :  "FACE",
             # "attr_default" : 0
             },
             {
-            "attr" :  "roma_list_height_C",
+            "attr" :  "mastro_list_height_C",
             "attr_type" :  "INT",
             "attr_domain" :  "FACE",
             # "attr_default" : 0
             },
             {
-            "attr" :  "roma_list_height_D",
+            "attr" :  "mastro_list_height_D",
             "attr_type" :  "INT",
             "attr_domain" :  "FACE",
             # "attr_default" : 0
             },
             {
-            "attr" :  "roma_list_height_E",
+            "attr" :  "mastro_list_height_E",
             "attr_type" :  "INT",
             "attr_domain" :  "FACE",
             # "attr_default" : 0
             },
             {
-            "attr" :  "roma_list_void",
+            "attr" :  "mastro_list_void",
             "attr_type" :  "INT",
             "attr_domain" :  "FACE",
             # "attr_default" : 0
             },
             {
-            "attr" :  "roma_floor_id",
+            "attr" :  "mastro_floor_id",
             "attr_type" :  "INT",
             "attr_domain" :  "FACE",
             "attr_default" : 0
             },
             {
-            "attr" :  "roma_number_of_storeys",
+            "attr" :  "mastro_number_of_storeys",
             "attr_type" :  "INT",
             "attr_domain" :  "FACE",
             "attr_default" : 1
             },
 ]
 
-road_attribute_set = [
+street_attribute_set = [
             {
-            "attr" :  "roma_road_id",
+            "attr" :  "mastro_street_id",
             "attr_type" :  "INT",
             "attr_domain" :  "EDGE",
             "attr_default" : 0
             },
             {
-            "attr" :  "roma_road_width",
+            "attr" :  "mastro_street_width",
             "attr_type" :  "FLOAT",
             "attr_domain" :  "EDGE",
             "attr_default" : 8
             },
             {
-            "attr" :  "roma_road_radius",
+            "attr" :  "mastro_street_radius",
             "attr_type" :  "FLOAT",
             "attr_domain" :  "EDGE",
             "attr_default" : 16
@@ -214,30 +214,30 @@ road_attribute_set = [
 ]
 
 # Defines class for custom properties
-class romaAddonProperties(bpy.types.PropertyGroup):
-    roma_option_attribute: bpy.props.IntProperty(
-        name="RoMa Option Attribute",
+class mastroAddonProperties(bpy.types.PropertyGroup):
+    mastro_option_attribute: bpy.props.IntProperty(
+        name="MaStro Option Attribute",
         default=1,
         min=1,
         description="The project option of the building"
     )
     
-    roma_phase_attribute: bpy.props.IntProperty(
-        name="RoMa Phase Attribute",
+    mastro_phase_attribute: bpy.props.IntProperty(
+        name="MaStro Phase Attribute",
         default=1,
         min=1,
         description="The construction phase of the building"
     )
     
-    roma_plot_attribute: bpy.props.IntProperty(
-        name="RoMa Plot Attribute",
+    mastro_plot_attribute: bpy.props.IntProperty(
+        name="MaStro Plot Attribute",
         default=1,
         min=1,
         description="Plot name"
     )
     
-    roma_block_attribute: bpy.props.IntProperty(
-        name="RoMa Block Attribute",
+    mastro_block_attribute: bpy.props.IntProperty(
+        name="MaStro Block Attribute",
         default=1,
         min=1,
         description="Block name"
@@ -254,54 +254,54 @@ class romaAddonProperties(bpy.types.PropertyGroup):
 #          self.perimeter = perimeter
          
 
-# class RoMa_Menu(Menu):
+# class MaStro_Menu(Menu):
 #     bl_idname = "VIEW3D_MT_custom_menu"
-#     bl_label = "RoMa"
+#     bl_label = "MaStro"
 
 #     def draw(self, context):
 #         layout = self.layout
 #         #layout.active = bool(context.active_object.mode!='EDIT  ')
-#         layout.operator(RoMa_MenuOperator_add_RoMa_mass.bl_idname)
-#         layout.operator(RoMa_MenuOperator_convert_to_RoMa_mass.bl_idname)
+#         layout.operator(MaStro_MenuOperator_add_MaStro_mass.bl_idname)
+#         layout.operator(MaStro_MenuOperator_convert_to_MaStro_mass.bl_idname)
 #         layout.separator()
-#         printAggregate = layout.operator(RoMa_MenuOperator_PrintData.bl_idname, text="Print the data of the mass in compact form")
+#         printAggregate = layout.operator(MaStro_MenuOperator_PrintData.bl_idname, text="Print the data of the mass in compact form")
 #         printAggregate.text = "aggregate"
-#         printGranular = layout.operator(RoMa_MenuOperator_PrintData.bl_idname, text="Print the data of the mass in extended form")
+#         printGranular = layout.operator(MaStro_MenuOperator_PrintData.bl_idname, text="Print the data of the mass in extended form")
 #         printGranular.text = "granular"
-#         layout.operator(RoMa_MenuOperator_ExportCSV.bl_idname)
+#         layout.operator(MaStro_MenuOperator_ExportCSV.bl_idname)
         # layout.separator()
-        # layout.operator(RoMa_Operator_transformation_orientation.bl_idname)
+        # layout.operator(MaStro_Operator_transformation_orientation.bl_idname)
         
-# panel to show operators when a non roma object is selected
-class VIEW3D_PT_RoMa_Panel(Panel):
+# panel to show operators when a non mastro object is selected
+class VIEW3D_PT_MaStro_Panel(Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "RoMa"
-    bl_label = "RoMa"
+    bl_category = "MaStro"
+    bl_label = "MaStro"
     
     @classmethod
     def poll(cls, context):
         return  (context.object is None or
                  context.selected_objects == [] or
                     (context.object.type != "MESH" if context.object else True) or
-                    ("RoMa object" not in context.object.data if context.object and context.object.type == "MESH" else False)
+                    ("MaStro object" not in context.object.data if context.object and context.object.type == "MESH" else False)
         )
     
     def draw(self, context):
         scene = context.scene
         layout = self.layout
-        layout.operator(RoMa_MenuOperator_add_RoMa_mass.bl_idname)
-        layout.operator(RoMa_MenuOperator_convert_to_RoMa_mass.bl_idname)
+        layout.operator(MaStro_MenuOperator_add_MaStro_mass.bl_idname)
+        layout.operator(MaStro_MenuOperator_convert_to_MaStro_mass.bl_idname)
 
-class RoMa_MenuOperator_add_RoMa_mass(Operator, AddObjectHelper):
-    """Add a RoMa mass"""
-    bl_idname = "object.roma_add_roma_mass"
-    bl_label = "RoMa Mass"
+class MaStro_MenuOperator_add_MaStro_mass(Operator, AddObjectHelper):
+    """Add a MaStro mass"""
+    bl_idname = "object.mastro_add_mastro_mass"
+    bl_label = "MaStro Mass"
     bl_options = {'REGISTER', 'UNDO'}
     
     width: bpy.props.FloatProperty(
         name="Width",
-        description="RoMa mass width",
+        description="MaStro mass width",
         # min=0.01, max=100.0,
         min=0,
         default=12,
@@ -309,7 +309,7 @@ class RoMa_MenuOperator_add_RoMa_mass(Operator, AddObjectHelper):
     
     depth: bpy.props.FloatProperty(
         name="Depth",
-        description="RoMa mass depth",
+        description="MaStro mass depth",
         # min=0.01, max=100.0,
         min=0,
         default=8,
@@ -324,12 +324,12 @@ class RoMa_MenuOperator_add_RoMa_mass(Operator, AddObjectHelper):
     
     def execute(self, context):
 
-        verts_loc, faces = add_roma_mass(
+        verts_loc, faces = add_mastro_mass(
             self.width,
             self.depth,
         )
 
-        mesh = bpy.data.meshes.new("RoMa mass")
+        mesh = bpy.data.meshes.new("MaStro mass")
 
         bm = bmesh.new()
 
@@ -355,17 +355,17 @@ class RoMa_MenuOperator_add_RoMa_mass(Operator, AddObjectHelper):
         addNodes()
         
         
-        mesh_attributes = obj.data.attributes["roma_number_of_storeys"].data.items()
+        mesh_attributes = obj.data.attributes["mastro_number_of_storeys"].data.items()
         mesh_attributes[0][1].value = self.storeys
 
-        # add roma mass geo node to the created object
-        geoName = "RoMa Mass"
+        # add mastro mass geo node to the created object
+        geoName = "MaStro Mass"
         obj.modifiers.new(geoName, "NODES")
-        group = bpy.data.node_groups["RoMa Mass"]
+        group = bpy.data.node_groups["MaStro Mass"]
         obj.modifiers[geoName].node_group = group
         return {'FINISHED'}
     
-def add_roma_mass(width, depth):
+def add_mastro_mass(width, depth):
     """
     This function takes inputs and returns vertex and face arrays.
     no actual mesh data creation is done here.
@@ -388,15 +388,15 @@ def add_roma_mass(width, depth):
 
     return verts, faces
 
-class RoMa_MenuOperator_add_RoMa_road(Operator, AddObjectHelper):
-    """Add a RoMa road"""
-    bl_idname = "object.roma_add_roma_road"
-    bl_label = "RoMa Road"
+class MaStro_MenuOperator_add_MaStro_street(Operator, AddObjectHelper):
+    """Add a MaStro street"""
+    bl_idname = "object.mastro_add_mastro_street"
+    bl_label = "MaStro Street"
     bl_options = {'REGISTER', 'UNDO'}
     
     width: bpy.props.FloatProperty(
         name="Width",
-        description="RoMa road width",
+        description="MaStro street width",
         # min=0.01, max=100.0,
         min=0,
         default=8,
@@ -404,7 +404,7 @@ class RoMa_MenuOperator_add_RoMa_road(Operator, AddObjectHelper):
     
     radius: bpy.props.FloatProperty(
         name="Radius",
-        description="RoMa road radius",
+        description="MaStro street radius",
         # min=0.01, max=100.0,
         min=0,
         default=16,
@@ -419,12 +419,12 @@ class RoMa_MenuOperator_add_RoMa_road(Operator, AddObjectHelper):
     
     def execute(self, context):
 
-        verts_loc, edges = add_roma_road(
+        verts_loc, edges = add_mastro_street(
             # self.width,
             # self.radius,
         )
 
-        mesh = bpy.data.meshes.new("RoMa road")
+        mesh = bpy.data.meshes.new("MaStro street")
 
         bm = bmesh.new()
 
@@ -445,22 +445,22 @@ class RoMa_MenuOperator_add_RoMa_road(Operator, AddObjectHelper):
         obj = bpy.context.active_object
         obj.select_set(True)
         
-        addRoadAttributes(obj)
+        addStreetAttributes(obj)
             
         addNodes()
         
         
-        # mesh_attributes = obj.data.attributes["roma_number_of_storeys"].data.items()
+        # mesh_attributes = obj.data.attributes["mastro_number_of_storeys"].data.items()
         # mesh_attributes[0][1].value = self.storeys
 
-        # add roma road geo node to the created object
-        geoName = "RoMa Road"
+        # add mastro street geo node to the created object
+        geoName = "MaStro Street"
         obj.modifiers.new(geoName, "NODES")
-        group = bpy.data.node_groups["RoMa Road"]
+        group = bpy.data.node_groups["MaStro Street"]
         obj.modifiers[geoName].node_group = group
         return {'FINISHED'}
     
-def add_roma_road():
+def add_mastro_street():
     """
     This function takes inputs and returns vertex and face arrays.
     no actual mesh data creation is done here.
@@ -492,13 +492,13 @@ def add_roma_road():
     return verts, edges
 
 # add the entry to the add menu
-def roma_add_menu_func(self, context):
-    self.layout.operator(RoMa_MenuOperator_add_RoMa_mass.bl_idname, icon='MESH_CUBE')
-    self.layout.operator(RoMa_MenuOperator_add_RoMa_road.bl_idname, icon='MESH_CUBE')
+def mastro_add_menu_func(self, context):
+    self.layout.operator(MaStro_MenuOperator_add_MaStro_mass.bl_idname, icon='MESH_CUBE')
+    self.layout.operator(MaStro_MenuOperator_add_MaStro_street.bl_idname, icon='MESH_CUBE')
     
-class RoMa_MenuOperator_convert_to_RoMa_mass(Operator):
-    bl_idname = "object.roma_convert_to_roma"
-    bl_label = "Convert the selected mesh to a RoMa mass"
+class MaStro_MenuOperator_convert_to_MaStro_mass(Operator):
+    bl_idname = "object.mastro_convert_to_mastro"
+    bl_label = "Convert the selected mesh to a MaStro mass"
     
     @classmethod
     def poll(cls, context):
@@ -517,18 +517,18 @@ class RoMa_MenuOperator_convert_to_RoMa_mass(Operator):
 
 # assign the mass attributes to the selected object
 def addMassAttributes(obj):
-    obj.roma_props['roma_option_attribute'] = 1
-    obj.roma_props['roma_phase_attribute'] = 1
-    obj.roma_props['roma_plot_attribute'] = 0
-    obj.roma_props['roma_block_attribute'] = 0
+    obj.mastro_props['mastro_option_attribute'] = 1
+    obj.mastro_props['mastro_phase_attribute'] = 1
+    obj.mastro_props['mastro_plot_attribute'] = 0
+    obj.mastro_props['mastro_block_attribute'] = 0
     mesh = obj.data
-    mesh["RoMa object"] = True
-    mesh["RoMa mass"] = True
+    mesh["MaStro object"] = True
+    mesh["MaStro mass"] = True
     
-    typology_id = bpy.context.scene.roma_typology_name_list_index
-    projectUses = bpy.context.scene.roma_use_name_list
+    typology_id = bpy.context.scene.mastro_typology_name_list_index
+    projectUses = bpy.context.scene.mastro_use_name_list
     
-    use_list = bpy.context.scene.roma_typology_name_list[typology_id].useList
+    use_list = bpy.context.scene.mastro_typology_name_list[typology_id].useList
     useSplit = use_list.split(";")
 
     use_id_list_A = "1"
@@ -648,27 +648,27 @@ def addMassAttributes(obj):
                         index = face.index
                         for mesh_attribute in attribute:
                             if mesh_attribute[0]  == index:
-                                if a["attr"] == "roma_typology_id":
-                                    mesh_attribute[1].value = bpy.context.scene.roma_typology_name_list[typology_id].id
-                                elif a["attr"] == "roma_list_use_id_A": 
+                                if a["attr"] == "mastro_typology_id":
+                                    mesh_attribute[1].value = bpy.context.scene.mastro_typology_name_list[typology_id].id
+                                elif a["attr"] == "mastro_list_use_id_A": 
                                     mesh_attribute[1].value = int(use_id_list_A)
-                                elif a["attr"] == "roma_list_use_id_B": 
+                                elif a["attr"] == "mastro_list_use_id_B": 
                                     mesh_attribute[1].value = int(use_id_list_B)
-                                elif a["attr"] == "roma_list_storey_A":
+                                elif a["attr"] == "mastro_list_storey_A":
                                     mesh_attribute[1].value = int(storey_list_A)
-                                elif a["attr"] == "roma_list_storey_B":
+                                elif a["attr"] == "mastro_list_storey_B":
                                     mesh_attribute[1].value = int(storey_list_B)
-                                elif a["attr"] == "roma_list_height_A":
+                                elif a["attr"] == "mastro_list_height_A":
                                     mesh_attribute[1].value = int(height_A)
-                                elif a["attr"] == "roma_list_height_B":
+                                elif a["attr"] == "mastro_list_height_B":
                                     mesh_attribute[1].value = int(height_B)
-                                elif a["attr"] == "roma_list_height_C":
+                                elif a["attr"] == "mastro_list_height_C":
                                     mesh_attribute[1].value = int(height_C)
-                                elif a["attr"] == "roma_list_height_D":
+                                elif a["attr"] == "mastro_list_height_D":
                                     mesh_attribute[1].value = int(height_D)
-                                elif a["attr"] == "roma_list_height_E":
+                                elif a["attr"] == "mastro_list_height_E":
                                     mesh_attribute[1].value = int(height_E)
-                                elif a["attr"] == "roma_list_void":
+                                elif a["attr"] == "mastro_list_void":
                                     mesh_attribute[1].value = int(void)
                                 # else:
                                 #     mesh_attribute[1].value = a["attr_default"]
@@ -684,19 +684,19 @@ def addMassAttributes(obj):
                 #     
                 #     attribute[0][1].value = None
 
-# add road attributes to the selected object
-def addRoadAttributes(obj):
-    obj.roma_props['roma_option_attribute'] = 1
-    obj.roma_props['roma_phase_attribute'] = 1
+# add street attributes to the selected object
+def addStreetAttributes(obj):
+    obj.mastro_props['mastro_option_attribute'] = 1
+    obj.mastro_props['mastro_phase_attribute'] = 1
     mesh = obj.data
-    mesh["RoMa object"] = True
-    mesh["RoMa road"] = True
+    mesh["MaStro object"] = True
+    mesh["MaStro street"] = True
     
-    road_id = bpy.context.scene.roma_road_name_list_index
-    width = bpy.context.scene.roma_road_name_list[road_id].roadWidth
-    radius = bpy.context.scene.roma_road_name_list[road_id].roadRadius
+    street_id = bpy.context.scene.mastro_street_name_list_index
+    width = bpy.context.scene.mastro_street_name_list[street_id].streetWidth
+    radius = bpy.context.scene.mastro_street_name_list[street_id].streetRadius
     
-    for a in road_attribute_set:
+    for a in street_attribute_set:
         try:
             mesh.attributes[a["attr"]]
         except:
@@ -710,22 +710,22 @@ def addRoadAttributes(obj):
                         index = edge.index
                         for mesh_attribute in attribute:
                             if mesh_attribute[0]  == index:
-                                if a["attr"] == "roma_road_id":
-                                    mesh_attribute[1].value = road_id
-                                elif a["attr"] == "roma_road_width": 
+                                if a["attr"] == "mastro_street_id":
+                                    mesh_attribute[1].value = street_id
+                                elif a["attr"] == "mastro_street_width": 
                                     mesh_attribute[1].value = width
-                                elif a["attr"] == "roma_road_radius": 
+                                elif a["attr"] == "mastro_street_radius": 
                                     mesh_attribute[1].value = radius
                                 break
     
-# import the roma nodes in the file
+# import the mastro nodes in the file
 def addNodes():
     USER = Path(resource_path('USER'))
-    src = USER / "scripts/addons" / "roma"
+    src = USER / "scripts/addons" / "mastro"
 
-    file_path = src / "roma.blend"
+    file_path = src / "mastro.blend"
     inner_path = "NodeTree"
-    geoNodes_list = ("RoMa Mass", "RoMa Road")
+    geoNodes_list = ("MaStro Mass", "MaStro Street")
 
     for group in geoNodes_list:
         if group not in bpy.data.node_groups:
@@ -740,8 +740,8 @@ def addNodes():
     
     
     
-# class RoMa_MenuOperator_PrintData(Operator):
-#     bl_idname = "object.roma_print_data"
+# class MaStro_MenuOperator_PrintData(Operator):
+#     bl_idname = "object.mastro_print_data"
 #     bl_label = "Print the data of the mass"
     
 #     text : bpy.props.StringProperty (
@@ -755,7 +755,7 @@ def addNodes():
 #         csvTemp = []
 #         objects = [obj for obj in bpy.context.scene.objects]
 #         for obj in objects:
-#             if obj.visible_get() and obj.type == "MESH" and "RoMa object" in obj.data:
+#             if obj.visible_get() and obj.type == "MESH" and "MaStro object" in obj.data:
 #                 csvTemp.append(get_mass_data(obj))
 #         for sublist in csvTemp:
 #             roughData.extend(sublist)
@@ -799,9 +799,9 @@ def addNodes():
         
 #         return {'FINISHED'}
     
-# class RoMa_MenuOperator_ExportCSV(Operator, ExportHelper):
-#     """Export the data of the visibile RoMa Objects as a CSV file"""
-#     bl_idname = "object.roma_export_csv"
+# class MaStro_MenuOperator_ExportCSV(Operator, ExportHelper):
+#     """Export the data of the visibile MaStro Objects as a CSV file"""
+#     bl_idname = "object.mastro_export_csv"
 #     bl_label = "Export data as CSV"
     
 #     filename_ext = ".csv"
@@ -816,7 +816,7 @@ def addNodes():
 #     def execute(self, context):
 #         return writeCSV(context, self.filepath)
 
-class RoMa_Operator_transformation_orientation(Operator):
+class MaStro_Operator_transformation_orientation(Operator):
     """Create transformation orientation from the selected edge"""
     bl_idname = "transform.set_orientation_from_edge"
     bl_label = "Edge"
@@ -1108,7 +1108,7 @@ def aggregateData(roughData):
 #     objects = [obj for obj in bpy.context.scene.objects]
 
 #     for obj in objects:
-#         if obj.visible_get() and obj.type == "MESH" and "RoMa object" in obj.data:
+#         if obj.visible_get() and obj.type == "MESH" and "MaStro object" in obj.data:
 #             dataRough.append(get_mass_data(obj))
 
 #     for sublist in dataRough:
@@ -1125,24 +1125,24 @@ def aggregateData(roughData):
     
     
 # Callback function to add drop down menu
-# def roma_menu(self, context):
+# def mastro_menu(self, context):
 #     layout = self.layout
-#     layout.menu(RoMa_Menu.bl_idname)
+#     layout.menu(MaStro_Menu.bl_idname)
 
 
 # def get_mass_data(obj):
 #     #mesh = obj.evaluated_get(bpy.context.evaluated_depsgraph_get()).data
-#     if "roma_option_attribute" in obj.roma_props.keys():
-#         option = obj.roma_props['roma_option_attribute']
+#     if "mastro_option_attribute" in obj.mastro_props.keys():
+#         option = obj.mastro_props['mastro_option_attribute']
 #     else:
 #         option = None
         
-#     if "roma_phase_attribute" in obj.roma_props.keys():
-#         phase = obj.roma_props['roma_phase_attribute']
+#     if "mastro_phase_attribute" in obj.mastro_props.keys():
+#         phase = obj.mastro_props['mastro_phase_attribute']
 #     else:
 #         phase = None
     
-#     phase = obj.roma_props['roma_phase_attribute']
+#     phase = obj.mastro_props['mastro_phase_attribute']
     
 #     mesh = obj.data
     
@@ -1151,27 +1151,27 @@ def aggregateData(roughData):
         
 #     data = []
     
-#     # bm_layer_plot = bm.faces.layers.int["roma_plot_id"]
-#     # bm_layer_block = bm.faces.layers.int["roma_block_id"]
-#     bm_layer_typology = bm.faces.layers.int["roma_typology_id"]
-#     bm_layer_storey = bm.faces.layers.int["roma_number_of_storeys"]
+#     # bm_layer_plot = bm.faces.layers.int["mastro_plot_id"]
+#     # bm_layer_block = bm.faces.layers.int["mastro_block_id"]
+#     bm_layer_typology = bm.faces.layers.int["mastro_typology_id"]
+#     bm_layer_storey = bm.faces.layers.int["mastro_number_of_storeys"]
     
 #     for f in bm.faces:
 #         edges = []
 #         #plot
-#         # for n in bpy.context.scene.roma_plot_name_list:
+#         # for n in bpy.context.scene.mastro_plot_name_list:
 #         #     if n.id == f[bm_layer_plot]:
 #         #         plot = n.name
 #         #         break
 
 #         #block
-#         # for n in bpy.context.scene.roma_block_name_list:
+#         # for n in bpy.context.scene.mastro_block_name_list:
 #         #     if n.id == f[bm_layer_block]:
 #         #         block = n.name
 #         #         break
 
 #         #typology
-#         for n in bpy.context.scene.roma_typology_name_list:
+#         for n in bpy.context.scene.mastro_typology_name_list:
 #             if n.id == f[bm_layer_typology]:
 #                 typology = n.name
 #                 break

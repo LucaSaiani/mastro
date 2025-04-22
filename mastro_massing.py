@@ -3,7 +3,7 @@
 # luca.saiani@gmail.com
 
 # Created by Luca Saiani
-# This is part of RoMa addon for Blender
+# This is part of MaStro addon for Blender
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,12 +25,12 @@ from bpy.types import Operator, Panel, UIList, PropertyGroup
 
 import math
 
-class VIEW3D_PT_RoMa_Mass(Panel):
+class VIEW3D_PT_MaStro_Mass(Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "RoMa"
+    bl_category = "MaStro"
     bl_label = "Mass"
-    #bl_idname = "ROMA_PT_Mass"
+    #bl_idname = "MASTRO_PT_Mass"
     
     
     # global plotName
@@ -44,8 +44,8 @@ class VIEW3D_PT_RoMa_Mass(Panel):
         return  (context.object is not None and 
                 context.selected_objects != [] and
                 context.object.type == "MESH" and 
-                "RoMa object" in context.object.data and
-                "RoMa mass" in context.object.data)
+                "MaStro object" in context.object.data and
+                "MaStro mass" in context.object.data)
     
     def draw(self, context):
         # obj = context.active_object 
@@ -63,17 +63,17 @@ class VIEW3D_PT_RoMa_Mass(Panel):
                 # row = layout.row()
                 row = layout.row(align=True)
                 
-                layout.prop(obj.roma_props, "roma_option_attribute", text="Option")
-                layout.prop(obj.roma_props, "roma_phase_attribute", text="Phase")
+                layout.prop(obj.mastro_props, "mastro_option_attribute", text="Option")
+                layout.prop(obj.mastro_props, "mastro_phase_attribute", text="Phase")
                 # row = layout.row()
                 row = layout.row(align=True)
-                row.prop(context.scene, "roma_plot_names", icon="MOD_BOOLEAN", icon_only=True, text="Plot")
-                if scene.roma_plot_name_list and len(scene.roma_plot_name_list) >0:
-                    row.label(text = scene.roma_plot_name_current[0].name)
+                row.prop(context.scene, "mastro_plot_names", icon="MOD_BOOLEAN", icon_only=True, text="Plot")
+                if scene.mastro_plot_name_list and len(scene.mastro_plot_name_list) >0:
+                    row.label(text = scene.mastro_plot_name_current[0].name)
                 row = layout.row(align=True)
-                row.prop(context.scene, "roma_block_names", icon="HOME", icon_only=True, text="Block")
-                if scene.roma_block_name_list and len(scene.roma_block_name_list) >0:
-                    row.label(text = scene.roma_block_name_current[0].name)
+                row.prop(context.scene, "mastro_block_names", icon="HOME", icon_only=True, text="Block")
+                if scene.mastro_block_name_list and len(scene.mastro_block_name_list) >0:
+                    row.label(text = scene.mastro_block_name_current[0].name)
                 
                     
             elif mode == "EDIT":      
@@ -98,18 +98,18 @@ class VIEW3D_PT_RoMa_Mass(Panel):
                 row = layout.row(align=True)
                 
                 # disable the number of storeys if there are no liquids
-                # current_typology = scene.roma_typology_name_current[0]
+                # current_typology = scene.mastro_typology_name_current[0]
                 
                 
                 # since it is possible to sort typologies in the ui, it can be that the index of the element
                 # in the list doesn't correspond to typology_id. Therefore it is necessary to find elements
-                # in the way below and not with use_list = bpy.context.scene.roma_typology_name_list[typology_id].useList
-                item = next(i for i in bpy.context.scene.roma_typology_name_list if i["id"] == scene.roma_typology_name_current[0].id)
+                # in the way below and not with use_list = bpy.context.scene.mastro_typology_name_list[typology_id].useList
+                item = next(i for i in bpy.context.scene.mastro_typology_name_list if i["id"] == scene.mastro_typology_name_current[0].id)
                 use_list = item.useList
                 uses = use_list.split(";")
                 tmp_enabled = False
                 for useID in uses:
-                    if context.scene.roma_use_name_list[int(useID)].liquid == True:
+                    if context.scene.mastro_use_name_list[int(useID)].liquid == True:
                         tmp_enabled = True
                         break
                 row.prop(context.scene, "attribute_mass_storeys", text="N° of storeys") 
@@ -118,17 +118,17 @@ class VIEW3D_PT_RoMa_Mass(Panel):
                 
                 
                 row = layout.row(align=True)
-                row.prop(context.scene, "roma_typology_names", icon="ASSET_MANAGER", icon_only=True, text="Typology")
-                if len(scene.roma_typology_name_list) >0:
-                    row.label(text=scene.roma_typology_name_current[0].name)
+                row.prop(context.scene, "mastro_typology_names", icon="ASSET_MANAGER", icon_only=True, text="Typology")
+                if len(scene.mastro_typology_name_list) >0:
+                    row.label(text=scene.mastro_typology_name_current[0].name)
                 rows = 3
                 row = layout.row()
                 row.template_list("OBJECT_UL_OBJ_Typology_Uses", 
                                   "obj_typology_uses_list", 
                                   scene,
-                                  "roma_obj_typology_uses_name_list",
+                                  "mastro_obj_typology_uses_name_list",
                                   scene,
-                                  "roma_obj_typology_uses_name_list_index",
+                                  "mastro_obj_typology_uses_name_list_index",
                                   rows = rows)
                 
             
@@ -177,14 +177,14 @@ class OBJECT_UL_OBJ_Typology_Uses(UIList):
         # # attribute_mass_typology_id = context.scene.attribute_mass_typology_id
         
         # try:
-        #     mesh.attributes["roma_typology_id"]
+        #     mesh.attributes["mastro_typology_id"]
         #     # attribute_mass_typology_id = context.scene.attribute_mass_typology_id
 
         #     mode = obj.mode
         #     bpy.ops.object.mode_set(mode='OBJECT')
            
         #     selected_faces = [p for p in bpy.context.active_object.data.polygons if p.select]
-        #     mesh_attributes = mesh.attributes["roma_typology_id"].data.items()
+        #     mesh_attributes = mesh.attributes["mastro_typology_id"].data.items()
 
             
         #     for face in selected_faces:
@@ -203,33 +203,33 @@ class OBJECT_UL_OBJ_Typology_Uses(UIList):
         #     return {'FINISHED'}
         
 
-'''Set the number of storeys of the selected face attribute of the RoMa mesh'''
+'''Set the number of storeys of the selected face attribute of the MaStro mesh'''
 class OBJECT_OT_Set_Face_Attribute_Storeys(Operator):
     bl_idname = "object.set_mesh_attribute_storeys"
-    bl_label = "Set face attributes assigned to the RoMa mesh"
+    bl_label = "Set face attributes assigned to the MaStro mesh"
     bl_options = {'REGISTER', 'UNDO'}
     
     def execute(self, context):
         obj = context.active_object
         mesh = obj.data
-        # mesh.attributes["roma_number_of_storeys"]
+        # mesh.attributes["mastro_number_of_storeys"]
         mode = obj.mode
         bpy.ops.object.mode_set(mode='OBJECT')
         selected_faces = [p for p in context.active_object.data.polygons if p.select]
         for face in selected_faces:
             faceIndex = face.index
             data = update_mesh_attributes_storeys(context, mesh, faceIndex)
-            mesh.attributes["roma_number_of_storeys"].data[faceIndex].value = data["numberOfStoreys"]
-            mesh.attributes["roma_list_storey_A"].data[faceIndex].value = data["storey_list_A"]
-            mesh.attributes["roma_list_storey_B"].data[faceIndex].value = data["storey_list_B"]
+            mesh.attributes["mastro_number_of_storeys"].data[faceIndex].value = data["numberOfStoreys"]
+            mesh.attributes["mastro_list_storey_A"].data[faceIndex].value = data["storey_list_A"]
+            mesh.attributes["mastro_list_storey_B"].data[faceIndex].value = data["storey_list_B"]
         bpy.ops.object.mode_set(mode=mode)
        
         return {'FINISHED'}
         
 '''function to update number of storeys accordingly to the assigned number of storeys'''
 def update_mesh_attributes_storeys(context, mesh, faceIndex, storeysSet = None):
-    typology_id = mesh.attributes["roma_typology_id"].data[faceIndex].value
-    projectUses = context.scene.roma_use_name_list
+    typology_id = mesh.attributes["mastro_typology_id"].data[faceIndex].value
+    projectUses = context.scene.mastro_use_name_list
     # if the function is run once the user updates the number of storeys,
     # the number of storeys is read from context.scene.attribute_mass_storeys.
     # Else the function is run because the user is updating the typology list and
@@ -241,8 +241,8 @@ def update_mesh_attributes_storeys(context, mesh, faceIndex, storeysSet = None):
             
     # since it is possible to sort typologies in the ui, it can be that the index of the element
     # in the list doesn't correspond to typology_id. Therefore it is necessary to find elements
-    # in the way below and not with use_list = bpy.context.scene.roma_typology_name_list[typology_id].useList
-    item = next(i for i in context.scene.roma_typology_name_list if i["id"] == typology_id)
+    # in the way below and not with use_list = bpy.context.scene.mastro_typology_name_list[typology_id].useList
+    item = next(i for i in context.scene.mastro_typology_name_list if i["id"] == typology_id)
     use_list = item.useList
     # uses are listed top to bottom, but they need to
     # be added bottom to top           
@@ -318,10 +318,10 @@ def update_mesh_attributes_storeys(context, mesh, faceIndex, storeysSet = None):
             }
     return data
 
-# Set the uses and their heights in the selected face attribute of the RoMa mesh
+# Set the uses and their heights in the selected face attribute of the MaStro mesh
 class OBJECT_OT_Set_Face_Attribute_Uses(Operator):
     bl_idname = "object.set_mesh_attribute_uses"
-    bl_label = "Set face attributes assigned to the RoMa mesh"
+    bl_label = "Set face attributes assigned to the MaStro mesh"
     bl_options = {'REGISTER', 'UNDO'}
     
     def execute(self, context):
@@ -333,20 +333,20 @@ class OBJECT_OT_Set_Face_Attribute_Uses(Operator):
         for face in selected_faces:
             faceIndex = face.index
             data = read_mesh_attributes_uses(context, mesh, faceIndex)
-            mesh.attributes["roma_typology_id"].data[faceIndex].value = data["typology_id"]
-            mesh.attributes["roma_list_use_id_A"].data[faceIndex].value = data["use_id_list_A"]
-            mesh.attributes["roma_list_use_id_B"].data[faceIndex].value = data["use_id_list_B"]
-            mesh.attributes["roma_list_height_A"].data[faceIndex].value = data["height_A"]
-            mesh.attributes["roma_list_height_B"].data[faceIndex].value = data["height_B"]
-            mesh.attributes["roma_list_height_C"].data[faceIndex].value = data["height_C"]
-            mesh.attributes["roma_list_height_D"].data[faceIndex].value = data["height_D"]
-            mesh.attributes["roma_list_height_E"].data[faceIndex].value = data["height_E"]
-            mesh.attributes["roma_list_void"].data[faceIndex].value = data["void"]
+            mesh.attributes["mastro_typology_id"].data[faceIndex].value = data["typology_id"]
+            mesh.attributes["mastro_list_use_id_A"].data[faceIndex].value = data["use_id_list_A"]
+            mesh.attributes["mastro_list_use_id_B"].data[faceIndex].value = data["use_id_list_B"]
+            mesh.attributes["mastro_list_height_A"].data[faceIndex].value = data["height_A"]
+            mesh.attributes["mastro_list_height_B"].data[faceIndex].value = data["height_B"]
+            mesh.attributes["mastro_list_height_C"].data[faceIndex].value = data["height_C"]
+            mesh.attributes["mastro_list_height_D"].data[faceIndex].value = data["height_D"]
+            mesh.attributes["mastro_list_height_E"].data[faceIndex].value = data["height_E"]
+            mesh.attributes["mastro_list_void"].data[faceIndex].value = data["void"]
             # number of storeys needs to be updated as well
             data = update_mesh_attributes_storeys(context, mesh, faceIndex)
-            mesh.attributes["roma_number_of_storeys"].data[faceIndex].value = data["numberOfStoreys"]
-            mesh.attributes["roma_list_storey_A"].data[faceIndex].value = data["storey_list_A"]
-            mesh.attributes["roma_list_storey_B"].data[faceIndex].value = data["storey_list_B"]
+            mesh.attributes["mastro_number_of_storeys"].data[faceIndex].value = data["numberOfStoreys"]
+            mesh.attributes["mastro_list_storey_A"].data[faceIndex].value = data["storey_list_A"]
+            mesh.attributes["mastro_list_storey_B"].data[faceIndex].value = data["storey_list_B"]
            
         bpy.ops.object.mode_set(mode=mode)
        
@@ -361,11 +361,11 @@ def read_mesh_attributes_uses(context, mesh, faceIndex, typologySet=None):
         typology_id = context.scene.attribute_mass_typology_id
     else:
       typology_id = typologySet
-    projectUses = context.scene.roma_use_name_list
+    projectUses = context.scene.mastro_use_name_list
     # since it is possible to sort typologies in the ui, it can be that the index of the element
     # in the list doesn't correspond to typology_id. Therefore it is necessary to find elements
-    # in the way below and not with use_list = bpy.context.scene.roma_typology_name_list[typology_id].useList
-    item = next(i for i in context.scene.roma_typology_name_list if i["id"] == typology_id)
+    # in the way below and not with use_list = bpy.context.scene.mastro_typology_name_list[typology_id].useList
+    item = next(i for i in context.scene.mastro_typology_name_list if i["id"] == typology_id)
     use_list = item.useList
     # uses are listed top to bottom, but they need to
     # be added bottom to top           
@@ -461,7 +461,7 @@ class obj_typology_uses_name_list(PropertyGroup):
            description="The number of storeys associated to that use",
            default = 0)
     
-def update_attributes_roma_mesh_storeys(self, context):
+def update_attributes_mastro_mesh_storeys(self, context):
     bpy.ops.object.set_mesh_attribute_storeys()
 
   
@@ -469,43 +469,43 @@ def update_attributes_roma_mesh_storeys(self, context):
 # this is quite old, maybe better to review
 def update_plot_name_id(self, context):
     scene = context.scene
-    name = scene.roma_plot_names
-    # scene.roma_plot_name_current[0].name = " " + name
-    scene.roma_plot_name_current[0].name = name
-    for n in scene.roma_plot_name_list:
+    name = scene.mastro_plot_names
+    # scene.mastro_plot_name_current[0].name = " " + name
+    scene.mastro_plot_name_current[0].name = name
+    for n in scene.mastro_plot_name_list:
         if n.name == name:
             scene.attribute_mass_plot_id = n.id
-            scene.roma_plot_name_current[0].id = n.id
+            scene.mastro_plot_name_current[0].id = n.id
             
             obj = context.active_object
-            obj.roma_props['roma_plot_attribute'] = n.id
+            obj.mastro_props['mastro_plot_attribute'] = n.id
             break 
 # this is quite old, maybe better to review
 def update_block_name_id(self, context):
     scene = context.scene
-    name = scene.roma_block_names
-    scene.roma_block_name_current[0].name = name
-    for n in scene.roma_block_name_list:
+    name = scene.mastro_block_names
+    scene.mastro_block_name_current[0].name = name
+    for n in scene.mastro_block_name_list:
         if n.name == name:
             scene.attribute_mass_block_id = n.id
-            scene.roma_block_name_current[0].id = n.id
+            scene.mastro_block_name_current[0].id = n.id
             
             obj = context.active_object
-            obj.roma_props['roma_block_attribute'] = n.id
+            obj.mastro_props['mastro_block_attribute'] = n.id
             break   
     
 #Update the typology label in the UI and all the relative data in the selected faces
-def update_attributes_roma_mesh_typology(self, context):
+def update_attributes_mastro_mesh_typology(self, context):
     # update the label
     scene = context.scene
-    name = scene.roma_typology_names
-    for n in scene.roma_typology_name_list:
+    name = scene.mastro_typology_names
+    for n in scene.mastro_typology_name_list:
         if n.name == name:
             scene.attribute_mass_typology_id = n.id
             # update the data accordingly to the typology id
             bpy.ops.object.set_mesh_attribute_uses()
-            scene.roma_typology_name_current[0].id = n.id
-            scene.roma_typology_name_current[0].name = name
+            scene.mastro_typology_name_current[0].id = n.id
+            scene.mastro_typology_name_current[0].name = name
             break  
         
     

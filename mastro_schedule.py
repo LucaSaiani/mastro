@@ -3,7 +3,7 @@
 # luca.saiani@gmail.com
 
 # Created by Luca Saiani
-# This is part of RoMa addon for Blender
+# This is part of MaStro addon for Blender
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -98,12 +98,12 @@ def uniqueKeys(arr, **kwargs):
 def addItemsToList(objectList, node, socketName = ""):
     nodeFingerPrint = writeNodeFingerPrint(node)
     for object in objectList:
-        RoMa_attribute_addItem(nodeFingerPrint,socketName, "output")
+        MaStro_attribute_addItem(nodeFingerPrint,socketName, "output")
         attributeIndex = node.outputs[socketName].object_items.active_index
         for key, value in object.items():
             try:
                 float(value)
-                RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+                MaStro_attribute_addKeyValueItem( node=nodeFingerPrint,
                                                 item_index=attributeIndex,
                                                 key=key,
                                                 valueType="FLOAT",
@@ -111,7 +111,7 @@ def addItemsToList(objectList, node, socketName = ""):
                                                 socketIdentifier=socketName
                                                 )
             except ValueError:
-                RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+                MaStro_attribute_addKeyValueItem( node=nodeFingerPrint,
                                                 item_index=attributeIndex,
                                                 key=key,
                                                 valueType="STRING",
@@ -178,10 +178,10 @@ def addKeysToNode(self,  **kwargs):
                         notify=execute_active_node_tree,
                         options={"PERSISTENT"}
                     )
-                #add the key to the romaKeyDictionary
-                bpy.context.scene.romaKeyDictionary.add()
-                last = len(bpy.context.scene.romaKeyDictionary)-1
-                bpy.context.scene.romaKeyDictionary[last].name = str(key)
+                #add the key to the mastroKeyDictionary
+                bpy.context.scene.mastroKeyDictionary.add()
+                last = len(bpy.context.scene.mastroKeyDictionary)-1
+                bpy.context.scene.mastroKeyDictionary[last].name = str(key)
                 # print("KEY", key)
         elif item_name == "outputs":
             for output in list:
@@ -193,10 +193,10 @@ def addKeysToNode(self,  **kwargs):
                         notify=execute_active_node_tree,
                         options={"PERSISTENT"}
                     )
-                #add the key to the romaKeyDictionary
-                bpy.context.scene.romaKeyDictionary.add()
-                last = len(bpy.context.scene.romaKeyDictionary)-1
-                bpy.context.scene.romaKeyDictionary[last].name = str(key)
+                #add the key to the mastroKeyDictionary
+                bpy.context.scene.mastroKeyDictionary.add()
+                last = len(bpy.context.scene.mastroKeyDictionary)-1
+                bpy.context.scene.mastroKeyDictionary[last].name = str(key)
                 # print("KEY", key)
         elif item_name == "key":
             key = self
@@ -207,10 +207,10 @@ def addKeysToNode(self,  **kwargs):
                     notify=execute_active_node_tree,
                     options={"PERSISTENT"}
                 )
-            #add the key to the romaKeyDictionary
-            bpy.context.scene.romaKeyDictionary.add()
-            last = len(bpy.context.scene.romaKeyDictionary)-1
-            bpy.context.scene.romaKeyDictionary[last].name = str(key)
+            #add the key to the mastroKeyDictionary
+            bpy.context.scene.mastroKeyDictionary.add()
+            last = len(bpy.context.scene.mastroKeyDictionary)-1
+            bpy.context.scene.mastroKeyDictionary[last].name = str(key)
             # print("KEY", key)
         
 # remove all the keys from the node
@@ -220,22 +220,22 @@ def removeKeyFromNode(self, **kwargs):
         if item_name == "inputs":
             for input in list:
                 key = self.path_resolve('inputs[\"'+input+'\"]')
-                for i, el in enumerate(bpy.context.scene.romaKeyDictionary):
+                for i, el in enumerate(bpy.context.scene.mastroKeyDictionary):
                     if el.name == str(key):
-                        bpy.context.scene.romaKeyDictionary.remove(i)
+                        bpy.context.scene.mastroKeyDictionary.remove(i)
                         break
         elif item_name == "outputs":
             for output in list:
                 key = self.path_resolve('outputs[\"'+output+'\"]')
-                for i, el in enumerate(bpy.context.scene.romaKeyDictionary):
+                for i, el in enumerate(bpy.context.scene.mastroKeyDictionary):
                     if el.name == str(key):
-                        bpy.context.scene.romaKeyDictionary.remove(i)
+                        bpy.context.scene.mastroKeyDictionary.remove(i)
                         break
         elif item_name == "key":
             key = self
-            for i, el in enumerate(bpy.context.scene.romaKeyDictionary):
+            for i, el in enumerate(bpy.context.scene.mastroKeyDictionary):
                     if el.name == str(key):
-                        bpy.context.scene.romaKeyDictionary.remove(i)
+                        bpy.context.scene.mastroKeyDictionary.remove(i)
                         break
 
 def cleanSocket(link, socketIdentifier, inputOutput):
@@ -252,29 +252,29 @@ def cleanSocket(link, socketIdentifier, inputOutput):
         else:
             l = link.outputs[socketIdentifier]
     
-        if l.bl_rna.name == 'RoMa_stringCollection_SocketType':
+        if l.bl_rna.name == 'MaStro_stringCollection_SocketType':
             l.object_items.clear()
-        elif l.bl_rna.name in ['RoMa_attributeCollection_SocketType']:
+        elif l.bl_rna.name in ['MaStro_attributeCollection_SocketType']:
             # l.pop('object_items', None)
             nodeFingerPrint = writeNodeFingerPrint(link)
-            RoMa_attribute_removeItem(nodeFingerPrint, socketIdentifier, inOut)
+            MaStro_attribute_removeItem(nodeFingerPrint, socketIdentifier, inOut)
    
             
     
 def cleanInputs(self):
     for input in self.inputs:
         cleanSocket(input.node, input.name, "input")
-        # if input.bl_rna.name == 'RoMa_stringCollection_SocketType':
+        # if input.bl_rna.name == 'MaStro_stringCollection_SocketType':
         #     input.object_items.clear()
-        # elif input.bl_rna.name == 'RoMa_attributeCollection_SocketType':
+        # elif input.bl_rna.name == 'MaStro_attributeCollection_SocketType':
         #     input.pop('object_items', None)
                                 
 def cleanOutputs(self):
      for output in self.outputs:
         cleanSocket(output.node, output.name, "output") 
-        # if output.bl_rna.name == 'RoMa_stringCollection_SocketType':
+        # if output.bl_rna.name == 'MaStro_stringCollection_SocketType':
         #     output.object_items.clear()
-        # elif output.bl_rna.name == 'RoMa_attributeCollection_SocketType':
+        # elif output.bl_rna.name == 'MaStro_attributeCollection_SocketType':
         #     output.pop('object_items', None)
             
             
@@ -298,16 +298,16 @@ def checkLink(self):
 # selected meshes
 def getAttributes(objNames, attrType):
     # for o in objNames: print(f"ottengo gli attributi per {o.name}")
-    romaObjs = [obj for obj in objNames if obj is not None and bpy.data.objects[obj.name].type == "MESH" and "RoMa object" in bpy.data.objects[obj.name].data]
-    if len(romaObjs) > 0:
+    mastroObjs = [obj for obj in objNames if obj is not None and bpy.data.objects[obj.name].type == "MESH" and "MaStro object" in bpy.data.objects[obj.name].data]
+    if len(mastroObjs) > 0:
         data = []
-        for el in romaObjs:
+        for el in mastroObjs:
             obj = bpy.data.objects[el.name]
           
-            option = obj.roma_props['roma_option_attribute']
-            phase = obj.roma_props['roma_phase_attribute']
-            plot = obj.roma_props['roma_plot_attribute']
-            block = obj.roma_props['roma_block_attribute']
+            option = obj.mastro_props['mastro_option_attribute']
+            phase = obj.mastro_props['mastro_phase_attribute']
+            plot = obj.mastro_props['mastro_plot_attribute']
+            block = obj.mastro_props['mastro_block_attribute']
     
             meshName = obj.name
             mesh = obj.data
@@ -316,25 +316,25 @@ def getAttributes(objNames, attrType):
             # bm.faces.ensure_lookup_table()    
            
          
-            bMesh_typology = bm.faces.layers.int["roma_typology_id"]
-            bMesh_use_id_list_A = bm.faces.layers.int["roma_list_use_id_A"]
-            bMesh_use_id_list_B = bm.faces.layers.int["roma_list_use_id_B"]
-            bMesh_storeys = bm.faces.layers.int["roma_number_of_storeys"]
-            bMesh_storey_list_A = bm.faces.layers.int["roma_list_storey_A"]
-            bMesh_storey_list_B = bm.faces.layers.int["roma_list_storey_B"]
-            bMesh_height_A = bm.faces.layers.int["roma_list_height_A"]
-            bMesh_height_B = bm.faces.layers.int["roma_list_height_B"]
-            bMesh_height_C = bm.faces.layers.int["roma_list_height_C"]
-            bMesh_height_D = bm.faces.layers.int["roma_list_height_D"]
-            bMesh_height_E = bm.faces.layers.int["roma_list_height_E"]
-            bMesh_void = bm.faces.layers.int["roma_list_void"]
+            bMesh_typology = bm.faces.layers.int["mastro_typology_id"]
+            bMesh_use_id_list_A = bm.faces.layers.int["mastro_list_use_id_A"]
+            bMesh_use_id_list_B = bm.faces.layers.int["mastro_list_use_id_B"]
+            bMesh_storeys = bm.faces.layers.int["mastro_number_of_storeys"]
+            bMesh_storey_list_A = bm.faces.layers.int["mastro_list_storey_A"]
+            bMesh_storey_list_B = bm.faces.layers.int["mastro_list_storey_B"]
+            bMesh_height_A = bm.faces.layers.int["mastro_list_height_A"]
+            bMesh_height_B = bm.faces.layers.int["mastro_list_height_B"]
+            bMesh_height_C = bm.faces.layers.int["mastro_list_height_C"]
+            bMesh_height_D = bm.faces.layers.int["mastro_list_height_D"]
+            bMesh_height_E = bm.faces.layers.int["mastro_list_height_E"]
+            bMesh_void = bm.faces.layers.int["mastro_list_void"]
     
             for f in bm.faces:
                 polyId = f.index
                 storeys = f[bMesh_storeys]
                 # get typology name
                 if attrType in ("all", "typology"):
-                    for n in bpy.context.scene.roma_typology_name_list:
+                    for n in bpy.context.scene.mastro_typology_name_list:
                         if n.id == f[bMesh_typology]:
                             typologyId = n.id
                             typologyName = n.name
@@ -353,7 +353,7 @@ def getAttributes(objNames, attrType):
                         use_B = int((f[bMesh_use_id_list_B] / 10 ** pos) % 10)
                         useId = use_A * 10 + use_B
                         # get use name
-                        for n in bpy.context.scene.roma_use_name_list:
+                        for n in bpy.context.scene.mastro_use_name_list:
                             if n.id == useId:
                                 useName = n.name
                                 break
@@ -414,7 +414,7 @@ def getAttributes(objNames, attrType):
     return
     
 # a function to walk the nodes, looking for the source 
-# of the attribute, the source being the RoMa objects
+# of the attribute, the source being the MaStro objects
 # def walkNodes(links):
 #     items = None
 #     if len(links) > 0:
@@ -422,10 +422,10 @@ def getAttributes(objNames, attrType):
 #             sockets = [x for x in link.to_node.inputs]
 #             for socket in sockets:
 #                 if socket.is_linked:
-#                     if socket.rna_type.name == 'RoMa_stringCollection_SocketType':
+#                     if socket.rna_type.name == 'MaStro_stringCollection_SocketType':
 #                         parent_node = socket.links[0].from_node
 #                         for output in parent_node.outputs:
-#                             if output.name == 'RoMa Mesh':
+#                             if output.name == 'MaStro Mesh':
 #                                 items = output.object_items
 #                                 return(items)
 #                     else:
@@ -463,7 +463,7 @@ def walkBackwards(parentNode, inputId, node, depth):
                     walkBackwards(parentNode, inputId, nextNode, depth)
     # else: # if there are no inputs, it may be that the node is an attribute node
     #     if node.outputs[0].name == "Attribute":
-    #         sourceObjects = parentNode.inputs['RoMa Mesh'].object_items
+    #         sourceObjects = parentNode.inputs['MaStro Mesh'].object_items
     #         node.objNames.clear()
     #         for obj in sourceObjects:
     #             item = node.objNames.add()
@@ -484,7 +484,7 @@ def execute_active_node_tree():
     #     if (node_tree):
     #         node_tree.execute(bpy.context)
     #         break
-    trees = [x for x in bpy.data.node_groups if x.bl_idname == "RoMaTreeType"]
+    trees = [x for x in bpy.data.node_groups if x.bl_idname == "MaStroTreeType"]
     if trees:
         for tree in trees:
             tree.execute()
@@ -495,7 +495,7 @@ def update_schedule_node_editor(node):
 
 # read attribute from the specified node
 def readAttributeFromLinkedNode (node, inputId):
-    nodeList = ['RoMa_attributeCollection_SocketType']
+    nodeList = ['MaStro_attributeCollection_SocketType']
     attributes = []
     if node.inputs[inputId].is_linked and node.inputs[inputId].links:
         if node.inputs[inputId].links[0].from_node.outputs:
@@ -538,7 +538,7 @@ def getAvailableAttributes(node, **kwargs):
         return
 
 # Function to add item to object_items
-def RoMa_attribute_addItem(nodeFingerPrint, socketIdentifier, inputOutput):
+def MaStro_attribute_addItem(nodeFingerPrint, socketIdentifier, inputOutput):
     node = readNodeFingerPrint(nodeFingerPrint)
     if inputOutput == "both":
         sockets = ['input', 'output']
@@ -559,7 +559,7 @@ def RoMa_attribute_addItem(nodeFingerPrint, socketIdentifier, inputOutput):
     return {'FINISHED'}
 
 # Function to remove items from object_items
-def RoMa_attribute_removeItem(nodeFingerPrint, socketIdentifier ,inputOutput):
+def MaStro_attribute_removeItem(nodeFingerPrint, socketIdentifier ,inputOutput):
     if inputOutput == "both":
         sockets = ['input', 'output']
     elif inputOutput == "input":
@@ -581,7 +581,7 @@ def RoMa_attribute_removeItem(nodeFingerPrint, socketIdentifier ,inputOutput):
             try:
                 collection.items.remove(collectionSize)
             except AttributeError as e:
-                print(F"Error in Roma_attribute_removeItem {e}")
+                print(F"Error in Mastro_attribute_removeItem {e}")
                 # this is to handle the sockets that have both default_value
                 # and item
                 pass                
@@ -597,7 +597,7 @@ def RoMa_attribute_removeItem(nodeFingerPrint, socketIdentifier ,inputOutput):
     return {'FINISHED'}
 
 # Function to add a key-value item to an element of the collection
-def RoMa_attribute_addKeyValueItem(**kwargs):
+def MaStro_attribute_addKeyValueItem(**kwargs):
     params = {
         'node': None,
         'item_index': None,
@@ -661,7 +661,7 @@ def rearrangeElements(node, keyName, newPosition):
     return {'FINISHED'}
 
 # Function to remove a key-value item from an element of the collection
-# def RoMa_attribute_removeKeyValueItem(self, **kwargs):
+# def MaStro_attribute_removeKeyValueItem(self, **kwargs):
 #     params = {
 #         'node': None,
 #         'item_index': None,
@@ -707,7 +707,7 @@ def copyAttributesToSocket(object_items, nodeFingerPrint, socketIdentifier, inpu
         sockets = ['output']
             
     for attr in object_items:
-        RoMa_attribute_addItem(nodeFingerPrint, socketIdentifier, inputOutput)
+        MaStro_attribute_addItem(nodeFingerPrint, socketIdentifier, inputOutput)
         for socket in sockets:
             if socket == "input":
                 attributeIndex = node.inputs[socketIdentifier].object_items.active_index
@@ -716,7 +716,7 @@ def copyAttributesToSocket(object_items, nodeFingerPrint, socketIdentifier, inpu
         
             for key in attr['key_value_items']:
                 if key['value_type'] == "FLOAT":
-                    RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+                    MaStro_attribute_addKeyValueItem( node=nodeFingerPrint,
                                                     item_index=attributeIndex,
                                                     key=key['name'],
                                                     valueType=key['value_type'],
@@ -725,7 +725,7 @@ def copyAttributesToSocket(object_items, nodeFingerPrint, socketIdentifier, inpu
                                                     socketIdentifier=socketIdentifier
                                                     )
                 else:
-                    RoMa_attribute_addKeyValueItem(node=nodeFingerPrint,
+                    MaStro_attribute_addKeyValueItem(node=nodeFingerPrint,
                                                     item_index=attributeIndex,
                                                     key=key['name'],
                                                     valueType=key['value_type'],
@@ -747,7 +747,7 @@ def copyAndMergeAttributeToSocket(object_items, nodeFingerPrint, socketIdentifie
     node = readNodeFingerPrint(nodeFingerPrint)
     
     for attr in object_items:
-        # RoMa_attribute_addItem(nodeFingerPrint, socketIdentifier, inputOutput)
+        # MaStro_attribute_addItem(nodeFingerPrint, socketIdentifier, inputOutput)
         for socket in sockets:
             if socket == "input":
                 attributeIndex = node.inputs[socketIdentifier].object_items.active_index
@@ -784,7 +784,7 @@ def copyAndMergeAttributeToSocket(object_items, nodeFingerPrint, socketIdentifie
                     for keys in attr['key_value_items']:
                         if keys['name'] == 'id' and keys['value_string'] == id:
                             if valueType == "FLOAT":
-                                RoMa_attribute_addKeyValueItem(node=nodeFingerPrint,
+                                MaStro_attribute_addKeyValueItem(node=nodeFingerPrint,
                                                             item_index=attributeIndex,
                                                             key=keyName,
                                                             valueType="FLOAT",
@@ -792,7 +792,7 @@ def copyAndMergeAttributeToSocket(object_items, nodeFingerPrint, socketIdentifie
                                                             socketIdentifier=socketIdentifier
                                                             )
                             else:
-                                RoMa_attribute_addKeyValueItem(node=nodeFingerPrint,
+                                MaStro_attribute_addKeyValueItem(node=nodeFingerPrint,
                                                             item_index=attributeIndex,
                                                             key=keyName,
                                                             valueType="STRING",
@@ -902,70 +902,70 @@ class dataForGraphic:
 ########## Classes to  manage attribute collection  #########################
 #############################################################################                
 
-# Class to store the name of RoMa objects
+# Class to store the name of MaStro objects
 # This class is used to define the list in 
-# RoMa_stringCollection_Socket and in the keys
-class RoMa_string_item(PropertyGroup):
+# MaStro_stringCollection_Socket and in the keys
+class MaStro_string_item(PropertyGroup):
     name: StringProperty(name="Name")
 
 
-# Define a key-value pair used in RoMa_attribute_collectionItem
-class RoMa_keyValueItem(PropertyGroup):
+# Define a key-value pair used in MaStro_attribute_collectionItem
+class MaStro_keyValueItem(PropertyGroup):
     # key: bpy.props.StringProperty(name="Key", description="Element's key")
     value_string: bpy.props.StringProperty(name="String value", description="String value", default="")
     value_float: bpy.props.FloatProperty(name="Float value", description="Float value", default=-1)
     value_type: bpy.props.StringProperty( name="Value Type", description="Type value", default='FLOAT')
 
 
-# Define the element of the collection RoMa_attribute_propertyGroup
-class RoMa_attribute_collectionItem(PropertyGroup):
-    key_value_items: bpy.props.CollectionProperty(type=RoMa_keyValueItem)
+# Define the element of the collection MaStro_attribute_propertyGroup
+class MaStro_attribute_collectionItem(PropertyGroup):
+    key_value_items: bpy.props.CollectionProperty(type=MaStro_keyValueItem)
 
     
-# Class to store the attributes of RoMa objects
-class RoMa_attribute_propertyGroup(PropertyGroup):
-    items: bpy.props.CollectionProperty(type=RoMa_attribute_collectionItem)
+# Class to store the attributes of MaStro objects
+class MaStro_attribute_propertyGroup(PropertyGroup):
+    items: bpy.props.CollectionProperty(type=MaStro_attribute_collectionItem)
     active_index: bpy.props.IntProperty(default=0)
     
-# Define the elements of the data RoMa_attribute_propertyGroup
+# Define the elements of the data MaStro_attribute_propertyGroup
 # It contains name and a collection of items (the row values in the schedule)
 # and the operation for the footer
-class RoMa_data_collectionItem(PropertyGroup):
+class MaStro_data_collectionItem(PropertyGroup):
     key_name : bpy.props.StringProperty(name="Key name")
-    key_value_items: bpy.props.CollectionProperty(type=RoMa_keyValueItem)
+    key_value_items: bpy.props.CollectionProperty(type=MaStro_keyValueItem)
     key_footer_operation : bpy.props.StringProperty(name="Key footer operation")
 
-# Class to store the data of RoMa objects
+# Class to store the data of MaStro objects
 # Data is used to define schedules
-class RoMa_data_propertyGroup(PropertyGroup):
-    items: bpy.props.CollectionProperty(type=RoMa_data_collectionItem)
+class MaStro_data_propertyGroup(PropertyGroup):
+    items: bpy.props.CollectionProperty(type=MaStro_data_collectionItem)
     active_index: bpy.props.IntProperty(default=0)
 
 
 #############################################################################
-########## RoMa Nodetree   ##################################################
+########## MaStro Nodetree   ##################################################
 #############################################################################           
 
-# The node tree for RoMa schedules
-class RoMaTree(NodeTree):
-    '''RoMa schedule'''
-    bl_idname = 'RoMaTreeType'
-    bl_label = "RoMa Schedule"
+# The node tree for MaStro schedules
+class MaStroTree(NodeTree):
+    '''MaStro schedule'''
+    bl_idname = 'MaStroTreeType'
+    bl_label = "MaStro Schedule"
     bl_icon = 'NODETREE'
     
     def execute(self):
         for node in self.nodes:
             node.execute()    
     
-# RoMa custom socket type
+# MaStro custom socket type
 # used to collect mesh names
-class RoMa_stringCollection_Socket(NodeSocket):
-    """RoMa node socket string collection type"""
-    bl_idname = 'RoMa_stringCollection_SocketType'
-    bl_label = "RoMa Mesh"
+class MaStro_stringCollection_Socket(NodeSocket):
+    """MaStro node socket string collection type"""
+    bl_idname = 'MaStro_stringCollection_SocketType'
+    bl_label = "MaStro Mesh"
     
     
-    object_items: CollectionProperty(type=RoMa_string_item)
+    object_items: CollectionProperty(type=MaStro_string_item)
    
     def draw(self, context, layout, node, text):
         layout.label(text=self.identifier)
@@ -974,14 +974,14 @@ class RoMa_stringCollection_Socket(NodeSocket):
     def draw_color_simple(cls):
         return (0, 0.84, 0.64, 1)
     
-# RoMa custom socket type
+# MaStro custom socket type
 # used in the math node
-# class RoMa_attributesCollectionAndFloat_Socket(NodeSocket):
-#     """RoMa node socket attribute collection and float type"""
-#     bl_idname = 'RoMa_attributeCollectionAndFloat_SocketType'
+# class MaStro_attributesCollectionAndFloat_Socket(NodeSocket):
+#     """MaStro node socket attribute collection and float type"""
+#     bl_idname = 'MaStro_attributeCollectionAndFloat_SocketType'
 #     bl_label = "Attribute"
     
-#     object_items: PointerProperty(type=RoMa_attribute_propertyGroup)
+#     object_items: PointerProperty(type=MaStro_attribute_propertyGroup)
 #     default_value : FloatProperty(default=1.0) 
    
 #     def draw(self, context, layout, node, text):
@@ -998,14 +998,14 @@ class RoMa_stringCollection_Socket(NodeSocket):
 #         return (0.63, 0.63, 0.63, 1)
 
     
-# RoMa custom socket type
+# MaStro custom socket type
 # used to collect attributes
-class RoMa_attributesCollection_Socket(NodeSocket):
-    """RoMa node socket attribute collection type"""
-    bl_idname = 'RoMa_attributeCollection_SocketType'
+class MaStro_attributesCollection_Socket(NodeSocket):
+    """MaStro node socket attribute collection type"""
+    bl_idname = 'MaStro_attributeCollection_SocketType'
     bl_label = "Attribute"
     
-    object_items: PointerProperty(type=RoMa_attribute_propertyGroup)
+    object_items: PointerProperty(type=MaStro_attribute_propertyGroup)
     default_value : FloatProperty(default=1.0) 
    
     def draw(self, context, layout, node, text):
@@ -1021,14 +1021,14 @@ class RoMa_attributesCollection_Socket(NodeSocket):
     def draw_color_simple(cls):
         return (0.63, 0.63, 0.63, 1)
     
-# RoMa custom socket type
+# MaStro custom socket type
 # used to manage data
-class RoMa_dataCollection_Socket(NodeSocket):
-    """RoMa node socket data collection type"""
-    bl_idname = 'RoMa_dataCollection_SocketType'
+class MaStro_dataCollection_Socket(NodeSocket):
+    """MaStro node socket data collection type"""
+    bl_idname = 'MaStro_dataCollection_SocketType'
     bl_label = "Data"
     
-    object_items: PointerProperty(type=RoMa_data_propertyGroup)
+    object_items: PointerProperty(type=MaStro_data_propertyGroup)
    
     def draw(self, context, layout, node, text):
         layout.label(text=self.identifier)
@@ -1037,14 +1037,14 @@ class RoMa_dataCollection_Socket(NodeSocket):
     def draw_color_simple(cls):
         return (1.0, 0.67, 0.0, 1.0)
     
-# RoMa custom socket type
+# MaStro custom socket type
 # used to set operation data
-# class RoMa_dataOperation_Socket(NodeSocket):
-#     """RoMa node socket to operate data"""
-#     bl_idname = 'RoMa_dataOperation_SocketType'
+# class MaStro_dataOperation_Socket(NodeSocket):
+#     """MaStro node socket to operate data"""
+#     bl_idname = 'MaStro_dataOperation_SocketType'
 #     bl_label = "Data Operation"
     
-#     object_items: PointerProperty(type=RoMa_attribute_propertyGroup)
+#     object_items: PointerProperty(type=MaStro_attribute_propertyGroup)
 #     default_value : FloatProperty(default=1.0) 
    
 #     def draw(self, context, layout, node, text):
@@ -1055,9 +1055,9 @@ class RoMa_dataCollection_Socket(NodeSocket):
 #         return (0.99, 0.96, 0.54, 1.0)
     
 # Customizable interface properties to generate a socket from.
-# class RoMaInterfaceSocket(NodeTreeInterfaceSocket):
+# class MaStroInterfaceSocket(NodeTreeInterfaceSocket):
 #     # The type of socket that is generated.
-#     bl_socket_idname = 'RoMaSocketType'
+#     bl_socket_idname = 'MaStroSocketType'
 
 #     default_value: FloatProperty(default=1.0, description="Default input value for new sockets",)
 
@@ -1082,36 +1082,36 @@ class RoMa_dataCollection_Socket(NodeSocket):
 
 # Mix-in class for all custom nodes in this tree type.
 # Defines a poll function to enable instantiation.
-class RoMaTreeNode:
+class MaStroTreeNode:
     @classmethod
     def poll(cls, ntree):
-        return ntree.bl_idname == 'RoMaTreeType'
+        return ntree.bl_idname == 'MaStroTreeType'
     
     def execute(self):
         pass
 
-class RoMaGroupInputNode(RoMaTreeNode, Node):
-    '''Input node containing all the RoMa meshes existing in the scene'''
-    bl_idname = 'Input RoMa Mesh'
+class MaStroGroupInputNode(MaStroTreeNode, Node):
+    '''Input node containing all the MaStro meshes existing in the scene'''
+    bl_idname = 'Input MaStro Mesh'
     bl_label = 'Group Input - All'
 
     def init(self, context):
-        self.outputs.new('RoMa_stringCollection_SocketType', name='RoMa Mesh', identifier='RoMa Mesh')
+        self.outputs.new('MaStro_stringCollection_SocketType', name='MaStro Mesh', identifier='MaStro Mesh')
     
     def update_selected_objects(self):
-        if self.outputs['RoMa Mesh'].is_linked:
+        if self.outputs['MaStro Mesh'].is_linked:
             cleanOutputs(self)
             objs = bpy.context.scene.objects
             # attributes = getAttributes(objs)
         
-            # romaObjs = []
-            romaObjs = [obj for obj in objs if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data]
-            # romaObjs = [obj.name for obj in objs if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data]
-            # self.outputs['RoMa Mesh'].object_items = romaObjs
-            for obj in romaObjs:
-                item = self.outputs['RoMa Mesh'].object_items.add()
+            # mastroObjs = []
+            mastroObjs = [obj for obj in objs if obj is not None and obj.type == "MESH" and "MaStro object" in obj.data]
+            # mastroObjs = [obj.name for obj in objs if obj is not None and obj.type == "MESH" and "MaStro object" in obj.data]
+            # self.outputs['MaStro Mesh'].object_items = mastroObjs
+            for obj in mastroObjs:
+                item = self.outputs['MaStro Mesh'].object_items.add()
                 item.name = obj.name
-            # print(f"RoMa meshes collected {len(self.outputs['RoMa Mesh'].object_items)}")
+            # print(f"MaStro meshes collected {len(self.outputs['MaStro Mesh'].object_items)}")
 
     def update(self):
         self.update_selected_objects()
@@ -1121,24 +1121,24 @@ class RoMaGroupInputNode(RoMaTreeNode, Node):
         
 
     
-class RoMaSelectedInputNode(RoMaTreeNode, Node):
-    '''Input node containing the selected RoMa meshes'''
-    bl_idname = 'Input RoMa Selected Mesh'
+class MaStroSelectedInputNode(MaStroTreeNode, Node):
+    '''Input node containing the selected MaStro meshes'''
+    bl_idname = 'Input MaStro Selected Mesh'
     bl_label = 'Group Input - Selected'
    
     def init(self, context):
-        self.outputs.new('RoMa_stringCollection_SocketType', name='RoMa Mesh', identifier='RoMa Mesh')
+        self.outputs.new('MaStro_stringCollection_SocketType', name='MaStro Mesh', identifier='MaStro Mesh')
     
     def update_selected_objects(self):
-        if self.outputs['RoMa Mesh'].is_linked:
+        if self.outputs['MaStro Mesh'].is_linked:
             cleanOutputs(self)
 
             objs = bpy.context.selected_objects
-            romaObjs = [obj for obj in objs if obj is not None and obj.type == "MESH" and "RoMa object" in obj.data]
-            for obj in romaObjs:
-                item = self.outputs['RoMa Mesh'].object_items.add()
+            mastroObjs = [obj for obj in objs if obj is not None and obj.type == "MESH" and "MaStro object" in obj.data]
+            for obj in mastroObjs:
+                item = self.outputs['MaStro Mesh'].object_items.add()
                 item.name = obj.name
-            # print(f"RoMa meshes collected {len(self.outputs['RoMa Mesh'].object_items)}")
+            # print(f"MaStro meshes collected {len(self.outputs['MaStro Mesh'].object_items)}")
 
     def update(self):
         self.update_selected_objects()  
@@ -1147,16 +1147,16 @@ class RoMaSelectedInputNode(RoMaTreeNode, Node):
         self.update_selected_objects()
 
     
-class RoMaAllAttributesNode(RoMaTreeNode, Node):
-    '''RoMa All Available Attributes'''
-    bl_idname = 'RoMa All Attributes'
+class MaStroAllAttributesNode(MaStroTreeNode, Node):
+    '''MaStro All Available Attributes'''
+    bl_idname = 'MaStro All Attributes'
     bl_label = 'All Attributes'
     # bl_description = 'Attribute'
     
-    # objNames : CollectionProperty(type=RoMa_string_item)
+    # objNames : CollectionProperty(type=MaStro_string_item)
     
     def init(self, context):
-        self.outputs.new('RoMa_attributeCollection_SocketType', name='Attribute', identifier = 'All Attributes')
+        self.outputs.new('MaStro_attributeCollection_SocketType', name='Attribute', identifier = 'All Attributes')
         self.outputs['All Attributes'].display_shape = 'DIAMOND_DOT'
         
     def manualExecute(self, objNames):
@@ -1169,14 +1169,14 @@ class RoMaAllAttributesNode(RoMaTreeNode, Node):
         if attributes:
             for attr in attributes:
                 # add a new entry to allocate parameters
-                RoMa_attribute_addItem(nodeFingerPrint, "All Attributes", "output")
+                MaStro_attribute_addItem(nodeFingerPrint, "All Attributes", "output")
                 
                 attributeIndex = self.outputs['All Attributes'].object_items.active_index
                 # add keys to the entry
                 for key, value in attr.items():
                     try:
                         float(value)
-                        RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+                        MaStro_attribute_addKeyValueItem( node=nodeFingerPrint,
                                                                 item_index=attributeIndex,
                                                                 key=key,
                                                                 valueType="FLOAT",
@@ -1184,7 +1184,7 @@ class RoMaAllAttributesNode(RoMaTreeNode, Node):
                                                                 socketIdentifier='All Attributes'
                                                                 )
                     except ValueError:
-                        RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+                        MaStro_attribute_addKeyValueItem( node=nodeFingerPrint,
                                                                 item_index=attributeIndex,
                                                                 key=key,
                                                                 valueType="STRING",
@@ -1210,16 +1210,16 @@ class RoMaAllAttributesNode(RoMaTreeNode, Node):
 
          
     
-class RoMaAreaAttributeNode(RoMaTreeNode, Node):
-    '''RoMa Area Attribute'''
-    bl_idname = 'RoMa Area Attribute'
+class MaStroAreaAttributeNode(MaStroTreeNode, Node):
+    '''MaStro Area Attribute'''
+    bl_idname = 'MaStro Area Attribute'
     bl_label = 'Area'
     # bl_description = 'Attribute'
     
-    # objNames : CollectionProperty(type=RoMa_string_item)
+    # objNames : CollectionProperty(type=MaStro_string_item)
     
     def init(self, context):
-        self.outputs.new('RoMa_attributeCollection_SocketType', name='Attribute', identifier="Area")
+        self.outputs.new('MaStro_attributeCollection_SocketType', name='Attribute', identifier="Area")
         self.outputs['Area'].display_shape = 'DIAMOND_DOT'
 
     def manualExecute(self, objNames):
@@ -1230,13 +1230,13 @@ class RoMaAreaAttributeNode(RoMaTreeNode, Node):
         if attributes:
             for attr in attributes:
                 # add a new entry to allocate parameters
-                RoMa_attribute_addItem(nodeFingerPrint, "Area", "output")
+                MaStro_attribute_addItem(nodeFingerPrint, "Area", "output")
                 attributeIndex = self.outputs['Area'].object_items.active_index
                 # add keys to the entry
                 for key, value in attr.items():
                     try:
                         float(value)
-                        RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+                        MaStro_attribute_addKeyValueItem( node=nodeFingerPrint,
                                                                 item_index=attributeIndex,
                                                                 key=key,
                                                                 valueType="FLOAT",
@@ -1244,7 +1244,7 @@ class RoMaAreaAttributeNode(RoMaTreeNode, Node):
                                                                 socketIdentifier='Area'
                                                                 )
                     except ValueError:
-                        RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+                        MaStro_attribute_addKeyValueItem( node=nodeFingerPrint,
                                                                 item_index=attributeIndex,
                                                                 key=key,
                                                                 valueType="STRING",
@@ -1255,16 +1255,16 @@ class RoMaAreaAttributeNode(RoMaTreeNode, Node):
         pass
 
             
-class RoMaUseAttributeNode(RoMaTreeNode, Node):
-    '''RoMa Use Attribute'''
-    bl_idname = 'RoMa Use Attribute'
+class MaStroUseAttributeNode(MaStroTreeNode, Node):
+    '''MaStro Use Attribute'''
+    bl_idname = 'MaStro Use Attribute'
     bl_label = 'Use'
     # bl_description = 'Attribute'
     
-    # objNames : CollectionProperty(type=RoMa_string_item)
+    # objNames : CollectionProperty(type=MaStro_string_item)
     
     def init(self, context):
-        self.outputs.new('RoMa_attributeCollection_SocketType', name='Attribute', identifier="Use")
+        self.outputs.new('MaStro_attributeCollection_SocketType', name='Attribute', identifier="Use")
         self.outputs['Use'].display_shape = 'DIAMOND_DOT'
 
     def manualExecute(self, objNames):
@@ -1275,13 +1275,13 @@ class RoMaUseAttributeNode(RoMaTreeNode, Node):
         if attributes:
             for attr in attributes:
                 # add a new entry to allocate parameters
-                RoMa_attribute_addItem(nodeFingerPrint, "Use", "output")
+                MaStro_attribute_addItem(nodeFingerPrint, "Use", "output")
                 attributeIndex = self.outputs['Use'].object_items.active_index
                 # add keys to the entry
                 for key, value in attr.items():
                     try:
                         float(value)
-                        RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+                        MaStro_attribute_addKeyValueItem( node=nodeFingerPrint,
                                                                 item_index=attributeIndex,
                                                                 key=key,
                                                                 valueType="FLOAT",
@@ -1289,7 +1289,7 @@ class RoMaUseAttributeNode(RoMaTreeNode, Node):
                                                                 socketIdentifier='Use'
                                                                 )
                     except ValueError:
-                        RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+                        MaStro_attribute_addKeyValueItem( node=nodeFingerPrint,
                                                                 item_index=attributeIndex,
                                                                 key=key,
                                                                 valueType="STRING",
@@ -1299,9 +1299,9 @@ class RoMaUseAttributeNode(RoMaTreeNode, Node):
     def execute(self):
         pass
                      
-class RomaDataMathFunction(RoMaTreeNode, Node):
+class MastroDataMathFunction(MaStroTreeNode, Node):
     '''Define the operation to be done with the data, both in every data entry and with the footer'''
-    bl_idname = "RoMa Table Function"
+    bl_idname = "MaStro Table Function"
     bl_label = "Table Function"
     
      # EnumProperty for dropdown box math
@@ -1320,8 +1320,8 @@ class RomaDataMathFunction(RoMaTreeNode, Node):
     )
     
     def init(self, context):
-        # self.outputs.new('RoMa_dataOperation_SocketType', name='Function', identifier='Function')
-        self.outputs.new('RoMa_attributeCollection_SocketType', name='Function', identifier='Function')
+        # self.outputs.new('MaStro_dataOperation_SocketType', name='Function', identifier='Function')
+        self.outputs.new('MaStro_attributeCollection_SocketType', name='Function', identifier='Function')
         
     def draw_buttons(self, context, layout):
         layout.prop(self, "dropdown", text="")
@@ -1373,10 +1373,10 @@ class RomaDataMathFunction(RoMaTreeNode, Node):
         # id = "keys_" + id
         
         nodeFingerPrint = writeNodeFingerPrint(self)
-        RoMa_attribute_addItem(nodeFingerPrint, "Function", "output")
+        MaStro_attribute_addItem(nodeFingerPrint, "Function", "output")
         attributeIndex = self.outputs['Function'].object_items.active_index
         # add the id to the attributes
-        RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+        MaStro_attribute_addKeyValueItem( node=nodeFingerPrint,
                                         item_index=attributeIndex,
                                         key='id',
                                         valueType="STRING",
@@ -1387,7 +1387,7 @@ class RomaDataMathFunction(RoMaTreeNode, Node):
         for kName, value in combo_key.items():
             try:
                 float(value)
-                RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+                MaStro_attribute_addKeyValueItem( node=nodeFingerPrint,
                                         item_index=attributeIndex,
                                         key=kName,
                                         valueType="FLOAT",
@@ -1395,7 +1395,7 @@ class RomaDataMathFunction(RoMaTreeNode, Node):
                                         socketIdentifier='Function'
                                         )
             except ValueError:
-                RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+                MaStro_attribute_addKeyValueItem( node=nodeFingerPrint,
                                         item_index=attributeIndex,
                                         key=kName,
                                         valueType="STRING",
@@ -1406,7 +1406,7 @@ class RomaDataMathFunction(RoMaTreeNode, Node):
             
         
         # add result to the attributes
-        RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+        MaStro_attribute_addKeyValueItem( node=nodeFingerPrint,
                                         item_index=attributeIndex,
                                         key=keyName,
                                         valueType="FLOAT",
@@ -1448,9 +1448,9 @@ class RomaDataMathFunction(RoMaTreeNode, Node):
    
     
     
-class RoMaDataNode(RoMaTreeNode, Node):
+class MaStroDataNode(MaStroTreeNode, Node):
     '''Define the column data to be shown in the schedule'''
-    bl_idname = 'RoMa Table Data'
+    bl_idname = 'MaStro Table Data'
     bl_label = "Table Data"
     
     dropdown : EnumProperty(
@@ -1458,36 +1458,36 @@ class RoMaDataNode(RoMaTreeNode, Node):
         description="Attribute to use as filter")
     
     def init(self, context):
-        self.inputs.new('RoMa_attributeCollection_SocketType', name='Row', identifier='Row')
-        self.inputs.new('RoMa_attributeCollection_SocketType', name='Footer', identifier='Footer')
+        self.inputs.new('MaStro_attributeCollection_SocketType', name='Row', identifier='Row')
+        self.inputs.new('MaStro_attributeCollection_SocketType', name='Footer', identifier='Footer')
         self.inputs['Row'].hide_value = True
         self.inputs['Footer'].hide_value = True
         
-        self.outputs.new('RoMa_dataCollection_SocketType', name='Data', identifier='Data')
+        self.outputs.new('MaStro_dataCollection_SocketType', name='Data', identifier='Data')
         
     def draw_buttons(self, context, layout):
         layout.prop(self, "dropdown", text="Key")
         
     
-class RoMaCaptureAttributeNode(RoMaTreeNode, Node):
-    '''Read RoMa attributes'''
-    bl_idname = 'Capture RoMa Attribute'
+class MaStroCaptureAttributeNode(MaStroTreeNode, Node):
+    '''Read MaStro attributes'''
+    bl_idname = 'Capture MaStro Attribute'
     bl_label = "Capture attribute"
     
-    # inputList = ["RoMa Mesh", 'Attribute']
+    # inputList = ["MaStro Mesh", 'Attribute']
     # outputList = ['Attribute']
     
     # validated = True
     executionOrder = []
     
     def init(self, context):
-        self.inputs.new('RoMa_stringCollection_SocketType', name='RoMa Mesh', identifier='RoMa Mesh')
-        self.inputs.new('RoMa_attributeCollection_SocketType', name='Attribute', identifier='Attribute')
+        self.inputs.new('MaStro_stringCollection_SocketType', name='MaStro Mesh', identifier='MaStro Mesh')
+        self.inputs.new('MaStro_attributeCollection_SocketType', name='Attribute', identifier='Attribute')
         self.inputs['Attribute'].display_shape = 'DIAMOND_DOT'
         self.inputs['Attribute'].hide_value = True
         
-        # self.outputs.new('RoMa_stringCollection_SocketType', 'RoMa Mesh')
-        self.outputs.new('RoMa_attributeCollection_SocketType', name='Attribute', identifier='Attribute')
+        # self.outputs.new('MaStro_stringCollection_SocketType', 'MaStro Mesh')
+        self.outputs.new('MaStro_attributeCollection_SocketType', name='Attribute', identifier='Attribute')
         self.outputs['Attribute'].display_shape = 'DIAMOND_DOT'
                                                                        
         # addKeysToNode(self, inputs=self.inputList, outputs=self.outputList)
@@ -1509,23 +1509,23 @@ class RoMaCaptureAttributeNode(RoMaTreeNode, Node):
     def update(self):
         # print("capture attribute eseguo dopo update")
         if checkLink(self):
-            if self.inputs['RoMa Mesh'].is_linked:
-                # self.readWrite_RoMa_mesh()
+            if self.inputs['MaStro Mesh'].is_linked:
+                # self.readWrite_MaStro_mesh()
                 if self.inputs['Attribute'].is_linked and self.outputs['Attribute'].is_linked:
                     self.readWrite_Attribute()
             else:
-                # cleanSocket(self, 'RoMa Mesh', 'input')
+                # cleanSocket(self, 'MaStro Mesh', 'input')
                 pass
             
             if self.inputs['Attribute'] and self.inputs['Attribute'].is_linked == False:
                 cleanSocket(self, 'Attribute' , 'both')
                 
 
-    # def readWrite_RoMa_mesh(self):
-    #     cleanSocket(self, 'RoMa Mesh', 'input')
-    #     object_items = self.inputs['RoMa Mesh'].links[0].from_socket.object_items
+    # def readWrite_MaStro_mesh(self):
+    #     cleanSocket(self, 'MaStro Mesh', 'input')
+    #     object_items = self.inputs['MaStro Mesh'].links[0].from_socket.object_items
     #     for obj in object_items:
-    #         itemIn = self.inputs['RoMa Mesh'].object_items.add()
+    #         itemIn = self.inputs['MaStro Mesh'].object_items.add()
     #         itemIn.name = obj.name
             
       
@@ -1552,7 +1552,7 @@ class RoMaCaptureAttributeNode(RoMaTreeNode, Node):
                 # in case the node is attribute related, it is necessary to run manualexecute with
                 # the names of the meshes
                 if node.outputs[0].name == 'Attribute':
-                    meshNames = self.inputs['RoMa Mesh'].links[0].from_socket.object_items
+                    meshNames = self.inputs['MaStro Mesh'].links[0].from_socket.object_items
                     node.manualExecute(meshNames)
                 else:
                     node.manualExecute()
@@ -1579,8 +1579,8 @@ class RoMaCaptureAttributeNode(RoMaTreeNode, Node):
     def execute(self):
         # print(f"capture attribute eseguo automatico")
         if checkLink(self):
-            if self.inputs['RoMa Mesh'].is_linked:
-                # self.readWrite_RoMa_mesh()
+            if self.inputs['MaStro Mesh'].is_linked:
+                # self.readWrite_MaStro_mesh()
                 if self.inputs['Attribute'].is_linked and self.outputs['Attribute'].is_linked:
                     self.readWrite_Attribute()
                     
@@ -1593,15 +1593,15 @@ class RoMaCaptureAttributeNode(RoMaTreeNode, Node):
                             
                         
 
-# class RoMaMathMenu(Menu):
+# class MaStro_MathMenu(Menu):
 #     bl_label = "Math"
-#     bl_idname = "ROMA_NODE_MT_menu_math"
+#     bl_idname = "MASTRO_NODE_MT_menu_math"
     
 #     # print("miao", props.dropdown_box_math)
     
 #     def draw(self, context):
 #         node = context.node
-#         props = node.RoMa_math_node_entries
+#         props = node.MaStro_math_node_entries
 #         enumItems = props.bl_rna.properties["dropdown_box_math"].enum_items
         
 #         set1 = enumItems[:10]        
@@ -1627,7 +1627,7 @@ class RoMaCaptureAttributeNode(RoMaTreeNode, Node):
 
 
 
-class RoMa_key_name_list(PropertyGroup):
+class MaStro_key_name_list(PropertyGroup):
     id: IntProperty(
            name="Id",
            default = 0)
@@ -1635,11 +1635,11 @@ class RoMa_key_name_list(PropertyGroup):
     name: StringProperty(
            name="Name",
            default="")
-        #    update=update_roma_filter_by_typology)
+        #    update=update_mastro_filter_by_typology)
         
-# class RoMaGetUniqueNode(RoMaTreeNode, Node):
+# class MaStroGetUniqueNode(MaStroTreeNode, Node):
 #     '''Get the list of unique values of a given key '''
-#     bl_idname = 'RoMa Unique Values'
+#     bl_idname = 'MaStro Unique Values'
 #     bl_label = "Unique values"     
   
     
@@ -1648,19 +1648,19 @@ class RoMa_key_name_list(PropertyGroup):
 #         description="Attribute to use as filter"
 #     )
     
-#     # key_list : CollectionProperty(type=RoMa_key_name_list)
+#     # key_list : CollectionProperty(type=MaStro_key_name_list)
         
 #     # key_list_index : IntProperty(name = "Key list index",
 #     #                             default = 0)
 #     # executionOrder = []
     
 #     def init(self, context):
-#         self.inputs.new('RoMa_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Attribute')
-#         # self.inputs.new('RoMa_dataCollection_SocketType', name='Data', identifier='Data', use_multi_input=True)
+#         self.inputs.new('MaStro_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Attribute')
+#         # self.inputs.new('MaStro_dataCollection_SocketType', name='Data', identifier='Data', use_multi_input=True)
 #         self.inputs['Attribute'].display_shape = 'DIAMOND_DOT'
 #         self.inputs['Attribute'].hide_value = True
         
-#         self.outputs.new('RoMa_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Attribute')
+#         self.outputs.new('MaStro_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Attribute')
 #         self.outputs['Attribute'].display_shape = 'DIAMOND_DOT'
         
 #     def copy(self, node):
@@ -1683,12 +1683,12 @@ class RoMa_key_name_list(PropertyGroup):
 #         addItemsToList(uniqueList, self, 'Attribute')
 #         # nodeFingerPrint = writeNodeFingerPrint(self)
 #         # for unique in uniqueList:
-#         #     RoMa_attribute_addItem(nodeFingerPrint,"Attribute", "output")
+#         #     MaStro_attribute_addItem(nodeFingerPrint,"Attribute", "output")
 #         #     attributeIndex = self.outputs['Attribute'].object_items.active_index
 #         #     for key, value in unique.items():
 #         #         try:
 #         #             float(value)
-#         #             RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+#         #             MaStro_attribute_addKeyValueItem( node=nodeFingerPrint,
 #         #                                             item_index=attributeIndex,
 #         #                                             key=key,
 #         #                                             valueType="FLOAT",
@@ -1696,7 +1696,7 @@ class RoMa_key_name_list(PropertyGroup):
 #         #                                             socketIdentifier='Attribute'
 #         #                                             )
 #         #         except ValueError:
-#         #             RoMa_attribute_addKeyValueItem( node=nodeFingerPrint,
+#         #             MaStro_attribute_addKeyValueItem( node=nodeFingerPrint,
 #         #                                             item_index=attributeIndex,
 #         #                                             key=key,
 #         #                                             valueType="STRING",
@@ -1716,9 +1716,9 @@ class RoMa_key_name_list(PropertyGroup):
 
     
     
-class RoMaTableNode(RoMaTreeNode, Node):
+class MaStroTableNode(MaStroTreeNode, Node):
     '''Group attributes in a table following on a selected criterion '''
-    bl_idname = 'Table by RoMa Attribute'
+    bl_idname = 'Table by MaStro Attribute'
     bl_label = "Table Group By"     
   
     
@@ -1728,19 +1728,19 @@ class RoMaTableNode(RoMaTreeNode, Node):
         update=lambda self, context: self.updateKeyName()
     )
     
-    key_list : CollectionProperty(type=RoMa_key_name_list)
+    key_list : CollectionProperty(type=MaStro_key_name_list)
         
     key_list_index : IntProperty(name = "Key list index",
                                 default = 0)
     executionOrder = []
     
     def init(self, context):
-        self.inputs.new('RoMa_attributeCollection_SocketType', name = 'Attribute', identifier='Attribute')
-        self.inputs.new('RoMa_dataCollection_SocketType', name='Data', identifier='Data', use_multi_input=True)
+        self.inputs.new('MaStro_attributeCollection_SocketType', name = 'Attribute', identifier='Attribute')
+        self.inputs.new('MaStro_dataCollection_SocketType', name='Data', identifier='Data', use_multi_input=True)
         self.inputs['Attribute'].display_shape = 'DIAMOND_DOT'
         self.inputs['Attribute'].hide_value = True
         
-        self.outputs.new('RoMa_attributeCollection_SocketType', name = 'Attribute', identifier='Table')
+        self.outputs.new('MaStro_attributeCollection_SocketType', name = 'Attribute', identifier='Table')
         # self.outputs['Value'].display_shape = 'DIAMOND_DOT'
         
     def copy(self, node):
@@ -1766,19 +1766,19 @@ class RoMaTableNode(RoMaTreeNode, Node):
         
         
         col = row.column(align=True)
-        col.operator("roma_key.new_item", icon='ADD', text="").nodeFingerprint = writeNodeFingerPrint(self)
+        col.operator("mastro_key.new_item", icon='ADD', text="").nodeFingerprint = writeNodeFingerPrint(self)
         sub = col.row()
-        sub.operator("roma_key.delete_item", icon='REMOVE', text="").nodeFingerprint = writeNodeFingerPrint(self)
+        sub.operator("mastro_key.delete_item", icon='REMOVE', text="").nodeFingerprint = writeNodeFingerPrint(self)
         if len(self.key_list) < 2:
             sub.enabled = False
         else:
             sub.enabled = True
         col.separator()
-        op = col.operator("roma_key.move_item", icon='TRIA_UP', text="")
+        op = col.operator("mastro_key.move_item", icon='TRIA_UP', text="")
         op.direction = 'UP'
         op.nodeFingerprint = writeNodeFingerPrint(self)
         
-        op=col.operator("roma_key.move_item", icon='TRIA_DOWN', text="")
+        op=col.operator("mastro_key.move_item", icon='TRIA_DOWN', text="")
         op.direction = 'DOWN'
         op.nodeFingerprint = writeNodeFingerPrint(self)
         
@@ -2004,7 +2004,7 @@ class NODE_UL_key_filter(UIList):
     
 class NODE_UL_key_filter_NewItem(Operator):
     '''Add a new key filter'''
-    bl_idname = "roma_key.new_item"
+    bl_idname = "mastro_key.new_item"
     bl_label = "Add"
     
     nodeFingerprint: StringProperty(name="Node Name")
@@ -2027,7 +2027,7 @@ class NODE_UL_key_filter_NewItem(Operator):
 
 class NODE_UL_key_filter_DeleteItem(Operator):
     '''Remove a key filter'''
-    bl_idname = "roma_key.delete_item"
+    bl_idname = "mastro_key.delete_item"
     bl_label = "Remove"
     
     nodeFingerprint: StringProperty(name="Node Name")
@@ -2050,7 +2050,7 @@ class NODE_UL_key_filter_DeleteItem(Operator):
     
 class NODE_UL_key_MoveItem(Operator):
     '''Move the filter. Filter on top have priority'''
-    bl_idname = "roma_key.move_item"
+    bl_idname = "mastro_key.move_item"
     bl_label = "Move key"
 
     direction: bpy.props.EnumProperty(items=(('UP', 'Up', ""),
@@ -2060,7 +2060,7 @@ class NODE_UL_key_MoveItem(Operator):
 
     # @classmethod
     # def poll(cls, context):
-    #     return context.scene.roma_typology_uses_name_list
+    #     return context.scene.mastro_typology_uses_name_list
 
     def move_index(self):
         node = readNodeFingerPrint(self.nodeFingerprint)
@@ -2085,9 +2085,9 @@ class NODE_UL_key_MoveItem(Operator):
         
         
     
-class RoMaMathNode(RoMaTreeNode, Node):
-    '''Read RoMa attributes'''
-    bl_idname = 'RoMa Math Node'
+class MaStro_MathNode(MaStroTreeNode, Node):
+    '''Read MaStro attributes'''
+    bl_idname = 'MaStro Math Node'
     bl_label = "Math"
     
     # EnumProperty for dropdown box math
@@ -2140,17 +2140,17 @@ class RoMaMathNode(RoMaTreeNode, Node):
     
     def init(self, context):
         # self.inputs.new('NodeSocketFloat', 'A Value', identifier='A')
-        self.inputs.new('RoMa_attributeCollection_SocketType', name = 'Attribute', identifier='A')
+        self.inputs.new('MaStro_attributeCollection_SocketType', name = 'Attribute', identifier='A')
         # self.inputs['A_list'].display_shape = 'DIAMOND_DOT'
         self.inputs['A'].display_shape = 'DIAMOND_DOT'
         
         # self.inputs.new('NodeSocketFloat', 'B Value', identifier='B')
-        self.inputs.new('RoMa_attributeCollection_SocketType', name = 'Attribute', identifier='B')
+        self.inputs.new('MaStro_attributeCollection_SocketType', name = 'Attribute', identifier='B')
         # self.inputs['B_list'].display_shape = 'DIAMOND_DOT'
         self.inputs['B'].display_shape = 'DIAMOND_DOT'
         
         # self.outputs.new('NodeSocketFloat', 'Value', identifier='output')
-        self.outputs.new('RoMa_attributeCollection_SocketType', name = 'Attribute', identifier='Value')
+        self.outputs.new('MaStro_attributeCollection_SocketType', name = 'Attribute', identifier='Value')
         self.outputs['Value'].display_shape = 'DIAMOND_DOT'
         
         self.update_socket_visibility()
@@ -2201,7 +2201,7 @@ class RoMaMathNode(RoMaTreeNode, Node):
                     
                     
         # if self.inputs['A'].is_linked:
-        #     A = PointerProperty(type=RoMa_attribute_propertyGroup)
+        #     A = PointerProperty(type=MaStro_attribute_propertyGroup)
         #     object_items = self.inputs['A'].links[0].from_socket.object_items.items
             
         # else:
@@ -2294,7 +2294,7 @@ class RoMaMathNode(RoMaTreeNode, Node):
                 removeKeyFromNode(self, inputs=[input.name])
                 # print("rimuovo")
             else:
-                keyList = bpy.context.scene.romaKeyDictionary.items()
+                keyList = bpy.context.scene.mastroKeyDictionary.items()
                 madeUpKey = self.path_resolve('inputs[\"'+input.name+'\"]')
                 keyToTest = [key[0] for key in keyList]
                 if str(madeUpKey) not in map(str, keyToTest):
@@ -2316,12 +2316,12 @@ class RoMaMathNode(RoMaTreeNode, Node):
         if self.inputs[0].is_linked and self.inputs[0].links:
             if self.inputs[0].links[0].from_node.outputs:
                 linked_output = self.inputs[0].links[0].from_socket
-                if linked_output.rna_type.name == 'RoMa_attributeCollection_SocketType':
+                if linked_output.rna_type.name == 'MaStro_attributeCollection_SocketType':
                     layout.prop(self, "dropdown_A", text="A")
         if self.inputs[1].is_linked and self.inputs[1].links:
             if self.inputs[1].links[0].from_node.outputs:
                 linked_output = self.inputs[1].links[0].from_socket
-                if linked_output.rna_type.name == 'RoMa_attributeCollection_SocketType':
+                if linked_output.rna_type.name == 'MaStro_attributeCollection_SocketType':
                     layout.prop(self, "dropdown_B", text="B")
     
     def update_socket_visibility(self):
@@ -2352,9 +2352,9 @@ class RoMaMathNode(RoMaTreeNode, Node):
         # self.update()
         
         
-class RoMaFloatNode(RoMaTreeNode, Node):
+class MaStroFloatNode(MaStroTreeNode, Node):
     bl_label = 'Value'
-    bl_idname = 'RoMa Value'
+    bl_idname = 'MaStro Value'
 
     float : FloatProperty(
                 name='',
@@ -2380,9 +2380,9 @@ class RoMaFloatNode(RoMaTreeNode, Node):
         self.outputs['Value'].default_value = self.float
         
         
-class RoMaIntegerNode(RoMaTreeNode, Node):
+class MaStroIntegerNode(MaStroTreeNode, Node):
     bl_label = 'Integer'
-    bl_idname = 'RoMa Integer'
+    bl_idname = 'MaStro Integer'
 
     integer : IntProperty(
                 name='',)
@@ -2407,18 +2407,18 @@ class RoMaIntegerNode(RoMaTreeNode, Node):
         self.outputs['Integer'].default_value = self.integer
        
 
-# class RoMaAttributeToColumnNode(RoMaTreeNode, Node):
+# class MaStroAttributeToColumnNode(MaStroTreeNode, Node):
 #     '''Create a column with the attribute data'''
-#     bl_idname = 'RoMa Column from Data'
+#     bl_idname = 'MaStro Column from Data'
 #     bl_label = "Data to Column"
     
 #     validated = True
     
 #     def init(self, context):
-#         self.inputs.new('RoMa_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Attribute')
+#         self.inputs.new('MaStro_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Attribute')
 #         self.inputs['Attribute'].display_shape = 'DIAMOND_DOT'
         
-#         self.outputs.new('RoMa_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Attribute')
+#         self.outputs.new('MaStro_attributeCollectionAndFloat_SocketType', name = 'Attribute', identifier='Attribute')
 #         self.outputs['Attribute'].display_shape = 'DIAMOND_DOT'
         
 #     def manualExecute(self):
@@ -2443,9 +2443,9 @@ class RoMaIntegerNode(RoMaTreeNode, Node):
 
 
         
-class RoMaViewerNode(RoMaTreeNode, Node):
+class MaStroViewerNode(MaStroTreeNode, Node):
     '''Add a viewer node'''
-    bl_idname = 'RoMa Viewer'
+    bl_idname = 'MaStro Viewer'
     bl_label = 'Viewer'
     
     def data_to_update_schedule_node_editor(self, context):
@@ -2458,9 +2458,9 @@ class RoMaViewerNode(RoMaTreeNode, Node):
 
     
     def init(self, context):
-        # self.outputs.new('RoMa_stringCollection_SocketType', 'RoMa Mesh')
-        # self.inputs.new('RoMa_stringCollection_SocketType', 'RoMa Mesh')
-        self.inputs.new('RoMa_attributeCollection_SocketType', name="Table", identifier='Schedule')
+        # self.outputs.new('MaStro_stringCollection_SocketType', 'MaStro Mesh')
+        # self.inputs.new('MaStro_stringCollection_SocketType', 'MaStro Mesh')
+        self.inputs.new('MaStro_attributeCollection_SocketType', name="Table", identifier='Schedule')
         self.inputs['Schedule'].hide_value = True
         self.inputs['Schedule'].display_shape = 'DIAMOND_DOT'
         
@@ -2502,7 +2502,7 @@ class RoMaViewerNode(RoMaTreeNode, Node):
         # nodeIndentifier = f"{treeName}::{nodeName}"
         nodeIndentifier = writeNodeFingerPrint(self)
         col = layout.column(align=True)
-        # col.operator("object.roma_add_column").sourceNode = nodeIndentifier
+        # col.operator("object.mastro_add_column").sourceNode = nodeIndentifier
         col.prop(self, "toggle", text="Show Table")
 
     
@@ -2510,36 +2510,36 @@ class RoMaViewerNode(RoMaTreeNode, Node):
 ################ Add menu ###################################################
 #############################################################################
 
-class RoMaNodeCategory(NodeCategory):
+class MaStroNodeCategory(NodeCategory):
     @classmethod
     def poll(cls, context):
-        return context.space_data.tree_type == "RoMaTreeType"
+        return context.space_data.tree_type == "MaStroTreeType"
     
 # all categories in a list
 node_categories = [
-    RoMaNodeCategory('INPUT', "Input", items=[
-        NodeItem("Input RoMa Mesh", label="All RoMa Meshes"),
-        NodeItem("Input RoMa Selected Mesh", label="Selected RoMa Meshes"),
+    MaStroNodeCategory('INPUT', "Input", items=[
+        NodeItem("Input MaStro Mesh", label="All MaStro Meshes"),
+        NodeItem("Input MaStro Selected Mesh", label="Selected MaStro Meshes"),
     ]),
-    RoMaNodeCategory('ATTRIBUTE', "Attribute", items=[
-        NodeItem("Capture RoMa Attribute", label="Capture Attribute"),
-        NodeItem("RoMa All Attributes", label="All Attributes"),
-        NodeItem("RoMa Area Attribute", label="Area"),
-        NodeItem("RoMa Use Attribute", label="Use"),
+    MaStroNodeCategory('ATTRIBUTE', "Attribute", items=[
+        NodeItem("Capture MaStro Attribute", label="Capture Attribute"),
+        NodeItem("MaStro All Attributes", label="All Attributes"),
+        NodeItem("MaStro Area Attribute", label="Area"),
+        NodeItem("MaStro Use Attribute", label="Use"),
     ]),
-    RoMaNodeCategory('MATHEMATIC', "Mathematic", items=[
-        NodeItem("RoMa Math Node", label="Math"),
-        NodeItem("RoMa Integer", label="Integer"),
-        NodeItem("RoMa Value", label="Value"),
+    MaStroNodeCategory('MATHEMATIC', "Mathematic", items=[
+        NodeItem("MaStro Math Node", label="Math"),
+        NodeItem("MaStro Integer", label="Integer"),
+        NodeItem("MaStro Value", label="Value"),
     ]),
-    RoMaNodeCategory('TABLE', "Table", items= [
-        NodeItem("Table by RoMa Attribute", label="Table"),
-        NodeItem("RoMa Table Data", label="Table Data"),
-        NodeItem("RoMa Table Function", label="Table Function"),
-        # NodeItem("RoMa Unique Values", label="Unique Values")
+    MaStroNodeCategory('TABLE', "Table", items= [
+        NodeItem("Table by MaStro Attribute", label="Table"),
+        NodeItem("MaStro Table Data", label="Table Data"),
+        NodeItem("MaStro Table Function", label="Table Function"),
+        # NodeItem("MaStro Unique Values", label="Unique Values")
     ]),
-    RoMaNodeCategory('OUTPUT', "Output", items=[
-        NodeItem("RoMa Viewer", label="Viewer"),
+    MaStroNodeCategory('OUTPUT', "Output", items=[
+        NodeItem("MaStro Viewer", label="Viewer"),
     ]),
 ]
 
@@ -2551,7 +2551,7 @@ node_categories = [
 ############################################################################################
 
 
-class NODE_EDITOR_Roma_Draw_Schedule(Operator):
+class NODE_EDITOR_Mastro_Draw_Schedule(Operator):
     """Tooltip"""
     bl_idname = "node.schedule_viewer"
     bl_label = "Show a schedule in the schedule editor"
@@ -2562,18 +2562,18 @@ class NODE_EDITOR_Roma_Draw_Schedule(Operator):
     
     @staticmethod
     def handle_add(self, context):
-        if NODE_EDITOR_Roma_Draw_Schedule._handle is None:
-            NODE_EDITOR_Roma_Draw_Schedule._handle = bpy.types.SpaceNodeEditor.draw_handler_add(draw_callback_schedule_overlay,
+        if NODE_EDITOR_Mastro_Draw_Schedule._handle is None:
+            NODE_EDITOR_Mastro_Draw_Schedule._handle = bpy.types.SpaceNodeEditor.draw_handler_add(draw_callback_schedule_overlay,
                                                                                                 (self, context, self.sourceNode),
                                                                                                 'WINDOW',
                                                                                                 'POST_VIEW')
     @staticmethod
     def handle_remove(self, context):
-        bpy.types.SpaceNodeEditor.draw_handler_remove(NODE_EDITOR_Roma_Draw_Schedule._handle, 'WINDOW')
-        NODE_EDITOR_Roma_Draw_Schedule._handle = None
+        bpy.types.SpaceNodeEditor.draw_handler_remove(NODE_EDITOR_Mastro_Draw_Schedule._handle, 'WINDOW')
+        NODE_EDITOR_Mastro_Draw_Schedule._handle = None
     
     def execute(self, context):
-        if NODE_EDITOR_Roma_Draw_Schedule._handle is None:
+        if NODE_EDITOR_Mastro_Draw_Schedule._handle is None:
             self.handle_add(self, context)
             context.area.tag_redraw()
         else:
@@ -2591,24 +2591,24 @@ def rgb_to_hsv(r, g, b):
     # Compute the maximum and minimum values among r, g, b
     max_rgb = max(r, g, b)
     min_rgb = min(r, g, b)
-    chroma = max_rgb - min_rgb  # Difference between max and min
+    chmastro = max_rgb - min_rgb  # Difference between max and min
     
     # Calculate Hue
-    if chroma == 0:
-        hue = 0  # If chroma is 0, hue is undefined (set to 0)
+    if chmastro == 0:
+        hue = 0  # If chmastro is 0, hue is undefined (set to 0)
     else:
         if max_rgb == r:
-            hue = ((g - b) / chroma) % 6
+            hue = ((g - b) / chmastro) % 6
         elif max_rgb == g:
-            hue = ((b - r) / chroma) + 2
+            hue = ((b - r) / chmastro) + 2
         else:
-            hue = ((r - g) / chroma) + 4
+            hue = ((r - g) / chmastro) + 4
         hue *= 60  # Convert to degrees
         if hue < 0:
             hue += 360
 
     # Calculate Saturation
-    saturation = 0 if max_rgb == 0 else chroma / max_rgb
+    saturation = 0 if max_rgb == 0 else chmastro / max_rgb
     
     # Calculate Value
     value = max_rgb
@@ -2622,28 +2622,28 @@ def hsv_to_rgb(h, s, v):
         r = g = b = v
         return r, g, b
     
-    # Calculate the chroma
-    chroma = v * s
+    # Calculate the chmastro
+    chmastro = v * s
     h_prime = h / 60.0  # Sector of the color wheel
-    x = chroma * (1 - abs(h_prime % 2 - 1))
+    x = chmastro * (1 - abs(h_prime % 2 - 1))
     
     if 0 <= h_prime < 1:
-        r1, g1, b1 = chroma, x, 0
+        r1, g1, b1 = chmastro, x, 0
     elif 1 <= h_prime < 2:
-        r1, g1, b1 = x, chroma, 0
+        r1, g1, b1 = x, chmastro, 0
     elif 2 <= h_prime < 3:
-        r1, g1, b1 = 0, chroma, x
+        r1, g1, b1 = 0, chmastro, x
     elif 3 <= h_prime < 4:
-        r1, g1, b1 = 0, x, chroma
+        r1, g1, b1 = 0, x, chmastro
     elif 4 <= h_prime < 5:
-        r1, g1, b1 = x, 0, chroma
+        r1, g1, b1 = x, 0, chmastro
     elif 5 <= h_prime < 6:
-        r1, g1, b1 = chroma, 0, x
+        r1, g1, b1 = chmastro, 0, x
     else:
         r1, g1, b1 = 0, 0, 0  # Should not happen
     
     # Match the value by adding the same amount to each component
-    m = v - chroma
+    m = v - chmastro
     r = r1 + m
     g = g1 + m
     b = b1 + m
@@ -2653,7 +2653,7 @@ def hsv_to_rgb(h, s, v):
 
 
 def draw_callback_schedule_overlay(self, context, sourceNode):
-    if context.area.ui_type == "RoMaTreeType":
+    if context.area.ui_type == "MaStroTreeType":
         # path = sourceNode.split("::")
         # treeName = path[0]
         # nodeName = path[1]
@@ -2791,10 +2791,10 @@ def draw_callback_schedule_overlay(self, context, sourceNode):
 ###################################################################################
 ############### 3D schedule #######################################################
 ###################################################################################
-# class RoMaAddColumn(Operator):
+# class MaStroAddColumn(Operator):
 #     '''Add a column to the schedule'''
-#     bl_idname="object.roma_add_column"
-#     bl_label="RoMa Column"
+#     bl_idname="object.mastro_add_column"
+#     bl_label="MaStro Column"
 #     bl_options = {'REGISTER'}
     
 #     sourceNode : bpy.props.StringProperty(name="Source Node")
@@ -2824,7 +2824,7 @@ def draw_callback_schedule_overlay(self, context, sourceNode):
 #         # data = node.inputs['Attribute'].links[0].from_socket.object_items
         
 #         # create a column with its cells
-#         mesh = bpy.data.meshes.new("RoMa Column")
+#         mesh = bpy.data.meshes.new("MaStro Column")
 #         bm = bmesh.new()
 #         verts, edges, faces, data = dataForGraphic(self.sourceNode, 
 #                                                    posX = 0, 
