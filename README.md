@@ -1,2 +1,2 @@
-# Roma
- A Blender addon to help designing Roads and Masterplans: RoMa
+# Mastro
+ A Blender addon to help designing masterplans and streets: MaStro
