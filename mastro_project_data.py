@@ -29,8 +29,8 @@ from bpy.props import StringProperty, IntProperty, FloatProperty, BoolProperty
 from bpy.types import PropertyGroup, UIList, Operator, Panel
 # from bpy.app.handlers import persistent
 
-from .roma_massing import read_mesh_attributes_uses, update_mesh_attributes_storeys
-from .roma_road import read_mesh_attributes_roads
+from .mastro_massing import read_mesh_attributes_uses, update_mesh_attributes_storeys
+from .mastro_street import read_mesh_attributes_roads
 
 # import random
 # import decimal
