@@ -32,7 +32,7 @@ from bpy.types import PropertyGroup, UIList, Operator, Panel
 from .mastro_massing import read_mesh_attributes_uses, update_mesh_attributes_storeys
 from .mastro_street import read_mesh_attributes_streets
 
-# import random
+import random
 # import decimal
 # from datetime import datetime
 
@@ -1972,6 +1972,7 @@ class VIEW3D_PT_MaStro_street_data(Panel):
         index = context.scene.mastro_street_name_list_index
         layout.prop(context.scene.mastro_street_name_list[index], "streetWidth", text="Width")
         layout.prop(context.scene.mastro_street_name_list[index], "streetRadius", text="Radius")
+        layout.prop(context.scene.mastro_street_name_list[index], "streetEdgeColor", text="Color Overlay")
        
 class OBJECT_UL_Street(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data,
@@ -2011,22 +2012,14 @@ class STREET_LIST_OT_NewItem(Operator):
 
     def execute(self, context): 
         context.scene.mastro_street_name_list.add()
-        # last = len(context.scene.mastro_use_name_list)-1
-        # if last == 0:
-        #     context.scene.mastro_use_name_list[0].id = 0
-        #     context.scene.mastro_use_name_list[0].name = ""
-        #     random.seed(datetime.now().timestamp())
-        #     rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
-        #     context.scene.mastro_use_name_list[0].RND = rndNumber
-        #     context.scene.mastro_use_name_list.add()
+        
         temp_list = []    
         for el in context.scene.mastro_street_name_list:
             temp_list.append(el.id)
         last = len(context.scene.mastro_street_name_list)-1
         
         context.scene.mastro_street_name_list[last].id = max(temp_list)+1
-        # rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
-        # context.scene.mastro_use_name_list[last].RND = rndNumber
+        context.scene.mastro_street_name_list[last].streetEdgeColor = [random.random(), random.random(), random.random(), 0.5]
             
         return{'FINISHED'}
     
@@ -2151,7 +2144,6 @@ class street_name_list(PropertyGroup):
            description="The type name of the street",
            default="Street type...")
     
-    
     streetWidth: FloatProperty(
         name="Street width",
         description="The width of the street",
@@ -2160,7 +2152,6 @@ class street_name_list(PropertyGroup):
         precision=3,
         default = 8,
         update=update_all_mastro_street_width)
-        
     
     streetRadius: FloatProperty(
         name="Street radius",
@@ -2170,6 +2161,14 @@ class street_name_list(PropertyGroup):
         precision=3,
         default = 16,
         update=update_all_mastro_street_radius)
+    
+    streetEdgeColor: bpy.props.FloatVectorProperty(
+        name = "Color of the edges of the street to be shown in the overlay",
+        subtype = "COLOR",
+        size = 4,
+        min = 0.0,
+        max = 1.0,
+        default = (1.0, 0.0, 0.0, 0.5))
         
 
 ##############################              #############################
