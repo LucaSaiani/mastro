@@ -71,19 +71,14 @@ class VIEW_3D_OT_show_mastro_overlay(Operator):
 
 def draw_selection_overlay(context):
     obj = bpy.context.active_object
-    if hasattr(obj, "data") and "MaStro object" in obj.data:
+    if hasattr(obj, "data") and "MaStro object" in obj.data and "MaStro mass" in obj.data:
         coords = []
         edgeIndices = []
         shader = gpu.shader.from_builtin('UNIFORM_COLOR')
-        
-        
         mesh = obj.data
         
         if mesh.is_editmode:
             bm = bmesh.from_edit_mesh(mesh)
-        # else:
-        #     bm = bmesh.new()
-        #     bm.from_mesh(mesh)
             
             # draw the edges of the selected object
             for vert in bm.verts:
@@ -96,13 +91,12 @@ def draw_selection_overlay(context):
                 
             
             batch = batch_for_shader(shader, 'LINES', {"pos": coords}, indices=edgeIndices)
-            r, g, b, a = [c for c in bpy.context.preferences.addons['mastro'].preferences.edgeColor]
+            r, g, b, a = [c for c in bpy.context.preferences.addons['mastro'].preferences.massEdgeColor]
             shader.uniform_float("color", (r, g, b, a))
         
-            gpu.state.line_width_set(bpy.context.preferences.addons['mastro'].preferences.edgeSize)
+            gpu.state.line_width_set(bpy.context.preferences.addons['mastro'].preferences.massEdgeSize)
             gpu.state.blend_set("ALPHA")
             batch.draw(shader)
-            
             
             # draw the selected faces
             faces = [f for f in bm.faces if f.select == True]
@@ -117,12 +111,43 @@ def draw_selection_overlay(context):
             dFaceindices = [(loop.vert.index for loop in looptris) for looptris in dbm.calc_loop_triangles()]
             # dEdgeindices = [(v.index for v in e.verts) for e in dbm.edges]
             batch = batch_for_shader(shader, 'TRIS', {"pos": dVertices}, indices=dFaceindices)
-            r, g, b, a = [c for c in bpy.context.preferences.addons['mastro'].preferences.faceColor]
+            r, g, b, a = [c for c in bpy.context.preferences.addons['mastro'].preferences.massFaceColor]
             shader.uniform_float("color", (r, g, b, a))       
             # gpu.state.blend_set("NONE")
             batch.draw(shader)
             
             dbm.free()
+            bm.free()
+            
+    elif hasattr(obj, "data") and "MaStro object" in obj.data and "MaStro street" in obj.data:
+        coords = []
+        edgeIndices = []
+        shader = gpu.shader.from_builtin('UNIFORM_COLOR')
+        mesh = obj.data
+        
+        if mesh.is_editmode:
+            bm = bmesh.from_edit_mesh(mesh)
+            
+            # draw the edges of the selected object
+            for vert in bm.verts:
+                coords.append(obj.matrix_world @ vert.co)
+                
+            for edge in bm.edges:
+                tmpEdge = (edge.verts[0].index, edge.verts[1].index)
+                edgeIndices.append(tmpEdge)
+                bMesh_street_id = bm.edges.layers.int["mastro_street_id"]
+                street_id = edge[bMesh_street_id]
+            
+                batch = batch_for_shader(shader, 'LINES', {"pos": coords}, indices=edgeIndices)
+                # r, g, b, a = [c for c in bpy.context.preferences.addons['mastro'].preferences.massEdgeColor]
+                r, g, b, a = [c for c in bpy.context.scene.mastro_street_name_list[street_id].streetEdgeColor]
+                shader.uniform_float("color", (r, g, b, a))
+                
+                gpu.state.line_width_set(bpy.context.preferences.addons['mastro'].preferences.streetEdgeSize)
+                gpu.state.blend_set("ALPHA")
+                batch.draw(shader)
+                edgeIndices = []
+
             bm.free()
     
 def draw_callback_selection_overlay(self, context):
@@ -192,7 +217,7 @@ class VIEW_3D_OT_show_mastro_attributes(Operator):
     
 def draw_main_show_attributes(context):
     obj = bpy.context.active_object
-    if hasattr(obj, "data") and "MaStro object" in obj.data:
+    if hasattr(obj, "data") and "MaStro object" in obj.data and "Mastro mass" in obj.data:
         # obj.update_from_editmode()
         scene = context.scene
             

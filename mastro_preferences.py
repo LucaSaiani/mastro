@@ -49,12 +49,6 @@ class mastro_addon_preferences(AddonPreferences):
         default = 8
     )
     
-    edgeSize: bpy.props.IntProperty(
-        name="Edge thickness of the selection",
-        min = 1,
-        default = 3
-    )
-    
     fontColor: bpy.props.FloatVectorProperty(
                  name = "Font Color Picker",
                  subtype = "COLOR",
@@ -63,26 +57,40 @@ class mastro_addon_preferences(AddonPreferences):
                  max = 1.0,
                  default = (1.0, 1.0, 0.0, 1.0))
     
-    edgeColor: bpy.props.FloatVectorProperty(
-                 name = "Color of the edges of the selected object",
+    massEdgeSize: bpy.props.IntProperty(
+        name="Edge thickness of the selected mass",
+        min = 1,
+        max = 10,
+        default = 3
+    )
+    
+    massEdgeColor: bpy.props.FloatVectorProperty(
+                 name = "Color of the edges of the selected mass",
                  subtype = "COLOR",
                  size = 4,
                  min = 0.0,
                  max = 1.0,
                  default = (1.0, 0.3, 0.0, 0.2))
     
-    faceColor: bpy.props.FloatVectorProperty(
-                 name = "Color of the selected faces",
+    massFaceColor: bpy.props.FloatVectorProperty(
+                 name = "Color of the selected faces of the active masss",
                  subtype = "COLOR",
                  size = 4,
                  min = 0.0,
                  max = 1.0,
                  default = (1.0, 0.0, 0.0, 0.4))
     
+    streetEdgeSize: bpy.props.IntProperty(
+        name="Edge thickness of the selected street",
+        min = 1,
+        max = 10,
+        default = 10
+    )
+    
     toggleSelectionOverlay: bpy.props.BoolProperty(
                 name = "Selection overlay",
                 default = True,
-                description = "Show selection overlay when the MaStro mass is in edit mode"
+                description = "Show selection overlay when the MaStro mass or street is in edit mode"
                 )
 
 
@@ -107,14 +115,17 @@ class mastro_addon_preferences(AddonPreferences):
         row.label(text = "Toggle selection overlay:")
         row.prop(self, "toggleSelectionOverlay", icon_only=True)
         row = layout.row()
-        row.label(text = "Edge selection size:")
-        row.prop(self, "edgeSize", icon_only=True)
+        row.label(text = "Mass - Edge selection size:")
+        row.prop(self, "massEdgeSize", icon_only=True)
         row = layout.row()
-        row.label(text = "Edge selection color:")
-        row.prop(self, "edgeColor", icon_only=True)
+        row.label(text = "Mass - Edge selection color:")
+        row.prop(self, "massEdgeColor", icon_only=True)
         row = layout.row()
-        row.label(text = "Face selection color:")
-        row.prop(self, "faceColor", icon_only=True)
+        row.label(text = "Mass - Face selection color:")
+        row.prop(self, "massFaceColor", icon_only=True)
+        row = layout.row()
+        row.label(text = "Street - Edge selection size:")
+        row.prop(self, "streetEdgeSize", icon_only=True)
        
         
 
