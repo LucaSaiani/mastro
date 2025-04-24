@@ -146,6 +146,7 @@ classes = (
     mastro_menu.MaStro_MenuOperator_add_MaStro_mass,
     mastro_menu.MaStro_MenuOperator_add_MaStro_street,
     mastro_menu.MaStro_MenuOperator_convert_to_MaStro_mass,
+    mastro_menu.MaStro_MenuOperator_convert_to_MaStro_street,
     # mastro_menu.MaStro_MenuOperator_PrintData,
     # mastro_menu.MaStro_MenuOperator_ExportCSV,
     mastro_menu.MaStro_Operator_transformation_orientation,
@@ -583,6 +584,9 @@ def register():
                                             default = False)
     bpy.types.WindowManager.toggle_storey_number = bpy.props.BoolProperty(
                                             name = "Number of Storeys",
+                                            default = False)
+    bpy.types.WindowManager.toggle_street_color = bpy.props.BoolProperty(
+                                            name = "Street color",
                                             default = False)
     bpy.types.WindowManager.toggle_auto_update_mass_data = bpy.props.BoolProperty(
                                             name = "Auto Update Mass Data",

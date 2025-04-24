@@ -494,6 +494,8 @@ class VIEW3D_PT_MaStro_show_data(Panel):
         # col.separator()
         col = layout.column(heading="Floor", align = True)
         col.prop(context.window_manager, 'toggle_floor_name', icon_only=False)
+        col = layout.column(heading="Street", align=True)
+        col.prop(context.window_manager, 'toggle_street_color', icon_only=False)
         
 ############################      ############################
 ############################ MASS ############################
