@@ -292,6 +292,8 @@ class VIEW3D_PT_MaStro_Panel(Panel):
         layout = self.layout
         layout.operator(MaStro_MenuOperator_add_MaStro_mass.bl_idname)
         layout.operator(MaStro_MenuOperator_convert_to_MaStro_mass.bl_idname)
+        layout.operator(MaStro_MenuOperator_add_MaStro_street.bl_idname)
+        layout.operator(MaStro_MenuOperator_convert_to_MaStro_street.bl_idname)
 
 class MaStro_MenuOperator_add_MaStro_mass(Operator, AddObjectHelper):
     """Add a MaStro mass"""
@@ -410,13 +412,7 @@ class MaStro_MenuOperator_add_MaStro_street(Operator, AddObjectHelper):
         default=16,
     )
     
-    # storeys: bpy.props.IntProperty(
-    #         name="Number of Storeys",
-    #         description="Number of storeys of the mass",
-    #         min = 1,
-    #         default = 3)
-    
-    
+  
     def execute(self, context):
 
         verts_loc, edges = add_mastro_street(
@@ -496,8 +492,9 @@ def mastro_add_menu_func(self, context):
     self.layout.operator(MaStro_MenuOperator_add_MaStro_mass.bl_idname, icon='MESH_CUBE')
     self.layout.operator(MaStro_MenuOperator_add_MaStro_street.bl_idname, icon='MESH_CUBE')
     
+    
 class MaStro_MenuOperator_convert_to_MaStro_mass(Operator):
-    bl_idname = "object.mastro_convert_to_mastro"
+    bl_idname = "object.mastro_convert_to_mastro_mass"
     bl_label = "Convert the selected mesh to a MaStro mass"
     
     @classmethod
@@ -515,6 +512,25 @@ class MaStro_MenuOperator_convert_to_MaStro_mass(Operator):
         # initLists()
         return {'FINISHED'}
 
+class MaStro_MenuOperator_convert_to_MaStro_street(Operator):
+    bl_idname = "object.mastro_convert_to_mastro_street"
+    bl_label = "Convert the selected mesh to a MaStro street"
+    
+    @classmethod
+    def poll(cls, context):
+        return context.mode == 'OBJECT'
+    
+    def execute(self, context):
+        selected_objects = bpy.context.selected_objects
+        selected_meshes = [obj for obj in selected_objects if obj.type == 'MESH']
+        # mode = None
+        for obj in selected_meshes:
+            addStreetAttributes(obj)
+            
+        addNodes()
+        # initLists()
+        return {'FINISHED'}
+    
 # assign the mass attributes to the selected object
 def addMassAttributes(obj):
     obj.mastro_props['mastro_option_attribute'] = 1

@@ -71,87 +71,105 @@ class VIEW_3D_OT_show_mastro_overlay(Operator):
 
 def draw_selection_overlay(context):
     obj = bpy.context.active_object
-    if hasattr(obj, "data") and "MaStro object" in obj.data and "MaStro mass" in obj.data:
-        coords = []
-        edgeIndices = []
-        shader = gpu.shader.from_builtin('UNIFORM_COLOR')
+    if hasattr(obj, "data") and "MaStro object" in obj.data:
         mesh = obj.data
-        
         if mesh.is_editmode:
-            bm = bmesh.from_edit_mesh(mesh)
-            
-            # draw the edges of the selected object
-            for vert in bm.verts:
-                # print(vert.index, vert.co, obj.matrix_world @ vert.co)
-                coords.append(obj.matrix_world @ vert.co)
-                
-            for edge in bm.edges:
-                tmpEdge = (edge.verts[0].index, edge.verts[1].index)
-                edgeIndices.append(tmpEdge)
-                
-            
-            batch = batch_for_shader(shader, 'LINES', {"pos": coords}, indices=edgeIndices)
-            r, g, b, a = [c for c in bpy.context.preferences.addons['mastro'].preferences.massEdgeColor]
-            shader.uniform_float("color", (r, g, b, a))
-        
-            gpu.state.line_width_set(bpy.context.preferences.addons['mastro'].preferences.massEdgeSize)
-            gpu.state.blend_set("ALPHA")
-            batch.draw(shader)
-            
-            # draw the selected faces
-            faces = [f for f in bm.faces if f.select == True]
-            
-            # create a new Bmesh with only the newly created faces
-            dbm = bmesh.new()
-            for face in faces:
-                dbm.faces.new((dbm.verts.new(obj.matrix_world @ v.co, v) for v in face.verts), face)
-            dbm.verts.index_update()    
-
-            dVertices = [v.co for v in dbm.verts]
-            dFaceindices = [(loop.vert.index for loop in looptris) for looptris in dbm.calc_loop_triangles()]
-            # dEdgeindices = [(v.index for v in e.verts) for e in dbm.edges]
-            batch = batch_for_shader(shader, 'TRIS', {"pos": dVertices}, indices=dFaceindices)
-            r, g, b, a = [c for c in bpy.context.preferences.addons['mastro'].preferences.massFaceColor]
-            shader.uniform_float("color", (r, g, b, a))       
-            # gpu.state.blend_set("NONE")
-            batch.draw(shader)
-            
-            dbm.free()
-            bm.free()
-            
-    elif hasattr(obj, "data") and "MaStro object" in obj.data and "MaStro street" in obj.data:
-        coords = []
-        edgeIndices = []
-        shader = gpu.shader.from_builtin('UNIFORM_COLOR')
-        mesh = obj.data
-        
-        if mesh.is_editmode:
-            bm = bmesh.from_edit_mesh(mesh)
-            
-            # draw the edges of the selected object
-            for vert in bm.verts:
-                coords.append(obj.matrix_world @ vert.co)
-                
-            for edge in bm.edges:
-                tmpEdge = (edge.verts[0].index, edge.verts[1].index)
-                edgeIndices.append(tmpEdge)
-                bMesh_street_id = bm.edges.layers.int["mastro_street_id"]
-                street_id = edge[bMesh_street_id]
-            
-                batch = batch_for_shader(shader, 'LINES', {"pos": coords}, indices=edgeIndices)
-                # r, g, b, a = [c for c in bpy.context.preferences.addons['mastro'].preferences.massEdgeColor]
-                r, g, b, a = [c for c in bpy.context.scene.mastro_street_name_list[street_id].streetEdgeColor]
-                shader.uniform_float("color", (r, g, b, a))
-                
-                gpu.state.line_width_set(bpy.context.preferences.addons['mastro'].preferences.streetEdgeSize)
-                gpu.state.blend_set("ALPHA")
-                batch.draw(shader)
+            if "MaStro mass" in obj.data:
+                coords = []
                 edgeIndices = []
+                shader = gpu.shader.from_builtin('UNIFORM_COLOR')
+                
+                
+                if mesh.is_editmode:
+                    bm = bmesh.from_edit_mesh(mesh)
+                    
+                    # draw the edges of the selected object
+                    for vert in bm.verts:
+                        # print(vert.index, vert.co, obj.matrix_world @ vert.co)
+                        coords.append(obj.matrix_world @ vert.co)
+                        
+                    for edge in bm.edges:
+                        tmpEdge = (edge.verts[0].index, edge.verts[1].index)
+                        edgeIndices.append(tmpEdge)
+                        
+                    
+                    batch = batch_for_shader(shader, 'LINES', {"pos": coords}, indices=edgeIndices)
+                    r, g, b, a = [c for c in bpy.context.preferences.addons['mastro'].preferences.massEdgeColor]
+                    shader.uniform_float("color", (r, g, b, a))
+                
+                    gpu.state.line_width_set(bpy.context.preferences.addons['mastro'].preferences.massEdgeSize)
+                    gpu.state.blend_set("ALPHA")
+                    batch.draw(shader)
+                    
+                    # draw the selected faces
+                    faces = [f for f in bm.faces if f.select == True]
+                    
+                    # create a new Bmesh with only the newly created faces
+                    dbm = bmesh.new()
+                    for face in faces:
+                        dbm.faces.new((dbm.verts.new(obj.matrix_world @ v.co, v) for v in face.verts), face)
+                    dbm.verts.index_update()    
 
-            bm.free()
-    
+                    dVertices = [v.co for v in dbm.verts]
+                    dFaceindices = [(loop.vert.index for loop in looptris) for looptris in dbm.calc_loop_triangles()]
+                    # dEdgeindices = [(v.index for v in e.verts) for e in dbm.edges]
+                    batch = batch_for_shader(shader, 'TRIS', {"pos": dVertices}, indices=dFaceindices)
+                    r, g, b, a = [c for c in bpy.context.preferences.addons['mastro'].preferences.massFaceColor]
+                    shader.uniform_float("color", (r, g, b, a))       
+                    # gpu.state.blend_set("NONE")
+                    batch.draw(shader)
+                    
+                    dbm.free()
+                    bm.free()
+                
+            # elif ("MaStro street" in obj.data and
+            #      not (bpy.context.window_manager.toggle_show_data and bpy.context.window_manager.toggle_street_color)
+            #     ):
+            elif "MaStro street" in obj.data:
+                show_street_overlay(obj)
+
 def draw_callback_selection_overlay(self, context):
     draw_selection_overlay(context)
+
+# a function to show the street overlays
+def show_street_overlay(obj):
+    coords = []
+    edgeIndices = []
+    shader = gpu.shader.from_builtin('UNIFORM_COLOR')
+    mesh = obj.data
+    
+    
+    if mesh.is_editmode:
+        bm = bmesh.from_edit_mesh(mesh)
+    else:
+        bm = bmesh.new()
+        bm.from_mesh(mesh)
+        bm.verts.ensure_lookup_table()
+        bm.edges.ensure_lookup_table()    
+        # bm.faces.ensure_lookup_table()  
+        
+    bMesh_street_id_layer = bm.edges.layers.int["mastro_street_id"]
+        
+    for edge in bm.edges:
+        coords = []
+        indices = []
+
+        v1 = obj.matrix_world @ edge.verts[0].co
+        v2 = obj.matrix_world @ edge.verts[1].co
+        coords = [v1, v2]
+        indices = [(0, 1)]
+        
+        if bMesh_street_id_layer:
+            street_id = edge[bMesh_street_id_layer]
+            if 0 <= street_id < len(bpy.context.scene.mastro_street_name_list):
+                r, g, b, a = [c for c in bpy.context.scene.mastro_street_name_list[street_id].streetEdgeColor]
+                shader.uniform_float("color", (r, g, b, a))
+                gpu.state.line_width_set(bpy.context.preferences.addons['mastro'].preferences.streetEdgeSize)
+                gpu.state.blend_set("ALPHA")
+                batch = batch_for_shader(shader, 'LINES', {"pos": coords}, indices=indices)
+                batch.draw(shader)
+
+    bm.free()
 
 # def mastro_selection_overlay(self, context):
 #     bpy.ops.wm.show_mastro_overlay()
@@ -191,33 +209,55 @@ class VIEW_3D_OT_show_mastro_attributes(Operator):
     bl_idname = "wm.show_mastro_attributes"
     bl_label = "Show MaStro attributes"
     
-    _handle = None  # keep function handler
+    _handle_2D = None  # keep function handler
+    _handle_3D = None
     
     @staticmethod
-    def handle_add(self, context):
-        if VIEW_3D_OT_show_mastro_attributes._handle is None:
-            VIEW_3D_OT_show_mastro_attributes._handle = bpy.types.SpaceView3D.draw_handler_add(draw_callback_px_show_attributes, (self, context),
+    def handle_add_2D(self, context):
+        if VIEW_3D_OT_show_mastro_attributes._handle_2D is None:
+            VIEW_3D_OT_show_mastro_attributes._handle_2D = bpy.types.SpaceView3D.draw_handler_add(draw_callback_px_show_attributes_2D, (self, context),
                                                                         'WINDOW',
                                                                         'POST_PIXEL')
+    @staticmethod
+    def handle_add_3D(self, context):
+        if VIEW_3D_OT_show_mastro_attributes._handle_3D is None:
+            VIEW_3D_OT_show_mastro_attributes._handle_3D = bpy.types.SpaceView3D.draw_handler_add(draw_callback_px_show_attributes_3D, (self, context),
+                                                                        'WINDOW',
+                                                                        'POST_VIEW')
 
     @staticmethod
-    def handle_remove(self, context):
-        if VIEW_3D_OT_show_mastro_attributes._handle is not None:
-            bpy.types.SpaceView3D.draw_handler_remove(VIEW_3D_OT_show_mastro_attributes._handle, 'WINDOW')
-        VIEW_3D_OT_show_mastro_attributes._handle = None
+    def handle_remove_2D(self, context):
+        if VIEW_3D_OT_show_mastro_attributes._handle_2D is not None:
+            bpy.types.SpaceView3D.draw_handler_remove(VIEW_3D_OT_show_mastro_attributes._handle_2D, 'WINDOW')
+        VIEW_3D_OT_show_mastro_attributes._handle_2D = None
+    
+    @staticmethod
+    def handle_remove_3D(self, context):
+        if VIEW_3D_OT_show_mastro_attributes._handle_3D is not None:
+            bpy.types.SpaceView3D.draw_handler_remove(VIEW_3D_OT_show_mastro_attributes._handle_3D, 'WINDOW')
+        VIEW_3D_OT_show_mastro_attributes._handle_3D = None
+
     
     def execute(self, context):
-        if VIEW_3D_OT_show_mastro_attributes._handle is None:
-            self.handle_add(self, context)
+        if VIEW_3D_OT_show_mastro_attributes._handle_2D is None:
+            self.handle_add_2D(self, context)
             context.area.tag_redraw()
         else:
-            self.handle_remove(self, context)
+            self.handle_remove_2D(self, context)
+            context.area.tag_redraw()
+            
+        if VIEW_3D_OT_show_mastro_attributes._handle_3D is None:
+            self.handle_add_3D(self, context)
+            context.area.tag_redraw()
+        else:
+            self.handle_remove_3D(self, context)
             context.area.tag_redraw()
         return {'FINISHED'}
     
-def draw_main_show_attributes(context):
+    
+def draw_main_show_attributes_2D(context):
     obj = bpy.context.active_object
-    if hasattr(obj, "data") and "MaStro object" in obj.data and "Mastro mass" in obj.data:
+    if hasattr(obj, "data") and "MaStro object" in obj.data and "MaStro mass" in obj.data:
         # obj.update_from_editmode()
         scene = context.scene
             
@@ -463,15 +503,28 @@ def draw_main_show_attributes(context):
                     x_offset = (-1 * line_width) / 2
                     y_offset -= line_height
         bm.free()
-        # del bm
-        # print("BM Free")
-        
-        
+ 
+         
+def draw_main_show_attributes_3D(context):
+    obj = bpy.context.active_object
+    if (hasattr(obj, "data") and 
+        "MaStro object" in obj.data and 
+        "MaStro street" in obj.data and
+        bpy.context.window_manager.toggle_street_color):
+        # if mesh is in edit mode, the street overlay is already drawn
+        mesh = obj.data
+        if mesh.is_editmode == False:
+            show_street_overlay(obj)
     
-def draw_callback_px_show_attributes(self, context):
-    draw_main_show_attributes(context)
+
+def draw_callback_px_show_attributes_2D(self, context):
+    draw_main_show_attributes_2D(context)
     
+
+def draw_callback_px_show_attributes_3D(self, context):
+    draw_main_show_attributes_3D(context)
         
+
 def update_show_attributes(self, context):
     bpy.ops.wm.show_mastro_attributes()
     
@@ -581,10 +634,10 @@ def updates(scene, depsgraph):
         bpy.ops.wm.show_mastro_overlay('INVOKE_DEFAULT')
      
         
-    ####################################################################################################
-    # when a typology is selected, it is necessary to update the #######################################
+    ######################################################################################################
+    # when a typology is selected, it is necessary to update the #########################################
     # uses in the UIList using the ones stored in scene.mastro_typology_uses_name_list ###################
-    ####################################################################################################
+    ######################################################################################################
     if hasattr(scene, "mastro_typology_name_list_index"):
         previous = scene.mastro_previous_selected_typology
         current = scene.mastro_typology_name_list_index
@@ -612,9 +665,9 @@ def updates(scene, depsgraph):
                             scene.mastro_typology_uses_name_list[last].name = use.name 
                             break
 
-    #############################################################################################
-    # is the selection has changed, some  data in the MaStro schedule need to be updated ##########
-    #############################################################################################
+    ################################################################################################
+    # is the selection has changed, some  data in the MaStro schedule need to be updated ###########
+    ################################################################################################
     # Detect selection changes or added or remove objects
     global previous_selection
     newSelection = False
