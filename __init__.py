@@ -77,9 +77,11 @@ from bpy.app.handlers import persistent
 classes = (
     mastro_preferences.mastro_addon_preferences,
     
+    mastro_geometryNodes.VIEW_PT_MaStro_Node_Panel,
     mastro_geometryNodes.VIEW_PT_MaStro_GN_Panel,
     mastro_geometryNodes.separate_geometry_by_factor_OT,
-    
+    mastro_geometryNodes.NODE_OT_sticky_note,
+        
     mastro_project_data.update_GN_Filter_OT,
     mastro_project_data.update_Shader_Filter_OT,
     # mastro_project_data.separate_geometry_by_factor_OT,
@@ -599,7 +601,7 @@ def register():
     #                                         update = mastro_schedule.update_schedule_node_editor)
     
     bpy.types.Object.mastro_props = bpy.props.PointerProperty(type=mastro_menu.mastroAddonProperties)
-    
+    # bpy.types.Scene.mastro_note_text_props = bpy.props.PointerProperty(type=mastro_geometryNodes.MaStroPostItText)
     # bpy.types.Scene.mastro_attribute_collection = bpy.props.PointerProperty(type=mastro_schedule.MaStro_attribute_propertyGroup)
 
     # Scene.updating_mesh_attributes_is_active = bpy.props.BoolProperty(
@@ -779,6 +781,7 @@ def register():
                                         items=get_floor_names_from_list,
                                         # update=mastro_wall.update_floor_name_label
                                         )
+   
     
     bpy.app.timers.register(initLists, first_interval=.1)
     bpy.app.timers.register(initNodes, first_interval=.1)
