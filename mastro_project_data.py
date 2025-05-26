@@ -1013,6 +1013,7 @@ class VIEW3D_PT_MaStro_mass_typology_data(Panel):
         col = layout.column(align=True)
         
         row = col.row(align=True)
+       
         row.prop(context.scene, "mastro_typology_uses_name", icon="COMMUNITY", icon_only=True, text="")
         row.prop(context.scene.mastro_use_name_list[index],"name", text="")
         row.operator("mastro_use_name_list.new_item", icon='ADD', text="")

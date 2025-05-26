@@ -43,6 +43,22 @@ class mastro_addon_preferences(AddonPreferences):
     #     name="Example Boolean",
     #     default=False,
     # )
+    
+    noteSize: bpy.props.IntProperty(
+        name="Font Size",
+        min = 8,
+        max = 64,
+        default = 12
+    )
+    
+    noteColor: bpy.props.FloatVectorProperty(
+                 name = "Font Color Picker",
+                 subtype = "COLOR",
+                 size = 3,
+                 min = 0.0,
+                 max = 1.0,
+                 default = (0.58, 0.392, 0.103))
+    
     fontSize: bpy.props.IntProperty(
         name="Font Size",
         min = 8,
@@ -107,7 +123,7 @@ class mastro_addon_preferences(AddonPreferences):
         row = layout.row()
         row.label(text = "Font Color:")
         row.prop(self, "fontColor", icon_only=True)
-        row = layout.row()
+        # row = layout.row()
         
         layout.separator
         # col = layout.column(align=True)
@@ -126,6 +142,14 @@ class mastro_addon_preferences(AddonPreferences):
         row = layout.row()
         row.label(text = "Street - Edge selection size:")
         row.prop(self, "streetEdgeSize", icon_only=True)
+        
+        layout.separator
+        row = layout.row()
+        row.label(text = "Note Font Size:")
+        row.prop(self, "noteSize", icon_only=True)
+        row = layout.row()
+        row.label(text = "Note Color:")
+        row.prop(self, "noteColor", icon_only=True)
        
         
 
