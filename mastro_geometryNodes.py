@@ -40,7 +40,8 @@ class NODE_OT_sticky_note(Operator):
 
     def execute(self, context):
         #get the list of all selected nodes
-        node_tree = bpy.context.space_data.node_tree
+        node_tree = bpy.context.space_data.edit_tree
+        print(node_tree)
         if node_tree:
             # selected_nodes = [node for node in node_tree.nodes if node.select]
             activeNode = node_tree.nodes.active
@@ -90,13 +91,14 @@ class VIEW_PT_MaStro_Node_Panel(Panel):
     def draw(self, context):
         # scene = context.scene
         layout = self.layout
-        node_tree = bpy.context.space_data.node_tree
-        activeNode = node_tree.nodes.active
-        # activeNode = get_active_node(self)
-        if activeNode and activeNode.select and "customNote" in activeNode:
-            layout.operator("node.sticky_note", text="Edit the Sticky Note")
-        else:
-            layout.operator("node.sticky_note", text="Add a Sticky Note")
+        node_tree = bpy.context.space_data.edit_tree
+        if node_tree:
+            activeNode = node_tree.nodes.active
+            # activeNode = get_active_node(self)
+            if activeNode and activeNode.select and "customNote" in activeNode:
+                layout.operator("node.sticky_note", text="Edit the Sticky Note")
+            else:
+                layout.operator("node.sticky_note", text="Add a Sticky Note")
 
     
 class VIEW_PT_MaStro_GN_Panel(Panel):
