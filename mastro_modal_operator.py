@@ -71,7 +71,7 @@ class VIEW_3D_OT_show_mastro_overlay(Operator):
 
 def draw_selection_overlay(context):
     obj = bpy.context.active_object
-    if hasattr(obj, "data") and "MaStro object" in obj.data:
+    if hasattr(obj, "data") and obj.data is not None and "MaStro object" in obj.data:
         mesh = obj.data
         if mesh.is_editmode:
             if "MaStro mass" in obj.data:
@@ -675,7 +675,7 @@ def updates(scene, depsgraph):
     if current_selection != previous_selection:
         for obj in current_selection: 
             mesh = bpy.data.objects[obj].data
-            if "MaStro object" in mesh:
+            if mesh is not None and "MaStro object" in mesh:
                 newSelection = True
                 break
     previous_selection = current_selection
