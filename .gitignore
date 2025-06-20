@@ -57,7 +57,13 @@ docs/_build/
 *.blend3
 *.blend4
 *.blend5
-blender_assets.cats.txt~
+*.blend6
+*.blend7
+*.blend8
+*.blend9
+*.blend10
+blender_assets.cats.*
 *_ss.blend
 mastro_250429.blend
 .vscode/
+ss_blend/*
