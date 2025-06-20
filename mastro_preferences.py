@@ -100,7 +100,7 @@ class mastro_addon_preferences(AddonPreferences):
         name="Edge thickness of the selected street",
         min = 1,
         max = 10,
-        default = 10
+        default = 2
     )
     
     toggleSelectionOverlay: bpy.props.BoolProperty(
@@ -108,50 +108,93 @@ class mastro_addon_preferences(AddonPreferences):
                 default = True,
                 description = "Show selection overlay when the MaStro mass or street is in edit mode"
                 )
+    
+    show_overlay_settings: bpy.props.BoolProperty(
+        name="Overslay Settings",
+        default=False
+    )
+
+    show_note_settings: bpy.props.BoolProperty(
+        name="Note Settings",
+        default=False
+    )
 
 
     def draw(self, context):
         layout = self.layout
-        # layout.label(text="MaStro addon preferences")
-        # layout.prop(self, "filepath")
-        # layout.prop(self, "number")
-        # layout.prop(self, "boolean")
-        # layout.label(text="Text")
-        row = layout.row()
-        row.label(text = "Font Size:")
-        row.prop(self, "fontSize", icon_only=True)
-        row = layout.row()
-        row.label(text = "Font Color:")
-        row.prop(self, "fontColor", icon_only=True)
-        # row = layout.row()
-        
-        layout.separator
-        # col = layout.column(align=True)
-        row = layout.row()
-        row.label(text = "Toggle selection overlay:")
-        row.prop(self, "toggleSelectionOverlay", icon_only=True)
-        row = layout.row()
-        row.label(text = "Mass - Edge selection size:")
-        row.prop(self, "massEdgeSize", icon_only=True)
-        row = layout.row()
-        row.label(text = "Mass - Edge selection color:")
-        row.prop(self, "massEdgeColor", icon_only=True)
-        row = layout.row()
-        row.label(text = "Mass - Face selection color:")
-        row.prop(self, "massFaceColor", icon_only=True)
-        row = layout.row()
-        row.label(text = "Street - Edge selection size:")
-        row.prop(self, "streetEdgeSize", icon_only=True)
-        
-        layout.separator
-        row = layout.row()
-        row.label(text = "Note Font Size:")
-        row.prop(self, "noteSize", icon_only=True)
-        row = layout.row()
-        row.label(text = "Note Color:")
-        row.prop(self, "noteColor", icon_only=True)
-       
-        
+
+        # Section: Overlay
+        box = layout.box()
+        box.prop(self, 
+                 "show_overlay_settings", 
+                 text="Overlays", 
+                 icon='TRIA_DOWN' if self.show_overlay_settings else 'TRIA_RIGHT', 
+                 emboss=False)
+        if self.show_overlay_settings:
+            col = box.column(align=True)
+            
+            row = col.row()
+            row.label(text = "Toggle Selection Overlays in Edit Mode:")
+            row.prop(self, "toggleSelectionOverlay", icon_only=True)
+            
+            # mass
+            row = col.row()
+            row.label(text="")
+            row = col.row()
+            row.label(text="Mass Overlay:")
+            
+            row = col.row()
+            row.label(text = "Mass - Edge selection size:")
+            row.prop(self, "massEdgeSize", icon_only=True)
+            
+            row = col.row()
+            row.label(text = "Mass - Edge selection color:")
+            row.prop(self, "massEdgeColor", icon_only=True)
+            
+            row = col.row()
+            row.label(text = "Mass - Face selection color:")
+            row.prop(self, "massFaceColor", icon_only=True)
+            
+            # street
+            row = col.row()
+            row.label(text="")
+            row = col.row()
+            row.label(text="Street Overlay:")
+            row = col.row()
+            row.label(text = "Street - Edge selection size:")
+            row.prop(self, "streetEdgeSize", icon_only=True)
+                       
+            # font
+            row = col.row()
+            row.label(text="")
+            row = col.row()
+            row.label(text="Font Settings:")
+            row = col.row()
+            row.label(text = "Size:")
+            row.prop(self, "fontSize", icon_only=True)
+            row = col.row()
+            row.label(text = "Color:")
+            row.prop(self, "fontColor", icon_only=True)
+            
+        # Section: Note
+        box = layout.box()
+        box.prop(self, 
+                 "show_note_settings", 
+                 text="Node Note", 
+                 icon='TRIA_DOWN' if self.show_note_settings else 'TRIA_RIGHT', 
+                 emboss=False)
+        if self.show_note_settings:
+            col = box.column(align=True) 
+            row = col.row()
+            row.label(text="Font Settings:")
+            row = col.row()
+            row.label(text = "Size:")
+            row.prop(self, "noteSize", icon_only=True)
+            row = col.row()
+            row.label(text = "Color:")
+            row.prop(self, "noteColor",icon_only=True)
+
+
 
 # class OBJECT_OT_mastro_addon_prefs(Operator):
 #     """Display example preferences"""
