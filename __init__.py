@@ -22,18 +22,18 @@
 # ----------------------------------------------
 # Define Addon info
 # ----------------------------------------------
-bl_info = {
-    "name": "MaStro",
-    "author": "Luca Saiani",
-    "version": (0, 0, 1),
-    "blender": (3, 4, 0),
-    "location": "View3D > Panel",
-    "description": "MaStro",
-    "warning": "",
-    "wiki_url": "",
-    "tracker_url": "",
-    "category": "Objects"
-}
+# bl_info = {
+#     "name": "MaStro",
+#     "author": "Luca Saiani",
+#     "version": (0, 0, 1),
+#     "blender": (3, 4, 0),
+#     "location": "View3D > Panel",
+#     "description": "MaStro",
+#     "warning": "",
+#     "wiki_url": "",
+#     "tracker_url": "",
+#     "category": "Objects"
+# }
 
 # import sys
 # import os
@@ -595,7 +595,7 @@ def register():
                                             name = "Number of Storeys",
                                             default = False)
     bpy.types.WindowManager.toggle_street_color = bpy.props.BoolProperty(
-                                            name = "Street color",
+                                            name = "Street Color",
                                             default = False)
     bpy.types.WindowManager.toggle_auto_update_mass_data = bpy.props.BoolProperty(
                                             name = "Auto Update Mass Data",
