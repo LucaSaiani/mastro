@@ -462,7 +462,7 @@ class VIEW3D_PT_MaStro_show_data(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     # bl_category = "MaStro"
-    bl_label = "Show Data"
+    bl_label = "Show Overlays"
     bl_parent_id = "VIEW3D_PT_MaStro_project_data"
     # bl_context = "scene"
     bl_options = {'DEFAULT_CLOSED'}
@@ -2114,7 +2114,7 @@ class OBJECT_OT_update_all_MaStro_street_attributes(Operator):
                         street_id = mesh.attributes["mastro_street_id"].data[edgeIndex].value
                         data = read_mesh_attributes_streets(context, mesh, edgeIndex, streetSet = street_id)
                         if [i for i in ["width"] if i in self.attributeToUpdate]:
-                            mesh.attributes["mastro_street_width"].data[edgeIndex].value = data["width"]
+                            mesh.attributes["mastro_street_width"].data[edgeIndex].value = data["width"]/2
                         elif [i for i in ["radius"] if i in self.attributeToUpdate]:
                             mesh.attributes["mastro_street_radius"].data[edgeIndex].value = data["radius"]
                     bpy.ops.object.mode_set(mode=objMode)
