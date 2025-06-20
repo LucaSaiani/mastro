@@ -104,11 +104,12 @@ def read_mesh_attributes_streets(context, mesh, edgeIndex, streetSet=None):
     else:
       street_id = streetSet
     projectStreets = context.scene.mastro_street_name_list
-    
 
+    index = next((i for i, elem in enumerate(projectStreets) if elem.id == street_id), None)
+    print("index", index, street_id)
     data = {"street_id" : street_id,
-            "width" : projectStreets[street_id].streetWidth,
-            "radius" : projectStreets[street_id].streetRadius
+            "width" : projectStreets[index].streetWidth,
+            "radius" : projectStreets[index].streetRadius
             }  
     return data
 
