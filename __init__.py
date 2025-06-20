@@ -297,12 +297,17 @@ def initLists():
         bpy.context.scene.mastro_obj_typology_uses_name_list.add()
         bpy.context.scene.mastro_obj_typology_uses_name_list[0].id = 0
         bpy.context.scene.mastro_obj_typology_uses_name_list[0].name =  bpy.context.scene.mastro_use_name_list[0].name
-        
-    if len(bpy.context.scene.mastro_street_name_list) == 0:
-        bpy.context.scene.mastro_street_name_list.add()
-        bpy.context.scene.mastro_street_name_list[0].id = 0
-        bpy.context.scene.mastro_street_name_list[0].name = "Street type... "
-        bpy.context.scene.mastro_street_name_list[0].normal = 0
+    
+    name_list = bpy.context.scene.mastro_street_name_list
+    if len(name_list) == 0:
+        name_list.add()
+        name_list[0].id = 0
+        name_list[0].name = "Street type... "
+    elif not 0 in [elem.id for elem in name_list]:
+        name_list.add()
+        name_list[-1].id = 0
+        name_list[-1].name = "Street type... "
+        # bpy.context.scene.mastro_street_name_list[0].normal = 0
     
     if len(bpy.context.scene.mastro_wall_name_list) == 0:
         bpy.context.scene.mastro_wall_name_list.add()
@@ -402,12 +407,14 @@ def get_floor_names_from_list(scene, context):
 
 @persistent
 def onFileLoaded(scene):
-    # initLists()
+    initLists()
     # initNodes()
     # bpy.context.scene.updating_mesh_attributes_is_active = False
     bpy.context.scene.show_selection_overlay_is_active = False
     bpy.context.scene.previous_selection_object_name = ""
     bpy.context.scene.previous_selection_face_id = -1
+    
+    
     
     # bpy.msgbus.subscribe_rna(
     #     key=mastro_project_data.OBJECT_UL_Typology,
