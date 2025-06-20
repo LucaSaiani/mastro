@@ -89,7 +89,7 @@ class OBJECT_OT_SetStreetId(Operator):
             edgeIndex = edge.index
             data = read_mesh_attributes_streets(context, mesh, edgeIndex)
             mesh.attributes["mastro_street_id"].data[edgeIndex].value = data["street_id"]
-            mesh.attributes["mastro_street_width"].data[edgeIndex].value = data["width"]
+            mesh.attributes["mastro_street_width"].data[edgeIndex].value = data["width"]/2
             mesh.attributes["mastro_street_radius"].data[edgeIndex].value = data["radius"]
         bpy.ops.object.mode_set(mode=mode)
         return {'FINISHED'}
@@ -106,7 +106,6 @@ def read_mesh_attributes_streets(context, mesh, edgeIndex, streetSet=None):
     projectStreets = context.scene.mastro_street_name_list
 
     index = next((i for i, elem in enumerate(projectStreets) if elem.id == street_id), None)
-    print("index", index, street_id)
     data = {"street_id" : street_id,
             "width" : projectStreets[index].streetWidth,
             "radius" : projectStreets[index].streetRadius
