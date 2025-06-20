@@ -161,8 +161,10 @@ def show_street_overlay(obj):
         
         if bMesh_street_id_layer:
             street_id = edge[bMesh_street_id_layer]
+            projectStreets = bpy.context.scene.mastro_street_name_list
+            index = next((i for i, elem in enumerate(projectStreets) if elem.id == street_id), None)
             if 0 <= street_id < len(bpy.context.scene.mastro_street_name_list):
-                r, g, b, a = [c for c in bpy.context.scene.mastro_street_name_list[street_id].streetEdgeColor]
+                r, g, b, a = [c for c in bpy.context.scene.mastro_street_name_list[index].streetEdgeColor]
                 shader.uniform_float("color", (r, g, b, a))
                 gpu.state.line_width_set(bpy.context.preferences.addons['mastro'].preferences.streetEdgeSize)
                 gpu.state.blend_set("ALPHA")
