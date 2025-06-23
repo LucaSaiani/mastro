@@ -57,7 +57,7 @@ class VIEW_3D_OT_show_mastro_overlay(Operator):
         VIEW_3D_OT_show_mastro_overlay._handle = None
     
     def execute(self, context):
-        if bpy.context.preferences.addons['mastro'].preferences.toggleSelectionOverlay:    
+        if bpy.context.preferences.addons[__package__].preferences.toggleSelectionOverlay:    
             self.handle_add(self, context)
         else:
             self.handle_remove(self, context)
@@ -94,10 +94,10 @@ def draw_selection_overlay(context):
                         
                     
                     batch = batch_for_shader(shader, 'LINES', {"pos": coords}, indices=edgeIndices)
-                    r, g, b, a = [c for c in bpy.context.preferences.addons['mastro'].preferences.massEdgeColor]
+                    r, g, b, a = [c for c in bpy.context.preferences.addons[__package__].preferences.massEdgeColor]
                     shader.uniform_float("color", (r, g, b, a))
                 
-                    gpu.state.line_width_set(bpy.context.preferences.addons['mastro'].preferences.massEdgeSize)
+                    gpu.state.line_width_set(bpy.context.preferences.addons[__package__].preferences.massEdgeSize)
                     gpu.state.blend_set("ALPHA")
                     batch.draw(shader)
                     
@@ -114,7 +114,7 @@ def draw_selection_overlay(context):
                     dFaceindices = [(loop.vert.index for loop in looptris) for looptris in dbm.calc_loop_triangles()]
                     # dEdgeindices = [(v.index for v in e.verts) for e in dbm.edges]
                     batch = batch_for_shader(shader, 'TRIS', {"pos": dVertices}, indices=dFaceindices)
-                    r, g, b, a = [c for c in bpy.context.preferences.addons['mastro'].preferences.massFaceColor]
+                    r, g, b, a = [c for c in bpy.context.preferences.addons[__package__].preferences.massFaceColor]
                     shader.uniform_float("color", (r, g, b, a))       
                     # gpu.state.blend_set("NONE")
                     batch.draw(shader)
@@ -166,7 +166,7 @@ def show_street_overlay(obj):
             if 0 <= street_id < len(bpy.context.scene.mastro_street_name_list):
                 r, g, b, a = [c for c in bpy.context.scene.mastro_street_name_list[index].streetEdgeColor]
                 shader.uniform_float("color", (r, g, b, a))
-                gpu.state.line_width_set(bpy.context.preferences.addons['mastro'].preferences.streetEdgeSize)
+                gpu.state.line_width_set(bpy.context.preferences.addons[__package__].preferences.streetEdgeSize)
                 gpu.state.blend_set("ALPHA")
                 batch = batch_for_shader(shader, 'LINES', {"pos": coords}, indices=indices)
                 batch.draw(shader)
@@ -178,8 +178,8 @@ def show_street_overlay(obj):
     
 # @persistent
 # def update_show_overlay(scene, context):
-#     if scene.show_selection_overlay_is_active != bpy.context.preferences.addons['mastro'].preferences.toggleSelectionOverlay:
-#         scene.show_selection_overlay_is_active = bpy.context.preferences.addons['mastro'].preferences.toggleSelectionOverlay
+#     if scene.show_selection_overlay_is_active != bpy.context.preferences.addons[__package__].preferences.toggleSelectionOverlay:
+#         scene.show_selection_overlay_is_active = bpy.context.preferences.addons[__package__].preferences.toggleSelectionOverlay
 #         bpy.ops.wm.show_mastro_overlay('INVOKE_DEFAULT')
     
 # @persistent
@@ -320,9 +320,9 @@ def draw_main_show_attributes_2D(context):
         
         font_id = font_info["font_id"]
         # blf.position(font_id, coord.x, coord.y, 0)
-        r, g, b, a = [c for c in bpy.context.preferences.addons['mastro'].preferences.fontColor]
+        r, g, b, a = [c for c in bpy.context.preferences.addons[__package__].preferences.fontColor]
         blf.color(font_id, r, g, b, a)
-        font_size =  bpy.context.preferences.addons['mastro'].preferences.fontSize
+        font_size =  bpy.context.preferences.addons[__package__].preferences.fontSize
         blf.size(font_id, font_size)
         
         # multi line text
@@ -631,8 +631,8 @@ def updates(scene, depsgraph):
     # show graphic overlays #######################################################
     ###############################################################################
 
-    if scene.show_selection_overlay_is_active != bpy.context.preferences.addons['mastro'].preferences.toggleSelectionOverlay:
-        scene.show_selection_overlay_is_active = bpy.context.preferences.addons['mastro'].preferences.toggleSelectionOverlay
+    if scene.show_selection_overlay_is_active != bpy.context.preferences.addons[__package__].preferences.toggleSelectionOverlay:
+        scene.show_selection_overlay_is_active = bpy.context.preferences.addons[__package__].preferences.toggleSelectionOverlay
         bpy.ops.wm.show_mastro_overlay('INVOKE_DEFAULT')
      
         

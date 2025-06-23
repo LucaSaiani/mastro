@@ -59,8 +59,8 @@ class NODE_OT_sticky_note(Operator):
                 postIt.label = "Note"
                 postIt["customNote"] = True
                 postIt.use_custom_color = True
-                postIt.color = bpy.context.preferences.addons['mastro'].preferences.noteColor
-                postIt.label_size = bpy.context.preferences.addons['mastro'].preferences.noteSize
+                postIt.color = bpy.context.preferences.addons[__package__].preferences.noteColor
+                postIt.label_size = bpy.context.preferences.addons[__package__].preferences.noteSize
                 postIt.shrink = False
                 if activeNode and activeNode.select:
                     postIt.location = activeNode.location
