@@ -49,8 +49,8 @@ class VIEW3D_PT_MaStro_Street(Panel):
                 # row = layout.row()
                 row = layout.row(align=True)
                 
-                layout.prop(obj.mastro_props, "mastro_option_attribute", text="Option")
-                layout.prop(obj.mastro_props, "mastro_phase_attribute", text="Phase")
+                # layout.prop(obj.mastro_props, "mastro_option_attribute", text="Option")
+                # layout.prop(obj.mastro_props, "mastro_phase_attribute", text="Phase")
                     
             elif mode == "EDIT":
                 scene = context.scene

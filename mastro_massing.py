@@ -63,8 +63,8 @@ class VIEW3D_PT_MaStro_Mass(Panel):
                 # row = layout.row()
                 row = layout.row(align=True)
                 
-                layout.prop(obj.mastro_props, "mastro_option_attribute", text="Option")
-                layout.prop(obj.mastro_props, "mastro_phase_attribute", text="Phase")
+                # layout.prop(obj.mastro_props, "mastro_option_attribute", text="Option")
+                # layout.prop(obj.mastro_props, "mastro_phase_attribute", text="Phase")
                 # row = layout.row()
                 row = layout.row(align=True)
                 row.prop(context.scene, "mastro_plot_names", icon="MOD_BOOLEAN", icon_only=True, text="Plot")
