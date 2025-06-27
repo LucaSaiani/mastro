@@ -215,19 +215,19 @@ street_attribute_set = [
 
 # Defines class for custom properties
 class mastroAddonProperties(bpy.types.PropertyGroup):
-    mastro_option_attribute: bpy.props.IntProperty(
-        name="MaStro Option Attribute",
-        default=1,
-        min=1,
-        description="The project option of the building"
-    )
+    # mastro_option_attribute: bpy.props.IntProperty(
+    #     name="MaStro Option Attribute",
+    #     default=1,
+    #     min=1,
+    #     description="The project option of the building"
+    # )
     
-    mastro_phase_attribute: bpy.props.IntProperty(
-        name="MaStro Phase Attribute",
-        default=1,
-        min=1,
-        description="The construction phase of the building"
-    )
+    # mastro_phase_attribute: bpy.props.IntProperty(
+    #     name="MaStro Phase Attribute",
+    #     default=1,
+    #     min=1,
+    #     description="The construction phase of the building"
+    # )
     
     mastro_plot_attribute: bpy.props.IntProperty(
         name="MaStro Plot Attribute",
@@ -533,8 +533,8 @@ class MaStro_MenuOperator_convert_to_MaStro_street(Operator):
     
 # assign the mass attributes to the selected object
 def addMassAttributes(obj):
-    obj.mastro_props['mastro_option_attribute'] = 1
-    obj.mastro_props['mastro_phase_attribute'] = 1
+    # obj.mastro_props['mastro_option_attribute'] = 1
+    # obj.mastro_props['mastro_phase_attribute'] = 1
     obj.mastro_props['mastro_plot_attribute'] = 0
     obj.mastro_props['mastro_block_attribute'] = 0
     mesh = obj.data
@@ -702,8 +702,8 @@ def addMassAttributes(obj):
 
 # add street attributes to the selected object
 def addStreetAttributes(obj):
-    obj.mastro_props['mastro_option_attribute'] = 1
-    obj.mastro_props['mastro_phase_attribute'] = 1
+    # obj.mastro_props['mastro_option_attribute'] = 1
+    # obj.mastro_props['mastro_phase_attribute'] = 1
     mesh = obj.data
     mesh["MaStro object"] = True
     mesh["MaStro street"] = True
@@ -736,20 +736,33 @@ def addStreetAttributes(obj):
     
 # import the mastro nodes in the file
 def addNodes():
-    USER = Path(resource_path('USER'))
-    src = USER / "scripts/addons" / "mastro"
+    # USER = Path(resource_path('USER'))
+    # src = USER / "scripts/addons" / "mastro"
 
-    file_path = src / "mastro.blend"
-    inner_path = "NodeTree"
-    geoNodes_list = ("MaStro Mass", "MaStro Street")
+    # file_path = src / "mastro.blend"
+    # inner_path = "NodeTree"
+    # geoNodes_list = ("MaStro Mass", "MaStro Street")
 
-    for group in geoNodes_list:
-        if group not in bpy.data.node_groups:
-            bpy.ops.wm.append(
-                filepath=str(file_path / inner_path / group),
-                directory=str(file_path / inner_path),
-                filename = group
-                )   
+    # for group in geoNodes_list:
+    #     if group not in bpy.data.node_groups:
+    #         bpy.ops.wm.append(
+    #             filepath=str(file_path / inner_path / group),
+    #             directory=str(file_path / inner_path),
+    #             filename = group
+    #             )   
+            
+    my_addon_path = Path(bpy.utils.extension_path_user(__package__))
+    blend_file_path = my_addon_path / "mastro.blend"
+    collections_to_load = ["MaStro Mass", "MaStro Street"]
+    
+    # link=False to append
+    with bpy.data.libraries.load(str(blend_file_path), link=False) as (data_from, data_to):
+        data_to.collections = [c for c in data_from.collections if c in collections_to_load]
+
+    for coll in data_to.collections:
+        for obj in coll.objects:
+            bpy.context.view_layer.active_layer_collection.collection.objects.link(obj)
+
     
 
         

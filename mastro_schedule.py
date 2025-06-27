@@ -304,8 +304,8 @@ def getAttributes(objNames, attrType):
         for el in mastroObjs:
             obj = bpy.data.objects[el.name]
           
-            option = obj.mastro_props['mastro_option_attribute']
-            phase = obj.mastro_props['mastro_phase_attribute']
+            # option = obj.mastro_props['mastro_option_attribute']
+            # phase = obj.mastro_props['mastro_phase_attribute']
             plot = obj.mastro_props['mastro_plot_attribute']
             block = obj.mastro_props['mastro_block_attribute']
     
@@ -390,8 +390,6 @@ def getAttributes(objNames, attrType):
                                     "useId"         : useId,
                                     "height"        : height,
                                     "void"          : void,
-                                    "option"        : option,
-                                    "phase"         : phase,
                                     "block"         : block,
                                     "plot"          : plot
                         }
