@@ -751,17 +751,20 @@ def addNodes():
     #             filename = group
     #             )   
             
-    my_addon_path = Path(bpy.utils.extension_path_user(__package__))
-    blend_file_path = my_addon_path / "mastro.blend"
-    collections_to_load = ["MaStro Mass", "MaStro Street"]
+    # my_addon_path = Path(bpy.utils.extension_path_user(__package__))
+    my_addon_path = Path(bpy.utils.user_resource('EXTENSIONS',path="vscode_development"))
+    blend_file_path = my_addon_path / "mastro/mastro.blend"
+    inner_path = "NodeTree"
     
-    # link=False to append
-    with bpy.data.libraries.load(str(blend_file_path), link=False) as (data_from, data_to):
-        data_to.collections = [c for c in data_from.collections if c in collections_to_load]
+    geoNodes_list = ("MaStro Mass", "MaStro Street")
 
-    for coll in data_to.collections:
-        for obj in coll.objects:
-            bpy.context.view_layer.active_layer_collection.collection.objects.link(obj)
+    for group in geoNodes_list:
+        if group not in bpy.data.node_groups:
+            bpy.ops.wm.append(
+                filepath=str(blend_file_path / inner_path / group),
+                directory=str(blend_file_path / inner_path),
+                filename = group
+                )   
 
     
 
