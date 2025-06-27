@@ -529,103 +529,136 @@ def draw_callback_px_show_attributes_3D(self, context):
 
 def update_show_attributes(self, context):
     bpy.ops.wm.show_mastro_attributes()
-    
-# Manage all the required updates fired by depsgraph_update  
+
+###############################################################################    
+########## Manage all the required updates fired by depsgraph_update  #########
+###############################################################################
 @persistent
 def updates(scene, depsgraph):
     ###############################################################################
-    # update the values in the UI accordingly with the selected faces #############
+    # update the values in the UI accordingly with the selected edges or faces ####
     ###############################################################################
     obj = bpy.context.active_object
     if obj:
-        if obj is not None and obj.type == "MESH" and "MaStro object" in obj.data and "MaStro mass" in obj.data:
-            if scene.previous_selection_object_name != obj.name:
-                scene.previous_selection_object_name = obj.name
-                scene.previous_selection_face_id = -1
-                # if obj is not None and obj.type == "MESH" and "MaStro object" in obj.data and "MaStro mass" in obj.data:
-                if obj.mode == "OBJECT":
-                    blockId = obj.mastro_props['mastro_block_attribute']
-                    plotId = obj.mastro_props['mastro_plot_attribute']
+        if obj is not None and obj.type == "MESH" and "MaStro object" in obj.data:
+            if "MaStro mass" in obj.data:
+                if scene.previous_selection_object_name != obj.name:
+                    scene.previous_selection_object_name = obj.name
+                    scene.previous_selection_face_id = -1
+                    # if obj is not None and obj.type == "MESH" and "MaStro object" in obj.data and "MaStro mass" in obj.data:
+                    if obj.mode == "OBJECT":
+                        blockId = obj.mastro_props['mastro_block_attribute']
+                        plotId = obj.mastro_props['mastro_plot_attribute']
+                        
+                        block = scene.mastro_block_name_list[blockId].name
+                        plot = scene.mastro_plot_name_list[plotId].name
+                        
+                        scene.mastro_block_name_current[0].name = block
+                        scene.mastro_plot_name_current[0].name = plot
+                else:
+                    # if obj is not None and obj.type == "MESH" and "MaStro object" in obj.data and obj.mode == 'EDIT':
+                    if obj.mode == 'EDIT':
+                        bm = bmesh.from_edit_mesh(obj.data)
+                        bMesh_storeys = bm.faces.layers.int["mastro_number_of_storeys"]
+                        bMesh_storey_list_A = bm.faces.layers.int["mastro_list_storey_A"]
+                        bMesh_storey_list_B = bm.faces.layers.int["mastro_list_storey_B"]
+                        bMesh_typology = bm.faces.layers.int["mastro_typology_id"]
                     
-                    block = scene.mastro_block_name_list[blockId].name
-                    plot = scene.mastro_plot_name_list[plotId].name
-                    
-                    scene.mastro_block_name_current[0].name = block
-                    scene.mastro_plot_name_current[0].name = plot
-            else:
-                # if obj is not None and obj.type == "MESH" and "MaStro object" in obj.data and obj.mode == 'EDIT':
+                        # check if there is an active face
+                        if isinstance(bm.select_history.active, bmesh.types.BMFace):
+                            active_face = bm.select_history.active.index
+                            if scene.previous_selection_face_id != active_face:
+                                scene.previous_selection_face_id = active_face
+                        else:
+                            selected_faces = [face for face in bm.faces if face.select]
+                            if len(selected_faces) > 0:
+                                for f in selected_faces:
+                                    scene.previous_selection_face_id = f.index
+                            else:
+                                scene.previous_selection_face_id = -1
+                        if scene.previous_selection_face_id != -1:
+                            #updating the information in UI
+                            bm.faces.ensure_lookup_table()
+                            storeys = bm.faces[scene.previous_selection_face_id][bMesh_storeys]
+                            list_storey_A = bm.faces[scene.previous_selection_face_id][bMesh_storey_list_A]
+                            list_storey_B = bm.faces[scene.previous_selection_face_id][bMesh_storey_list_B]
+                            typology = bm.faces[scene.previous_selection_face_id][bMesh_typology]
+                            
+                            # number of storeys
+                            if storeys == 0: # in case a new face is created in edit mode, the number of set storeys is 1
+                                storeys = 1
+                                bpy.ops.object.set_mesh_attribute_storeys
+                            scene["attribute_mass_storeys"] = storeys
+                            
+                            # typology name
+                            # since it is possible to sort typologies in the ui, it can be that the index of the element
+                            # in the list doesn't correspond to typology_id. Therefore it is necessary to find elements
+                            # in the way below and not with use_list = bpy.context.scene.mastro_typology_name_list[typology_id].useList
+                            item = next(i for i in scene.mastro_typology_name_list if i["id"] == typology)
+                            scene.mastro_typology_name_current[0].name = item.name
+                            # uses related to the typology
+                            usesUiList = bpy.context.scene.mastro_obj_typology_uses_name_list 
+                            # clean the list
+                            while len(usesUiList) > 0:
+                                index = scene.mastro_obj_typology_uses_name_list_index
+                                usesUiList.remove(index)
+                                scene.mastro_obj_typology_uses_name_list_index = min(max(0, index - 1), len(usesUiList) - 1)
+                            # populate the list of uses
+                            use_list = item.useList
+                            list_storey_A = str(list_storey_A)[1:]
+                            list_storey_B = str(list_storey_B)[1:]
+                            list_storey_A = list_storey_A[::-1]
+                            list_storey_B = list_storey_B[::-1]
+                            
+                            useSplit = use_list.split(";") 
+                            for enum, el in enumerate(useSplit):
+                                id = int(el)
+                                usesUiList.add()
+                                usesUiList[enum].id = enum + 1
+                                for use in scene.mastro_use_name_list:
+                                    if id == use.id:
+                                        usesUiList[enum].name = use.name
+                                        usesUiList[enum].nameId = use.id
+                                        # when a new face is added in edit mode
+                                        # no storeys are assigned to the newly created face
+                                        # therefore the system returns an indexError
+                                        try:
+                                            storeys = list_storey_A[enum] + list_storey_B[enum]
+                                        except IndexError:
+                                            storeys = 1
+                                        usesUiList[enum].storeys = int(storeys)     
+                                        break
+                        bm.free
+            elif "MaStro street" in obj.data:
                 if obj.mode == 'EDIT':
                     bm = bmesh.from_edit_mesh(obj.data)
-                    bMesh_storeys = bm.faces.layers.int["mastro_number_of_storeys"]
-                    bMesh_storey_list_A = bm.faces.layers.int["mastro_list_storey_A"]
-                    bMesh_storey_list_B = bm.faces.layers.int["mastro_list_storey_B"]
-                    bMesh_typology = bm.faces.layers.int["mastro_typology_id"]
-                
-                    # check if there is an active face
-                    if isinstance(bm.select_history.active, bmesh.types.BMFace):
-                        active_face = bm.select_history.active.index
-                        if scene.previous_selection_face_id != active_face:
-                            scene.previous_selection_face_id = active_face
-                    else:
-                        selected_faces = [face for face in bm.faces if face.select]
-                        if len(selected_faces) > 0:
-                            for f in selected_faces:
-                                scene.previous_selection_face_id = f.index
+                    bMesh_street_type = bm.edges.layers.int["mastro_street_id"]
+                    
+                    # check if there is an active edge
+                    if isinstance(bm.select_history.active, bmesh.types.BMEdge):
+                        active_edge = bm.select_history.active.index
+                        if scene.previous_selection_edge_id != active_edge:
+                            scene.previous_selection_edge_id = active_edge
                         else:
-                            scene.previous_selection_face_id = -1
-                    if scene.previous_selection_face_id != -1:
-                        #updating the information in UI
-                        bm.faces.ensure_lookup_table()
-                        storeys = bm.faces[scene.previous_selection_face_id][bMesh_storeys]
-                        list_storey_A = bm.faces[scene.previous_selection_face_id][bMesh_storey_list_A]
-                        list_storey_B = bm.faces[scene.previous_selection_face_id][bMesh_storey_list_B]
-                        typology = bm.faces[scene.previous_selection_face_id][bMesh_typology]
-                        
-                        # number of storeys
-                        if storeys == 0: # in case a new face is created in edit mode, the number of set storeys is 1
-                            storeys = 1
-                            bpy.ops.object.set_mesh_attribute_storeys
-                        scene["attribute_mass_storeys"] = storeys
-                        
-                        # typology name
-                        # since it is possible to sort typologies in the ui, it can be that the index of the element
-                        # in the list doesn't correspond to typology_id. Therefore it is necessary to find elements
-                        # in the way below and not with use_list = bpy.context.scene.mastro_typology_name_list[typology_id].useList
-                        item = next(i for i in scene.mastro_typology_name_list if i["id"] == typology)
-                        scene.mastro_typology_name_current[0].name = item.name
-                        # uses related to the typology
-                        usesUiList = bpy.context.scene.mastro_obj_typology_uses_name_list 
-                        # clean the list
-                        while len(usesUiList) > 0:
-                            index = scene.mastro_obj_typology_uses_name_list_index
-                            usesUiList.remove(index)
-                            scene.mastro_obj_typology_uses_name_list_index = min(max(0, index - 1), len(usesUiList) - 1)
-                        # populate the list of uses
-                        use_list = item.useList
-                        list_storey_A = str(list_storey_A)[1:]
-                        list_storey_B = str(list_storey_B)[1:]
-                        list_storey_A = list_storey_A[::-1]
-                        list_storey_B = list_storey_B[::-1]
-                        
-                        useSplit = use_list.split(";") 
-                        for enum, el in enumerate(useSplit):
-                            id = int(el)
-                            usesUiList.add()
-                            usesUiList[enum].id = enum + 1
-                            for use in scene.mastro_use_name_list:
-                                if id == use.id:
-                                    usesUiList[enum].name = use.name
-                                    usesUiList[enum].nameId = use.id
-                                    # when a new face is added in edit mode
-                                    # no storeys are assigned to the newly created face
-                                    # therefore the system returns an indexError
-                                    try:
-                                        storeys = list_storey_A[enum] + list_storey_B[enum]
-                                    except IndexError:
-                                        storeys = 1
-                                    usesUiList[enum].storeys = int(storeys)     
-                                    break
-                    bm.free
+                            selected_edges = [edge for edge in bm.edges if edge.select]
+                            if len(selected_edges) > 0:
+                                for e in selected_edges:
+                                    scene.previous_selection_edge_id = e.index
+                            else:
+                                scene.previous_selection_edge_id = -1
+                        if scene.previous_selection_edge_id != -1:
+                            #updating the information in UI
+                            bm.edges.ensure_lookup_table()
+                            street_type = bm.edges[scene.previous_selection_edge_id][bMesh_street_type]
+                            # street type name
+                            # since it is possible to sort typologies in the ui, it can be that the index of the element
+                            # in the list doesn't correspond to street_id. Therefore it is necessary to find elements
+                            # in the way below
+                            item = next(i for i in scene.mastro_street_name_list if i["id"] == street_type)
+                            scene.mastro_street_name_current[0].name = item.name
+                        bm.free
+                            
+                    
                     
     ###############################################################################
     # show graphic overlays #######################################################
@@ -668,7 +701,7 @@ def updates(scene, depsgraph):
                             break
 
     ################################################################################################
-    # is the selection has changed, some  data in the MaStro schedule need to be updated ###########
+    # is the selection has changed, some data in the MaStro schedule need to be updated ###########
     ################################################################################################
     # Detect selection changes or added or remove objects
     global previous_selection

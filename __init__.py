@@ -710,7 +710,12 @@ def register():
                                     name="Previously selected face Id",
                                     default = -1,
                                     description="Store the id of the previous selected face"
-                                    )                  
+                                    )
+    Scene.previous_selection_edge_id = bpy.props.IntProperty(
+                                    name="Previously selected edge Id",
+                                    default = -1,
+                                    description="Store the id of the previous selected edge"
+                                    )                                   
     Scene.mastro_plot_name_list = bpy.props.CollectionProperty(type = mastro_project_data.plot_name_list)
     Scene.mastro_plot_name_current = bpy.props.CollectionProperty(type =mastro_project_data.name_with_id)
     Scene.mastro_plot_name_list_index = bpy.props.IntProperty(name = "Plot Name",
@@ -846,6 +851,7 @@ def unregister():
 
     del Scene.previous_selection_object_name
     del Scene.previous_selection_face_id
+    del Scene.previous_selection_edge_id
     del Scene.mastro_plot_name_list
     del Scene.mastro_block_name_list
     del Scene.mastro_use_name_list
