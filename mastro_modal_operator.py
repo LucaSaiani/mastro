@@ -101,7 +101,7 @@ def draw_selection_overlay(context):
                     batch.draw(shader)
                     
                     # draw the selected faces
-                    if tuple(bpy.context.scene.tool_settings.mesh_select_mode[2]):
+                    if bpy.context.scene.tool_settings.mesh_select_mode[2]:
                         faces = [f for f in bm.faces if f.select == True]
                         
                         # create a new Bmesh with only the newly created faces
@@ -122,7 +122,7 @@ def draw_selection_overlay(context):
                         dbm.free()
                         bm.free()
             
-                    if tuple(bpy.context.scene.tool_settings.mesh_select_mode[1]):
+                    if bpy.context.scene.tool_settings.mesh_select_mode[1]:
                         show_wall_overlay(obj)
                 
             # elif ("MaStro street" in obj.data and
@@ -701,7 +701,7 @@ def updates(scene, depsgraph):
                         bMesh_typology = bm.faces.layers.int["mastro_typology_id"]
                         bMesh_wall_type = bm.edges.layers.int["mastro_wall_id"]
 
-                        if tuple(bpy.context.scene.tool_settings.mesh_select_mode)[1] == True:
+                        if bpy.context.scene.tool_settings.mesh_select_mode[1]:
                             # check if there is an active edge
                             if isinstance(bm.select_history.active, bmesh.types.BMEdge):
                                 active_edge = bm.select_history.active.index
@@ -725,7 +725,7 @@ def updates(scene, depsgraph):
                                     item = next(i for i in scene.mastro_wall_name_list if i["id"] == wall_type)
                                     scene.mastro_wall_name_current[0].name = item.name
                             
-                        if tuple(bpy.context.scene.tool_settings.mesh_select_mode)[2] == True:
+                        if bpy.context.scene.tool_settings.mesh_select_mode[2]:
                             # check if there is an active face
                             if isinstance(bm.select_history.active, bmesh.types.BMFace):
                                 active_face = bm.select_history.active.index
@@ -796,7 +796,7 @@ def updates(scene, depsgraph):
                     bm = bmesh.from_edit_mesh(obj.data)
                     bMesh_street_type = bm.edges.layers.int["mastro_street_id"]
                     
-                    if tuple(bpy.context.scene.tool_settings.mesh_select_mode)[1] == True:
+                    if bpy.context.scene.tool_settings.mesh_select_mode[1]:
                         # check if there is an active edge
                         if isinstance(bm.select_history.active, bmesh.types.BMEdge):
                             active_edge = bm.select_history.active.index

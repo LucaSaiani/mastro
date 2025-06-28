@@ -30,6 +30,7 @@ from bpy.types import PropertyGroup, UIList, Operator, Panel
 # from bpy.app.handlers import persistent
 
 from .mastro_massing import read_mesh_attributes_uses, update_mesh_attributes_storeys
+from .mastro_wall import read_mesh_attributes_walls
 from .mastro_street import read_mesh_attributes_streets
 
 import random
@@ -1411,6 +1412,16 @@ def update_all_mastro_meshes_void(self, context):
     if context.window_manager.toggle_auto_update_mass_data:
         updates = "void"
         bpy.ops.object.update_all_mastro_meshes_attributes(attributeToUpdate=updates)
+        
+# this is for the wall thickness
+def update_all_mastro_wall_thickness(self, context):
+    updates = "wall_thickness"
+    bpy.ops.object.update_all_mastro_meshes_attributes(attributeToUpdate=updates)
+    
+# this is for the wall offset
+def update_all_mastro_wall_offset(self, context):
+    updates = "wall_offset"
+    bpy.ops.object.update_all_mastro_meshes_attributes(attributeToUpdate=updates)
 
         
 # Operator to update the attributes of all the MaStro meshes in the scene        
@@ -1462,6 +1473,7 @@ class OBJECT_OT_update_all_MaStro_meshes_attributes(Operator):
                     mesh = obj.data
                     objMode = obj.mode
                     bpy.ops.object.mode_set(mode='OBJECT')
+                    
                     faces = context.active_object.data.polygons
                     for face in faces:
                         # print(f"Object {obj.name} face {face.index}")
@@ -1490,6 +1502,17 @@ class OBJECT_OT_update_all_MaStro_meshes_attributes(Operator):
                                 mesh.attributes["mastro_list_storey_A"].data[faceIndex].value = data["storey_list_A"]
                                 mesh.attributes["mastro_list_storey_B"].data[faceIndex].value = data["storey_list_B"]
                         # print(f"Done face {face.index}")
+                        
+                    edges = context.active_object.data.edges
+                    for edge in edges:
+                        edgeIndex = edge.index
+                        wall_id = mesh.attributes["mastro_wall_id"].data[edgeIndex].value
+                        data = read_mesh_attributes_walls(context, mesh, edgeIndex, wallSet = wall_id)
+                        if [i for i in ["wall_thickness"] if i in self.attributeToUpdate]:
+                            mesh.attributes["mastro_wall_thickness"].data[edgeIndex].value = data["wall_thickness"]
+                        elif [i for i in ["wall_offset"] if i in self.attributeToUpdate]:
+                            mesh.attributes["mastro_wall_offset"].data[edgeIndex].value = data["wall_offset"]
+        
                     bpy.ops.object.mode_set(mode=objMode)
                     
                     # If the object was hidden, it is set to hidden again
@@ -1770,7 +1793,7 @@ class wall_name_list(PropertyGroup):
         #max=99,
         precision=3,
         default = 0.300,
-        # update=update_mastro_masses_data
+        update=update_all_mastro_wall_thickness
         )
     
     wallOffset: FloatProperty(
@@ -1780,7 +1803,7 @@ class wall_name_list(PropertyGroup):
         #max=99,
         precision=3,
         default = 0,
-        # update=update_mastro_masses_data
+        update=update_all_mastro_wall_offset
         )
     
     normal: IntProperty(
