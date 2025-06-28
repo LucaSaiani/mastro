@@ -161,33 +161,26 @@ class update_GN_Filter_OT(Operator):
     bl_idname = "node.update_gn_filter"
     bl_label = "Update the GN filter by Use"
     
-    # filter_name: bpy.props.StringProperty(name="Filter type name")
+    filter_name: bpy.props.StringProperty(name="Filter type name")
         
-    #     return node_obj, node_x_location
     def newGroup (self, groupName, type):
-        attributeName = "mastro_use"
-        # if self.filter_name == "use": attributeName = "MaStro_Use"
-        # elif self.filter_name == "typology": attributeName = "mastro_typology_id"
-        
-         # geometry nodes group
-        # if type == "GN":
+        # if self.filter_name == "plot": attributeName = "mastro_plot_id"
+        # elif self.filter_name == "block": attributeName = "mastro_block_id"
+        if self.filter_name == "use": attributeName = "mastro_use"
+        elif self.filter_name == "typology": attributeName = "mastro_typology_id"
+        elif self.filter_name == "wall type": attributeName = "mastro_wall_id"
+        elif self.filter_name == "street type": attributeName = "mastro_street_id"
+
+        # GN group
         group = bpy.data.node_groups.new(groupName,'GeometryNodeTree')
-        
+        group.default_group_node_width = 200
         #Add Group Output
         group_output = group.nodes.new('NodeGroupOutput')
+        
+        # Add named attribute
         named_attribute_node = group.nodes.new(type="GeometryNodeInputNamedAttribute")
         named_attribute_node.data_type = 'INT'
         named_attribute_node.inputs[0].default_value = attributeName
-        # else: # shader group
-        #     group = bpy.data.node_groups.new(groupName,'ShaderNodeTree')
-        #     #Add Group Output
-        #     group_output = group.nodes.new('NodeGroupOutput')
-        #     # Add named attribute
-        #     named_attribute_node = group.nodes.new(type="ShaderNodeAttribute")
-        #     named_attribute_node.attribute_type = 'GEOMETRY'
-        #     named_attribute_node.attribute_name = attributeName
-        #     named_attribute_node.name = "Named Attribute" # this to keep more generic the following code
-        #     named_attribute_node.label = "Named Attribute"
             
         group_output.location = (600, 0)
         named_attribute_node.location = (0,-100)
@@ -195,18 +188,10 @@ class update_GN_Filter_OT(Operator):
         
         
     def execute(self, context):
-        # groupTypes = ["GN", "Shader"]
-        
-        #Create NodeGroup
-        # for type in groupTypes:
-        name = "MaStro Geometry Filter by Use"
-            # if type == "GN": name = "MaStro Geometry Filter by " + self.filter_name
-            # else: name = "MaStro Shader Filter by " + self.filter_name
-            
+        name = "MaStro Filter by " + self.filter_name.title()
+                    
         if name not in bpy.data.node_groups:
             filterBy_Group = self.newGroup(name, "GN")
-            #     if type == "GN": filterBy_Group = self.newGroup(name, "GN")
-            #     elif type == "Shader": filterBy_Group = self.newGroup(name, "Shader")
         else:
             filterBy_Group = bpy.data.node_groups[name]
                 
@@ -222,21 +207,17 @@ class update_GN_Filter_OT(Operator):
                 tmpId = node.inputs[3].default_value
                 filterNodeIds.append(tmpId)
                 filterNodeDescriptions.append(filterBy_Group.interface.items_tree[tmpId].description)
-            # elif node.type == "MATH":
-            #         tmpId = int(node.inputs[1].default_value)
-            #         filterNodeIds.append(tmpId)
-            #         filterNodeDescriptions.append(filterBy_Group.interface.items_tree[tmpId].description)
-                    
             
         if len(filterNodeIds) == 0:
             lastId = -1           
         else:
             lastId = max(filterNodeIds)
-            # print(lastId, len(nodes))
-                
-            # if self.filter_name == "use": listToLoop = bpy.context.scene.mastro_use_name_list
-            # elif self.filter_name == "typology": listToLoop = bpy.context.scene.mastro_typology_name_list
-        listToLoop = bpy.context.scene.mastro_use_name_list
+            
+        if self.filter_name == "use": listToLoop = bpy.context.scene.mastro_use_name_list
+        elif self.filter_name == "typology": listToLoop = bpy.context.scene.mastro_typology_name_list
+        elif self.filter_name == "wall type": listToLoop = bpy.context.scene.mastro_wall_name_list
+        elif self.filter_name == "street type": listToLoop = bpy.context.scene.mastro_street_name_list
+        
         for el in listToLoop:
             if hasattr(el, "id"):
                 #a new name has been added
@@ -246,16 +227,10 @@ class update_GN_Filter_OT(Operator):
                     else:
                         node_y_location = 0
                     
-                    # if type == "GN":
                     compare_node = filterBy_Group.nodes.new(type="FunctionNodeCompare")
                     compare_node.data_type = 'INT'
                     compare_node.operation = 'EQUAL'
                     compare_node.inputs[3].default_value = el.id
-                    # else:
-                    #     compare_node = filterBy_Group.nodes.new(type="ShaderNodeMath")
-                    #     compare_node.operation = "COMPARE"
-                    #     compare_node.inputs[1].default_value = el.id
-                    #     compare_node.inputs[2].default_value = 0.001
                         
                     compare_node.location = (300, node_y_location-35)
                     compare_node.hide = True
@@ -265,7 +240,10 @@ class update_GN_Filter_OT(Operator):
                     
                     #Add the Output Sockets and change their Default Value
                     if el.name == "":
-                        elName = "Use name..."
+                        if self.filter_name == "use": elName = "Use name..."
+                        elif self.filter_name == "typology": elName = "Typology name..."
+                        elif self.filter_name == "wall type": elName = "Wall name..."
+                        elif self.filter_name == "steet type": lelName = "Street name..."
                     else:
                         elName = el.name
                     descr = "id: " + str(el.id) + " - " + elName
@@ -274,10 +252,6 @@ class update_GN_Filter_OT(Operator):
                     #Add Links
                     index = len(group_output.inputs) -2
                     filterBy_Group.links.new(named_attribute_node.outputs[0], compare_node.inputs[2])
-                    # if type == "GN":
-                    #     filterBy_Group.links.new(named_attribute_node.outputs[0], compare_node.inputs[2])
-                    # else:
-                    #     filterBy_Group.links.new(named_attribute_node.outputs[2], compare_node.inputs[0])
                     filterBy_Group.links.new(compare_node.outputs[0], group_output.inputs[index])
 
                 # a name has been renamed
@@ -286,10 +260,6 @@ class update_GN_Filter_OT(Operator):
                         if i == int(el.id):
                             filterBy_Group.interface.items_tree[i].name = str(el.name)
                             filterBy_Group.interface.items_tree[i].description = "id: " + str(el.id) + " - " + str(el.name)
-                            
-                            
-                            
-                        
 
         return {'FINISHED'}
     
@@ -331,6 +301,7 @@ class update_Shader_Filter_OT(Operator):
         # value_attribute_node = group.nodes.new(type="ShaderNodeValue")
         # value_attribute_node.label = self.filter_name + " number"
         # value_attribute_node.outputs[0].default_value = 0
+        
 
             
         group_output.location = (600, 0)
@@ -347,11 +318,9 @@ class update_Shader_Filter_OT(Operator):
         # for type in groupTypes:
         #     if type == "GN": name = "MaStro Geometry Filter by " + self.filter_name
         #     else: name = "MaStro Shader Filter by " + self.filter_name
-        name = "MaStro Shader Filter by " + self.filter_name
+        name = "MaStro Filter by " + self.filter_name
         
         if name not in bpy.data.node_groups:
-            # if type == "GN": filterBy_Group = self.newGroup(name, "GN")
-            # elif type == "Shader": filterBy_Group = self.newGroup(name, "Shader")
             filterBy_Group = self.newGroup(name, "Shader")
         else:
             filterBy_Group = bpy.data.node_groups[name]
@@ -430,7 +399,7 @@ class update_Shader_Filter_OT(Operator):
                     # if type == "GN":
                     #     filterBy_Group.links.new(named_attribute_node.outputs[0], compare_node.inputs[2])
                     # else:
-                    filterBy_Group.links.new(named_attribute_node.outputs[2], compare_node.inputs[0])
+                    filterBy_Group.links.new(named_attribute_node.outputs[0], compare_node.inputs[0])
                     filterBy_Group.links.new(compare_node.outputs[0], group_output.inputs[index])
 
                 # a name has been renamed
@@ -893,8 +862,9 @@ class block_name_list(PropertyGroup):
 # also updates the names of mastro_typology_uses_name_list_index  
 def update_mastro_filter_by_use(self, context):
     from . import initLists
-    bpy.ops.node.update_gn_filter()
+    bpy.ops.node.update_gn_filter(filter_name="use")
     bpy.ops.node.update_shader_filter(filter_name="use")
+    
     # updating mastro_typology_uses_name_list_index
     current_list = context.scene.mastro_typology_uses_name_list
     for i, el in enumerate(current_list):
@@ -1131,7 +1101,8 @@ class TYPOLOGY_LIST_OT_DuplicateItem(Operator):
         # copy data to the new entry
         context.scene.mastro_typology_name_list[last].name = nameToCopy + " copy"
         context.scene.mastro_typology_name_list[last].useList = usesToCopy
-        # update the filter shader
+
+        bpy.ops.node.update_gn_filter(filter_name="typology")
         bpy.ops.node.update_shader_filter(filter_name="typology")
         return{'FINISHED'}
     
@@ -1171,6 +1142,7 @@ class TYPOLOGY_LIST_OT_MoveItem(Operator):
 # update the node "filter by typology" if a new typology is added or
 # a typology name has changed
 def update_mastro_filter_by_typology(self, context):
+    bpy.ops.node.update_gn_filter(filter_name="typology")
     bpy.ops.node.update_shader_filter(filter_name="typology")
     return None
 
@@ -1318,7 +1290,7 @@ class USE_LIST_OT_NewItem(Operator):
         context.scene.mastro_typology_uses_name_list[subIndex].id = id
         update_typology_uses_list(context)
         
-        bpy.ops.node.update_gn_filter()
+        bpy.ops.node.update_gn_filter(filter_name="use")
         bpy.ops.node.update_shader_filter(filter_name="use")
         return{'FINISHED'}
 
@@ -1739,7 +1711,8 @@ class WALL_LIST_OT_NewItem(Operator):
         
         context.scene.mastro_wall_name_list[last].id = max(temp_list)+1
         context.scene.mastro_wall_name_list[last].wallEdgeColor = [random.random(), random.random(), random.random(), 0.5]
-            
+        
+        bpy.ops.node.update_gn_filter(filter_name="wall type")    
         return{'FINISHED'}
     
 class WALL_LIST_OT_MoveItem(Operator):
@@ -1769,6 +1742,13 @@ class WALL_LIST_OT_MoveItem(Operator):
         self.move_index()
 
         return{'FINISHED'}
+    
+# update the node "filter by wall type" if a new wall type is added or
+# a wall typey name has changed
+def update_mastro_filter_by_wall_type(self, context):
+    bpy.ops.node.update_gn_filter(filter_name="wall type")
+    # bpy.ops.node.update_shader_filter(filter_name="wall type")
+    return None
             
 class wall_name_list(PropertyGroup):
     id: IntProperty(
@@ -1779,7 +1759,8 @@ class wall_name_list(PropertyGroup):
     name: StringProperty(
            name="Wall Name",
            description="The name of the wall",
-           default="Wall type...")
+           default="Wall type...",
+           update=update_mastro_filter_by_wall_type)
     
     # shortName: StringProperty(
     #        name="Wall Name",
@@ -2046,6 +2027,8 @@ class STREET_LIST_OT_NewItem(Operator):
         
         context.scene.mastro_street_name_list[last].id = max(temp_list)+1
         context.scene.mastro_street_name_list[last].streetEdgeColor = [random.random(), random.random(), random.random(), 0.5]
+        
+        bpy.ops.node.update_gn_filter(filter_name="street type")
             
         return{'FINISHED'}
     
@@ -2158,6 +2141,12 @@ class OBJECT_OT_update_all_MaStro_street_attributes(Operator):
             bpy.ops.object.mode_set(mode=activeObjMode)
         return {'FINISHED'}
         
+# update the node "filter by street type" if a new street type is added or
+# a street type name has changed
+def update_mastro_filter_by_street_type(self, context):
+    bpy.ops.node.update_gn_filter(filter_name="street type")
+    # bpy.ops.node.update_shader_filter(filter_name="street type")
+    return None
 
 class street_name_list(PropertyGroup):
     id: IntProperty(
@@ -2168,7 +2157,8 @@ class street_name_list(PropertyGroup):
     name: StringProperty(
            name="Street type Name",
            description="The type name of the street",
-           default="Street type...")
+           default="Street type...",
+           update=update_mastro_filter_by_street_type)
     
     streetWidth: FloatProperty(
         name="Street width",
