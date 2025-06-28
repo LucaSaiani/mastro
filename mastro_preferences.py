@@ -86,7 +86,7 @@ class mastro_addon_preferences(AddonPreferences):
                  size = 4,
                  min = 0.0,
                  max = 1.0,
-                 default = (1.0, 0.3, 0.0, 0.2))
+                 default = (1.0, 0.0, 0.0, 0.1))
     
     massFaceColor: bpy.props.FloatVectorProperty(
                  name = "Color of the selected faces of the active masss",
