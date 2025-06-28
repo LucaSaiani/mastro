@@ -582,7 +582,7 @@ def register():
     bpy.types.WindowManager.toggle_typology_name = bpy.props.BoolProperty(
                                             name = "Typology",
                                             default = False)
-    bpy.types.WindowManager.toggle_wall_name = bpy.props.BoolProperty(
+    bpy.types.WindowManager.toggle_wall_type = bpy.props.BoolProperty(
                                             name = "Type",
                                             default = False)
     bpy.types.WindowManager.toggle_wall_normal = bpy.props.BoolProperty(
@@ -825,7 +825,7 @@ def unregister():
     del bpy.types.WindowManager.toggle_block_name
     del bpy.types.WindowManager.toggle_typology_name
     del bpy.types.WindowManager.toggle_storey_number
-    del bpy.types.WindowManager.toggle_wall_name
+    del bpy.types.WindowManager.toggle_wall_type
     del bpy.types.WindowManager.toggle_wall_normal
     del bpy.types.WindowManager.toggle_floor_name
     del bpy.types.WindowManager.toggle_auto_update_mass_data

@@ -483,13 +483,14 @@ class VIEW3D_PT_MaStro_show_data(Panel):
         # col = flow.column()
         # col = flow.column(heading="Mass", align = True)
         col = layout.column(heading="Mass", align=True)
-        col.prop(context.window_manager, 'toggle_plot_name', icon_only=False)
-        col.prop(context.window_manager, 'toggle_block_name', icon_only=False)
-        col.prop(context.window_manager, 'toggle_typology_name', icon_only=False)
         col.prop(context.window_manager, 'toggle_storey_number', icon_only=False)
+        col.prop(context.window_manager, 'toggle_typology_name', icon_only=False)
+        col.prop(context.window_manager, 'toggle_block_name', icon_only=False)
+        col.prop(context.window_manager, 'toggle_plot_name', icon_only=False)
+        
         # col.separator()
         col = layout.column(heading="Wall", align = True)
-        col.prop(context.window_manager, 'toggle_wall_name', icon_only=False)
+        col.prop(context.window_manager, 'toggle_wall_type', icon_only=False)
         col.prop(context.window_manager, 'toggle_wall_normal', icon_only=False)
         # col.separator()
         col = layout.column(heading="Floor", align = True)
@@ -960,8 +961,6 @@ class VIEW3D_PT_MaStro_mass_typology_data(Panel):
     
     def draw(self, context):
         scene = context.scene
-        
-        
         
         layout = self.layout
         layout.use_property_split = True
@@ -1657,9 +1656,10 @@ class VIEW3D_PT_MaStro_building_wall_data(Panel):
         # row = layout.row(align=True)
         # layout.prop(context.scene, "mastro_typology_uses_name", icon="COMMUNITY", icon_only=False, text="Type:")
         index = context.scene.mastro_wall_name_list_index
-        layout.prop(context.scene.mastro_wall_name_list[index], "shortName", text="Short name")
+        # layout.prop(context.scene.mastro_wall_name_list[index], "shortName", text="Short name")
         layout.prop(context.scene.mastro_wall_name_list[index], "wallThickness", text="Thickness")
         layout.prop(context.scene.mastro_wall_name_list[index], "wallOffset", text="Offset")
+        layout.prop(context.scene.mastro_wall_name_list[index], "wallEdgeColor", text="Color Overlay")
        
        
        
@@ -1708,22 +1708,14 @@ class WALL_LIST_OT_NewItem(Operator):
 
     def execute(self, context): 
         context.scene.mastro_wall_name_list.add()
-        # last = len(context.scene.mastro_use_name_list)-1
-        # if last == 0:
-        #     context.scene.mastro_use_name_list[0].id = 0
-        #     context.scene.mastro_use_name_list[0].name = ""
-        #     random.seed(datetime.now().timestamp())
-        #     rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
-        #     context.scene.mastro_use_name_list[0].RND = rndNumber
-        #     context.scene.mastro_use_name_list.add()
+
         temp_list = []    
         for el in context.scene.mastro_wall_name_list:
             temp_list.append(el.id)
         last = len(context.scene.mastro_wall_name_list)-1
         
         context.scene.mastro_wall_name_list[last].id = max(temp_list)+1
-        # rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
-        # context.scene.mastro_use_name_list[last].RND = rndNumber
+        context.scene.mastro_wall_name_list[last].wallEdgeColor = [random.random(), random.random(), random.random(), 0.5]
             
         return{'FINISHED'}
     
@@ -1766,10 +1758,10 @@ class wall_name_list(PropertyGroup):
            description="The name of the wall",
            default="Wall type...")
     
-    shortName: StringProperty(
-           name="Wall Name",
-           description="A short name describing the wall",
-           default="WLL")
+    # shortName: StringProperty(
+    #        name="Wall Name",
+    #        description="A short name describing the wall",
+    #        default="WLL")
     
     wallThickness: FloatProperty(
         name="Wall thickness",
@@ -1795,6 +1787,14 @@ class wall_name_list(PropertyGroup):
            name="Wall Normal",
            description="Invert the normal of the wall",
            default = 1)
+    
+    wallEdgeColor: bpy.props.FloatVectorProperty(
+        name = "Color of the edges of the wall to be shown in the overlay",
+        subtype = "COLOR",
+        size = 4,
+        min = 0.0,
+        max = 1.0,
+        default = (0.0, 0.0, 1.0, 0.5))
     
 ############################        ############################
 ############################ FLOOR  ############################
