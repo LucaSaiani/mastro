@@ -788,7 +788,7 @@ def register():
                                         name="Wall List",
                                         description="",
                                         items=get_wall_names_from_list,
-                                        update=mastro_wall.update_wall_name_label
+                                        update=mastro_wall.update_attributes_wall
                                         )
     
     Scene.mastro_floor_name_list = bpy.props.CollectionProperty(type = mastro_project_data.floor_name_list)
