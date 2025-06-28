@@ -595,7 +595,7 @@ def register():
                                             name = "Number of Storeys",
                                             default = False)
     bpy.types.WindowManager.toggle_street_color = bpy.props.BoolProperty(
-                                            name = "Street Color",
+                                            name = "Type",
                                             default = False)
     bpy.types.WindowManager.toggle_auto_update_mass_data = bpy.props.BoolProperty(
                                             name = "Auto Update Mass Data",
