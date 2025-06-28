@@ -55,14 +55,14 @@ class VIEW3D_PT_MaStro_Wall(Panel):
                     row.enabled = False
                 
                 row.prop(context.scene, "mastro_wall_names", icon="NODE_TEXTURE", icon_only=True, text="Wall Type")
-                if len(scene.mastro_plot_name_list) >0:
+                if len(scene.mastro_wall_name_list) >0:
                     row.label(text = scene.mastro_wall_name_current[0].name)
                     wallId = scene.mastro_wall_name_current[0].id
                     # thickness = round(scene.mastro_wall_name_list[wallId].wallThickness,3)
                     thickness = "%.3f" % scene.mastro_wall_name_list[wallId].wallThickness
-                    layout.label(text = str(thickness))
+                    # layout.label(text = str(thickness))
                     # scene.attribute_wall_thickness = thickness
-                    layout.prop(context.scene, 'attribute_wall_thickness', text="Thickness")
+                    # layout.prop(context.scene, 'attribute_wall_thickness', text="Thickness")
                     # layout.prop(context.scene, 'attribute_wall_offset', text="Offset")
                 else:
                     row.label(text = "")

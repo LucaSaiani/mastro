@@ -298,7 +298,9 @@ def initLists():
         bpy.context.scene.mastro_obj_typology_uses_name_list[0].id = 0
         bpy.context.scene.mastro_obj_typology_uses_name_list[0].name =  bpy.context.scene.mastro_use_name_list[0].name
     
+    # street
     name_list = bpy.context.scene.mastro_street_name_list
+    name_list_current = bpy.context.scene.mastro_street_name_current
     if len(name_list) == 0:
         name_list.add()
         name_list[0].id = 0
@@ -307,13 +309,29 @@ def initLists():
         name_list.add()
         name_list[-1].id = 0
         name_list[-1].name = "Street type... "
-        # bpy.context.scene.mastro_street_name_list[0].normal = 0
-    
-    if len(bpy.context.scene.mastro_wall_name_list) == 0:
-        bpy.context.scene.mastro_wall_name_list.add()
-        bpy.context.scene.mastro_wall_name_list[0].id = 0
-        bpy.context.scene.mastro_wall_name_list[0].name = "Wall type... "
-        bpy.context.scene.mastro_wall_name_list[0].normal = 0
+    if len(name_list_current) == 0:
+        name_list_current.add()
+        name_list_current[0].id = 0
+        name_list_current[0].name = name_list[0].name    
+        
+        
+    # wall
+    name_list = bpy.context.scene.mastro_wall_name_list
+    name_list_current = bpy.context.scene.mastro_wall_name_current
+    if len(name_list) == 0:
+        name_list.add()
+        name_list[0].id = 0
+        name_list[0].name = "Wall type... "
+        name_list[0].normal = 0
+    elif not 0 in [elem.id for elem in name_list]:
+        name_list.add()
+        name_list[-1].id = 0
+        name_list[-1].name = "Wall type... "
+        name_list[-1].normal = 0
+    if len(name_list_current) == 0:
+        name_list_current.add()
+        name_list_current[0].id = 0
+        name_list_current[0].name = name_list[0].name    
     
     if len(bpy.context.scene.mastro_floor_name_list) == 0:
         bpy.context.scene.mastro_floor_name_list.add()
@@ -334,16 +352,6 @@ def initLists():
         bpy.context.scene.mastro_typology_name_current.add()
         bpy.context.scene.mastro_typology_name_current[0].id = 0
         bpy.context.scene.mastro_typology_name_current[0].name = bpy.context.scene.mastro_typology_name_list[0].name
-        
-    if len(bpy.context.scene.mastro_street_name_current) == 0:
-        bpy.context.scene.mastro_street_name_current.add()
-        bpy.context.scene.mastro_street_name_current[0].id = 0
-        bpy.context.scene.mastro_street_name_current[0].name = bpy.context.scene.mastro_street_name_list[0].name
-   
-    if len(bpy.context.scene.mastro_wall_name_current) == 0:
-        bpy.context.scene.mastro_wall_name_current.add()
-        bpy.context.scene.mastro_wall_name_current[0].id = 0
-        bpy.context.scene.mastro_wall_name_current[0].name = bpy.context.scene.mastro_wall_name_list[0].name
         
     if len(bpy.context.scene.mastro_floor_name_current) == 0:
         bpy.context.scene.mastro_floor_name_current.add()
@@ -780,7 +788,7 @@ def register():
                                         name="Wall List",
                                         description="",
                                         items=get_wall_names_from_list,
-                                        # update=mastro_wall.update_wall_name_label
+                                        update=mastro_wall.update_wall_name_label
                                         )
     
     Scene.mastro_floor_name_list = bpy.props.CollectionProperty(type = mastro_project_data.floor_name_list)
