@@ -96,6 +96,13 @@ class mastro_addon_preferences(AddonPreferences):
                  max = 1.0,
                  default = (1.0, 0.0, 0.0, 0.4))
     
+    wallEdgeSize: bpy.props.IntProperty(
+        name="Edge thickness of the selected wall",
+        min = 1,
+        max = 10,
+        default = 4
+    )
+    
     streetEdgeSize: bpy.props.IntProperty(
         name="Edge thickness of the selected street",
         min = 1,
@@ -162,14 +169,27 @@ class mastro_addon_preferences(AddonPreferences):
             row.label(text = "Face color:")
             row.prop(self, "massFaceColor", icon_only=True)
             
+            # wall
+            row = col.row()
+            row.label(text="")
+
+            row = col.row()
+            row.label(text="Wall Overlay:")
+
+            row = col.row()
+            row.label(text = "Thickness:")
+            row.prop(self, "wallEdgeSize", icon_only=True)
+            
             # street
             row = col.row()
             row.label(text="")
             row = col.row()
             row.label(text="Street Overlay:")
+
             row = col.row()
             row.label(text = "Thickness:")
             row.prop(self, "streetEdgeSize", icon_only=True)
+
             row = col.row()
             row.label(text = "Dash length:")
             row.prop(self, "streetEdgeDashSize", icon_only=True)
@@ -179,9 +199,11 @@ class mastro_addon_preferences(AddonPreferences):
             row.label(text="")
             row = col.row()
             row.label(text="Font:")
+
             row = col.row()
             row.label(text = "Size:")
             row.prop(self, "fontSize", icon_only=True)
+
             row = col.row()
             row.label(text = "Color:")
             row.prop(self, "fontColor", icon_only=True)
@@ -196,10 +218,12 @@ class mastro_addon_preferences(AddonPreferences):
         if self.show_note_settings:
             col = box.column(align=True) 
             row = col.row()
-            row.label(text="Fonts:")
+            row.label(text="Font:")
+
             row = col.row()
             row.label(text = "Size:")
             row.prop(self, "noteSize", icon_only=True)
+
             row = col.row()
             row.label(text = "Color:")
             row.prop(self, "noteColor",icon_only=True)

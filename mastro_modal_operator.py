@@ -36,7 +36,7 @@ from .mastro_schedule import MaStro_MathNode, execute_active_node_tree
 
 previous_selection = {}
 
-# show the faces of a MaStro object as overlay
+# show the overlays when in edit mode
 class VIEW_3D_OT_show_mastro_overlay(Operator):
     bl_idname = "wm.show_mastro_overlay"
     bl_label = "Show MaStro selection"
@@ -60,12 +60,12 @@ class VIEW_3D_OT_show_mastro_overlay(Operator):
         if bpy.context.preferences.addons[__package__].preferences.toggleSelectionOverlay:    
             self.handle_add(self, context)
         else:
-            self.handle_remove(self, context)
+            try:
+                self.handle_remove(self, context)
+            except Exception as e: print(e)
         return {'FINISHED'}
     
     def invoke(self, context, event):  # attributes["storey A"][index][1].value = int(list_storey_A)
-      
-        
         self.execute(context)
         return {'RUNNING_MODAL'}
 
@@ -78,7 +78,6 @@ def draw_selection_overlay(context):
                 coords = []
                 edgeIndices = []
                 shader = gpu.shader.from_builtin('UNIFORM_COLOR')
-                
                 
                 if mesh.is_editmode:
                     bm = bmesh.from_edit_mesh(mesh)
@@ -102,25 +101,29 @@ def draw_selection_overlay(context):
                     batch.draw(shader)
                     
                     # draw the selected faces
-                    faces = [f for f in bm.faces if f.select == True]
-                    
-                    # create a new Bmesh with only the newly created faces
-                    dbm = bmesh.new()
-                    for face in faces:
-                        dbm.faces.new((dbm.verts.new(obj.matrix_world @ v.co, v) for v in face.verts), face)
-                    dbm.verts.index_update()    
+                    if bpy.context.tool_settings.mesh_select_mode[2]:
+                        faces = [f for f in bm.faces if f.select == True]
+                        
+                        # create a new Bmesh with only the newly created faces
+                        dbm = bmesh.new()
+                        for face in faces:
+                            dbm.faces.new((dbm.verts.new(obj.matrix_world @ v.co, v) for v in face.verts), face)
+                        dbm.verts.index_update()    
 
-                    dVertices = [v.co for v in dbm.verts]
-                    dFaceindices = [(loop.vert.index for loop in looptris) for looptris in dbm.calc_loop_triangles()]
-                    # dEdgeindices = [(v.index for v in e.verts) for e in dbm.edges]
-                    batch = batch_for_shader(shader, 'TRIS', {"pos": dVertices}, indices=dFaceindices)
-                    r, g, b, a = [c for c in bpy.context.preferences.addons[__package__].preferences.massFaceColor]
-                    shader.uniform_float("color", (r, g, b, a))       
-                    # gpu.state.blend_set("NONE")
-                    batch.draw(shader)
-                    
-                    dbm.free()
-                    bm.free()
+                        dVertices = [v.co for v in dbm.verts]
+                        dFaceindices = [(loop.vert.index for loop in looptris) for looptris in dbm.calc_loop_triangles()]
+                        # dEdgeindices = [(v.index for v in e.verts) for e in dbm.edges]
+                        batch = batch_for_shader(shader, 'TRIS', {"pos": dVertices}, indices=dFaceindices)
+                        r, g, b, a = [c for c in bpy.context.preferences.addons[__package__].preferences.massFaceColor]
+                        shader.uniform_float("color", (r, g, b, a))       
+                        # gpu.state.blend_set("NONE")
+                        batch.draw(shader)
+                        
+                        dbm.free()
+                        bm.free()
+            
+                    if bpy.context.tool_settings.mesh_select_mode[1]:
+                        show_wall_overlay(obj)
                 
             # elif ("MaStro street" in obj.data and
             #      not (bpy.context.window_manager.toggle_show_data and bpy.context.window_manager.toggle_street_color)
@@ -130,6 +133,44 @@ def draw_selection_overlay(context):
 
 def draw_callback_selection_overlay(self, context):
     draw_selection_overlay(context)
+    
+# a function to show wall overlays
+def show_wall_overlay(obj):
+    coords = []
+    # edgeIndices = []
+    shader = gpu.shader.from_builtin('UNIFORM_COLOR')
+    mesh = obj.data
+    
+    if mesh.is_editmode:
+        bm = bmesh.from_edit_mesh(mesh)
+    else:
+        bm = bmesh.new()
+        bm.from_mesh(mesh)
+        bm.verts.ensure_lookup_table()
+        bm.edges.ensure_lookup_table()    
+        
+    bMesh_wall_id_layer = bm.edges.layers.int["mastro_wall_id"]
+    projectWalls = bpy.context.scene.mastro_wall_name_list
+    
+    # matrix = bpy.context.region_data.perspective_matrix
+    for edge in bm.edges:
+        v1 = obj.matrix_world @ edge.verts[0].co
+        v2 = obj.matrix_world @ edge.verts[1].co
+        coords = [v1, v2]
+        indices = [(0, 1)]
+        
+        wall_id = edge[bMesh_wall_id_layer]
+        index = next((i for i, elem in enumerate(projectWalls) if elem.id == wall_id), None)
+        if 0 <= wall_id < len(bpy.context.scene.mastro_wall_name_list):
+            r, g, b, a = [c for c in bpy.context.scene.mastro_wall_name_list[index].wallEdgeColor]
+            shader.uniform_float("color", (r, g, b, a))
+            gpu.state.line_width_set(bpy.context.preferences.addons[__package__].preferences.wallEdgeSize)
+            gpu.state.blend_set("ALPHA")
+            batch = batch_for_shader(shader, 'LINES', {"pos": coords}, indices=indices)
+            batch.draw(shader)
+
+    bm.free()
+
 
 # a function to show the street overlays
 def show_street_overlay(obj):
@@ -368,7 +409,7 @@ def draw_main_show_attributes_2D(context):
         bm.edges.ensure_lookup_table()    
         bm.faces.ensure_lookup_table()      
         
-        bMesh_wall = bm.edges.layers.int["mastro_wall_id"]
+        # bMesh_wall = bm.edges.layers.int["mastro_wall_id"]
         bMesh_normal = bm.edges.layers.int["mastro_inverted_normal"]
        
         # bMesh_plot = bm.faces.layers.int["mastro_plot_id"]
@@ -437,22 +478,22 @@ def draw_main_show_attributes_2D(context):
             line_width = 0
             vert_offset = 0
             
-            idWall = bmEdge[bMesh_wall]
+            # idWall = bmEdge[bMesh_wall]
             normal = bmEdge[bMesh_normal]
             
             text_edge = []
             text_edge = ""
             text_normal = ""
             
-            if bpy.context.window_manager.toggle_wall_name:   
-                for n in bpy.context.scene.mastro_wall_name_list:
-                    if n.id == idWall:
-                        text_edge = (n.name, 0)
-                        line_width = blf.dimensions(font_id, n.name)[0]
-                        vert_offset = -1 * half_line_height
-                        text_edge.append(text_edge)
-                        text_edge.append(cr)
-                        break
+            # if bpy.context.window_manager.toggle_wall_name:   
+            #     for n in bpy.context.scene.mastro_wall_name_list:
+            #         if n.id == idWall:
+            #             text_edge = (n.name, 0)
+            #             line_width = blf.dimensions(font_id, n.name)[0]
+            #             vert_offset = -1 * half_line_height
+            #             text_edge.append(text_edge)
+            #             text_edge.append(cr)
+            #             break
             if bpy.context.window_manager.toggle_wall_normal:
                 if normal == -1:   
                     symbol = "↔️"
@@ -601,14 +642,17 @@ def draw_main_show_attributes_2D(context):
          
 def draw_main_show_attributes_3D(context):
     obj = bpy.context.active_object
-    if (hasattr(obj, "data") and 
-        "MaStro object" in obj.data and 
-        "MaStro street" in obj.data and
-        bpy.context.window_manager.toggle_street_color):
-        # if mesh is in edit mode, the street overlay is already drawn
-        mesh = obj.data
-        if mesh.is_editmode == False:
-            show_street_overlay(obj)
+    if hasattr(obj, "data") and  "MaStro object" in obj.data:
+        if "MaStro street" in obj.data and bpy.context.window_manager.toggle_street_color:
+            # if mesh is in edit mode, the street overlay is already drawn
+            mesh = obj.data
+            if mesh.is_editmode == False:
+                show_street_overlay(obj)
+        if "MaStro mass" in obj.data and bpy.context.window_manager.toggle_wall_type:
+            # if mesh is in edit mode, the wall overlay is already drawn
+            mesh = obj.data
+            if mesh.is_editmode == False:
+                show_wall_overlay(obj)
     
 
 def draw_callback_px_show_attributes_2D(self, context):
