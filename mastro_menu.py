@@ -31,8 +31,9 @@ import random, math, mathutils, csv
 
 from decimal import Decimal #, ROUND_HALF_DOWN
 from datetime import datetime
-from bpy.utils import resource_path
+# from bpy.utils import resource_path
 from pathlib import Path
+
 
 # header_aggregateData = ["Option", "Phase", "Plot Name", "Block Name", "Use", "N. of Storeys", "Footprint", "Perimeter", "Wall area", "GEA"]
 # header_granularData = ["Option", "Phase", "Plot Name", "Block Name", "Use", "Floor", "Level", "GEA", "Perimeter", "Wall area"]
@@ -736,22 +737,7 @@ def addStreetAttributes(obj):
     
 # import the mastro nodes in the file
 def addNodes():
-    # USER = Path(resource_path('USER'))
-    # src = USER / "scripts/addons" / "mastro"
 
-    # file_path = src / "mastro.blend"
-    # inner_path = "NodeTree"
-    # geoNodes_list = ("MaStro Mass", "MaStro Street")
-
-    # for group in geoNodes_list:
-    #     if group not in bpy.data.node_groups:
-    #         bpy.ops.wm.append(
-    #             filepath=str(file_path / inner_path / group),
-    #             directory=str(file_path / inner_path),
-    #             filename = group
-    #             )   
-            
-    # my_addon_path = Path(bpy.utils.extension_path_user(__package__))
     my_addon_path = Path(bpy.utils.user_resource('EXTENSIONS',path="vscode_development"))
     blend_file_path = my_addon_path / "mastro/mastro.blend"
     inner_path = "NodeTree"
