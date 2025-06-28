@@ -258,7 +258,11 @@ classes = (
 
 def initNodes():
     bpy.ops.node.separate_geometry_by_factor()
-    bpy.ops.node.update_gn_filter()
+    bpy.ops.node.update_gn_filter(filter_name="use")
+    bpy.ops.node.update_gn_filter(filter_name="typology")
+    bpy.ops.node.update_gn_filter(filter_name="wall type")
+    bpy.ops.node.update_gn_filter(filter_name="street type")
+    
     bpy.ops.node.update_shader_filter(filter_name="plot")
     bpy.ops.node.update_shader_filter(filter_name="block")
     bpy.ops.node.update_shader_filter(filter_name="use")
@@ -416,7 +420,7 @@ def get_floor_names_from_list(scene, context):
 @persistent
 def onFileLoaded(scene):
     initLists()
-    # initNodes()
+    initNodes()
     # bpy.context.scene.updating_mesh_attributes_is_active = False
     bpy.context.scene.show_selection_overlay_is_active = False
     bpy.context.scene.previous_selection_object_name = ""
