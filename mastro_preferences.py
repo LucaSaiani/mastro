@@ -100,7 +100,14 @@ class mastro_addon_preferences(AddonPreferences):
         name="Edge thickness of the selected street",
         min = 1,
         max = 10,
-        default = 2
+        default = 4
+    )
+    
+    streetEdgeDashSize: bpy.props.IntProperty(
+        name="The dash size representing the selected street",
+        min = 1,
+        max = 20,
+        default = 5
     )
     
     toggleSelectionOverlay: bpy.props.BoolProperty(
@@ -144,15 +151,15 @@ class mastro_addon_preferences(AddonPreferences):
             row.label(text="Mass Overlay:")
             
             row = col.row()
-            row.label(text = "Mass - Edge selection size:")
+            row.label(text = "Edge thickness:")
             row.prop(self, "massEdgeSize", icon_only=True)
             
             row = col.row()
-            row.label(text = "Mass - Edge selection color:")
+            row.label(text = "Edge color:")
             row.prop(self, "massEdgeColor", icon_only=True)
             
             row = col.row()
-            row.label(text = "Mass - Face selection color:")
+            row.label(text = "Face color:")
             row.prop(self, "massFaceColor", icon_only=True)
             
             # street
@@ -161,14 +168,17 @@ class mastro_addon_preferences(AddonPreferences):
             row = col.row()
             row.label(text="Street Overlay:")
             row = col.row()
-            row.label(text = "Street - Edge selection size:")
+            row.label(text = "Thickness:")
             row.prop(self, "streetEdgeSize", icon_only=True)
+            row = col.row()
+            row.label(text = "Dash length:")
+            row.prop(self, "streetEdgeDashSize", icon_only=True)
                        
             # font
             row = col.row()
             row.label(text="")
             row = col.row()
-            row.label(text="Font Settings:")
+            row.label(text="Font:")
             row = col.row()
             row.label(text = "Size:")
             row.prop(self, "fontSize", icon_only=True)
@@ -186,7 +196,7 @@ class mastro_addon_preferences(AddonPreferences):
         if self.show_note_settings:
             col = box.column(align=True) 
             row = col.row()
-            row.label(text="Font Settings:")
+            row.label(text="Fonts:")
             row = col.row()
             row.label(text = "Size:")
             row.prop(self, "noteSize", icon_only=True)

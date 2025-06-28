@@ -133,9 +133,40 @@ def draw_callback_selection_overlay(self, context):
 
 # a function to show the street overlays
 def show_street_overlay(obj):
-    coords = []
-    edgeIndices = []
-    shader = gpu.shader.from_builtin('UNIFORM_COLOR')
+    # dash shader to draw streets
+    vert_out = gpu.types.GPUStageInterfaceInfo("my_interface")
+    vert_out.smooth('FLOAT', "v_ArcLength")
+
+    dash_shader = gpu.types.GPUShaderCreateInfo()
+    dash_shader.push_constant('MAT4', "u_ViewProjectionMatrix")
+    dash_shader.push_constant('FLOAT', "u_Scale")
+    dash_shader.vertex_in(0, 'VEC3', "position")
+    dash_shader.vertex_in(1, 'FLOAT', "arcLength")
+    dash_shader.vertex_out(vert_out)
+    dash_shader.fragment_out(0, 'VEC4', "FragColor")
+
+    dash_shader.vertex_source(
+        "void main()"
+        "{"
+        "  v_ArcLength = arcLength;"
+        "  gl_Position = u_ViewProjectionMatrix * vec4(position, 1.0f);"
+        "}"
+    )
+
+    dash_shader.fragment_source(
+        "void main()"
+        "{"
+        "  if (step(sin(v_ArcLength * u_Scale), 0.5) == 1) discard;"
+        "  FragColor = vec4(1.0);"
+        "}"
+    )
+
+    shader = gpu.shader.create_from_info(dash_shader)
+    
+    
+    # coords = []
+    # edgeIndices = []
+    # shader = gpu.shader.from_builtin('UNIFORM_COLOR')
     mesh = obj.data
     
     
@@ -149,27 +180,88 @@ def show_street_overlay(obj):
         # bm.faces.ensure_lookup_table()  
         
     bMesh_street_id_layer = bm.edges.layers.int["mastro_street_id"]
-        
-    for edge in bm.edges:
-        coords = []
-        indices = []
+    projectStreets = bpy.context.scene.mastro_street_name_list
+    
+    matrix = bpy.context.region_data.perspective_matrix
+    dash_scale = 20 - bpy.context.preferences.addons[__package__].preferences.streetEdgeDashSize +1
 
+    
+    # coords = []
+    # indices = []
+    # arc_lengths = [0]
+
+    for edge in bm.edges:
         v1 = obj.matrix_world @ edge.verts[0].co
         v2 = obj.matrix_world @ edge.verts[1].co
         coords = [v1, v2]
         indices = [(0, 1)]
+        l = (v2 - v1).length
+        arc_length = [0.0, l]
         
-        if bMesh_street_id_layer:
-            street_id = edge[bMesh_street_id_layer]
-            projectStreets = bpy.context.scene.mastro_street_name_list
-            index = next((i for i, elem in enumerate(projectStreets) if elem.id == street_id), None)
-            if 0 <= street_id < len(bpy.context.scene.mastro_street_name_list):
-                r, g, b, a = [c for c in bpy.context.scene.mastro_street_name_list[index].streetEdgeColor]
-                shader.uniform_float("color", (r, g, b, a))
-                gpu.state.line_width_set(bpy.context.preferences.addons[__package__].preferences.streetEdgeSize)
-                gpu.state.blend_set("ALPHA")
-                batch = batch_for_shader(shader, 'LINES', {"pos": coords}, indices=indices)
-                batch.draw(shader)
+        
+        street_id = edge[bMesh_street_id_layer]
+        index = next((i for i, elem in enumerate(projectStreets) if elem.id == street_id), None)
+        if 0 <= street_id < len(bpy.context.scene.mastro_street_name_list):
+            r, g, b, a = [c for c in bpy.context.scene.mastro_street_name_list[index].streetEdgeColor]
+            dash_shader.fragment_source(f"""
+                void main() {{
+                    if (step(sin(v_ArcLength * u_Scale), 0.5) == 1.0) discard;
+                    FragColor = vec4({r}, {g}, {b}, {a});
+                }}
+            """)
+
+            
+        # arc_lengths = [0]
+        # for a, b in zip(coords[:-1], coords[1:]):
+        #     arc_lengths.append(arc_lengths[-1] + (a - b).length)
+        
+            shader = gpu.shader.create_from_info(dash_shader)   
+            
+            batch = batch_for_shader(
+                shader, 'LINES',
+                {"position": coords, "arcLength": arc_length},
+                indices = indices
+            )
+            shader.uniform_float("u_ViewProjectionMatrix", matrix)
+            shader.uniform_float("u_Scale", dash_scale)
+                
+            gpu.state.line_width_set(bpy.context.preferences.addons[__package__].preferences.streetEdgeSize)
+            gpu.state.blend_set("ALPHA")
+            batch.draw(shader)
+        
+    # for edge in bm.edges:
+    #     coords = []
+    #     indices = []
+
+    #     v1 = obj.matrix_world @ edge.verts[0].co
+    #     v2 = obj.matrix_world @ edge.verts[1].co
+    #     coords = [v1, v2]
+    #     indices = [(0, 1)]
+        
+    # if bMesh_street_id_layer:
+    #     street_id = edge[bMesh_street_id_layer]
+    #     projectStreets = bpy.context.scene.mastro_street_name_list
+    #     index = next((i for i, elem in enumerate(projectStreets) if elem.id == street_id), None)
+    #     if 0 <= street_id < len(bpy.context.scene.mastro_street_name_list):
+    #         r, g, b, a = [c for c in bpy.context.scene.mastro_street_name_list[index].streetEdgeColor]
+    #         dash_shader.fragment_source(f"""
+    #             void main() {{
+    #                 if (step(sin(v_ArcLength * u_Scale), 0.5) == 1.0) discard;
+    #                 FragColor = vec4({r}, {g}, {b}, {a});
+    #             }}
+    #         """)
+    #         shader = gpu.shader.create_from_info(dash_shader)   
+    #         # shader.uniform_float("color", (r, g, b, a))
+    #         # dash_shader.fragment_out("color", (r, g, b, a))
+    #         #dash shader
+            
+    #         shader.uniform_float("u_ViewProjectionMatrix", matrix)
+    #         shader.uniform_float("u_Scale", dash_scale)
+            
+    #         gpu.state.line_width_set(bpy.context.preferences.addons[__package__].preferences.streetEdgeSize)
+    #         gpu.state.blend_set("ALPHA")
+    #         # batch = batch_for_shader(shader, 'LINES', {"pos": coords}, indices=indices)   
+    #         batch.draw(shader)
 
     bm.free()
 
