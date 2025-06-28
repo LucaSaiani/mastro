@@ -70,7 +70,7 @@ mass_attribute_set = [
             "attr" :  "mastro_inverted_normal",
             "attr_type" :  "INT",
             "attr_domain" :  "EDGE",
-            "attr_default" : 1
+            "attr_default" : 0
             },
             # {
             # "attr" :  "mastro_number_of_storeys_per_face",
