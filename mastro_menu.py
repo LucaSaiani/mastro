@@ -20,6 +20,7 @@
 
 import bpy
 import bmesh 
+import os
 from bpy.types import Menu, Operator, Panel
 from bpy_extras.io_utils import ExportHelper
 from bpy_extras.object_utils import AddObjectHelper
@@ -738,8 +739,9 @@ def addStreetAttributes(obj):
 # import the mastro nodes in the file
 def addNodes():
 
-    my_addon_path = Path(bpy.utils.user_resource('EXTENSIONS',path="vscode_development"))
+    my_addon_path = Path(bpy.utils.user_resource('EXTENSIONS'))
     blend_file_path = my_addon_path / "mastro/mastro.blend"
+    if not os.path.isdir(blend_file_path): blend_file_path = my_addon_path / "vscode_development/mastro/mastro.blend"
     inner_path = "NodeTree"
     
     geoNodes_list = ("MaStro Mass", "MaStro Street")
