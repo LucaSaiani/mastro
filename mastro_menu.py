@@ -933,9 +933,10 @@ class VIEW3D_MT_orientations_pie(Menu):
         # orientation = orient_slot.custom_orientation
         # custom_menu.prop(orient_slot, "type", expand=True)
         custom_orientations = bpy.context.scene.transform_orientation_slots[0]
-        custom_names = [ori.name for ori in custom_orientations]
+        if custom_orientations:
+            custom_names = [ori.name for ori in custom_orientations]
         
-        print(custom_names)
+        # print(custom_names)
         # list the custom orientations
         # scene = context.scene
         # transform_slots = context.scene.transform_orientation_slots
