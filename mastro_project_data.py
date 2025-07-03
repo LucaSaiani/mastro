@@ -331,8 +331,8 @@ class update_Shader_Filter_OT(Operator):
         # for type in groupTypes:
         #     if type == "GN": name = "MaStro Geometry Filter by " + self.filter_name
         #     else: name = "MaStro Shader Filter by " + self.filter_name
-        name = "MaStro Filter by " + self.filter_name
-        
+        name = "MaStro Filter by " + self.filter_name.title()
+
         if name not in bpy.data.node_groups:
             filterBy_Group = self.newGroup(name, "Shader")
         else:
@@ -363,7 +363,8 @@ class update_Shader_Filter_OT(Operator):
         else:
             lastId = max(filterNodeIds)
             # print(lastId, len(nodes))
-            
+        
+        
         if self.filter_name == "plot": listToLoop = bpy.context.scene.mastro_plot_name_list
         elif self.filter_name == "block": listToLoop = bpy.context.scene.mastro_block_name_list
         elif self.filter_name == "use": listToLoop = bpy.context.scene.mastro_use_name_list
