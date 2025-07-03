@@ -19,22 +19,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 
-# ----------------------------------------------
-# Define Addon info
-# ----------------------------------------------
-# bl_info = {
-#     "name": "MaStro",
-#     "author": "Luca Saiani",
-#     "version": (0, 0, 1),
-#     "blender": (3, 4, 0),
-#     "location": "View3D > Panel",
-#     "description": "MaStro",
-#     "warning": "",
-#     "wiki_url": "",
-#     "tracker_url": "",
-#     "category": "Objects"
-# }
-
 # import sys
 # import os
 
@@ -43,7 +27,9 @@ if "bpy" in locals():
     importlib.reload(mastro_preferences),
     importlib.reload(mastro_project_data),
     importlib.reload(mastro_menu),
-    # importlib.reload(mastro_vertex),
+    importlib.reload(mastro_keymaps),
+    importlib.reload(icons),
+    importlib.reload(mastro_xy_constraint_operators),
     importlib.reload(mastro_wall),
     importlib.reload(mastro_street),
     importlib.reload(mastro_massing),
@@ -54,7 +40,9 @@ else:
     from . import mastro_preferences
     from . import mastro_project_data
     from . import mastro_menu
-    # from . import mastro_vertex
+    from . import mastro_keymaps
+    from . import icons
+    from . import mastro_xy_constraint_operators
     from . import mastro_wall
     from . import mastro_street
     from . import mastro_massing
@@ -157,6 +145,7 @@ classes = (
     # mastro_menu.MaStro_Menu,
     mastro_menu.VIEW3D_PT_MaStro_Panel,
     mastro_menu.mastroAddonProperties,
+    mastro_menu.ConstraintXYSettings,
     
     mastro_schedule.MaStroTree,
     mastro_schedule.MaStro_string_item,
@@ -502,11 +491,24 @@ def register():
     # bpy.app.handlers.depsgraph_update_post.append(mastro_modal_operator.update_mesh_attributes_depsgraph)
     # bpy.app.handlers.depsgraph_update_post.append(mastro_modal_operator.update_show_overlay)
     
+    # Register constraint operators
+    mastro_xy_constraint_operators.register()
+    
+    icons.register()
+    
     from bpy.utils import register_class
     for cls in classes:
         register_class(cls)
     
+    # Register keymaps
+    mastro_keymaps.register()
+    # Hack to make sure keymaps register (on restart Blender can sometimes not have access to user keymaps)
+    bpy.app.timers.register(mastro_keymaps.ensure_keymaps, first_interval=2.0)
+    
     nodeitems_utils.register_node_categories('MASTRO_NODES', mastro_schedule.node_categories) 
+    
+    # Add toggle to both tool header
+    # bpy.types.VIEW3D_HT_tool_header.append(mastro_menu.constraint_xy_button)
     
     # bpy.msgbus.subscribe_rna(
     #     key=mastro_project_data.OBJECT_UL_Typology,
@@ -631,6 +633,8 @@ def register():
     #                                     name = "Update attributes once faces are selected",
     #                                     default = 0
     #                                     )
+    Scene.constraint_xy_setting = bpy.props.PointerProperty(type=mastro_menu.ConstraintXYSettings)
+   
     Scene.mastroKeyDictionary = bpy.props.CollectionProperty(type=mastro_schedule.MaStro_string_item)
     Scene.show_selection_overlay_is_active = bpy.props.BoolProperty(
                                         name = "Show selection overlay",
@@ -815,6 +819,11 @@ def unregister():
     bpy.app.handlers.load_post.remove(onFileLoaded)
     bpy.app.handlers.load_factory_startup_post.remove(onFileDefault)
     bpy.app.handlers.depsgraph_update_post.remove(mastro_modal_operator.updates)
+    
+    # Unregister constraint operators
+    mastro_xy_constraint_operators.unregister()
+    
+    icons.unregister()
     # bpy.app.handlers.depsgraph_update_post.remove(mastro_project_data.update_typology_uses_function)
     # bpy.app.handlers.depsgraph_update_post.remove(mastro_modal_operator.update_mesh_attributes_depsgraph)
     # bpy.app.handlers.depsgraph_update_post.remove(mastro_modal_operator.update_show_overlay)
@@ -829,7 +838,7 @@ def unregister():
     # bpy.types.VIEW3D_PT_transform_orientations.remove(mastro_menu.extend_transform_operation_panel)
     # bpy.types.VIEW3D_MT_editor_menus.remove(mastro_menu.mastro_menu)
     bpy.types.VIEW3D_MT_mesh_add.remove(mastro_menu.mastro_add_menu_func)
-    
+    # bpy.types.VIEW3D_HT_header.remove(mastro_menu.constraint_xy_button)
     # del bpy.types.Scene.MaStro_math_node_entries
     # del bpy.types.Scene.MaStroAttributes
     del bpy.types.WindowManager.toggle_show_data
@@ -845,6 +854,7 @@ def unregister():
     del bpy.types.Object.mastro_props
     
     del Scene.mastroKeyDictionary
+    del Scene.constraint_xy_setting
     # del Scene.updating_mesh_attributes_is_active
     del Scene.attribute_mass_plot_id
     del Scene.attribute_mass_block_id
@@ -899,6 +909,12 @@ def unregister():
     from bpy.utils import unregister_class
     for cls in reversed(classes):
         unregister_class(cls)
+        
+    # Unregister keymaps
+    mastro_keymaps.unregister()
+    
+        
+   
     
     
 if __name__ == "__main__":
