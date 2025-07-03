@@ -36,7 +36,7 @@ from pathlib import Path
 
 # Contexts the UI shows up in — this should pair with the 'keymap_names' variable in ac_keymaps.py
 # this comment is originally from SpaghetMeNot
-contexts = ['OBJECT']
+contexts = ['OBJECT', "EDIT"]
 
 # header_aggregateData = ["Option", "Phase", "Plot Name", "Block Name", "Use", "N. of Storeys", "Footprint", "Perimeter", "Wall area", "GEA"]
 # header_granularData = ["Option", "Phase", "Plot Name", "Block Name", "Use", "Floor", "Level", "GEA", "Perimeter", "Wall area"]
