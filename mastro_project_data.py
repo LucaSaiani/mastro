@@ -29,9 +29,9 @@ from bpy.props import StringProperty, IntProperty, FloatProperty, BoolProperty
 from bpy.types import PropertyGroup, UIList, Operator, Panel
 # from bpy.app.handlers import persistent
 
-from .mastro_massing import read_mesh_attributes_uses, update_mesh_attributes_storeys
-from .mastro_wall import read_mesh_attributes_walls
-from .mastro_street import read_mesh_attributes_streets
+from . mastro_massing import read_mesh_attributes_uses, update_mesh_attributes_storeys
+from . mastro_wall import read_mesh_attributes_walls
+from . mastro_street import read_mesh_attributes_streets
 
 import random
 # import decimal
@@ -174,14 +174,26 @@ class update_GN_Filter_OT(Operator):
         # GN group
         group = bpy.data.node_groups.new(groupName,'GeometryNodeTree')
         group.default_group_node_width = 200
-        #Add Group Output
+        
+        group_input = group.nodes.new("NodeGroupInput")
         group_output = group.nodes.new('NodeGroupOutput')
+        
+        group_menu = group.nodes.new("GeometryNodeMenuSwitch")
+        group_evaluate_point = group.nodes.new("GeometryNodeFieldOnDomain")
+        group_evaluate_edge = group.nodes.new("GeometryNodeFieldOnDomain")
+        group_evaluate_face = group.nodes.new("GeometryNodeFieldOnDomain")
+        group_evaluate_spline = group.nodes.new("GeometryNodeFieldOnDomain")
+        group_evaluate_instance = group.nodes.new("GeometryNodeFieldOnDomain")
+
+
         
         # Add named attribute
         named_attribute_node = group.nodes.new(type="GeometryNodeInputNamedAttribute")
         named_attribute_node.data_type = 'INT'
         named_attribute_node.inputs[0].default_value = attributeName
             
+        group_input.location = (-600,0)
+        group_menu.location = (-300,0)
         group_output.location = (600, 0)
         named_attribute_node.location = (0,-100)
         return(group)
@@ -197,6 +209,7 @@ class update_GN_Filter_OT(Operator):
                 
         nodes = filterBy_Group.nodes
         
+        # group_input = nodes["Group Input"]
         group_output = nodes["Group Output"]
         named_attribute_node = nodes["Named Attribute"]
                     
