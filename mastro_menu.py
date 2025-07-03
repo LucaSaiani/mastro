@@ -26,8 +26,7 @@ from bpy_extras.io_utils import ExportHelper
 from bpy_extras.object_utils import AddObjectHelper
 from bpy.props import StringProperty
 
-
-# import decimal
+from . import icons
 import random, math, mathutils, csv
 
 from decimal import Decimal #, ROUND_HALF_DOWN
@@ -35,6 +34,9 @@ from datetime import datetime
 # from bpy.utils import resource_path
 from pathlib import Path
 
+# Contexts the UI shows up in — this should pair with the 'keymap_names' variable in ac_keymaps.py
+# this comment is originally from SpaghetMeNot
+contexts = ['OBJECT']
 
 # header_aggregateData = ["Option", "Phase", "Plot Name", "Block Name", "Use", "N. of Storeys", "Footprint", "Perimeter", "Wall area", "GEA"]
 # header_granularData = ["Option", "Phase", "Plot Name", "Block Name", "Use", "Floor", "Level", "GEA", "Perimeter", "Wall area"]
@@ -284,7 +286,7 @@ class VIEW3D_PT_MaStro_Panel(Panel):
     @classmethod
     def poll(cls, context):
         return  (context.object is None or
-                 context.selected_objects == [] or
+                #  context.selected_objects == [] or
                     (context.object.type != "MESH" if context.object else True) or
                     ("MaStro object" not in context.object.data if context.object and context.object.type == "MESH" else False)
         )
@@ -367,6 +369,7 @@ class MaStro_MenuOperator_add_MaStro_mass(Operator, AddObjectHelper):
         obj.modifiers.new(geoName, "NODES")
         group = bpy.data.node_groups["MaStro Mass"]
         obj.modifiers[geoName].node_group = group
+        context.view_layer.objects.active = obj
         return {'FINISHED'}
     
 def add_mastro_mass(width, depth):
@@ -456,6 +459,7 @@ class MaStro_MenuOperator_add_MaStro_street(Operator, AddObjectHelper):
         obj.modifiers.new(geoName, "NODES")
         group = bpy.data.node_groups["MaStro Street"]
         obj.modifiers[geoName].node_group = group
+        context.view_layer.objects.active = obj
         return {'FINISHED'}
     
 def add_mastro_street():
@@ -972,6 +976,8 @@ class VIEW3D_PT_transform_orientations(Panel):
     def draw(self, context):
         
         obj = context.object
+        
+        constaint_xy_settings = context.scene.constraint_xy_setting
         # if obj is None or obj.type != 'MESH':
         #     self.report({'ERROR'}, "Select a mesh object")
         #     return {'CANCELLED'}
@@ -989,13 +995,15 @@ class VIEW3D_PT_transform_orientations(Panel):
         
         col = row.column(align=True)
         col.prop(orient_slot, "type", expand=True)
-        
+         
         col_operators = row.column(align=True)
-        col_operators.operator("transform.create_orientation", text="", icon='ADD', emboss=False).use = True
+        icon_value = icons.icon_id('AC_ON') if constaint_xy_settings.constraint_xy_on else icons.icon_id('AC_OFF')
+        col_operators.prop(constaint_xy_settings, 'constraint_xy_on', text='', icon_value=icon_value)
+       
+        col_operators.operator("transform.create_orientation", text="", icon='ADD', emboss=False)
         # this creates a new orientation from the selected edge
         if obj.mode == 'EDIT' and obj is not None and obj.type == 'MESH':
             col_operators.operator("transform.set_orientation_from_edge", text="", icon="EDGESEL", emboss=False)
-
         
         if orientation:
             row = layout.row(align=False)
@@ -1007,6 +1015,31 @@ class VIEW3D_PT_transform_orientations(Panel):
 #     layout = self.layout
 #     layout.operator("transform.set_orientation_from_edge", text="Set Orientation from Edge")
         
+class ConstraintXYSettings(bpy.types.PropertyGroup):
+    """Property Group for all xy constraint scene properties"""
+    constraint_xy_on: bpy.props.BoolProperty(
+        name = 'XY constraints on',
+        default = False,
+        description = 'Toggle XY constraint behaviour globally'
+    )
+    last_custom_orientation: bpy.props.StringProperty(
+        name = 'Auto-constraint last custom orientation',
+        default = "",
+        description = 'Used to store the last used custom orientation so we can clean it up next transform (there is a crash if deleted with the current operator and then locking to an axis manually'
+    )
+            
+# def constraint_xy_button(self, context):
+#     """Draws the xy constraint toggle in object mode"""
+#     if context.mode not in contexts:
+#         return
+#     constaint_xy_settings = context.scene.constraint_xy_setting
+#     layout = self.layout
+#     row = layout.row(align=True)
+#     # icon_value = icons.icon_id('AC_ON') if ac_settings.autoconstraint_on else icons.icon_id('AC_OFF')
+#     # row.prop(ac_settings, 'autoconstraint_on', text='', icon_value=icon_value)
+#     row.prop(constaint_xy_settings, "constraint_xy_on", text="XY Constraint")
+    
+    
 def aggregateData(roughData):
     roughData = sorted(roughData, key=lambda x:(x[0], x[1], x[2], x[3], x[4]))
         

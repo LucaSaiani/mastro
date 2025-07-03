@@ -30,7 +30,7 @@ class VIEW3D_PT_MaStro_Street(Panel):
     @classmethod
     def poll(cls, context):
         return (context.object is not None and
-                context.selected_objects != [] and 
+                # context.selected_objects != [] and 
                 context.object.type == "MESH" and 
                 "MaStro object" in context.object.data and
                 "MaStro street" in context.object.data)
