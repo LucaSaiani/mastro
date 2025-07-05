@@ -28,15 +28,16 @@
      inkscape:document-units="px"
      inkscape:zoom="3.9559173"
      inkscape:cx="73.18151"
-     inkscape:cy="63.575647"
+     inkscape:cy="63.828432"
      inkscape:window-width="2179"
      inkscape:window-height="1229"
      inkscape:window-x="670"
      inkscape:window-y="322"
      inkscape:window-maximized="0"
-     inkscape:current-layer="layer3"
+     inkscape:current-layer="layer1"
      inkscape:clip-to-page="false"
-     inkscape:antialias-rendering="true" />
+     inkscape:antialias-rendering="true"
+     showgrid="false" />
   <defs
      id="defs1">
     <clipPath
@@ -79,7 +80,7 @@
      style="display:inline"
      sodipodi:insensitive="true">
     <path
-       style="fill:#3485fd;fill-opacity:1;stroke:#ffffff;stroke-width:0.515428;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
+       style="fill:#0d6efd;fill-opacity:1;stroke:#ffffff;stroke-width:0.515428;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
        d="m 127.74231,113.89387 c -7.20021,7.20021 1.47054,-1.46749 -13.84538,13.84842 7.58574,0 13.80605,-0.0424 13.80605,-0.0424 0,0 0.0393,-3.57019 0.0393,-13.80603 z"
        id="path7"
        sodipodi:nodetypes="cccc" />
@@ -89,7 +90,7 @@
      id="layer3"
      inkscape:label="Corner 1">
     <path
-       style="fill:none;fill-opacity:1;stroke:#81b4fe;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:9, 9;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
+       style="fill:none;fill-opacity:1;stroke:#a8cbfe;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:9, 9;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
        id="path14"
        sodipodi:type="arc"
        sodipodi:cx="79.525475"
@@ -143,13 +144,14 @@
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15px;font-family:Cantarell;-inkscape-font-specification:Cantarell;fill:#ffffff;fill-opacity:1">O</tspan></text>
     <g
        id="g15"
-       transform="translate(5.3492436,-5.3418024)">
+       transform="translate(5.3492436,-5.3418024)"
+       style="stroke:#5a9cfe">
       <path
-         style="fill:none;stroke:#81b4fe;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+         style="fill:none;stroke:#5a9cfe;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
          d="m 65.868125,45.848505 c 0.357493,0.178746 16.891554,0 16.891554,0"
          id="path15" />
       <path
-         style="fill:none;stroke:#81b4fe;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+         style="fill:none;stroke:#5a9cfe;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
          d="m 74.465609,37.501574 c -0.178746,0.357493 0,16.891554 0,16.891554"
          id="path15-2" />
     </g>
