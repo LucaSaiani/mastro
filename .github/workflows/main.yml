@@ -1,0 +1,30 @@
+name: Create zip with selected files
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Create folder with selected files
+        run: |
+          mkdir export
+          cp -r src export/
+          cp README.md export/
+
+      - name: Create ZIP file
+        run: |
+          cd export
+          zip -r ../export.zip .
+
+      - name: Upload ZIP as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: export-zip
+          path: export.zip
