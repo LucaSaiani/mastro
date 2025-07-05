@@ -3,4 +3,4 @@
 
 ## 📦 Download
 
-[Scarica export.zip](https://github.com/LucaSaiani/mastro/releases/download/export-latest/mastro.zip)
+[Download mastro.zip](https://github.com/LucaSaiani/mastro/releases/download/export-latest/mastro.zip)
