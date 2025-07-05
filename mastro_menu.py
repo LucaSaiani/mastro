@@ -21,6 +21,7 @@
 import bpy
 import bmesh 
 import os
+import addon_utils
 from bpy.types import Menu, Operator, Panel
 from bpy_extras.io_utils import ExportHelper
 from bpy_extras.object_utils import AddObjectHelper
@@ -34,9 +35,7 @@ from datetime import datetime
 # from bpy.utils import resource_path
 from pathlib import Path
 
-# Contexts the UI shows up in — this should pair with the 'keymap_names' variable in ac_keymaps.py
-# this comment is originally from SpaghetMeNot
-contexts = ['OBJECT', "EDIT"]
+contexts = ['OBJECT', "EDIT_MESH"]
 
 # header_aggregateData = ["Option", "Phase", "Plot Name", "Block Name", "Use", "N. of Storeys", "Footprint", "Perimeter", "Wall area", "GEA"]
 # header_granularData = ["Option", "Phase", "Plot Name", "Block Name", "Use", "Floor", "Level", "GEA", "Perimeter", "Wall area"]
@@ -742,10 +741,14 @@ def addStreetAttributes(obj):
     
 # import the mastro nodes in the file
 def addNodes():
+    for mod in addon_utils.modules():
+        if mod.bl_info['name'] == 'MaStro':
+            my_addon_path = Path(mod.__file__).parent.resolve()
+            break
 
-    my_addon_path = Path(bpy.utils.user_resource('EXTENSIONS'))
+    # my_addon_path = Path(bpy.utils.user_resource('EXTENSIONS'))
     blend_file_path = my_addon_path / "mastro/mastro.blend"
-    if not os.path.isdir(blend_file_path): blend_file_path = my_addon_path / "vscode_development/mastro/mastro.blend"
+    # if not os.path.isdir(blend_file_path): blend_file_path = my_addon_path / "vscode_development/mastro/mastro.blend"
     inner_path = "NodeTree"
     
     geoNodes_list = ("MaStro Mass", "MaStro Street")
@@ -997,8 +1000,8 @@ class VIEW3D_PT_transform_orientations(Panel):
         col.prop(orient_slot, "type", expand=True)
          
         col_operators = row.column(align=True)
-        icon_value = icons.icon_id('AC_ON') if constaint_xy_settings.constraint_xy_on else icons.icon_id('AC_OFF')
-        col_operators.prop(constaint_xy_settings, 'constraint_xy_on', text='', icon_value=icon_value)
+        # icon_value = icons.icon_id('AC_ON') if constaint_xy_settings.constraint_xy_on else icons.icon_id('AC_OFF')
+        # col_operators.prop(constaint_xy_settings, 'constraint_xy_on', text='', icon_value=icon_value)
        
         col_operators.operator("transform.create_orientation", text="", icon='ADD', emboss=False)
         # this creates a new orientation from the selected edge
@@ -1018,7 +1021,7 @@ class VIEW3D_PT_transform_orientations(Panel):
 class ConstraintXYSettings(bpy.types.PropertyGroup):
     """Property Group for all xy constraint scene properties"""
     constraint_xy_on: bpy.props.BoolProperty(
-        name = 'XY constraints on',
+        name = 'XY constraints',
         default = False,
         description = 'Toggle XY constraint behaviour globally'
     )
@@ -1028,16 +1031,16 @@ class ConstraintXYSettings(bpy.types.PropertyGroup):
         description = 'Used to store the last used custom orientation so we can clean it up next transform (there is a crash if deleted with the current operator and then locking to an axis manually'
     )
             
-# def constraint_xy_button(self, context):
-#     """Draws the xy constraint toggle in object mode"""
-#     if context.mode not in contexts:
-#         return
-#     constaint_xy_settings = context.scene.constraint_xy_setting
-#     layout = self.layout
-#     row = layout.row(align=True)
-#     # icon_value = icons.icon_id('AC_ON') if ac_settings.autoconstraint_on else icons.icon_id('AC_OFF')
-#     # row.prop(ac_settings, 'autoconstraint_on', text='', icon_value=icon_value)
-#     row.prop(constaint_xy_settings, "constraint_xy_on", text="XY Constraint")
+def constraint_xy_button(self, context):
+    """Draws the xy constraint toggle"""
+    if context.mode not in contexts:
+        return
+    constaint_xy_settings = context.scene.constraint_xy_setting
+    layout = self.layout
+    row = layout.row(align=True)
+    icon_value = icons.icon_id('xy_on') if constaint_xy_settings.constraint_xy_on else icons.icon_id('xy_off')
+    # row.prop(ac_settings, 'autoconstraint_on', text='', icon_value=icon_value)
+    row.prop(constaint_xy_settings, "constraint_xy_on", text="", icon_value=icon_value)
     
     
 def aggregateData(roughData):

@@ -502,13 +502,14 @@ def register():
     
     # Register keymaps
     mastro_keymaps.register()
+    
     # Hack to make sure keymaps register (on restart Blender can sometimes not have access to user keymaps)
-    bpy.app.timers.register(mastro_keymaps.ensure_keymaps, first_interval=2.0)
+    # bpy.app.timers.register(mastro_keymaps.ensure_keymaps, first_interval=2.0)
     
     nodeitems_utils.register_node_categories('MASTRO_NODES', mastro_schedule.node_categories) 
     
     # Add toggle to both tool header
-    # bpy.types.VIEW3D_HT_tool_header.append(mastro_menu.constraint_xy_button)
+    bpy.types.VIEW3D_HT_tool_header.append(mastro_menu.constraint_xy_button)
     
     # bpy.msgbus.subscribe_rna(
     #     key=mastro_project_data.OBJECT_UL_Typology,
@@ -823,7 +824,7 @@ def unregister():
     # Unregister constraint operators
     mastro_xy_constraint_operators.unregister()
     
-    icons.unregister()
+    
     # bpy.app.handlers.depsgraph_update_post.remove(mastro_project_data.update_typology_uses_function)
     # bpy.app.handlers.depsgraph_update_post.remove(mastro_modal_operator.update_mesh_attributes_depsgraph)
     # bpy.app.handlers.depsgraph_update_post.remove(mastro_modal_operator.update_show_overlay)
@@ -838,7 +839,9 @@ def unregister():
     # bpy.types.VIEW3D_PT_transform_orientations.remove(mastro_menu.extend_transform_operation_panel)
     # bpy.types.VIEW3D_MT_editor_menus.remove(mastro_menu.mastro_menu)
     bpy.types.VIEW3D_MT_mesh_add.remove(mastro_menu.mastro_add_menu_func)
-    # bpy.types.VIEW3D_HT_header.remove(mastro_menu.constraint_xy_button)
+    
+    bpy.types.VIEW3D_HT_tool_header.remove(mastro_menu.constraint_xy_button)
+    
     # del bpy.types.Scene.MaStro_math_node_entries
     # del bpy.types.Scene.MaStroAttributes
     del bpy.types.WindowManager.toggle_show_data
@@ -912,6 +915,8 @@ def unregister():
         
     # Unregister keymaps
     mastro_keymaps.unregister()
+    
+    icons.unregister()
     
         
    
