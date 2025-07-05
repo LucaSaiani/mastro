@@ -24,10 +24,10 @@ jobs:
       - name: Create ZIP file
         run: |
           cd export
-          zip -r ../mastro.zip .
+          zip -r ../mastro.zip ./*
 
       - name: Upload ZIP as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mastro-zip
+          name: mastro
           path: mastro.zip
