@@ -23,10 +23,14 @@ jobs:
 
       - name: Create ZIP file
         run: |
-          zip -r mastro.zip export/
+          cd export
+          zip -r ..mastro.zip ./*
 
-      - name: Upload ZIP as artifact
-        uses: actions/upload-artifact@v4
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v1
         with:
-          name: mastro
-          path: mastro.zip
+          tag_name: export-latest
+          name: Export ZIP
+          files: mastro.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
