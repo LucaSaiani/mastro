@@ -9,7 +9,7 @@ def register():
     global pcoll
     pcoll = bpy.utils.previews.new()
     dir = Path(__file__).parent
-    for img_file in dir.glob("*.png"):
+    for img_file in dir.glob("*.svg"):
         pcoll.load(img_file.stem, str(img_file), 'IMAGE')
 
 
