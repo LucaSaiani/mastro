@@ -41,19 +41,21 @@ def get_view_axis(context):
         view_vector = view_vector @ inv_mat
 
     # Return closest axis
-    abs_vector = [abs(view_vector[0]), abs(view_vector[1]), abs(view_vector[2])]
-    if abs_vector[0] > abs_vector[1] and abs_vector[0] > abs_vector[2]:
-        return (True, False, False)
-    elif abs_vector[1] > abs_vector[0] and abs_vector[1] > abs_vector[2]:
-        return (False, True, False)
-    elif abs_vector[2] >= abs_vector[0] and abs_vector[2] >= abs_vector[0]:
-        return (False, False, True)
-
+    # abs_vector = [abs(view_vector[0]), abs(view_vector[1]), abs(view_vector[2])]
+    # if abs_vector[0] > abs_vector[1] and abs_vector[0] > abs_vector[2]:
+    #     return (True, False, False)
+    # elif abs_vector[1] > abs_vector[0] and abs_vector[1] > abs_vector[2]:
+    #     return (False, True, False)
+    # elif abs_vector[2] >= abs_vector[0] and abs_vector[2] >= abs_vector[0]:
+    #     return (False, False, True)
+    return(False, False, True)
 
 def get_view_plane(context):
     """Returns the most perpendicular plane to the view vector in the form of a tuple of bools. e.g. XY plane = (True, True, False)"""
     view_axis = get_view_axis(context)
-    return (not view_axis[0], not view_axis[1], not view_axis[2])
+    # return (not view_axis[0], not view_axis[1], not view_axis[2])
+    return(True, True, False)
+
 
 
 def multiple_objects_local(context):
@@ -87,7 +89,7 @@ def apply_active_object_space(context) -> bool:
     return use_active_object_space
 
 
-class TRANSFORM_OT_translate_auto_constraint(bpy.types.Operator):
+class TRANSFORM_OT_translate_xy_constraint(bpy.types.Operator):
     """Wrapper for transform.translate operator with automatic axis constraints"""
     bl_idname = "transform.translate_xy_constraint"
     bl_label = "Translate XY Constraint"
@@ -107,7 +109,7 @@ class TRANSFORM_OT_translate_auto_constraint(bpy.types.Operator):
             return {'FINISHED'}
 
         # If multiple objects selected with local orientation, use the active objects orientation
-        use_active_object_space = apply_active_object_space(context)
+        # use_active_object_space = apply_active_object_space(context)
 
         # Invoke translate with constraints
         bpy.ops.transform.translate('INVOKE_DEFAULT',
@@ -115,13 +117,13 @@ class TRANSFORM_OT_translate_auto_constraint(bpy.types.Operator):
         )
         
         # Switch back to local orientation after running tool
-        if use_active_object_space:
-            context.scene.transform_orientation_slots[0].type = 'LOCAL'
+        # if use_active_object_space:
+        #     context.scene.transform_orientation_slots[0].type = 'LOCAL'
 
         return {'FINISHED'}
 
 
-class TRANSFORM_OT_rotate_auto_constraint(bpy.types.Operator):
+class TRANSFORM_OT_rotate_xy_constraint(bpy.types.Operator):
     """Wrapper for transform.rotate operator with automatic axis constraints"""
     bl_idname = "transform.rotate_xy_constraint"
     bl_label = "Rotate XY Constraint"
@@ -135,33 +137,33 @@ class TRANSFORM_OT_rotate_auto_constraint(bpy.types.Operator):
 
     def execute(self, context):
         # Run normal rotate if auto_constraints are off
-        axis = get_view_axis(context)
+        # axis = get_view_axis(context)
         constaint_xy_settings = context.scene.constraint_xy_setting
         if  not constaint_xy_settings.constraint_xy_on or context.mode not in context_modes:
             bpy.ops.transform.rotate('INVOKE_DEFAULT')
             return {'FINISHED'}
         
         # If multiple objects selected with local orientation, use the active objects orientation
-        use_active_object_space = apply_active_object_space(context)
+        # use_active_object_space = apply_active_object_space(context)
 
         # Invoke rotate with constraints
         bpy.ops.transform.rotate('INVOKE_DEFAULT',
-            constraint_axis = axis
+            constraint_axis = get_view_axis(context)
         )
         
         # Switch back to local orientation after running tool
-        if use_active_object_space:
-            context.scene.transform_orientation_slots[0].type = 'LOCAL'
+        # if use_active_object_space:
+        #     context.scene.transform_orientation_slots[0].type = 'LOCAL'
 
         return {'FINISHED'}
 
 
-context_modes = ['OBJECT']
+context_modes = ['OBJECT', 'EDIT_MESH']
 
 # Used for registering and unregistering classes
 blender_classes = [
-    TRANSFORM_OT_translate_auto_constraint,
-    TRANSFORM_OT_rotate_auto_constraint,
+    TRANSFORM_OT_translate_xy_constraint,
+    TRANSFORM_OT_rotate_xy_constraint,
 ]
 
 
