@@ -15,11 +15,11 @@ jobs:
       - name: Create folder with selected files
         run: |
           mkdir mastro
-          cp -r icons export/
-          cp *.py export/
-          cp mastro.blend export/
-          cp LICENSE.txt export/
-          cp blender_manifest.toml export/
+          cp -r icons mastro/
+          cp *.py mastro/
+          cp mastro.blend mastro/
+          cp LICENSE.txt mastro/
+          cp blender_manifest.toml mastro/
 
       - name: Create ZIP file
         run: |
