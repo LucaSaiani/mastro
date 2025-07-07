@@ -1689,7 +1689,7 @@ class OBJECT_UL_Wall(UIList):
             split = layout.split(factor=0.4)
             sub = split.split()
             sub.label(text="Id: %d" % (item.id)) 
-            sub.prop(context.scene.mastro_street_name_list[index], "streetEdgeColor", text="")
+            sub.prop(context.scene.mastro_wall_name_list[index], "streetEdgeColor", text="")
 
             split.prop(context.scene.mastro_wall_name_list[index],
                        "name",
