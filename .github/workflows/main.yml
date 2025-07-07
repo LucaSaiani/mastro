@@ -23,8 +23,9 @@ jobs:
 
       - name: Create ZIP file
         run: |
-          zip -r mastro.zip ./mastro/
-
+          cd mastro
+          zip -r ../mastro.zip .
+          
       - name: Create GitHub release
         uses: softprops/action-gh-release@v1
         with:
