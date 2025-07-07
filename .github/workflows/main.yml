@@ -23,13 +23,12 @@ jobs:
 
       - name: Create ZIP file
         run: |
-          cd export
-          zip -r ..mastro.zip ./*
+          zip -r mastro.zip ./export/
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: export-latest
+          tag_name: latest-mastro
           name: Export ZIP
           files: mastro.zip
         env:
