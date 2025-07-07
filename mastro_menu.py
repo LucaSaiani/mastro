@@ -747,7 +747,7 @@ def addNodes():
             break
 
     # my_addon_path = Path(bpy.utils.user_resource('EXTENSIONS'))
-    blend_file_path = my_addon_path / "mastro/mastro.blend"
+    blend_file_path = my_addon_path / "mastro.blend"
     # if not os.path.isdir(blend_file_path): blend_file_path = my_addon_path / "vscode_development/mastro/mastro.blend"
     inner_path = "NodeTree"
     
