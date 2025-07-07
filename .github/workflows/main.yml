@@ -14,7 +14,7 @@ jobs:
 
       - name: Create folder with selected files
         run: |
-          mkdir export
+          mkdir mastro
           cp -r icons export/
           cp *.py export/
           cp mastro.blend export/
@@ -23,13 +23,13 @@ jobs:
 
       - name: Create ZIP file
         run: |
-          zip -r mastro.zip ./export/
+          zip -r mastro.zip ./mastro/
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: latest-mastro
-          name: Export ZIP
+          name: MaStro ZIP
           files: mastro.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
