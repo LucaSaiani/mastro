@@ -1,5 +1,5 @@
 # Mastro
- A Blender addon to help designing masterplans and streets: MaStro
+ A Blender addon to help design masterplans and streets: MaStro
 
 ## 📦 Download
 
