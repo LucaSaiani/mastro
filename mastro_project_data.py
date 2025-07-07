@@ -570,7 +570,7 @@ class OBJECT_UL_Plot(UIList):
             
             # split.label(text="Index: %d" % (index))
             
-            split = layout.split(factor=0.3)
+            split = layout.split(factor=0.4)
             split.label(text="Id: %d" % (item.id)) 
             # split.label(text=item.name, icon=custom_icon) 
             split.prop(context.scene.mastro_plot_name_list[index],
@@ -741,7 +741,7 @@ class OBJECT_UL_Block(UIList):
         custom_icon = 'HOME'
 
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
-            split = layout.split(factor=0.5)
+            split = layout.split(factor=0.4)
             split.label(text="Id: %d" % (item.id)) 
             # split.label(text=item.name, icon=custom_icon) 
             split.prop(context.scene.mastro_block_name_list[index],
@@ -1050,7 +1050,7 @@ class OBJECT_UL_Typology(UIList):
             #print("selected typology: ", context.scene.mastro_typology_name_list[selected_typology_index].id)
             
             
-            split = layout.split(factor=0.5)
+            split = layout.split(factor=0.4)
             split.label(text="Id: %d" % (item.id)) 
             # split.label(text=item.name, icon=custom_icon) 
             # item = context.scene.mastro_typology_name_list[context.scene.mastro_typology_name_list_index]
@@ -1175,10 +1175,10 @@ class OBJECT_UL_Typology_Uses(UIList):
                         storeys = el.storeys
                         liquid = el.liquid
                         break
-                split = layout.split(factor=0.5)
+                split = layout.split(factor=0.4)
                 col1 = split.column()
                 col2 = split.column()
-                subSplit = col1.split(factor=0.3)
+                subSplit = col1.split(factor=0.4)
                 subSplit1 = subSplit.column()
                 subSplit2 = subSplit.column()
                 if liquid:
@@ -1192,7 +1192,7 @@ class OBJECT_UL_Typology_Uses(UIList):
                     
                 col2.label(text=item.name)
             else:
-                split = layout.split(factor=0.5)
+                split = layout.split(factor=0.4)
                 split.label(text="")
                 split.label(text=item.name)
      
@@ -1668,7 +1668,7 @@ class VIEW3D_PT_MaStro_building_wall_data(Panel):
         # layout.prop(context.scene.mastro_wall_name_list[index], "shortName", text="Short name")
         layout.prop(context.scene.mastro_wall_name_list[index], "wallThickness", text="Thickness")
         layout.prop(context.scene.mastro_wall_name_list[index], "wallOffset", text="Offset")
-        layout.prop(context.scene.mastro_wall_name_list[index], "wallEdgeColor", text="Color Overlay")
+        # layout.prop(context.scene.mastro_wall_name_list[index], "wallEdgeColor", text="Color Overlay")
        
        
        
@@ -1686,9 +1686,11 @@ class OBJECT_UL_Wall(UIList):
         custom_icon = 'NODE_TEXTURE'
 
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
-            split = layout.split(factor=0.5)
-            split.label(text="Id: %d" % (item.id)) 
-            # split.label(text=item.name, icon=custom_icon) 
+            split = layout.split(factor=0.4)
+            sub = split.split()
+            sub.label(text="Id: %d" % (item.id)) 
+            sub.prop(context.scene.mastro_street_name_list[index], "streetEdgeColor", text="")
+
             split.prop(context.scene.mastro_wall_name_list[index],
                        "name",
                        icon_only=True,
@@ -1867,7 +1869,7 @@ class OBJECT_UL_Floor(UIList):
         custom_icon = 'VIEW_PERSPECTIVE'
 
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
-            split = layout.split(factor=0.5)
+            split = layout.split(factor=0.4)
             split.label(text="Id: %d" % (item.id)) 
             # split.label(text=item.name, icon=custom_icon) 
             split.prop(context.scene.mastro_floor_name_list[index],
@@ -1993,7 +1995,7 @@ class VIEW3D_PT_MaStro_street_data(Panel):
         index = context.scene.mastro_street_name_list_index
         layout.prop(context.scene.mastro_street_name_list[index], "streetWidth", text="Width")
         layout.prop(context.scene.mastro_street_name_list[index], "streetRadius", text="Radius")
-        layout.prop(context.scene.mastro_street_name_list[index], "streetEdgeColor", text="Color Overlay")
+        # layout.prop(context.scene.mastro_street_name_list[index], "streetEdgeColor", text="Color Overlay")
        
 class OBJECT_UL_Street(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data,
@@ -2002,8 +2004,12 @@ class OBJECT_UL_Street(UIList):
         custom_icon = 'NODE_TEXTURE'
 
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
-            split = layout.split(factor=0.5)
-            split.label(text="Id: %d" % (item.id)) 
+            split = layout.split(factor=0.4)
+            # split.label(text="Id: %d" % (item.id)) 
+            sub = split.split()
+            sub.label(text="Id: %d" % (item.id)) 
+            sub.prop(context.scene.mastro_street_name_list[index], "streetEdgeColor", text="")
+            
             # split.label(text=item.name, icon=custom_icon) 
             split.prop(context.scene.mastro_street_name_list[index],
                        "name",
