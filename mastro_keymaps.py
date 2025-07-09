@@ -166,17 +166,17 @@ def register():
     # ])
     # for k in user_kmis:
     #     k.active = False
-    print()
+    # print()
     user_config_keymaps = wm.keyconfigs.user.keymaps
     for keymap in user_config_keymaps:
         if keymap.name in keymap_names:
             for kmi in keymap.keymap_items:
                 if kmi.idname == "transform.translate" and kmi.type == "G":
                     kmi.active = False
-                    print(keymap.name, kmi.idname, kmi.type, kmi.active)
+                    # print(keymap.name, kmi.idname, kmi.type, kmi.active)
                 elif kmi.idname == "transform.rotate" and kmi.type == "R":
                     kmi.active = False
-                    print(keymap.name, kmi.idname, kmi.type, kmi.active)
+                    # print(keymap.name, kmi.idname, kmi.type, kmi.active)
                 
     # Note that in background mode (no GUI available), keyconfigs are not available either,
     # so we have to check this to avoid nasty errors in background case.
@@ -201,16 +201,16 @@ def register():
         kmi = km.keymap_items.new("transform.rotate_xy_constraint", 'R', 'PRESS')
         addon_keymaps.append((km, kmi))
         
-    print()
-    print()
-    user_config_keymaps = wm.keyconfigs.user.keymaps
-    for keymap in user_config_keymaps:
-        if keymap.name in keymap_names:
-            for kmi in keymap.keymap_items:
-                if (kmi.idname == "transform.translate" or kmi.idname == "transform.translate_xy_constraint") and kmi.type == "G":
-                    print("post", keymap.name, kmi.idname, kmi.type, kmi.active)    
-                if (kmi.idname == "transform.rotate" or kmi.idname == "transform.rotate_xy_constraint") and kmi.type == "R":
-                    print("post", keymap.name, kmi.idname, kmi.type, kmi.active)    
+    # print()
+    # print()
+    # user_config_keymaps = wm.keyconfigs.user.keymaps
+    # for keymap in user_config_keymaps:
+    #     if keymap.name in keymap_names:
+    #         for kmi in keymap.keymap_items:
+    #             if (kmi.idname == "transform.translate" or kmi.idname == "transform.translate_xy_constraint") and kmi.type == "G":
+    #                 print("post", keymap.name, kmi.idname, kmi.type, kmi.active)    
+    #             if (kmi.idname == "transform.rotate" or kmi.idname == "transform.rotate_xy_constraint") and kmi.type == "R":
+    #                 print("post", keymap.name, kmi.idname, kmi.type, kmi.active)    
     # for keymap in addon_keymaps:
     #     for kmi in keymap.kmi:
     #         print("post", kmi.name)
