@@ -864,7 +864,7 @@ class MaStro_Operator_transform_orientation(Operator):
         # Switch to Object Mode and get selected vertices
         bpy.ops.object.mode_set(mode='OBJECT')
         mesh = obj.data
-        selected_verts = [v.co for v in mesh.vertices if v.select]
+        selected_verts = [obj.matrix_world @ v.co for v in mesh.vertices if v.select]
 
         if len(selected_verts) != 2:
             self.report({'ERROR'}, "Select exactly two vertices forming an edge")
