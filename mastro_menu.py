@@ -273,7 +273,7 @@ class mastroAddonProperties(bpy.types.PropertyGroup):
 #         printGranular.text = "granular"
 #         layout.operator(MaStro_MenuOperator_ExportCSV.bl_idname)
         # layout.separator()
-        # layout.operator(MaStro_Operator_transformation_orientation.bl_idname)
+        # layout.operator(MaStro_Operator_transform_orientation.bl_idname)
         
 # panel to show operators when a non mastro object is selected
 class VIEW3D_PT_MaStro_Panel(Panel):
@@ -843,8 +843,8 @@ def addNodes():
 #     def execute(self, context):
 #         return writeCSV(context, self.filepath)
 
-class MaStro_Operator_transformation_orientation(Operator):
-    """Create transformation orientation from the selected edge"""
+class MaStro_Operator_transform_orientation(Operator):
+    """Create transform orientation from the selected edge"""
     bl_idname = "transform.set_orientation_from_edge"
     bl_label = "Edge"
     bl_options = {'REGISTER', 'UNDO'}
@@ -904,68 +904,38 @@ class MaStro_Operator_transformation_orientation(Operator):
         return {'FINISHED'}
 
 # Replace the existing Orientations pie menu, adding custom orientations
-class VIEW3D_MT_orientations_pie(Menu):
-    bl_label = "Orientation"
+# class VIEW3D_MT_orientations_pie(Menu):
+#     bl_label = "Orientation"
 
-    # def draw(self, context):
-    #     layout = self.layout
-    #     pie = layout.menu_pie()
-    #     scene = context.scene
-
-    #     pie.prop(scene.transform_orientation_slots[0], "type", expand=True)
-    #     pie.prop(scene.transform_orientation_slots[0], "type", text="Custom", expand=False)
-    
-    def draw(self, context):
-        obj = context.object
+#     def draw(self, context):
+#         obj = context.object
         
-        layout = self.layout
-        pie = layout.menu_pie()
-        scene = context.scene
+#         layout = self.layout
+#         pie = layout.menu_pie()
+#         scene = context.scene
 
-        pie.prop(scene.transform_orientation_slots[0], "type", expand=True)
+#         pie.prop(scene.transform_orientation_slots[0], "type", expand=True)
         
-        custom = pie.column()
-        gap = custom.column()
-        gap.separator()
-        gap.scale_y = 25
-        custom_menu = custom.box().column()
-        # custom_menu.scale_y=1.3
-        # custom_menu.label(text="Custom:")
+#         custom = pie.column()
+#         gap = custom.column()
+#         gap.separator()
+#         gap.scale_y = 25
+#         custom_menu = custom.box().column()
+#         # custom_menu.scale_y=1.3
+#         # custom_menu.label(text="Custom:")
        
-        custom_menu.operator("transform.create_orientation", text="New", icon='ADD', emboss=False).use = True
-        if obj.mode == 'EDIT' and obj is not None and obj.type == 'MESH':
-            custom_menu.operator("transform.set_orientation_from_edge", text="New from Edge", icon='EDGESEL', emboss=False)
-        # custom_menu.prop(scene.transform_orientation_slots[0], "type", expand=True)
-        # orient_slot = scene.transform_orientation_slots[0]
-        # orientation = orient_slot.custom_orientation
-        # custom_menu.prop(orient_slot, "type", expand=True)
-        custom_orientations = bpy.context.scene.transform_orientation_slots[0]
-        if custom_orientations:
-            custom_names = [ori.name for ori in custom_orientations]
+#         custom_menu.operator("transform.create_orientation", text="New", icon='ADD', emboss=False).use = True
+#         if obj.mode == 'EDIT' and obj is not None and obj.type == 'MESH':
+#             custom_menu.operator("transform.set_orientation_from_edge", text="New from Edge", icon='EDGESEL', emboss=False)
+#         # custom_menu.prop(scene.transform_orientation_slots[0], "type", expand=True)
+#         # orient_slot = scene.transform_orientation_slots[0]
+#         # orientation = orient_slot.custom_orientation
+#         # custom_menu.prop(orient_slot, "type", expand=True)
+#         custom_orientations = bpy.context.scene.transform_orientation_slots[0]
+#         if custom_orientations:
+#             custom_names = [ori.name for ori in custom_orientations]
         
-        # print(custom_names)
-        # list the custom orientations
-        # scene = context.scene
-        # transform_slots = context.scene.transform_orientation_slots
-        # builtin_transforms = [i.identifier for i in bpy.types.TransformOrientationSlot.bl_rna.properties['type'].enum_items]
-        # orient_slot = scene.transform_orientation_slots[0]        
-        
-        # hacky (but the only way) to get the all available transforms
-        # try:
-        #     context.scene.transform_orientation_slots[0].type = ""
-        # except Exception as inst:
-        #     # transforms = str(inst).split("'")[1::2]
-        #     print("ciao", inst)
-
-        # for transform in transforms:
-        #     print(transform)
-        #     if transform in builtin_transforms:
-        #         continue
-                
-        #     # custom_menu.operator("transform.select_orientation", text=transform, icon=None, emboss=False)
-        #     print(transform)
-            # transform_slots[0].type = transform
-            # bpy.ops.transform.delete_orientation()
+       
        
 
         
