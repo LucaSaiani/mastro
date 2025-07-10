@@ -31,8 +31,11 @@ from bpy.types import Operator
 from mathutils import Vector
 
 from .mastro_schedule import MaStro_MathNode, execute_active_node_tree
+
 # from datetime import datetime
 # import math
+
+known_scenes = set()
 
 previous_selection = {}
 
@@ -665,15 +668,36 @@ def draw_callback_px_show_attributes_3D(self, context):
 
 def update_show_attributes(self, context):
     bpy.ops.wm.show_mastro_attributes()
+    
+
 
 ###############################################################################    
 ########## Manage all the required updates fired by depsgraph_update  #########
 ###############################################################################
+
+# when a new scene is created, it is necessary to initialize the
+# variables related to the scene
+def check_new_scenes():
+    from . import initLists
+    global known_scenes
+    current_scenes = set(bpy.data.scenes.keys())
+    # print("current:")
+    # for s in current_scenes: print(s)
+    # print()
+    new_scenes = current_scenes - known_scenes
+    if new_scenes:
+        for scene in new_scenes:
+            print(f"Nuova scena creata: {scene}")
+            initLists()
+        known_scenes = current_scenes
+        
+        
 @persistent
 def updates(scene, depsgraph):
     ###############################################################################
     # update the values in the UI accordingly with the selected edges or faces ####
     ###############################################################################
+    check_new_scenes()
     obj = bpy.context.active_object
     if obj:
         if obj is not None and obj.type == "MESH" and "MaStro object" in obj.data:
