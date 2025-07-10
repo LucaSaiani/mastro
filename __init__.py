@@ -254,38 +254,126 @@ def initNodes():
     bpy.ops.node.update_shader_filter(filter_name="typology")
 
 def initLists():
-    if len(bpy.context.scene.mastro_plot_name_list) == 0:
-        bpy.context.scene.mastro_plot_name_list.add()
-        bpy.context.scene.mastro_plot_name_list[0].id = 0
-        bpy.context.scene.mastro_plot_name_list[0].name = "Plot name..."
+    # plot name
+    name_list = bpy.context.scene.mastro_plot_name_list
+    name_list_current = bpy.context.scene.mastro_plot_name_current
+    if len(name_list) == 0:
+        name_list.add()
+        name_list[0].id = 0
+        name_list[0].name = "Plot type... "
+    elif not 0 in [elem.id for elem in name_list]:
+        name_list.add()
+        name_list[-1].id = 0
+        name_list[-1].name = "Plot type... "
+    if len(name_list_current) == 0:
+        name_list_current.add()
+        name_list_current[0].id = 0
+        name_list_current[0].name = name_list[0].name 
         
-    if len(bpy.context.scene.mastro_block_name_list) == 0:
-        bpy.context.scene.mastro_block_name_list.add()
-        bpy.context.scene.mastro_block_name_list[0].id = 0
-        bpy.context.scene.mastro_block_name_list[0].name = "Block name..."
-        
-    if len(bpy.context.scene.mastro_use_name_list) == 0:
-        bpy.context.scene.mastro_use_name_list.add()
-        bpy.context.scene.mastro_use_name_list[0].id = 0
-        bpy.context.scene.mastro_use_name_list[0].name = "Use name..."
-        bpy.context.scene.mastro_use_name_list[0].storeys = 3
-        bpy.context.scene.mastro_use_name_list[0].liquid = True
+    # if len(bpy.context.scene.mastro_plot_name_list) == 0:
+    #     bpy.context.scene.mastro_plot_name_list.add()
+    #     bpy.context.scene.mastro_plot_name_list[0].id = 0
+    #     bpy.context.scene.mastro_plot_name_list[0].name = "Plot name..."
     
-    if len(bpy.context.scene.mastro_typology_name_list) == 0:
-        bpy.context.scene.mastro_typology_name_list.add()
-        bpy.context.scene.mastro_typology_name_list[0].id = 0
-        bpy.context.scene.mastro_typology_name_list[0].name = "Typology name... "
-        bpy.context.scene.mastro_typology_name_list[0].useList = "0"
+    # if len(bpy.context.scene.mastro_plot_name_current) == 0:
+    #     bpy.context.scene.mastro_plot_name_current.add()
+    #     bpy.context.scene.mastro_plot_name_current[0].id = 0
+    #     bpy.context.scene.mastro_plot_name_current[0].name = bpy.context.scene.mastro_plot_name_list[0].name
     
-    if len(bpy.context.scene.mastro_typology_uses_name_list) == 0:
-        bpy.context.scene.mastro_typology_uses_name_list.add()
-        bpy.context.scene.mastro_typology_uses_name_list[0].id = 0
-        bpy.context.scene.mastro_typology_uses_name_list[0].name = bpy.context.scene.mastro_use_name_list[0].name
+    # block name
+    name_list = bpy.context.scene.mastro_block_name_list
+    name_list_current = bpy.context.scene.mastro_block_name_current
+    if len(name_list) == 0:
+        name_list.add()
+        name_list[0].id = 0
+        name_list[0].name = "Block type... "
+    elif not 0 in [elem.id for elem in name_list]:
+        name_list.add()
+        name_list[-1].id = 0
+        name_list[-1].name = "Block type... "
+    if len(name_list_current) == 0:
+        name_list_current.add()
+        name_list_current[0].id = 0
+        name_list_current[0].name = name_list[0].name 
         
-    if len(bpy.context.scene.mastro_obj_typology_uses_name_list) == 0:
-        bpy.context.scene.mastro_obj_typology_uses_name_list.add()
-        bpy.context.scene.mastro_obj_typology_uses_name_list[0].id = 0
-        bpy.context.scene.mastro_obj_typology_uses_name_list[0].name =  bpy.context.scene.mastro_use_name_list[0].name
+    # if len(bpy.context.scene.mastro_block_name_list) == 0:
+    #     bpy.context.scene.mastro_block_name_list.add()
+    #     bpy.context.scene.mastro_block_name_list[0].id = 0
+    #     bpy.context.scene.mastro_block_name_list[0].name = "Block name..."
+    
+    # if len(bpy.context.scene.mastro_block_name_current) == 0:
+    #     bpy.context.scene.mastro_block_name_current.add()
+    #     bpy.context.scene.mastro_block_name_current[0].id = 0
+    #     bpy.context.scene.mastro_block_name_current[0].name = bpy.context.scene.mastro_block_name_list[0].name
+    
+    # use
+    name_list = bpy.context.scene.mastro_use_name_list
+    if len(name_list) == 0:
+        name_list.add()
+        name_list[0].id = 0
+        name_list[0].name = "Use type... "
+        name_list[0].storeys = 3
+        name_list[0].liquid = True
+    elif not 0 in [elem.id for elem in name_list]:
+        name_list.add()
+        name_list[-1].id = 0
+        name_list[-1].name = "Use type... "
+        name_list[-1].storeys = 3
+        name_list[-1].liquid = True
+        
+    # if len(bpy.context.scene.mastro_use_name_list) == 0:
+    #     bpy.context.scene.mastro_use_name_list.add()
+    #     bpy.context.scene.mastro_use_name_list[0].id = 0
+    #     bpy.context.scene.mastro_use_name_list[0].name = "Use name..."
+    #     bpy.context.scene.mastro_use_name_list[0].storeys = 3
+    #     bpy.context.scene.mastro_use_name_list[0].liquid = True
+    
+    # typology
+    name_list = bpy.context.scene.mastro_typology_name_list
+    name_list_current = bpy.context.scene.mastro_typology_name_current
+    if len(name_list) == 0:
+        name_list.add()
+        name_list[0].id = 0
+        name_list[0].name = "Typology type... "
+        name_list[0].useList = "0"
+    elif not 0 in [elem.id for elem in name_list]:
+        name_list.add()
+        name_list[-1].id = 0
+        name_list[-1].name = "Typology type... "
+        name_list[-1].useList = "0"
+    if len(name_list_current) == 0:
+        name_list_current.add()
+        name_list_current[0].id = 0
+        name_list_current[0].name = name_list[0].name 
+    
+    # if len(bpy.context.scene.mastro_typology_name_list) == 0:
+    #     bpy.context.scene.mastro_typology_name_list.add()
+    #     bpy.context.scene.mastro_typology_name_list[0].id = 0
+    #     bpy.context.scene.mastro_typology_name_list[0].name = "Typology name... "
+    #     bpy.context.scene.mastro_typology_name_list[0].useList = "0"
+    
+    # if len(bpy.context.scene.mastro_typology_name_current) == 0:
+    #     bpy.context.scene.mastro_typology_name_current.add()
+    #     bpy.context.scene.mastro_typology_name_current[0].id = 0
+    #     bpy.context.scene.mastro_typology_name_current[0].name = bpy.context.scene.mastro_typology_name_list[0].name
+        
+    # typology uses name list
+    name_list = bpy.context.scene.mastro_typology_uses_name_list
+    if len(name_list_current) == 0:
+        name_list_current.add()
+        name_list_current[0].id = 0
+        name_list_current[0].name = bpy.context.scene.mastro_use_name_list[0].name
+    elif not 0 in [elem.id for elem in name_list]:
+        name_list.add()
+        name_list[-1].id = 0
+        name_list[-1].name = bpy.context.scene.mastro_use_name_list[0].name
+    
+    
+    # if len(bpy.context.scene.mastro_typology_uses_name_list) == 0:
+    #     bpy.context.scene.mastro_typology_uses_name_list.add()
+    #     bpy.context.scene.mastro_typology_uses_name_list[0].id = 0
+    #     bpy.context.scene.mastro_typology_uses_name_list[0].name = bpy.context.scene.mastro_use_name_list[0].name
+        
     
     # street
     name_list = bpy.context.scene.mastro_street_name_list
@@ -302,7 +390,6 @@ def initLists():
         name_list_current.add()
         name_list_current[0].id = 0
         name_list_current[0].name = name_list[0].name    
-        
         
     # wall
     name_list = bpy.context.scene.mastro_wall_name_list
@@ -321,31 +408,47 @@ def initLists():
         name_list_current.add()
         name_list_current[0].id = 0
         name_list_current[0].name = name_list[0].name    
+        
+    # floor name
+    name_list = bpy.context.scene.mastro_floor_name_list
+    name_list_current = bpy.context.scene.mastro_floor_name_current
+    if len(name_list) == 0:
+        name_list.add()
+        name_list[0].id = 0
+        name_list[0].name = "Floor type... "
+    elif not 0 in [elem.id for elem in name_list]:
+        name_list.add()
+        name_list[-1].id = 0
+        name_list[-1].name = "Floor type... "
+    if len(name_list_current) == 0:
+        name_list_current.add()
+        name_list_current[0].id = 0
+        name_list_current[0].name = name_list[0].name 
     
-    if len(bpy.context.scene.mastro_floor_name_list) == 0:
-        bpy.context.scene.mastro_floor_name_list.add()
-        bpy.context.scene.mastro_floor_name_list[0].id = 0
-        bpy.context.scene.mastro_floor_name_list[0].name = "Floor type..."
-        
-    if len(bpy.context.scene.mastro_plot_name_current) == 0:
-        bpy.context.scene.mastro_plot_name_current.add()
-        bpy.context.scene.mastro_plot_name_current[0].id = 0
-        bpy.context.scene.mastro_plot_name_current[0].name = bpy.context.scene.mastro_plot_name_list[0].name
+    # if len(bpy.context.scene.mastro_floor_name_list) == 0:
+    #     bpy.context.scene.mastro_floor_name_list.add()
+    #     bpy.context.scene.mastro_floor_name_list[0].id = 0
+    #     bpy.context.scene.mastro_floor_name_list[0].name = "Floor type..."
     
-    if len(bpy.context.scene.mastro_block_name_current) == 0:
-        bpy.context.scene.mastro_block_name_current.add()
-        bpy.context.scene.mastro_block_name_current[0].id = 0
-        bpy.context.scene.mastro_block_name_current[0].name = bpy.context.scene.mastro_block_name_list[0].name
+    # if len(bpy.context.scene.mastro_floor_name_current) == 0:
+    #     bpy.context.scene.mastro_floor_name_current.add()
+    #     bpy.context.scene.mastro_floor_name_current[0].id = 0
+    #     bpy.context.scene.mastro_floor_name_current[0].name = bpy.context.scene.mastro_floor_name_list[0].name
         
-    if len(bpy.context.scene.mastro_typology_name_current) == 0:
-        bpy.context.scene.mastro_typology_name_current.add()
-        bpy.context.scene.mastro_typology_name_current[0].id = 0
-        bpy.context.scene.mastro_typology_name_current[0].name = bpy.context.scene.mastro_typology_name_list[0].name
+    # if len(bpy.context.scene.mastro_obj_typology_uses_name_list) == 0:
+    #     bpy.context.scene.mastro_obj_typology_uses_name_list.add()
+    #     bpy.context.scene.mastro_obj_typology_uses_name_list[0].id = 0
+    #     bpy.context.scene.mastro_obj_typology_uses_name_list[0].name =  bpy.context.scene.mastro_use_name_list[0].name
+    
+    
+   
         
-    if len(bpy.context.scene.mastro_floor_name_current) == 0:
-        bpy.context.scene.mastro_floor_name_current.add()
-        bpy.context.scene.mastro_floor_name_current[0].id = 0
-        bpy.context.scene.mastro_floor_name_current[0].name = bpy.context.scene.mastro_floor_name_list[0].name
+    
+    
+    
+        
+       
+   
    
 
 
@@ -411,7 +514,8 @@ def onFileLoaded(scene):
     bpy.context.scene.previous_selection_object_name = ""
     bpy.context.scene.previous_selection_face_id = -1
     
-    
+    mastro_modal_operator.known_scenes.clear()
+    mastro_modal_operator.known_scenes.update(bpy.data.scenes.keys())
     
     # bpy.msgbus.subscribe_rna(
     #     key=mastro_project_data.OBJECT_UL_Typology,
@@ -444,6 +548,9 @@ def onFileDefault(scene):
     bpy.context.scene.show_selection_overlay_is_active = False
     bpy.context.scene.previous_selection_object_name = ""
     bpy.context.scene.previous_selection_face_id = -1
+    
+    mastro_modal_operator.known_scenes.clear()
+    mastro_modal_operator.known_scenes.update(bpy.data.scenes.keys())
     
     # bpy.msgbus.subscribe_rna(
     #     key=mastro_project_data.OBJECT_UL_Typology,

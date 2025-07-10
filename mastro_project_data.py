@@ -1666,8 +1666,9 @@ class VIEW3D_PT_MaStro_building_wall_data(Panel):
         # layout.prop(context.scene, "mastro_typology_uses_name", icon="COMMUNITY", icon_only=False, text="Type:")
         index = context.scene.mastro_wall_name_list_index
         # layout.prop(context.scene.mastro_wall_name_list[index], "shortName", text="Short name")
-        layout.prop(context.scene.mastro_wall_name_list[index], "wallThickness", text="Thickness")
-        layout.prop(context.scene.mastro_wall_name_list[index], "wallOffset", text="Offset")
+        if len(context.scene.mastro_wall_name_list) > 0:
+            layout.prop(context.scene.mastro_wall_name_list[index], "wallThickness", text="Thickness")
+            layout.prop(context.scene.mastro_wall_name_list[index], "wallOffset", text="Offset")
         # layout.prop(context.scene.mastro_wall_name_list[index], "wallEdgeColor", text="Color Overlay")
        
        
@@ -1689,7 +1690,7 @@ class OBJECT_UL_Wall(UIList):
             split = layout.split(factor=0.4)
             sub = split.split()
             sub.label(text="Id: %d" % (item.id)) 
-            sub.prop(context.scene.mastro_wall_name_list[index], "streetEdgeColor", text="")
+            sub.prop(context.scene.mastro_wall_name_list[index], "wallEdgeColor", text="")
 
             split.prop(context.scene.mastro_wall_name_list[index],
                        "name",
@@ -1993,8 +1994,12 @@ class VIEW3D_PT_MaStro_street_data(Panel):
         col.operator("mastro_street_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
         
         index = context.scene.mastro_street_name_list_index
-        layout.prop(context.scene.mastro_street_name_list[index], "streetWidth", text="Width")
-        layout.prop(context.scene.mastro_street_name_list[index], "streetRadius", text="Radius")
+        if len(context.scene.mastro_street_name_list) > 0:
+            layout.prop(context.scene.mastro_street_name_list[index], "streetWidth", text="Width")
+            layout.prop(context.scene.mastro_street_name_list[index], "streetRadius", text="Radius")
+        # else:
+        #     from . import initLists
+        #     initLists()
         # layout.prop(context.scene.mastro_street_name_list[index], "streetEdgeColor", text="Color Overlay")
        
 class OBJECT_UL_Street(UIList):
