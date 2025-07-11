@@ -1727,7 +1727,7 @@ class WALL_LIST_OT_NewItem(Operator):
         last = len(context.scene.mastro_wall_name_list)-1
         
         context.scene.mastro_wall_name_list[last].id = max(temp_list)+1
-        context.scene.mastro_wall_name_list[last].wallEdgeColor = [random.random(), random.random(), random.random(), 0.5]
+        context.scene.mastro_wall_name_list[last].wallEdgeColor = [random.random(), random.random(), random.random()]
         
         bpy.ops.node.update_gn_filter(filter_name="wall type")    
         return{'FINISHED'}
@@ -1812,10 +1812,10 @@ class wall_name_list(PropertyGroup):
     wallEdgeColor: bpy.props.FloatVectorProperty(
         name = "Color of the edges of the wall to be shown in the overlay",
         subtype = "COLOR",
-        size = 4,
+        size = 3,
         min = 0.0,
         max = 1.0,
-        default = (0.0, 0.0, 1.0, 0.5))
+        default = (0.0, 0.0, 1.0))
     
 ############################        ############################
 ############################ FLOOR  ############################
@@ -2051,7 +2051,7 @@ class STREET_LIST_OT_NewItem(Operator):
         last = len(context.scene.mastro_street_name_list)-1
         
         context.scene.mastro_street_name_list[last].id = max(temp_list)+1
-        context.scene.mastro_street_name_list[last].streetEdgeColor = [random.random(), random.random(), random.random(), 0.5]
+        context.scene.mastro_street_name_list[last].streetEdgeColor = [random.random(), random.random(), random.random()]
         
         bpy.ops.node.update_gn_filter(filter_name="street type")
             
@@ -2206,10 +2206,10 @@ class street_name_list(PropertyGroup):
     streetEdgeColor: bpy.props.FloatVectorProperty(
         name = "Color of the edges of the street to be shown in the overlay",
         subtype = "COLOR",
-        size = 4,
+        size = 3,
         min = 0.0,
         max = 1.0,
-        default = (1.0, 0.0, 0.0, 0.5))
+        default = (1.0, 0.0, 0.0))
         
 
 ##############################              #############################

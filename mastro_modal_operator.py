@@ -139,18 +139,31 @@ def draw_callback_selection_overlay(self, context):
     
 # a function to show wall overlays
 def show_wall_overlay(obj):
+    theme = bpy.context.preferences.themes[0].view_3d
+    color_editmesh_active = theme.editmesh_active
+    color_edge_mode_select = theme.edge_mode_select
+ 
+
     coords = []
-    # edgeIndices = []
+    # edgeIndices = []  
     shader = gpu.shader.from_builtin('UNIFORM_COLOR')
     mesh = obj.data
     
-    if mesh.is_editmode:
-        bm = bmesh.from_edit_mesh(mesh)
-    else:
-        bm = bmesh.new()
-        bm.from_mesh(mesh)
-        bm.verts.ensure_lookup_table()
-        bm.edges.ensure_lookup_table()    
+    # if mesh.is_editmode:
+    bm = bmesh.from_edit_mesh(mesh)
+    
+    # active edge
+    active_edge = None
+    for e in bm.edges:
+        if e.select and e.is_valid and e == bm.select_history.active:
+            active_edge = e
+            break
+    
+    # else:
+    #     bm = bmesh.new()
+    #     bm.from_mesh(mesh)
+    #     bm.verts.ensure_lookup_table()
+    #     bm.edges.ensure_lookup_table()    
         
     bMesh_wall_id_layer = bm.edges.layers.int["mastro_wall_id"]
     projectWalls = bpy.context.scene.mastro_wall_name_list
@@ -165,8 +178,15 @@ def show_wall_overlay(obj):
         wall_id = edge[bMesh_wall_id_layer]
         index = next((i for i, elem in enumerate(projectWalls) if elem.id == wall_id), None)
         if 0 <= wall_id < len(bpy.context.scene.mastro_wall_name_list):
-            r, g, b, a = [c for c in bpy.context.scene.mastro_wall_name_list[index].wallEdgeColor]
-            shader.uniform_float("color", (r, g, b, a))
+            if edge is active_edge:
+                rgba = color_editmesh_active
+            elif edge.select:
+                rgba = (*color_edge_mode_select[:], 1.0)
+            else:
+                r, g, b = [c for c in bpy.context.scene.mastro_wall_name_list[index].wallEdgeColor]
+                rgba = (r, g, b, 1.0)   
+            shader.uniform_float("color", rgba)    
+                
             gpu.state.line_width_set(bpy.context.preferences.addons[__package__].preferences.wallEdgeSize)
             gpu.state.blend_set("ALPHA")
             batch = batch_for_shader(shader, 'LINES', {"pos": coords}, indices=indices)
@@ -177,6 +197,10 @@ def show_wall_overlay(obj):
 
 # a function to show the street overlays
 def show_street_overlay(obj):
+    theme = bpy.context.preferences.themes[0].view_3d
+    color_editmesh_active = theme.editmesh_active
+    color_edge_mode_select = theme.edge_mode_select
+    
     # dash shader to draw streets
     vert_out = gpu.types.GPUStageInterfaceInfo("my_interface")
     vert_out.smooth('FLOAT', "v_ArcLength")
@@ -216,6 +240,13 @@ def show_street_overlay(obj):
     
     if mesh.is_editmode:
         bm = bmesh.from_edit_mesh(mesh)
+        
+        # active edge
+        active_edge = None
+        for e in bm.edges:
+            if e.select and e.is_valid and e == bm.select_history.active:
+                active_edge = e
+                break
     else:
         bm = bmesh.new()
         bm.from_mesh(mesh)
@@ -246,7 +277,18 @@ def show_street_overlay(obj):
         street_id = edge[bMesh_street_id_layer]
         index = next((i for i, elem in enumerate(projectStreets) if elem.id == street_id), None)
         if 0 <= street_id < len(bpy.context.scene.mastro_street_name_list):
-            r, g, b, a = [c for c in bpy.context.scene.mastro_street_name_list[index].streetEdgeColor]
+            if mesh.is_editmode:
+                if edge is active_edge:
+                    r, g, b, a = color_editmesh_active
+                elif edge.select:
+                    r, g, b, a = (*color_edge_mode_select[:], 1.0)
+                else:
+                    r, g, b = [c for c in bpy.context.scene.mastro_street_name_list[index].streetEdgeColor]
+                    a = 1.0
+            else:
+                r, g, b = [c for c in bpy.context.scene.mastro_street_name_list[index].streetEdgeColor]
+                a = 1.0
+            # r, g, b = [c for c in bpy.context.scene.mastro_street_name_list[index].streetEdgeColor]
             dash_shader.fragment_source(f"""
                 void main() {{
                     if (step(sin(v_ArcLength * u_Scale), 0.5) == 1.0) discard;
@@ -876,16 +918,17 @@ def updates(scene, depsgraph):
                 list = scene.mastro_typology_name_list[selected_typology_index].useList    
                 split_list = list.split(";")
                 for el in split_list:
-                    scene.mastro_typology_uses_name_list.add()
-                    temp_list = []    
-                    temp_list.append(int(el))
-                    last = len(scene.mastro_typology_uses_name_list)-1
-                    # look for the correspondent use name in mastro_use_name_list
-                    for use in scene.mastro_use_name_list:
-                        if int(el) == use.id:
-                            scene.mastro_typology_uses_name_list[last].id = use.id
-                            scene.mastro_typology_uses_name_list[last].name = use.name 
-                            break
+                    if el.strip() != '': # to avoid empty values which could append when the software starts
+                        scene.mastro_typology_uses_name_list.add()
+                        temp_list = []    
+                        temp_list.append(int(el))
+                        last = len(scene.mastro_typology_uses_name_list)-1
+                        # look for the correspondent use name in mastro_use_name_list
+                        for use in scene.mastro_use_name_list:
+                            if int(el) == use.id:
+                                scene.mastro_typology_uses_name_list[last].id = use.id
+                                scene.mastro_typology_uses_name_list[last].name = use.name 
+                                break
 
     ################################################################################################
     # is the selection has changed, some data in the MaStro schedule need to be updated ###########
