@@ -343,7 +343,8 @@ class OBJECT_OT_Set_Face_Attribute_Uses(Operator):
             mesh.attributes["mastro_list_height_E"].data[faceIndex].value = data["height_E"]
             mesh.attributes["mastro_list_void"].data[faceIndex].value = data["void"]
             # number of storeys needs to be updated as well
-            data = update_mesh_attributes_storeys(context, mesh, faceIndex)
+            numberOfStoreys = mesh.attributes["mastro_number_of_storeys"].data[faceIndex].value
+            data = update_mesh_attributes_storeys(context, mesh, faceIndex, storeysSet = numberOfStoreys)
             mesh.attributes["mastro_number_of_storeys"].data[faceIndex].value = data["numberOfStoreys"]
             mesh.attributes["mastro_list_storey_A"].data[faceIndex].value = data["storey_list_A"]
             mesh.attributes["mastro_list_storey_B"].data[faceIndex].value = data["storey_list_B"]
