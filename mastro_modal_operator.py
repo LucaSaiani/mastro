@@ -816,7 +816,14 @@ def updates(scene, depsgraph):
                                 if storeys == 0: # in case a new face is created in edit mode, the number of set storeys is 1
                                     storeys = 1
                                     bpy.ops.object.set_mesh_attribute_storeys
-                                scene["attribute_mass_storeys"] = storeys
+                                # if scene.attribute_mass_storeys != storeys:
+                                #     scene.attribute_mass_storeys = storeys
+                                
+                                if bpy.context.scene.attribute_mass_storeys != storeys:
+                                    bpy.context.scene.attribute_mass_storeys = storeys
+                                # scene["attribute_mass_storeys"] = storeys
+                                
+                                
                                 # typology name
                                 # since it is possible to sort typologies in the ui, it can be that the index of the element
                                 # in the list doesn't correspond to typology_id. Therefore it is necessary to find elements
@@ -856,6 +863,8 @@ def updates(scene, depsgraph):
                                             usesUiList[enum].storeys = int(storeys)     
                                             break
                         bm.free
+                        # bpy.data.scenes["Scene"].attribute_mass_storeys = 5 
+                        
             elif "MaStro street" in obj.data:
                 if obj.mode == 'EDIT':
                     bm = bmesh.from_edit_mesh(obj.data)

@@ -131,8 +131,8 @@ class VIEW3D_PT_MaStro_Mass(Panel):
                                   "mastro_obj_typology_uses_name_list_index",
                                   rows = rows)
                 
-            
                 
+
       
 
 class OBJECT_UL_OBJ_Typology_Uses(UIList):
@@ -238,7 +238,6 @@ def update_mesh_attributes_storeys(context, mesh, faceIndex, storeysSet = None):
         numberOfStoreys = context.scene.attribute_mass_storeys
     else:
         numberOfStoreys = storeysSet
-            
     # since it is possible to sort typologies in the ui, it can be that the index of the element
     # in the list doesn't correspond to typology_id. Therefore it is necessary to find elements
     # in the way below and not with use_list = bpy.context.scene.mastro_typology_name_list[typology_id].useList
