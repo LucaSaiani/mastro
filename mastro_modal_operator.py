@@ -732,7 +732,7 @@ def check_new_scenes():
             print(f"Nuova scena creata: {scene}")
             initLists()
         known_scenes = current_scenes
-        
+    return()
         
 @persistent
 def updates(scene, depsgraph):
@@ -817,7 +817,6 @@ def updates(scene, depsgraph):
                                     storeys = 1
                                     bpy.ops.object.set_mesh_attribute_storeys
                                 scene["attribute_mass_storeys"] = storeys
-                                
                                 # typology name
                                 # since it is possible to sort typologies in the ui, it can be that the index of the element
                                 # in the list doesn't correspond to typology_id. Therefore it is necessary to find elements
