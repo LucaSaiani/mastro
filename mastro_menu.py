@@ -875,11 +875,11 @@ class MaStro_Operator_transform_orientation(Operator):
         tangent = (p2 - p1).normalized()
 
         # Define the other axes to form an orthonormal basis
-        x_axis = tangent
-        y_axis = mathutils.Vector((0, 0, 1)).cross(x_axis)  # Perpendicular vector
-        if y_axis.length == 0:
-            y_axis = mathutils.Vector((0, 1, 0))
-        z_axis = x_axis.cross(y_axis)
+        y_axis = tangent
+        x_axis = mathutils.Vector((0, 0, 1)).cross(y_axis)  # Perpendicular vector
+        if x_axis.length == 0:
+            x_axis = mathutils.Vector((1, 0, 0))
+        z_axis = y_axis.cross(x_axis)
 
         # Normalize the axes
         x_axis.normalize()
