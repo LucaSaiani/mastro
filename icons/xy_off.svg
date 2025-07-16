@@ -24,12 +24,12 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:zoom="0.625"
-     inkscape:cx="750.4"
-     inkscape:cy="799.2"
-     inkscape:window-width="2350"
-     inkscape:window-height="1557"
-     inkscape:window-x="1648"
-     inkscape:window-y="180"
+     inkscape:cx="749.6"
+     inkscape:cy="800"
+     inkscape:window-width="2017"
+     inkscape:window-height="1232"
+     inkscape:window-x="1276"
+     inkscape:window-y="379"
      inkscape:window-maximized="0"
      inkscape:current-layer="svg3">
     <inkscape:grid
@@ -58,11 +58,6 @@
          d="m 307.51172,103 c -0.0577,-0.001 -0.11517,0.007 -0.16992,0.0254 l -6,2 c -0.45678,0.15155 -0.45678,0.79767 0,0.94922 l 6,2 c 0.10269,0.0343 0.21371,0.0343 0.3164,0 l 6,-2 c 0.45678,-0.15155 0.45678,-0.79767 0,-0.94922 l -6,-2 c -0.0473,-0.0157 -0.0967,-0.0243 -0.14648,-0.0254 z"
          id="path1"
          style="opacity:0.3" />
-      <path
-         d="M 307.49219,93.992188 A 0.50005,0.50005 0 0 0 307,94.5 v 5.88867 l -5.6582,1.88672 a 0.50028181,0.50028181 0 1 0 0.3164,0.94922 l 5.8418,-1.94727 5.8418,1.94727 a 0.50028181,0.50028181 0 1 0 0.3164,-0.94922 L 308,100.38867 V 94.5 a 0.50005,0.50005 0 0 0 -0.50781,-0.507812 z"
-         opacity="0.6"
-         id="path2"
-         style="opacity:0.15" />
     </g>
   </g>
   <g
