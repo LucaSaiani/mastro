@@ -65,6 +65,7 @@ classes = (
     mastro_geometryNodes.VIEW_PT_MaStro_GN_Panel,
     mastro_geometryNodes.separate_geometry_by_factor_OT,
     mastro_geometryNodes.NODE_OT_sticky_note,
+    mastro_geometryNodes.StickyNoteProperties,
         
     mastro_project_data.update_GN_Filter_OT,
     mastro_project_data.update_Shader_Filter_OT,
@@ -730,6 +731,7 @@ def register():
     #                                         update = mastro_schedule.update_schedule_node_editor)
     
     bpy.types.Object.mastro_props = bpy.props.PointerProperty(type=mastro_menu.mastroAddonProperties)
+    bpy.types.Node.sticky_note_props = bpy.props.PointerProperty(type=mastro_geometryNodes.StickyNoteProperties)
     # bpy.types.Scene.mastro_note_text_props = bpy.props.PointerProperty(type=mastro_geometryNodes.MaStroPostItText)
     # bpy.types.Scene.mastro_attribute_collection = bpy.props.PointerProperty(type=mastro_schedule.MaStro_attribute_propertyGroup)
 
@@ -918,6 +920,7 @@ def register():
                                         # update=mastro_wall.update_floor_name_label
                                         )
    
+  
     
     bpy.app.timers.register(initLists, first_interval=.1)
     bpy.app.timers.register(initNodes, first_interval=.1)
@@ -963,6 +966,7 @@ def unregister():
     del bpy.types.WindowManager.toggle_auto_update_mass_data
     # del bpy.types.WindowManager.toggle_schedule_in_editor
     del bpy.types.Object.mastro_props
+    del bpy.types.Node.sticky_note_props
     
     del Scene.mastroKeyDictionary
     del Scene.constraint_xy_setting
@@ -1016,6 +1020,8 @@ def unregister():
     del Scene.mastro_previous_selected_typology
     
     del Scene.mastro_group_node_number_of_split
+    
+    
     
     from bpy.utils import unregister_class
     for cls in reversed(classes):
