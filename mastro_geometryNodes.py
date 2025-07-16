@@ -62,8 +62,8 @@ class NODE_OT_sticky_note(Operator):
                     textName = postIt.text.name
                     note_text = bpy.data.texts[textName]
                     openTextEditor(note_text)
-                else:
-                    self.report({'WARNING'}, "Selected node is a custom note but has no linked text data.")
+                # else:
+                #     self.report({'WARNING'}, "Selected node is a custom note but has no linked text data.")
                     # return {'CANCELLED'} # Or handle gracefully
             # create a new note
             else:
