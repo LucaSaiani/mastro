@@ -728,9 +728,9 @@ def check_new_scenes():
     # print()
     new_scenes = current_scenes - known_scenes
     if new_scenes:
-        for scene in new_scenes:
-            print(f"Nuova scena creata: {scene}")
-            initLists()
+        for sceneName in new_scenes:
+            print(f"Nuova scena creata: {sceneName}")
+            initLists(sceneName)
         known_scenes = current_scenes
     return()
         
