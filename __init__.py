@@ -593,7 +593,7 @@ def onFileDefault(scene):
 def register():
     bpy.app.handlers.load_post.append(onFileLoaded)
     bpy.app.handlers.load_factory_startup_post.append(onFileDefault)
-    bpy.app.handlers.depsgraph_update_post.append(mastro_modal_operator.updates)
+    
     # bpy.app.handlers.depsgraph_update_post.append(mastro_project_data.update_typology_uses_function)
     # bpy.app.handlers.depsgraph_update_post.append(mastro_modal_operator.update_mesh_attributes_depsgraph)
     # bpy.app.handlers.depsgraph_update_post.append(mastro_modal_operator.update_show_overlay)
@@ -922,6 +922,7 @@ def register():
     bpy.app.timers.register(initLists, first_interval=.1)
     bpy.app.timers.register(initNodes, first_interval=.1)
     # bpy.app.timers.register(mastro_modal_operator.update_mesh_attributes_depsgraph, first_interval=.1)
+    bpy.app.handlers.depsgraph_update_post.append(mastro_modal_operator.updates)
 
 def unregister():
     bpy.app.handlers.load_post.remove(onFileLoaded)
