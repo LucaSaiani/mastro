@@ -1,7 +1,7 @@
 import bpy 
 
 from bpy.types import Panel, Operator, PropertyGroup
-from bpy.props import StringProperty
+from bpy.props import BoolProperty
 
 # def get_active_node(self):
 #     space_data = bpy.context.space_data
@@ -30,6 +30,14 @@ def openTextEditor(text):
     area.spaces[0].show_word_wrap = True
     area.spaces[0].text = text
     
+# a class to define a custom property "custom note"
+class StickyNoteProperties(PropertyGroup):
+    customNote: BoolProperty(
+        name="Custom Note",
+        description="Indicates if this NodeFrame is a custom sticky note",
+        default=False
+    )
+    
 # to create a sticky note
 class NODE_OT_sticky_note(Operator):
     bl_idname = "node.sticky_note"
@@ -41,23 +49,30 @@ class NODE_OT_sticky_note(Operator):
     def execute(self, context):
         #get the list of all selected nodes
         node_tree = bpy.context.space_data.edit_tree
-        print(node_tree)
         if node_tree:
-            # selected_nodes = [node for node in node_tree.nodes if node.select]
             activeNode = node_tree.nodes.active
+            is_custom_note = False
+            if activeNode and hasattr(activeNode, "sticky_note_props"):
+                is_custom_note = activeNode.sticky_note_props.customNote
+                
             # edit existing note
-            if activeNode and activeNode.select and "customNote" in activeNode:
+            if activeNode and activeNode.select and is_custom_note:
                 postIt = activeNode
-                textName = postIt.text.name
-                note_text = bpy.data.texts[textName]
-                openTextEditor(note_text)
+                if hasattr(postIt, 'text') and postIt.text:
+                    textName = postIt.text.name
+                    note_text = bpy.data.texts[textName]
+                    openTextEditor(note_text)
+                else:
+                    self.report({'WARNING'}, "Selected node is a custom note but has no linked text data.")
+                    # return {'CANCELLED'} # Or handle gracefully
             # create a new note
             else:
                 postIt = node_tree.nodes.new("NodeFrame")
                 # postIt.select = False
                 postIt.name = "MaStro note"
                 postIt.label = "Note"
-                postIt["customNote"] = True
+                postIt.sticky_note_props.customNote = True
+           
                 postIt.use_custom_color = True
                 postIt.color = bpy.context.preferences.addons[__package__].preferences.noteColor
                 postIt.label_size = bpy.context.preferences.addons[__package__].preferences.noteSize
@@ -94,8 +109,11 @@ class VIEW_PT_MaStro_Node_Panel(Panel):
         node_tree = bpy.context.space_data.edit_tree
         if node_tree:
             activeNode = node_tree.nodes.active
+            is_custom_note = False
+            if activeNode and hasattr(activeNode, "sticky_note_props"):
+                is_custom_note = activeNode.sticky_note_props.customNote
             # activeNode = get_active_node(self)
-            if activeNode and activeNode.select and "customNote" in activeNode:
+            if activeNode and activeNode.select and is_custom_note:
                 layout.operator("node.sticky_note", text="Edit the Sticky Note")
             else:
                 layout.operator("node.sticky_note", text="Add a Sticky Note")
