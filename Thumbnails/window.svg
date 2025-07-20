@@ -26,13 +26,13 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
-     inkscape:zoom="5.6568542"
-     inkscape:cx="60.192465"
-     inkscape:cy="54.800776"
+     inkscape:zoom="4"
+     inkscape:cx="47.125"
+     inkscape:cy="74.25"
      inkscape:window-width="2179"
      inkscape:window-height="1202"
-     inkscape:window-x="1397"
-     inkscape:window-y="235"
+     inkscape:window-x="1486"
+     inkscape:window-y="434"
      inkscape:window-maximized="0"
      inkscape:current-layer="layer3"
      inkscape:clip-to-page="false"
@@ -90,48 +90,42 @@
      id="layer3"
      inkscape:label="Graph"
      style="display:inline;fill:#fe7865">
-    <g
-       id="g2">
-      <rect
-         style="opacity:1;fill:#fd4314;stroke:none;stroke-width:1.00157;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none"
-         id="rect1"
-         width="58.689865"
-         height="92.277435"
-         x="35.88567"
-         y="10.783379" />
-      <rect
-         style="display:inline;fill:#fe7865;stroke:none;stroke-width:0.869707;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none"
-         id="rect1-8"
-         width="49.851028"
-         height="81.915771"
-         x="40.305088"
-         y="15.964211" />
-    </g>
+    <rect
+       style="display:inline;fill:#fd7e14;stroke:none;stroke-width:2.6966;stroke-linejoin:bevel;stroke-miterlimit:0;stroke-dasharray:10.7864, 2.6966"
+       id="rect7"
+       width="64.971252"
+       height="90.625"
+       x="31.466248"
+       y="18.375" />
+    <rect
+       style="display:inline;fill:#febc85;stroke:none;stroke-width:2.33662;stroke-linejoin:bevel;stroke-miterlimit:0;stroke-dasharray:9.34641, 2.33662"
+       id="rect7-0"
+       width="54.484978"
+       height="81.139084"
+       x="36.757511"
+       y="23.235912" />
   </g>
   <g
      inkscape:label="Corner"
      inkscape:groupmode="layer"
      id="layer1"
      style="display:inline">
-    <g
-       id="g1">
-      <path
-         style="fill:#fd4314;fill-opacity:1;stroke:#ffffff;stroke-width:0.515428;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
-         d="m 127.74231,113.89387 c -7.20021,7.20021 1.47054,-1.46749 -13.84538,13.84842 7.58574,0 13.80605,-0.0424 13.80605,-0.0424 0,0 0.0393,-3.57019 0.0393,-13.80603 z"
-         id="path7"
-         sodipodi:nodetypes="cccc" />
-      <text
-         xml:space="preserve"
-         style="font-size:15px;line-height:1.25;font-family:sans-serif;fill:#ffffff;fill-opacity:1"
-         x="110.42426"
-         y="124.04616"
-         id="text14-6-6-5-2"
-         inkscape:label="M"><tspan
-           sodipodi:role="line"
-           id="tspan14-8-4-0-1"
-           x="110.42426"
-           y="124.04616"
-           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:15px;font-family:Cantarell;-inkscape-font-specification:'Cantarell Bold';fill:#ffffff;fill-opacity:1">M</tspan></text>
-    </g>
+    <path
+       style="display:inline;fill:#fd7e14;fill-opacity:1;stroke:#ffffff;stroke-width:0.2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
+       d="m 127.74231,113.89387 c -7.20021,7.20021 1.47054,-1.46749 -13.84538,13.84842 7.58574,0 13.80605,-0.0424 13.80605,-0.0424 0,0 0.0393,-3.57019 0.0393,-13.80603 z"
+       id="path406"
+       sodipodi:nodetypes="cccc" />
+    <text
+       xml:space="preserve"
+       style="font-size:15px;line-height:1.25;font-family:sans-serif;display:inline;fill:#ffffff;fill-opacity:1"
+       x="113.21716"
+       y="125.38454"
+       id="text14-6-6-5-2"
+       inkscape:label="M"><tspan
+         sodipodi:role="line"
+         id="tspan14-8-4-0-1"
+         x="113.21716"
+         y="125.38454"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:15px;font-family:Cantarell;-inkscape-font-specification:'Cantarell Bold';fill:#ffffff;fill-opacity:1">M</tspan></text>
   </g>
 </svg>

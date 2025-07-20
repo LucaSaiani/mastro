@@ -92,7 +92,7 @@
      style="display:inline;fill:#fe7865">
     <path
        id="rect40"
-       style="opacity:1;fill:#fd4314;stroke:none;stroke-width:1.00157;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none"
+       style="opacity:1;fill:#fd7e14;stroke:none;stroke-width:1.00157;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none"
        d="M 4.5140876,8.1425781 V 107.31445 H 123.48591 V 8.1425781 Z M 41.119175,23.972656 H 87.361362 V 89.625 H 41.119175 Z"
        sodipodi:nodetypes="cccccccccc" />
   </g>
@@ -101,25 +101,22 @@
      inkscape:groupmode="layer"
      id="layer1"
      style="display:inline">
-    <g
-       id="g1">
-      <path
-         style="fill:#fd4314;fill-opacity:1;stroke:#ffffff;stroke-width:0.515428;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
-         d="m 127.74231,113.89387 c -7.20021,7.20021 1.47054,-1.46749 -13.84538,13.84842 7.58574,0 13.80605,-0.0424 13.80605,-0.0424 0,0 0.0393,-3.57019 0.0393,-13.80603 z"
-         id="path7"
-         sodipodi:nodetypes="cccc" />
-      <text
-         xml:space="preserve"
-         style="font-size:15px;line-height:1.25;font-family:sans-serif;fill:#ffffff;fill-opacity:1"
-         x="110.42426"
-         y="124.04616"
-         id="text14-6-6-5-2"
-         inkscape:label="M"><tspan
-           sodipodi:role="line"
-           id="tspan14-8-4-0-1"
-           x="110.42426"
-           y="124.04616"
-           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:15px;font-family:Cantarell;-inkscape-font-specification:'Cantarell Bold';fill:#ffffff;fill-opacity:1">M</tspan></text>
-    </g>
+    <path
+       style="display:inline;fill:#fd7e14;fill-opacity:1;stroke:#ffffff;stroke-width:0.2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
+       d="m 127.74231,113.89387 c -7.20021,7.20021 1.47054,-1.46749 -13.84538,13.84842 7.58574,0 13.80605,-0.0424 13.80605,-0.0424 0,0 0.0393,-3.57019 0.0393,-13.80603 z"
+       id="path406"
+       sodipodi:nodetypes="cccc" />
+    <text
+       xml:space="preserve"
+       style="font-size:15px;line-height:1.25;font-family:sans-serif;display:inline;fill:#ffffff;fill-opacity:1"
+       x="113.21716"
+       y="125.38454"
+       id="text14-6-6-5-2"
+       inkscape:label="M"><tspan
+         sodipodi:role="line"
+         id="tspan14-8-4-0-1"
+         x="113.21716"
+         y="125.38454"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:15px;font-family:Cantarell;-inkscape-font-specification:'Cantarell Bold';fill:#ffffff;fill-opacity:1">M</tspan></text>
   </g>
 </svg>
