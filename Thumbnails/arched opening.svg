@@ -27,7 +27,7 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
      inkscape:zoom="4"
-     inkscape:cx="63.875"
+     inkscape:cx="63.75"
      inkscape:cy="94"
      inkscape:window-width="2179"
      inkscape:window-height="1202"
@@ -114,7 +114,7 @@
        sodipodi:nodetypes="cccc" />
     <text
        xml:space="preserve"
-       style="font-size:15px;line-height:1.25;font-family:sans-serif;display:inline;fill:#ffffff;fill-opacity:1"
+       style="font-size:15px;line-height:1.25;font-family:sans-serif;display:none;fill:#ffffff;fill-opacity:1"
        x="113.21716"
        y="125.38454"
        id="text14-6-6-5-2"

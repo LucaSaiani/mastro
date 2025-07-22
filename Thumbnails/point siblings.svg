@@ -57,36 +57,36 @@
     <text
        xml:space="preserve"
        style="font-size:15px;line-height:1.25;font-family:sans-serif;fill:#81b4fe;stroke:none;stroke-width:1.50345"
-       x="17.496151"
-       y="50.719151"
+       x="19.283617"
+       y="48.574192"
        id="text8"><tspan
          sodipodi:role="line"
          id="tspan8"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15px;font-family:Cantarell;-inkscape-font-specification:Cantarell;fill:#81b4fe;fill-opacity:1;stroke:none;stroke-width:1.50345"
-         x="17.496151"
-         y="50.719151">O</tspan></text>
+         x="19.283617"
+         y="48.574192">O</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:15px;line-height:1.25;font-family:sans-serif;fill:#5a9cfe;stroke:none;stroke-width:1.50345"
-       x="47.627605"
-       y="71.419662"
+       x="46.733871"
+       y="73.922112"
        id="text8-2"><tspan
          sodipodi:role="line"
          id="tspan8-6"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15px;font-family:Cantarell;-inkscape-font-specification:Cantarell;fill:#5a9cfe;fill-opacity:1;stroke:none;stroke-width:1.50345"
-         x="47.627605"
-         y="71.419662">O</tspan></text>
+         x="46.733871"
+         y="73.922112">O</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:15px;line-height:1.25;font-family:sans-serif;fill:#a8cbfe;stroke:none;stroke-width:1.50345"
        x="85.227455"
-       y="87.101517"
+       y="84.956558"
        id="text8-2-1"><tspan
          sodipodi:role="line"
          id="tspan8-6-5"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15px;font-family:Cantarell;-inkscape-font-specification:Cantarell;fill:#a8cbfe;fill-opacity:1;stroke:none;stroke-width:1.50345"
          x="85.227455"
-         y="87.101517">O</tspan></text>
+         y="84.956558">O</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:15px;line-height:1.25;font-family:sans-serif;fill:#81b4fe;stroke:none;stroke-width:1.50345"
@@ -154,22 +154,22 @@
          x="67.701744"
          y="121.2803">B</tspan></text>
     <path
-       style="fill:none;stroke:#0d6efd;stroke-width:5;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:none;stroke:#0d6efd;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
        d="M 6.5394062,20.37033 8.3827683,71.984486 61.471615,43.965372 84.329313,109.58909 124.14594,70.141123"
        id="path9"
        sodipodi:nodetypes="ccccc" />
     <path
-       style="fill:none;stroke:#81b4fe;stroke-width:3;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:9,9;stroke-opacity:1;stroke-dashoffset:0"
+       style="fill:none;stroke:#81b4fe;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:6,6;stroke-opacity:1;stroke-dashoffset:0"
        d="m 13.958747,20.007307 c 0.13034,0.651726 2.059414,38.601563 2.059414,38.601563 L 58.595485,36.145059"
        id="path10"
        sodipodi:nodetypes="ccc" />
     <path
-       style="fill:none;stroke:#5a9cfe;stroke-width:3;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:9,9;stroke-opacity:1;stroke-dashoffset:0"
+       style="fill:none;stroke:#5a9cfe;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:6,6;stroke-opacity:1;stroke-dashoffset:0"
        d="M 7.4937038,81.307211 C 16.458471,76.481052 57.095879,54.463482 57.095879,54.463482 l 21.656356,59.901938"
        id="path11"
        sodipodi:nodetypes="ccc" />
     <path
-       style="fill:none;stroke:#a8cbfe;stroke-width:3;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:9,9;stroke-opacity:1;stroke-dashoffset:0"
+       style="fill:none;stroke:#a8cbfe;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:6,6;stroke-opacity:1;stroke-dashoffset:0"
        d="m 67.802353,39.42927 c 0,1.042764 19.792517,56.782741 19.792517,56.782741 l 32.03277,-31.838482"
        id="path12"
        sodipodi:nodetypes="ccc" />
