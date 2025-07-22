@@ -870,8 +870,13 @@ class MaStro_Operator_transform_orientation(Operator):
             self.report({'ERROR'}, "Select exactly two vertices forming an edge")
             return {'CANCELLED'}
 
+        # Project points onto XY plane
+        p1 = selected_verts[0].copy()
+        p1.z = 0
+        p2 = selected_verts[1].copy()
+        p2.z = 0
+        
         # Compute the tangent as a normalized vector
-        p1, p2 = selected_verts
         tangent = (p2 - p1).normalized()
 
         # Define the other axes to form an orthonormal basis
