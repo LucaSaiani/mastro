@@ -27,11 +27,11 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
      inkscape:zoom="3.9559173"
-     inkscape:cx="13.018472"
-     inkscape:cy="82.787373"
+     inkscape:cx="4.6765386"
+     inkscape:cy="69.895293"
      inkscape:window-width="2179"
      inkscape:window-height="1229"
-     inkscape:window-x="497"
+     inkscape:window-x="1266"
      inkscape:window-y="229"
      inkscape:window-maximized="0"
      inkscape:current-layer="layer3"
@@ -90,14 +90,15 @@
      inkscape:label="Corner 1">
     <path
        id="path3"
-       d="M 282.93,560.039 C 406.52,657.93 563.199,631.68 665.391,495.98"
-       style="fill:none;stroke:#a8cbfe;stroke-width:22.50000056;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1;stroke-dasharray:67.49989376, 67.49989376;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 284.50659,561.53966 C 408.09659,659.43066 563.199,631.68 665.391,495.98"
+       style="fill:none;stroke:#a8cbfe;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1;stroke-dasharray:45,45;stroke-dashoffset:0;stroke-opacity:1"
        transform="matrix(0.13333333,0,0,-0.13333333,-1.3720592,128.20988)"
-       clip-path="url(#clipPath4)" />
+       clip-path="url(#clipPath4)"
+       sodipodi:nodetypes="cc" />
     <path
        id="path5"
        d="M 175.621,798.75 446.211,209.262 782.40041,650.37293 873.398,769.77"
-       style="fill:none;stroke:#0d6efd;stroke-width:37.5;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:none;stroke:#0d6efd;stroke-width:15.00000038;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        transform="matrix(0.13333333,0,0,-0.13333333,-1.3720592,128.20988)"
        clip-path="url(#clipPath6)"
        sodipodi:nodetypes="cccc" />
