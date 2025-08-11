@@ -15,7 +15,8 @@ a3f2d709-4bae-4a9a-8533-6ffb0c083b23:MaStro/Architecture/Mass:MaStro-Architectur
 80b6c5d3-7466-4029-8dd5-71511ce9f0bf:MaStro/Architecture/Primitives:MaStro-Architecture-Primitives
 729d6dec-1b48-4880-8a4b-dab9444115b7:MaStro/Architecture/Stairs:MaStro-Architecture-Stairs
 ad620ac8-6a6e-41b1-a5d7-e94d9f67732f:MaStro/Curve:MaStro-Curve
-874660c8-3961-48e4-a6b0-0418882b9fe3:MaStro/Elements - Complex:MaStro-Elements - Complex
+21927b53-55eb-4db2-b4c2-3b70562a9aee:MaStro/Curve/Operation:MaStro-Curve-Operation
+ba1a3696-9dc6-44d7-8384-5d5281480941:MaStro/Curve/Primitives:MaStro-Curve-Primitives
 048bb430-702f-4b63-9fd8-29c78e7bcf01:MaStro/Indices:MaStro-Indices
 5fdecf71-a6cc-472a-9298-6d4a67e0d834:MaStro/Instances:MaStro-Instances
 7da0e70c-2d7b-4886-b24a-db30d2de829d:MaStro/Mesh:MaStro-Mesh
