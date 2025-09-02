@@ -110,12 +110,12 @@ class mastro_addon_preferences(AddonPreferences):
         default = 4
     )
     
-    streetEdgeDashSize: bpy.props.IntProperty(
-        name="The dash size representing the selected street",
-        min = 1,
-        max = 20,
-        default = 5
-    )
+    # streetEdgeDashSize: bpy.props.IntProperty(
+    #     name="The dash size representing the selected street",
+    #     min = 1,
+    #     max = 20,
+    #     default = 5
+    # )
     
     toggleSelectionOverlay: bpy.props.BoolProperty(
                 name = "Selection overlay",
@@ -190,9 +190,9 @@ class mastro_addon_preferences(AddonPreferences):
             row.label(text = "Thickness:")
             row.prop(self, "streetEdgeSize", icon_only=True)
 
-            row = col.row()
-            row.label(text = "Dash length:")
-            row.prop(self, "streetEdgeDashSize", icon_only=True)
+            # row = col.row()
+            # row.label(text = "Dash length:")
+            # row.prop(self, "streetEdgeDashSize", icon_only=True)
                        
             # font
             row = col.row()
