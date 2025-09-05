@@ -844,68 +844,73 @@ def addNodes():
 #         return writeCSV(context, self.filepath)
 
 class MaStro_Operator_transform_orientation(Operator):
-    """Create transform orientation from the selected edge"""
-    bl_idname = "transform.set_orientation_from_edge"
-    bl_label = "Edge"
+    """Create transform orientation from the last selected edge or the last two vertices"""
+    bl_idname = "transform.set_orientation_from_selection"
+    bl_label = "Selection"
     bl_options = {'REGISTER', 'UNDO'}
-    
-    # @classmethod
-    # def poll(cls, context):
-    #     return context.mode == 'EDIT' and context.object is not None and context.object.type == 'MESH'
 
-
-    
     def execute(self, context):
         obj = context.object
         if obj is None or obj.type != 'MESH':
             self.report({'ERROR'}, "Select a mesh object")
             return {'CANCELLED'}
 
-        # Switch to Object Mode and get selected vertices
-        bpy.ops.object.mode_set(mode='OBJECT')
-        mesh = obj.data
-        selected_verts = [obj.matrix_world @ v.co for v in mesh.vertices if v.select]
+        # Ensure we're in Edit Mesh mode
+        bpy.ops.object.mode_set(mode='EDIT')
+        bm = bmesh.from_edit_mesh(obj.data)
 
-        if len(selected_verts) != 2:
-            self.report({'ERROR'}, "Select exactly two vertices forming an edge")
+        p1, p2 = None, None
+
+        # Caso 1: ultimo edge selezionato
+        if bm.select_history and isinstance(bm.select_history[-1], bmesh.types.BMEdge):
+            last_edge = bm.select_history[-1]
+            v1, v2 = last_edge.verts
+            p1 = obj.matrix_world @ v1.co
+            p2 = obj.matrix_world @ v2.co
+
+        # Caso 2: ultimi due vertici selezionati
+        else:
+            verts_in_history = [elem for elem in bm.select_history if isinstance(elem, bmesh.types.BMVert)]
+            if len(verts_in_history) >= 2:
+                v1, v2 = verts_in_history[-2:]
+                p1 = obj.matrix_world @ v1.co
+                p2 = obj.matrix_world @ v2.co
+
+        if not p1 or not p2:
+            self.report({'ERROR'}, "Select at least one edge or two vertices")
             return {'CANCELLED'}
 
         # Project points onto XY plane
-        p1 = selected_verts[0].copy()
-        p1.z = 0
-        p2 = selected_verts[1].copy()
-        p2.z = 0
-        
-        # Compute the tangent as a normalized vector
+        p1 = p1.copy(); p1.z = 0
+        p2 = p2.copy(); p2.z = 0
+
+        # Compute tangent
         tangent = (p2 - p1).normalized()
 
-        # Define the other axes to form an orthonormal basis
+        # Build axes
         y_axis = tangent
-        x_axis = mathutils.Vector((0, 0, 1)).cross(y_axis)  # Perpendicular vector
+        x_axis = mathutils.Vector((0, 0, 1)).cross(y_axis)
         if x_axis.length == 0:
             x_axis = mathutils.Vector((1, 0, 0))
         z_axis = y_axis.cross(x_axis)
 
-        # Normalize the axes
+        # Normalize
         x_axis.normalize()
         y_axis.normalize()
         z_axis.normalize()
 
-        # Create the 3x3 transformation matrix
+        # Matrix
         matrix = mathutils.Matrix((x_axis, y_axis, z_axis)).transposed()
 
-        # Create a new transform orientation in Blender
-        bpy.ops.transform.create_orientation(name="Edge", use=True, overwrite=True)
+        # Create transform orientation
+        bpy.ops.transform.create_orientation(name="Selection", use=True, overwrite=True)
         orientation = context.scene.transform_orientation_slots[0]
         orientation.custom_orientation.matrix = matrix
-        
-        # Set the new orientation as active
-        context.scene.transform_orientation_slots[0].type = 'Edge'
-        
-        # Switch back to Edit Mode
+        context.scene.transform_orientation_slots[0].type = 'Selection'
+
+        # Stay in Edit Mode
         bpy.ops.object.mode_set(mode='EDIT')
-        
-        # self.report({'INFO'}, "Transform Orientation Set from Edge Tangent")
+
         return {'FINISHED'}
 
 # Replace the existing Orientations pie menu, adding custom orientations
@@ -931,7 +936,7 @@ class MaStro_Operator_transform_orientation(Operator):
        
 #         custom_menu.operator("transform.create_orientation", text="New", icon='ADD', emboss=False).use = True
 #         if obj.mode == 'EDIT' and obj is not None and obj.type == 'MESH':
-#             custom_menu.operator("transform.set_orientation_from_edge", text="New from Edge", icon='EDGESEL', emboss=False)
+#             custom_menu.operator("transform.set_orientation_from_selection", text="New from Edge", icon='EDGESEL', emboss=False)
 #         # custom_menu.prop(scene.transform_orientation_slots[0], "type", expand=True)
 #         # orient_slot = scene.transform_orientation_slots[0]
 #         # orientation = orient_slot.custom_orientation
@@ -981,7 +986,7 @@ class VIEW3D_PT_transform_orientations(Panel):
         col_operators.operator("transform.create_orientation", text="", icon='ADD', emboss=False)
         # this creates a new orientation from the selected edge
         if obj.mode == 'EDIT' and obj is not None and obj.type == 'MESH':
-            col_operators.operator("transform.set_orientation_from_edge", text="", icon="EDGESEL", emboss=False)
+            col_operators.operator("transform.set_orientation_from_selection", text="", icon="EDGESEL", emboss=False)
         
         if orientation:
             row = layout.row(align=False)
@@ -991,7 +996,7 @@ class VIEW3D_PT_transform_orientations(Panel):
 # # Extend the existing Transform Orientations panel in the UI
 # def extend_transform_operation_panel(self, context):
 #     layout = self.layout
-#     layout.operator("transform.set_orientation_from_edge", text="Set Orientation from Edge")
+#     layout.operator("transform.set_orientation_from_selection", text="Set Orientation from Edge")
         
 class ConstraintXYSettings(bpy.types.PropertyGroup):
     """Property Group for all xy constraint scene properties"""
