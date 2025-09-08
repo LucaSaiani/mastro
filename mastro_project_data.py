@@ -1461,43 +1461,45 @@ class OBJECT_OT_update_all_MaStro_meshes_attributes(Operator):
                     bpy.ops.object.mode_set(mode='OBJECT')
                     
                     faces = context.active_object.data.polygons
-                    for face in faces:
-                        # print(f"Object {obj.name} face {face.index}")
-                        faceIndex = face.index
-                        if [i for i in ["all", "floorToFloor", "void"] if i in self.attributeToUpdate]:
-                            typology = mesh.attributes["mastro_typology_id"].data[faceIndex].value
-                            data = read_mesh_attributes_uses(context, mesh, faceIndex, typologySet = typology)
-                            if [i for i in ["all"] if i in self.attributeToUpdate]:
-                                # mesh.attributes["mastro_typology_id"].data[faceIndex].value = data["typology_id"]
-                                mesh.attributes["mastro_list_use_id_A"].data[faceIndex].value = data["use_id_list_A"]
-                                mesh.attributes["mastro_list_use_id_B"].data[faceIndex].value = data["use_id_list_B"]
-                            if [i for i in ["all", "floorToFloor"] if i in self.attributeToUpdate]:
-                                mesh.attributes["mastro_list_height_A"].data[faceIndex].value = data["height_A"]
-                                mesh.attributes["mastro_list_height_B"].data[faceIndex].value = data["height_B"]
-                                mesh.attributes["mastro_list_height_C"].data[faceIndex].value = data["height_C"]
-                                mesh.attributes["mastro_list_height_D"].data[faceIndex].value = data["height_D"]
-                                mesh.attributes["mastro_list_height_E"].data[faceIndex].value = data["height_E"]
-                            if [i for i in ["all", "void"] if i in self.attributeToUpdate]:
-                                mesh.attributes["mastro_list_void"].data[faceIndex].value = data["void"]
-                                
-                        if [i for i in ["all", "numberOfStoreys"] if i in self.attributeToUpdate]:
-                            storeys = mesh.attributes["mastro_number_of_storeys"].data[faceIndex].value
-                            data = update_mesh_attributes_storeys(context, mesh, faceIndex, storeysSet = storeys)
+                    if hasattr(mesh, "attributes") and "mastro_typology_id" in mesh.attributes:
+                        for face in faces:
+                            # print(f"Object {obj.name} face {face.index}")
+                            faceIndex = face.index
+                            if [i for i in ["all", "floorToFloor", "void"] if i in self.attributeToUpdate]:
+                                typology = mesh.attributes["mastro_typology_id"].data[faceIndex].value
+                                data = read_mesh_attributes_uses(context, mesh, faceIndex, typologySet = typology)
+                                if [i for i in ["all"] if i in self.attributeToUpdate]:
+                                    # mesh.attributes["mastro_typology_id"].data[faceIndex].value = data["typology_id"]
+                                    mesh.attributes["mastro_list_use_id_A"].data[faceIndex].value = data["use_id_list_A"]
+                                    mesh.attributes["mastro_list_use_id_B"].data[faceIndex].value = data["use_id_list_B"]
+                                if [i for i in ["all", "floorToFloor"] if i in self.attributeToUpdate]:
+                                    mesh.attributes["mastro_list_height_A"].data[faceIndex].value = data["height_A"]
+                                    mesh.attributes["mastro_list_height_B"].data[faceIndex].value = data["height_B"]
+                                    mesh.attributes["mastro_list_height_C"].data[faceIndex].value = data["height_C"]
+                                    mesh.attributes["mastro_list_height_D"].data[faceIndex].value = data["height_D"]
+                                    mesh.attributes["mastro_list_height_E"].data[faceIndex].value = data["height_E"]
+                                if [i for i in ["all", "void"] if i in self.attributeToUpdate]:
+                                    mesh.attributes["mastro_list_void"].data[faceIndex].value = data["void"]
+                                    
                             if [i for i in ["all", "numberOfStoreys"] if i in self.attributeToUpdate]:
-                                mesh.attributes["mastro_number_of_storeys"].data[faceIndex].value = data["numberOfStoreys"]
-                                mesh.attributes["mastro_list_storey_A"].data[faceIndex].value = data["storey_list_A"]
-                                mesh.attributes["mastro_list_storey_B"].data[faceIndex].value = data["storey_list_B"]
-                        # print(f"Done face {face.index}")
+                                storeys = mesh.attributes["mastro_number_of_storeys"].data[faceIndex].value
+                                data = update_mesh_attributes_storeys(context, mesh, faceIndex, storeysSet = storeys)
+                                if [i for i in ["all", "numberOfStoreys"] if i in self.attributeToUpdate]:
+                                    mesh.attributes["mastro_number_of_storeys"].data[faceIndex].value = data["numberOfStoreys"]
+                                    mesh.attributes["mastro_list_storey_A"].data[faceIndex].value = data["storey_list_A"]
+                                    mesh.attributes["mastro_list_storey_B"].data[faceIndex].value = data["storey_list_B"]
+                            # print(f"Done face {face.index}")
                         
                     edges = context.active_object.data.edges
-                    for edge in edges:
-                        edgeIndex = edge.index
-                        wall_id = mesh.attributes["mastro_wall_id"].data[edgeIndex].value
-                        data = read_mesh_attributes_walls(context, mesh, edgeIndex, wallSet = wall_id)
-                        if [i for i in ["wall_thickness"] if i in self.attributeToUpdate]:
-                            mesh.attributes["mastro_wall_thickness"].data[edgeIndex].value = data["wall_thickness"]
-                        elif [i for i in ["wall_offset"] if i in self.attributeToUpdate]:
-                            mesh.attributes["mastro_wall_offset"].data[edgeIndex].value = data["wall_offset"]
+                    if hasattr(mesh, "attributes") and "mastro_wall_id" in mesh.attributes:
+                        for edge in edges:
+                            edgeIndex = edge.index
+                            wall_id = mesh.attributes["mastro_wall_id"].data[edgeIndex].value
+                            data = read_mesh_attributes_walls(context, mesh, edgeIndex, wallSet = wall_id)
+                            if [i for i in ["wall_thickness"] if i in self.attributeToUpdate]:
+                                mesh.attributes["mastro_wall_thickness"].data[edgeIndex].value = data["wall_thickness"]
+                            elif [i for i in ["wall_offset"] if i in self.attributeToUpdate]:
+                                mesh.attributes["mastro_wall_offset"].data[edgeIndex].value = data["wall_offset"]
         
                     bpy.ops.object.mode_set(mode=objMode)
                     
