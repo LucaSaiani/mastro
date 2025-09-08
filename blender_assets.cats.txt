@@ -19,10 +19,12 @@ ad620ac8-6a6e-41b1-a5d7-e94d9f67732f:MaStro/Curve:MaStro-Curve
 ba1a3696-9dc6-44d7-8384-5d5281480941:MaStro/Curve/Primitives:MaStro-Curve-Primitives
 048bb430-702f-4b63-9fd8-29c78e7bcf01:MaStro/Indices:MaStro-Indices
 5fdecf71-a6cc-472a-9298-6d4a67e0d834:MaStro/Instances:MaStro-Instances
+f849bd86-5298-407b-9e04-1e7681dd6062:MaStro/Materials:MaStro-Materials
+87599df8-9659-4869-9539-61b197945762:MaStro/Materials/Shaders:MaStro-Materials-Shaders
+fa7bef10-8469-46d3-a137-6a29858f7709:MaStro/Materials/Textures:MaStro-Materials-Textures
 7da0e70c-2d7b-4886-b24a-db30d2de829d:MaStro/Mesh:MaStro-Mesh
 a29dad23-c9ae-4be8-a71d-bf6ee8400214:MaStro/Mesh/Grid:MaStro-Mesh-Grid
 bd25134d-ca50-4c8f-98d2-ec2cd2e92a39:MaStro/Mesh/Operation:MaStro-Mesh-Operation
-f849bd86-5298-407b-9e04-1e7681dd6062:MaStro/Shaders:MaStro-Shaders
 646146b5-56bb-41fa-9499-64a573a508bb:MaStro/Street:MaStro-Street
 7e5e4352-7132-4faa-a136-1fb48d50ceb5:MaStro/Utilities:MaStro-Utilities
 04bce851-efab-4a82-a0e0-58c5d3f4bb17:MaStro/Vectors:MaStro-Vectors
