@@ -195,6 +195,76 @@ mass_attribute_set = [
             },
 ]
 
+plot_attribute_set = [
+            {
+            "attr" :  "mastro_typology_id",
+            "attr_type" :  "INT",
+            "attr_domain" :  "EDGE",
+            },
+            {
+            "attr" :  "mastro_list_use_id_A",
+            "attr_type" :  "INT",
+            "attr_domain" :  "EDGE",
+            },
+             {
+            "attr" :  "mastro_list_use_id_B",
+            "attr_type" :  "INT",
+            "attr_domain" :  "EDGE",
+            },
+            {
+            "attr" :  "mastro_list_storey_A",
+            "attr_type" :  "INT",
+            "attr_domain" :  "EDGE",
+            },
+            {
+            "attr" :  "mastro_list_storey_B",
+            "attr_type" :  "INT",
+            "attr_domain" :  "EDGE",
+            },
+            {
+            "attr" :  "mastro_list_height_A",
+            "attr_type" :  "INT",
+            "attr_domain" :  "EDGE",
+            },
+            {
+            "attr" :  "mastro_list_height_B",
+            "attr_type" :  "INT",
+            "attr_domain" :  "EDGE",
+            },
+            {
+            "attr" :  "mastro_list_height_C",
+            "attr_type" :  "INT",
+            "attr_domain" :  "EDGE",
+            },
+            {
+            "attr" :  "mastro_list_height_D",
+            "attr_type" :  "INT",
+            "attr_domain" :  "EDGE",
+            },
+            {
+            "attr" :  "mastro_list_height_E",
+            "attr_type" :  "INT",
+            "attr_domain" :  "EDGE",
+            },
+            {
+            "attr" :  "mastro_list_void",
+            "attr_type" :  "INT",
+            "attr_domain" :  "EDGE",
+            },
+            {
+            "attr" :  "mastro_floor_id",
+            "attr_type" :  "INT",
+            "attr_domain" :  "EDGE",
+            "attr_default" : 0
+            },
+            {
+            "attr" :  "mastro_number_of_storeys",
+            "attr_type" :  "INT",
+            "attr_domain" :  "EDGE",
+            "attr_default" : 1
+            },
+]
+
 street_attribute_set = [
             {
             "attr" :  "mastro_street_id",
@@ -293,9 +363,9 @@ class VIEW3D_PT_MaStro_Panel(Panel):
     def draw(self, context):
         scene = context.scene
         layout = self.layout
-        layout.operator(MaStro_MenuOperator_add_MaStro_mass.bl_idname)
+        # layout.operator(MaStro_MenuOperator_add_MaStro_mass.bl_idname)
         layout.operator(MaStro_MenuOperator_convert_to_MaStro_mass.bl_idname)
-        layout.operator(MaStro_MenuOperator_add_MaStro_street.bl_idname)
+        # layout.operator(MaStro_MenuOperator_add_MaStro_street.bl_idname)
         layout.operator(MaStro_MenuOperator_convert_to_MaStro_street.bl_idname)
 
 class MaStro_MenuOperator_add_MaStro_mass(Operator, AddObjectHelper):
@@ -393,6 +463,106 @@ def add_mastro_mass(width, depth):
         verts[i] = v[0] * width, v[1] * depth, v[2]
 
     return verts, faces
+
+class MaStro_MenuOperator_add_MaStro_plot(Operator, AddObjectHelper):
+    """Add a MaStro maplotss"""
+    bl_idname = "object.mastro_add_mastro_plot"
+    bl_label = "MaStro Plot"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    # width: bpy.props.FloatProperty(
+    #     name="Width",
+    #     description="MaStro mass width",
+    #     # min=0.01, max=100.0,
+    #     min=0,
+    #     default=12,
+    # )
+    
+    depth: bpy.props.FloatProperty(
+        name="Depth",
+        description="MaStro plot depth",
+        # min=0.01, max=100.0,
+        min=0,
+        default=16,
+    )
+    
+    storeys: bpy.props.IntProperty(
+            name="Number of Storeys",
+            description="Number of storeys of the plot masses",
+            min = 1,
+            default = 3)
+    
+    
+    def execute(self, context):
+
+        verts_loc, edges = add_mastro_plot()
+
+        mesh = bpy.data.meshes.new("MaStro plot")
+
+        bm = bmesh.new()
+
+        for v_co in verts_loc:
+            bm.verts.new(v_co)
+
+        bm.verts.ensure_lookup_table()
+        for e_idx in edges:
+            bm.edges.new([bm.verts[i] for i in e_idx])
+
+        bm.to_mesh(mesh)
+        mesh.update()
+
+        # add the mesh as an object into the scene with this utility module
+        from bpy_extras import object_utils
+        object_utils.object_data_add(context, mesh, operator=self)
+        
+        obj = bpy.context.active_object
+        obj.select_set(True)
+        
+        addPlotAttributes(obj)
+            
+        addNodes()
+        
+        
+        # mesh_attributes = obj.data.attributes["mastro_number_of_storeys"].data.items()
+        # mesh_attributes[0][1].value = self.storeys
+
+        # add mastro plot and mastro mass geo node to the created object
+        geoName = "MaStro Plot"
+        obj.modifiers.new(geoName, "NODES")
+        group = bpy.data.node_groups["MaStro Plot"]
+        obj.modifiers[geoName].node_group = group
+        context.view_layer.objects.active = obj
+        
+        geoName = "MaStro Mass"
+        obj.modifiers.new(geoName, "NODES")
+        group = bpy.data.node_groups["MaStro Mass"]
+        obj.modifiers[geoName].node_group = group
+        context.view_layer.objects.active = obj
+        return {'FINISHED'}
+    
+def add_mastro_plot():
+    """
+    This function takes inputs and returns vertex and face arrays.
+    no actual mesh data creation is done here.
+    """
+
+    verts = [
+        (+0.0, +0.0,  +0.0),
+        (+30.0, +0.0,  +0.0),
+        (+47.321, +10.0,  +0.0),
+        (+47.321, +40.0,  +0.0),
+        ]
+    
+    edges = [
+        (0,1),
+        (1,2),
+        (2,3)
+    ]
+    # faces = [
+    #     (0, 1, 2, 3),
+    # ]
+
+    return verts, edges
 
 class MaStro_MenuOperator_add_MaStro_street(Operator, AddObjectHelper):
     """Add a MaStro street"""
@@ -494,6 +664,7 @@ def add_mastro_street():
 
 # add the entry to the add menu
 def mastro_add_menu_func(self, context):
+    self.layout.operator(MaStro_MenuOperator_add_MaStro_plot.bl_idname, icon='MESH_CUBE')
     self.layout.operator(MaStro_MenuOperator_add_MaStro_mass.bl_idname, icon='MESH_CUBE')
     self.layout.operator(MaStro_MenuOperator_add_MaStro_street.bl_idname, icon='MESH_CUBE')
     
@@ -705,6 +876,192 @@ def addMassAttributes(obj):
                 #     
                 #     attribute[0][1].value = None
 
+# assign the mass attributes to the selected object
+def addPlotAttributes(obj):
+    obj.mastro_props['mastro_plot_attribute'] = 0
+    obj.mastro_props['mastro_block_attribute'] = 0
+    mesh = obj.data
+    mesh["MaStro object"] = True
+    mesh["MaStro plot"] = True
+    
+    typology_id = bpy.context.scene.mastro_typology_name_list_index
+    projectUses = bpy.context.scene.mastro_use_name_list
+    
+    use_list = bpy.context.scene.mastro_typology_name_list[typology_id].useList
+    useSplit = use_list.split(";")
+
+    use_id_list_A = "1"
+    use_id_list_B = "1"
+    storey_list_A = "1"
+    storey_list_B = "1"
+    height_A = "1"
+    height_B = "1"
+    height_C = "1"
+    height_D = "1"
+    height_E = "1"
+    liquidPosition = []
+    fixedStoreys = 0
+    numberOfStoreys = 3 # default value for initial number of storeys
+    void = "1"
+    
+    for enum,el in enumerate(useSplit):
+        if int(el) < 10:
+            tmpUse = "0" + el
+        else:
+            tmpUse = str(el)
+       
+        # print(el[0], el[1])
+        use_id_list_A += tmpUse[0]
+        use_id_list_B += tmpUse[1]
+        
+        
+            
+        for use in projectUses:
+            if use.id == int(el):
+                # number of storeys for the use
+                # if a use is "liquid" the number of storeys is set as 00
+                if use.liquid: 
+                    storeys = "00"
+                    liquidPosition.append(enum)
+                else:
+                    fixedStoreys += use.storeys
+                    storeys = str(use.storeys)
+                    if use.storeys < 10:
+                        storeys = "0" + storeys
+
+                storey_list_A += storeys[0]
+                storey_list_B += storeys[1]
+                
+                void += str(int(use.void))
+                
+                height = str(round(use.floorToFloor,3))
+                if use.floorToFloor < 10:
+                    height = "0" + height
+                height_A += height[0]
+                height_B += height[1]
+                try:
+                    # height[3]
+                    height_C += height[3]
+                    try:
+                        height_D += height[4]
+                        try:
+                            height_E += height[5]
+                        except:
+                            height_E += "0"
+                    except:
+                        height_D += "0"
+                        height_E += "0"
+                except:
+                    height_C += "0"
+                    height_D += "0"
+                    height_E += "0"
+                break
+            
+        storeyCheck = numberOfStoreys - fixedStoreys - len(liquidPosition)
+        # if the typology has more storeys than the selected mass
+        # some extra storeys are added
+        if storeyCheck < 1: 
+            bpy.context.scene.attribute_mass_storeys = fixedStoreys + len(liquidPosition)
+        storeyLeft = numberOfStoreys - fixedStoreys
+        
+        # the 1 at the start of the number is removed
+        storey_list_A = storey_list_A[1:]
+        storey_list_B = storey_list_B[1:]  
+        if len(liquidPosition) > 0:
+            n = storeyLeft/len(liquidPosition)
+            liquidStoreyNumber = math.floor(n)
+
+            insert = str(liquidStoreyNumber)
+            if liquidStoreyNumber < 10:
+                insert = "0" + insert
+                
+            index = 0
+            while index < len(liquidPosition):
+                el = liquidPosition[index]
+                # if the rounding of the liquid storeys is uneven,
+                # the last liquid floor is increased of 1 storeyx
+                if index == len(liquidPosition) -1 and  math.modf(n)[0] > 0:
+                    insert = str(liquidStoreyNumber +1) 
+                    if liquidStoreyNumber +1 < 10:
+                        insert = "0" + insert
+
+                storey_list_A = storey_list_A[:el] + insert[0] + storey_list_A[el +1:]
+                storey_list_B = storey_list_B[:el] + insert[1] + storey_list_B[el +1:]
+                # print("el", el)
+                index += 1
+        # the 1 is readded
+        storey_list_A = "1" + storey_list_A  
+        storey_list_B = "1" + storey_list_B
+            
+    for a in plot_attribute_set:
+        try:
+            mesh.attributes[a["attr"]]
+        except:
+            if a["attr_domain"] is None: # to set custom attributes to the object, not to vertex, edge or face
+                obj[a["attr"]] = a["attr_default"]
+            else:
+                mesh.attributes.new(name=a["attr"], type=a["attr_type"], domain=a["attr_domain"])
+                if a["attr_domain"] == 'EDGE':
+                #     attribute = mesh.attributes[a["attr"]].data.items()
+                #     for face in mesh.polygons:
+                #         index = face.index
+                #         for mesh_attribute in attribute:
+                #             if mesh_attribute[0]  == index:
+                #                 if a["attr"] == "mastro_typology_id":
+                #                     mesh_attribute[1].value = bpy.context.scene.mastro_typology_name_list[typology_id].id
+                #                 elif a["attr"] == "mastro_list_use_id_A": 
+                #                     mesh_attribute[1].value = int(use_id_list_A)
+                #                 elif a["attr"] == "mastro_list_use_id_B": 
+                #                     mesh_attribute[1].value = int(use_id_list_B)
+                #                 elif a["attr"] == "mastro_list_storey_A":
+                #                     mesh_attribute[1].value = int(storey_list_A)
+                #                 elif a["attr"] == "mastro_list_storey_B":
+                #                     mesh_attribute[1].value = int(storey_list_B)
+                #                 elif a["attr"] == "mastro_list_height_A":
+                #                     mesh_attribute[1].value = int(height_A)
+                #                 elif a["attr"] == "mastro_list_height_B":
+                #                     mesh_attribute[1].value = int(height_B)
+                #                 elif a["attr"] == "mastro_list_height_C":
+                #                     mesh_attribute[1].value = int(height_C)
+                #                 elif a["attr"] == "mastro_list_height_D":
+                #                     mesh_attribute[1].value = int(height_D)
+                #                 elif a["attr"] == "mastro_list_height_E":
+                #                     mesh_attribute[1].value = int(height_E)
+                #                 elif a["attr"] == "mastro_list_void":
+                #                     mesh_attribute[1].value = int(void)
+                #                 # else:
+                #                 #     mesh_attribute[1].value = a["attr_default"]
+                #                 break
+                # elif a["attr_domain"] == 'EDGE':
+                    attribute = mesh.attributes[a["attr"]].data.items()
+                    for edge in mesh.edges:
+                        index = edge.index
+                        for mesh_attribute in attribute:
+                            if mesh_attribute[0]  == index:
+                                if a["attr"] == "mastro_typology_id":
+                                    mesh_attribute[1].value = bpy.context.scene.mastro_typology_name_list[typology_id].id
+                                elif a["attr"] == "mastro_list_use_id_A": 
+                                    mesh_attribute[1].value = int(use_id_list_A)
+                                elif a["attr"] == "mastro_list_use_id_B": 
+                                    mesh_attribute[1].value = int(use_id_list_B)
+                                elif a["attr"] == "mastro_list_storey_A":
+                                    mesh_attribute[1].value = int(storey_list_A)
+                                elif a["attr"] == "mastro_list_storey_B":
+                                    mesh_attribute[1].value = int(storey_list_B)
+                                elif a["attr"] == "mastro_list_height_A":
+                                    mesh_attribute[1].value = int(height_A)
+                                elif a["attr"] == "mastro_list_height_B":
+                                    mesh_attribute[1].value = int(height_B)
+                                elif a["attr"] == "mastro_list_height_C":
+                                    mesh_attribute[1].value = int(height_C)
+                                elif a["attr"] == "mastro_list_height_D":
+                                    mesh_attribute[1].value = int(height_D)
+                                elif a["attr"] == "mastro_list_height_E":
+                                    mesh_attribute[1].value = int(height_E)
+                                elif a["attr"] == "mastro_list_void":
+                                    mesh_attribute[1].value = int(void)
+                                break
+                            
 # add street attributes to the selected object
 def addStreetAttributes(obj):
     # obj.mastro_props['mastro_option_attribute'] = 1
@@ -751,7 +1108,7 @@ def addNodes():
     # if not os.path.isdir(blend_file_path): blend_file_path = my_addon_path / "vscode_development/mastro/mastro.blend"
     inner_path = "NodeTree"
     
-    geoNodes_list = ("MaStro Mass", "MaStro Street")
+    geoNodes_list = ("MaStro Mass", "MaStro Plot", "MaStro Street")
 
     for group in geoNodes_list:
         if group not in bpy.data.node_groups:

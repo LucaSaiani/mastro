@@ -131,6 +131,7 @@ classes = (
     mastro_project_data.FLOOR_LIST_OT_MoveItem,
     
     mastro_menu.MaStro_MenuOperator_add_MaStro_mass,
+    mastro_menu.MaStro_MenuOperator_add_MaStro_plot,
     mastro_menu.MaStro_MenuOperator_add_MaStro_street,
     mastro_menu.MaStro_MenuOperator_convert_to_MaStro_mass,
     mastro_menu.MaStro_MenuOperator_convert_to_MaStro_street,
