@@ -23,6 +23,7 @@ def register():
     # so we have to check this to avoid nasty errors in background case.
     kc = wm.keyconfigs.addon
     if kc:
+        print("aggiungo KC")
         # if keymap doesn't exist, it is added
         def ensure_keymap(name, space_type, idname, key_type, key_value):
             km = kc.keymaps.get(name)
@@ -46,6 +47,16 @@ def register():
         ensure_keymap('Object Mode', 'EMPTY', "transform.translate_xy_constraint", 'G', 'PRESS')
         ensure_keymap('Mesh', 'EMPTY', "transform.rotate_xy_constraint", 'R', 'PRESS')
         ensure_keymap('Object Mode', 'EMPTY', "transform.rotate_xy_constraint", 'R', 'PRESS')
+        
+        user_config_keymaps = wm.keyconfigs.user.keymaps
+        for keymap in user_config_keymaps:
+            if keymap.name in keymap_names:
+                for kmi in keymap.keymap_items:
+                    if kmi.idname == "transform.translate_xy_constraint" and kmi.type == "G":
+                        kmi.active = True
+                    elif kmi.idname == "transform.rotate_xy_constraint" and kmi.type == "R":
+                        kmi.active = True
+        
   
     
 def unregister():
