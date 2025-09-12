@@ -1030,30 +1030,10 @@ class OBJECT_UL_Typology(UIList):
         custom_icon = 'ASSET_MANAGER'
 
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
-            #update the uses list for the current typology
-            
-            # selected_typology_index = context.scene.mastro_typology_name_list_index
-            # selected_typology_id = context.scene.mastro_typology_name_list[selected_typology_index].id
-            # if selectedTypology != selected_typology_id:
-            #     selectedTypology = selected_typology_id
-            #     use_name_list = context.scene.mastro_typology_uses_name_list
-            #     index = context.scene.mastro_typology_uses_name_list_index
-            #     # use_name_list.remove(index)
-                # use_name_length = len(use_name_list)
-                # counter = 0
-                # while counter < use_name_length:
-                #     bpy.ops.mastro_typology_uses_name_list.delete_item()
-                #     counter +=1
-                
-                # print("selected one", selectedTypology, index)
-                # context.scene.mastro_typology_uses_name_list[index].name = "cappero"
-            #print("selected typology: ", context.scene.mastro_typology_name_list[selected_typology_index].id)
-            
-            
             split = layout.split(factor=0.4)
-            split.label(text="Id: %d" % (item.id)) 
-            # split.label(text=item.name, icon=custom_icon) 
-            # item = context.scene.mastro_typology_name_list[context.scene.mastro_typology_name_list_index]
+            sub = split.split()
+            sub.label(text="Id: %d" % (item.id)) 
+            sub.prop(context.scene.mastro_typology_name_list[index], "typologyEdgeColor", text="")
             split.prop(context.scene.mastro_typology_name_list[index],
                        "name",
                        icon_only=True,
@@ -1090,7 +1070,7 @@ class TYPOLOGY_LIST_OT_NewItem(Operator):
             temp_list.append(el.id)
         last = len(context.scene.mastro_typology_name_list)-1
         context.scene.mastro_typology_name_list[last].id = max(temp_list)+1
-        
+        context.scene.mastro_typology_name_list[last].typologyEdgeColor = [random.random(), random.random(), random.random()]
         # add a use to the newly created typology
         current_typology_id = context.scene.mastro_typology_name_list[last].id
         bpy.context.scene.mastro_typology_name_list[current_typology_id].useList = "0"
@@ -1121,7 +1101,8 @@ class TYPOLOGY_LIST_OT_DuplicateItem(Operator):
         # copy data to the new entry
         context.scene.mastro_typology_name_list[last].name = nameToCopy + " copy"
         context.scene.mastro_typology_name_list[last].useList = usesToCopy
-
+        context.scene.mastro_typology_name_list[last].typologyEdgeColor = [random.random(), random.random(), random.random()]
+        
         bpy.ops.node.update_gn_filter(filter_name="typology")
         bpy.ops.node.update_shader_filter(filter_name="typology")
         return{'FINISHED'}
@@ -1241,6 +1222,7 @@ The number of uses is limited to 7 for each typology'''
         last = len(context.scene.mastro_typology_uses_name_list)-1
         
         context.scene.mastro_typology_uses_name_list[last].id = max(temp_list)+1
+        context.scene.mastro_street_name_list[last].typologyEdgeColor = [random.random(), random.random(), random.random()]
         return{'FINISHED'}
 
 class TYPOLOGY_USES_LIST_OT_DeleteItem(Operator):
@@ -1555,6 +1537,14 @@ class typology_name_list(PropertyGroup):
             description="The uses for the typology",
             default="",
             update=update_all_mastro_meshes_useList)
+    
+    typologyEdgeColor: bpy.props.FloatVectorProperty(
+        name = "Color of the edges of the typology to be shown in the overlay",
+        subtype = "COLOR",
+        size = 3,
+        min = 0.0,
+        max = 1.0,
+        default = (0.0, 0.7, 0.0))
             
 class use_name_list(PropertyGroup):
     id: IntProperty(
