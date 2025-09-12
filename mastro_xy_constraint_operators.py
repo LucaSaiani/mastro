@@ -3,6 +3,7 @@
 import bpy
 import mathutils
 
+context_modes = ['OBJECT', 'EDIT_MESH']
 
 def get_view_axis(context):
     """Returns the closest axis to the view vector in a tuple of bools. e.g. X axis = (True, False, False)"""
@@ -158,22 +159,22 @@ class TRANSFORM_OT_rotate_xy_constraint(bpy.types.Operator):
         return {'FINISHED'}
 
 
-context_modes = ['OBJECT', 'EDIT_MESH']
-
-# Used for registering and unregistering classes
-blender_classes = [
-    TRANSFORM_OT_translate_xy_constraint,
-    TRANSFORM_OT_rotate_xy_constraint,
-]
 
 
-def register():
-    # Register classes
-    for blender_class in blender_classes:
-        bpy.utils.register_class(blender_class)
+# # Used for registering and unregistering classes
+# blender_classes = [
+#     TRANSFORM_OT_translate_xy_constraint,
+#     TRANSFORM_OT_rotate_xy_constraint,
+# ]
 
 
-def unregister():
-    # Unregister classes
-    for blender_class in blender_classes:
-        bpy.utils.unregister_class(blender_class)
+# def register():
+#     # Register classes
+#     for blender_class in blender_classes:
+#         bpy.utils.register_class(blender_class)
+
+
+# def unregister():
+#     # Unregister classes
+#     for blender_class in blender_classes:
+#         bpy.utils.unregister_class(blender_class)
