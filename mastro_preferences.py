@@ -96,6 +96,13 @@ class mastro_addon_preferences(AddonPreferences):
                  max = 1.0,
                  default = (1.0, 0.0, 0.0, 0.4))
     
+    plotEdgeSize: bpy.props.IntProperty(
+        name="Edge thickness of the selected plot",
+        min = 1,
+        max = 10,
+        default = 3
+    )
+    
     wallEdgeSize: bpy.props.IntProperty(
         name="Edge thickness of the selected wall",
         min = 1,
@@ -120,7 +127,7 @@ class mastro_addon_preferences(AddonPreferences):
     toggleSelectionOverlay: bpy.props.BoolProperty(
                 name = "Selection overlay",
                 default = True,
-                description = "Show selection overlay when the MaStro mass or street is in edit mode"
+                description = "Show selection overlay when the MaStro mass, plot or street is in edit mode"
                 )
     
     show_overlay_settings: bpy.props.BoolProperty(
@@ -168,6 +175,16 @@ class mastro_addon_preferences(AddonPreferences):
             row = col.row()
             row.label(text = "Face color:")
             row.prop(self, "massFaceColor", icon_only=True)
+            
+            # plot
+            row = col.row()
+            row.label(text="")
+            row = col.row()
+            row.label(text="Plot Overlay:")
+            
+            row = col.row()
+            row.label(text = "Edge thickness:")
+            row.prop(self, "plotEdgeSize", icon_only=True)
             
             # wall
             row = col.row()
