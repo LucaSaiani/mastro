@@ -132,18 +132,78 @@ def draw_selection_overlay(context):
             # elif ("MaStro street" in obj.data and
             #      not (bpy.context.window_manager.toggle_show_data and bpy.context.window_manager.toggle_street_color)
             #     ):
+            elif "MaStro plot" in obj.data:
+                show_plot_overlay(obj)
             elif "MaStro street" in obj.data:
                 show_street_overlay(obj)
 
 def draw_callback_selection_overlay(self, context):
     draw_selection_overlay(context)
     
+# a function to show plot overlays
+def show_plot_overlay(obj):
+    theme = bpy.context.preferences.themes[0].view_3d
+    color_editmesh_active = theme.editmesh_active
+    color_edge_mode_select = theme.edge_mode_select
+
+    shader = gpu.shader.from_builtin('UNIFORM_COLOR')
+    mesh = obj.data
+    
+    if mesh.is_editmode:
+        bm = bmesh.from_edit_mesh(mesh)
+        
+        # active edge
+        active_edge = None
+        for e in bm.edges:
+            if e.select and e.is_valid and e == bm.select_history.active:
+                active_edge = e
+                break
+    else:
+        bm = bmesh.new()
+        bm.from_mesh(mesh)
+        bm.verts.ensure_lookup_table()
+        bm.edges.ensure_lookup_table()    
+        # bm.faces.ensure_lookup_table()  
+        
+    bMesh_plot_id_layer = bm.edges.layers.int["mastro_typology_id_EDGE"]
+    projectTypologies = bpy.context.scene.mastro_typology_name_list
+    
+    # matrix = bpy.context.region_data.perspective_matrix
+    for edge in bm.edges:
+        v1 = obj.matrix_world @ edge.verts[0].co
+        v2 = obj.matrix_world @ edge.verts[1].co
+        coords = [v1, v2]
+        indices = [(0, 1)]
+        
+        typology_id = edge[bMesh_plot_id_layer]
+        index = next((i for i, elem in enumerate(projectTypologies) if elem.id == typology_id), None)
+        if 0 <= typology_id < len(bpy.context.scene.mastro_typology_name_list):
+            if mesh.is_editmode:
+                if edge is active_edge:
+                    r, g, b, a = color_editmesh_active
+                elif edge.select:
+                    r, g, b, a = (*color_edge_mode_select[:], 1.0)
+                else:
+                    r, g, b = [c for c in bpy.context.scene.mastro_typology_name_list[index].typologyEdgeColor]
+                    a = 1.0
+            else:
+                r, g, b = [c for c in bpy.context.scene.mastro_typology_name_list[index].typologyEdgeColor]
+                a = 1.0
+            
+            rgba = (r, g, b, a)   
+            shader.uniform_float("color", rgba)    
+                
+            gpu.state.line_width_set(bpy.context.preferences.addons[__package__].preferences.plotEdgeSize)
+            gpu.state.blend_set("ALPHA")
+            batch = batch_for_shader(shader, 'LINES', {"pos": coords}, indices=indices)
+            batch.draw(shader)
+
+    bm.free()
 # a function to show wall overlays
 def show_wall_overlay(obj):
     theme = bpy.context.preferences.themes[0].view_3d
     color_editmesh_active = theme.editmesh_active
     color_edge_mode_select = theme.edge_mode_select
- 
 
     coords = []
     # edgeIndices = []  
@@ -271,8 +331,8 @@ def show_street_overlay(obj):
         v2 = obj.matrix_world @ edge.verts[1].co
         coords = [v1, v2]
         indices = [(0, 1)]
-        l = (v2 - v1).length
-        arc_length = [0.0, l]
+        # l = (v2 - v1).length
+        # arc_length = [0.0, l]
         
         
         street_id = edge[bMesh_street_id_layer]
@@ -303,7 +363,7 @@ def show_street_overlay(obj):
         #     arc_lengths.append(arc_lengths[-1] + (a - b).length)
         
             # shader = gpu.shader.create_from_info(dash_shader)   
-            rgba = (r, g, b, 1.0)   
+            rgba = (r, g, b, a)   
             shader.uniform_float("color", rgba) 
             
             batch = batch_for_shader(
@@ -441,7 +501,7 @@ class VIEW_3D_OT_show_mastro_attributes(Operator):
     
 def draw_main_show_attributes_2D(context):
     obj = bpy.context.active_object
-    if hasattr(obj, "data") and "MaStro object" in obj.data and "MaStro mass" in obj.data:
+    if hasattr(obj, "data") and "MaStro object" in obj.data and ("MaStro mass" in obj.data or "MaStro plot" in obj.data):
         # obj.update_from_editmode()
         scene = context.scene
             
@@ -458,14 +518,20 @@ def draw_main_show_attributes_2D(context):
         bm.edges.ensure_lookup_table()    
         bm.faces.ensure_lookup_table()      
         
-        # bMesh_wall = bm.edges.layers.int["mastro_wall_id"]
-        bMesh_normal = bm.edges.layers.int["mastro_inverted_normal"]
-       
-        # bMesh_plot = bm.faces.layers.int["mastro_plot_id"]
-        # bMesh_block = bm.faces.layers.int["mastro_block_id"]
-        bMesh_typology = bm.faces.layers.int["mastro_typology_id"]
-        bMesh_storey = bm.faces.layers.int["mastro_number_of_storeys"]
-        bMesh_floor = bm.faces.layers.int["mastro_floor_id"]
+        if "MaStro mass" in obj.data:
+            # bMesh_wall = bm.edges.layers.int["mastro_wall_id"]
+            bMesh_normal = bm.edges.layers.int["mastro_inverted_normal"]
+        
+            # bMesh_plot = bm.faces.layers.int["mastro_plot_id"]
+            # bMesh_block = bm.faces.layers.int["mastro_block_id"]
+            bMesh_typology = bm.faces.layers.int["mastro_typology_id"]
+            bMesh_storey = bm.faces.layers.int["mastro_number_of_storeys"]
+            bMesh_floor = bm.faces.layers.int["mastro_floor_id"]
+        elif "MaStro plot" in obj.data:
+            bMesh_normal = bm.edges.layers.int["mastro_inverted_normal_EDGE"]
+            bMesh_typology = bm.edges.layers.int["mastro_typology_id_EDGE"]
+            bMesh_storey = bm.edges.layers.int["mastro_number_of_storeys_EDGE"]
+            
     
         region = bpy.context.region
      
@@ -531,9 +597,32 @@ def draw_main_show_attributes_2D(context):
             normal = bmEdge[bMesh_normal]
             
             text_edge = []
-            text_edge = ""
+            text_typology = ""
             text_normal = ""
+            text_storey = ""
             
+            if "MaStro plot" in obj.data:
+                idUse = bmEdge[bMesh_typology]
+                storey = bmEdge[bMesh_storey]
+                if bpy.context.window_manager.toggle_typology_name:   
+                    for n in scene.mastro_typology_name_list:
+                        if n.id == idUse:
+                            if n.name != "":
+                                text_typology = (("Typology: " + n.name), 0)
+                                if blf.dimensions(font_id, text_typology[0])[0] > line_width:
+                                    line_width = blf.dimensions(font_id, text_typology[0])[0]
+                                vert_offset += half_line_height
+                                text_edge.append(text_typology)
+                                text_edge.append(cr)           
+                                break
+                if bpy.context.window_manager.toggle_storey_number:  
+                    text_storey = (("N° of storeys: " + str(storey)), 0)
+                    if blf.dimensions(font_id, text_storey[0])[0] > line_width:
+                                line_width = blf.dimensions(font_id, text_storey[0])[0]
+                    vert_offset += half_line_height
+                    text_edge.append(text_storey)
+                            
+                            
             # if bpy.context.window_manager.toggle_wall_name:   
             #     for n in bpy.context.scene.mastro_wall_name_list:
             #         if n.id == idWall:
@@ -575,117 +664,117 @@ def draw_main_show_attributes_2D(context):
                             x_offset = (-1 * line_width) / 2
                             y_offset -= line_height
                     break
+        
+        if "MaStro mass" in obj.data:
+            for bmFace in bm.faces:
+                center_local = bmFace.calc_center_median()
                 
-        for bmFace in bm.faces:
-            center_local = bmFace.calc_center_median()
-            
-            center = matrix @ center_local # convert the coordinates from local to world
-            # idPlot = bmFace[bMesh_plot]
-            # idBlock = bmFace[bMesh_block]
-            idUse = bmFace[bMesh_typology]
-            idFloor = bmFace[bMesh_floor]
-            storey = bmFace[bMesh_storey]
-            storey = bmFace[bMesh_storey]
-            
-            line_width = 0
-            vert_offset = 0
-            
-            text_face = []
-            text_plot = ""
-            text_block = ""
-            text_typology = ""
-            text_storey = ""
-            text_floor = ""
-            
-            # plotId
-            if bpy.context.window_manager.toggle_plot_name:   
-                plotId = obj.mastro_props['mastro_plot_attribute']
-                for n in scene.mastro_plot_name_list:
-                    if n.id == plotId:
-                        if n.name != "":
-                            text_plot = (("Plot: " + n.name), 0)
-                            line_width = blf.dimensions(font_id, text_plot[0])[0]
-                            vert_offset = half_line_height
-                            text_face.append(text_plot)
-                            text_face.append(cr)
-                        break
+                center = matrix @ center_local # convert the coordinates from local to world
+                # idPlot = bmFace[bMesh_plot]
+                # idBlock = bmFace[bMesh_block]
+                idUse = bmFace[bMesh_typology]
+                idFloor = bmFace[bMesh_floor]
+                storey = bmFace[bMesh_storey]
                 
-            # blockId
-            if bpy.context.window_manager.toggle_block_name:   
-                blockId = obj.mastro_props['mastro_block_attribute']
-                for n in scene.mastro_block_name_list:
-                    if n.id == blockId:
-                        if n.name != "":
-                            text_block = (("Block: " + n.name), 0)
-                            if blf.dimensions(font_id, text_block[0])[0] > line_width:
-                                line_width = blf.dimensions(font_id, text_block[0])[0]
+                line_width = 0
+                vert_offset = 0
+                
+                text_face = []
+                text_plot = ""
+                text_block = ""
+                text_typology = ""
+                text_storey = ""
+                text_floor = ""
+                
+                # plotId
+                if bpy.context.window_manager.toggle_plot_name:   
+                    plotId = obj.mastro_props['mastro_plot_attribute']
+                    for n in scene.mastro_plot_name_list:
+                        if n.id == plotId:
+                            if n.name != "":
+                                text_plot = (("Plot: " + n.name), 0)
+                                line_width = blf.dimensions(font_id, text_plot[0])[0]
+                                vert_offset = half_line_height
+                                text_face.append(text_plot)
+                                text_face.append(cr)
+                            break
+                    
+                # blockId
+                if bpy.context.window_manager.toggle_block_name:   
+                    blockId = obj.mastro_props['mastro_block_attribute']
+                    for n in scene.mastro_block_name_list:
+                        if n.id == blockId:
+                            if n.name != "":
+                                text_block = (("Block: " + n.name), 0)
+                                if blf.dimensions(font_id, text_block[0])[0] > line_width:
+                                    line_width = blf.dimensions(font_id, text_block[0])[0]
+                                    vert_offset += half_line_height
+                                text_face.append(text_block)
+                                text_face.append(cr)
+                            break
+                    
+                # if bpy.context.window_manager.toggle_plot_name:   
+                #     for n in bpy.context.scene.mastro_plot_name_list:
+                #         if n.id == idPlot:
+                #             text_plot = (("Plot: " + n.name), 0)
+                #             line_width = blf.dimensions(font_id, text_plot[0])[0]
+                #             vert_offset = half_line_height
+                #             text.append(text_plot)
+                #             text.append(cr)
+                #             break
+                # if bpy.context.window_manager.toggle_block_name:   
+                #     for n in bpy.context.scene.mastro_block_name_list:
+                #         if n.id == idBlock:
+                #             text_block = (("Block: " + n.name), 0)
+                #             if blf.dimensions(font_id, text_block[0])[0] > line_width:
+                #                 line_width = blf.dimensions(font_id, text_block[0])[0]
+                #             vert_offset += half_line_height
+                #             text.append(text_block)
+                #             text.append(cr)
+                #             break
+                if bpy.context.window_manager.toggle_typology_name:   
+                    for n in scene.mastro_typology_name_list:
+                        if n.id == idUse:
+                            if n.name != "":
+                                text_typology = (("Typology: " + n.name), 0)
+                                if blf.dimensions(font_id, text_typology[0])[0] > line_width:
+                                    line_width = blf.dimensions(font_id, text_typology[0])[0]
                                 vert_offset += half_line_height
-                            text_face.append(text_block)
-                            text_face.append(cr)
-                        break
-                
-            # if bpy.context.window_manager.toggle_plot_name:   
-            #     for n in bpy.context.scene.mastro_plot_name_list:
-            #         if n.id == idPlot:
-            #             text_plot = (("Plot: " + n.name), 0)
-            #             line_width = blf.dimensions(font_id, text_plot[0])[0]
-            #             vert_offset = half_line_height
-            #             text.append(text_plot)
-            #             text.append(cr)
-            #             break
-            # if bpy.context.window_manager.toggle_block_name:   
-            #     for n in bpy.context.scene.mastro_block_name_list:
-            #         if n.id == idBlock:
-            #             text_block = (("Block: " + n.name), 0)
-            #             if blf.dimensions(font_id, text_block[0])[0] > line_width:
-            #                 line_width = blf.dimensions(font_id, text_block[0])[0]
-            #             vert_offset += half_line_height
-            #             text.append(text_block)
-            #             text.append(cr)
-            #             break
-            if bpy.context.window_manager.toggle_typology_name:   
-                for n in scene.mastro_typology_name_list:
-                    if n.id == idUse:
-                        if n.name != "":
-                            text_typology = (("Typology: " + n.name), 0)
-                            if blf.dimensions(font_id, text_typology[0])[0] > line_width:
-                                line_width = blf.dimensions(font_id, text_typology[0])[0]
+                                text_face.append(text_typology)
+                                text_face.append(cr)           
+                                break
+                if bpy.context.window_manager.toggle_floor_name:   
+                    for n in scene.mastro_floor_name_list:
+                        if n.id == idFloor:
+                            text_floor = (("Floor: " + n.name), 0)
+                            if blf.dimensions(font_id, text_floor[0])[0] > line_width:
+                                line_width = blf.dimensions(font_id, text_floor[0])[0]
                             vert_offset += half_line_height
-                            text_face.append(text_typology)
+                            text_face.append(text_floor)
                             text_face.append(cr)           
                             break
-            if bpy.context.window_manager.toggle_floor_name:   
-                for n in scene.mastro_floor_name_list:
-                    if n.id == idFloor:
-                        text_floor = (("Floor: " + n.name), 0)
-                        if blf.dimensions(font_id, text_floor[0])[0] > line_width:
-                            line_width = blf.dimensions(font_id, text_floor[0])[0]
-                        vert_offset += half_line_height
-                        text_face.append(text_floor)
-                        text_face.append(cr)           
-                        break
-            if bpy.context.window_manager.toggle_storey_number:  
-                text_storey = (("N° of storeys: " + str(storey)), 0)
-                if blf.dimensions(font_id, text_storey[0])[0] > line_width:
-                            line_width = blf.dimensions(font_id, text_storey[0])[0]
-                vert_offset += half_line_height
-                text_face.append(text_storey)
+                if bpy.context.window_manager.toggle_storey_number:  
+                    text_storey = (("N° of storeys: " + str(storey)), 0)
+                    if blf.dimensions(font_id, text_storey[0])[0] > line_width:
+                                line_width = blf.dimensions(font_id, text_storey[0])[0]
+                    vert_offset += half_line_height
+                    text_face.append(text_storey)
             
             
-            coord = view3d_utils.location_3d_to_region_2d(region, rv3d, center)
-            x_offset = (-1 * line_width) / 2
-            y_offset = vert_offset - half_line_height
-            # print(text_face)
-            for pstr in text_face:
-                if len(pstr) == 2:
-                    string = pstr[0]
-                    text_width, text_height = blf.dimensions(font_id, string)
-                    blf.position(font_id, (coord.x + x_offset), (coord.y + y_offset), 0)
-                    blf.draw(font_id, string)
-                    x_offset += text_width
-                else:
-                    x_offset = (-1 * line_width) / 2
-                    y_offset -= line_height
+                coord = view3d_utils.location_3d_to_region_2d(region, rv3d, center)
+                x_offset = (-1 * line_width) / 2
+                y_offset = vert_offset - half_line_height
+                # print(text_face)
+                for pstr in text_face:
+                    if len(pstr) == 2:
+                        string = pstr[0]
+                        text_width, text_height = blf.dimensions(font_id, string)
+                        blf.position(font_id, (coord.x + x_offset), (coord.y + y_offset), 0)
+                        blf.draw(font_id, string)
+                        x_offset += text_width
+                    else:
+                        x_offset = (-1 * line_width) / 2
+                        y_offset -= line_height
         bm.free()
  
          
@@ -702,6 +791,11 @@ def draw_main_show_attributes_3D(context):
             mesh = obj.data
             if mesh.is_editmode == False:
                 show_wall_overlay(obj)
+        if "MaStro plot" in obj.data and bpy.context.window_manager.toggle_plot_type:
+            # if mesh is in edit mode, the plot overlay is already drawn
+            mesh = obj.data 
+            if mesh.is_editmode == False:
+                show_plot_overlay(obj)
     
 
 def draw_callback_px_show_attributes_2D(self, context):

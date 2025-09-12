@@ -472,6 +472,13 @@ class VIEW3D_PT_MaStro_show_data(Panel):
         col.prop(context.window_manager, 'toggle_block_name', icon_only=False)
         col.prop(context.window_manager, 'toggle_plot_name', icon_only=False)
         
+        col = layout.column(heading="Plot", align=True)
+        col.prop(context.window_manager, 'toggle_plot_type', icon_only=False)
+        # col.prop(context.window_manager, 'toggle_storey_number', icon_only=False)
+        # col.prop(context.window_manager, 'toggle_typology_name', icon_only=False)
+        # col.prop(context.window_manager, 'toggle_block_name', icon_only=False)
+        # col.prop(context.window_manager, 'toggle_plot_name', icon_only=False)
+        
         # col.separator()
         col = layout.column(heading="Wall", align = True)
         col.prop(context.window_manager, 'toggle_wall_type', icon_only=False)

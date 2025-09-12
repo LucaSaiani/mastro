@@ -716,6 +716,9 @@ def register():
     bpy.types.WindowManager.toggle_typology_name = bpy.props.BoolProperty(
                                             name = "Typology",
                                             default = False)
+    bpy.types.WindowManager.toggle_plot_type = bpy.props.BoolProperty(
+                                            name = "Typology",
+                                            default = False)
     bpy.types.WindowManager.toggle_wall_type = bpy.props.BoolProperty(
                                             name = "Type",
                                             default = False)
