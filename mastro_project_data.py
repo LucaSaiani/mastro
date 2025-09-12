@@ -29,7 +29,7 @@ from bpy.props import StringProperty, IntProperty, FloatProperty, BoolProperty
 from bpy.types import PropertyGroup, UIList, Operator, Panel
 # from bpy.app.handlers import persistent
 
-from . mastro_massing import read_mesh_attributes_uses, update_mesh_attributes_storeys
+from . mastro_massing import read_mesh_attributes_uses, update_mesh_face_attributes_storeys
 from . mastro_wall import read_mesh_attributes_walls
 from . mastro_street import read_mesh_attributes_streets
 
@@ -1090,6 +1090,12 @@ class TYPOLOGY_LIST_OT_NewItem(Operator):
             temp_list.append(el.id)
         last = len(context.scene.mastro_typology_name_list)-1
         context.scene.mastro_typology_name_list[last].id = max(temp_list)+1
+        
+        # add a use to the newly created typology
+        current_typology_id = context.scene.mastro_typology_name_list[last].id
+        bpy.context.scene.mastro_typology_name_list[current_typology_id].useList = "0"
+        # bpy.ops.mastro_typology_uses_name_list.new_item()
+        
         bpy.ops.node.update_shader_filter(filter_name="typology")
         # update the filter shader
         return{'FINISHED'}
@@ -1218,6 +1224,8 @@ class OBJECT_UL_Typology_Uses(UIList):
 # Add a new use to the list of uses of the selected typology. 
 # Uses are limited to seven uses for each typology
 class TYPOLOGY_USES_LIST_OT_NewItem(Operator):
+    '''Add a new use to the typology. 
+The number of uses is limited to 7 for each typology'''
     bl_idname = "mastro_typology_uses_name_list.new_item"
     bl_label = "Add use"
     
@@ -1235,8 +1243,8 @@ class TYPOLOGY_USES_LIST_OT_NewItem(Operator):
         context.scene.mastro_typology_uses_name_list[last].id = max(temp_list)+1
         return{'FINISHED'}
 
-# Remove the selected use from the current typology
 class TYPOLOGY_USES_LIST_OT_DeleteItem(Operator):
+    '''Remove the use from the current typology'''
     bl_idname = "mastro_typology_uses_name_list.delete_item"
     bl_label = "Remove"
     
@@ -1256,6 +1264,7 @@ class TYPOLOGY_USES_LIST_OT_DeleteItem(Operator):
     
 # Move the selected use up or down in the list
 class TYPOLOGY_USES_LIST_OT_MoveItem(Operator):
+    '''Move the selected use up or down in the list'''
     bl_idname = "mastro_typology_uses_name_list.move_item"
     bl_label = "Move use"
 
@@ -1286,6 +1295,7 @@ class TYPOLOGY_USES_LIST_OT_MoveItem(Operator):
 
 # Add a new use to the list of the uses for the current project
 class USE_LIST_OT_NewItem(Operator):
+    '''Add a new use'''
     bl_idname = "mastro_use_name_list.new_item"
     bl_label = "New use"
 
@@ -1483,7 +1493,7 @@ class OBJECT_OT_update_all_MaStro_meshes_attributes(Operator):
                                     
                             if [i for i in ["all", "numberOfStoreys"] if i in self.attributeToUpdate]:
                                 storeys = mesh.attributes["mastro_number_of_storeys"].data[faceIndex].value
-                                data = update_mesh_attributes_storeys(context, mesh, faceIndex, storeysSet = storeys)
+                                data = update_mesh_face_attributes_storeys(context, mesh, faceIndex, storeysSet = storeys)
                                 if [i for i in ["all", "numberOfStoreys"] if i in self.attributeToUpdate]:
                                     mesh.attributes["mastro_number_of_storeys"].data[faceIndex].value = data["numberOfStoreys"]
                                     mesh.attributes["mastro_list_storey_A"].data[faceIndex].value = data["storey_list_A"]
