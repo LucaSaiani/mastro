@@ -23,7 +23,7 @@ if "bpy" in locals():
     importlib.reload(mastro_preferences),
     importlib.reload(mastro_project_data),
     importlib.reload(mastro_menu),
-    importlib.reload(mastro_keymaps),
+    # importlib.reload(mastro_keymaps),
     importlib.reload(icons),
     importlib.reload(mastro_xy_constraint_operators),
     importlib.reload(mastro_wall),
@@ -36,7 +36,7 @@ else:
     from . import mastro_preferences
     from . import mastro_project_data
     from . import mastro_menu
-    from . import mastro_keymaps
+    # from . import mastro_keymaps
     from . import icons
     from . import mastro_xy_constraint_operators
     from . import mastro_wall
@@ -56,6 +56,9 @@ import nodeitems_utils
 # from nodeitems_utils import NodeCategory, NodeItem
 
 from bpy.app.handlers import persistent
+
+# store keymaps here to access after registration
+addon_keymaps = []
 
 
 classes = (
@@ -209,9 +212,13 @@ classes = (
     # mastro_massing.OBJECT_OT_SetTypologyId,
     mastro_massing.OBJECT_UL_OBJ_Typology_Uses,
     mastro_massing.OBJECT_OT_Set_Face_Attribute_Storeys,
+    mastro_massing.OBJECT_OT_Set_Edge_Attribute_Storeys,
     mastro_massing.OBJECT_OT_Set_Face_Attribute_Uses,
+    mastro_massing.OBJECT_OT_Set_Edge_Attribute_Uses,
+    mastro_massing.OBJECT_OT_Set_Edge_Attribute_Depth,
     mastro_massing.obj_typology_uses_name_list,
     mastro_massing.VIEW3D_PT_MaStro_Mass,
+    mastro_massing.VIEW3D_PT_MaStro_Plot,
     
     mastro_modal_operator.VIEW_3D_OT_show_mastro_overlay,
     mastro_modal_operator.VIEW_3D_OT_show_mastro_attributes,
@@ -226,6 +233,9 @@ classes = (
     mastro_wall.OBJECT_OT_SetWallNormal,
     mastro_wall.OBJECT_OT_SetFloorId,
     mastro_wall.VIEW3D_PT_MaStro_Wall,
+    
+    mastro_xy_constraint_operators.TRANSFORM_OT_translate_xy_constraint,
+    mastro_xy_constraint_operators.TRANSFORM_OT_rotate_xy_constraint
 )
 
 # MaStroGroupInputNode = mastro_schedule.MaStroGroupInputNode
@@ -292,11 +302,11 @@ def initLists(scene=None):
     if len(name_list) == 0:
         name_list.add()
         name_list[0].id = 0
-        name_list[0].name = "Block type... "
+        name_list[0].name = "Block name... "
     elif not 0 in [elem.id for elem in name_list]:
         name_list.add()
         name_list[-1].id = 0
-        name_list[-1].name = "Block type... "
+        name_list[-1].name = "Block name... "
     if len(name_list_current) == 0:
         name_list_current.add()
         name_list_current[0].id = 0
@@ -317,13 +327,13 @@ def initLists(scene=None):
     if len(name_list) == 0:
         name_list.add()
         name_list[0].id = 0
-        name_list[0].name = "Use type... "
+        name_list[0].name = "Use name... "
         name_list[0].storeys = 3
         name_list[0].liquid = True
     elif not 0 in [elem.id for elem in name_list]:
         name_list.add()
         name_list[-1].id = 0
-        name_list[-1].name = "Use type... "
+        name_list[-1].name = "Use name... "
         name_list[-1].storeys = 3
         name_list[-1].liquid = True
         
@@ -340,12 +350,12 @@ def initLists(scene=None):
     if len(name_list) == 0:
         name_list.add()
         name_list[0].id = 0
-        name_list[0].name = "Typology type... "
+        name_list[0].name = "Typology name... "
         name_list[0].useList = "0"
     elif not 0 in [elem.id for elem in name_list]:
         name_list.add()
         name_list[-1].id = 0
-        name_list[-1].name = "Typology type... "
+        name_list[-1].name = "Typology name... "
         name_list[-1].useList = "0"
     if len(name_list_current) == 0:
         name_list_current.add()
@@ -601,7 +611,7 @@ def register():
     # bpy.app.handlers.depsgraph_update_post.append(mastro_modal_operator.update_show_overlay)
     
     # Register constraint operators
-    mastro_xy_constraint_operators.register()
+    # mastro_xy_constraint_operators.register()
     
     icons.register()
     
@@ -610,7 +620,7 @@ def register():
         register_class(cls)
     
     # Register keymaps
-    mastro_keymaps.register()
+    # mastro_keymaps.register()
     
     # Hack to make sure keymaps register (on restart Blender can sometimes not have access to user keymaps)
     # bpy.app.timers.register(mastro_keymaps.ensure_keymaps, first_interval=2.0)
@@ -802,6 +812,12 @@ def register():
                                         min=1, 
                                         default=3,
                                         update = mastro_massing.update_attributes_mastro_mesh_storeys)
+    Scene.attribute_plot_depth = bpy.props.FloatProperty(
+                                        name="The depth of the building",
+                                        min=0, 
+                                        default=18,
+                                        update = mastro_massing.update_attributes_mastro_plot_depth)
+    
     # Scene.mouse_keyboard_event = bpy.props.StringProperty(
     #                                     name="Mouse and keyboard event"
     #                             )
@@ -842,7 +858,17 @@ def register():
                                     name="Previously selected edge Id",
                                     default = -1,
                                     description="Store the id of the previous selected edge"
-                                    )                                   
+                                    )
+    Scene.previous_selection_vert_id = bpy.props.IntProperty(
+                                    name="Previously selected vert Id",
+                                    default = -1,
+                                    description="Store the id of the previous selected vertex"
+                                    )
+    Scene.previous_edge_number = bpy.props.IntProperty(
+                                    name="Previously number of edges",
+                                    default = -1,
+                                    description="Store the number of edges of the previous selection"
+                                    )                                          
     Scene.mastro_plot_name_list = bpy.props.CollectionProperty(type = mastro_project_data.plot_name_list)
     Scene.mastro_plot_name_current = bpy.props.CollectionProperty(type =mastro_project_data.name_with_id)
     Scene.mastro_plot_name_list_index = bpy.props.IntProperty(name = "Plot Name",
@@ -927,6 +953,27 @@ def register():
     bpy.app.timers.register(initNodes, first_interval=.1)
     # bpy.app.timers.register(mastro_modal_operator.update_mesh_attributes_depsgraph, first_interval=.1)
     bpy.app.handlers.depsgraph_update_post.append(mastro_modal_operator.updates)
+    
+    # handle the keymap
+    wm = bpy.context.window_manager
+    # Note that in background mode (no GUI available), keyconfigs are not available either,
+    # so we have to check this to avoid nasty errors in background case.
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
+        kmi = km.keymap_items.new(mastro_xy_constraint_operators.TRANSFORM_OT_translate_xy_constraint.bl_idname, 'G', 'PRESS', ctrl=False, shift=False)
+        addon_keymaps.append((km, kmi))
+        
+        kmi = km.keymap_items.new(mastro_xy_constraint_operators.TRANSFORM_OT_rotate_xy_constraint.bl_idname, 'R', 'PRESS', ctrl=False, shift=False)
+        addon_keymaps.append((km, kmi))
+        
+        km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
+        kmi = km.keymap_items.new(mastro_xy_constraint_operators.TRANSFORM_OT_translate_xy_constraint.bl_idname, 'G', 'PRESS', ctrl=False, shift=False)
+        addon_keymaps.append((km, kmi))
+        
+        kmi = km.keymap_items.new(mastro_xy_constraint_operators.TRANSFORM_OT_rotate_xy_constraint.bl_idname, 'R', 'PRESS', ctrl=False, shift=False)
+        addon_keymaps.append((km, kmi))
+    
 
 def unregister():
     bpy.app.handlers.load_post.remove(onFileLoaded)
@@ -934,7 +981,7 @@ def unregister():
     bpy.app.handlers.depsgraph_update_post.remove(mastro_modal_operator.updates)
     
     # Unregister constraint operators
-    mastro_xy_constraint_operators.unregister()
+    # mastro_xy_constraint_operators.unregister()
     
     
     # bpy.app.handlers.depsgraph_update_post.remove(mastro_project_data.update_typology_uses_function)
@@ -981,6 +1028,7 @@ def unregister():
     del Scene.attribute_wall_offset
     del Scene.attribute_floor_id
     del Scene.attribute_mass_storeys
+    del Scene.attribute_plot_depth
     # del Scene.mastro_attribute_collection
     # del Scene.update_attributes
     # del Scene.mouse_keyboard_event
@@ -990,6 +1038,9 @@ def unregister():
     del Scene.previous_selection_object_name
     del Scene.previous_selection_face_id
     del Scene.previous_selection_edge_id
+    del Scene.previous_selection_vert_id
+    del Scene.previous_edge_number
+    
     del Scene.mastro_plot_name_list
     del Scene.mastro_block_name_list
     del Scene.mastro_use_name_list
@@ -1029,7 +1080,7 @@ def unregister():
         unregister_class(cls)
         
     # Unregister keymaps
-    mastro_keymaps.unregister()
+    # mastro_keymaps.unregister()
     
     icons.unregister()
     

@@ -263,6 +263,36 @@ plot_attribute_set = [
             "attr_domain" :  "EDGE",
             "attr_default" : 1
             },
+            {
+            "attr" :  "mastro_plot_depth",
+            "attr_type" :  "FLOAT",
+            "attr_domain" :  "EDGE",
+            "attr_default" : 18
+            },
+            {
+            "attr" :  "mastro_wall_id",
+            "attr_type" :  "INT",
+            "attr_domain" :  "EDGE",
+            "attr_default" : 0
+            },
+            {
+            "attr" :  "mastro_wall_thickness",
+            "attr_type" :  "FLOAT",
+            "attr_domain" :  "EDGE",
+            "attr_default" : 0.300
+            },
+            {
+            "attr" :  "mastro_wall_offset",
+            "attr_type" :  "FLOAT",
+            "attr_domain" :  "EDGE",
+            "attr_default" : 0
+            },
+            {
+            "attr" :  "mastro_inverted_normal",
+            "attr_type" :  "INT",
+            "attr_domain" :  "EDGE",
+            "attr_default" : 0
+            },
 ]
 
 street_attribute_set = [
@@ -390,11 +420,11 @@ class MaStro_MenuOperator_add_MaStro_mass(Operator, AddObjectHelper):
         default=8,
     )
     
-    storeys: bpy.props.IntProperty(
-            name="Number of Storeys",
-            description="Number of storeys of the mass",
-            min = 1,
-            default = 3)
+    # storeys: bpy.props.IntProperty(
+    #         name="Number of Storeys",
+    #         description="Number of storeys of the mass",
+    #         min = 1,
+    #         default = 3)
     
     
     def execute(self, context):
@@ -429,9 +459,9 @@ class MaStro_MenuOperator_add_MaStro_mass(Operator, AddObjectHelper):
             
         addNodes()
         
-        
         mesh_attributes = obj.data.attributes["mastro_number_of_storeys"].data.items()
-        mesh_attributes[0][1].value = self.storeys
+        # mesh_attributes[0][1].value = self.storeys
+        mesh_attributes[0][1].value = 3
 
         # add mastro mass geo node to the created object
         geoName = "MaStro Mass"
@@ -478,19 +508,19 @@ class MaStro_MenuOperator_add_MaStro_plot(Operator, AddObjectHelper):
     #     default=12,
     # )
     
-    depth: bpy.props.FloatProperty(
-        name="Depth",
-        description="MaStro plot depth",
-        # min=0.01, max=100.0,
-        min=0,
-        default=16,
-    )
+    # depth: bpy.props.FloatProperty(
+    #     name="Depth",
+    #     description="MaStro plot depth",
+    #     # min=0.01, max=100.0,
+    #     min=0,
+    #     default=16,
+    # )
     
-    storeys: bpy.props.IntProperty(
-            name="Number of Storeys",
-            description="Number of storeys of the plot masses",
-            min = 1,
-            default = 3)
+    # storeys: bpy.props.IntProperty(
+    #         name="Number of Storeys",
+    #         description="Number of storeys of the plot masses",
+    #         min = 1,
+    #         default = 3)
     
     
     def execute(self, context):
@@ -522,9 +552,12 @@ class MaStro_MenuOperator_add_MaStro_plot(Operator, AddObjectHelper):
             
         addNodes()
         
-        
-        # mesh_attributes = obj.data.attributes["mastro_number_of_storeys"].data.items()
-        # mesh_attributes[0][1].value = self.storeys
+        mesh_attributes = obj.data.attributes["mastro_number_of_storeys_EDGE"].data.items()
+        for edge in mesh.edges:
+            index = edge.index
+            for mesh_attribute in mesh_attributes:
+                if mesh_attribute[0]  == index:
+                    mesh_attribute[1].value = 3
 
         # add mastro plot and mastro mass geo node to the created object
         geoName = "MaStro Plot"
@@ -862,8 +895,6 @@ def addMassAttributes(obj):
                                     mesh_attribute[1].value = int(height_E)
                                 elif a["attr"] == "mastro_list_void":
                                     mesh_attribute[1].value = int(void)
-                                # else:
-                                #     mesh_attribute[1].value = a["attr_default"]
                                 break
                 elif a["attr_domain"] == 'EDGE':
                     attribute = mesh.attributes[a["attr"]].data.items()
@@ -1000,40 +1031,14 @@ def addPlotAttributes(obj):
             if a["attr_domain"] is None: # to set custom attributes to the object, not to vertex, edge or face
                 obj[a["attr"]] = a["attr_default"]
             else:
-                mesh.attributes.new(name=a["attr"], type=a["attr_type"], domain=a["attr_domain"])
+                edge_attr_name = f"{a['attr']}_EDGE"
+                face_attr_name = a['attr']
+                
+                mesh.attributes.new(name=edge_attr_name, type=a["attr_type"], domain="EDGE")
+                mesh.attributes.new(name=face_attr_name, type=a["attr_type"], domain="FACE")
+
                 if a["attr_domain"] == 'EDGE':
-                #     attribute = mesh.attributes[a["attr"]].data.items()
-                #     for face in mesh.polygons:
-                #         index = face.index
-                #         for mesh_attribute in attribute:
-                #             if mesh_attribute[0]  == index:
-                #                 if a["attr"] == "mastro_typology_id":
-                #                     mesh_attribute[1].value = bpy.context.scene.mastro_typology_name_list[typology_id].id
-                #                 elif a["attr"] == "mastro_list_use_id_A": 
-                #                     mesh_attribute[1].value = int(use_id_list_A)
-                #                 elif a["attr"] == "mastro_list_use_id_B": 
-                #                     mesh_attribute[1].value = int(use_id_list_B)
-                #                 elif a["attr"] == "mastro_list_storey_A":
-                #                     mesh_attribute[1].value = int(storey_list_A)
-                #                 elif a["attr"] == "mastro_list_storey_B":
-                #                     mesh_attribute[1].value = int(storey_list_B)
-                #                 elif a["attr"] == "mastro_list_height_A":
-                #                     mesh_attribute[1].value = int(height_A)
-                #                 elif a["attr"] == "mastro_list_height_B":
-                #                     mesh_attribute[1].value = int(height_B)
-                #                 elif a["attr"] == "mastro_list_height_C":
-                #                     mesh_attribute[1].value = int(height_C)
-                #                 elif a["attr"] == "mastro_list_height_D":
-                #                     mesh_attribute[1].value = int(height_D)
-                #                 elif a["attr"] == "mastro_list_height_E":
-                #                     mesh_attribute[1].value = int(height_E)
-                #                 elif a["attr"] == "mastro_list_void":
-                #                     mesh_attribute[1].value = int(void)
-                #                 # else:
-                #                 #     mesh_attribute[1].value = a["attr_default"]
-                #                 break
-                # elif a["attr_domain"] == 'EDGE':
-                    attribute = mesh.attributes[a["attr"]].data.items()
+                    attribute = mesh.attributes[edge_attr_name].data.items()
                     for edge in mesh.edges:
                         index = edge.index
                         for mesh_attribute in attribute:
@@ -1060,6 +1065,8 @@ def addPlotAttributes(obj):
                                     mesh_attribute[1].value = int(height_E)
                                 elif a["attr"] == "mastro_list_void":
                                     mesh_attribute[1].value = int(void)
+                                else:
+                                    mesh_attribute[1].value = a["attr_default"]
                                 break
                             
 # add street attributes to the selected object
@@ -1317,7 +1324,7 @@ class VIEW3D_PT_transform_orientations(Panel):
         
         obj = context.object
         
-        constaint_xy_settings = context.scene.constraint_xy_setting
+        # constaint_xy_settings = context.scene.constraint_xy_setting
         # if obj is None or obj.type != 'MESH':
         #     self.report({'ERROR'}, "Select a mesh object")
         #     return {'CANCELLED'}
@@ -1362,12 +1369,13 @@ class ConstraintXYSettings(bpy.types.PropertyGroup):
         default = False,
         description = 'Toggle XY constraint behaviour globally'
     )
-    last_custom_orientation: bpy.props.StringProperty(
-        name = 'Auto-constraint last custom orientation',
-        default = "",
-        description = 'Used to store the last used custom orientation so we can clean it up next transform (there is a crash if deleted with the current operator and then locking to an axis manually'
-    )
+    # last_custom_orientation: bpy.props.StringProperty(
+    #     name = 'Auto-constraint last custom orientation',
+    #     default = "",
+    #     description = 'Used to store the last used custom orientation so we can clean it up next transform (there is a crash if deleted with the current operator and then locking to an axis manually'
+    # )
             
+# define the constraint to xy axis button
 def constraint_xy_button(self, context):
     """Draws the xy constraint toggle"""
     if context.mode not in contexts:
@@ -1376,7 +1384,6 @@ def constraint_xy_button(self, context):
     layout = self.layout
     row = layout.row(align=True)
     icon_value = icons.icon_id('xy_on') if constaint_xy_settings.constraint_xy_on else icons.icon_id('xy_off')
-    # row.prop(ac_settings, 'autoconstraint_on', text='', icon_value=icon_value)
     row.prop(constaint_xy_settings, "constraint_xy_on", text="", icon_value=icon_value)
     
     

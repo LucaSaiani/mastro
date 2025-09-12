@@ -22,15 +22,16 @@ import bpy
 import blf
 import bmesh
 import gpu
-from gpu_extras.batch import batch_for_shader
+import math
 
+from gpu_extras.batch import batch_for_shader
 from bpy.app.handlers import persistent
 from bpy_extras import view3d_utils
 from bpy.types import Operator
-
 from mathutils import Vector
 
 from .mastro_schedule import MaStro_MathNode, execute_active_node_tree
+from .mastro_massing import update_mesh_edge_attributes_storeys, read_mesh_attributes_uses
 
 # from datetime import datetime
 # import math
@@ -746,6 +747,9 @@ def updates(scene, depsgraph):
     obj = bpy.context.active_object
     if obj:
         if obj is not None and obj.type == "MESH" and "MaStro object" in obj.data:
+            #######################################################################
+            ############################# MaStro Mass #############################
+            #######################################################################
             if "MaStro mass" in obj.data:
                 if scene.previous_selection_object_name != obj.name:
                     scene.previous_selection_object_name = obj.name
@@ -816,14 +820,16 @@ def updates(scene, depsgraph):
                                 typology = bm.faces[scene.previous_selection_face_id][bMesh_typology]
                                 
                                 # number of storeys
-                                if storeys == 0: # in case a new face is created in edit mode, the number of set storeys is 1
-                                    storeys = 1
-                                    bpy.ops.object.set_mesh_attribute_storeys
-                                # if scene.attribute_mass_storeys != storeys:
-                                #     scene.attribute_mass_storeys = storeys
+                                # if storeys == 0: # in case a new face is created in edit mode, the number of set storeys is 1
+                                #     storeys = 1
+                                    # bpy.ops.object.set_mesh_face_attribute_storeys
+                                selected_faces = [face for face in bm.faces if face.select]
+                                if len(selected_faces) == 1:
+                                    if scene.attribute_mass_storeys != storeys:
+                                        scene.attribute_mass_storeys = storeys
                                 
-                                if bpy.context.scene.attribute_mass_storeys != storeys:
-                                    bpy.context.scene.attribute_mass_storeys = storeys
+                                # if bpy.context.scene.attribute_mass_storeys != storeys:
+                                #     bpy.context.scene.props_mass_storeys._ui_temp_storeys = storeys
                                 # scene["attribute_mass_storeys"] = storeys
                                 
                                 
@@ -868,6 +874,247 @@ def updates(scene, depsgraph):
                         bm.free
                         # bpy.data.scenes["Scene"].attribute_mass_storeys = 5 
                         
+            #######################################################################
+            ############################# MaStro Plot #############################
+            #######################################################################
+                        
+            elif "MaStro plot" in obj.data:
+                if scene.previous_selection_object_name != obj.name:
+                    scene.previous_selection_object_name = obj.name
+                    # scene.previous_selection_edge_id = -1
+                    if obj.mode == "OBJECT":
+                        # blockId = obj.mastro_props['mastro_block_attribute']
+                        plotId = obj.mastro_props['mastro_plot_attribute']
+                        
+                        # block = scene.mastro_block_name_list[blockId].name
+                        plot = scene.mastro_plot_name_list[plotId].name
+                        
+                        # scene.mastro_block_name_current[0].name = block
+                        scene.mastro_plot_name_current[0].name = plot
+                else:
+                    # if obj is not None and obj.type == "MESH" and "MaStro object" in obj.data and obj.mode == 'EDIT':
+                    if obj.mode == 'EDIT':
+                        bm = bmesh.from_edit_mesh(obj.data)
+                        bm.verts.ensure_lookup_table()
+                        mesh = obj.data  
+
+                        bMesh_storeys = bm.edges.layers.int["mastro_number_of_storeys_EDGE"]
+                        bMesh_storey_list_A = bm.edges.layers.int["mastro_list_storey_A_EDGE"]
+                        bMesh_storey_list_B = bm.edges.layers.int["mastro_list_storey_B_EDGE"]
+                        
+                        bMesh_plot_depth = bm.edges.layers.float["mastro_plot_depth_EDGE"]
+                        
+                        bMesh_typology = bm.edges.layers.int["mastro_typology_id_EDGE"]
+                        bMesh_use_list_A   = bm.edges.layers.int["mastro_list_use_id_A_EDGE"]
+                        bMesh_use_list_B   = bm.edges.layers.int["mastro_list_use_id_B_EDGE"]
+                        bMesh_height_A     = bm.edges.layers.int["mastro_list_height_A_EDGE"]
+                        bMesh_height_B     = bm.edges.layers.int["mastro_list_height_B_EDGE"]
+                        bMesh_height_C     = bm.edges.layers.int["mastro_list_height_C_EDGE"]
+                        bMesh_height_D     = bm.edges.layers.int["mastro_list_height_D_EDGE"]
+                        bMesh_height_E     = bm.edges.layers.int["mastro_list_height_E_EDGE"]
+                        bMesh_void         = bm.edges.layers.int["mastro_list_void_EDGE"]
+                        
+                        ######################  Vert ########################################
+                        if bpy.context.scene.tool_settings.mesh_select_mode[0]:
+                            # check if a new vertex is added, and in case add parameters
+                            if isinstance(bm.select_history.active, bmesh.types.BMVert):
+                                active_vert = bm.select_history.active
+                                # check if a new vertex is selected
+                                if scene.previous_selection_vert_id != active_vert.index:
+                                    scene.previous_selection_vert_id = active_vert.index
+                                    # get how many vertices are selected
+                                    selected_verts = [v for v in bm.verts if v.select]
+                                    # check if the new vertex is at the end of edge and there is
+                                    # only 1 selected vertex, we are in the case of extruded 
+                                    # vertex, and therefore it is necessary to add parameters
+                                    if len(selected_verts) == 1 and len(active_vert.link_edges) == 1:
+                                        # check it the connected edge has attributes
+                                        bm.edges.ensure_lookup_table()
+                                        # bm.verts.ensure_lookup_table()
+                                        # active_vert = bm.select_history.active
+                                        connected_edge = active_vert.link_edges[0]
+                                        storeys = bm.edges[connected_edge.index][bMesh_storeys]
+                                        
+                                        # if storeys are 0, it is a new edge and data is assigned
+                                        if storeys == 0:
+                                            # update the typology ------------------------------------------
+                                            typology_id = bpy.context.scene.mastro_typology_name_current[0].id
+                                            connected_edge[bMesh_typology] = typology_id
+                                            
+                                            # update the number of storeys ------------------------------------------
+                                            data = update_mesh_edge_attributes_storeys(bpy.context, mesh, connected_edge.index)
+                                            connected_edge[bMesh_storeys] = data["numberOfStoreys"]
+                                            connected_edge[bMesh_storey_list_A] = int(data["storey_list_A"])
+                                            connected_edge[bMesh_storey_list_B] = int(data["storey_list_B"])
+                                            
+                                            # update the plot depth ------------------------------------------
+                                            depth = bpy.context.scene.attribute_plot_depth
+                                            if depth == 0:
+                                                depth = 18
+                                            connected_edge[bMesh_plot_depth] = depth
+
+                                            # update the uses ------------------------------------------
+                                            data = read_mesh_attributes_uses(bpy.context, typologySet = typology_id)
+                                            connected_edge[bMesh_use_list_A] = data["use_id_list_A"]
+                                            connected_edge[bMesh_use_list_B] = data["use_id_list_B"]
+                                            connected_edge[bMesh_height_A] = data["height_A"]
+                                            connected_edge[bMesh_height_B] = data["height_B"]
+                                            connected_edge[bMesh_height_C] = data["height_C"]
+                                            connected_edge[bMesh_height_D] = data["height_D"]
+                                            connected_edge[bMesh_height_E] = data["height_E"]
+                                            connected_edge[bMesh_void] = data["void"]
+
+                                            bmesh.update_edit_mesh(mesh)
+                                            
+                                # the selected vertices are the same: it mean that the user
+                                # has operated something with the vertices
+                                else:
+                                    # get how many vertices are selected
+                                    selected_verts = [v for v in bm.verts if v.select]
+                                    if len(selected_verts) == 2:
+                                        bm.edges.ensure_lookup_table()
+                                        if scene.previous_edge_number != len(bm.edges):
+                                            # an edge has been added with "new edge" operator
+                                            if scene.previous_edge_number == len(bm.edges) -1:
+                                                # values are copied
+                                                # get the id of the newly created edge
+                                                last_edge = bm.edges[-1]
+                                                # update the typology ------------------------------------------
+                                                typology_id = bpy.context.scene.mastro_typology_name_current[0].id
+                                                last_edge[bMesh_typology] = typology_id
+                                                
+                                                # update the number of storeys ------------------------------------------
+                                                data = update_mesh_edge_attributes_storeys(bpy.context, mesh, last_edge.index)
+                                                last_edge[bMesh_storeys] = data["numberOfStoreys"]
+                                                last_edge[bMesh_storey_list_A] = int(data["storey_list_A"])
+                                                last_edge[bMesh_storey_list_B] = int(data["storey_list_B"])
+                                                
+                                                # update the plot depth ------------------------------------------
+                                                depth = bpy.context.scene.attribute_plot_depth
+                                                if depth == 0:
+                                                    depth = 18
+                                                last_edge[bMesh_plot_depth] = depth
+
+                                                # update the uses ------------------------------------------
+                                                data = read_mesh_attributes_uses(bpy.context, typologySet = typology_id)
+                                                last_edge[bMesh_use_list_A] = data["use_id_list_A"]
+                                                last_edge[bMesh_use_list_B] = data["use_id_list_B"]
+                                                last_edge[bMesh_height_A] = data["height_A"]
+                                                last_edge[bMesh_height_B] = data["height_B"]
+                                                last_edge[bMesh_height_C] = data["height_C"]
+                                                last_edge[bMesh_height_D] = data["height_D"]
+                                                last_edge[bMesh_height_E] = data["height_E"]
+                                                connected_edge[bMesh_void] = data["void"]
+
+                                                bmesh.update_edit_mesh(mesh)
+                                                
+                                scene.previous_edge_number = len(bm.edges)
+
+                        ######################  Edge ########################################
+                        if bpy.context.scene.tool_settings.mesh_select_mode[1]:
+                            # check if there is an active edge
+                            if isinstance(bm.select_history.active, bmesh.types.BMEdge):
+                                bm.edges.ensure_lookup_table()
+                                active_edge = bm.select_history.active
+                                selected_edges = [edge for edge in bm.edges if edge.select]
+                                
+                                if scene.previous_selection_edge_id != active_edge.index and scene.previous_selection_edge_id != -1:
+                                    scene.previous_selection_edge_id = active_edge.index
+                                    #updating the information in UI
+                                    storeys = bm.edges[active_edge.index][bMesh_storeys]
+                                    list_storey_A = bm.edges[active_edge.index][bMesh_storey_list_A]
+                                    list_storey_B = bm.edges[active_edge.index][bMesh_storey_list_B]
+                                    typology = bm.edges[active_edge.index][bMesh_typology]
+                                    plot_depth = bm.edges[active_edge.index][bMesh_plot_depth]
+                                    
+                                    # if storeys are 0, it is a new edge and data is assigned
+                                    if storeys == 0:
+                                        # update the typology ------------------------------------------
+                                        typology_id = bpy.context.scene.mastro_typology_name_current[0].id
+                                        active_edge[bMesh_typology] = typology_id
+                                        
+                                        # update the number of storeys ------------------------------------------
+                                        data = update_mesh_edge_attributes_storeys(bpy.context, mesh, active_edge.index)
+                                        active_edge[bMesh_storeys] = data["numberOfStoreys"]
+                                        active_edge[bMesh_storey_list_A] = int(data["storey_list_A"])
+                                        active_edge[bMesh_storey_list_B] = int(data["storey_list_B"])
+                                        
+                                        # update the plot depth ------------------------------------------
+                                        depth = bpy.context.scene.attribute_plot_depth
+                                        if depth == 0:
+                                            depth = 18
+                                        active_edge[bMesh_plot_depth] = depth
+                                        
+                                        # update typology and related uses ------------------------------------------
+                                        data = read_mesh_attributes_uses(bpy.context, typologySet = typology_id)
+                                        active_edge[bMesh_use_list_A] = data["use_id_list_A"]
+                                        active_edge[bMesh_use_list_B] = data["use_id_list_B"]
+                                        active_edge[bMesh_height_A] = data["height_A"]
+                                        active_edge[bMesh_height_B] = data["height_B"]
+                                        active_edge[bMesh_height_C] = data["height_C"]
+                                        active_edge[bMesh_height_D] = data["height_D"]
+                                        active_edge[bMesh_height_E] = data["height_E"]
+                                        active_edge[bMesh_void] = data["void"]
+                                        
+                                        bmesh.update_edit_mesh(mesh)
+                                    
+                                    if len(selected_edges) == 1:
+                                        if bpy.context.scene.attribute_mass_storeys != storeys:
+                                            bpy.context.scene.attribute_mass_storeys = storeys
+                                    
+                                        if bpy.context.scene.attribute_plot_depth != plot_depth:
+                                            bpy.context.scene.attribute_plot_depth = plot_depth
+                                    
+                                    # typology name
+                                    # since it is possible to sort typologies in the ui, it can be that the index of the element
+                                    # in the list doesn't correspond to typology_id. Therefore it is necessary to find elements
+                                    # in the way below and not with use_list = bpy.context.scene.mastro_typology_name_list[typology_id].useList
+                                    item = next(i for i in scene.mastro_typology_name_list if i["id"] == typology)
+                                    scene.mastro_typology_name_current[0].name = item.name
+                                    # uses related to the typology
+                                    usesUiList = bpy.context.scene.mastro_obj_typology_uses_name_list 
+                                    # clean the list
+                                    while len(usesUiList) > 0:
+                                        index = scene.mastro_obj_typology_uses_name_list_index
+                                        usesUiList.remove(index)
+                                        scene.mastro_obj_typology_uses_name_list_index = min(max(0, index - 1), len(usesUiList) - 1)
+                                    # populate the list of uses
+                                    use_list = item.useList
+                                    list_storey_A = str(list_storey_A)[1:]
+                                    list_storey_B = str(list_storey_B)[1:]
+                                    list_storey_A = list_storey_A[::-1]
+                                    list_storey_B = list_storey_B[::-1]
+                                    
+                                    useSplit = use_list.split(";") 
+                                    for enum, el in enumerate(useSplit):
+                                        id = int(el)
+                                        usesUiList.add()
+                                        usesUiList[enum].id = enum + 1
+                                        for use in scene.mastro_use_name_list:
+                                            if id == use.id:
+                                                usesUiList[enum].name = use.name
+                                                usesUiList[enum].nameId = use.id
+                                                # when a new face is added in edit mode
+                                                # no storeys are assigned to the newly created face
+                                                # therefore the system returns an indexError
+                                                try:
+                                                    storeys = list_storey_A[enum] + list_storey_B[enum]
+                                                except IndexError:
+                                                    storeys = 1
+                                                usesUiList[enum].storeys = int(storeys)     
+                                                break
+                                else:
+                                    if len(selected_edges) > 0:
+                                        # for e in selected_edges:
+                                        scene.previous_selection_edge_id = selected_edges[-1].index
+                                    else: # no selected edges
+                                        scene.previous_selection_edge_id = -1
+                                # if scene.previous_selection_edge_id != -1:
+                        bm.free
+                        
+            #######################################################################
+            ########################### MaStro Street #############################
+            #######################################################################
             elif "MaStro street" in obj.data:
                 if obj.mode == 'EDIT':
                     bm = bmesh.from_edit_mesh(obj.data)
@@ -878,6 +1125,7 @@ def updates(scene, depsgraph):
                         if isinstance(bm.select_history.active, bmesh.types.BMEdge):
                             active_edge = bm.select_history.active.index
                             if scene.previous_selection_edge_id != active_edge:
+                                
                                 scene.previous_selection_edge_id = active_edge
                             else:
                                 selected_edges = [edge for edge in bm.edges if edge.select]
