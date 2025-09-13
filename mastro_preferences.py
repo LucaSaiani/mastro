@@ -62,7 +62,7 @@ class mastro_addon_preferences(AddonPreferences):
     fontSize: bpy.props.IntProperty(
         name="Font Size",
         min = 8,
-        default = 8
+        default = 16
     )
     
     fontColor: bpy.props.FloatVectorProperty(
