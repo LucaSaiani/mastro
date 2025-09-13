@@ -401,7 +401,7 @@ class VIEW3D_PT_MaStro_Panel(Panel):
 class MaStro_MenuOperator_add_MaStro_mass(Operator, AddObjectHelper):
     """Add a MaStro mass"""
     bl_idname = "object.mastro_add_mastro_mass"
-    bl_label = "MaStro Mass"
+    bl_label = "Mass"
     bl_options = {'REGISTER', 'UNDO'}
     
     width: bpy.props.FloatProperty(
@@ -497,7 +497,7 @@ def add_mastro_mass(width, depth):
 class MaStro_MenuOperator_add_MaStro_plot(Operator, AddObjectHelper):
     """Add a MaStro maplotss"""
     bl_idname = "object.mastro_add_mastro_plot"
-    bl_label = "MaStro Plot"
+    bl_label = "Plot"
     bl_options = {'REGISTER', 'UNDO'}
     
     # width: bpy.props.FloatProperty(
@@ -600,24 +600,24 @@ def add_mastro_plot():
 class MaStro_MenuOperator_add_MaStro_street(Operator, AddObjectHelper):
     """Add a MaStro street"""
     bl_idname = "object.mastro_add_mastro_street"
-    bl_label = "MaStro Street"
+    bl_label = "Street"
     bl_options = {'REGISTER', 'UNDO'}
     
-    width: bpy.props.FloatProperty(
-        name="Width",
-        description="MaStro street width",
-        # min=0.01, max=100.0,
-        min=0,
-        default=8,
-    )
+    # width: bpy.props.FloatProperty(
+    #     name="Width",
+    #     description="MaStro street width",
+    #     # min=0.01, max=100.0,
+    #     min=0,
+    #     default=8,
+    # )
     
-    radius: bpy.props.FloatProperty(
-        name="Radius",
-        description="MaStro street radius",
-        # min=0.01, max=100.0,
-        min=0,
-        default=16,
-    )
+    # radius: bpy.props.FloatProperty(
+    #     name="Radius",
+    #     description="MaStro street radius",
+    #     # min=0.01, max=100.0,
+    #     min=0,
+    #     default=16,
+    # )
     
   
     def execute(self, context):
@@ -672,7 +672,7 @@ def add_mastro_street():
 
     verts = [
         (+0.0, +0.0, +0.0),
-        (+19.0, +25.0, +0.0),
+        (+22.0, +28.0, +0.0),
         (+56.0, +35.0,  +0.0),
         (-42.0, +38.0, +0.0),
         (-70.0, +20.0, +0.0),
@@ -695,11 +695,35 @@ def add_mastro_street():
 
     return verts, edges
 
+    
+# class VIEW3D_MT_mastro_add(bpy.types.Menu):
+#     bl_label = "MaStro"
+#     bl_idname = "VIEW3D_MT_mastro_add"
+
+#     def draw(self, context):
+#         # self.layout.operator(MaStro_MenuOperator_add_MaStro_plot.bl_idname, icon='MESH_CUBE')
+#         # self.layout.operator(MaStro_MenuOperator_add_MaStro_mass.bl_idname, icon='MESH_CUBE')
+#         # self.layout.separator()
+#         # self.layout.operator(MaStro_MenuOperator_add_MaStro_street.bl_idname, icon='MESH_CUBE')
+#         layout = self.layout
+
+#         # Icona custom come primo elemento
+#         my_icon = icons.icon_id('mastro')
+#         layout.operator("mastro.icon_preview", text="", icon_value=my_icon)
+
+#         # Poi i tuoi operatori custom
+#         layout.operator("mesh.primitive_cube_add", icon="MESH_CUBE")
+#         layout.operator("mesh.primitive_uv_sphere_add", icon="MESH_UVSPHERE")
+
 # add the entry to the add menu
 def mastro_add_menu_func(self, context):
-    self.layout.operator(MaStro_MenuOperator_add_MaStro_plot.bl_idname, icon='MESH_CUBE')
-    self.layout.operator(MaStro_MenuOperator_add_MaStro_mass.bl_idname, icon='MESH_CUBE')
-    self.layout.operator(MaStro_MenuOperator_add_MaStro_street.bl_idname, icon='MESH_CUBE')
+    self.layout.separator()
+    myIcon = icons.icon_id("plot")
+    self.layout.operator(MaStro_MenuOperator_add_MaStro_plot.bl_idname, icon_value=myIcon)
+    myIcon = icons.icon_id("mass")
+    self.layout.operator(MaStro_MenuOperator_add_MaStro_mass.bl_idname, icon_value=myIcon)
+    myIcon = icons.icon_id("street")
+    self.layout.operator(MaStro_MenuOperator_add_MaStro_street.bl_idname, icon_value=myIcon)
     
     
 class MaStro_MenuOperator_convert_to_MaStro_mass(Operator):
