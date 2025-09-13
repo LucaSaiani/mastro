@@ -179,11 +179,11 @@ class update_GN_Filter_OT(Operator):
         group_output = group.nodes.new('NodeGroupOutput')
         
         group_menu = group.nodes.new("GeometryNodeMenuSwitch")
-        group_evaluate_point = group.nodes.new("GeometryNodeFieldOnDomain")
-        group_evaluate_edge = group.nodes.new("GeometryNodeFieldOnDomain")
-        group_evaluate_face = group.nodes.new("GeometryNodeFieldOnDomain")
-        group_evaluate_spline = group.nodes.new("GeometryNodeFieldOnDomain")
-        group_evaluate_instance = group.nodes.new("GeometryNodeFieldOnDomain")
+        # group_evaluate_point = group.nodes.new("GeometryNodeFieldOnDomain")
+        # group_evaluate_edge = group.nodes.new("GeometryNodeFieldOnDomain")
+        # group_evaluate_face = group.nodes.new("GeometryNodeFieldOnDomain")
+        # group_evaluate_spline = group.nodes.new("GeometryNodeFieldOnDomain")
+        # group_evaluate_instance = group.nodes.new("GeometryNodeFieldOnDomain")
 
 
         
@@ -466,14 +466,20 @@ class VIEW3D_PT_MaStro_show_data(Panel):
 
         # col = flow.column()
         # col = flow.column(heading="Mass", align = True)
-        col = layout.column(heading="Mass", align=True)
+        col = layout.column(heading="Plot & Mass", align=True)
         col.prop(context.window_manager, 'toggle_storey_number', icon_only=False)
+        col.separator()
         col.prop(context.window_manager, 'toggle_typology_name', icon_only=False)
+        col.prop(context.window_manager, 'toggle_plot_typology_color', icon_only=False)
+        col.separator()
+        col.prop(context.window_manager, 'toggle_plot_normal', icon_only=False)
+        col.separator()
         col.prop(context.window_manager, 'toggle_block_name', icon_only=False)
         col.prop(context.window_manager, 'toggle_plot_name', icon_only=False)
         
-        col = layout.column(heading="Plot", align=True)
-        col.prop(context.window_manager, 'toggle_plot_type', icon_only=False)
+        # col = layout.column(heading="Plot", align=True)
+        
+        
         # col.prop(context.window_manager, 'toggle_storey_number', icon_only=False)
         # col.prop(context.window_manager, 'toggle_typology_name', icon_only=False)
         # col.prop(context.window_manager, 'toggle_block_name', icon_only=False)

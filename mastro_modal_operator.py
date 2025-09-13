@@ -528,7 +528,7 @@ def draw_main_show_attributes_2D(context):
             bMesh_storey = bm.faces.layers.int["mastro_number_of_storeys"]
             bMesh_floor = bm.faces.layers.int["mastro_floor_id"]
         elif "MaStro plot" in obj.data:
-            bMesh_normal = bm.edges.layers.int["mastro_inverted_normal_EDGE"]
+            bMesh_normal = bm.edges.layers.bool["mastro_inverted_normal_EDGE"]
             bMesh_typology = bm.edges.layers.int["mastro_typology_id_EDGE"]
             bMesh_storey = bm.edges.layers.int["mastro_number_of_storeys_EDGE"]
             
@@ -621,6 +621,14 @@ def draw_main_show_attributes_2D(context):
                                 line_width = blf.dimensions(font_id, text_storey[0])[0]
                     vert_offset += half_line_height
                     text_edge.append(text_storey)
+                    text_edge.append(cr)  
+                if bpy.context.window_manager.toggle_plot_normal: 
+                    if normal == True:   
+                        symbol = "⥌"
+                        text_normal = (symbol, 0)
+                        line_width = blf.dimensions(font_id, symbol)[0] 
+                        vert_offset += (blf.dimensions(font_id, symbol)[1] * 1.45)/2
+                        text_edge.append(text_normal)
                             
                             
             # if bpy.context.window_manager.toggle_wall_name:   
@@ -632,19 +640,20 @@ def draw_main_show_attributes_2D(context):
             #             text_edge.append(text_edge)
             #             text_edge.append(cr)
             #             break
-            if bpy.context.window_manager.toggle_wall_normal:
-                if normal == -1:   
-                    symbol = "↔️"
-                    text_normal = (symbol, 0)
-                    # if blf.dimensions(font_id, symbol)[0] > line_width:
-                    line_width = blf.dimensions(font_id, symbol)[0]
-                    # if vert_offset == 0:
-                    vert_offset += (blf.dimensions(font_id, symbol)[1] * 1.45)/2
-                    # else:
-                    #     vert_offset += (blf.dimensions(font_id, symbol)[1] * 1.45)* (-1.5)
-                            
-                        # vert_offset += half_line_height
-                    text_edge.append(text_normal)
+            # if "MaStro mass" in obj.data:
+            #     if bpy.context.window_manager.toggle_wall_normal:
+            #         if normal == True:   
+            #             symbol = "↔️"
+            #             text_normal = (symbol, 0)
+            #             # if blf.dimensions(font_id, symbol)[0] > line_width:
+            #             line_width = blf.dimensions(font_id, symbol)[0]
+            #             # if vert_offset == 0:
+            #             vert_offset += (blf.dimensions(font_id, symbol)[1] * 1.45)/2
+            #             # else:
+            #             #     vert_offset += (blf.dimensions(font_id, symbol)[1] * 1.45)* (-1.5)
+                                
+            #                 # vert_offset += half_line_height
+            #             text_edge.append(text_normal)
                     
             coord = view3d_utils.location_3d_to_region_2d(region, rv3d, center)
             # coord = center
@@ -791,7 +800,7 @@ def draw_main_show_attributes_3D(context):
             mesh = obj.data
             if mesh.is_editmode == False:
                 show_wall_overlay(obj)
-        if "MaStro plot" in obj.data and bpy.context.window_manager.toggle_plot_type:
+        if "MaStro plot" in obj.data and bpy.context.window_manager.toggle_plot_typology_color:
             # if mesh is in edit mode, the plot overlay is already drawn
             mesh = obj.data 
             if mesh.is_editmode == False:

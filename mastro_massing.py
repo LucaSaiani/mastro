@@ -128,6 +128,7 @@ class VIEW3D_PT_MaStro_Mass(Panel):
                                   scene,
                                   "mastro_obj_typology_uses_name_list_index",
                                   rows = rows)
+                
       
 
 class OBJECT_UL_OBJ_Typology_Uses(UIList):
@@ -244,6 +245,9 @@ class VIEW3D_PT_MaStro_Plot(Panel):
                                   scene,
                                   "mastro_obj_typology_uses_name_list_index",
                                   rows = rows)
+                
+                row = layout.row(align=True)
+                row.prop(context.scene, "attribute_plot_normal", text="Invert Normal") 
     
     
 # class OBJECT_OT_SetTypologyId(Operator):
@@ -657,6 +661,28 @@ class OBJECT_OT_Set_Edge_Attribute_Uses(Operator):
        
         return {'FINISHED'}
     
+class OBJECT_OT_Set_Plot_Edge_Attribute_Normal(Operator):
+    """Set the value which will set to reverse or not reverse the plot edge in the plot GN"""
+    bl_idname = "object.set_mesh_plot_edge_attribute_normal"
+    bl_label = "Set to normal of the plot edge in the plot GN"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    def execute(self, context):
+        obj = context.active_object
+        mesh = obj.data
+        mode = obj.mode
+        bpy.ops.object.mode_set(mode='OBJECT')
+        selected_edges = [e for e in context.active_object.data.edges if e.select]
+        normal = bpy.context.scene.attribute_plot_normal
+        for edge in selected_edges:
+            edgeIndex = edge.index
+            mesh.attributes["mastro_inverted_normal_EDGE"].data[edgeIndex].value = normal
+        bpy.ops.object.mode_set(mode=mode)
+        return {'FINISHED'}
+    
+
+    
+    
 # function to update the uses and their relative heights accordingly to the assigned typologySet:
 # if the function is run by the user when in edit mode the typologyId is read from 
 # context.scene.attribute_mass_typology_id, else the typology is updated from the
@@ -775,6 +801,10 @@ def update_attributes_mastro_mesh_storeys(self, context):
         
 def update_attributes_mastro_plot_depth(self, context):
     bpy.ops.object.set_mesh_edge_attribute_depth()
+    
+# update the plot normal
+def update_plot_normal(self, context):
+    bpy.ops.object.set_mesh_plot_edge_attribute_normal()
 
   
 # update the plot id attribute assigned to the selected object
@@ -792,6 +822,7 @@ def update_plot_name_id(self, context):
             obj = context.active_object
             obj.mastro_props['mastro_plot_attribute'] = n.id
             break 
+        
 # this is quite old, maybe better to review
 def update_block_name_id(self, context):
     scene = context.scene
@@ -829,6 +860,8 @@ def update_attributes_mastro_mesh_typology(self, context):
                 scene.mastro_typology_name_current[0].id = n.id
                 scene.mastro_typology_name_current[0].name = name
                 break  
+            
+
     
         
     
