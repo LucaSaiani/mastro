@@ -133,6 +133,9 @@ classes = (
     mastro_project_data.FLOOR_LIST_OT_NewItem,
     mastro_project_data.FLOOR_LIST_OT_MoveItem,
     
+    # mastro_menu.VIEW3D_MT_mastro_add,
+    mastro_menu.VIEW3D_PT_transform_orientations,
+    mastro_menu.VIEW3D_PT_MaStro_Panel,
     mastro_menu.MaStro_MenuOperator_add_MaStro_mass,
     mastro_menu.MaStro_MenuOperator_add_MaStro_plot,
     mastro_menu.MaStro_MenuOperator_add_MaStro_street,
@@ -141,13 +144,11 @@ classes = (
     # mastro_menu.MaStro_MenuOperator_PrintData,
     # mastro_menu.MaStro_MenuOperator_ExportCSV,
     mastro_menu.MaStro_Operator_transform_orientation,
-    mastro_menu.VIEW3D_PT_transform_orientations,
     # mastro_menu.VIEW3D_MT_orientations_pie,
     # mastro_menu.MaStro_Menu,
-    mastro_menu.VIEW3D_PT_MaStro_Panel,
     mastro_menu.mastroAddonProperties,
     mastro_menu.ConstraintXYSettings,
-    
+
     mastro_schedule.MaStroTree,
     mastro_schedule.MaStro_string_item,
     mastro_schedule.MaStro_keyValueItem,
@@ -703,7 +704,10 @@ def register():
     
     # bpy.types.VIEW3D_PT_transform_orientations.append(mastro_menu.extend_transform_operation_panel)
     # bpy.types.VIEW3D_MT_editor_menus.append(mastro_menu.mastro_menu)
+    
     bpy.types.VIEW3D_MT_mesh_add.append(mastro_menu.mastro_add_menu_func)
+    # bpy.types.VIEW3D_MT_add.append(mastro_menu.mastro_add_menu_func)
+    
     bpy.types.WindowManager.toggle_show_data = bpy.props.BoolProperty(
                                             default = False,
                                             update = mastro_modal_operator.update_show_attributes)
@@ -1000,7 +1004,9 @@ def unregister():
 
     # bpy.types.VIEW3D_PT_transform_orientations.remove(mastro_menu.extend_transform_operation_panel)
     # bpy.types.VIEW3D_MT_editor_menus.remove(mastro_menu.mastro_menu)
+    
     bpy.types.VIEW3D_MT_mesh_add.remove(mastro_menu.mastro_add_menu_func)
+    # bpy.types.VIEW3D_MT_add.remove(mastro_menu.mastro_add_menu_func)
     
     bpy.types.VIEW3D_HT_tool_header.remove(mastro_menu.constraint_xy_button)
     
