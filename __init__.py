@@ -72,43 +72,31 @@ classes = (
         
     mastro_project_data.update_GN_Filter_OT,
     mastro_project_data.update_Shader_Filter_OT,
-    # mastro_project_data.separate_geometry_by_factor_OT,
-    
     mastro_project_data.VIEW3D_PT_MaStro_project_data,
     mastro_project_data.VIEW3D_PT_MaStro_show_data,
     mastro_project_data.VIEW3D_PT_MaStro_mass_data,
     mastro_project_data.VIEW3D_PT_MaStro_mass_plot_data,
     mastro_project_data.VIEW3D_PT_MaStro_mass_block_data,
-    # mastro_project_data.VIEW3D_PT_MaStro_mass_use_data,
     mastro_project_data.VIEW3D_PT_MaStro_mass_typology_data,
     mastro_project_data.VIEW3D_PT_MaStro_street_data,
-    
     mastro_project_data.VIEW3D_PT_MaStro_building_data,
     mastro_project_data.VIEW3D_PT_MaStro_building_wall_data,
     mastro_project_data.VIEW3D_PT_MaStro_building_floor_data,
-    # mastro_project_data.TEST_OT_modal_operator,
-    
     mastro_project_data.name_with_id,
     mastro_project_data.OBJECT_UL_Plot,
     mastro_project_data.plot_name_list,
     mastro_project_data.PLOT_LIST_OT_NewItem,
     mastro_project_data.PLOT_LIST_OT_MoveItem,
-    
     mastro_project_data.OBJECT_UL_Block,
     mastro_project_data.block_name_list,
     mastro_project_data.BLOCK_LIST_OT_NewItem,
     mastro_project_data.BLOCK_LIST_OT_MoveItem,
-    
-    # mastro_project_data.OBJECT_UL_Use,
     mastro_project_data.use_name_list,
     mastro_project_data.USE_LIST_OT_NewItem,
-    # mastro_project_data.USE_LIST_OT_MoveItem,
-    
     mastro_project_data.OBJECT_UL_Typology,
     mastro_project_data.typology_name_list,
     mastro_project_data.TYPOLOGY_LIST_OT_NewItem,
     mastro_project_data.TYPOLOGY_LIST_OT_MoveItem,
-    
     mastro_project_data.OBJECT_UL_Typology_Uses,
     mastro_project_data.typology_uses_name_list,
     mastro_project_data.TYPOLOGY_USES_LIST_OT_NewItem,
@@ -117,17 +105,14 @@ classes = (
     mastro_project_data.TYPOLOGY_USES_LIST_OT_MoveItem,
     mastro_project_data.OBJECT_OT_update_all_MaStro_meshes_attributes,
     mastro_project_data.OBJECT_OT_update_all_MaStro_street_attributes,
-
     mastro_project_data.OBJECT_UL_Street,
     mastro_project_data.street_name_list,
     mastro_project_data.STREET_LIST_OT_NewItem,
     mastro_project_data.STREET_LIST_OT_MoveItem,
-    
     mastro_project_data.OBJECT_UL_Wall,
     mastro_project_data.wall_name_list,
     mastro_project_data.WALL_LIST_OT_NewItem,
     mastro_project_data.WALL_LIST_OT_MoveItem,
-    
     mastro_project_data.OBJECT_UL_Floor,
     mastro_project_data.floor_name_list,
     mastro_project_data.FLOOR_LIST_OT_NewItem,
@@ -220,6 +205,7 @@ classes = (
     mastro_massing.obj_typology_uses_name_list,
     mastro_massing.VIEW3D_PT_MaStro_Mass,
     mastro_massing.VIEW3D_PT_MaStro_Plot,
+    mastro_massing.OBJECT_OT_Set_Plot_Edge_Attribute_Normal,
     
     mastro_modal_operator.VIEW_3D_OT_show_mastro_overlay,
     mastro_modal_operator.VIEW_3D_OT_show_mastro_attributes,
@@ -712,22 +698,25 @@ def register():
                                             default = False,
                                             update = mastro_modal_operator.update_show_attributes)
     bpy.types.WindowManager.toggle_plot_name = bpy.props.BoolProperty(
-                                            name = "Plot",
+                                            name = "Plot Name",
                                             default = False)
     bpy.types.WindowManager.toggle_block_name = bpy.props.BoolProperty(
-                                            name = "Block",
+                                            name = "Block Name",
                                             default = False)
     bpy.types.WindowManager.toggle_typology_name = bpy.props.BoolProperty(
-                                            name = "Typology",
+                                            name = "Typology Name",
                                             default = False)
-    bpy.types.WindowManager.toggle_plot_type = bpy.props.BoolProperty(
-                                            name = "Typology",
+    bpy.types.WindowManager.toggle_plot_typology_color = bpy.props.BoolProperty(
+                                            name = "Typology Color",
+                                            default = False)
+    bpy.types.WindowManager.toggle_plot_normal = bpy.props.BoolProperty(
+                                            name = "Inverted Normal",
                                             default = False)
     bpy.types.WindowManager.toggle_wall_type = bpy.props.BoolProperty(
                                             name = "Type",
                                             default = False)
     bpy.types.WindowManager.toggle_wall_normal = bpy.props.BoolProperty(
-                                            name = "Inverted Normals",
+                                            name = "Inverted Normal",
                                             default = False)
     bpy.types.WindowManager.toggle_floor_name = bpy.props.BoolProperty(
                                             name = "Type",
@@ -824,6 +813,9 @@ def register():
                                         min=0, 
                                         default=18,
                                         update = mastro_massing.update_attributes_mastro_plot_depth)
+    Scene.attribute_plot_normal = bpy.props.BoolProperty(
+                                            default = False,
+                                            update = mastro_massing.update_plot_normal)
     
     # Scene.mouse_keyboard_event = bpy.props.StringProperty(
     #                                     name="Mouse and keyboard event"
@@ -1016,6 +1008,8 @@ def unregister():
     del bpy.types.WindowManager.toggle_plot_name
     del bpy.types.WindowManager.toggle_block_name
     del bpy.types.WindowManager.toggle_typology_name
+    del bpy.types.WindowManager.toggle_plot_typology_color
+    del bpy.types.WindowManager.toggle_plot_normal
     del bpy.types.WindowManager.toggle_storey_number
     del bpy.types.WindowManager.toggle_wall_type
     del bpy.types.WindowManager.toggle_wall_normal
@@ -1038,6 +1032,7 @@ def unregister():
     del Scene.attribute_floor_id
     del Scene.attribute_mass_storeys
     del Scene.attribute_plot_depth
+    del Scene.attribute_plot_normal
     # del Scene.mastro_attribute_collection
     # del Scene.update_attributes
     # del Scene.mouse_keyboard_event
