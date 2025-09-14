@@ -47,15 +47,11 @@ else:
     from . import mastro_geometryNodes
     
 import bpy
-# import bmesh
-
-from bpy.types import(
-                        Scene
-                        )
 import nodeitems_utils
-# from nodeitems_utils import NodeCategory, NodeItem
 
+from bpy.types import(Scene)
 from bpy.app.handlers import persistent
+import math
 
 # store keymaps here to access after registration
 addon_keymaps = []
@@ -206,6 +202,7 @@ classes = (
     mastro_massing.VIEW3D_PT_MaStro_Mass,
     mastro_massing.VIEW3D_PT_MaStro_Plot,
     mastro_massing.OBJECT_OT_Set_Plot_Edge_Attribute_Normal,
+    mastro_massing.OBJECT_OT_Set_Plot_Edge_Angle,
     
     mastro_modal_operator.VIEW_3D_OT_show_mastro_overlay,
     mastro_modal_operator.VIEW_3D_OT_show_mastro_attributes,
@@ -246,6 +243,7 @@ def initNodes():
     bpy.ops.node.update_gn_filter(filter_name="typology")
     bpy.ops.node.update_gn_filter(filter_name="wall type")
     bpy.ops.node.update_gn_filter(filter_name="street type")
+    bpy.ops.node.update_gn_filter(filter_name="plot side")
     
     bpy.ops.node.update_shader_filter(filter_name="plot")
     bpy.ops.node.update_shader_filter(filter_name="block")
@@ -442,18 +440,6 @@ def initLists(scene=None):
     #     bpy.context.scene.mastro_obj_typology_uses_name_list.add()
     #     bpy.context.scene.mastro_obj_typology_uses_name_list[0].id = 0
     #     bpy.context.scene.mastro_obj_typology_uses_name_list[0].name =  bpy.context.scene.mastro_use_name_list[0].name
-    
-    
-   
-        
-    
-    
-    
-        
-       
-   
-   
-
 
 def get_plot_names_from_list(scene, context):
     items = []
@@ -775,12 +761,14 @@ def register():
     Scene.attribute_street_width = bpy.props.FloatProperty(
                                         name = "Street width",
                                         default=8,
-                                        precision=3
+                                        precision=3,
+                                        subtype="DISTANCE"
                                         )
     Scene.attribute_street_radius = bpy.props.FloatProperty(
                                         name = "Street radius",
                                         default=18,
-                                        precision=3
+                                        precision=3,
+                                        subtype="DISTANCE"
                                         )
     Scene.attribute_wall_id = bpy.props.IntProperty(
                                         name="Wall Id",
@@ -789,12 +777,14 @@ def register():
     Scene.attribute_wall_thickness = bpy.props.FloatProperty(
                                         name = "Wall thickness",
                                         default=0.300,
-                                        precision=3
+                                        precision=3,
+                                        subtype="DISTANCE"
                                         )
     Scene.attribute_wall_offset = bpy.props.FloatProperty(
                                         name = "Wall offset",
                                         default=0,
-                                        precision=3
+                                        precision=3,
+                                        subtype="DISTANCE"
                                         )
     Scene.attribute_wall_normal = bpy.props.BoolProperty(
                                             default = False,
@@ -808,10 +798,18 @@ def register():
                                         min=1, 
                                         default=3,
                                         update = mastro_massing.update_attributes_mastro_mesh_storeys)
+    Scene.attribute_plot_side_angle = bpy.props.FloatProperty(
+                                        name="Block Side Angle",
+                                        min=math.radians(-90),    
+                                        max=math.radians(90),  
+                                        default=0,
+                                        subtype='ANGLE',
+                                        update = mastro_massing.update_attributes_plot_side_angle)
     Scene.attribute_plot_depth = bpy.props.FloatProperty(
                                         name="The depth of the building",
                                         min=0, 
                                         default=18,
+                                        subtype="DISTANCE",
                                         update = mastro_massing.update_attributes_mastro_plot_depth)
     Scene.attribute_plot_normal = bpy.props.BoolProperty(
                                             default = False,

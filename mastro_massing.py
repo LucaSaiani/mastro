@@ -199,19 +199,34 @@ class VIEW3D_PT_MaStro_Plot(Panel):
                 scene = context.scene
                 
                 layout = self.layout
-                layout.use_property_split = True    
-                layout.use_property_decorate = False  # No animation.
-                
-                if tuple(bpy.context.scene.tool_settings.mesh_select_mode)[1] == True: #we are selecting edges
-                    layout.enabled = True
+                layout.use_property_split = True
+                layout.use_property_decorate = False
+
+                layout_1 = layout.column()
+                layout_0 = layout.column()
+               
+                # layout_0 = self.layout
+                # layout_0.use_property_split = True    
+                # layout_0.use_property_decorate = False  # No animation. 
+                # layout_1 = self.layout
+                # layout_1.use_property_split = True    
+                # layout_1.use_property_decorate = False  # No animation.
+               
+                if tuple(bpy.context.scene.tool_settings.mesh_select_mode)[0] == True: #we are selecting edges
+                    layout_0.enabled = True
                 else:
-                    layout.enabled = False
+                    layout_0.enabled = False
+                if tuple(bpy.context.scene.tool_settings.mesh_select_mode)[1] == True: #we are selecting edges
+                    layout_1.enabled = True
+                else:
+                    layout_1.enabled = False
+                
                 
          
                 ################ TYPOLOGY ######################
-                row = layout.row(align=True)
+                row = layout_1.row(align=True)
                 row.prop(context.scene, "attribute_mass_storeys", text="N° of storeys") 
-                row = layout.row(align=True)
+                row = layout_1.row(align=True)
                 row.prop(context.scene, "attribute_plot_depth", text="Depth") 
                 # disable the number of storeys if there are no liquids
                 # current_typology = scene.mastro_typology_name_current[0]
@@ -220,7 +235,7 @@ class VIEW3D_PT_MaStro_Plot(Panel):
                 # since it is possible to sort typologies in the ui, it can be that the index of the element
                 # in the list doesn't correspond to typology_id. Therefore it is necessary to find elements
                 # in the way below and not with use_list = bpy.context.scene.mastro_typology_name_list[typology_id].useList
-                row = layout.row(align=True)
+                row = layout_1.row(align=True)
                 item = next(i for i in bpy.context.scene.mastro_typology_name_list if i["id"] == scene.mastro_typology_name_current[0].id)
                 use_list = item.useList
                 uses = use_list.split(";")
@@ -232,12 +247,12 @@ class VIEW3D_PT_MaStro_Plot(Panel):
                 
                 row.enabled = tmp_enabled
                 
-                row = layout.row(align=True)
+                row = layout_1.row(align=True)
                 row.prop(context.scene, "mastro_typology_names", icon="ASSET_MANAGER", icon_only=True, text="Typology")
                 if len(scene.mastro_typology_name_list) >0:
                     row.label(text=scene.mastro_typology_name_current[0].name)
                 rows = 3
-                row = layout.row()
+                row = layout_1.row()
                 row.template_list("OBJECT_UL_OBJ_Typology_Uses", 
                                   "obj_typology_uses_list", 
                                   scene,
@@ -246,8 +261,11 @@ class VIEW3D_PT_MaStro_Plot(Panel):
                                   "mastro_obj_typology_uses_name_list_index",
                                   rows = rows)
                 
-                row = layout.row(align=True)
+                row = layout_1.row(align=True)
                 row.prop(context.scene, "attribute_plot_normal", text="Invert Normal") 
+                
+                row = layout_0.row(align=True)
+                row.prop(context.scene, "attribute_plot_side_angle", text="Side rotation") 
     
     
 # class OBJECT_OT_SetTypologyId(Operator):
@@ -680,7 +698,23 @@ class OBJECT_OT_Set_Plot_Edge_Attribute_Normal(Operator):
         bpy.ops.object.mode_set(mode=mode)
         return {'FINISHED'}
     
-
+class OBJECT_OT_Set_Plot_Edge_Angle(Operator):
+    bl_idname = "object.set_plot_edge_attribute_angle"
+    bl_label = "Set the corner angle"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    def execute(self, context):
+        obj = context.active_object
+        mesh = obj.data
+        mode = obj.mode
+        bpy.ops.object.mode_set(mode='OBJECT')
+        selected_verts = [v for v in context.active_object.data.vertices if v.select]
+        angle = bpy.context.scene.attribute_plot_side_angle
+        for vert in selected_verts:
+            vertIndex = vert.index
+            mesh.attributes["mastro_side_angle"].data[vertIndex].value = angle
+        bpy.ops.object.mode_set(mode=mode)
+        return {'FINISHED'}
     
     
 # function to update the uses and their relative heights accordingly to the assigned typologySet:
@@ -801,6 +835,9 @@ def update_attributes_mastro_mesh_storeys(self, context):
         
 def update_attributes_mastro_plot_depth(self, context):
     bpy.ops.object.set_mesh_edge_attribute_depth()
+    
+def update_attributes_plot_side_angle(self, context):
+    bpy.ops.object.set_plot_edge_attribute_angle()
     
 # update the plot normal
 def update_plot_normal(self, context):

@@ -269,28 +269,34 @@ plot_attribute_set = [
             "attr_domain" :  "EDGE",
             "attr_default" : 18
             },
-            {
-            "attr" :  "mastro_wall_id",
-            "attr_type" :  "INT",
-            "attr_domain" :  "EDGE",
-            "attr_default" : 0
-            },
-            {
-            "attr" :  "mastro_wall_thickness",
-            "attr_type" :  "FLOAT",
-            "attr_domain" :  "EDGE",
-            "attr_default" : 0.300
-            },
-            {
-            "attr" :  "mastro_wall_offset",
-            "attr_type" :  "FLOAT",
-            "attr_domain" :  "EDGE",
-            "attr_default" : 0
-            },
+            # {
+            # "attr" :  "mastro_wall_id",
+            # "attr_type" :  "INT",
+            # "attr_domain" :  "EDGE",
+            # "attr_default" : 0
+            # },
+            # {
+            # "attr" :  "mastro_wall_thickness",
+            # "attr_type" :  "FLOAT",
+            # "attr_domain" :  "EDGE",
+            # "attr_default" : 0.300
+            # },
+            # {
+            # "attr" :  "mastro_wall_offset",
+            # "attr_type" :  "FLOAT",
+            # "attr_domain" :  "EDGE",
+            # "attr_default" : 0
+            # },
             {
             "attr" :  "mastro_inverted_normal",
             "attr_type" :  "BOOLEAN",
             "attr_domain" :  "EDGE",
+            "attr_default" : 0
+            },
+            {
+            "attr" :  "mastro_side_angle",
+            "attr_type" :  "FLOAT",
+            "attr_domain" :  "POINT",
             "attr_default" : 0
             },
 ]
@@ -1054,10 +1060,20 @@ def addPlotAttributes(obj):
         except:
             if a["attr_domain"] is None: # to set custom attributes to the object, not to vertex, edge or face
                 obj[a["attr"]] = a["attr_default"]
+            elif a["attr_domain"] == "POINT":
+                vert_attr_name = a['attr']
+                mesh.attributes.new(name=vert_attr_name, type=a["attr_type"], domain="POINT")
+                attribute = mesh.attributes[vert_attr_name].data.items()
+                for vert in mesh.vertices:
+                    index = vert.index
+                    for mesh_attribute in attribute:
+                        if mesh_attribute[0]  == index:
+                            if a["attr"] == "mastro_side_angle":
+                                mesh_attribute[1].value = 0
             else:
                 edge_attr_name = f"{a['attr']}_EDGE"
                 face_attr_name = a['attr']
-                
+
                 mesh.attributes.new(name=edge_attr_name, type=a["attr_type"], domain="EDGE")
                 mesh.attributes.new(name=face_attr_name, type=a["attr_type"], domain="FACE")
 
