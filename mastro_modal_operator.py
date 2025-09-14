@@ -1005,6 +1005,7 @@ def updates(scene, depsgraph):
                         bMesh_storey_list_A = bm.edges.layers.int["mastro_list_storey_A_EDGE"]
                         bMesh_storey_list_B = bm.edges.layers.int["mastro_list_storey_B_EDGE"]
                         
+                        bMesh_plot_normal = bm.edges.layers.bool["mastro_inverted_normal_EDGE"]
                         bMesh_plot_depth = bm.edges.layers.float["mastro_plot_depth_EDGE"]
                         
                         bMesh_typology = bm.edges.layers.int["mastro_typology_id_EDGE"]
@@ -1017,11 +1018,15 @@ def updates(scene, depsgraph):
                         bMesh_height_E     = bm.edges.layers.int["mastro_list_height_E_EDGE"]
                         bMesh_void         = bm.edges.layers.int["mastro_list_void_EDGE"]
                         
+                        bMesh_angle = bm.verts.layers.float["mastro_side_angle"]
+                        
                         ######################  Vert ########################################
                         if bpy.context.scene.tool_settings.mesh_select_mode[0]:
                             # check if a new vertex is added, and in case add parameters
                             if isinstance(bm.select_history.active, bmesh.types.BMVert):
                                 active_vert = bm.select_history.active
+                                angle = bm.verts[active_vert.index][bMesh_angle]
+                                number_of_edges = len(bm.edges)
                                 # check if a new vertex is selected
                                 if scene.previous_selection_vert_id != active_vert.index:
                                     scene.previous_selection_vert_id = active_vert.index
@@ -1030,6 +1035,7 @@ def updates(scene, depsgraph):
                                     # check if the new vertex is at the end of edge and there is
                                     # only 1 selected vertex, we are in the case of extruded 
                                     # vertex, and therefore it is necessary to add parameters
+                                    
                                     if len(selected_verts) == 1 and len(active_vert.link_edges) == 1:
                                         # check it the connected edge has attributes
                                         bm.edges.ensure_lookup_table()
@@ -1055,7 +1061,7 @@ def updates(scene, depsgraph):
                                             if depth == 0:
                                                 depth = 18
                                             connected_edge[bMesh_plot_depth] = depth
-
+                                            
                                             # update the uses ------------------------------------------
                                             data = read_mesh_attributes_uses(bpy.context, typologySet = typology_id)
                                             connected_edge[bMesh_use_list_A] = data["use_id_list_A"]
@@ -1066,6 +1072,10 @@ def updates(scene, depsgraph):
                                             connected_edge[bMesh_height_D] = data["height_D"]
                                             connected_edge[bMesh_height_E] = data["height_E"]
                                             connected_edge[bMesh_void] = data["void"]
+                                            
+                                            # update the side angle ------------------------------------
+                                            active_vert[bMesh_angle] = 0
+                                            bpy.context.scene.attribute_plot_side_angle = 0
 
                                             bmesh.update_edit_mesh(mesh)
                                             
@@ -1107,11 +1117,15 @@ def updates(scene, depsgraph):
                                                 last_edge[bMesh_height_C] = data["height_C"]
                                                 last_edge[bMesh_height_D] = data["height_D"]
                                                 last_edge[bMesh_height_E] = data["height_E"]
-                                                connected_edge[bMesh_void] = data["void"]
+                                                last_edge[bMesh_void] = data["void"]
 
                                                 bmesh.update_edit_mesh(mesh)
                                                 
-                                scene.previous_edge_number = len(bm.edges)
+                                scene.previous_edge_number = number_of_edges
+                                
+                                if len(selected_verts) == 1:
+                                    if bpy.context.scene.attribute_plot_side_angle != angle:
+                                        bpy.context.scene.attribute_plot_side_angle = angle   
 
                         ######################  Edge ########################################
                         if bpy.context.scene.tool_settings.mesh_select_mode[1]:
@@ -1129,6 +1143,7 @@ def updates(scene, depsgraph):
                                     list_storey_B = bm.edges[active_edge.index][bMesh_storey_list_B]
                                     typology = bm.edges[active_edge.index][bMesh_typology]
                                     plot_depth = bm.edges[active_edge.index][bMesh_plot_depth]
+                                    plot_normal = bm.edges[active_edge.index][bMesh_plot_normal]
                                     
                                     # if storeys are 0, it is a new edge and data is assigned
                                     if storeys == 0:
@@ -1167,6 +1182,9 @@ def updates(scene, depsgraph):
                                     
                                         if bpy.context.scene.attribute_plot_depth != plot_depth:
                                             bpy.context.scene.attribute_plot_depth = plot_depth
+                                            
+                                        if bpy.context.scene.attribute_plot_normal != plot_normal:
+                                            bpy.context.scene.attribute_plot_normal = plot_normal
                                     
                                     # typology name
                                     # since it is possible to sort typologies in the ui, it can be that the index of the element

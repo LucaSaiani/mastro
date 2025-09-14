@@ -27,6 +27,7 @@ import bpy
 
 from bpy.props import StringProperty, IntProperty, FloatProperty, BoolProperty
 from bpy.types import PropertyGroup, UIList, Operator, Panel
+from types import SimpleNamespace
 # from bpy.app.handlers import persistent
 
 from . mastro_massing import read_mesh_attributes_uses, update_mesh_face_attributes_storeys
@@ -170,6 +171,7 @@ class update_GN_Filter_OT(Operator):
         elif self.filter_name == "typology": attributeName = "mastro_typology_id"
         elif self.filter_name == "wall type": attributeName = "mastro_wall_id"
         elif self.filter_name == "street type": attributeName = "mastro_street_id"
+        elif self.filter_name == "plot side": attributeName = "mastro_plot_side"
 
         # GN group
         group = bpy.data.node_groups.new(groupName,'GeometryNodeTree')
@@ -178,7 +180,7 @@ class update_GN_Filter_OT(Operator):
         group_input = group.nodes.new("NodeGroupInput")
         group_output = group.nodes.new('NodeGroupOutput')
         
-        group_menu = group.nodes.new("GeometryNodeMenuSwitch")
+        # group_menu = group.nodes.new("GeometryNodeMenuSwitch")
         # group_evaluate_point = group.nodes.new("GeometryNodeFieldOnDomain")
         # group_evaluate_edge = group.nodes.new("GeometryNodeFieldOnDomain")
         # group_evaluate_face = group.nodes.new("GeometryNodeFieldOnDomain")
@@ -193,7 +195,7 @@ class update_GN_Filter_OT(Operator):
         named_attribute_node.inputs[0].default_value = attributeName
             
         group_input.location = (-600,0)
-        group_menu.location = (-300,0)
+        # group_menu.location = (-300,0)
         group_output.location = (600, 0)
         named_attribute_node.location = (0,-100)
         return(group)
@@ -230,6 +232,11 @@ class update_GN_Filter_OT(Operator):
         elif self.filter_name == "typology": listToLoop = bpy.context.scene.mastro_typology_name_list
         elif self.filter_name == "wall type": listToLoop = bpy.context.scene.mastro_wall_name_list
         elif self.filter_name == "street type": listToLoop = bpy.context.scene.mastro_street_name_list
+        elif self.filter_name == "plot side": listToLoop = [
+                                                            SimpleNamespace(id=0, name="External Side"),
+                                                            SimpleNamespace(id=1, name="Internal Side"),
+                                                            SimpleNamespace(id=2, name="Lateral Side")
+                                                        ]
         
         for el in listToLoop:
             if hasattr(el, "id"):
