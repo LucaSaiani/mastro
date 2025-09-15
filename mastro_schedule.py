@@ -306,8 +306,8 @@ def getAttributes(objNames, attrType):
           
             # option = obj.mastro_props['mastro_option_attribute']
             # phase = obj.mastro_props['mastro_phase_attribute']
-            plot = obj.mastro_props['mastro_plot_attribute']
             block = obj.mastro_props['mastro_block_attribute']
+            building = obj.mastro_props['mastro_building_attribute']
     
             meshName = obj.name
             mesh = obj.data
@@ -390,8 +390,8 @@ def getAttributes(objNames, attrType):
                                     "useId"         : useId,
                                     "height"        : height,
                                     "void"          : void,
-                                    "block"         : block,
-                                    "plot"          : plot
+                                    "building"         : building,
+                                    "block"          : block
                         }
                     elif attrType == "area":
                         tmpData = {

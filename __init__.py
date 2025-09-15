@@ -71,22 +71,22 @@ classes = (
     mastro_project_data.VIEW3D_PT_MaStro_project_data,
     mastro_project_data.VIEW3D_PT_MaStro_show_data,
     mastro_project_data.VIEW3D_PT_MaStro_mass_data,
-    mastro_project_data.VIEW3D_PT_MaStro_mass_plot_data,
     mastro_project_data.VIEW3D_PT_MaStro_mass_block_data,
+    mastro_project_data.VIEW3D_PT_MaStro_mass_building_data,
     mastro_project_data.VIEW3D_PT_MaStro_mass_typology_data,
     mastro_project_data.VIEW3D_PT_MaStro_street_data,
-    mastro_project_data.VIEW3D_PT_MaStro_building_data,
-    mastro_project_data.VIEW3D_PT_MaStro_building_wall_data,
-    mastro_project_data.VIEW3D_PT_MaStro_building_floor_data,
+    mastro_project_data.VIEW3D_PT_MaStro_architecture_data,
+    mastro_project_data.VIEW3D_PT_MaStro_architecture_wall_data,
+    mastro_project_data.VIEW3D_PT_MaStro_architecture_floor_data,
     mastro_project_data.name_with_id,
-    mastro_project_data.OBJECT_UL_Plot,
-    mastro_project_data.plot_name_list,
-    mastro_project_data.PLOT_LIST_OT_NewItem,
-    mastro_project_data.PLOT_LIST_OT_MoveItem,
     mastro_project_data.OBJECT_UL_Block,
     mastro_project_data.block_name_list,
     mastro_project_data.BLOCK_LIST_OT_NewItem,
     mastro_project_data.BLOCK_LIST_OT_MoveItem,
+    mastro_project_data.OBJECT_UL_Building,
+    mastro_project_data.building_name_list,
+    mastro_project_data.BUILDING_LIST_OT_NewItem,
+    mastro_project_data.BUILDING_LIST_OT_MoveItem,
     mastro_project_data.use_name_list,
     mastro_project_data.USE_LIST_OT_NewItem,
     mastro_project_data.OBJECT_UL_Typology,
@@ -118,7 +118,7 @@ classes = (
     mastro_menu.VIEW3D_PT_transform_orientations,
     mastro_menu.VIEW3D_PT_MaStro_Panel,
     mastro_menu.MaStro_MenuOperator_add_MaStro_mass,
-    mastro_menu.MaStro_MenuOperator_add_MaStro_plot,
+    mastro_menu.MaStro_MenuOperator_add_MaStro_block,
     mastro_menu.MaStro_MenuOperator_add_MaStro_street,
     mastro_menu.MaStro_MenuOperator_convert_to_MaStro_mass,
     mastro_menu.MaStro_MenuOperator_convert_to_MaStro_street,
@@ -200,9 +200,9 @@ classes = (
     mastro_massing.OBJECT_OT_Set_Edge_Attribute_Depth,
     mastro_massing.obj_typology_uses_name_list,
     mastro_massing.VIEW3D_PT_MaStro_Mass,
-    mastro_massing.VIEW3D_PT_MaStro_Plot,
-    mastro_massing.OBJECT_OT_Set_Plot_Edge_Attribute_Normal,
-    mastro_massing.OBJECT_OT_Set_Plot_Edge_Angle,
+    mastro_massing.VIEW3D_PT_MaStro_Block,
+    mastro_massing.OBJECT_OT_Set_Block_Edge_Attribute_Normal,
+    mastro_massing.OBJECT_OT_Set_Block_Edge_Angle,
     
     mastro_modal_operator.VIEW_3D_OT_show_mastro_overlay,
     mastro_modal_operator.VIEW_3D_OT_show_mastro_attributes,
@@ -243,10 +243,10 @@ def initNodes():
     bpy.ops.node.update_gn_filter(filter_name="typology")
     bpy.ops.node.update_gn_filter(filter_name="wall type")
     bpy.ops.node.update_gn_filter(filter_name="street type")
-    bpy.ops.node.update_gn_filter(filter_name="plot side")
+    bpy.ops.node.update_gn_filter(filter_name="block side")
     
-    bpy.ops.node.update_shader_filter(filter_name="plot")
     bpy.ops.node.update_shader_filter(filter_name="block")
+    bpy.ops.node.update_shader_filter(filter_name="building")
     bpy.ops.node.update_shader_filter(filter_name="use")
     bpy.ops.node.update_shader_filter(filter_name="typology")
 
@@ -255,43 +255,17 @@ def initLists(scene=None):
         s = bpy.context.scene
     else:
         s = bpy.data.scenes[scene]
-    # plot name
-    name_list = s.mastro_plot_name_list
-    name_list_current = s.mastro_plot_name_current
-    if len(name_list) == 0:
-        name_list.add()
-        name_list[0].id = 0
-        name_list[0].name = "Plot type... "
-    elif not 0 in [elem.id for elem in name_list]:
-        name_list.add()
-        name_list[-1].id = 0
-        name_list[-1].name = "Plot type... "
-    if len(name_list_current) == 0:
-        name_list_current.add()
-        name_list_current[0].id = 0
-        name_list_current[0].name = name_list[0].name 
-        
-    # if len(bpy.context.scene.mastro_plot_name_list) == 0:
-    #     bpy.context.scene.mastro_plot_name_list.add()
-    #     bpy.context.scene.mastro_plot_name_list[0].id = 0
-    #     bpy.context.scene.mastro_plot_name_list[0].name = "Plot name..."
-    
-    # if len(bpy.context.scene.mastro_plot_name_current) == 0:
-    #     bpy.context.scene.mastro_plot_name_current.add()
-    #     bpy.context.scene.mastro_plot_name_current[0].id = 0
-    #     bpy.context.scene.mastro_plot_name_current[0].name = bpy.context.scene.mastro_plot_name_list[0].name
-    
     # block name
     name_list = s.mastro_block_name_list
     name_list_current = s.mastro_block_name_current
     if len(name_list) == 0:
         name_list.add()
         name_list[0].id = 0
-        name_list[0].name = "Block name... "
+        name_list[0].name = "Block type... "
     elif not 0 in [elem.id for elem in name_list]:
         name_list.add()
         name_list[-1].id = 0
-        name_list[-1].name = "Block name... "
+        name_list[-1].name = "Block type... "
     if len(name_list_current) == 0:
         name_list_current.add()
         name_list_current[0].id = 0
@@ -306,6 +280,32 @@ def initLists(scene=None):
     #     bpy.context.scene.mastro_block_name_current.add()
     #     bpy.context.scene.mastro_block_name_current[0].id = 0
     #     bpy.context.scene.mastro_block_name_current[0].name = bpy.context.scene.mastro_block_name_list[0].name
+    
+    # building name
+    name_list = s.mastro_building_name_list
+    name_list_current = s.mastro_building_name_current
+    if len(name_list) == 0:
+        name_list.add()
+        name_list[0].id = 0
+        name_list[0].name = "Building name... "
+    elif not 0 in [elem.id for elem in name_list]:
+        name_list.add()
+        name_list[-1].id = 0
+        name_list[-1].name = "Building name... "
+    if len(name_list_current) == 0:
+        name_list_current.add()
+        name_list_current[0].id = 0
+        name_list_current[0].name = name_list[0].name 
+        
+    # if len(bpy.context.scene.mastro_building_name_list) == 0:
+    #     bpy.context.scene.mastro_building_name_list.add()
+    #     bpy.context.scene.mastro_building_name_list[0].id = 0
+    #     bpy.context.scene.mastro_building_name_list[0].name = "Building name..."
+    
+    # if len(bpy.context.scene.mastro_building_name_current) == 0:
+    #     bpy.context.scene.mastro_building_name_current.add()
+    #     bpy.context.scene.mastro_building_name_current[0].id = 0
+    #     bpy.context.scene.mastro_building_name_current[0].name = bpy.context.scene.mastro_building_name_list[0].name
     
     # use
     name_list = s.mastro_use_name_list
@@ -441,17 +441,17 @@ def initLists(scene=None):
     #     bpy.context.scene.mastro_obj_typology_uses_name_list[0].id = 0
     #     bpy.context.scene.mastro_obj_typology_uses_name_list[0].name =  bpy.context.scene.mastro_use_name_list[0].name
 
-def get_plot_names_from_list(scene, context):
+def get_block_names_from_list(scene, context):
     items = []
     
-    for el in scene.mastro_plot_name_list:
+    for el in scene.mastro_block_name_list:
         newProp = (el.name, el.name, "")
         items.append(newProp)
     return items
 
-def get_block_names_from_list(scene, context):
+def get_building_names_from_list(scene, context):
     items = []
-    for el in scene.mastro_block_name_list:
+    for el in scene.mastro_building_name_list:
         newProp = (el.name, el.name, "")
         items.append(newProp)
     return items
@@ -683,19 +683,19 @@ def register():
     bpy.types.WindowManager.toggle_show_data = bpy.props.BoolProperty(
                                             default = False,
                                             update = mastro_modal_operator.update_show_attributes)
-    bpy.types.WindowManager.toggle_plot_name = bpy.props.BoolProperty(
-                                            name = "Plot Name",
-                                            default = False)
     bpy.types.WindowManager.toggle_block_name = bpy.props.BoolProperty(
                                             name = "Block Name",
+                                            default = False)
+    bpy.types.WindowManager.toggle_building_name = bpy.props.BoolProperty(
+                                            name = "Building Name",
                                             default = False)
     bpy.types.WindowManager.toggle_typology_name = bpy.props.BoolProperty(
                                             name = "Typology Name",
                                             default = False)
-    bpy.types.WindowManager.toggle_plot_typology_color = bpy.props.BoolProperty(
+    bpy.types.WindowManager.toggle_block_typology_color = bpy.props.BoolProperty(
                                             name = "Typology Color",
                                             default = False)
-    bpy.types.WindowManager.toggle_plot_normal = bpy.props.BoolProperty(
+    bpy.types.WindowManager.toggle_block_normal = bpy.props.BoolProperty(
                                             name = "Inverted Normal",
                                             default = False)
     bpy.types.WindowManager.toggle_wall_type = bpy.props.BoolProperty(
@@ -743,11 +743,11 @@ def register():
                                         name = "Show selection overlay",
                                         default = False
                                         )
-    Scene.attribute_mass_plot_id = bpy.props.IntProperty(
-                                        name="Plot Id",
-                                        default=0)
     Scene.attribute_mass_block_id = bpy.props.IntProperty(
                                         name="Block Id",
+                                        default=0)
+    Scene.attribute_mass_building_id = bpy.props.IntProperty(
+                                        name="Building Id",
                                         default=0)
     Scene.attribute_mass_typology_id = bpy.props.IntProperty(
                                         name="Typology Id",
@@ -798,22 +798,22 @@ def register():
                                         min=1, 
                                         default=3,
                                         update = mastro_massing.update_attributes_mastro_mesh_storeys)
-    Scene.attribute_plot_side_angle = bpy.props.FloatProperty(
-                                        name="Block Side Angle",
+    Scene.attribute_block_side_angle = bpy.props.FloatProperty(
+                                        name="Building Side Angle",
                                         min=math.radians(-90),    
                                         max=math.radians(90),  
                                         default=0,
                                         subtype='ANGLE',
-                                        update = mastro_massing.update_attributes_plot_side_angle)
-    Scene.attribute_plot_depth = bpy.props.FloatProperty(
+                                        update = mastro_massing.update_attributes_block_side_angle)
+    Scene.attribute_block_depth = bpy.props.FloatProperty(
                                         name="The depth of the building",
                                         min=0, 
                                         default=18,
                                         subtype="DISTANCE",
-                                        update = mastro_massing.update_attributes_mastro_plot_depth)
-    Scene.attribute_plot_normal = bpy.props.BoolProperty(
+                                        update = mastro_massing.update_attributes_mastro_block_depth)
+    Scene.attribute_block_normal = bpy.props.BoolProperty(
                                             default = False,
-                                            update = mastro_massing.update_plot_normal)
+                                            update = mastro_massing.update_block_normal)
     
     # Scene.mouse_keyboard_event = bpy.props.StringProperty(
     #                                     name="Mouse and keyboard event"
@@ -866,25 +866,25 @@ def register():
                                     default = -1,
                                     description="Store the number of edges of the previous selection"
                                     )                                          
-    Scene.mastro_plot_name_list = bpy.props.CollectionProperty(type = mastro_project_data.plot_name_list)
-    Scene.mastro_plot_name_current = bpy.props.CollectionProperty(type =mastro_project_data.name_with_id)
-    Scene.mastro_plot_name_list_index = bpy.props.IntProperty(name = "Plot Name",
-                                             default = 0)
-    Scene.mastro_plot_names = bpy.props.EnumProperty(
-                                        name="Plot names",
-                                        description="Current plot name",
-                                        items=get_plot_names_from_list,
-                                        update=mastro_massing.update_plot_name_id)
-    
     Scene.mastro_block_name_list = bpy.props.CollectionProperty(type = mastro_project_data.block_name_list)
     Scene.mastro_block_name_current = bpy.props.CollectionProperty(type =mastro_project_data.name_with_id)
     Scene.mastro_block_name_list_index = bpy.props.IntProperty(name = "Block Name",
                                              default = 0)
     Scene.mastro_block_names = bpy.props.EnumProperty(
                                         name="Block names",
-                                        description="Current block name ",
+                                        description="Current block name",
                                         items=get_block_names_from_list,
                                         update=mastro_massing.update_block_name_id)
+    
+    Scene.mastro_building_name_list = bpy.props.CollectionProperty(type = mastro_project_data.building_name_list)
+    Scene.mastro_building_name_current = bpy.props.CollectionProperty(type =mastro_project_data.name_with_id)
+    Scene.mastro_building_name_list_index = bpy.props.IntProperty(name = "Building Name",
+                                             default = 0)
+    Scene.mastro_building_names = bpy.props.EnumProperty(
+                                        name="Building names",
+                                        description="Current building name ",
+                                        items=get_building_names_from_list,
+                                        update=mastro_massing.update_building_name_id)
     
     Scene.mastro_use_name_list = bpy.props.CollectionProperty(type = mastro_project_data.use_name_list)
 
@@ -1003,11 +1003,11 @@ def unregister():
     # del bpy.types.Scene.MaStro_math_node_entries
     # del bpy.types.Scene.MaStroAttributes
     del bpy.types.WindowManager.toggle_show_data
-    del bpy.types.WindowManager.toggle_plot_name
     del bpy.types.WindowManager.toggle_block_name
+    del bpy.types.WindowManager.toggle_building_name
     del bpy.types.WindowManager.toggle_typology_name
-    del bpy.types.WindowManager.toggle_plot_typology_color
-    del bpy.types.WindowManager.toggle_plot_normal
+    del bpy.types.WindowManager.toggle_block_typology_color
+    del bpy.types.WindowManager.toggle_block_normal
     del bpy.types.WindowManager.toggle_storey_number
     del bpy.types.WindowManager.toggle_wall_type
     del bpy.types.WindowManager.toggle_wall_normal
@@ -1020,8 +1020,8 @@ def unregister():
     del Scene.mastroKeyDictionary
     del Scene.constraint_xy_setting
     # del Scene.updating_mesh_attributes_is_active
-    del Scene.attribute_mass_plot_id
     del Scene.attribute_mass_block_id
+    del Scene.attribute_mass_building_id
     del Scene.attribute_mass_typology_id
     del Scene.attribute_wall_id
     del Scene.attribute_wall_thickness
@@ -1029,8 +1029,8 @@ def unregister():
     del Scene.attribute_wall_offset
     del Scene.attribute_floor_id
     del Scene.attribute_mass_storeys
-    del Scene.attribute_plot_depth
-    del Scene.attribute_plot_normal
+    del Scene.attribute_block_depth
+    del Scene.attribute_block_normal
     # del Scene.mastro_attribute_collection
     # del Scene.update_attributes
     # del Scene.mouse_keyboard_event
@@ -1043,29 +1043,29 @@ def unregister():
     del Scene.previous_selection_vert_id
     del Scene.previous_edge_number
     
-    del Scene.mastro_plot_name_list
     del Scene.mastro_block_name_list
+    del Scene.mastro_building_name_list
     del Scene.mastro_use_name_list
     del Scene.mastro_typology_name_list
     del Scene.mastro_obj_typology_uses_name_list
     del Scene.mastro_wall_name_list
     del Scene.mastro_floor_name_list
     
-    del Scene.mastro_plot_name_current
     del Scene.mastro_block_name_current
+    del Scene.mastro_building_name_current
     del Scene.mastro_typology_name_current
     del Scene.mastro_wall_name_current
     del Scene.mastro_floor_name_current
     
-    del Scene.mastro_plot_name_list_index
     del Scene.mastro_block_name_list_index
+    del Scene.mastro_building_name_list_index
     del Scene.mastro_typology_name_list_index
     del Scene.mastro_obj_typology_uses_name_list_index
     del Scene.mastro_wall_name_list_index
     del Scene.mastro_floor_name_list_index
     
-    del Scene.mastro_plot_names
     del Scene.mastro_block_names
+    del Scene.mastro_building_names
     del Scene.mastro_typology_uses_name
     del Scene.mastro_typology_names
     del Scene.mastro_wall_names
