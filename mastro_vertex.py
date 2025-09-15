@@ -99,7 +99,7 @@ class OBJECT_OT_SetVertexAttribute(Operator):
 #     # mesh.validate(verbose=True)
 #     object_data_add(context, mesh, operator=self)
 #     mesh.attributes.new(name="mastro_wall_type", type="INT", domain="EDGE")
-#     mesh.attributes.new(name="mastro_plot_name", type="STRING", domain="FACE")
+#     mesh.attributes.new(name="mastro_block_name", type="STRING", domain="FACE")
     
 # def add_MaStro_wall_button(self, context):
 #     self.layout.operator(

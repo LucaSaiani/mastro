@@ -165,13 +165,13 @@ class update_GN_Filter_OT(Operator):
     filter_name: bpy.props.StringProperty(name="Filter type name")
         
     def newGroup (self, groupName, type):
-        # if self.filter_name == "plot": attributeName = "mastro_plot_id"
-        # elif self.filter_name == "block": attributeName = "mastro_block_id"
+        # if self.filter_name == "block": attributeName = "mastro_block_id"
+        # elif self.filter_name == "building": attributeName = "mastro_building_id"
         if self.filter_name == "use": attributeName = "mastro_use"
         elif self.filter_name == "typology": attributeName = "mastro_typology_id"
         elif self.filter_name == "wall type": attributeName = "mastro_wall_id"
         elif self.filter_name == "street type": attributeName = "mastro_street_id"
-        elif self.filter_name == "plot side": attributeName = "mastro_plot_side"
+        elif self.filter_name == "block side": attributeName = "mastro_block_side"
 
         # GN group
         group = bpy.data.node_groups.new(groupName,'GeometryNodeTree')
@@ -232,7 +232,7 @@ class update_GN_Filter_OT(Operator):
         elif self.filter_name == "typology": listToLoop = bpy.context.scene.mastro_typology_name_list
         elif self.filter_name == "wall type": listToLoop = bpy.context.scene.mastro_wall_name_list
         elif self.filter_name == "street type": listToLoop = bpy.context.scene.mastro_street_name_list
-        elif self.filter_name == "plot side": listToLoop = [
+        elif self.filter_name == "block side": listToLoop = [
                                                             SimpleNamespace(id=0, name="External Side"),
                                                             SimpleNamespace(id=1, name="Internal Side"),
                                                             SimpleNamespace(id=2, name="Lateral Side")
@@ -292,8 +292,8 @@ class update_Shader_Filter_OT(Operator):
         
     #     return node_obj, node_x_location
     def newGroup (self, groupName, type):
-        if self.filter_name == "plot": attributeName = "mastro_plot_id"
-        elif self.filter_name == "block": attributeName = "mastro_block_id"
+        if self.filter_name == "block": attributeName = "mastro_block_id"
+        elif self.filter_name == "building": attributeName = "mastro_building_id"
         elif self.filter_name == "use": attributeName = "mastro_use"
         elif self.filter_name == "typology": attributeName = "mastro_typology_id"
         
@@ -372,8 +372,8 @@ class update_Shader_Filter_OT(Operator):
             # print(lastId, len(nodes))
         
         
-        if self.filter_name == "plot": listToLoop = bpy.context.scene.mastro_plot_name_list
-        elif self.filter_name == "block": listToLoop = bpy.context.scene.mastro_block_name_list
+        if self.filter_name == "block": listToLoop = bpy.context.scene.mastro_block_name_list
+        elif self.filter_name == "building": listToLoop = bpy.context.scene.mastro_building_name_list
         elif self.filter_name == "use": listToLoop = bpy.context.scene.mastro_use_name_list
         elif self.filter_name == "typology": listToLoop = bpy.context.scene.mastro_typology_name_list
         
@@ -473,24 +473,24 @@ class VIEW3D_PT_MaStro_show_data(Panel):
 
         # col = flow.column()
         # col = flow.column(heading="Mass", align = True)
-        col = layout.column(heading="Plot & Mass", align=True)
+        col = layout.column(heading="Block & Mass", align=True)
         col.prop(context.window_manager, 'toggle_storey_number', icon_only=False)
         col.separator()
         col.prop(context.window_manager, 'toggle_typology_name', icon_only=False)
-        col.prop(context.window_manager, 'toggle_plot_typology_color', icon_only=False)
+        col.prop(context.window_manager, 'toggle_block_typology_color', icon_only=False)
         col.separator()
-        col.prop(context.window_manager, 'toggle_plot_normal', icon_only=False)
+        col.prop(context.window_manager, 'toggle_block_normal', icon_only=False)
         col.separator()
+        col.prop(context.window_manager, 'toggle_building_name', icon_only=False)
         col.prop(context.window_manager, 'toggle_block_name', icon_only=False)
-        col.prop(context.window_manager, 'toggle_plot_name', icon_only=False)
         
-        # col = layout.column(heading="Plot", align=True)
+        # col = layout.column(heading="Block", align=True)
         
         
         # col.prop(context.window_manager, 'toggle_storey_number', icon_only=False)
         # col.prop(context.window_manager, 'toggle_typology_name', icon_only=False)
+        # col.prop(context.window_manager, 'toggle_building_name', icon_only=False)
         # col.prop(context.window_manager, 'toggle_block_name', icon_only=False)
-        # col.prop(context.window_manager, 'toggle_plot_name', icon_only=False)
         
         # col.separator()
         col = layout.column(heading="Wall", align = True)
@@ -533,13 +533,13 @@ class VIEW3D_PT_MaStro_mass_data(Panel):
         pass
       
 ############################        ############################
-############################ PLOT   ############################
+############################ BLOCK   ############################
 ############################        ############################ 
             
-class VIEW3D_PT_MaStro_mass_plot_data(Panel):
+class VIEW3D_PT_MaStro_mass_block_data(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
-    bl_label = "Plot"
+    bl_label = "Block"
     bl_parent_id = "VIEW3D_PT_MaStro_mass_data"
     bl_options = {'DEFAULT_CLOSED'}
     
@@ -550,35 +550,35 @@ class VIEW3D_PT_MaStro_mass_plot_data(Panel):
         layout.use_property_decorate = False  # No animation.
         
         row = layout.row()
-        # row.label(text="Plot")
+        # row.label(text="Block")
         
         rows = 3
         
         row = layout.row()
-        row.template_list("OBJECT_UL_Plot", "plot_list", scene,
-                        "mastro_plot_name_list", scene, "mastro_plot_name_list_index", rows = rows)
+        row.template_list("OBJECT_UL_Block", "block_list", scene,
+                        "mastro_block_name_list", scene, "mastro_block_name_list_index", rows = rows)
         
         
         col = row.column(align=True)
-        col.operator("mastro_plot_name_list.new_item", icon='ADD', text="")
+        col.operator("mastro_block_name_list.new_item", icon='ADD', text="")
         # col.operator("mastro_wall_type_list.delete_item", icon='REMOVE', text="")
         col.separator()
-        col.operator("mastro_plot_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
-        col.operator("mastro_plot_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
+        col.operator("mastro_block_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
+        col.operator("mastro_block_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
         
         # row = layout.row()
         # row = layout.row(align=True)
-        # row.prop(context.scene, "mastro_plot_names", icon="MOD_BOOLEAN", icon_only=True, text="")
-        # row.operator("scene.add_plot_name", icon="ADD", text="New")
+        # row.prop(context.scene, "mastro_block_names", icon="MOD_BOOLEAN", icon_only=True, text="")
+        # row.operator("scene.add_block_name", icon="ADD", text="New")
         
-        # if scene.mastro_plot_name_list_index >= 0 and scene.mastro_plot_name_list:
-        #     item = scene.mastro_plot_name_list[scene.mastro_plot_name_list_index]
-        #     row.prop(item, "name", icon_only=True, text="Plot Name")
+        # if scene.mastro_block_name_list_index >= 0 and scene.mastro_block_name_list:
+        #     item = scene.mastro_block_name_list[scene.mastro_block_name_list_index]
+        #     row.prop(item, "name", icon_only=True, text="Block Name")
             
         # row.prop(item, "index")
         
-class OBJECT_UL_Plot(UIList):
-    """Plot name UIList."""
+class OBJECT_UL_Block(UIList):
+    """Block name UIList."""
     def draw_item(self, context, layout, data, item, icon, active_data,
                   active_propname, index):
        
@@ -593,7 +593,7 @@ class OBJECT_UL_Plot(UIList):
             split = layout.split(factor=0.4)
             split.label(text="Id: %d" % (item.id)) 
             # split.label(text=item.name, icon=custom_icon) 
-            split.prop(context.scene.mastro_plot_name_list[index],
+            split.prop(context.scene.mastro_block_name_list[index],
                        "name",
                        icon_only=True,
                        icon = custom_icon)
@@ -606,7 +606,7 @@ class OBJECT_UL_Plot(UIList):
             layout.alignment = 'CENTER'
             layout.label(text="", icon = custom_icon)
 
-        # self.filter_zero_id(context, data, "mastro_plot_name_list")
+        # self.filter_zero_id(context, data, "mastro_block_name_list")
 
 
     def filter_items(self, context, data, propname):
@@ -620,162 +620,6 @@ class OBJECT_UL_Plot(UIList):
         ordered = []
         items = getattr(data, propname)
         # Initialize with all items visible
-        filtered = [self.bitflag_filter_item] * len(items)
-        
-        # for i, item in enumerate(items):
-        #     if item.id == 0:
-        #         filtered[i] &= ~self.bitflag_filter_item
-        return filtered, ordered
-
-    def draw_filter(self, context, layout):
-        pass
-    
-class PLOT_LIST_OT_NewItem(Operator):
-    bl_idname = "mastro_plot_name_list.new_item"
-    bl_label = "Add a new plot"
-
-    def execute(self, context): 
-        context.scene.mastro_plot_name_list.add()
-        # last = len(context.scene.mastro_plot_name_list)-1
-        # if last == 0:
-        #     context.scene.mastro_plot_name_list[0].id = 0
-        #     context.scene.mastro_plot_name_list[0].name = ""
-        #     random.seed(datetime.now().timestamp())
-        #     rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
-        #     context.scene.mastro_plot_name_list[0].RND = rndNumber
-        #     context.scene.mastro_plot_name_list.add()
-        temp_list = []    
-        for el in context.scene.mastro_plot_name_list:
-            temp_list.append(el.id)
-        last = len(context.scene.mastro_plot_name_list)-1
-        
-        context.scene.mastro_plot_name_list[last].id = max(temp_list)+1
-        # rndNumber = float(decimal.Decimal(random.randrange(0,1000))/1000)
-        # context.scene.mastro_plot_name_list[last].RND = rndNumber
-        bpy.ops.node.update_shader_filter(filter_name="plot")   
-        return{'FINISHED'}
-    
-class PLOT_LIST_OT_MoveItem(Operator):
-    bl_idname = "mastro_plot_name_list.move_item"
-    bl_label = "Move an item in the list"
-
-    direction: bpy.props.EnumProperty(items=(('UP', 'Up', ""),
-                                              ('DOWN', 'Down', ""),))
-
-    @classmethod
-    def poll(cls, context):
-        return context.scene.mastro_plot_name_list
-
-    def move_index(self):
-        index = bpy.context.scene.mastro_plot_name_list_index
-        list_length = len(bpy.context.scene.mastro_plot_name_list) - 1 
-        new_index = index + (-1 if self.direction == 'UP' else 1)
-
-        bpy.context.scene.mastro_plot_name_list_index = max(0, min(new_index, list_length))
-
-    def execute(self, context):
-        mastro_plot_name_list = context.scene.mastro_plot_name_list
-        index = context.scene.mastro_plot_name_list_index
-
-        neighbor = index + (-1 if self.direction == 'UP' else 1)
-        mastro_plot_name_list.move(neighbor, index)
-        self.move_index()
-
-        return{'FINISHED'}
-    
-# update the node "filter by plot" if a new plot is added or
-# a plot name has changed
-def update_mastro_filter_by_plot(self, context):
-    bpy.ops.node.update_shader_filter(filter_name="plot")
-    return None
-            
-class plot_name_list(PropertyGroup):
-    id: IntProperty(
-           name="Id",
-           description="Plot name id",
-           default = 0)
-    
-    name: StringProperty(
-           name="Plot Name",
-           description="The name of the plot",
-           default="Plot name...",
-           update=update_mastro_filter_by_plot)
-    
-    # RND: FloatProperty(
-    #        name="Random Value per Plot",
-    #        description="A random value assigned to each plot",
-    #        default = 0)
-        
-############################        ############################
-############################ BLOCK  ############################
-############################        ############################
-
-    
-class VIEW3D_PT_MaStro_mass_block_data(Panel):
-    bl_space_type = "PROPERTIES"
-    bl_region_type = "WINDOW"
-    bl_label = "Block"
-    bl_parent_id = "VIEW3D_PT_MaStro_mass_data"
-    bl_options = {'DEFAULT_CLOSED'}
-    
-    def draw(self, context):
-        scene = context.scene
-        
-        layout = self.layout
-        layout.use_property_split = True
-        layout.use_property_decorate = False  # No animation.
-        
-        row = layout.row()
-        
-        #row.label(text="Block")
-        # row.prop(context.window_manager, 'toggle_block_name', toggle=True, icon="HIDE_OFF", icon_only=True)
-        
-        # is_sortable = len(scene.mastro_block_name_list) > 1
-        rows = 3
-        # if is_sortable:
-        #     rows = 5
-            
-        row = layout.row()
-        row.template_list("OBJECT_UL_Block", "block_list", scene,
-                        "mastro_block_name_list", scene, "mastro_block_name_list_index", rows = rows)
-        
-        
-        col = row.column(align=True)
-        col.operator("mastro_block_name_list.new_item", icon='ADD', text="")
-        col.separator()
-        col.operator("mastro_block_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
-        col.operator("mastro_block_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
-        
-        # row = layout.row()
-        # row = layout.row(align=True)
-        
-        # if scene.mastro_block_name_list_index >= 0 and scene.mastro_block_name_list:
-        #     item = scene.mastro_block_name_list[scene.mastro_block_name_list_index]
-        #     row.prop(item, "name", icon_only=True, text="Block Name")
-            
-            
-class OBJECT_UL_Block(UIList):
-    def draw_item(self, context, layout, data, item, icon, active_data,
-                  active_propname, index):
-       
-        custom_icon = 'HOME'
-
-        if self.layout_type in {'DEFAULT', 'COMPACT'}:
-            split = layout.split(factor=0.4)
-            split.label(text="Id: %d" % (item.id)) 
-            # split.label(text=item.name, icon=custom_icon) 
-            split.prop(context.scene.mastro_block_name_list[index],
-                       "name",
-                       icon_only=True,
-                       icon = custom_icon)
-        elif self.layout_type in {'GRID'}:
-            layout.alignment = 'CENTER'
-            layout.label(text="", icon = custom_icon)
-
-    def filter_items(self, context, data, propname):
-        filtered = []
-        ordered = []
-        items = getattr(data, propname)
         filtered = [self.bitflag_filter_item] * len(items)
         
         # for i, item in enumerate(items):
@@ -808,7 +652,7 @@ class BLOCK_LIST_OT_NewItem(Operator):
         context.scene.mastro_block_name_list[last].id = max(temp_list)+1
         # rndNumber = float(decimal.Decimal(random.randrange(0,1000))/1000)
         # context.scene.mastro_block_name_list[last].RND = rndNumber
-        bpy.ops.node.update_shader_filter(filter_name="block")
+        bpy.ops.node.update_shader_filter(filter_name="block")   
         return{'FINISHED'}
     
 class BLOCK_LIST_OT_MoveItem(Operator):
@@ -856,6 +700,162 @@ class block_name_list(PropertyGroup):
            description="The name of the block",
            default="Block name...",
            update=update_mastro_filter_by_block)
+    
+    # RND: FloatProperty(
+    #        name="Random Value per Block",
+    #        description="A random value assigned to each block",
+    #        default = 0)
+        
+############################        ############################
+############################ BUILDING  ############################
+############################        ############################
+
+    
+class VIEW3D_PT_MaStro_mass_building_data(Panel):
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_label = "Building"
+    bl_parent_id = "VIEW3D_PT_MaStro_mass_data"
+    bl_options = {'DEFAULT_CLOSED'}
+    
+    def draw(self, context):
+        scene = context.scene
+        
+        layout = self.layout
+        layout.use_property_split = True
+        layout.use_property_decorate = False  # No animation.
+        
+        row = layout.row()
+        
+        #row.label(text="Building")
+        # row.prop(context.window_manager, 'toggle_building_name', toggle=True, icon="HIDE_OFF", icon_only=True)
+        
+        # is_sortable = len(scene.mastro_building_name_list) > 1
+        rows = 3
+        # if is_sortable:
+        #     rows = 5
+            
+        row = layout.row()
+        row.template_list("OBJECT_UL_Building", "building_list", scene,
+                        "mastro_building_name_list", scene, "mastro_building_name_list_index", rows = rows)
+        
+        
+        col = row.column(align=True)
+        col.operator("mastro_building_name_list.new_item", icon='ADD', text="")
+        col.separator()
+        col.operator("mastro_building_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
+        col.operator("mastro_building_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
+        
+        # row = layout.row()
+        # row = layout.row(align=True)
+        
+        # if scene.mastro_building_name_list_index >= 0 and scene.mastro_building_name_list:
+        #     item = scene.mastro_building_name_list[scene.mastro_building_name_list_index]
+        #     row.prop(item, "name", icon_only=True, text="Building Name")
+            
+            
+class OBJECT_UL_Building(UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data,
+                  active_propname, index):
+       
+        custom_icon = 'HOME'
+
+        if self.layout_type in {'DEFAULT', 'COMPACT'}:
+            split = layout.split(factor=0.4)
+            split.label(text="Id: %d" % (item.id)) 
+            # split.label(text=item.name, icon=custom_icon) 
+            split.prop(context.scene.mastro_building_name_list[index],
+                       "name",
+                       icon_only=True,
+                       icon = custom_icon)
+        elif self.layout_type in {'GRID'}:
+            layout.alignment = 'CENTER'
+            layout.label(text="", icon = custom_icon)
+
+    def filter_items(self, context, data, propname):
+        filtered = []
+        ordered = []
+        items = getattr(data, propname)
+        filtered = [self.bitflag_filter_item] * len(items)
+        
+        # for i, item in enumerate(items):
+        #     if item.id == 0:
+        #         filtered[i] &= ~self.bitflag_filter_item
+        return filtered, ordered
+
+    def draw_filter(self, context, layout):
+        pass
+    
+class BUILDING_LIST_OT_NewItem(Operator):
+    bl_idname = "mastro_building_name_list.new_item"
+    bl_label = "Add a new building"
+
+    def execute(self, context): 
+        context.scene.mastro_building_name_list.add()
+        # last = len(context.scene.mastro_building_name_list)-1
+        # if last == 0:
+        #     context.scene.mastro_building_name_list[0].id = 0
+        #     context.scene.mastro_building_name_list[0].name = ""
+        #     random.seed(datetime.now().timestamp())
+        #     rndNumber = float(decimal.Decimal(random.randrange(0,10000000))/10000000)
+        #     context.scene.mastro_building_name_list[0].RND = rndNumber
+        #     context.scene.mastro_building_name_list.add()
+        temp_list = []    
+        for el in context.scene.mastro_building_name_list:
+            temp_list.append(el.id)
+        last = len(context.scene.mastro_building_name_list)-1
+        
+        context.scene.mastro_building_name_list[last].id = max(temp_list)+1
+        # rndNumber = float(decimal.Decimal(random.randrange(0,1000))/1000)
+        # context.scene.mastro_building_name_list[last].RND = rndNumber
+        bpy.ops.node.update_shader_filter(filter_name="building")
+        return{'FINISHED'}
+    
+class BUILDING_LIST_OT_MoveItem(Operator):
+    bl_idname = "mastro_building_name_list.move_item"
+    bl_label = "Move an item in the list"
+
+    direction: bpy.props.EnumProperty(items=(('UP', 'Up', ""),
+                                              ('DOWN', 'Down', ""),))
+
+    @classmethod
+    def poll(cls, context):
+        return context.scene.mastro_building_name_list
+
+    def move_index(self):
+        index = bpy.context.scene.mastro_building_name_list_index
+        list_length = len(bpy.context.scene.mastro_building_name_list) - 1 
+        new_index = index + (-1 if self.direction == 'UP' else 1)
+
+        bpy.context.scene.mastro_building_name_list_index = max(0, min(new_index, list_length))
+
+    def execute(self, context):
+        mastro_building_name_list = context.scene.mastro_building_name_list
+        index = context.scene.mastro_building_name_list_index
+
+        neighbor = index + (-1 if self.direction == 'UP' else 1)
+        mastro_building_name_list.move(neighbor, index)
+        self.move_index()
+
+        return{'FINISHED'}
+    
+# update the node "filter by building" if a new building is added or
+# a building name has changed
+def update_mastro_filter_by_building(self, context):
+    bpy.ops.node.update_shader_filter(filter_name="building")
+    return None
+            
+class building_name_list(PropertyGroup):
+    id: IntProperty(
+           name="Id",
+           description="Building name id",
+           default = 0)
+    
+    name: StringProperty(
+           name="Building Name",
+           description="The name of the building",
+           default="Building name...",
+           update=update_mastro_filter_by_building)
     
 
     
@@ -926,7 +926,7 @@ def update_mastro_filter_by_use(self, context):
     
 #     name: StringProperty(
 #            name="Use Name",
-#            description="The use of the block",
+#            description="The use of the building",
 #            default = "Use name...",
 #            update=update_mastro_filter_by_use)
     
@@ -1633,7 +1633,7 @@ class typology_uses_name_list(PropertyGroup):
 ############################                ############################
         
         
-class VIEW3D_PT_MaStro_building_data(Panel):
+class VIEW3D_PT_MaStro_architecture_data(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     # bl_category = "MaStro"
@@ -1650,11 +1650,11 @@ class VIEW3D_PT_MaStro_building_data(Panel):
 ############################ WALL   ############################
 ############################        ############################
         
-class VIEW3D_PT_MaStro_building_wall_data(Panel):
+class VIEW3D_PT_MaStro_architecture_wall_data(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_label = "Wall"
-    bl_parent_id = "VIEW3D_PT_MaStro_building_data"
+    bl_parent_id = "VIEW3D_PT_MaStro_architecture_data"
     bl_options = {'DEFAULT_CLOSED'}      
     
     def draw(self, context):
@@ -1844,11 +1844,11 @@ class wall_name_list(PropertyGroup):
 ############################        ############################
             
 
-class VIEW3D_PT_MaStro_building_floor_data(Panel):
+class VIEW3D_PT_MaStro_architecture_floor_data(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_label = "Floor"
-    bl_parent_id = "VIEW3D_PT_MaStro_building_data"
+    bl_parent_id = "VIEW3D_PT_MaStro_architecture_data"
     bl_options = {'DEFAULT_CLOSED'}      
     
     def draw(self, context):
@@ -2249,9 +2249,9 @@ class name_with_id(PropertyGroup):
         default = "")
         
 
-# def update_plot_name_toggle(self, context):
-#     if self.plot_name_toggle:
-#         bpy.ops.plot_name_OT('INVOKE_DEFAULT')
+# def update_block_name_toggle(self, context):
+#     if self.block_name_toggle:
+#         bpy.ops.block_name_OT('INVOKE_DEFAULT')
 #     return
 
 

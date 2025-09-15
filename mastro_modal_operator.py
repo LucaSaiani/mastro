@@ -132,16 +132,16 @@ def draw_selection_overlay(context):
             # elif ("MaStro street" in obj.data and
             #      not (bpy.context.window_manager.toggle_show_data and bpy.context.window_manager.toggle_street_color)
             #     ):
-            elif "MaStro plot" in obj.data:
-                show_plot_overlay(obj)
+            elif "MaStro block" in obj.data:
+                show_block_overlay(obj)
             elif "MaStro street" in obj.data:
                 show_street_overlay(obj)
 
 def draw_callback_selection_overlay(self, context):
     draw_selection_overlay(context)
     
-# a function to show plot overlays
-def show_plot_overlay(obj):
+# a function to show block overlays
+def show_block_overlay(obj):
     theme = bpy.context.preferences.themes[0].view_3d
     color_editmesh_active = theme.editmesh_active
     color_edge_mode_select = theme.edge_mode_select
@@ -165,7 +165,7 @@ def show_plot_overlay(obj):
         bm.edges.ensure_lookup_table()    
         # bm.faces.ensure_lookup_table()  
         
-    bMesh_plot_id_layer = bm.edges.layers.int["mastro_typology_id_EDGE"]
+    bMesh_block_id_layer = bm.edges.layers.int["mastro_typology_id_EDGE"]
     projectTypologies = bpy.context.scene.mastro_typology_name_list
     
     # matrix = bpy.context.region_data.perspective_matrix
@@ -175,7 +175,7 @@ def show_plot_overlay(obj):
         coords = [v1, v2]
         indices = [(0, 1)]
         
-        typology_id = edge[bMesh_plot_id_layer]
+        typology_id = edge[bMesh_block_id_layer]
         index = next((i for i, elem in enumerate(projectTypologies) if elem.id == typology_id), None)
         if 0 <= typology_id < len(bpy.context.scene.mastro_typology_name_list):
             if mesh.is_editmode:
@@ -193,7 +193,7 @@ def show_plot_overlay(obj):
             rgba = (r, g, b, a)   
             shader.uniform_float("color", rgba)    
                 
-            gpu.state.line_width_set(bpy.context.preferences.addons[__package__].preferences.plotEdgeSize)
+            gpu.state.line_width_set(bpy.context.preferences.addons[__package__].preferences.blockEdgeSize)
             gpu.state.blend_set("ALPHA")
             batch = batch_for_shader(shader, 'LINES', {"pos": coords}, indices=indices)
             batch.draw(shader)
@@ -501,7 +501,7 @@ class VIEW_3D_OT_show_mastro_attributes(Operator):
     
 def draw_main_show_attributes_2D(context):
     obj = bpy.context.active_object
-    if hasattr(obj, "data") and "MaStro object" in obj.data and ("MaStro mass" in obj.data or "MaStro plot" in obj.data):
+    if hasattr(obj, "data") and "MaStro object" in obj.data and ("MaStro mass" in obj.data or "MaStro block" in obj.data):
         # obj.update_from_editmode()
         scene = context.scene
             
@@ -522,12 +522,12 @@ def draw_main_show_attributes_2D(context):
             # bMesh_wall = bm.edges.layers.int["mastro_wall_id"]
             bMesh_normal = bm.edges.layers.int["mastro_inverted_normal"]
         
-            # bMesh_plot = bm.faces.layers.int["mastro_plot_id"]
             # bMesh_block = bm.faces.layers.int["mastro_block_id"]
+            # bMesh_building = bm.faces.layers.int["mastro_building_id"]
             bMesh_typology = bm.faces.layers.int["mastro_typology_id"]
             bMesh_storey = bm.faces.layers.int["mastro_number_of_storeys"]
             bMesh_floor = bm.faces.layers.int["mastro_floor_id"]
-        elif "MaStro plot" in obj.data:
+        elif "MaStro block" in obj.data:
             bMesh_normal = bm.edges.layers.bool["mastro_inverted_normal_EDGE"]
             bMesh_typology = bm.edges.layers.int["mastro_typology_id_EDGE"]
             bMesh_storey = bm.edges.layers.int["mastro_number_of_storeys_EDGE"]
@@ -601,7 +601,7 @@ def draw_main_show_attributes_2D(context):
             text_normal = ""
             text_storey = ""
             
-            if "MaStro plot" in obj.data:
+            if "MaStro block" in obj.data:
                 idUse = bmEdge[bMesh_typology]
                 storey = bmEdge[bMesh_storey]
                 if bpy.context.window_manager.toggle_typology_name:   
@@ -622,7 +622,7 @@ def draw_main_show_attributes_2D(context):
                     vert_offset += half_line_height
                     text_edge.append(text_storey)
                     text_edge.append(cr)  
-                if bpy.context.window_manager.toggle_plot_normal: 
+                if bpy.context.window_manager.toggle_block_normal: 
                     if normal == True:   
                         symbol = "⥌"
                         text_normal = (symbol, 0)
@@ -679,8 +679,8 @@ def draw_main_show_attributes_2D(context):
                 center_local = bmFace.calc_center_median()
                 
                 center = matrix @ center_local # convert the coordinates from local to world
-                # idPlot = bmFace[bMesh_plot]
                 # idBlock = bmFace[bMesh_block]
+                # idBuilding = bmFace[bMesh_building]
                 idUse = bmFace[bMesh_typology]
                 idFloor = bmFace[bMesh_floor]
                 storey = bmFace[bMesh_storey]
@@ -689,25 +689,12 @@ def draw_main_show_attributes_2D(context):
                 vert_offset = 0
                 
                 text_face = []
-                text_plot = ""
                 text_block = ""
+                text_building = ""
                 text_typology = ""
                 text_storey = ""
                 text_floor = ""
                 
-                # plotId
-                if bpy.context.window_manager.toggle_plot_name:   
-                    plotId = obj.mastro_props['mastro_plot_attribute']
-                    for n in scene.mastro_plot_name_list:
-                        if n.id == plotId:
-                            if n.name != "":
-                                text_plot = (("Plot: " + n.name), 0)
-                                line_width = blf.dimensions(font_id, text_plot[0])[0]
-                                vert_offset = half_line_height
-                                text_face.append(text_plot)
-                                text_face.append(cr)
-                            break
-                    
                 # blockId
                 if bpy.context.window_manager.toggle_block_name:   
                     blockId = obj.mastro_props['mastro_block_attribute']
@@ -715,30 +702,43 @@ def draw_main_show_attributes_2D(context):
                         if n.id == blockId:
                             if n.name != "":
                                 text_block = (("Block: " + n.name), 0)
-                                if blf.dimensions(font_id, text_block[0])[0] > line_width:
-                                    line_width = blf.dimensions(font_id, text_block[0])[0]
-                                    vert_offset += half_line_height
+                                line_width = blf.dimensions(font_id, text_block[0])[0]
+                                vert_offset = half_line_height
                                 text_face.append(text_block)
                                 text_face.append(cr)
                             break
                     
-                # if bpy.context.window_manager.toggle_plot_name:   
-                #     for n in bpy.context.scene.mastro_plot_name_list:
-                #         if n.id == idPlot:
-                #             text_plot = (("Plot: " + n.name), 0)
-                #             line_width = blf.dimensions(font_id, text_plot[0])[0]
-                #             vert_offset = half_line_height
-                #             text.append(text_plot)
-                #             text.append(cr)
-                #             break
+                # buildingId
+                if bpy.context.window_manager.toggle_building_name:   
+                    buildingId = obj.mastro_props['mastro_building_attribute']
+                    for n in scene.mastro_building_name_list:
+                        if n.id == buildingId:
+                            if n.name != "":
+                                text_building = (("Building: " + n.name), 0)
+                                if blf.dimensions(font_id, text_building[0])[0] > line_width:
+                                    line_width = blf.dimensions(font_id, text_building[0])[0]
+                                    vert_offset += half_line_height
+                                text_face.append(text_building)
+                                text_face.append(cr)
+                            break
+                    
                 # if bpy.context.window_manager.toggle_block_name:   
                 #     for n in bpy.context.scene.mastro_block_name_list:
                 #         if n.id == idBlock:
                 #             text_block = (("Block: " + n.name), 0)
-                #             if blf.dimensions(font_id, text_block[0])[0] > line_width:
-                #                 line_width = blf.dimensions(font_id, text_block[0])[0]
-                #             vert_offset += half_line_height
+                #             line_width = blf.dimensions(font_id, text_block[0])[0]
+                #             vert_offset = half_line_height
                 #             text.append(text_block)
+                #             text.append(cr)
+                #             break
+                # if bpy.context.window_manager.toggle_building_name:   
+                #     for n in bpy.context.scene.mastro_building_name_list:
+                #         if n.id == idBuilding:
+                #             text_building = (("Building: " + n.name), 0)
+                #             if blf.dimensions(font_id, text_building[0])[0] > line_width:
+                #                 line_width = blf.dimensions(font_id, text_building[0])[0]
+                #             vert_offset += half_line_height
+                #             text.append(text_building)
                 #             text.append(cr)
                 #             break
                 if bpy.context.window_manager.toggle_typology_name:   
@@ -800,11 +800,11 @@ def draw_main_show_attributes_3D(context):
             mesh = obj.data
             if mesh.is_editmode == False:
                 show_wall_overlay(obj)
-        if "MaStro plot" in obj.data and bpy.context.window_manager.toggle_plot_typology_color:
-            # if mesh is in edit mode, the plot overlay is already drawn
+        if "MaStro block" in obj.data and bpy.context.window_manager.toggle_block_typology_color:
+            # if mesh is in edit mode, the block overlay is already drawn
             mesh = obj.data 
             if mesh.is_editmode == False:
-                show_plot_overlay(obj)
+                show_block_overlay(obj)
     
 
 def draw_callback_px_show_attributes_2D(self, context):
@@ -859,14 +859,14 @@ def updates(scene, depsgraph):
                     scene.previous_selection_face_id = -1
                     # if obj is not None and obj.type == "MESH" and "MaStro object" in obj.data and "MaStro mass" in obj.data:
                     if obj.mode == "OBJECT":
+                        buildingId = obj.mastro_props['mastro_building_attribute']
                         blockId = obj.mastro_props['mastro_block_attribute']
-                        plotId = obj.mastro_props['mastro_plot_attribute']
                         
+                        building = scene.mastro_building_name_list[buildingId].name
                         block = scene.mastro_block_name_list[blockId].name
-                        plot = scene.mastro_plot_name_list[plotId].name
                         
+                        scene.mastro_building_name_current[0].name = building
                         scene.mastro_block_name_current[0].name = block
-                        scene.mastro_plot_name_current[0].name = plot
                 else:
                     # if obj is not None and obj.type == "MESH" and "MaStro object" in obj.data and obj.mode == 'EDIT':
                     if obj.mode == 'EDIT':
@@ -978,22 +978,22 @@ def updates(scene, depsgraph):
                         # bpy.data.scenes["Scene"].attribute_mass_storeys = 5 
                         
             #######################################################################
-            ############################# MaStro Plot #############################
+            ############################# MaStro Block #############################
             #######################################################################
                         
-            elif "MaStro plot" in obj.data:
+            elif "MaStro block" in obj.data:
                 if scene.previous_selection_object_name != obj.name:
                     scene.previous_selection_object_name = obj.name
                     # scene.previous_selection_edge_id = -1
                     if obj.mode == "OBJECT":
-                        # blockId = obj.mastro_props['mastro_block_attribute']
-                        plotId = obj.mastro_props['mastro_plot_attribute']
+                        # buildingId = obj.mastro_props['mastro_building_attribute']
+                        blockId = obj.mastro_props['mastro_block_attribute']
                         
-                        # block = scene.mastro_block_name_list[blockId].name
-                        plot = scene.mastro_plot_name_list[plotId].name
+                        # building = scene.mastro_building_name_list[buildingId].name
+                        block = scene.mastro_block_name_list[blockId].name
                         
-                        # scene.mastro_block_name_current[0].name = block
-                        scene.mastro_plot_name_current[0].name = plot
+                        # scene.mastro_building_name_current[0].name = building
+                        scene.mastro_block_name_current[0].name = block
                 else:
                     # if obj is not None and obj.type == "MESH" and "MaStro object" in obj.data and obj.mode == 'EDIT':
                     if obj.mode == 'EDIT':
@@ -1005,8 +1005,8 @@ def updates(scene, depsgraph):
                         bMesh_storey_list_A = bm.edges.layers.int["mastro_list_storey_A_EDGE"]
                         bMesh_storey_list_B = bm.edges.layers.int["mastro_list_storey_B_EDGE"]
                         
-                        bMesh_plot_normal = bm.edges.layers.bool["mastro_inverted_normal_EDGE"]
-                        bMesh_plot_depth = bm.edges.layers.float["mastro_plot_depth_EDGE"]
+                        bMesh_block_normal = bm.edges.layers.bool["mastro_inverted_normal_EDGE"]
+                        bMesh_block_depth = bm.edges.layers.float["mastro_block_depth_EDGE"]
                         
                         bMesh_typology = bm.edges.layers.int["mastro_typology_id_EDGE"]
                         bMesh_use_list_A   = bm.edges.layers.int["mastro_list_use_id_A_EDGE"]
@@ -1056,11 +1056,11 @@ def updates(scene, depsgraph):
                                             connected_edge[bMesh_storey_list_A] = int(data["storey_list_A"])
                                             connected_edge[bMesh_storey_list_B] = int(data["storey_list_B"])
                                             
-                                            # update the plot depth ------------------------------------------
-                                            depth = bpy.context.scene.attribute_plot_depth
+                                            # update the block depth ------------------------------------------
+                                            depth = bpy.context.scene.attribute_block_depth
                                             if depth == 0:
                                                 depth = 18
-                                            connected_edge[bMesh_plot_depth] = depth
+                                            connected_edge[bMesh_block_depth] = depth
                                             
                                             # update the uses ------------------------------------------
                                             data = read_mesh_attributes_uses(bpy.context, typologySet = typology_id)
@@ -1075,7 +1075,7 @@ def updates(scene, depsgraph):
                                             
                                             # update the side angle ------------------------------------
                                             active_vert[bMesh_angle] = 0
-                                            bpy.context.scene.attribute_plot_side_angle = 0
+                                            bpy.context.scene.attribute_block_side_angle = 0
 
                                             bmesh.update_edit_mesh(mesh)
                                             
@@ -1102,11 +1102,11 @@ def updates(scene, depsgraph):
                                                 last_edge[bMesh_storey_list_A] = int(data["storey_list_A"])
                                                 last_edge[bMesh_storey_list_B] = int(data["storey_list_B"])
                                                 
-                                                # update the plot depth ------------------------------------------
-                                                depth = bpy.context.scene.attribute_plot_depth
+                                                # update the block depth ------------------------------------------
+                                                depth = bpy.context.scene.attribute_block_depth
                                                 if depth == 0:
                                                     depth = 18
-                                                last_edge[bMesh_plot_depth] = depth
+                                                last_edge[bMesh_block_depth] = depth
 
                                                 # update the uses ------------------------------------------
                                                 data = read_mesh_attributes_uses(bpy.context, typologySet = typology_id)
@@ -1124,8 +1124,8 @@ def updates(scene, depsgraph):
                                 scene.previous_edge_number = number_of_edges
                                 
                                 if len(selected_verts) == 1:
-                                    if bpy.context.scene.attribute_plot_side_angle != angle:
-                                        bpy.context.scene.attribute_plot_side_angle = angle   
+                                    if bpy.context.scene.attribute_block_side_angle != angle:
+                                        bpy.context.scene.attribute_block_side_angle = angle   
 
                         ######################  Edge ########################################
                         if bpy.context.scene.tool_settings.mesh_select_mode[1]:
@@ -1142,8 +1142,8 @@ def updates(scene, depsgraph):
                                     list_storey_A = bm.edges[active_edge.index][bMesh_storey_list_A]
                                     list_storey_B = bm.edges[active_edge.index][bMesh_storey_list_B]
                                     typology = bm.edges[active_edge.index][bMesh_typology]
-                                    plot_depth = bm.edges[active_edge.index][bMesh_plot_depth]
-                                    plot_normal = bm.edges[active_edge.index][bMesh_plot_normal]
+                                    block_depth = bm.edges[active_edge.index][bMesh_block_depth]
+                                    block_normal = bm.edges[active_edge.index][bMesh_block_normal]
                                     
                                     # if storeys are 0, it is a new edge and data is assigned
                                     if storeys == 0:
@@ -1157,11 +1157,11 @@ def updates(scene, depsgraph):
                                         active_edge[bMesh_storey_list_A] = int(data["storey_list_A"])
                                         active_edge[bMesh_storey_list_B] = int(data["storey_list_B"])
                                         
-                                        # update the plot depth ------------------------------------------
-                                        depth = bpy.context.scene.attribute_plot_depth
+                                        # update the block depth ------------------------------------------
+                                        depth = bpy.context.scene.attribute_block_depth
                                         if depth == 0:
                                             depth = 18
-                                        active_edge[bMesh_plot_depth] = depth
+                                        active_edge[bMesh_block_depth] = depth
                                         
                                         # update typology and related uses ------------------------------------------
                                         data = read_mesh_attributes_uses(bpy.context, typologySet = typology_id)
@@ -1180,11 +1180,11 @@ def updates(scene, depsgraph):
                                         if bpy.context.scene.attribute_mass_storeys != storeys:
                                             bpy.context.scene.attribute_mass_storeys = storeys
                                     
-                                        if bpy.context.scene.attribute_plot_depth != plot_depth:
-                                            bpy.context.scene.attribute_plot_depth = plot_depth
+                                        if bpy.context.scene.attribute_block_depth != block_depth:
+                                            bpy.context.scene.attribute_block_depth = block_depth
                                             
-                                        if bpy.context.scene.attribute_plot_normal != plot_normal:
-                                            bpy.context.scene.attribute_plot_normal = plot_normal
+                                        if bpy.context.scene.attribute_block_normal != block_normal:
+                                            bpy.context.scene.attribute_block_normal = block_normal
                                     
                                     # typology name
                                     # since it is possible to sort typologies in the ui, it can be that the index of the element

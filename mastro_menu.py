@@ -37,8 +37,8 @@ from pathlib import Path
 
 contexts = ['OBJECT', "EDIT_MESH"]
 
-# header_aggregateData = ["Option", "Phase", "Plot Name", "Block Name", "Use", "N. of Storeys", "Footprint", "Perimeter", "Wall area", "GEA"]
-# header_granularData = ["Option", "Phase", "Plot Name", "Block Name", "Use", "Floor", "Level", "GEA", "Perimeter", "Wall area"]
+# header_aggregateData = ["Option", "Phase", "Block Name", "Building Name", "Use", "N. of Storeys", "Footprint", "Perimeter", "Wall area", "GEA"]
+# header_granularData = ["Option", "Phase", "Block Name", "Building Name", "Use", "Floor", "Level", "GEA", "Perimeter", "Wall area"]
     
 # floorToFloorLevel = 4.2
 
@@ -80,18 +80,6 @@ mass_attribute_set = [
             # "attr_domain" :  "EDGE"
             # },
             # {
-            # "attr" :  "mastro_plot_id",
-            # "attr_type" :  "INT",
-            # "attr_domain" :  "FACE",
-            # "attr_default" : 0
-            # },
-            # {
-            # "attr" :  "mastro_plot_RND",
-            # "attr_type" :  "FLOAT",
-            # "attr_domain" :  "FACE",
-            # "attr_default" : 0
-            # },
-            # {
             # "attr" :  "mastro_block_id",
             # "attr_type" :  "INT",
             # "attr_domain" :  "FACE",
@@ -99,6 +87,18 @@ mass_attribute_set = [
             # },
             # {
             # "attr" :  "mastro_block_RND",
+            # "attr_type" :  "FLOAT",
+            # "attr_domain" :  "FACE",
+            # "attr_default" : 0
+            # },
+            # {
+            # "attr" :  "mastro_building_id",
+            # "attr_type" :  "INT",
+            # "attr_domain" :  "FACE",
+            # "attr_default" : 0
+            # },
+            # {
+            # "attr" :  "mastro_building_RND",
             # "attr_type" :  "FLOAT",
             # "attr_domain" :  "FACE",
             # "attr_default" : 0
@@ -195,7 +195,7 @@ mass_attribute_set = [
             },
 ]
 
-plot_attribute_set = [
+block_attribute_set = [
             {
             "attr" :  "mastro_typology_id",
             "attr_type" :  "INT",
@@ -264,7 +264,7 @@ plot_attribute_set = [
             "attr_default" : 1
             },
             {
-            "attr" :  "mastro_plot_depth",
+            "attr" :  "mastro_block_depth",
             "attr_type" :  "FLOAT",
             "attr_domain" :  "EDGE",
             "attr_default" : 18
@@ -338,18 +338,18 @@ class mastroAddonProperties(bpy.types.PropertyGroup):
     #     description="The construction phase of the building"
     # )
     
-    mastro_plot_attribute: bpy.props.IntProperty(
-        name="MaStro Plot Attribute",
-        default=1,
-        min=1,
-        description="Plot name"
-    )
-    
     mastro_block_attribute: bpy.props.IntProperty(
         name="MaStro Block Attribute",
         default=1,
         min=1,
         description="Block name"
+    )
+    
+    mastro_building_attribute: bpy.props.IntProperty(
+        name="MaStro Building Attribute",
+        default=1,
+        min=1,
+        description="Building name"
     )
     
 # class faceEdge():
@@ -500,10 +500,10 @@ def add_mastro_mass(width, depth):
 
     return verts, faces
 
-class MaStro_MenuOperator_add_MaStro_plot(Operator, AddObjectHelper):
-    """Add a MaStro maplotss"""
-    bl_idname = "object.mastro_add_mastro_plot"
-    bl_label = "Plot"
+class MaStro_MenuOperator_add_MaStro_block(Operator, AddObjectHelper):
+    """Add a MaStro mablockss"""
+    bl_idname = "object.mastro_add_mastro_block"
+    bl_label = "Block"
     bl_options = {'REGISTER', 'UNDO'}
     
     # width: bpy.props.FloatProperty(
@@ -516,7 +516,7 @@ class MaStro_MenuOperator_add_MaStro_plot(Operator, AddObjectHelper):
     
     # depth: bpy.props.FloatProperty(
     #     name="Depth",
-    #     description="MaStro plot depth",
+    #     description="MaStro block depth",
     #     # min=0.01, max=100.0,
     #     min=0,
     #     default=16,
@@ -524,16 +524,16 @@ class MaStro_MenuOperator_add_MaStro_plot(Operator, AddObjectHelper):
     
     # storeys: bpy.props.IntProperty(
     #         name="Number of Storeys",
-    #         description="Number of storeys of the plot masses",
+    #         description="Number of storeys of the block masses",
     #         min = 1,
     #         default = 3)
     
     
     def execute(self, context):
 
-        verts_loc, edges = add_mastro_plot()
+        verts_loc, edges = add_mastro_block()
 
-        mesh = bpy.data.meshes.new("MaStro plot")
+        mesh = bpy.data.meshes.new("MaStro block")
 
         bm = bmesh.new()
 
@@ -554,7 +554,7 @@ class MaStro_MenuOperator_add_MaStro_plot(Operator, AddObjectHelper):
         obj = bpy.context.active_object
         obj.select_set(True)
         
-        addPlotAttributes(obj)
+        addBlockAttributes(obj)
             
         addNodes()
         
@@ -565,10 +565,10 @@ class MaStro_MenuOperator_add_MaStro_plot(Operator, AddObjectHelper):
                 if mesh_attribute[0]  == index:
                     mesh_attribute[1].value = 3
 
-        # add mastro plot and mastro mass geo node to the created object
-        geoName = "MaStro Plot"
+        # add mastro block and mastro mass geo node to the created object
+        geoName = "MaStro Block"
         obj.modifiers.new(geoName, "NODES")
-        group = bpy.data.node_groups["MaStro Plot"]
+        group = bpy.data.node_groups["MaStro Block"]
         obj.modifiers[geoName].node_group = group
         context.view_layer.objects.active = obj
         
@@ -579,7 +579,7 @@ class MaStro_MenuOperator_add_MaStro_plot(Operator, AddObjectHelper):
         context.view_layer.objects.active = obj
         return {'FINISHED'}
     
-def add_mastro_plot():
+def add_mastro_block():
     """
     This function takes inputs and returns vertex and face arrays.
     no actual mesh data creation is done here.
@@ -707,7 +707,7 @@ def add_mastro_street():
 #     bl_idname = "VIEW3D_MT_mastro_add"
 
 #     def draw(self, context):
-#         # self.layout.operator(MaStro_MenuOperator_add_MaStro_plot.bl_idname, icon='MESH_CUBE')
+#         # self.layout.operator(MaStro_MenuOperator_add_MaStro_block.bl_idname, icon='MESH_CUBE')
 #         # self.layout.operator(MaStro_MenuOperator_add_MaStro_mass.bl_idname, icon='MESH_CUBE')
 #         # self.layout.separator()
 #         # self.layout.operator(MaStro_MenuOperator_add_MaStro_street.bl_idname, icon='MESH_CUBE')
@@ -724,8 +724,8 @@ def add_mastro_street():
 # add the entry to the add menu
 def mastro_add_menu_func(self, context):
     self.layout.separator()
-    myIcon = icons.icon_id("plot")
-    self.layout.operator(MaStro_MenuOperator_add_MaStro_plot.bl_idname, icon_value=myIcon)
+    myIcon = icons.icon_id("block")
+    self.layout.operator(MaStro_MenuOperator_add_MaStro_block.bl_idname, icon_value=myIcon)
     myIcon = icons.icon_id("mass")
     self.layout.operator(MaStro_MenuOperator_add_MaStro_mass.bl_idname, icon_value=myIcon)
     myIcon = icons.icon_id("street")
@@ -774,8 +774,8 @@ class MaStro_MenuOperator_convert_to_MaStro_street(Operator):
 def addMassAttributes(obj):
     # obj.mastro_props['mastro_option_attribute'] = 1
     # obj.mastro_props['mastro_phase_attribute'] = 1
-    obj.mastro_props['mastro_plot_attribute'] = 0
     obj.mastro_props['mastro_block_attribute'] = 0
+    obj.mastro_props['mastro_building_attribute'] = 0
     mesh = obj.data
     mesh["MaStro object"] = True
     mesh["MaStro mass"] = True
@@ -938,12 +938,12 @@ def addMassAttributes(obj):
                 #     attribute[0][1].value = None
 
 # assign the mass attributes to the selected object
-def addPlotAttributes(obj):
-    obj.mastro_props['mastro_plot_attribute'] = 0
+def addBlockAttributes(obj):
     obj.mastro_props['mastro_block_attribute'] = 0
+    obj.mastro_props['mastro_building_attribute'] = 0
     mesh = obj.data
     mesh["MaStro object"] = True
-    mesh["MaStro plot"] = True
+    mesh["MaStro block"] = True
     
     typology_id = bpy.context.scene.mastro_typology_name_list_index
     projectUses = bpy.context.scene.mastro_use_name_list
@@ -1054,7 +1054,7 @@ def addPlotAttributes(obj):
         storey_list_A = "1" + storey_list_A  
         storey_list_B = "1" + storey_list_B
             
-    for a in plot_attribute_set:
+    for a in block_attribute_set:
         try:
             mesh.attributes[a["attr"]]
         except:
@@ -1155,7 +1155,7 @@ def addNodes():
     # if not os.path.isdir(blend_file_path): blend_file_path = my_addon_path / "vscode_development/mastro/mastro.blend"
     inner_path = "NodeTree"
     
-    geoNodes_list = ("MaStro Mass", "MaStro Plot", "MaStro Street")
+    geoNodes_list = ("MaStro Mass", "MaStro Block", "MaStro Street")
 
     for group in geoNodes_list:
         if group not in bpy.data.node_groups:
@@ -1592,23 +1592,23 @@ def aggregateData(roughData):
         
 #     data = []
     
-#     # bm_layer_plot = bm.faces.layers.int["mastro_plot_id"]
 #     # bm_layer_block = bm.faces.layers.int["mastro_block_id"]
+#     # bm_layer_building = bm.faces.layers.int["mastro_building_id"]
 #     bm_layer_typology = bm.faces.layers.int["mastro_typology_id"]
 #     bm_layer_storey = bm.faces.layers.int["mastro_number_of_storeys"]
     
 #     for f in bm.faces:
 #         edges = []
-#         #plot
-#         # for n in bpy.context.scene.mastro_plot_name_list:
-#         #     if n.id == f[bm_layer_plot]:
-#         #         plot = n.name
-#         #         break
-
 #         #block
 #         # for n in bpy.context.scene.mastro_block_name_list:
 #         #     if n.id == f[bm_layer_block]:
 #         #         block = n.name
+#         #         break
+
+#         #building
+#         # for n in bpy.context.scene.mastro_building_name_list:
+#         #     if n.id == f[bm_layer_building]:
+#         #         building = n.name
 #         #         break
 
 #         #typology
@@ -1691,6 +1691,6 @@ def aggregateData(roughData):
 #         # level = Decimal(level)
 #         # level = level.quantize(Decimal('0.001'))
         
-#         data.append([option, phase, plot, block, typology, storeys, level, footprint, perimeter, wall_area, GEA, edges])
+#         data.append([option, phase, block, building, typology, storeys, level, footprint, perimeter, wall_area, GEA, edges])
             
 #     return(data)

@@ -91,7 +91,7 @@ class VIEW3D_PT_MaStro_Wall(Panel):
 ############################        ############################
 
 class OBJECT_OT_SetWallId(Operator):
-    """Set Face Attribute as use of the block"""
+    """Set Face Attribute as use of the building"""
     bl_idname = "object.set_attribute_wall_id"
     bl_label = "Set Edge Attribute as Wall type"
     bl_options = {'REGISTER', 'UNDO'}

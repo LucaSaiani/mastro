@@ -33,7 +33,7 @@ class VIEW3D_PT_MaStro_Mass(Panel):
     #bl_idname = "MASTRO_PT_Mass"
     
     
-    # global plotName
+    # global blockName
     
     # @classmethod
     # def poll(cls, context):
@@ -67,13 +67,13 @@ class VIEW3D_PT_MaStro_Mass(Panel):
                 # layout.prop(obj.mastro_props, "mastro_phase_attribute", text="Phase")
                 # row = layout.row()
                 # row = layout.row(align=True)
-                row.prop(context.scene, "mastro_plot_names", icon="MOD_BOOLEAN", icon_only=True, text="Plot")
-                if scene.mastro_plot_name_list and len(scene.mastro_plot_name_list) >0:
-                    row.label(text = scene.mastro_plot_name_current[0].name)
-                row = layout.row(align=True)
-                row.prop(context.scene, "mastro_block_names", icon="HOME", icon_only=True, text="Block")
+                row.prop(context.scene, "mastro_block_names", icon="MOD_BOOLEAN", icon_only=True, text="Block")
                 if scene.mastro_block_name_list and len(scene.mastro_block_name_list) >0:
                     row.label(text = scene.mastro_block_name_current[0].name)
+                row = layout.row(align=True)
+                row.prop(context.scene, "mastro_building_names", icon="HOME", icon_only=True, text="Building")
+                if scene.mastro_building_name_list and len(scene.mastro_building_name_list) >0:
+                    row.label(text = scene.mastro_building_name_current[0].name)
                 
                     
             elif mode == "EDIT":      
@@ -159,18 +159,18 @@ class OBJECT_UL_OBJ_Typology_Uses(UIList):
         pass
     
     
-class VIEW3D_PT_MaStro_Plot(Panel):
+class VIEW3D_PT_MaStro_Block(Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "MaStro"
-    bl_label = "Plot"
+    bl_label = "Block"
     
     @classmethod
     def poll(cls, context):
         return  (context.object is not None and 
                 context.object.type == "MESH" and 
                 "MaStro object" in context.object.data and
-                "MaStro plot" in context.object.data)
+                "MaStro block" in context.object.data)
     
     def draw(self, context):
         obj = context.object
@@ -186,13 +186,13 @@ class VIEW3D_PT_MaStro_Plot(Panel):
                 
                 row = layout.row(align=True)
                 
-                row.prop(context.scene, "mastro_plot_names", icon="MOD_BOOLEAN", icon_only=True, text="Plot")
-                if scene.mastro_plot_name_list and len(scene.mastro_plot_name_list) >0:
-                    row.label(text = scene.mastro_plot_name_current[0].name)
+                row.prop(context.scene, "mastro_block_names", icon="MOD_BOOLEAN", icon_only=True, text="Block")
+                if scene.mastro_block_name_list and len(scene.mastro_block_name_list) >0:
+                    row.label(text = scene.mastro_block_name_current[0].name)
                 # row = layout.row(align=True)
-                # row.prop(context.scene, "mastro_block_names", icon="HOME", icon_only=True, text="Block")
-                # if scene.mastro_block_name_list and len(scene.mastro_block_name_list) >0:
-                #     row.label(text = scene.mastro_block_name_current[0].name)
+                # row.prop(context.scene, "mastro_building_names", icon="HOME", icon_only=True, text="Building")
+                # if scene.mastro_building_name_list and len(scene.mastro_building_name_list) >0:
+                #     row.label(text = scene.mastro_building_name_current[0].name)
                 
                     
             elif mode == "EDIT":      
@@ -227,7 +227,7 @@ class VIEW3D_PT_MaStro_Plot(Panel):
                 row = layout_1.row(align=True)
                 row.prop(context.scene, "attribute_mass_storeys", text="N° of storeys") 
                 row = layout_1.row(align=True)
-                row.prop(context.scene, "attribute_plot_depth", text="Depth") 
+                row.prop(context.scene, "attribute_block_depth", text="Depth") 
                 # disable the number of storeys if there are no liquids
                 # current_typology = scene.mastro_typology_name_current[0]
                 
@@ -262,16 +262,16 @@ class VIEW3D_PT_MaStro_Plot(Panel):
                                   rows = rows)
                 
                 row = layout_1.row(align=True)
-                row.prop(context.scene, "attribute_plot_normal", text="Invert Normal") 
+                row.prop(context.scene, "attribute_block_normal", text="Invert Normal") 
                 
                 row = layout_0.row(align=True)
-                row.prop(context.scene, "attribute_plot_side_angle", text="Side rotation") 
+                row.prop(context.scene, "attribute_block_side_angle", text="Side rotation") 
     
     
 # class OBJECT_OT_SetTypologyId(Operator):
-#     """Set Face Attribute as typology of the block"""
+#     """Set Face Attribute as typology of the building"""
 #     bl_idname = "object.set_attribute_mass_typology_id"
-#     bl_label = "Set Face Attribute as Typology of the Block"
+#     bl_label = "Set Face Attribute as Typology of the Building"
 #     bl_options = {'REGISTER', 'UNDO'}
     
 #     def execute(self, context):
@@ -423,10 +423,10 @@ def update_mesh_face_attributes_storeys(context, mesh, faceIndex, storeysSet = N
             }
     return data
 
-'''Set the number of storeys of the selected edfe attribute of the MaStro plot'''
+'''Set the number of storeys of the selected edfe attribute of the MaStro block'''
 class OBJECT_OT_Set_Edge_Attribute_Storeys(Operator):
     bl_idname = "object.set_mesh_edge_attribute_storeys"
-    bl_label = "Set edge storey attributes assigned to the MaStro plot"
+    bl_label = "Set edge storey attributes assigned to the MaStro block"
     bl_options = {'REGISTER', 'UNDO'}
     
     def execute(self, context):
@@ -456,7 +456,7 @@ class OBJECT_OT_Set_Edge_Attribute_Storeys(Operator):
        
         return {'FINISHED'}
     
-'''Plot: function to update number of storeys accordingly to the assigned number of storeys'''
+'''Block: function to update number of storeys accordingly to the assigned number of storeys'''
 def update_mesh_edge_attributes_storeys(context, mesh, edgeIndex, storeysSet = None):
     # in case the edge is a new edge, the tipology id doesn't exist so the one set in the UI is used instead
     if len(mesh.attributes["mastro_typology_id_EDGE"].data) > 0:
@@ -553,10 +553,10 @@ def update_mesh_edge_attributes_storeys(context, mesh, edgeIndex, storeysSet = N
             }
     return data
 
-'''Set the depth of the block of the selected edfe attribute of the MaStro plot'''
+'''Set the depth of the building of the selected edge attribute of the MaStro block'''
 class OBJECT_OT_Set_Edge_Attribute_Depth(Operator):
     bl_idname = "object.set_mesh_edge_attribute_depth"
-    bl_label = "Set edge depth attributes assigned to the MaStro plot"
+    bl_label = "Set edge depth attributes assigned to the MaStro block"
     bl_options = {'REGISTER', 'UNDO'}
     
     def execute(self, context):
@@ -571,38 +571,38 @@ class OBJECT_OT_Set_Edge_Attribute_Depth(Operator):
             edgeIndex = edge.index
             # data = update_mesh_edge_attributes_depth(context, mesh, edgeIndex)
             data = update_mesh_edge_attributes_depth(context)
-            mesh.attributes["mastro_plot_depth_EDGE"].data[edgeIndex].value = data["plotDepth"]
+            mesh.attributes["mastro_block_depth_EDGE"].data[edgeIndex].value = data["blockDepth"]
         # else:
         #     active_vert = bpy.context.scene.previous_selection_vert_id
         #     active_edges =  [e for e in mesh.edges if active_vert in e.vertices]
         #     for edge in active_edges:
         #         edgeIndex = edge.index
         #         data = update_mesh_edge_attributes_depth(context)
-        #         mesh.attributes["mastro_plot_depth_EDGE"].data[edgeIndex].value = data["plotDepth"]
+        #         mesh.attributes["mastro_block_depth_EDGE"].data[edgeIndex].value = data["blockDepth"]
 
         bpy.ops.object.mode_set(mode=mode)
        
         return {'FINISHED'}
     
-'''Plot: function to update depth of the block accordingly to the assigned number of storeys'''
+'''Block: function to update depth of the building accordingly to the assigned number of storeys'''
 # def update_mesh_edge_attributes_depth(context, mesh, edgeIndex, depthSet = None):
 def update_mesh_edge_attributes_depth(context, depthSet = None):
 
     # typology_id = mesh.attributes["mastro_typology_id_EDGE"].data[edgeIndex].value
     # projectUses = context.scene.mastro_use_name_list
 
-    # if the function is run once the user updates the depth of the block,
-    # the value is read from context.scene.attribute_plot_depth.
+    # if the function is run once the user updates the depth of the building,
+    # the value is read from context.scene.attribute_block_depth.
     # Else the function is run because the user is updating the depth and
     # in this case the value used is the one stored in each edge of the mesh
     if depthSet == None:
-        plotDepth = context.scene.attribute_plot_depth
-        if plotDepth == 0:
-            plotDepth = 18
+        blockDepth = context.scene.attribute_block_depth
+        if blockDepth == 0:
+            blockDepth = 18
     else:
-        plotDepth = depthSet
+        blockDepth = depthSet
     
-    data = {"plotDepth" : float(plotDepth)
+    data = {"blockDepth" : float(blockDepth)
             }
     return data
 
@@ -643,10 +643,10 @@ class OBJECT_OT_Set_Face_Attribute_Uses(Operator):
        
         return {'FINISHED'}
 
-# Set the uses and their heights in the selected edge attribute of the MaStro plot
+# Set the uses and their heights in the selected edge attribute of the MaStro block
 class OBJECT_OT_Set_Edge_Attribute_Uses(Operator):
     bl_idname = "object.set_mesh_edge_attribute_uses"
-    bl_label = "Set edge attributes assigned to the MaStro plot"
+    bl_label = "Set edge attributes assigned to the MaStro block"
     bl_options = {'REGISTER', 'UNDO'}
     
     def execute(self, context):
@@ -679,10 +679,10 @@ class OBJECT_OT_Set_Edge_Attribute_Uses(Operator):
        
         return {'FINISHED'}
     
-class OBJECT_OT_Set_Plot_Edge_Attribute_Normal(Operator):
-    """Set the value which will set to reverse or not reverse the plot edge in the plot GN"""
-    bl_idname = "object.set_mesh_plot_edge_attribute_normal"
-    bl_label = "Set to normal of the plot edge in the plot GN"
+class OBJECT_OT_Set_Block_Edge_Attribute_Normal(Operator):
+    """Set the value which will set to reverse or not reverse the block edge in the block GN"""
+    bl_idname = "object.set_mesh_block_edge_attribute_normal"
+    bl_label = "Set to normal of the block edge in the block GN"
     bl_options = {'REGISTER', 'UNDO'}
     
     def execute(self, context):
@@ -691,15 +691,15 @@ class OBJECT_OT_Set_Plot_Edge_Attribute_Normal(Operator):
         mode = obj.mode
         bpy.ops.object.mode_set(mode='OBJECT')
         selected_edges = [e for e in context.active_object.data.edges if e.select]
-        normal = bpy.context.scene.attribute_plot_normal
+        normal = bpy.context.scene.attribute_block_normal
         for edge in selected_edges:
             edgeIndex = edge.index
             mesh.attributes["mastro_inverted_normal_EDGE"].data[edgeIndex].value = normal
         bpy.ops.object.mode_set(mode=mode)
         return {'FINISHED'}
     
-class OBJECT_OT_Set_Plot_Edge_Angle(Operator):
-    bl_idname = "object.set_plot_edge_attribute_angle"
+class OBJECT_OT_Set_Block_Edge_Angle(Operator):
+    bl_idname = "object.set_block_edge_attribute_angle"
     bl_label = "Set the corner angle"
     bl_options = {'REGISTER', 'UNDO'}
     
@@ -709,7 +709,7 @@ class OBJECT_OT_Set_Plot_Edge_Angle(Operator):
         mode = obj.mode
         bpy.ops.object.mode_set(mode='OBJECT')
         selected_verts = [v for v in context.active_object.data.vertices if v.select]
-        angle = bpy.context.scene.attribute_plot_side_angle
+        angle = bpy.context.scene.attribute_block_side_angle
         for vert in selected_verts:
             vertIndex = vert.index
             mesh.attributes["mastro_side_angle"].data[vertIndex].value = angle
@@ -830,40 +830,26 @@ class obj_typology_uses_name_list(PropertyGroup):
 def update_attributes_mastro_mesh_storeys(self, context):
     if "MaStro mass" in context.object.data: 
         bpy.ops.object.set_mesh_face_attribute_storeys()
-    elif "MaStro plot" in context.object.data:
+    elif "MaStro block" in context.object.data:
         bpy.ops.object.set_mesh_edge_attribute_storeys()
         
-def update_attributes_mastro_plot_depth(self, context):
+def update_attributes_mastro_block_depth(self, context):
     bpy.ops.object.set_mesh_edge_attribute_depth()
     
-def update_attributes_plot_side_angle(self, context):
-    bpy.ops.object.set_plot_edge_attribute_angle()
+def update_attributes_block_side_angle(self, context):
+    bpy.ops.object.set_block_edge_attribute_angle()
     
-# update the plot normal
-def update_plot_normal(self, context):
-    bpy.ops.object.set_mesh_plot_edge_attribute_normal()
+# update the block normal
+def update_block_normal(self, context):
+    bpy.ops.object.set_mesh_block_edge_attribute_normal()
 
   
-# update the plot id attribute assigned to the selected object
-# this is quite old, maybe better to review
-def update_plot_name_id(self, context):
-    scene = context.scene
-    name = scene.mastro_plot_names
-    # scene.mastro_plot_name_current[0].name = " " + name
-    scene.mastro_plot_name_current[0].name = name
-    for n in scene.mastro_plot_name_list:
-        if n.name == name:
-            scene.attribute_mass_plot_id = n.id
-            scene.mastro_plot_name_current[0].id = n.id
-            
-            obj = context.active_object
-            obj.mastro_props['mastro_plot_attribute'] = n.id
-            break 
-        
+# update the block id attribute assigned to the selected object
 # this is quite old, maybe better to review
 def update_block_name_id(self, context):
     scene = context.scene
     name = scene.mastro_block_names
+    # scene.mastro_block_name_current[0].name = " " + name
     scene.mastro_block_name_current[0].name = name
     for n in scene.mastro_block_name_list:
         if n.name == name:
@@ -872,6 +858,20 @@ def update_block_name_id(self, context):
             
             obj = context.active_object
             obj.mastro_props['mastro_block_attribute'] = n.id
+            break 
+        
+# this is quite old, maybe better to review
+def update_building_name_id(self, context):
+    scene = context.scene
+    name = scene.mastro_building_names
+    scene.mastro_building_name_current[0].name = name
+    for n in scene.mastro_building_name_list:
+        if n.name == name:
+            scene.attribute_mass_building_id = n.id
+            scene.mastro_building_name_current[0].id = n.id
+            
+            obj = context.active_object
+            obj.mastro_props['mastro_building_attribute'] = n.id
             break   
     
 #Update the typology label in the UI and all the relative data in the selected faces
@@ -888,7 +888,7 @@ def update_attributes_mastro_mesh_typology(self, context):
                 scene.mastro_typology_name_current[0].id = n.id
                 scene.mastro_typology_name_current[0].name = name
                 break  
-    elif "MaStro plot" in context.object.data:
+    elif "MaStro block" in context.object.data:
         for n in scene.mastro_typology_name_list:
             if n.name == name:
                 scene.attribute_mass_typology_id = n.id
