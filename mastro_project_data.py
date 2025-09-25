@@ -1479,7 +1479,7 @@ class OBJECT_OT_update_all_MaStro_meshes_attributes(Operator):
                             faceIndex = face.index
                             if [i for i in ["all", "floorToFloor", "void"] if i in self.attributeToUpdate]:
                                 typology = mesh.attributes["mastro_typology_id"].data[faceIndex].value
-                                data = read_mesh_attributes_uses(context, mesh, faceIndex, typologySet = typology)
+                                data = read_mesh_attributes_uses(context, typologySet = typology)
                                 if [i for i in ["all"] if i in self.attributeToUpdate]:
                                     # mesh.attributes["mastro_typology_id"].data[faceIndex].value = data["typology_id"]
                                     mesh.attributes["mastro_list_use_id_A"].data[faceIndex].value = data["use_id_list_A"]
