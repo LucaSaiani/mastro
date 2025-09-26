@@ -8,6 +8,8 @@ VERSION 1
 
 cf45073a-5179-4228-833e-2d33d9ba4e41:Cut Out:Cut Out
 1650e96f-4819-4b03-8c83-3b88ed343547:MaStro:MaStro
+396b7132-e59a-4ba2-b835-116259631193:MaStro Assets:MaStro Assets
+5c7579a4-17be-48af-9637-15a272bc50da:MaStro Assets/Windows:MaStro Assets-Windows
 d922c348-ab12-45a7-a416-5350c16b434f:MaStro/Architecture:MaStro-Architecture
 93576a95-8fea-44c1-abd2-d90998a5fad5:MaStro/Architecture/Annotation:MaStro-Architecture-Annotation
 ab8fb733-a64c-4350-816b-e148d68d34d4:MaStro/Architecture/Façade:MaStro-Architecture-Façade
@@ -15,7 +17,7 @@ a3f2d709-4bae-4a9a-8533-6ffb0c083b23:MaStro/Architecture/Mass:MaStro-Architectur
 80b6c5d3-7466-4029-8dd5-71511ce9f0bf:MaStro/Architecture/Primitives:MaStro-Architecture-Primitives
 729d6dec-1b48-4880-8a4b-dab9444115b7:MaStro/Architecture/Stairs:MaStro-Architecture-Stairs
 ad620ac8-6a6e-41b1-a5d7-e94d9f67732f:MaStro/Curve:MaStro-Curve
-21927b53-55eb-4db2-b4c2-3b70562a9aee:MaStro/Curve/Operation:MaStro-Curve-Operation
+21927b53-55eb-4db2-b4c2-3b70562a9aee:MaStro/Curve/Operations:MaStro-Curve-Operations
 ba1a3696-9dc6-44d7-8384-5d5281480941:MaStro/Curve/Primitives:MaStro-Curve-Primitives
 048bb430-702f-4b63-9fd8-29c78e7bcf01:MaStro/Indices:MaStro-Indices
 5fdecf71-a6cc-472a-9298-6d4a67e0d834:MaStro/Instances:MaStro-Instances
@@ -24,7 +26,8 @@ f849bd86-5298-407b-9e04-1e7681dd6062:MaStro/Materials:MaStro-Materials
 fa7bef10-8469-46d3-a137-6a29858f7709:MaStro/Materials/Textures:MaStro-Materials-Textures
 7da0e70c-2d7b-4886-b24a-db30d2de829d:MaStro/Mesh:MaStro-Mesh
 a29dad23-c9ae-4be8-a71d-bf6ee8400214:MaStro/Mesh/Grid:MaStro-Mesh-Grid
-bd25134d-ca50-4c8f-98d2-ec2cd2e92a39:MaStro/Mesh/Operation:MaStro-Mesh-Operation
+97752dc3-68e0-44a8-942c-e3dc5876e47d:MaStro/Mesh/Operations:MaStro-Mesh-Operations
+bd25134d-ca50-4c8f-98d2-ec2cd2e92a39:MaStro/Mesh/Transform:MaStro-Mesh-Transform
 646146b5-56bb-41fa-9499-64a573a508bb:MaStro/Street:MaStro-Street
 7e5e4352-7132-4faa-a136-1fb48d50ceb5:MaStro/Utilities:MaStro-Utilities
 04bce851-efab-4a82-a0e0-58c5d3f4bb17:MaStro/Vectors:MaStro-Vectors
