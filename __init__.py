@@ -803,12 +803,14 @@ def register():
                                         min=math.radians(-90),    
                                         max=math.radians(90),  
                                         default=0,
+                                        precision=2,
                                         subtype='ANGLE',
                                         update = mastro_massing.update_attributes_block_side_angle)
     Scene.attribute_block_depth = bpy.props.FloatProperty(
                                         name="The depth of the building",
                                         min=0, 
                                         default=18,
+                                        precision=3,
                                         subtype="DISTANCE",
                                         update = mastro_massing.update_attributes_mastro_block_depth)
     Scene.attribute_block_normal = bpy.props.BoolProperty(
