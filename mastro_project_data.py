@@ -1242,7 +1242,7 @@ The number of uses is limited to 7 for each typology'''
         last = len(context.scene.mastro_typology_uses_name_list)-1
         
         context.scene.mastro_typology_uses_name_list[last].id = max(temp_list)+1
-        context.scene.mastro_street_name_list[last].typologyEdgeColor = [random.random(), random.random(), random.random()]
+        context.scene.mastro_typology_uses_name_list[last].typologyEdgeColor = [random.random(), random.random(), random.random()]
         return{'FINISHED'}
 
 class TYPOLOGY_USES_LIST_OT_DeleteItem(Operator):
