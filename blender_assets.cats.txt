@@ -10,6 +10,10 @@ cf45073a-5179-4228-833e-2d33d9ba4e41:Cut Out:Cut Out
 1650e96f-4819-4b03-8c83-3b88ed343547:MaStro:MaStro
 396b7132-e59a-4ba2-b835-116259631193:MaStro Assets:MaStro Assets
 5c7579a4-17be-48af-9637-15a272bc50da:MaStro Assets/Windows:MaStro Assets-Windows
+1f8dd1a0-2708-4db6-943e-a978344d832a:MaStro Assets/Windows/Casements:MaStro Assets-Windows-Casements
+0f70ff3b-d264-44a4-9013-c03a1eecce60:MaStro Assets/Windows/Frames:MaStro Assets-Windows-Frames
+78a72ab7-b14a-43b3-86e5-8b0245161845:MaStro Assets/Windows/Windows:MaStro Assets-Windows-Windows
+57fbac60-ad88-4e59-ba62-6b4b03fd300a:MaStro Assets/Windowsills:MaStro Assets-Windowsills
 d922c348-ab12-45a7-a416-5350c16b434f:MaStro/Architecture:MaStro-Architecture
 93576a95-8fea-44c1-abd2-d90998a5fad5:MaStro/Architecture/Annotation:MaStro-Architecture-Annotation
 ab8fb733-a64c-4350-816b-e148d68d34d4:MaStro/Architecture/Façade:MaStro-Architecture-Façade
@@ -27,7 +31,6 @@ fa7bef10-8469-46d3-a137-6a29858f7709:MaStro/Materials/Textures:MaStro-Materials-
 7da0e70c-2d7b-4886-b24a-db30d2de829d:MaStro/Mesh:MaStro-Mesh
 a29dad23-c9ae-4be8-a71d-bf6ee8400214:MaStro/Mesh/Grid:MaStro-Mesh-Grid
 97752dc3-68e0-44a8-942c-e3dc5876e47d:MaStro/Mesh/Operations:MaStro-Mesh-Operations
-bd25134d-ca50-4c8f-98d2-ec2cd2e92a39:MaStro/Mesh/Transform:MaStro-Mesh-Transform
 646146b5-56bb-41fa-9499-64a573a508bb:MaStro/Street:MaStro-Street
 7e5e4352-7132-4faa-a136-1fb48d50ceb5:MaStro/Utilities:MaStro-Utilities
 04bce851-efab-4a82-a0e0-58c5d3f4bb17:MaStro/Vectors:MaStro-Vectors
