@@ -1159,7 +1159,7 @@ def addNodes():
 
     for group in geoNodes_list:
         if group not in bpy.data.node_groups:
-            bpy.ops.wm.append(
+            bpy.ops.wm.link(
                 filepath=str(blend_file_path / inner_path / group),
                 directory=str(blend_file_path / inner_path),
                 filename = group
