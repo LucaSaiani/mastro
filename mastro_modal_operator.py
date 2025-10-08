@@ -210,15 +210,30 @@ def show_wall_overlay(obj):
     shader = gpu.shader.from_builtin('UNIFORM_COLOR')
     mesh = obj.data
     
-    # if mesh.is_editmode:
-    bm = bmesh.from_edit_mesh(mesh)
+    if mesh.is_editmode:
+        bm = bmesh.from_edit_mesh(mesh)
+        
+        # active edge
+        active_edge = None
+        for e in bm.edges:
+            if e.select and e.is_valid and e == bm.select_history.active:
+                active_edge = e
+                break
+    else:
+        bm = bmesh.new()
+        bm.from_mesh(mesh)
+        bm.verts.ensure_lookup_table()
+        bm.edges.ensure_lookup_table()    
+        active_edge = None
+        # bm.faces.ensure_lookup_table()  
+        
     
-    # active edge
-    active_edge = None
-    for e in bm.edges:
-        if e.select and e.is_valid and e == bm.select_history.active:
-            active_edge = e
-            break
+    # # active edge
+    # active_edge = None
+    # for e in bm.edges:
+    #     if e.select and e.is_valid and e == bm.select_history.active:
+    #         active_edge = e
+    #         break
     
     # else:
     #     bm = bmesh.new()
