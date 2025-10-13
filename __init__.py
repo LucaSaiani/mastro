@@ -120,6 +120,7 @@ classes = (
     mastro_menu.MaStro_MenuOperator_add_MaStro_mass,
     mastro_menu.MaStro_MenuOperator_add_MaStro_block,
     mastro_menu.MaStro_MenuOperator_add_MaStro_street,
+    mastro_menu.MaStro_MenuOperator_add_MaStro_dimension,
     mastro_menu.MaStro_MenuOperator_convert_to_MaStro_mass,
     mastro_menu.MaStro_MenuOperator_convert_to_MaStro_street,
     # mastro_menu.MaStro_MenuOperator_PrintData,
