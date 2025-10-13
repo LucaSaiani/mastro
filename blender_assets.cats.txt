@@ -9,11 +9,26 @@ VERSION 1
 cf45073a-5179-4228-833e-2d33d9ba4e41:Cut Out:Cut Out
 1650e96f-4819-4b03-8c83-3b88ed343547:MaStro:MaStro
 396b7132-e59a-4ba2-b835-116259631193:MaStro Assets:MaStro Assets
+2f12e865-77a8-4db1-95ca-9c9a829b7337:MaStro Assets/Materials:MaStro Assets-Materials
+bfb096d2-85a8-4c51-bf27-c2db1e1af080:MaStro Assets/Materials/Shaders:MaStro Assets-Materials-Shaders
+ec6d5603-879d-4463-b670-9722aece8d75:MaStro Assets/Materials/Shaders/Glass:MaStro Assets-Materials-Shaders-Glass
+e5fbbed9-ba08-4585-8048-380d8bbd7408:MaStro Assets/Materials/Shaders/Marble:MaStro Assets-Materials-Shaders-Marble
+30900c2b-c008-42b4-bc19-25f812940d12:MaStro Assets/Materials/Shaders/Pattern:MaStro Assets-Materials-Shaders-Pattern
+6f4869fc-3e10-460b-b49c-c823774ef8ca:MaStro Assets/Materials/Shaders/Stone:MaStro Assets-Materials-Shaders-Stone
+e2db2261-03df-480f-9118-f020914b4d16:MaStro Assets/Materials/Shaders/Wall:MaStro Assets-Materials-Shaders-Wall
+3919b743-7354-45b5-9b06-5e47f0907f4a:MaStro Assets/Materials/Shaders/Wood:MaStro Assets-Materials-Shaders-Wood
+3a4bee09-1cc6-4020-8cb3-5c8fb03b2f65:MaStro Assets/Materials/Textures:MaStro Assets-Materials-Textures
+10bdfc99-2d07-4f27-8495-21572eceae5e:MaStro Assets/Materials/Textures/Marble:MaStro Assets-Materials-Textures-Marble
+5ad63230-b1a4-46f2-9701-39976f3603e5:MaStro Assets/Materials/Textures/Pattern:MaStro Assets-Materials-Textures-Pattern
+24ebfdbf-7c92-4ca6-afb3-30fc26cc3e3c:MaStro Assets/Materials/Textures/Stone:MaStro Assets-Materials-Textures-Stone
+617e75c0-5fa4-4f9e-ae98-ab194cc57437:MaStro Assets/Materials/Textures/Wall:MaStro Assets-Materials-Textures-Wall
+8144a86c-4790-46d9-9be9-900db45a2514:MaStro Assets/Materials/Textures/Wood:MaStro Assets-Materials-Textures-Wood
 5c7579a4-17be-48af-9637-15a272bc50da:MaStro Assets/Windows:MaStro Assets-Windows
-1f8dd1a0-2708-4db6-943e-a978344d832a:MaStro Assets/Windows/Casements:MaStro Assets-Windows-Casements
-0f70ff3b-d264-44a4-9013-c03a1eecce60:MaStro Assets/Windows/Frames:MaStro Assets-Windows-Frames
-78a72ab7-b14a-43b3-86e5-8b0245161845:MaStro Assets/Windows/Windows:MaStro Assets-Windows-Windows
-57fbac60-ad88-4e59-ba62-6b4b03fd300a:MaStro Assets/Windowsills:MaStro Assets-Windowsills
+b4748e65-3d65-4b7f-8e7b-17a31fac4bd2:MaStro Assets/Windows/Casements:MaStro Assets-Windows-Casements
+8bd3a441-c4fa-45e1-98ec-e4d7eecadd12:MaStro Assets/Windows/Frames:MaStro Assets-Windows-Frames
+5efc4d40-0970-4de2-905c-5f2993455a78:MaStro Assets/Windows/Shutters:MaStro Assets-Windows-Shutters
+64ec2829-d12c-4519-90c0-78d49b88b7f1:MaStro Assets/Windows/Windows:MaStro Assets-Windows-Windows
+2b0d420b-411e-47ac-8156-edc43377d469:MaStro Assets/Windows/Windowsills:MaStro Assets-Windows-Windowsills
 d922c348-ab12-45a7-a416-5350c16b434f:MaStro/Architecture:MaStro-Architecture
 93576a95-8fea-44c1-abd2-d90998a5fad5:MaStro/Architecture/Annotation:MaStro-Architecture-Annotation
 ab8fb733-a64c-4350-816b-e148d68d34d4:MaStro/Architecture/Façade:MaStro-Architecture-Façade
@@ -30,6 +45,7 @@ f849bd86-5298-407b-9e04-1e7681dd6062:MaStro/Materials:MaStro-Materials
 fa7bef10-8469-46d3-a137-6a29858f7709:MaStro/Materials/Textures:MaStro-Materials-Textures
 7da0e70c-2d7b-4886-b24a-db30d2de829d:MaStro/Mesh:MaStro-Mesh
 a29dad23-c9ae-4be8-a71d-bf6ee8400214:MaStro/Mesh/Grid:MaStro-Mesh-Grid
+bd25134d-ca50-4c8f-98d2-ec2cd2e92a39:MaStro/Mesh/Mapping:MaStro-Mesh-Mapping
 97752dc3-68e0-44a8-942c-e3dc5876e47d:MaStro/Mesh/Operations:MaStro-Mesh-Operations
 646146b5-56bb-41fa-9499-64a573a508bb:MaStro/Street:MaStro-Street
 7e5e4352-7132-4faa-a136-1fb48d50ceb5:MaStro/Utilities:MaStro-Utilities
