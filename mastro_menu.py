@@ -721,6 +721,55 @@ def add_mastro_street():
 #         layout.operator("mesh.primitive_cube_add", icon="MESH_CUBE")
 #         layout.operator("mesh.primitive_uv_sphere_add", icon="MESH_UVSPHERE")
 
+class MaStro_MenuOperator_add_MaStro_dimension(Operator, AddObjectHelper):
+    """Add a MaStro linear dimension"""
+    bl_idname = "object.mastro_add_mastro_dimension"
+    bl_label = "Dimension"
+    bl_options = {'REGISTER', 'UNDO'}
+      
+    def execute(self, context):
+        verts = [
+        (+0.0, +0.0, +0.0),
+        (+0.0, +0.0, +1.0)
+        ]
+
+        edges = [
+            (0, 1)
+        ]
+
+        mesh = bpy.data.meshes.new("MaStro Dimension")
+
+        bm = bmesh.new()
+
+        for v_co in verts:
+            bm.verts.new(v_co)
+
+        bm.verts.ensure_lookup_table()
+        for e_idx in edges:
+            bm.edges.new((bm.verts[e_idx[0]], bm.verts[e_idx[1]]))
+
+        bm.to_mesh(mesh)
+        mesh.update()
+
+        # add the mesh as an object into the scene with this utility module
+        from bpy_extras import object_utils
+        object_utils.object_data_add(context, mesh, operator=self)
+        
+        obj = bpy.context.active_object
+        obj.select_set(True)
+            
+        addNodes()
+
+        # add mastro dimension geo node to the created object
+        geoName = "MaStro Dimension"
+        obj.modifiers.new(geoName, "NODES")
+        group = bpy.data.node_groups["MaStro Dimension"]
+        obj.modifiers[geoName].node_group = group
+        context.view_layer.objects.active = obj
+        return {'FINISHED'}
+    
+
+
 # add the entry to the add menu
 def mastro_add_menu_func(self, context):
     self.layout.separator()
@@ -730,6 +779,8 @@ def mastro_add_menu_func(self, context):
     self.layout.operator(MaStro_MenuOperator_add_MaStro_mass.bl_idname, icon_value=myIcon)
     myIcon = icons.icon_id("street")
     self.layout.operator(MaStro_MenuOperator_add_MaStro_street.bl_idname, icon_value=myIcon)
+    # myIcon = icons.icon_id("street")
+    self.layout.operator(MaStro_MenuOperator_add_MaStro_dimension.bl_idname, icon_value=myIcon)
     
     
 class MaStro_MenuOperator_convert_to_MaStro_mass(Operator):
@@ -1155,7 +1206,7 @@ def addNodes():
     # if not os.path.isdir(blend_file_path): blend_file_path = my_addon_path / "vscode_development/mastro/mastro.blend"
     inner_path = "NodeTree"
     
-    geoNodes_list = ("MaStro Mass", "MaStro Block", "MaStro Street")
+    geoNodes_list = ("MaStro Mass", "MaStro Block", "MaStro Street", "MaStro Dimension")
 
     for group in geoNodes_list:
         if group not in bpy.data.node_groups:
