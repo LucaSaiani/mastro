@@ -1506,7 +1506,6 @@ class OBJECT_OT_update_all_MaStro_meshes_attributes(Operator):
                                     mesh.attributes["mastro_list_storey_A"].data[faceIndex].value = data["storey_list_A"]
                                     mesh.attributes["mastro_list_storey_B"].data[faceIndex].value = data["storey_list_B"]
                             # print(f"Done face {face.index}")
-                        
                     # edges = context.active_object.data.edges
                     edges = obj.data.edges
                     if hasattr(mesh, "attributes") and "mastro_wall_id" in mesh.attributes:
