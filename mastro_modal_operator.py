@@ -376,7 +376,7 @@ class VIEW_3D_OT_show_mastro_attributes(Operator):
     
 def draw_main_show_attributes_2D(context):
     obj = bpy.context.active_object
-    if hasattr(obj, "data") and "MaStro object" in obj.data and ("MaStro mass" in obj.data or "MaStro block" in obj.data):
+    if hasattr(obj, "data") and isinstance(obj.data, dict) and "MaStro object" in obj.data and ("MaStro mass" in obj.data or "MaStro block" in obj.data):
         # obj.update_from_editmode()
         scene = context.scene
             
@@ -664,7 +664,7 @@ def draw_main_show_attributes_2D(context):
          
 def draw_main_show_attributes_3D(context):
     obj = bpy.context.active_object
-    if hasattr(obj, "data") and  "MaStro object" in obj.data:
+    if hasattr(obj, "data") and isinstance(obj.data, dict) and  "MaStro object" in obj.data:
         mesh = obj.data
         if mesh.is_editmode == True and bpy.context.window_manager.toggle_show_data_edit_mode:
             draw_selection_overlay(obj)
@@ -717,6 +717,7 @@ def updates(scene, depsgraph):
     # update the values in the UI accordingly with the selected edges or faces ####
     ###############################################################################
     check_new_scenes()
+    
     obj = bpy.context.active_object
     if obj:
         if obj is not None and obj.type == "MESH" and "MaStro object" in obj.data:
@@ -798,9 +799,13 @@ def updates(scene, depsgraph):
                                     # bpy.ops.object.set_mesh_face_attribute_storeys
                                 selected_faces = [face for face in bm.faces if face.select]
                                 if len(selected_faces) == 1:
+                                    if storeys == 0:
+                                        storeys = 1
+                                        list_storey_A = 10
+                                        list_storey_B = 11
+                                        typology = 0
                                     if scene.attribute_mass_storeys != storeys:
                                         scene.attribute_mass_storeys = storeys
-                                
                                 # if bpy.context.scene.attribute_mass_storeys != storeys:
                                 #     bpy.context.scene.props_mass_storeys._ui_temp_storeys = storeys
                                 # scene["attribute_mass_storeys"] = storeys

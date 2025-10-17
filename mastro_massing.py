@@ -19,6 +19,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import bpy
+import bmesh
 
 from bpy.props import StringProperty, IntProperty
 from bpy.types import Operator, Panel, UIList, PropertyGroup
@@ -318,16 +319,19 @@ class OBJECT_OT_Set_Face_Attribute_Storeys(Operator):
         obj = context.active_object
         mesh = obj.data
         mode = obj.mode
+        
         bpy.ops.object.mode_set(mode='OBJECT')
+                       
         selected_faces = [p for p in context.active_object.data.polygons if p.select]
-        for face in selected_faces:
-            faceIndex = face.index
-            data = update_mesh_face_attributes_storeys(context, mesh, faceIndex)
-            mesh.attributes["mastro_number_of_storeys"].data[faceIndex].value = data["numberOfStoreys"]
-            mesh.attributes["mastro_list_storey_A"].data[faceIndex].value = data["storey_list_A"]
-            mesh.attributes["mastro_list_storey_B"].data[faceIndex].value = data["storey_list_B"]
+        if len(selected_faces) > 0:
+            for face in selected_faces:
+                faceIndex = face.index
+                data = update_mesh_face_attributes_storeys(context, mesh, faceIndex)
+                mesh.attributes["mastro_number_of_storeys"].data[faceIndex].value = data["numberOfStoreys"]
+                mesh.attributes["mastro_list_storey_A"].data[faceIndex].value = data["storey_list_A"]
+                mesh.attributes["mastro_list_storey_B"].data[faceIndex].value = data["storey_list_B"]
         bpy.ops.object.mode_set(mode=mode)
-       
+        
         return {'FINISHED'}
 
         
@@ -824,7 +828,7 @@ class obj_typology_uses_name_list(PropertyGroup):
     storeys: IntProperty(
            name="Number of storeys",
            description="The number of storeys associated to that use",
-           default = 0)
+           default = 1)
     
 def update_attributes_mastro_mesh_storeys(self, context):
     if "MaStro mass" in context.object.data: 
