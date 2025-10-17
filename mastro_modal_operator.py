@@ -664,8 +664,8 @@ def draw_main_show_attributes_2D(context):
          
 def draw_main_show_attributes_3D(context):
     obj = bpy.context.active_object
-    mesh = obj.data
     if hasattr(obj, "data") and  "MaStro object" in obj.data:
+        mesh = obj.data
         if mesh.is_editmode == True and bpy.context.window_manager.toggle_show_data_edit_mode:
             draw_selection_overlay(obj)
         elif mesh.is_editmode == False:
