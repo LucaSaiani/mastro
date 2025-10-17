@@ -836,6 +836,9 @@ def addMassAttributes(obj):
     
     use_list = bpy.context.scene.mastro_typology_name_list[typology_id].useList
     useSplit = use_list.split(";")
+    # uses are listed top to bottom, but they need to
+    # be added bottom to top 
+    useSplit.reverse() 
 
     use_id_list_A = "1"
     use_id_list_B = "1"
@@ -939,7 +942,6 @@ def addMassAttributes(obj):
         # the 1 is readded
         storey_list_A = "1" + storey_list_A  
         storey_list_B = "1" + storey_list_B
-            
     for a in mass_attribute_set:
         try:
             mesh.attributes[a["attr"]]
