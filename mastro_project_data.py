@@ -460,19 +460,22 @@ class VIEW3D_PT_MaStro_show_data(Panel):
     bl_order = 0
     
     def draw_header(self, context):
-        self.layout.prop(context.window_manager, "toggle_show_data", text="")
+        self.layout.prop(context.window_manager, "toggle_show_overlays", text="")
         
     def draw(self, context):
         layout = self.layout
         layout.use_property_split = True
         layout.use_property_decorate = False  # No animation.
         
-        layout.active = context.window_manager.toggle_show_data
+        layout.active = context.window_manager.toggle_show_overlays
         
         # flow = layout.grid_flow(row_major=True, columns=0, even_columns=True, even_rows=False, align=True)
 
         # col = flow.column()
         # col = flow.column(heading="Mass", align = True)
+        col = layout.column(heading="Edit Mode Overlays", align=True)
+        col.prop(context.window_manager, 'toggle_show_data_edit_mode', icon_only=False)
+        col.separator()
         col = layout.column(heading="Block & Mass", align=True)
         col.prop(context.window_manager, 'toggle_storey_number', icon_only=False)
         col.separator()

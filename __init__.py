@@ -205,7 +205,7 @@ classes = (
     mastro_massing.OBJECT_OT_Set_Block_Edge_Attribute_Normal,
     mastro_massing.OBJECT_OT_Set_Block_Edge_Angle,
     
-    mastro_modal_operator.VIEW_3D_OT_show_mastro_overlay,
+    # mastro_modal_operator.VIEW_3D_OT_show_mastro_overlay,
     mastro_modal_operator.VIEW_3D_OT_show_mastro_attributes,
     # mastro_modal_operator.VIEW_3D_OT_update_mesh_attributes,
     # mastro_modal_operator.VIEW_3D_OT_update_all_meshes_attributes,
@@ -239,7 +239,7 @@ classes = (
 # MASTRO_NODE_FLOAT_HANDLE = 2
 
 def initNodes():
-    bpy.ops.node.separate_geometry_by_factor()
+    # bpy.ops.node.separate_geometry_by_factor()
     bpy.ops.node.update_gn_filter(filter_name="use")
     bpy.ops.node.update_gn_filter(filter_name="typology")
     bpy.ops.node.update_gn_filter(filter_name="wall type")
@@ -500,7 +500,7 @@ def onFileLoaded(scene):
     initLists()
     initNodes()
     # bpy.context.scene.updating_mesh_attributes_is_active = False
-    bpy.context.scene.show_selection_overlay_is_active = False
+    # bpy.context.scene.show_selection_overlay_is_active = False
     bpy.context.scene.previous_selection_object_name = ""
     bpy.context.scene.previous_selection_face_id = -1
     
@@ -535,7 +535,7 @@ def onFileLoaded(scene):
 def onFileDefault(scene):
     initLists()
     initNodes()
-    bpy.context.scene.show_selection_overlay_is_active = False
+    # bpy.context.scene.show_selection_overlay_is_active = False
     bpy.context.scene.previous_selection_object_name = ""
     bpy.context.scene.previous_selection_face_id = -1
     
@@ -681,9 +681,13 @@ def register():
     bpy.types.VIEW3D_MT_mesh_add.append(mastro_menu.mastro_add_menu_func)
     # bpy.types.VIEW3D_MT_add.append(mastro_menu.mastro_add_menu_func)
     
-    bpy.types.WindowManager.toggle_show_data = bpy.props.BoolProperty(
+    bpy.types.WindowManager.toggle_show_overlays = bpy.props.BoolProperty(
                                             default = False,
                                             update = mastro_modal_operator.update_show_attributes)
+    bpy.types.WindowManager.toggle_show_data_edit_mode = bpy.props.BoolProperty(
+                                            name = "Edit Mode Overlays",
+                                            default = True,
+                                            description = "Show selection overlay when the MaStro mass, block or street is in edit mode")
     bpy.types.WindowManager.toggle_block_name = bpy.props.BoolProperty(
                                             name = "Block Name",
                                             default = False)
@@ -740,10 +744,10 @@ def register():
     Scene.constraint_xy_setting = bpy.props.PointerProperty(type=mastro_menu.ConstraintXYSettings)
    
     Scene.mastroKeyDictionary = bpy.props.CollectionProperty(type=mastro_schedule.MaStro_string_item)
-    Scene.show_selection_overlay_is_active = bpy.props.BoolProperty(
-                                        name = "Show selection overlay",
-                                        default = False
-                                        )
+    # Scene.show_selection_overlay_is_active = bpy.props.BoolProperty(
+    #                                     name = "Show selection overlay",
+    #                                     default = False
+    #                                     )
     Scene.attribute_mass_block_id = bpy.props.IntProperty(
                                         name="Block Id",
                                         default=0)
@@ -954,6 +958,8 @@ def register():
     # bpy.app.timers.register(mastro_modal_operator.update_mesh_attributes_depsgraph, first_interval=.1)
     bpy.app.handlers.depsgraph_update_post.append(mastro_modal_operator.updates)
     
+    
+    
     # handle the keymap
     wm = bpy.context.window_manager
     # Note that in background mode (no GUI available), keyconfigs are not available either,
@@ -1005,7 +1011,8 @@ def unregister():
     
     # del bpy.types.Scene.MaStro_math_node_entries
     # del bpy.types.Scene.MaStroAttributes
-    del bpy.types.WindowManager.toggle_show_data
+    del bpy.types.WindowManager.toggle_show_overlays
+    del bpy.types.WindowManager.toggle_show_data_edit_mode
     del bpy.types.WindowManager.toggle_block_name
     del bpy.types.WindowManager.toggle_building_name
     del bpy.types.WindowManager.toggle_typology_name

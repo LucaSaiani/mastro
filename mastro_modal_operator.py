@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2025 Luca Saiani
+# Copyright (C) 2022-2025 Luca Saianishow_mastro_overlayupdate_show_attributes
 
 # luca.saiani@gmail.com
 
@@ -41,37 +41,40 @@ known_scenes = set()
 previous_selection = {}
 
 # show the overlays when in edit mode
-class VIEW_3D_OT_show_mastro_overlay(Operator):
-    bl_idname = "wm.show_mastro_overlay"
-    bl_label = "Show MaStro selection"
+# class VIEW_3D_OT_show_mastro_overlay(Operator):
+#     bl_idname = "wm.show_mastro_overlay"
+#     bl_label = "Show MaStro selection"
     
-    _handle = None
+#     _handle = None
     
-    @staticmethod
-    def handle_add(self, context):
-        if VIEW_3D_OT_show_mastro_overlay._handle is None:
-            VIEW_3D_OT_show_mastro_overlay._handle =bpy.types.SpaceView3D.draw_handler_add(draw_callback_selection_overlay,
-                                                                                           (self, context),
-                                                                                           'WINDOW',
-                                                                                           'POST_VIEW')
+#     @staticmethod
+#     def handle_add(self, context):
+#         if VIEW_3D_OT_show_mastro_overlay._handle is None:
+#             VIEW_3D_OT_show_mastro_overlay._handle =bpy.types.SpaceView3D.draw_handler_add(draw_callback_selection_overlay,
+#                                                                                            (self, context),
+#                                                                                            'WINDOW',
+#                                                                                            'POST_VIEW')
             
-    @staticmethod
-    def handle_remove(self, context):
-        bpy.types.SpaceView3D.draw_handler_remove(VIEW_3D_OT_show_mastro_overlay._handle, 'WINDOW')
-        VIEW_3D_OT_show_mastro_overlay._handle = None
+#     @staticmethod
+#     def handle_remove(self, context):
+#         bpy.types.SpaceView3D.draw_handler_remove(VIEW_3D_OT_show_mastro_overlay._handle, 'WINDOW')
+#         VIEW_3D_OT_show_mastro_overlay._handle = None
     
-    def execute(self, context):
-        if bpy.context.preferences.addons[__package__].preferences.toggleSelectionOverlay:    
-            self.handle_add(self, context)
-        else:
-            try:
-                self.handle_remove(self, context)
-            except Exception as e: print(e)
-        return {'FINISHED'}
+#     def execute(self, context):
+#         # if bpy.context.preferences.addons[__package__].preferences.toggleSelectionOverlay:    
+#         if bpy.context.window_manager.toggle_show_data_edit_mode:
+#             print("miao")
+#             self.handle_add(self, context)
+#         else:
+#             try:
+#                 print("bau")
+#                 self.handle_remove(self, context)
+#             except Exception as e: print(e)
+#         return {'FINISHED'}
     
-    def invoke(self, context, event):  # attributes["storey A"][index][1].value = int(list_storey_A)
-        self.execute(context)
-        return {'RUNNING_MODAL'}
+#     def invoke(self, context, event):  # attributes["storey A"][index][1].value = int(list_storey_A)
+#         self.execute(context)
+#         return {'RUNNING_MODAL'}
 
 def draw_selection_overlay(context):
     obj = bpy.context.active_object
@@ -128,17 +131,14 @@ def draw_selection_overlay(context):
             
                     if bpy.context.scene.tool_settings.mesh_select_mode[1]:
                         show_wall_overlay(obj)
-                
-            # elif ("MaStro street" in obj.data and
-            #      not (bpy.context.window_manager.toggle_show_data and bpy.context.window_manager.toggle_street_color)
-            #     ):
+
             elif "MaStro block" in obj.data:
                 show_block_overlay(obj)
             elif "MaStro street" in obj.data:
                 show_street_overlay(obj)
 
-def draw_callback_selection_overlay(self, context):
-    draw_selection_overlay(context)
+# def draw_callback_selection_overlay(self, context):
+#     draw_selection_overlay(context)
     
 # a function to show block overlays
 def show_block_overlay(obj):
@@ -199,6 +199,8 @@ def show_block_overlay(obj):
             batch.draw(shader)
 
     bm.free()
+    
+    
 # a function to show wall overlays
 def show_wall_overlay(obj):
     theme = bpy.context.preferences.themes[0].view_3d
@@ -225,21 +227,6 @@ def show_wall_overlay(obj):
         bm.verts.ensure_lookup_table()
         bm.edges.ensure_lookup_table()    
         active_edge = None
-        # bm.faces.ensure_lookup_table()  
-        
-    
-    # # active edge
-    # active_edge = None
-    # for e in bm.edges:
-    #     if e.select and e.is_valid and e == bm.select_history.active:
-    #         active_edge = e
-    #         break
-    
-    # else:
-    #     bm = bmesh.new()
-    #     bm.from_mesh(mesh)
-    #     bm.verts.ensure_lookup_table()
-    #     bm.edges.ensure_lookup_table()    
         
     bMesh_wall_id_layer = bm.edges.layers.int["mastro_wall_id"]
     projectWalls = bpy.context.scene.mastro_wall_name_list
@@ -276,40 +263,7 @@ def show_street_overlay(obj):
     theme = bpy.context.preferences.themes[0].view_3d
     color_editmesh_active = theme.editmesh_active
     color_edge_mode_select = theme.edge_mode_select
-    
-    # dash shader to draw streets
-    # vert_out = gpu.types.GPUStageInterfaceInfo("my_interface")
-    # vert_out.smooth('FLOAT', "v_ArcLength")
-
-    # dash_shader = gpu.types.GPUShaderCreateInfo()
-    # dash_shader.push_constant('MAT4', "u_ViewProjectionMatrix")
-    # dash_shader.push_constant('FLOAT', "u_Scale")
-    # dash_shader.vertex_in(0, 'VEC3', "position")
-    # dash_shader.vertex_in(1, 'FLOAT', "arcLength")
-    # dash_shader.vertex_out(vert_out)
-    # dash_shader.fragment_out(0, 'VEC4', "FragColor")
-
-    # dash_shader.vertex_source(
-    #     "void main()"
-    #     "{"
-    #     "  v_ArcLength = arcLength;"
-    #     "  gl_Position = u_ViewProjectionMatrix * vec4(position, 1.0f);"
-    #     "}"
-    # )
-
-    # dash_shader.fragment_source(
-    #     "void main()"
-    #     "{"
-    #     "  if (step(sin(v_ArcLength * u_Scale), 0.5) == 1) discard;"
-    #     "  FragColor = vec4(1.0);"
-    #     "}"
-    # )
-
-    # shader = gpu.shader.create_from_info(dash_shader)
-    
-    
-    # coords = []
-    # edgeIndices = []
+ 
     shader = gpu.shader.from_builtin('UNIFORM_COLOR')
     mesh = obj.data
     
@@ -328,27 +282,15 @@ def show_street_overlay(obj):
         bm.from_mesh(mesh)
         bm.verts.ensure_lookup_table()
         bm.edges.ensure_lookup_table()    
-        # bm.faces.ensure_lookup_table()  
         
     bMesh_street_id_layer = bm.edges.layers.int["mastro_street_id"]
     projectStreets = bpy.context.scene.mastro_street_name_list
-    
-    # matrix = bpy.context.region_data.perspective_matrix
-    # dash_scale = 20 - bpy.context.preferences.addons[__package__].preferences.streetEdgeDashSize +1
-
-    
-    # coords = []
-    # indices = []
-    # arc_lengths = [0]
 
     for edge in bm.edges:
         v1 = obj.matrix_world @ edge.verts[0].co
         v2 = obj.matrix_world @ edge.verts[1].co
         coords = [v1, v2]
         indices = [(0, 1)]
-        # l = (v2 - v1).length
-        # arc_length = [0.0, l]
-        
         
         street_id = edge[bMesh_street_id_layer]
         index = next((i for i, elem in enumerate(projectStreets) if elem.id == street_id), None)
@@ -364,20 +306,6 @@ def show_street_overlay(obj):
             else:
                 r, g, b = [c for c in bpy.context.scene.mastro_street_name_list[index].streetEdgeColor]
                 a = 1.0
-            # r, g, b = [c for c in bpy.context.scene.mastro_street_name_list[index].streetEdgeColor]
-            # dash_shader.fragment_source(f"""
-            #     void main() {{
-            #         if (step(sin(v_ArcLength * u_Scale), 0.5) == 1.0) discard;
-            #         FragColor = vec4({r}, {g}, {b}, {a});
-            #     }}
-            # """)
-
-            
-        # arc_lengths = [0]
-        # for a, b in zip(coords[:-1], coords[1:]):
-        #     arc_lengths.append(arc_lengths[-1] + (a - b).length)
-        
-            # shader = gpu.shader.create_from_info(dash_shader)   
             rgba = (r, g, b, a)   
             shader.uniform_float("color", rgba) 
             
@@ -386,82 +314,14 @@ def show_street_overlay(obj):
                 {"pos": coords},
                 indices = indices
             )
-            # shader.uniform_float("u_ViewProjectionMatrix", matrix)
-            # shader.uniform_float("u_Scale", dash_scale)
                 
             gpu.state.line_width_set(bpy.context.preferences.addons[__package__].preferences.streetEdgeSize)
             gpu.state.blend_set("ALPHA")
             
             batch.draw(shader)
-        
-    # for edge in bm.edges:
-    #     coords = []
-    #     indices = []
-
-    #     v1 = obj.matrix_world @ edge.verts[0].co
-    #     v2 = obj.matrix_world @ edge.verts[1].co
-    #     coords = [v1, v2]
-    #     indices = [(0, 1)]
-        
-    # if bMesh_street_id_layer:
-    #     street_id = edge[bMesh_street_id_layer]
-    #     projectStreets = bpy.context.scene.mastro_street_name_list
-    #     index = next((i for i, elem in enumerate(projectStreets) if elem.id == street_id), None)
-    #     if 0 <= street_id < len(bpy.context.scene.mastro_street_name_list):
-    #         r, g, b, a = [c for c in bpy.context.scene.mastro_street_name_list[index].streetEdgeColor]
-    #         dash_shader.fragment_source(f"""
-    #             void main() {{
-    #                 if (step(sin(v_ArcLength * u_Scale), 0.5) == 1.0) discard;
-    #                 FragColor = vec4({r}, {g}, {b}, {a});
-    #             }}
-    #         """)
-    #         shader = gpu.shader.create_from_info(dash_shader)   
-    #         # shader.uniform_float("color", (r, g, b, a))
-    #         # dash_shader.fragment_out("color", (r, g, b, a))
-    #         #dash shader
-            
-    #         shader.uniform_float("u_ViewProjectionMatrix", matrix)
-    #         shader.uniform_float("u_Scale", dash_scale)
-            
-    #         gpu.state.line_width_set(bpy.context.preferences.addons[__package__].preferences.streetEdgeSize)
-    #         gpu.state.blend_set("ALPHA")
-    #         # batch = batch_for_shader(shader, 'LINES', {"pos": coords}, indices=indices)   
-    #         batch.draw(shader)
-
+  
     bm.free()
 
-# def mastro_selection_overlay(self, context):
-#     bpy.ops.wm.show_mastro_overlay()
-    
-# @persistent
-# def update_show_overlay(scene, context):
-#     if scene.show_selection_overlay_is_active != bpy.context.preferences.addons[__package__].preferences.toggleSelectionOverlay:
-#         scene.show_selection_overlay_is_active = bpy.context.preferences.addons[__package__].preferences.toggleSelectionOverlay
-#         bpy.ops.wm.show_mastro_overlay('INVOKE_DEFAULT')
-    
-# @persistent
-# def reportEvent():
-#     bpy.ops.wm.mouse_keyboard_event('INVOKE_DEFAULT')
-    
-# '''An operator to report the mouse or keyboard event'''
-# class EventReporter(Operator):
-#     bl_idname = "wm.mouse_keyboard_event"
-#     bl_label = "Return the mouse or keyboard event"
-    
-#     @classmethod
-#     def poll(cls, context):
-#         return (context.object is not None)
-#     #  and "MaStro object" in context.object.data
-#     # and context.object.type == 'MESH'
-#     def invoke(self, context, event):
-#         # obj = bpy.context.active_object
-#         # if obj is not None and obj.type == "MESH" and "MaStro object" in obj.data:
-#         #     # if event.mouse_
-#         #     # context.scene.mouse_event = event
-#         if event.type != "":
-#             context.scene.mouse_keyboard_event = event.type
-        
-#         return {'FINISHED'}
 
 # show the overlayed attributes (type, number of storeys, etc...)
 class VIEW_3D_OT_show_mastro_attributes(Operator):
@@ -804,23 +664,18 @@ def draw_main_show_attributes_2D(context):
          
 def draw_main_show_attributes_3D(context):
     obj = bpy.context.active_object
+    mesh = obj.data
     if hasattr(obj, "data") and  "MaStro object" in obj.data:
-        if "MaStro street" in obj.data and bpy.context.window_manager.toggle_street_color:
-            # if mesh is in edit mode, the street overlay is already drawn
-            mesh = obj.data
-            if mesh.is_editmode == False:
+        if mesh.is_editmode == True and bpy.context.window_manager.toggle_show_data_edit_mode:
+            draw_selection_overlay(obj)
+        elif mesh.is_editmode == False:
+            if "MaStro street" in obj.data and bpy.context.window_manager.toggle_street_color:
                 show_street_overlay(obj)
-        if "MaStro mass" in obj.data and bpy.context.window_manager.toggle_wall_type:
-            # if mesh is in edit mode, the wall overlay is already drawn
-            mesh = obj.data
-            if mesh.is_editmode == False:
+            if "MaStro mass" in obj.data and bpy.context.window_manager.toggle_wall_type:
                 show_wall_overlay(obj)
-        if "MaStro block" in obj.data and bpy.context.window_manager.toggle_block_typology_color:
-            # if mesh is in edit mode, the block overlay is already drawn
-            mesh = obj.data 
-            if mesh.is_editmode == False:
+            if "MaStro block" in obj.data and bpy.context.window_manager.toggle_block_typology_color:
                 show_block_overlay(obj)
-    
+        
 
 def draw_callback_px_show_attributes_2D(self, context):
     draw_main_show_attributes_2D(context)
@@ -1288,9 +1143,17 @@ def updates(scene, depsgraph):
     # show graphic overlays #######################################################
     ###############################################################################
 
-    if scene.show_selection_overlay_is_active != bpy.context.preferences.addons[__package__].preferences.toggleSelectionOverlay:
-        scene.show_selection_overlay_is_active = bpy.context.preferences.addons[__package__].preferences.toggleSelectionOverlay
-        bpy.ops.wm.show_mastro_overlay('INVOKE_DEFAULT')
+    # if scene.show_selection_overlay_is_active != bpy.context.preferences.addons[__package__].preferences.toggleSelectionOverlay:
+    #     scene.show_selection_overlay_is_active = bpy.context.preferences.addons[__package__].preferences.toggleSelectionOverlay
+    #     bpy.ops.wm.show_mastro_overlay('INVOKE_DEFAULT')
+    
+    # if bpy.context.window_manager.toggle_show_overlays: 
+    #     if scene.show_selection_overlay_is_active != bpy.context.window_manager.toggle_show_data_edit_mode:
+    #         scene.show_selection_overlay_is_active = bpy.context.window_manager.toggle_show_data_edit_mode
+    #         print("invoco")
+    #         bpy.ops.wm.show_mastro_overlay('INVOKE_DEFAULT')
+    # else:
+    #     scene.show_selection_overlay_is_active = False
      
         
     ######################################################################################################

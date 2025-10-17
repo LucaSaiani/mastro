@@ -317,7 +317,6 @@ class OBJECT_OT_Set_Face_Attribute_Storeys(Operator):
     def execute(self, context):
         obj = context.active_object
         mesh = obj.data
-        # mesh.attributes["mastro_number_of_storeys"]
         mode = obj.mode
         bpy.ops.object.mode_set(mode='OBJECT')
         selected_faces = [p for p in context.active_object.data.polygons if p.select]
@@ -828,10 +827,11 @@ class obj_typology_uses_name_list(PropertyGroup):
            default = 0)
     
 def update_attributes_mastro_mesh_storeys(self, context):
-    if "MaStro mass" in context.object.data: 
-        bpy.ops.object.set_mesh_face_attribute_storeys()
-    elif "MaStro block" in context.object.data:
-        bpy.ops.object.set_mesh_edge_attribute_storeys()
+    # if "MaStro mass" in context.object.data: 
+    #     bpy.ops.object.set_mesh_face_attribute_storeys()
+    # elif "MaStro block" in context.object.data:
+    #     bpy.ops.object.set_mesh_edge_attribute_storeys()
+    pass
         
 def update_attributes_mastro_block_depth(self, context):
     bpy.ops.object.set_mesh_edge_attribute_depth()
