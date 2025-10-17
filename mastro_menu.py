@@ -976,6 +976,10 @@ def addMassAttributes(obj):
                                     mesh_attribute[1].value = int(height_E)
                                 elif a["attr"] == "mastro_list_void":
                                     mesh_attribute[1].value = int(void)
+                                elif a["attr"] == "mastro_floor_id":
+                                    mesh_attribute[1].value = int(0)
+                                elif a["attr"] == "mastro_number_of_storeys":
+                                    mesh_attribute[1].value = 3
                                 break
                 elif a["attr_domain"] == 'EDGE':
                     attribute = mesh.attributes[a["attr"]].data.items()
