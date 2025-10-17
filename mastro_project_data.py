@@ -1470,12 +1470,14 @@ class OBJECT_OT_update_all_MaStro_meshes_attributes(Operator):
                 if used_collection == True:
                     # bpy.context.scene.collection.children.link(collection)
                     # print(f"Touching {obj.name}")
-                    bpy.context.view_layer.objects.active = obj
-                    mesh = obj.data
-                    objMode = obj.mode
-                    bpy.ops.object.mode_set(mode='OBJECT')
+                    if obj.name in bpy.context.view_layer.objects:
+                        bpy.context.view_layer.objects.active = obj
+                        objMode = obj.mode
+                        bpy.ops.object.mode_set(mode='OBJECT')
                     
-                    faces = context.active_object.data.polygons
+                    mesh = obj.data
+                    # faces = context.active_object.data.polygons
+                    faces = mesh.polygons
                     if hasattr(mesh, "attributes") and "mastro_typology_id" in mesh.attributes:
                         for face in faces:
                             # print(f"Object {obj.name} face {face.index}")
@@ -1505,7 +1507,8 @@ class OBJECT_OT_update_all_MaStro_meshes_attributes(Operator):
                                     mesh.attributes["mastro_list_storey_B"].data[faceIndex].value = data["storey_list_B"]
                             # print(f"Done face {face.index}")
                         
-                    edges = context.active_object.data.edges
+                    # edges = context.active_object.data.edges
+                    edges = obj.data.edges
                     if hasattr(mesh, "attributes") and "mastro_wall_id" in mesh.attributes:
                         for edge in edges:
                             edgeIndex = edge.index
@@ -1516,13 +1519,13 @@ class OBJECT_OT_update_all_MaStro_meshes_attributes(Operator):
                             elif [i for i in ["wall_offset"] if i in self.attributeToUpdate]:
                                 mesh.attributes["mastro_wall_offset"].data[edgeIndex].value = data["wall_offset"]
         
-                    bpy.ops.object.mode_set(mode=objMode)
-                    
-                    # If the object was hidden, it is set to hidden again
-                    # Also the collection is set to the previous status
-                    # In case it has changed
-                    if alreadyVisible == False:
-                        obj.hide_set(True)
+                    if obj.name in bpy.context.view_layer.objects:
+                        bpy.ops.object.mode_set(mode=objMode)
+                        # If the object was hidden, it is set to hidden again
+                        # Also the collection is set to the previous status
+                        # In case it has changed
+                        if alreadyVisible == False:
+                            obj.hide_set(True)
                     if alreadyVisibleCollection == False:
                         collection.hide_viewport = True
                         layer_collection = bpy.context.view_layer.layer_collection.children.get(collection.name)
