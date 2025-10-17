@@ -124,11 +124,11 @@ class mastro_addon_preferences(AddonPreferences):
     #     default = 5
     # )
     
-    toggleSelectionOverlay: bpy.props.BoolProperty(
-                name = "Selection overlay",
-                default = True,
-                description = "Show selection overlay when the MaStro mass, block or street is in edit mode"
-                )
+    # toggleSelectionOverlay: bpy.props.BoolProperty(
+    #             name = "Selection overlay",
+    #             default = True,
+    #             description = "Show selection overlay when the MaStro mass, block or street is in edit mode"
+    #             )
     
     show_overlay_settings: bpy.props.BoolProperty(
         name="Overslay Settings",
@@ -154,9 +154,9 @@ class mastro_addon_preferences(AddonPreferences):
         if self.show_overlay_settings:
             col = box.column(align=True)
             
-            row = col.row()
-            row.label(text = "Toggle Selection Overlays in Edit Mode:")
-            row.prop(self, "toggleSelectionOverlay", icon_only=True)
+            # row = col.row()
+            # row.label(text = "Toggle Selection Overlays in Edit Mode:")
+            # row.prop(self, "toggleSelectionOverlay", icon_only=True)
             
             # mass
             row = col.row()
