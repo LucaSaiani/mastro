@@ -376,7 +376,7 @@ class VIEW_3D_OT_show_mastro_attributes(Operator):
     
 def draw_main_show_attributes_2D(context):
     obj = bpy.context.active_object
-    if hasattr(obj, "data") and isinstance(obj.data, dict) and "MaStro object" in obj.data and ("MaStro mass" in obj.data or "MaStro block" in obj.data):
+    if hasattr(obj, "data") and "MaStro object" in obj.data and ("MaStro mass" in obj.data or "MaStro block" in obj.data):
         # obj.update_from_editmode()
         scene = context.scene
             
@@ -664,7 +664,7 @@ def draw_main_show_attributes_2D(context):
          
 def draw_main_show_attributes_3D(context):
     obj = bpy.context.active_object
-    if hasattr(obj, "data") and isinstance(obj.data, dict) and  "MaStro object" in obj.data:
+    if hasattr(obj, "data") and "MaStro object" in obj.data:
         mesh = obj.data
         if mesh.is_editmode == True and bpy.context.window_manager.toggle_show_data_edit_mode:
             draw_selection_overlay(obj)
