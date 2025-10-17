@@ -827,11 +827,10 @@ class obj_typology_uses_name_list(PropertyGroup):
            default = 0)
     
 def update_attributes_mastro_mesh_storeys(self, context):
-    # if "MaStro mass" in context.object.data: 
-    #     bpy.ops.object.set_mesh_face_attribute_storeys()
-    # elif "MaStro block" in context.object.data:
-    #     bpy.ops.object.set_mesh_edge_attribute_storeys()
-    pass
+    if "MaStro mass" in context.object.data: 
+        bpy.ops.object.set_mesh_face_attribute_storeys()
+    elif "MaStro block" in context.object.data:
+        bpy.ops.object.set_mesh_edge_attribute_storeys()
         
 def update_attributes_mastro_block_depth(self, context):
     bpy.ops.object.set_mesh_edge_attribute_depth()
