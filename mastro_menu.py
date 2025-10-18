@@ -70,7 +70,7 @@ mass_attribute_set = [
             },
             {
             "attr" :  "mastro_inverted_normal",
-            "attr_type" :  "INT",
+            "attr_type" :  "BOOLEAN",
             "attr_domain" :  "EDGE",
             "attr_default" : 0
             },

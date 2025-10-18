@@ -263,7 +263,7 @@ class VIEW3D_PT_MaStro_Block(Panel):
                                   rows = rows)
                 
                 row = layout_1.row(align=True)
-                row.prop(context.scene, "attribute_block_normal", text="Invert Normal") 
+                row.prop(context.scene, "attribute_block_normal", text="Flip Normal") 
                 
                 row = layout_0.row(align=True)
                 row.prop(context.scene, "attribute_block_side_angle", text="Side rotation") 

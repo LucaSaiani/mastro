@@ -53,7 +53,6 @@ class VIEW3D_PT_MaStro_Wall(Panel):
                     row.enabled = True
                 else:
                     row.enabled = False
-                
                 row.prop(context.scene, "mastro_wall_names", icon="NODE_TEXTURE", icon_only=True, text="Wall Type")
                 if len(scene.mastro_wall_name_list) >0:
                     row.label(text = scene.mastro_wall_name_current[0].name)
@@ -67,9 +66,8 @@ class VIEW3D_PT_MaStro_Wall(Panel):
                 else:
                     row.label(text = "")
                 
-                
-                # layout.prop(context.scene, 'attribute_wall_normal', toggle=True, icon="ARROW_LEFTRIGHT", icon_only=True)
-                
+                row = layout.row(align=True)
+                row.prop(context.scene, 'attribute_wall_normal', text="Flip Normal")
                 
                 ################ FLOOR ######################
                 row = layout.row()
@@ -135,33 +133,42 @@ class OBJECT_OT_SetWallNormal(Operator):
     def execute(self, context):
         obj = context.active_object
         mesh = obj.data
+        mode = obj.mode
+        bpy.ops.object.mode_set(mode='OBJECT')
+        selected_edges = [e for e in context.active_object.data.edges if e.select]
+        normal = bpy.context.scene.attribute_wall_normal
+        for edge in selected_edges:
+            edgeIndex = edge.index
+            mesh.attributes["mastro_inverted_normal"].data[edgeIndex].value = normal
+        bpy.ops.object.mode_set(mode=mode)
+        return {'FINISHED'}
 
-        attribute_wall_normal = context.scene.attribute_wall_normal
+        # attribute_wall_normal = context.scene.attribute_wall_normal
         
-        try:
-            mesh.attributes["mastro_wall_id"]
-            mode = obj.mode
-            bpy.ops.object.mode_set(mode='OBJECT')
+        # try:
+            # mesh.attributes["mastro_wall_id"]
+            # mode = obj.mode
+            # bpy.ops.object.mode_set(mode='OBJECT')
            
-            selected_edges = [e for e in bpy.context.active_object.data.edges if e.select]
-            mesh_attributes_normals = mesh.attributes["mastro_inverted_normal"].data.items()
+            # selected_edges = [e for e in bpy.context.active_object.data.edges if e.select]
+            # mesh_attributes_normals = mesh.attributes["mastro_inverted_normal"].data.items()
             
-            for edge in selected_edges:
-                index = edge.index
-                for mesh_attribute in mesh_attributes_normals:
-                    if mesh_attribute[0] == index:
-                        # mesh_attribute[1].value = attribute_wall_normal*1 # convert boolean to 0 or 1
-                        if attribute_wall_normal:
-                            mesh_attribute[1].value = -1
-                        else:
-                            mesh_attribute[1].value = 1
+            # for edge in selected_edges:
+            #     index = edge.index
+            #     for mesh_attribute in mesh_attributes_normals:
+            #         if mesh_attribute[0] == index:
+            #             # mesh_attribute[1].value = attribute_wall_normal*1 # convert boolean to 0 or 1
+            #             if attribute_wall_normal:
+            #                 mesh_attribute[1].value = -1
+            #             else:
+            #                 mesh_attribute[1].value = 1
                 
-            bpy.ops.object.mode_set(mode=mode)
+            # bpy.ops.object.mode_set(mode=mode)
                     
             # self.report({'INFO'}, "Attribute set to face, use: "+str(attribute_mass_use_id))
-            return {'FINISHED'}
-        except:
-            return {'FINISHED'}
+        #     return {'FINISHED'}
+        # except:
+        #     return {'FINISHED'}
         
 def update_wall_normal(self, context):
     bpy.ops.object.set_attribute_wall_normal()
