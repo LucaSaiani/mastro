@@ -27,7 +27,7 @@ from bpy_extras.io_utils import ExportHelper
 from bpy_extras.object_utils import AddObjectHelper
 from bpy.props import StringProperty
 
-from . import icons
+from . import Icons as icons
 import random, math, mathutils, csv
 
 from decimal import Decimal #, ROUND_HALF_DOWN
