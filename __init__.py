@@ -24,7 +24,7 @@ if "bpy" in locals():
     importlib.reload(mastro_project_data),
     importlib.reload(mastro_menu),
     # importlib.reload(mastro_keymaps),
-    importlib.reload(icons),
+    importlib.reload(Icons),
     importlib.reload(mastro_xy_constraint_operators),
     importlib.reload(mastro_wall),
     importlib.reload(mastro_street),
@@ -37,13 +37,13 @@ else:
     from . import mastro_project_data
     from . import mastro_menu
     # from . import mastro_keymaps
-    from . import icons
+    from . import Icons
     from . import mastro_xy_constraint_operators
     from . import mastro_wall
     from . import mastro_street
     from . import mastro_massing
     from . import mastro_schedule
-    from . import mastro_modal_operator
+    # from . import mastro_modal_operator
     from . import mastro_geometryNodes
     
 import bpy
@@ -52,6 +52,7 @@ import nodeitems_utils
 from bpy.types import(Scene)
 from bpy.app.handlers import persistent
 import math
+
 
 # store keymaps here to access after registration
 addon_keymaps = []
@@ -206,7 +207,7 @@ classes = (
     mastro_massing.OBJECT_OT_Set_Block_Edge_Angle,
     
     # mastro_modal_operator.VIEW_3D_OT_show_mastro_overlay,
-    mastro_modal_operator.VIEW_3D_OT_show_mastro_attributes,
+    # mastro_modal_operator.VIEW_3D_OT_show_mastro_attributes,
     # mastro_modal_operator.VIEW_3D_OT_update_mesh_attributes,
     # mastro_modal_operator.VIEW_3D_OT_update_all_meshes_attributes,
     # mastro_modal_operator.EventReporter,
@@ -237,6 +238,9 @@ classes = (
 # MASTRO_NODE_CAPTURE_ATTRIBUTE_HANDLE = 0
 # MASTRO_NODE_INTEGER_HANDLE = 1
 # MASTRO_NODE_FLOAT_HANDLE = 2
+
+def get_prefs():
+    return bpy.context.preferences.addons[__package__].preferences
 
 def initNodes():
     # bpy.ops.node.separate_geometry_by_factor()
@@ -575,8 +579,31 @@ def onFileDefault(scene):
     # )
 
 # MASTRO_TYPOLOGY_NAME_LIST_INDEX_KEY = 0
+
+
+def get_addon_classes(revert=False):
+    from .Handlers.classes import classes as handler_classes
+    from .GNodes.customnodes import classes as nodes_classes
+    from .GNodes.ui import classes as ui_classes
+
+    classes = handler_classes + nodes_classes + ui_classes
+
+    if (revert):
+        return reversed(classes)
+
+    return classes
     
 def register():
+    from bpy.utils import register_class
+    for cls in classes:
+        register_class(cls)
+    for cls in get_addon_classes():
+        register_class(cls)
+        
+    from .Handlers.classes.showAttributes import update_show_attributes as updateShowAttibutes
+    from . import mastro_modal_operator
+
+        
     bpy.app.handlers.load_post.append(onFileLoaded)
     bpy.app.handlers.load_factory_startup_post.append(onFileDefault)
     
@@ -587,11 +614,11 @@ def register():
     # Register constraint operators
     # mastro_xy_constraint_operators.register()
     
-    icons.register()
+    Icons.register()
     
-    from bpy.utils import register_class
-    for cls in classes:
-        register_class(cls)
+    
+        
+   
     
     # Register keymaps
     # mastro_keymaps.register()
@@ -603,6 +630,11 @@ def register():
     
     # Add toggle to both tool header
     bpy.types.VIEW3D_HT_tool_header.append(mastro_menu.constraint_xy_button)
+    
+    
+    # load UI for custom nodes
+    from .GNodes.ui import load_ui
+    load_ui()
     
     # bpy.msgbus.subscribe_rna(
     #     key=mastro_project_data.OBJECT_UL_Typology,
@@ -683,7 +715,7 @@ def register():
     
     bpy.types.WindowManager.toggle_show_overlays = bpy.props.BoolProperty(
                                             default = False,
-                                            update = mastro_modal_operator.update_show_attributes)
+                                            update = updateShowAttibutes)
     bpy.types.WindowManager.toggle_show_data_edit_mode = bpy.props.BoolProperty(
                                             name = "Edit Mode Overlays",
                                             default = True,
@@ -1009,6 +1041,10 @@ def unregister():
     
     bpy.types.VIEW3D_HT_tool_header.remove(mastro_menu.constraint_xy_button)
     
+    # unload UI for custom nodes
+    from .GNodes.ui import unload_ui
+    unload_ui()
+    
     # del bpy.types.Scene.MaStro_math_node_entries
     # del bpy.types.Scene.MaStroAttributes
     del bpy.types.WindowManager.toggle_show_overlays
@@ -1091,10 +1127,16 @@ def unregister():
     for cls in reversed(classes):
         unregister_class(cls)
         
+    for cls in reversed(get_addon_classes()):
+        unregister_class(cls)
+    
+        
+    
+        
     # Unregister keymaps
     # mastro_keymaps.unregister()
     
-    icons.unregister()
+    Icons.unregister()
     
         
    
