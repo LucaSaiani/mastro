@@ -1,3 +1,4 @@
 autoconstraints: SpaghetMeNot and autoConStraintsFree
 Erindale
 Ilir
+Nodebooster come esempio per i nodi
