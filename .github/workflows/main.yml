@@ -18,7 +18,7 @@ jobs:
           cp -r GNodes mastro/
           cp -r Handlers mastro/
           cp -r Icons mastro/
-          cp -r Utils/
+          cp -r Utils mastro/
           cp -r *.py mastro/
           cp mastro.blend mastro/
           cp LICENSE.txt mastro/
