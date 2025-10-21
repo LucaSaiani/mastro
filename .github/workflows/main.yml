@@ -15,8 +15,8 @@ jobs:
       - name: Create folder with selected files
         run: |
           mkdir mastro
-          cp -r icons mastro/
-          cp *.py mastro/
+          cp -r Icons mastro/
+          cp -r *.py mastro/
           cp mastro.blend mastro/
           cp LICENSE.txt mastro/
           cp blender_manifest.toml mastro/
