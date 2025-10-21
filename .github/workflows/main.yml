@@ -15,7 +15,10 @@ jobs:
       - name: Create folder with selected files
         run: |
           mkdir mastro
+          cp -r GNodes mastro/
+          cp -r Handlers mastro/
           cp -r Icons mastro/
+          cp -r Utils/
           cp -r *.py mastro/
           cp mastro.blend mastro/
           cp LICENSE.txt mastro/
