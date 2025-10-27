@@ -600,8 +600,13 @@ def register():
     for cls in get_addon_classes():
         register_class(cls)
         
+    from .GNodes.customnodes import load_properties
+    load_properties()
+
+        
     from .Handlers.classes.showAttributes import update_show_attributes as updateShowAttibutes
-    from . import mastro_modal_operator
+    from .Handlers.definitions.updates import updates as handlerUpdates
+    # from . import mastro_modal_operator
 
         
     bpy.app.handlers.load_post.append(onFileLoaded)
@@ -988,7 +993,7 @@ def register():
     bpy.app.timers.register(initLists, first_interval=.1)
     bpy.app.timers.register(initNodes, first_interval=.1)
     # bpy.app.timers.register(mastro_modal_operator.update_mesh_attributes_depsgraph, first_interval=.1)
-    bpy.app.handlers.depsgraph_update_post.append(mastro_modal_operator.updates)
+    bpy.app.handlers.depsgraph_update_post.append(handlerUpdates)
     
     
     
@@ -1016,7 +1021,7 @@ def register():
 def unregister():
     bpy.app.handlers.load_post.remove(onFileLoaded)
     bpy.app.handlers.load_factory_startup_post.remove(onFileDefault)
-    bpy.app.handlers.depsgraph_update_post.remove(mastro_modal_operator.updates)
+    bpy.app.handlers.depsgraph_update_post.remove(handlerUpdates)
     
     # Unregister constraint operators
     # mastro_xy_constraint_operators.unregister()
@@ -1122,6 +1127,8 @@ def unregister():
     del Scene.mastro_group_node_number_of_split
     
     
+    from .GNodes.customnodes import unload_properties
+    unload_properties()
     
     from bpy.utils import unregister_class
     for cls in reversed(classes):
