@@ -18,8 +18,26 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from . windowinfo import MASTRO_NG_windowinfo
+import bpy
+
+from .windowinfo import MASTRO_NG_windowinfo
 
 classes = (
     MASTRO_NG_windowinfo,
     )
+
+def load_properties():
+
+    bpy.types.Scene.windowInfoNodeCounter = bpy.props.IntProperty(
+                                        name="Window Into Node Counter",
+                                        default=0,
+                                        description="Keep track of the number of Window Info Nodes that are used in the scene")
+                                        # update = mastro_massing.update_attributes_mastro_mesh)
+
+    return None
+
+def unload_properties():
+
+    del bpy.types.Scene.windowInfoNodeCounter 
+
+    return None
