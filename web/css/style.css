@@ -1,0 +1,234 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Source+Code+Pro&display=swap');
+
+/* ================= Variabili ================= */
+:root {
+    --indentation-level: 10px; /* Indentation for submenus */
+    --menu-width: 250px;
+    --default-padding-left: 0px;
+    --default-padding-right: 20px;
+}
+
+/* --- BASE STYLES --- */
+
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  background-color: #948979;
+  font-family: 'Open Sans', sans-serif;
+  color: #DFD0B8;
+  /* overflow: hidden; */
+}
+
+a { 
+    text-decoration: none;
+    color: #DFD0B8;
+}
+
+p {
+    line-height: 1.6;
+    text-align: justify;
+}
+
+/* dl{
+    
+} */
+
+dt {
+    font-weight:bolder;
+}
+
+dd {
+    margin-top: -10px;
+   
+}
+
+
+
+h1, h2, h3 {
+    font-weight: 600;
+    /* color: #222831; */
+}
+
+h4 {
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 0.85rem;
+    margin: 25px 0 10px 0;
+    color: #DFD0B8;
+}
+
+ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+li {
+    /* Il LI è un contenitore a blocco per l'Accordion. */
+    position: static; 
+    display: block; 
+    padding: 0; /* Il padding viene gestito da .menu-title-content */
+    margin: 0;
+    font-size: 0.95rem;
+    cursor: default;
+    transition: background-color 0.2s;
+}
+
+li:hover > .menu-title-content {
+    background-color: #222831;
+}
+
+/* ================= TITLE & LAYOUT ================= */
+
+.title {
+    padding-left: 20px;
+    color: #222831;
+    flex: 0 0 auto;
+}
+
+.row {
+    display: flex;
+    flex: 1 1 auto;
+    height: 100%; /* <-- assicura che la riga prenda tutto lo spazio verticale */
+  overflow: hidden; /* <-- evita scroll indesiderati nella row */
+}
+
+/* ================= MENU ================= */
+.menu {
+    flex: 0 0 auto;
+    width: var(--menu-width);
+    padding-left: 20px;
+    background-color: #1b222c;
+    overflow-y: auto;
+    position: relative;
+}
+
+.menu ::selection {
+    background-color: rgb(33, 38, 45);
+}
+
+.menu li.active > .menu-title-content {
+    background-color: #393E46;
+    font-weight: 600;
+}
+
+/* --- NUOVO CONTENITORE PER TESTO E FRECCIA --- */
+.menu-title-content {
+    /* Applichiamo padding e flex qui, dove vogliamo l'allineamento */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px var(--default-padding-right) 5px var(--default-padding-left);
+    
+    /* Permette alla freccia di essere un figlio ben allineato */
+    position: relative; 
+    cursor: pointer;
+}
+
+/* --- ACCORDION SUBMENU LOGIC --- */
+
+.submenu {
+    display: none; /* Hidden by default, shown by JS */
+    
+    /* Applies indentation to the entire submenu block */
+    padding-left: var(--indentation-level); 
+    
+    /* Reset positioning */
+    margin: 0; 
+    position: static; 
+    width: 100%; 
+}
+
+/* Show submenu only when the 'open' class is applied by JavaScript */
+.has-submenu.open > .submenu {
+    display: block;
+}
+
+/* Freccia: Ora è un pseudo-elemento del menu-title-content */
+.menu-title-content::after {
+    content: "▶"; 
+    font-size: 0.8em;
+    margin-left: 6px; 
+    flex-shrink: 0;
+    transition: transform 0.2s;
+}
+
+.has-submenu.open > .menu-title-content::after {
+    content: "▼";
+}
+
+/* Il padding va riapplicato agli elementi LI annidati */
+.submenu li > .menu-title-content {
+    padding-left: 0; /* L'indentazione è già sul UL genitore */
+    padding-right: var(--default-padding-right);
+}
+
+/* Se l'elemento non ha un sottomenu, non visualizza la freccia */
+li:not(.has-submenu) > .menu-title-content::after {
+    content: none;
+}
+
+/* ================= MAIN PAGE ================= */
+.page {
+    flex: 1 1 70%;
+    padding: 0px 40px 40px 40px ;
+    background-color: #393E46;
+    /* color: #EEEEEE; */
+    overflow-y: auto;
+    text-align: left;
+}
+
+.content-wrapper {
+    /* width: 80%;  */
+    /* margin: 20px auto;  */
+    /* padding: 10px; */
+    /* border: 1px solid #ccc; */
+    overflow: auto; 
+    /* margin-top: -20px; */
+    /* font-family: Arial, sans-serif; */
+}
+
+.title-container {
+    display: flex;
+    align-items: center;       
+    justify-content: space-between;
+    padding: 10px 0px;        
+}
+
+.title-container h1 {
+    margin: 0;
+    font-size: 1.8rem;
+}
+
+.title-container .header-icon {
+    max-height: 60px;          /* dimensione massima, regola come vuoi */
+    width: auto;
+}
+
+.header-icon {
+    width: 50px;
+    height: auto;
+    vertical-align: middle;
+    margin-top: 10px;
+    margin-right: 2px;
+}
+
+.top-right-image {
+      float: right;
+      margin: 20px 0 15px 15px;
+      width: 250px;
+      height: auto;
+      border: 2px solid #333;
+      padding: 5px;
+    }
+
+.example {
+    width: 100%;
+    height: auto;
+}
