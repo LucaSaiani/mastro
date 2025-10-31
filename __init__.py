@@ -30,9 +30,11 @@ if "bpy" in locals():
     importlib.reload(mastro_street),
     importlib.reload(mastro_massing),
     importlib.reload(mastro_schedule)
-    importlib.reload(mastro_modal_operator)
+    # importlib.reload(mastro_modal_operator)
     importlib.reload(mastro_geometryNodes)
 else:
+    from . import Utils
+    
     from . import mastro_preferences
     from . import mastro_project_data
     from . import mastro_menu
@@ -52,7 +54,6 @@ import nodeitems_utils
 from bpy.types import(Scene)
 from bpy.app.handlers import persistent
 import math
-
 
 # store keymaps here to access after registration
 addon_keymaps = []
@@ -508,8 +509,9 @@ def onFileLoaded(scene):
     bpy.context.scene.previous_selection_object_name = ""
     bpy.context.scene.previous_selection_face_id = -1
     
-    mastro_modal_operator.known_scenes.clear()
-    mastro_modal_operator.known_scenes.update(bpy.data.scenes.keys())
+    from .Handlers.definitions.updates import known_scenes as knownScenes
+    knownScenes.clear()
+    knownScenes.update(bpy.data.scenes.keys())
     
     # bpy.msgbus.subscribe_rna(
     #     key=mastro_project_data.OBJECT_UL_Typology,
@@ -543,8 +545,9 @@ def onFileDefault(scene):
     bpy.context.scene.previous_selection_object_name = ""
     bpy.context.scene.previous_selection_face_id = -1
     
-    mastro_modal_operator.known_scenes.clear()
-    mastro_modal_operator.known_scenes.update(bpy.data.scenes.keys())
+    from .Handlers.definitions.updates import known_scenes as knownScenes
+    knownScenes.clear()
+    knownScenes.update(bpy.data.scenes.keys())
     
     # bpy.msgbus.subscribe_rna(
     #     key=mastro_project_data.OBJECT_UL_Typology,
@@ -600,12 +603,17 @@ def register():
     for cls in get_addon_classes():
         register_class(cls)
         
+    for mod in Utils.modules:
+        if hasattr(mod, "register"):
+            mod.register()
+        
     from .GNodes.customnodes import load_properties
     load_properties()
 
         
     from .Handlers.classes.showAttributes import update_show_attributes as updateShowAttibutes
     from .Handlers.definitions.updates import updates as handlerUpdates
+
     # from . import mastro_modal_operator
 
         
@@ -992,6 +1000,8 @@ def register():
     
     bpy.app.timers.register(initLists, first_interval=.1)
     bpy.app.timers.register(initNodes, first_interval=.1)
+    
+    
     # bpy.app.timers.register(mastro_modal_operator.update_mesh_attributes_depsgraph, first_interval=.1)
     bpy.app.handlers.depsgraph_update_post.append(handlerUpdates)
     
@@ -1021,6 +1031,9 @@ def register():
 def unregister():
     bpy.app.handlers.load_post.remove(onFileLoaded)
     bpy.app.handlers.load_factory_startup_post.remove(onFileDefault)
+    
+    from .Handlers.definitions.updates import updates as handlerUpdates
+
     bpy.app.handlers.depsgraph_update_post.remove(handlerUpdates)
     
     # Unregister constraint operators
@@ -1117,6 +1130,7 @@ def unregister():
     
     del Scene.mastro_block_names
     del Scene.mastro_building_names
+
     del Scene.mastro_typology_uses_name
     del Scene.mastro_typology_names
     del Scene.mastro_wall_names
@@ -1130,6 +1144,12 @@ def unregister():
     from .GNodes.customnodes import unload_properties
     unload_properties()
     
+    
+    for mod in reversed(Utils.modules):
+        if hasattr(mod, "register"):
+            mod.unregister()
+            
+            
     from bpy.utils import unregister_class
     for cls in reversed(classes):
         unregister_class(cls)
