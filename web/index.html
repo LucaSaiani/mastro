@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <title>MaStro</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+  <div class="title">
+    <h1>MaStro</h1>
+  </div>
+
+  <div class="row">
+    <!-- MENU LATERALE -->
+    <div class="menu">
+      <nav>
+        <ul id="menu-list">
+
+          <h4>GETTING STARTED</h4>
+          
+          <li data-page="introduction.html">Introduction</li>
+          <li data-page="install.html">Install</li>
+
+          <h4>SECTIONS</h4>
+          <li data-page="userInterface.html">User Interface</li>
+          <li data-page="GNodes.html" class="has-submenu">
+            <span class="menu-item">Nodes</span>
+            <ul class="submenu"></ul>
+          </li>
+
+          <h4>EXTRAS</h4>
+          <li data-page="acknowledgement.html">Aknowledgement</li>
+          <li data-page="copyright.html">Copyright</li>
+
+        </ul>
+      </nav>
+    </div>
+
+    <!-- AREA CONTENUTO -->
+    <div class="page" id="content">
+      <h2>Welcome!</h2>
+      <p>Select a page from the menu.</p>
+    </div>
+  </div>
+
+  <script src="js/script.js"></script>
+  
+</body>
+</html>
