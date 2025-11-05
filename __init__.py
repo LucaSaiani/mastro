@@ -70,6 +70,7 @@ from . Icons import register as register_icons, unregister as unregister_icons
 from . Utils import modules
 from . Utils.init_lists import init_lists
 from . Handlers.definitions.updates import known_scenes as knownScenes
+from . Keymaps.keymap import register as register_keymaps, unregister as unregister_keymaps
 ########################################
 # from . import Utils
 # from . import UI
@@ -79,7 +80,7 @@ from bpy.app.handlers import persistent
 import math
 
 # store keymaps here to access after registration
-addon_keymaps = []
+# addon_keymaps = []
 
 
 classes = (
@@ -352,6 +353,8 @@ def register():
         if hasattr(mod, "register"):
             mod.register()
     
+    ### registering shortcuts ###
+    register_keymaps()
     
     ############################################################
             
@@ -391,25 +394,25 @@ def register():
     
     
     
-    # handle the keymap
-    wm = bpy.context.window_manager
-    # Note that in background mode (no GUI available), keyconfigs are not available either,
-    # so we have to check this to avoid nasty errors in background case.
-    kc = wm.keyconfigs.addon
-    if kc:
-        km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
-        kmi = km.keymap_items.new(mastro_xy_constraint_operators.TRANSFORM_OT_translate_xy_constraint.bl_idname, 'G', 'PRESS', ctrl=False, shift=False)
-        addon_keymaps.append((km, kmi))
+    # # handle the keymap
+    # wm = bpy.context.window_manager
+    # # Note that in background mode (no GUI available), keyconfigs are not available either,
+    # # so we have to check this to avoid nasty errors in background case.
+    # kc = wm.keyconfigs.addon
+    # if kc:
+    #     km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
+    #     kmi = km.keymap_items.new(mastro_xy_constraint_operators.TRANSFORM_OT_translate_xy_constraint.bl_idname, 'G', 'PRESS', ctrl=False, shift=False)
+    #     addon_keymaps.append((km, kmi))
         
-        kmi = km.keymap_items.new(mastro_xy_constraint_operators.TRANSFORM_OT_rotate_xy_constraint.bl_idname, 'R', 'PRESS', ctrl=False, shift=False)
-        addon_keymaps.append((km, kmi))
+    #     kmi = km.keymap_items.new(mastro_xy_constraint_operators.TRANSFORM_OT_rotate_xy_constraint.bl_idname, 'R', 'PRESS', ctrl=False, shift=False)
+    #     addon_keymaps.append((km, kmi))
         
-        km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
-        kmi = km.keymap_items.new(mastro_xy_constraint_operators.TRANSFORM_OT_translate_xy_constraint.bl_idname, 'G', 'PRESS', ctrl=False, shift=False)
-        addon_keymaps.append((km, kmi))
+    #     km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
+    #     kmi = km.keymap_items.new(mastro_xy_constraint_operators.TRANSFORM_OT_translate_xy_constraint.bl_idname, 'G', 'PRESS', ctrl=False, shift=False)
+    #     addon_keymaps.append((km, kmi))
         
-        kmi = km.keymap_items.new(mastro_xy_constraint_operators.TRANSFORM_OT_rotate_xy_constraint.bl_idname, 'R', 'PRESS', ctrl=False, shift=False)
-        addon_keymaps.append((km, kmi))
+    #     kmi = km.keymap_items.new(mastro_xy_constraint_operators.TRANSFORM_OT_rotate_xy_constraint.bl_idname, 'R', 'PRESS', ctrl=False, shift=False)
+    #     addon_keymaps.append((km, kmi))
     
 
 def unregister():
@@ -433,6 +436,9 @@ def unregister():
   
 
     ############################################################
+    
+    ### unregistering shortcuts ###
+    unregister_keymaps()
     
     ### unregistering modules ###            
     for mod in reversed(modules):
