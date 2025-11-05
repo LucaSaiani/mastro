@@ -18,6 +18,7 @@ jobs:
           cp -r GNodes mastro/
           cp -r Handlers mastro/
           cp -r Icons mastro/
+          cp -r Keymaps mastro/
           cp -r Operators mastro/
           cp -r UI mastro/
           cp -r Utils mastro/
