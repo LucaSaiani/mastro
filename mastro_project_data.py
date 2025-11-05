@@ -30,9 +30,12 @@ from bpy.types import PropertyGroup, UIList, Operator, Panel
 from types import SimpleNamespace
 # from bpy.app.handlers import persistent
 
-from . mastro_massing import read_mesh_attributes_uses, update_mesh_face_attributes_storeys
+# from . mastro_massing import read_mesh_attributes_uses
+from .Utils.read_use_attribute import read_use_attribute
 from . mastro_wall import read_mesh_attributes_walls
 from . mastro_street import read_mesh_attributes_streets
+
+from .Utils.read_storey_attribute import read_storey_attribute
 
 import random
 # import decimal
@@ -898,7 +901,7 @@ class building_name_list(PropertyGroup):
 # a use name has changed
 # also updates the names of mastro_typology_uses_name_list_index  
 def update_mastro_filter_by_use(self, context):
-    from . import initLists
+    from . Utils.init_lists import init_lists
     bpy.ops.node.update_gn_filter(filter_name="use")
     bpy.ops.node.update_shader_filter(filter_name="use")
     
@@ -912,7 +915,7 @@ def update_mastro_filter_by_use(self, context):
     usesUiList = context.scene.mastro_obj_typology_uses_name_list
     subIndex = context.scene.mastro_typology_uses_name_list_index
     if  len(context.scene.mastro_typology_uses_name_list) == 0: 
-        initLists()
+        init_lists()
     subName = context.scene.mastro_typology_uses_name_list[subIndex].name
     useIndex = context.scene.mastro_use_name_list.find(subName)
     for use in usesUiList:
@@ -1484,7 +1487,7 @@ class OBJECT_OT_update_all_MaStro_meshes_attributes(Operator):
                             faceIndex = face.index
                             if [i for i in ["all", "floorToFloor", "void"] if i in self.attributeToUpdate]:
                                 typology = mesh.attributes["mastro_typology_id"].data[faceIndex].value
-                                data = read_mesh_attributes_uses(context, typologySet = typology)
+                                data = read_use_attribute(context, typologySet = typology)
                                 if [i for i in ["all"] if i in self.attributeToUpdate]:
                                     # mesh.attributes["mastro_typology_id"].data[faceIndex].value = data["typology_id"]
                                     mesh.attributes["mastro_list_use_id_A"].data[faceIndex].value = data["use_id_list_A"]
@@ -1500,7 +1503,7 @@ class OBJECT_OT_update_all_MaStro_meshes_attributes(Operator):
                                     
                             if [i for i in ["all", "numberOfStoreys"] if i in self.attributeToUpdate]:
                                 storeys = mesh.attributes["mastro_number_of_storeys"].data[faceIndex].value
-                                data = update_mesh_face_attributes_storeys(context, mesh, faceIndex, storeysSet = storeys)
+                                data = read_storey_attribute(context, mesh, faceIndex, element_type="FACE", storeysSet = storeys)
                                 if [i for i in ["all", "numberOfStoreys"] if i in self.attributeToUpdate]:
                                     mesh.attributes["mastro_number_of_storeys"].data[faceIndex].value = data["numberOfStoreys"]
                                     mesh.attributes["mastro_list_storey_A"].data[faceIndex].value = data["storey_list_A"]
@@ -2024,10 +2027,7 @@ class VIEW3D_PT_MaStro_street_data(Panel):
         if len(context.scene.mastro_street_name_list) > 0:
             layout.prop(context.scene.mastro_street_name_list[index], "streetWidth", text="Width")
             layout.prop(context.scene.mastro_street_name_list[index], "streetRadius", text="Radius")
-        # else:
-        #     from . import initLists
-        #     initLists()
-        # layout.prop(context.scene.mastro_street_name_list[index], "streetEdgeColor", text="Color Overlay")
+        
        
 class OBJECT_UL_Street(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data,
