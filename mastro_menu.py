@@ -770,17 +770,17 @@ class MaStro_MenuOperator_add_MaStro_dimension(Operator, AddObjectHelper):
     
 
 
-# add the entry to the add menu
-def mastro_add_menu_func(self, context):
-    self.layout.separator()
-    myIcon = icons.icon_id("block")
-    self.layout.operator(MaStro_MenuOperator_add_MaStro_block.bl_idname, icon_value=myIcon)
-    myIcon = icons.icon_id("mass")
-    self.layout.operator(MaStro_MenuOperator_add_MaStro_mass.bl_idname, icon_value=myIcon)
-    myIcon = icons.icon_id("street")
-    self.layout.operator(MaStro_MenuOperator_add_MaStro_street.bl_idname, icon_value=myIcon)
-    # myIcon = icons.icon_id("street")
-    self.layout.operator(MaStro_MenuOperator_add_MaStro_dimension.bl_idname, icon_value=myIcon)
+# # add the entry to the add menu
+# def mastro_add_menu_func(self, context):
+#     self.layout.separator()
+#     myIcon = icons.icon_id("block")
+#     self.layout.operator(MaStro_MenuOperator_add_MaStro_block.bl_idname, icon_value=myIcon)
+#     myIcon = icons.icon_id("mass")
+#     self.layout.operator(MaStro_MenuOperator_add_MaStro_mass.bl_idname, icon_value=myIcon)
+#     myIcon = icons.icon_id("street")
+#     self.layout.operator(MaStro_MenuOperator_add_MaStro_street.bl_idname, icon_value=myIcon)
+#     # myIcon = icons.icon_id("street")
+#     self.layout.operator(MaStro_MenuOperator_add_MaStro_dimension.bl_idname, icon_value=myIcon)
     
     
 class MaStro_MenuOperator_convert_to_MaStro_mass(Operator):

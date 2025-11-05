@@ -238,7 +238,7 @@ def updates(scene, depsgraph):
                                     # number of storeys
                                     # if storeys == 0: # in case a new face is created in edit mode, the number of set storeys is 1
                                     #     storeys = 1
-                                        # bpy.ops.object.set_mesh_face_attribute_storeys
+                                        # bpy.ops.object.set_face_attribute_storeys
                                     # selected_faces = [face for face in bm.faces if face.select]
                                     # if len(selected_faces) == 1:
                                     if storeys == 0:

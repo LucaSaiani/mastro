@@ -20,38 +20,61 @@
 
 if "bpy" in locals():
     import importlib
-    importlib.reload(mastro_preferences),
+    # importlib.reload(preferences),
     importlib.reload(mastro_project_data),
     importlib.reload(mastro_menu),
     # importlib.reload(mastro_keymaps),
-    importlib.reload(Icons),
+    # importlib.reload(Icons),
     importlib.reload(mastro_xy_constraint_operators),
     importlib.reload(mastro_wall),
     importlib.reload(mastro_street),
-    importlib.reload(mastro_massing),
+    # importlib.reload(mastro_massing),
     importlib.reload(mastro_schedule)
     # importlib.reload(mastro_modal_operator)
     importlib.reload(mastro_geometryNodes)
 else:
-    from . import Utils
     
-    from . import mastro_preferences
+    
+    
+    
+    # from .UI.classes import preferences
     from . import mastro_project_data
     from . import mastro_menu
     # from . import mastro_keymaps
-    from . import Icons
+    # from . import Icons
     from . import mastro_xy_constraint_operators
     from . import mastro_wall
     from . import mastro_street
-    from . import mastro_massing
+    # from . import mastro_massing
     from . import mastro_schedule
     # from . import mastro_modal_operator
     from . import mastro_geometryNodes
     
-import bpy
+
 import nodeitems_utils
 
-from bpy.types import(Scene)
+
+
+#### IMPORT DA TENERE ASSOLUTAMENTE ####
+import bpy
+
+# to set up __package__ when the extension starts from vs code
+IS_VSCODE_DEV = __package__ is not None and __package__.startswith("bl_ext.vscode_development.")
+if IS_VSCODE_DEV:
+    PREFS_KEY = "bl_ext.vscode_development.mastro"
+else:
+    PREFS_KEY = __package__
+
+from . UI.properties.properties import register as register_properties, unregister as unregister_properties
+from . Icons import register as register_icons, unregister as unregister_icons
+from . Utils import modules
+from . Utils.init_lists import init_lists
+from . Handlers.definitions.updates import known_scenes as knownScenes
+########################################
+# from . import Utils
+# from . import UI
+
+# from bpy.types import(Scene)
 from bpy.app.handlers import persistent
 import math
 
@@ -60,7 +83,7 @@ addon_keymaps = []
 
 
 classes = (
-    mastro_preferences.mastro_addon_preferences,
+    # preferences.mastro_addon_preferences,
     
     mastro_geometryNodes.VIEW_PT_MaStro_Node_Panel,
     mastro_geometryNodes.VIEW_PT_MaStro_GN_Panel,
@@ -195,17 +218,17 @@ classes = (
     # mastro_vertex.VIEW3D_PT_MaStro_vertex,
     
     # mastro_massing.OBJECT_OT_SetTypologyId,
-    mastro_massing.OBJECT_UL_OBJ_Typology_Uses,
-    mastro_massing.OBJECT_OT_Set_Face_Attribute_Storeys,
-    mastro_massing.OBJECT_OT_Set_Edge_Attribute_Storeys,
-    mastro_massing.OBJECT_OT_Set_Face_Attribute_Uses,
-    mastro_massing.OBJECT_OT_Set_Edge_Attribute_Uses,
-    mastro_massing.OBJECT_OT_Set_Edge_Attribute_Depth,
-    mastro_massing.obj_typology_uses_name_list,
-    mastro_massing.VIEW3D_PT_MaStro_Mass,
-    mastro_massing.VIEW3D_PT_MaStro_Block,
-    mastro_massing.OBJECT_OT_Set_Block_Edge_Attribute_Normal,
-    mastro_massing.OBJECT_OT_Set_Block_Edge_Angle,
+    # mastro_massing.OBJECT_UL_OBJ_Typology_Uses,
+    # mastro_massing.OBJECT_OT_Set_Face_Attribute_Storeys,
+    # mastro_massing.OBJECT_OT_Set_Edge_Attribute_Storeys,
+    # mastro_massing.OBJECT_OT_Set_Face_Attribute_Uses,
+    # mastro_massing.OBJECT_OT_Set_Edge_Attribute_Uses,
+    # mastro_massing.OBJECT_OT_Set_Edge_Attribute_Depth,
+    # mastro_massing.obj_typology_uses_name_list,
+    # mastro_massing.VIEW3D_PT_MaStro_Mass,
+    # mastro_massing.VIEW3D_PT_MaStro_Block,
+    # mastro_massing.OBJECT_OT_Set_Block_Edge_Attribute_Normal,
+    # mastro_massing.OBJECT_OT_Set_Block_Edge_Angle,
     
     # mastro_modal_operator.VIEW_3D_OT_show_mastro_overlay,
     # mastro_modal_operator.VIEW_3D_OT_show_mastro_attributes,
@@ -240,8 +263,9 @@ classes = (
 # MASTRO_NODE_INTEGER_HANDLE = 1
 # MASTRO_NODE_FLOAT_HANDLE = 2
 
-def get_prefs():
-    return bpy.context.preferences.addons[__package__].preferences
+# def get_prefs():
+#     return bpy.context.preferences.addons[__package__].preferences
+    
 
 def initNodes():
     # bpy.ops.node.separate_geometry_by_factor()
@@ -256,340 +280,47 @@ def initNodes():
     bpy.ops.node.update_shader_filter(filter_name="use")
     bpy.ops.node.update_shader_filter(filter_name="typology")
 
-def initLists(scene=None):
-    if scene == None:
-        s = bpy.context.scene
-    else:
-        s = bpy.data.scenes[scene]
-    # block name
-    name_list = s.mastro_block_name_list
-    name_list_current = s.mastro_block_name_current
-    if len(name_list) == 0:
-        name_list.add()
-        name_list[0].id = 0
-        name_list[0].name = "Block type... "
-    elif not 0 in [elem.id for elem in name_list]:
-        name_list.add()
-        name_list[-1].id = 0
-        name_list[-1].name = "Block type... "
-    if len(name_list_current) == 0:
-        name_list_current.add()
-        name_list_current[0].id = 0
-        name_list_current[0].name = name_list[0].name 
-        
-    # if len(bpy.context.scene.mastro_block_name_list) == 0:
-    #     bpy.context.scene.mastro_block_name_list.add()
-    #     bpy.context.scene.mastro_block_name_list[0].id = 0
-    #     bpy.context.scene.mastro_block_name_list[0].name = "Block name..."
-    
-    # if len(bpy.context.scene.mastro_block_name_current) == 0:
-    #     bpy.context.scene.mastro_block_name_current.add()
-    #     bpy.context.scene.mastro_block_name_current[0].id = 0
-    #     bpy.context.scene.mastro_block_name_current[0].name = bpy.context.scene.mastro_block_name_list[0].name
-    
-    # building name
-    name_list = s.mastro_building_name_list
-    name_list_current = s.mastro_building_name_current
-    if len(name_list) == 0:
-        name_list.add()
-        name_list[0].id = 0
-        name_list[0].name = "Building name... "
-    elif not 0 in [elem.id for elem in name_list]:
-        name_list.add()
-        name_list[-1].id = 0
-        name_list[-1].name = "Building name... "
-    if len(name_list_current) == 0:
-        name_list_current.add()
-        name_list_current[0].id = 0
-        name_list_current[0].name = name_list[0].name 
-        
-    # if len(bpy.context.scene.mastro_building_name_list) == 0:
-    #     bpy.context.scene.mastro_building_name_list.add()
-    #     bpy.context.scene.mastro_building_name_list[0].id = 0
-    #     bpy.context.scene.mastro_building_name_list[0].name = "Building name..."
-    
-    # if len(bpy.context.scene.mastro_building_name_current) == 0:
-    #     bpy.context.scene.mastro_building_name_current.add()
-    #     bpy.context.scene.mastro_building_name_current[0].id = 0
-    #     bpy.context.scene.mastro_building_name_current[0].name = bpy.context.scene.mastro_building_name_list[0].name
-    
-    # use
-    name_list = s.mastro_use_name_list
-    if len(name_list) == 0:
-        name_list.add()
-        name_list[0].id = 0
-        name_list[0].name = "Use name... "
-        name_list[0].storeys = 3
-        name_list[0].liquid = True
-    elif not 0 in [elem.id for elem in name_list]:
-        name_list.add()
-        name_list[-1].id = 0
-        name_list[-1].name = "Use name... "
-        name_list[-1].storeys = 3
-        name_list[-1].liquid = True
-        
-    # if len(bpy.context.scene.mastro_use_name_list) == 0:
-    #     bpy.context.scene.mastro_use_name_list.add()
-    #     bpy.context.scene.mastro_use_name_list[0].id = 0
-    #     bpy.context.scene.mastro_use_name_list[0].name = "Use name..."
-    #     bpy.context.scene.mastro_use_name_list[0].storeys = 3
-    #     bpy.context.scene.mastro_use_name_list[0].liquid = True
-    
-    # typology
-    name_list = s.mastro_typology_name_list
-    name_list_current = s.mastro_typology_name_current
-    if len(name_list) == 0:
-        name_list.add()
-        name_list[0].id = 0
-        name_list[0].name = "Typology name... "
-        name_list[0].useList = "0"
-    elif not 0 in [elem.id for elem in name_list]:
-        name_list.add()
-        name_list[-1].id = 0
-        name_list[-1].name = "Typology name... "
-        name_list[-1].useList = "0"
-    if len(name_list_current) == 0:
-        name_list_current.add()
-        name_list_current[0].id = 0
-        name_list_current[0].name = name_list[0].name 
-    
-    # if len(bpy.context.scene.mastro_typology_name_list) == 0:
-    #     bpy.context.scene.mastro_typology_name_list.add()
-    #     bpy.context.scene.mastro_typology_name_list[0].id = 0
-    #     bpy.context.scene.mastro_typology_name_list[0].name = "Typology name... "
-    #     bpy.context.scene.mastro_typology_name_list[0].useList = "0"
-    
-    # if len(bpy.context.scene.mastro_typology_name_current) == 0:
-    #     bpy.context.scene.mastro_typology_name_current.add()
-    #     bpy.context.scene.mastro_typology_name_current[0].id = 0
-    #     bpy.context.scene.mastro_typology_name_current[0].name = bpy.context.scene.mastro_typology_name_list[0].name
-        
-    # typology uses name list
-    name_list = s.mastro_typology_uses_name_list
-    if len(name_list_current) == 0:
-        name_list_current.add()
-        name_list_current[0].id = 0
-        name_list_current[0].name = s.mastro_use_name_list[0].name
-    elif not 0 in [elem.id for elem in name_list]:
-        name_list.add()
-        name_list[-1].id = 0
-        name_list[-1].name = s.mastro_use_name_list[0].name
-    
-    
-    # if len(bpy.context.scene.mastro_typology_uses_name_list) == 0:
-    #     bpy.context.scene.mastro_typology_uses_name_list.add()
-    #     bpy.context.scene.mastro_typology_uses_name_list[0].id = 0
-    #     bpy.context.scene.mastro_typology_uses_name_list[0].name = bpy.context.scene.mastro_use_name_list[0].name
-        
-    
-    # street
-    name_list = s.mastro_street_name_list
-    name_list_current = s.mastro_street_name_current
-    if len(name_list) == 0:
-        name_list.add()
-        name_list[0].id = 0
-        name_list[0].name = "Street type... "
-    elif not 0 in [elem.id for elem in name_list]:
-        name_list.add()
-        name_list[-1].id = 0
-        name_list[-1].name = "Street type... "
-    if len(name_list_current) == 0:
-        name_list_current.add()
-        name_list_current[0].id = 0
-        name_list_current[0].name = name_list[0].name    
-        
-    # wall
-    name_list = s.mastro_wall_name_list
-    name_list_current = s.mastro_wall_name_current
-    if len(name_list) == 0:
-        name_list.add()
-        name_list[0].id = 0
-        name_list[0].name = "Wall type... "
-        name_list[0].normal = 0
-    elif not 0 in [elem.id for elem in name_list]:
-        name_list.add()
-        name_list[-1].id = 0
-        name_list[-1].name = "Wall type... "
-        name_list[-1].normal = 0
-    if len(name_list_current) == 0:
-        name_list_current.add()
-        name_list_current[0].id = 0
-        name_list_current[0].name = name_list[0].name    
-        
-    # floor name
-    name_list = s.mastro_floor_name_list
-    name_list_current = s.mastro_floor_name_current
-    if len(name_list) == 0:
-        name_list.add()
-        name_list[0].id = 0
-        name_list[0].name = "Floor type... "
-    elif not 0 in [elem.id for elem in name_list]:
-        name_list.add()
-        name_list[-1].id = 0
-        name_list[-1].name = "Floor type... "
-    if len(name_list_current) == 0:
-        name_list_current.add()
-        name_list_current[0].id = 0
-        name_list_current[0].name = name_list[0].name 
-    
-    # if len(bpy.context.scene.mastro_floor_name_list) == 0:
-    #     bpy.context.scene.mastro_floor_name_list.add()
-    #     bpy.context.scene.mastro_floor_name_list[0].id = 0
-    #     bpy.context.scene.mastro_floor_name_list[0].name = "Floor type..."
-    
-    # if len(bpy.context.scene.mastro_floor_name_current) == 0:
-    #     bpy.context.scene.mastro_floor_name_current.add()
-    #     bpy.context.scene.mastro_floor_name_current[0].id = 0
-    #     bpy.context.scene.mastro_floor_name_current[0].name = bpy.context.scene.mastro_floor_name_list[0].name
-        
-    # if len(bpy.context.scene.mastro_obj_typology_uses_name_list) == 0:
-    #     bpy.context.scene.mastro_obj_typology_uses_name_list.add()
-    #     bpy.context.scene.mastro_obj_typology_uses_name_list[0].id = 0
-    #     bpy.context.scene.mastro_obj_typology_uses_name_list[0].name =  bpy.context.scene.mastro_use_name_list[0].name
 
-def get_block_names_from_list(scene, context):
-    items = []
-    
-    for el in scene.mastro_block_name_list:
-        newProp = (el.name, el.name, "")
-        items.append(newProp)
-    return items
-
-def get_building_names_from_list(scene, context):
-    items = []
-    for el in scene.mastro_building_name_list:
-        newProp = (el.name, el.name, "")
-        items.append(newProp)
-    return items
-
-def get_use_names_from_list(scene, context):
-    items = []
-    for el in scene.mastro_use_name_list:
-        newProp = (el.name, el.name, "")
-        items.append(newProp)
-    items.sort()
-    return items
-
-def get_typology_names_from_list(scene, context):
-    items = []
-    for el in scene.mastro_typology_name_list:
-        newProp = (el.name, el.name, "")
-        items.append(newProp)
-    # items.sort()
-    return items
-
-def get_street_names_from_list(scene, context):
-    items = []
-    for el in scene.mastro_street_name_list:
-        newProp = (el.name, el.name, "")
-        items.append(newProp)
-    return items
-
-def get_wall_names_from_list(scene, context):
-    items = []
-    for el in scene.mastro_wall_name_list:
-        newProp = (el.name, el.name, "")
-        items.append(newProp)
-    return items
-
-def get_floor_names_from_list(scene, context):
-    items = []
-    for el in scene.mastro_floor_name_list:
-        newProp = (el.name, el.name, "")
-        items.append(newProp)
-    return items
 
 
 @persistent
 def onFileLoaded(scene):
-    initLists()
+    init_lists()
     initNodes()
     # bpy.context.scene.updating_mesh_attributes_is_active = False
     # bpy.context.scene.show_selection_overlay_is_active = False
     bpy.context.scene.previous_selection_object_name = ""
     bpy.context.scene.previous_selection_face_id = -1
     
-    from .Handlers.definitions.updates import known_scenes as knownScenes
+    
     knownScenes.clear()
     knownScenes.update(bpy.data.scenes.keys())
     
-    # bpy.msgbus.subscribe_rna(
-    #     key=mastro_project_data.OBJECT_UL_Typology,
-    #     owner=MASTRO_TYPOLOGY_NAME_LIST_INDEX_KEY,
-    #     args = (),
-    #     notify=mastro_project_data.update_uses_uiList,
-    #     options={"PERSISTENT",}
-    # )
-        
-    # bpy.msgbus.subscribe_rna(
-    #     key=MaStroNodeInteger,
-    #     owner=MASTRO_NODE_INTEGER_HANDLE,
-    #     args = (),
-    #     notify=mastro_schedule.execute_active_node_tree,
-    #     options={"PERSISTENT",}
-    # )
-    
-    # bpy.msgbus.subscribe_rna(
-    #     key=MaStroNodeFloat,
-    #     owner=MASTRO_NODE_FLOAT_HANDLE,
-    #     args = (),
-    #     notify=mastro_schedule.execute_active_node_tree,
-    #     options={"PERSISTENT",}
-    # )
+  
    
 @persistent
 def onFileDefault(scene):
-    initLists()
+    init_lists()
     initNodes()
     # bpy.context.scene.show_selection_overlay_is_active = False
     bpy.context.scene.previous_selection_object_name = ""
     bpy.context.scene.previous_selection_face_id = -1
     
-    from .Handlers.definitions.updates import known_scenes as knownScenes
+    
     knownScenes.clear()
     knownScenes.update(bpy.data.scenes.keys())
     
-    # bpy.msgbus.subscribe_rna(
-    #     key=mastro_project_data.OBJECT_UL_Typology,
-    #     owner=MASTRO_TYPOLOGY_NAME_LIST_INDEX_KEY,
-    #     args = (),
-    #     notify=mastro_project_data.update_uses_uiList,
-    #     options={"PERSISTENT",}
-    # )
     
-    # bpy.msgbus.subscribe_rna(
-    #     key=MaStroNodeCaptureAttribute,
-    #     owner=MASTRO_NODE_CAPTURE_ATTRIBUTE_HANDLE,
-    #     args = (),
-    #     notify=mastro_schedule.execute_active_node_tree,
-    #     options={"PERSISTENT",}
-    # )
-        
-    # bpy.msgbus.subscribe_rna(
-    #     key=MaStroNodeInteger,
-    #     owner=MASTRO_NODE_INTEGER_HANDLE,
-    #     args = (),
-    #     notify=mastro_schedule.execute_active_node_tree,
-    #     options={"PERSISTENT",}
-    # )
-    
-    # bpy.msgbus.subscribe_rna(
-    #     key=MaStroNodeFloat,
-    #     owner=MASTRO_NODE_FLOAT_HANDLE,
-    #     args = (),
-    #     notify=mastro_schedule.execute_active_node_tree,
-    #     options={"PERSISTENT",}
-    # )
-
-# MASTRO_TYPOLOGY_NAME_LIST_INDEX_KEY = 0
 
 
 def get_addon_classes(revert=False):
+    from .UI.classes import classes as preference_classes
     from .Handlers.classes import classes as handler_classes
     from .GNodes.customnodes import classes as nodes_classes
     from .GNodes.ui import classes as ui_classes
-
-    classes = handler_classes + nodes_classes + ui_classes
+    from .Operators import classes as operator_classes
+    
+    classes = preference_classes + handler_classes + nodes_classes + ui_classes + operator_classes
 
     if (revert):
         return reversed(classes)
@@ -597,21 +328,38 @@ def get_addon_classes(revert=False):
     return classes
     
 def register():
+    ############################################################
+    
+    
+    
+    ### registering icons ###
+    register_icons()
+        
+    ### registering classes ###
     from bpy.utils import register_class
-    for cls in classes:
-        register_class(cls)
+    
     for cls in get_addon_classes():
         register_class(cls)
         
-    for mod in Utils.modules:
+    for cls in classes:
+        register_class(cls)
+        
+    ### registering properties ###
+    register_properties()
+        
+    ### registering modules ###
+    for mod in modules:
         if hasattr(mod, "register"):
             mod.register()
-        
-    from .GNodes.customnodes import load_properties
-    load_properties()
+    
+    
+    ############################################################
+            
+    # from .GNodes.customnodes import load_properties
+    # load_properties()
 
         
-    from .Handlers.classes.showAttributes import update_show_attributes as updateShowAttibutes
+    # from .Handlers.classes.showAttributes import update_show_attributes as updateShowAttibutes
     from .Handlers.definitions.updates import updates as handlerUpdates
 
     # from . import mastro_modal_operator
@@ -620,25 +368,7 @@ def register():
     bpy.app.handlers.load_post.append(onFileLoaded)
     bpy.app.handlers.load_factory_startup_post.append(onFileDefault)
     
-    # bpy.app.handlers.depsgraph_update_post.append(mastro_project_data.update_typology_uses_function)
-    # bpy.app.handlers.depsgraph_update_post.append(mastro_modal_operator.update_mesh_attributes_depsgraph)
-    # bpy.app.handlers.depsgraph_update_post.append(mastro_modal_operator.update_show_overlay)
-    
-    # Register constraint operators
-    # mastro_xy_constraint_operators.register()
-    
-    Icons.register()
-    
-    
-        
-   
-    
-    # Register keymaps
-    # mastro_keymaps.register()
-    
-    # Hack to make sure keymaps register (on restart Blender can sometimes not have access to user keymaps)
-    # bpy.app.timers.register(mastro_keymaps.ensure_keymaps, first_interval=2.0)
-    
+      
     nodeitems_utils.register_node_categories('MASTRO_NODES', mastro_schedule.node_categories) 
     
     # Add toggle to both tool header
@@ -649,356 +379,10 @@ def register():
     from .GNodes.ui import load_ui
     load_ui()
     
-    # bpy.msgbus.subscribe_rna(
-    #     key=mastro_project_data.OBJECT_UL_Typology,
-    #     owner=MASTRO_TYPOLOGY_NAME_LIST_INDEX_KEY,
-    #     args = (),
-    #     notify=mastro_project_data.update_uses_uiList,
-    #     options={"PERSISTENT",}
-    # )
-    # bpy.msgbus.subscribe_rna(
-    #     key=MaStroGroupInputNode,
-    #     owner=MASTRO_NODE_GROUP_HANDLE,
-    #     args = (),
-    #     notify=mastro_schedule.execute_active_node_tree,
-    #     options={"PERSISTENT",}
-    # )
-    
-    # bpy.msgbus.subscribe_rna(
-    #     key=MaStroViewerNode,
-    #     owner=MASTRO_VIEWER_HANDLE,
-    #     args = (),
-    #     notify=mastro_schedule.execute_active_node_tree,
-    #     options={"PERSISTENT",}
-    # )
-    
-    
-    
-    # bpy.msgbus.subscribe_rna(
-    #     key=CustomNodeText,
-    #     owner=CUSTOM_NODE_TEXT_HANDLE,
-    #     args = (),
-    #     notify=mastro_schedule.execute_active_node_tree,
-    #     options={"PERSISTENT",}
-    # )
-    
-    # bpy.msgbus.subscribe_rna(
-    #     key=MaStroNodeCaptureAttribute,
-    #     owner=MASTRO_NODE_CAPTURE_ATTRIBUTE_HANDLE,
-    #     args = (),
-    #     notify=mastro_schedule.execute_active_node_tree,
-    #     options={"PERSISTENT",}
-    # )
-        
-    # bpy.msgbus.subscribe_rna(
-    #     key=MaStroNodeInteger,
-    #     owner=MASTRO_NODE_INTEGER_HANDLE,
-    #     args = (),
-    #     notify=mastro_schedule.execute_active_node_tree,
-    #     options={"PERSISTENT",}
-    # )
-    # bpy.msgbus.subscribe_rna(
-    #     key=MaStroNodeFloat,
-    #     owner=MASTRO_NODE_FLOAT_HANDLE,
-    #     args = (),
-    #     notify=mastro_schedule.execute_active_node_tree,
-    #     options={"PERSISTENT",}
-    # )
-    # bpy.msgbus.subscribe_rna(
-    #     key=MaStroNodeMath,
-    #     owner=MASTRO_NODE_MATH_HANDLE,
-    #     args = (),
-    #     notify=mastro_schedule.execute_active_node_tree,
-    #     options={"PERSISTENT",}
-    # )
-    # bpy.msgbus.subscribe_rna(
-    #     key=CustomNodeJoin,
-    #     owner=CUSTOM_NODE_JOIN_HANDLE,
-    #     args = (),
-    #     notify=mastro_schedule.execute_active_node_tree,
-    #     options={"PERSISTENT",}
-    # )
-    # bpy.types.Scene.MaStro_math_node_entries = bpy.props.PointerProperty(type=mastro_schedule.Mastro_MathSubMenuEntries)
-    
-    # bpy.types.VIEW3D_PT_transform_orientations.append(mastro_menu.extend_transform_operation_panel)
-    # bpy.types.VIEW3D_MT_editor_menus.append(mastro_menu.mastro_menu)
-    
-    bpy.types.VIEW3D_MT_mesh_add.append(mastro_menu.mastro_add_menu_func)
-    # bpy.types.VIEW3D_MT_add.append(mastro_menu.mastro_add_menu_func)
-    
-    bpy.types.WindowManager.toggle_show_overlays = bpy.props.BoolProperty(
-                                            default = False,
-                                            update = updateShowAttibutes)
-    bpy.types.WindowManager.toggle_show_data_edit_mode = bpy.props.BoolProperty(
-                                            name = "Edit Mode Overlays",
-                                            default = True,
-                                            description = "Show selection overlay when the MaStro mass, block or street is in edit mode")
-    bpy.types.WindowManager.toggle_block_name = bpy.props.BoolProperty(
-                                            name = "Block Name",
-                                            default = False)
-    bpy.types.WindowManager.toggle_building_name = bpy.props.BoolProperty(
-                                            name = "Building Name",
-                                            default = False)
-    bpy.types.WindowManager.toggle_typology_name = bpy.props.BoolProperty(
-                                            name = "Typology Name",
-                                            default = False)
-    bpy.types.WindowManager.toggle_block_typology_color = bpy.props.BoolProperty(
-                                            name = "Typology Color",
-                                            default = False)
-    bpy.types.WindowManager.toggle_block_normal = bpy.props.BoolProperty(
-                                            name = "Inverted Normal",
-                                            default = False)
-    bpy.types.WindowManager.toggle_wall_type = bpy.props.BoolProperty(
-                                            name = "Type",
-                                            default = False)
-    bpy.types.WindowManager.toggle_wall_normal = bpy.props.BoolProperty(
-                                            name = "Inverted Normal",
-                                            default = False)
-    bpy.types.WindowManager.toggle_floor_name = bpy.props.BoolProperty(
-                                            name = "Type",
-                                            default = False)
-    bpy.types.WindowManager.toggle_storey_number = bpy.props.BoolProperty(
-                                            name = "Number of Storeys",
-                                            default = False)
-    bpy.types.WindowManager.toggle_street_color = bpy.props.BoolProperty(
-                                            name = "Type",
-                                            default = False)
-    bpy.types.WindowManager.toggle_auto_update_mass_data = bpy.props.BoolProperty(
-                                            name = "Auto Update Mass Data",
-                                            default = True)
-                                            # update = mastro_project_data.update_all_mastro_meshes_useList)
-                                            
-    # bpy.types.WindowManager.toggle_schedule_in_editor = bpy.props.BoolProperty(
-    #                                         name = "Show Schedule",
-    #                                         default = False,
-    #                                         update = mastro_schedule.update_schedule_node_editor)
-    
-    bpy.types.Object.mastro_props = bpy.props.PointerProperty(type=mastro_menu.mastroAddonProperties)
-    bpy.types.Node.sticky_note_props = bpy.props.PointerProperty(type=mastro_geometryNodes.StickyNoteProperties)
-    # bpy.types.Scene.mastro_note_text_props = bpy.props.PointerProperty(type=mastro_geometryNodes.MaStroPostItText)
-    # bpy.types.Scene.mastro_attribute_collection = bpy.props.PointerProperty(type=mastro_schedule.MaStro_attribute_propertyGroup)
-
-    # Scene.updating_mesh_attributes_is_active = bpy.props.BoolProperty(
-    #                                     name = "update attributes via depsgraph",
-    #                                     default = False
-    #                                     )
-    # Scene.update_attributes = bpy.props.IntProperty(
-    #                                     name = "Update attributes once faces are selected",
-    #                                     default = 0
-    #                                     )
-    Scene.constraint_xy_setting = bpy.props.PointerProperty(type=mastro_menu.ConstraintXYSettings)
-   
-    Scene.mastroKeyDictionary = bpy.props.CollectionProperty(type=mastro_schedule.MaStro_string_item)
-    # Scene.show_selection_overlay_is_active = bpy.props.BoolProperty(
-    #                                     name = "Show selection overlay",
-    #                                     default = False
-    #                                     )
-    Scene.attribute_mass_block_id = bpy.props.IntProperty(
-                                        name="Block Id",
-                                        default=0)
-    Scene.attribute_mass_building_id = bpy.props.IntProperty(
-                                        name="Building Id",
-                                        default=0)
-    Scene.attribute_mass_typology_id = bpy.props.IntProperty(
-                                        name="Typology Id",
-                                        default=0)
-                                        # update = mastro_massing.update_attributes_mastro_mesh)
-    Scene.attribute_street_id = bpy.props.IntProperty(
-                                        name="Street Id",
-                                        default=0,
-                                        #update = mastro_street.update_attribute_street_id
-                                        )
-    Scene.attribute_street_width = bpy.props.FloatProperty(
-                                        name = "Street width",
-                                        default=8,
-                                        precision=3,
-                                        subtype="DISTANCE"
-                                        )
-    Scene.attribute_street_radius = bpy.props.FloatProperty(
-                                        name = "Street radius",
-                                        default=18,
-                                        precision=3,
-                                        subtype="DISTANCE"
-                                        )
-    Scene.attribute_wall_id = bpy.props.IntProperty(
-                                        name="Wall Id",
-                                        default=0,
-                                        update = mastro_wall.update_attribute_wall_id)
-    Scene.attribute_wall_thickness = bpy.props.FloatProperty(
-                                        name = "Wall thickness",
-                                        default=0.300,
-                                        precision=3,
-                                        subtype="DISTANCE"
-                                        )
-    Scene.attribute_wall_offset = bpy.props.FloatProperty(
-                                        name = "Wall offset",
-                                        default=0,
-                                        precision=3,
-                                        subtype="DISTANCE"
-                                        )
-    Scene.attribute_wall_normal = bpy.props.BoolProperty(
-                                            default = False,
-                                            update = mastro_wall.update_wall_normal)
-    Scene.attribute_floor_id = bpy.props.IntProperty(
-                                        name="Floor Id",
-                                        default=0,
-                                        update = mastro_wall.update_attribute_floor_id)
-    Scene.attribute_mass_storeys = bpy.props.IntProperty(
-                                        name="Number of Storeys",
-                                        min=1, 
-                                        default=3,
-                                        update = mastro_massing.update_attributes_mastro_mesh_storeys)
-    Scene.attribute_block_side_angle = bpy.props.FloatProperty(
-                                        name="Building Side Angle",
-                                        min=math.radians(-90),    
-                                        max=math.radians(90),  
-                                        default=0,
-                                        precision=2,
-                                        subtype='ANGLE',
-                                        update = mastro_massing.update_attributes_block_side_angle)
-    Scene.attribute_block_depth = bpy.props.FloatProperty(
-                                        name="The depth of the building",
-                                        min=0, 
-                                        default=18,
-                                        precision=3,
-                                        subtype="DISTANCE",
-                                        update = mastro_massing.update_attributes_mastro_block_depth)
-    Scene.attribute_block_normal = bpy.props.BoolProperty(
-                                            default = False,
-                                            update = mastro_massing.update_block_normal)
-    
-    # Scene.mouse_keyboard_event = bpy.props.StringProperty(
-    #                                     name="Mouse and keyboard event"
-    #                             )
-    # Scene.attribute_obj_option = bpy.props.IntProperty(
-    #                                     name="Building option",
-    #                                     min=1, 
-    #                                     default=1,
-    # Scene.attribute_obj_phase = bpy.props.IntProperty(
-    #                                     name="Building phase",
-    #                                     min=1, 
-    #                                     default=1,
-    
-    Scene.geometryMenuSwitch  = bpy.props.EnumProperty(
-                                                items = (
-                                                        ("POINT", "Point", ""),
-                                                        ("EDGE", "Edge", ""),
-                                                        ("FACE", "Face", ""),
-                                                        ),
-                                                default = "EDGE",
-                                                update=mastro_geometryNodes.updateGroup)
-    
-    Scene.mastro_group_node_number_of_split = bpy.props.IntProperty(name = "Number of split",
-                                             default = 1,
-                                             min = 1,
-                                             update=mastro_geometryNodes.updateGroup)
-    
-    Scene.previous_selection_object_name = bpy.props.StringProperty(
-                                    name="Previously selected object name",
-                                    default = "",
-                                    description="Store the name of the previous selected object"
-                                    )
-    Scene.previous_selection_face_id = bpy.props.IntProperty(
-                                    name="Previously selected face Id",
-                                    default = -1,
-                                    description="Store the id of the previous selected face"
-                                    )
-    Scene.previous_selection_edge_id = bpy.props.IntProperty(
-                                    name="Previously selected edge Id",
-                                    default = -1,
-                                    description="Store the id of the previous selected edge"
-                                    )
-    Scene.previous_selection_vert_id = bpy.props.IntProperty(
-                                    name="Previously selected vert Id",
-                                    default = -1,
-                                    description="Store the id of the previous selected vertex"
-                                    )
-    Scene.previous_edge_number = bpy.props.IntProperty(
-                                    name="Previously number of edges",
-                                    default = -1,
-                                    description="Store the number of edges of the previous selection"
-                                    )                                          
-    Scene.mastro_block_name_list = bpy.props.CollectionProperty(type = mastro_project_data.block_name_list)
-    Scene.mastro_block_name_current = bpy.props.CollectionProperty(type =mastro_project_data.name_with_id)
-    Scene.mastro_block_name_list_index = bpy.props.IntProperty(name = "Block Name",
-                                             default = 0)
-    Scene.mastro_block_names = bpy.props.EnumProperty(
-                                        name="Block names",
-                                        description="Current block name",
-                                        items=get_block_names_from_list,
-                                        update=mastro_massing.update_block_name_id)
-    
-    Scene.mastro_building_name_list = bpy.props.CollectionProperty(type = mastro_project_data.building_name_list)
-    Scene.mastro_building_name_current = bpy.props.CollectionProperty(type =mastro_project_data.name_with_id)
-    Scene.mastro_building_name_list_index = bpy.props.IntProperty(name = "Building Name",
-                                             default = 0)
-    Scene.mastro_building_names = bpy.props.EnumProperty(
-                                        name="Building names",
-                                        description="Current building name ",
-                                        items=get_building_names_from_list,
-                                        update=mastro_massing.update_building_name_id)
-    
-    Scene.mastro_use_name_list = bpy.props.CollectionProperty(type = mastro_project_data.use_name_list)
-
-    Scene.mastro_typology_name_list = bpy.props.CollectionProperty(type = mastro_project_data.typology_name_list)
-    Scene.mastro_typology_name_current = bpy.props.CollectionProperty(type =mastro_project_data.name_with_id)
-    Scene.mastro_typology_name_list_index = bpy.props.IntProperty(name = "Typology Name",
-                                             default = 0)
-    Scene.mastro_typology_names = bpy.props.EnumProperty(
-                                        name="Typology List",
-                                        items=get_typology_names_from_list,
-                                        update=mastro_massing.update_attributes_mastro_mesh_typology)
-    Scene.mastro_typology_uses_name_list = bpy.props.CollectionProperty(type = mastro_project_data.typology_uses_name_list)
-    Scene.mastro_typology_uses_name_list_index = bpy.props.IntProperty(name = "Typology Use Name",
-                                             default = 0)
-    Scene.mastro_previous_selected_typology = bpy.props.IntProperty(
-                                        name="Previous Typology Id",
-                                        default = -1)
-    Scene.mastro_typology_uses_name = bpy.props.EnumProperty(
-                                        name="Typology uses drop down menu",
-                                        description="Typology use drop down list in the Typology Uses UI",
-                                        items=get_use_names_from_list,
-                                        update=mastro_project_data.update_typology_uses_name_label)
-    Scene.mastro_obj_typology_uses_name_list = bpy.props.CollectionProperty(type = mastro_massing.obj_typology_uses_name_list)
-    Scene.mastro_obj_typology_uses_name_list_index = bpy.props.IntProperty(name = "Typology Use Name of the selected object",
-                                             default = 0)
-    
-    Scene.mastro_street_name_list = bpy.props.CollectionProperty(type = mastro_project_data.street_name_list)
-    Scene.mastro_street_name_current = bpy.props.CollectionProperty(type =mastro_project_data.name_with_id)
-    Scene.mastro_street_name_list_index = bpy.props.IntProperty(name = "Street Name",
-                                             default = 0)
-    Scene.mastro_street_names = bpy.props.EnumProperty(
-                                        name="Street List",
-                                        description="",
-                                        items=get_street_names_from_list,
-                                        update=mastro_street.update_attributes_street
-                                        )
-    
-    Scene.mastro_wall_name_list = bpy.props.CollectionProperty(type = mastro_project_data.wall_name_list)
-    Scene.mastro_wall_name_current = bpy.props.CollectionProperty(type =mastro_project_data.name_with_id)
-    Scene.mastro_wall_name_list_index = bpy.props.IntProperty(name = "Wall Name",
-                                             default = 0)
-    Scene.mastro_wall_names = bpy.props.EnumProperty(
-                                        name="Wall List",
-                                        description="",
-                                        items=get_wall_names_from_list,
-                                        update=mastro_wall.update_attributes_wall
-                                        )
-    
-    Scene.mastro_floor_name_list = bpy.props.CollectionProperty(type = mastro_project_data.floor_name_list)
-    Scene.mastro_floor_name_current = bpy.props.CollectionProperty(type =mastro_project_data.name_with_id)
-    Scene.mastro_floor_name_list_index = bpy.props.IntProperty(name = "Floor Name",
-                                             default = 0)
-    Scene.mastro_floor_names = bpy.props.EnumProperty(
-                                        name="Floor List",
-                                        description="",
-                                        items=get_floor_names_from_list,
-                                        # update=mastro_wall.update_floor_name_label
-                                        )
    
   
     
-    bpy.app.timers.register(initLists, first_interval=.1)
+    bpy.app.timers.register(init_lists, first_interval=.1)
     bpy.app.timers.register(initNodes, first_interval=.1)
     
     
@@ -1036,134 +420,45 @@ def unregister():
 
     bpy.app.handlers.depsgraph_update_post.remove(handlerUpdates)
     
-    # Unregister constraint operators
-    # mastro_xy_constraint_operators.unregister()
-    
-    
-    # bpy.app.handlers.depsgraph_update_post.remove(mastro_project_data.update_typology_uses_function)
-    # bpy.app.handlers.depsgraph_update_post.remove(mastro_modal_operator.update_mesh_attributes_depsgraph)
-    # bpy.app.handlers.depsgraph_update_post.remove(mastro_modal_operator.update_show_overlay)
-    
-
-    # bpy.msgbus.clear_by_owner(MASTRO_TYPOLOGY_NAME_LIST_INDEX_KEY)
-    # bpy.msgbus.clear_by_owner(MASTRO_NODE_INTEGER_HANDLE)
-    # bpy.msgbus.clear_by_owner(MASTRO_NODE_FLOAT_HANDLE)
-    
+       
     nodeitems_utils.unregister_node_categories('MASTRO_NODES')
 
-    # bpy.types.VIEW3D_PT_transform_orientations.remove(mastro_menu.extend_transform_operation_panel)
-    # bpy.types.VIEW3D_MT_editor_menus.remove(mastro_menu.mastro_menu)
-    
-    bpy.types.VIEW3D_MT_mesh_add.remove(mastro_menu.mastro_add_menu_func)
-    # bpy.types.VIEW3D_MT_add.remove(mastro_menu.mastro_add_menu_func)
-    
+     
     bpy.types.VIEW3D_HT_tool_header.remove(mastro_menu.constraint_xy_button)
     
     # unload UI for custom nodes
     from .GNodes.ui import unload_ui
     unload_ui()
     
-    # del bpy.types.Scene.MaStro_math_node_entries
-    # del bpy.types.Scene.MaStroAttributes
-    del bpy.types.WindowManager.toggle_show_overlays
-    del bpy.types.WindowManager.toggle_show_data_edit_mode
-    del bpy.types.WindowManager.toggle_block_name
-    del bpy.types.WindowManager.toggle_building_name
-    del bpy.types.WindowManager.toggle_typology_name
-    del bpy.types.WindowManager.toggle_block_typology_color
-    del bpy.types.WindowManager.toggle_block_normal
-    del bpy.types.WindowManager.toggle_storey_number
-    del bpy.types.WindowManager.toggle_wall_type
-    del bpy.types.WindowManager.toggle_wall_normal
-    del bpy.types.WindowManager.toggle_floor_name
-    del bpy.types.WindowManager.toggle_auto_update_mass_data
-    # del bpy.types.WindowManager.toggle_schedule_in_editor
-    del bpy.types.Object.mastro_props
-    del bpy.types.Node.sticky_note_props
-    
-    del Scene.mastroKeyDictionary
-    del Scene.constraint_xy_setting
-    # del Scene.updating_mesh_attributes_is_active
-    del Scene.attribute_mass_block_id
-    del Scene.attribute_mass_building_id
-    del Scene.attribute_mass_typology_id
-    del Scene.attribute_wall_id
-    del Scene.attribute_wall_thickness
-    del Scene.attribute_wall_normal
-    del Scene.attribute_wall_offset
-    del Scene.attribute_floor_id
-    del Scene.attribute_mass_storeys
-    del Scene.attribute_block_depth
-    del Scene.attribute_block_normal
-    # del Scene.mastro_attribute_collection
-    # del Scene.update_attributes
-    # del Scene.mouse_keyboard_event
-    
-    del Scene.geometryMenuSwitch
+  
 
-    del Scene.previous_selection_object_name
-    del Scene.previous_selection_face_id
-    del Scene.previous_selection_edge_id
-    del Scene.previous_selection_vert_id
-    del Scene.previous_edge_number
+    ############################################################
     
-    del Scene.mastro_block_name_list
-    del Scene.mastro_building_name_list
-    del Scene.mastro_use_name_list
-    del Scene.mastro_typology_name_list
-    del Scene.mastro_obj_typology_uses_name_list
-    del Scene.mastro_wall_name_list
-    del Scene.mastro_floor_name_list
-    
-    del Scene.mastro_block_name_current
-    del Scene.mastro_building_name_current
-    del Scene.mastro_typology_name_current
-    del Scene.mastro_wall_name_current
-    del Scene.mastro_floor_name_current
-    
-    del Scene.mastro_block_name_list_index
-    del Scene.mastro_building_name_list_index
-    del Scene.mastro_typology_name_list_index
-    del Scene.mastro_obj_typology_uses_name_list_index
-    del Scene.mastro_wall_name_list_index
-    del Scene.mastro_floor_name_list_index
-    
-    del Scene.mastro_block_names
-    del Scene.mastro_building_names
-
-    del Scene.mastro_typology_uses_name
-    del Scene.mastro_typology_names
-    del Scene.mastro_wall_names
-    del Scene.mastro_floor_names
-    
-    del Scene.mastro_previous_selected_typology
-    
-    del Scene.mastro_group_node_number_of_split
-    
-    
-    from .GNodes.customnodes import unload_properties
-    unload_properties()
-    
-    
-    for mod in reversed(Utils.modules):
+    ### unregistering modules ###            
+    for mod in reversed(modules):
         if hasattr(mod, "register"):
             mod.unregister()
             
-            
+    ### unregistering properties ###
+    unregister_properties()
+    
+    ### unregistering classes ###            
     from bpy.utils import unregister_class
+    
     for cls in reversed(classes):
         unregister_class(cls)
         
     for cls in reversed(get_addon_classes()):
         unregister_class(cls)
-    
         
+    ### unregister icons ###
+    unregister_icons()
     
+   
         
-    # Unregister keymaps
-    # mastro_keymaps.unregister()
+    ############################################################
     
-    Icons.unregister()
+    
     
         
    

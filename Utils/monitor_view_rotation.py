@@ -1,6 +1,6 @@
 import bpy 
 import math
-import mathutils
+# import mathutils
 
 _last_view_matrix = None
 
@@ -21,7 +21,8 @@ def monitor_view_rotation():
             current_view = region_3d.view_matrix.copy()
             
             if _last_view_matrix is not None and matrices_differ(current_view, _last_view_matrix):
-                print("✅ La vista 3D è stata ruotata o spostata!")
+                pass
+                # print("✅ La vista 3D è stata ruotata o spostata!")
             
             _last_view_matrix = current_view
             break
