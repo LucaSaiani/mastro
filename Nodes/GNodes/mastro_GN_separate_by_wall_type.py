@@ -109,6 +109,8 @@ class mastro_GN_separate_by_wall_type(GeometryNodeCustomGroup):
                 break
         
         # print(lastOutput)
+        listToLoop = sorted(listToLoop, key=lambda x: x.id)
+        
         for el in listToLoop:
             if hasattr(el, "id"):
                 
