@@ -1,7 +1,6 @@
 import bpy 
 
-from ..customnodes import classes as MASTROCUSTOMCLASSES
-
+from ..GNodes import classes as MASTROCUSTOMCLASSES
 
 class MASTRO_MT_add_gn_menu(bpy.types.Menu):
 
@@ -14,7 +13,7 @@ class MASTRO_MT_add_gn_menu(bpy.types.Menu):
 
     def draw(self, context):
         for cls in MASTROCUSTOMCLASSES:
-            if ('_NG_' in cls.__name__):
+            if ('_GN_' in cls.__name__):
                 op = self.layout.operator("node.add_node", text=cls.bl_label,)
                 op.type = cls.bl_idname
                 op.use_transform = True
@@ -24,7 +23,7 @@ class MASTRO_MT_add_gn_menu(bpy.types.Menu):
 
 def mastro_addGNmenu_append(self, context,):
 
-    self.layout.menu("MASTRO_MT_add_gn_menu", text="MaStro Filter",)
+    self.layout.menu("MASTRO_MT_add_gn_menu", text="MaStro",)
 
     return None 
 

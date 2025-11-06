@@ -71,10 +71,13 @@ from . Utils import modules
 from . Utils.init_lists import init_lists
 from . Handlers.definitions.updates import known_scenes as knownScenes
 from . Keymaps.keymap import register as register_keymaps, unregister as unregister_keymaps
+from . Nodes.ui import register as register_gn_ui, unregister as unregister_gn_ui
+  
 ########################################
 # from . import Utils
 # from . import UI
 
+from .Nodes.GNodes.mastro_GN_separate_by_wall_type import mastro_GN_separate_by_wall_type
 # from bpy.types import(Scene)
 from bpy.app.handlers import persistent
 import math
@@ -92,7 +95,7 @@ classes = (
     mastro_geometryNodes.NODE_OT_sticky_note,
     mastro_geometryNodes.StickyNoteProperties,
         
-    mastro_project_data.update_GN_Filter_OT,
+    # mastro_project_data.filter_by_OT,
     mastro_project_data.update_Shader_Filter_OT,
     mastro_project_data.VIEW3D_PT_MaStro_project_data,
     mastro_project_data.VIEW3D_PT_MaStro_show_data,
@@ -269,12 +272,19 @@ classes = (
     
 
 def initNodes():
+    # from .Nodes.GNodes.test_filter_by import mastro_GN_separate_by_wall_type
+    nt = bpy.data.node_groups.new("MasterUpdateTMP", "GeometryNodeTree")
+    separateByWallTypeNode = nt.nodes.new("separateByWallType")
+    # testNode.updates(bpy.context.scene)
+    mastro_GN_separate_by_wall_type.update_all(bpy.context.scene)
+    bpy.data.node_groups.remove(nt) 
+    
     # bpy.ops.node.separate_geometry_by_factor()
-    bpy.ops.node.update_gn_filter(filter_name="use")
-    bpy.ops.node.update_gn_filter(filter_name="typology")
-    bpy.ops.node.update_gn_filter(filter_name="wall type")
-    bpy.ops.node.update_gn_filter(filter_name="street type")
-    bpy.ops.node.update_gn_filter(filter_name="block side")
+    bpy.ops.node.gn_filter_by(filter_name="use")
+    bpy.ops.node.gn_filter_by(filter_name="typology")
+    bpy.ops.node.gn_filter_by(filter_name="wall type")
+    bpy.ops.node.gn_filter_by(filter_name="street type")
+    bpy.ops.node.gn_filter_by(filter_name="block side")
     
     bpy.ops.node.update_shader_filter(filter_name="block")
     bpy.ops.node.update_shader_filter(filter_name="building")
@@ -317,8 +327,8 @@ def onFileDefault(scene):
 def get_addon_classes(revert=False):
     from .UI.classes import classes as preference_classes
     from .Handlers.classes import classes as handler_classes
-    from .GNodes.customnodes import classes as nodes_classes
-    from .GNodes.ui import classes as ui_classes
+    from .Nodes.GNodes import classes as nodes_classes
+    from .Nodes.ui import classes as ui_classes
     from .Operators import classes as operator_classes
     
     classes = preference_classes + handler_classes + nodes_classes + ui_classes + operator_classes
@@ -353,6 +363,9 @@ def register():
         if hasattr(mod, "register"):
             mod.register()
     
+    ### registering nodes UI ###
+    register_gn_ui()
+    
     ### registering shortcuts ###
     register_keymaps()
     
@@ -378,9 +391,7 @@ def register():
     bpy.types.VIEW3D_HT_tool_header.append(mastro_menu.constraint_xy_button)
     
     
-    # load UI for custom nodes
-    from .GNodes.ui import load_ui
-    load_ui()
+
     
    
   
@@ -429,9 +440,9 @@ def unregister():
      
     bpy.types.VIEW3D_HT_tool_header.remove(mastro_menu.constraint_xy_button)
     
-    # unload UI for custom nodes
-    from .GNodes.ui import unload_ui
-    unload_ui()
+    # # unload UI for custom nodes
+    # from .Nodes.ui import unload_ui
+    # unload_ui()
     
   
 
@@ -439,6 +450,9 @@ def unregister():
     
     ### unregistering shortcuts ###
     unregister_keymaps()
+    
+    ### unregistering nodes UI ###
+    unregister_gn_ui()
     
     ### unregistering modules ###            
     for mod in reversed(modules):

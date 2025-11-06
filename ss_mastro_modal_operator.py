@@ -32,7 +32,7 @@ from mathutils import Vector
 
 from .mastro_schedule import MaStro_MathNode, execute_active_node_tree
 from .mastro_massing import update_mesh_edge_attributes_storeys, read_mesh_attributes_uses
-from .GNodes.customnodes import MASTRO_NG_windowinfo
+from .Nodes.GNodes import MASTRO_NG_windowinfo
 
 # from datetime import datetime
 # import math

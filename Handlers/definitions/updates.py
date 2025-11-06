@@ -11,7 +11,7 @@ from bpy.types import Operator
 from mathutils import Vector
 
 from ...mastro_schedule import MaStro_MathNode, execute_active_node_tree
-from ...GNodes.customnodes import MASTRO_NG_windowinfo
+from ...Nodes.GNodes import mastro_GN_windowinfo
 from ...Utils.read_storey_attribute import read_storey_attribute
 from ...Utils.read_use_attribute import read_use_attribute
 # from datetime import datetime
@@ -627,7 +627,7 @@ def updates(scene, depsgraph):
     #     print("cuao")
     #     if isinstance(update.id, bpy.types.Object):
     #         # update the nodes below
-    MASTRO_NG_windowinfo.update_all()
+    mastro_GN_windowinfo.update_all()
             # break
     
 

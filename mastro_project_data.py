@@ -35,6 +35,8 @@ from .Utils.read_use_attribute import read_use_attribute
 from . mastro_wall import read_mesh_attributes_walls
 from . mastro_street import read_mesh_attributes_streets
 
+from .Nodes.GNodes.mastro_GN_separate_by_wall_type import mastro_GN_separate_by_wall_type
+
 from .Utils.read_storey_attribute import read_storey_attribute
 
 import random
@@ -160,131 +162,131 @@ import random
        
 
     
-class update_GN_Filter_OT(Operator):
-    """Update the GN node Filter by Use"""
-    bl_idname = "node.update_gn_filter"
-    bl_label = "Update the GN filter by Use"
+# class filter_by_OT(Operator):
+#     """Update the GN node Filter by Use"""
+#     bl_idname = "node.gn_filter_by"
+#     bl_label = "Update the GN filter by Use"
     
-    filter_name: bpy.props.StringProperty(name="Filter type name")
+#     filter_name: bpy.props.StringProperty(name="Filter type name")
         
-    def newGroup (self, groupName, type):
-        # if self.filter_name == "block": attributeName = "mastro_block_id"
-        # elif self.filter_name == "building": attributeName = "mastro_building_id"
-        if self.filter_name == "use": attributeName = "mastro_use"
-        elif self.filter_name == "typology": attributeName = "mastro_typology_id"
-        elif self.filter_name == "wall type": attributeName = "mastro_wall_id"
-        elif self.filter_name == "street type": attributeName = "mastro_street_id"
-        elif self.filter_name == "block side": attributeName = "mastro_block_side"
+#     def newGroup (self, groupName, type):
+#         # if self.filter_name == "block": attributeName = "mastro_block_id"
+#         # elif self.filter_name == "building": attributeName = "mastro_building_id"
+#         if self.filter_name == "use": attributeName = "mastro_use"
+#         elif self.filter_name == "typology": attributeName = "mastro_typology_id"
+#         elif self.filter_name == "wall type": attributeName = "mastro_wall_id"
+#         elif self.filter_name == "street type": attributeName = "mastro_street_id"
+#         elif self.filter_name == "block side": attributeName = "mastro_block_side"
 
-        # GN group
-        group = bpy.data.node_groups.new(groupName,'GeometryNodeTree')
-        group.default_group_node_width = 200
+#         # GN group
+#         group = bpy.data.node_groups.new(groupName,'GeometryNodeTree')
+#         group.default_group_node_width = 200
         
-        group_input = group.nodes.new("NodeGroupInput")
-        group_output = group.nodes.new('NodeGroupOutput')
+#         group_input = group.nodes.new("NodeGroupInput")
+#         group_output = group.nodes.new('NodeGroupOutput')
         
-        # group_menu = group.nodes.new("GeometryNodeMenuSwitch")
-        # group_evaluate_point = group.nodes.new("GeometryNodeFieldOnDomain")
-        # group_evaluate_edge = group.nodes.new("GeometryNodeFieldOnDomain")
-        # group_evaluate_face = group.nodes.new("GeometryNodeFieldOnDomain")
-        # group_evaluate_spline = group.nodes.new("GeometryNodeFieldOnDomain")
-        # group_evaluate_instance = group.nodes.new("GeometryNodeFieldOnDomain")
+#         # group_menu = group.nodes.new("GeometryNodeMenuSwitch")
+#         # group_evaluate_point = group.nodes.new("GeometryNodeFieldOnDomain")
+#         # group_evaluate_edge = group.nodes.new("GeometryNodeFieldOnDomain")
+#         # group_evaluate_face = group.nodes.new("GeometryNodeFieldOnDomain")
+#         # group_evaluate_spline = group.nodes.new("GeometryNodeFieldOnDomain")
+#         # group_evaluate_instance = group.nodes.new("GeometryNodeFieldOnDomain")
 
 
         
-        # Add named attribute
-        named_attribute_node = group.nodes.new(type="GeometryNodeInputNamedAttribute")
-        named_attribute_node.data_type = 'INT'
-        named_attribute_node.inputs[0].default_value = attributeName
+#         # Add named attribute
+#         named_attribute_node = group.nodes.new(type="GeometryNodeInputNamedAttribute")
+#         named_attribute_node.data_type = 'INT'
+#         named_attribute_node.inputs[0].default_value = attributeName
             
-        group_input.location = (-600,0)
-        # group_menu.location = (-300,0)
-        group_output.location = (600, 0)
-        named_attribute_node.location = (0,-100)
-        return(group)
+#         group_input.location = (-600,0)
+#         # group_menu.location = (-300,0)
+#         group_output.location = (600, 0)
+#         named_attribute_node.location = (0,-100)
+#         return(group)
         
         
-    def execute(self, context):
-        name = "MaStro Filter by " + self.filter_name.title()
+#     def execute(self, context):
+#         name = "MaStro Filter by " + self.filter_name.title()
                     
-        if name not in bpy.data.node_groups:
-            filterBy_Group = self.newGroup(name, "GN")
-        else:
-            filterBy_Group = bpy.data.node_groups[name]
+#         if name not in bpy.data.node_groups:
+#             filterBy_Group = self.newGroup(name, "GN")
+#         else:
+#             filterBy_Group = bpy.data.node_groups[name]
                 
-        nodes = filterBy_Group.nodes
+#         nodes = filterBy_Group.nodes
         
-        # group_input = nodes["Group Input"]
-        group_output = nodes["Group Output"]
-        named_attribute_node = nodes["Named Attribute"]
+#         # group_input = nodes["Group Input"]
+#         group_output = nodes["Group Output"]
+#         named_attribute_node = nodes["Named Attribute"]
                     
-        filterNodeIds = []
-        filterNodeDescriptions = []
-        for node in nodes:
-            if node.type == "COMPARE":
-                tmpId = node.inputs[3].default_value
-                filterNodeIds.append(tmpId)
-                filterNodeDescriptions.append(filterBy_Group.interface.items_tree[tmpId].description)
+#         filterNodeIds = []
+#         filterNodeDescriptions = []
+#         for node in nodes:
+#             if node.type == "COMPARE":
+#                 tmpId = node.inputs[3].default_value
+#                 filterNodeIds.append(tmpId)
+#                 filterNodeDescriptions.append(filterBy_Group.interface.items_tree[tmpId].description)
             
-        if len(filterNodeIds) == 0:
-            lastId = -1           
-        else:
-            lastId = max(filterNodeIds)
+#         if len(filterNodeIds) == 0:
+#             lastId = -1           
+#         else:
+#             lastId = max(filterNodeIds)
             
-        if self.filter_name == "use": listToLoop = bpy.context.scene.mastro_use_name_list
-        elif self.filter_name == "typology": listToLoop = bpy.context.scene.mastro_typology_name_list
-        elif self.filter_name == "wall type": listToLoop = bpy.context.scene.mastro_wall_name_list
-        elif self.filter_name == "street type": listToLoop = bpy.context.scene.mastro_street_name_list
-        elif self.filter_name == "block side": listToLoop = [
-                                                            SimpleNamespace(id=0, name="External Side"),
-                                                            SimpleNamespace(id=1, name="Internal Side"),
-                                                            SimpleNamespace(id=2, name="Lateral Side")
-                                                        ]
+#         if self.filter_name == "use": listToLoop = bpy.context.scene.mastro_use_name_list
+#         elif self.filter_name == "typology": listToLoop = bpy.context.scene.mastro_typology_name_list
+#         elif self.filter_name == "wall type": listToLoop = bpy.context.scene.mastro_wall_name_list
+#         elif self.filter_name == "street type": listToLoop = bpy.context.scene.mastro_street_name_list
+#         elif self.filter_name == "block side": listToLoop = [
+#                                                             SimpleNamespace(id=0, name="External Side"),
+#                                                             SimpleNamespace(id=1, name="Internal Side"),
+#                                                             SimpleNamespace(id=2, name="Lateral Side")
+#                                                         ]
         
-        for el in listToLoop:
-            if hasattr(el, "id"):
-                #a new name has been added
-                if el.id not in filterNodeIds:
-                    if lastId >= 0:
-                        node_y_location = nodes["Compare " + str(lastId)].location[1] -25
-                    else:
-                        node_y_location = 0
+#         for el in listToLoop:
+#             if hasattr(el, "id"):
+#                 #a new name has been added
+#                 if el.id not in filterNodeIds:
+#                     if lastId >= 0:
+#                         node_y_location = nodes["Compare " + str(lastId)].location[1] -25
+#                     else:
+#                         node_y_location = 0
                     
-                    compare_node = filterBy_Group.nodes.new(type="FunctionNodeCompare")
-                    compare_node.data_type = 'INT'
-                    compare_node.operation = 'EQUAL'
-                    compare_node.inputs[3].default_value = el.id
+#                     compare_node = filterBy_Group.nodes.new(type="FunctionNodeCompare")
+#                     compare_node.data_type = 'INT'
+#                     compare_node.operation = 'EQUAL'
+#                     compare_node.inputs[3].default_value = el.id
                         
-                    compare_node.location = (300, node_y_location-35)
-                    compare_node.hide = True
-                    compare_node.label="="+str(el.id)
-                    compare_node.name="Compare "+str(el.id)
-                    lastId = el.id
+#                     compare_node.location = (300, node_y_location-35)
+#                     compare_node.hide = True
+#                     compare_node.label="="+str(el.id)
+#                     compare_node.name="Compare "+str(el.id)
+#                     lastId = el.id
                     
-                    #Add the Output Sockets and change their Default Value
-                    if el.name == "":
-                        if self.filter_name == "use": elName = "Use name..."
-                        elif self.filter_name == "typology": elName = "Typology name..."
-                        elif self.filter_name == "wall type": elName = "Wall name..."
-                        elif self.filter_name == "steet type": lelName = "Street name..."
-                    else:
-                        elName = el.name
-                    descr = "id: " + str(el.id) + " - " + elName
-                    filterBy_Group.interface.new_socket(name=elName,description=descr,in_out ="OUTPUT", socket_type="NodeSocketBool")
+#                     #Add the Output Sockets and change their Default Value
+#                     if el.name == "":
+#                         if self.filter_name == "use": elName = "Use name..."
+#                         elif self.filter_name == "typology": elName = "Typology name..."
+#                         elif self.filter_name == "wall type": elName = "Wall name..."
+#                         elif self.filter_name == "steet type": lelName = "Street name..."
+#                     else:
+#                         elName = el.name
+#                     descr = "id: " + str(el.id) + " - " + elName
+#                     filterBy_Group.interface.new_socket(name=elName,description=descr,in_out ="OUTPUT", socket_type="NodeSocketBool")
             
-                    #Add Links
-                    index = len(group_output.inputs) -2
-                    filterBy_Group.links.new(named_attribute_node.outputs[0], compare_node.inputs[2])
-                    filterBy_Group.links.new(compare_node.outputs[0], group_output.inputs[index])
+#                     #Add Links
+#                     index = len(group_output.inputs) -2
+#                     filterBy_Group.links.new(named_attribute_node.outputs[0], compare_node.inputs[2])
+#                     filterBy_Group.links.new(compare_node.outputs[0], group_output.inputs[index])
 
-                # a name has been renamed
-                elif ("id: " + str(el.id) + " - " + str(el.name)) not in filterNodeDescriptions:
-                    for i, desc in enumerate(filterNodeDescriptions):
-                        if i == int(el.id):
-                            filterBy_Group.interface.items_tree[i].name = str(el.name)
-                            filterBy_Group.interface.items_tree[i].description = "id: " + str(el.id) + " - " + str(el.name)
+#                 # a name has been renamed
+#                 elif ("id: " + str(el.id) + " - " + str(el.name)) not in filterNodeDescriptions:
+#                     for i, desc in enumerate(filterNodeDescriptions):
+#                         if i == int(el.id):
+#                             filterBy_Group.interface.items_tree[i].name = str(el.name)
+#                             filterBy_Group.interface.items_tree[i].description = "id: " + str(el.id) + " - " + str(el.name)
 
-        return {'FINISHED'}
+#         return {'FINISHED'}
     
 class update_Shader_Filter_OT(Operator):
     """Update the shader node Filter by... based on the passed type value"""
@@ -902,7 +904,7 @@ class building_name_list(PropertyGroup):
 # also updates the names of mastro_typology_uses_name_list_index  
 def update_mastro_filter_by_use(self, context):
     from . Utils.init_lists import init_lists
-    bpy.ops.node.update_gn_filter(filter_name="use")
+    bpy.ops.node.gn_filter_by(filter_name="use")
     bpy.ops.node.update_shader_filter(filter_name="use")
     
     # updating mastro_typology_uses_name_list_index
@@ -1129,7 +1131,7 @@ class TYPOLOGY_LIST_OT_DuplicateItem(Operator):
         context.scene.mastro_typology_name_list[last].useList = usesToCopy
         context.scene.mastro_typology_name_list[last].typologyEdgeColor = [random.random(), random.random(), random.random()]
         
-        bpy.ops.node.update_gn_filter(filter_name="typology")
+        bpy.ops.node.gn_filter_by(filter_name="typology")
         bpy.ops.node.update_shader_filter(filter_name="typology")
         return{'FINISHED'}
     
@@ -1169,7 +1171,7 @@ class TYPOLOGY_LIST_OT_MoveItem(Operator):
 # update the node "filter by typology" if a new typology is added or
 # a typology name has changed
 def update_mastro_filter_by_typology(self, context):
-    bpy.ops.node.update_gn_filter(filter_name="typology")
+    bpy.ops.node.gn_filter_by(filter_name="typology")
     bpy.ops.node.update_shader_filter(filter_name="typology")
     return None
 
@@ -1322,7 +1324,7 @@ class USE_LIST_OT_NewItem(Operator):
         context.scene.mastro_typology_uses_name_list[subIndex].id = id
         update_typology_uses_list(context)
         
-        bpy.ops.node.update_gn_filter(filter_name="use")
+        bpy.ops.node.gn_filter_by(filter_name="use")
         bpy.ops.node.update_shader_filter(filter_name="use")
         return{'FINISHED'}
 
@@ -1759,7 +1761,7 @@ class WALL_LIST_OT_NewItem(Operator):
         context.scene.mastro_wall_name_list[last].id = max(temp_list)+1
         context.scene.mastro_wall_name_list[last].wallEdgeColor = [random.random(), random.random(), random.random()]
         
-        bpy.ops.node.update_gn_filter(filter_name="wall type")    
+        bpy.ops.node.gn_filter_by(filter_name="wall type")    
         return{'FINISHED'}
     
 class WALL_LIST_OT_MoveItem(Operator):
@@ -1793,7 +1795,13 @@ class WALL_LIST_OT_MoveItem(Operator):
 # update the node "filter by wall type" if a new wall type is added or
 # a wall typey name has changed
 def update_mastro_filter_by_wall_type(self, context):
-    bpy.ops.node.update_gn_filter(filter_name="wall type")
+    nt = bpy.data.node_groups.new("MasterUpdateTMP", "GeometryNodeTree")
+    # testNode = nt.nodes.new("separateByWallType")
+    # testNode.update_all(bpy.context.scene)
+    mastro_GN_separate_by_wall_type.update_all(bpy.context.scene)
+    bpy.data.node_groups.remove(nt) 
+    
+    bpy.ops.node.gn_filter_by(filter_name="wall type")
     # bpy.ops.node.update_shader_filter(filter_name="wall type")
     return None
             
@@ -2080,7 +2088,7 @@ class STREET_LIST_OT_NewItem(Operator):
         context.scene.mastro_street_name_list[last].id = max(temp_list)+1
         context.scene.mastro_street_name_list[last].streetEdgeColor = [random.random(), random.random(), random.random()]
         
-        bpy.ops.node.update_gn_filter(filter_name="street type")
+        bpy.ops.node.gn_filter_by(filter_name="street type")
             
         return{'FINISHED'}
     
@@ -2196,7 +2204,7 @@ class OBJECT_OT_update_all_MaStro_street_attributes(Operator):
 # update the node "filter by street type" if a new street type is added or
 # a street type name has changed
 def update_mastro_filter_by_street_type(self, context):
-    bpy.ops.node.update_gn_filter(filter_name="street type")
+    bpy.ops.node.gn_filter_by(filter_name="street type")
     # bpy.ops.node.update_shader_filter(filter_name="street type")
     return None
 

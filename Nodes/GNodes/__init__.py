@@ -1,9 +1,12 @@
-import bpy
 
-from .windowinfo import MASTRO_NG_windowinfo
+from .filter_by import mastro_GN_filter_by_OT
+from .mastro_GN_separate_by_wall_type import mastro_GN_separate_by_wall_type
+from .window_info import mastro_GN_windowinfo
 
 classes = (
-    MASTRO_NG_windowinfo,
+    mastro_GN_filter_by_OT,
+    mastro_GN_separate_by_wall_type,
+    mastro_GN_windowinfo,
     )
 
 # def register():
