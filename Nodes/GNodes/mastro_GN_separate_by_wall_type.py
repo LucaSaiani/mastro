@@ -202,7 +202,7 @@ class mastro_GN_separate_by_wall_type(GeometryNodeCustomGroup):
         # Update nodes already instanced in modifiers
         for obj in bpy.data.objects:
             for mod in obj.modifiers:
-                if hasattr(mod, "node_group"):
+                if hasattr(mod, "node_group") and mod.node_group is not None:
                     for n in mod.node_group.nodes:
                         if getattr(n, "bl_idname", "") == cls.bl_idname:
                             # print("update found", n)
