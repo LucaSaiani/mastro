@@ -3,7 +3,7 @@ from bpy_extras.view3d_utils import location_3d_to_region_2d
 
 from ..utils.node_utils import create_new_nodegroup, set_socket_defvalue
 
-class MASTRO_NG_windowinfo(bpy.types.GeometryNodeCustomGroup):
+class mastro_GN_windowinfo(bpy.types.GeometryNodeCustomGroup):
     bl_idname = "MastroGNWindowInfo"
     bl_label = "Window info"
 

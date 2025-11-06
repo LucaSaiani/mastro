@@ -27,7 +27,8 @@ def create_new_nodegroup(name, in_sockets={}, out_sockets={},):
         create_socket(ng, in_out='INPUT', socket_type=socket_type, socket_name=socket_name,)
     for socket_name, socket_type in out_sockets.items():
         create_socket(ng, in_out='OUTPUT', socket_type=socket_type, socket_name=socket_name,)
-        
+    
+    # out_node.update()
     return ng
 
 def set_socket_defvalue(ng, idx, in_out='OUTPUT', value=None,):

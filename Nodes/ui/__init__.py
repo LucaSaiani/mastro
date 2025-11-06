@@ -22,11 +22,11 @@ classes = (
     )
 
 
-def load_ui():
+def register():
     append_menus()
     return None
 
 
-def unload_ui():
+def unregister():
     remove_menus()
     return None
