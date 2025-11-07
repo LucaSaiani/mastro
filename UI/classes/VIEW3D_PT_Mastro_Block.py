@@ -1,11 +1,12 @@
 import bpy 
 from bpy.types import Panel 
 
-class VIEW3D_PT_MaStro_Block(Panel):
+class VIEW3D_PT_Mastro_Block(Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "MaStro"
     bl_label = "Block"
+    bl_order = 0
     
     @classmethod
     def poll(cls, context):
@@ -104,7 +105,7 @@ class VIEW3D_PT_MaStro_Block(Panel):
                                   rows = rows)
                 
                 row = layout_1.row(align=True)
-                row.prop(context.scene, "attribute_block_normal", text="Flip Normal") 
+                row.prop(context.scene, "attribute_wall_normal", text="Flip Normal") 
                 
                 row = layout_0.row(align=True)
                 row.prop(context.scene, "attribute_block_side_angle", text="Side rotation") 

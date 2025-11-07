@@ -2,11 +2,12 @@ import bpy
 from bpy.types import Panel 
 
 """View 3D panel to show the mass related UI"""
-class VIEW3D_PT_MaStro_Mass(Panel):
+class VIEW3D_PT_Mastro_Mass(Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "MaStro"
     bl_label = "Mass"
+    bl_order = 0
     #bl_idname = "MASTRO_PT_Mass"
     
     

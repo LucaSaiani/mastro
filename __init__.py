@@ -22,11 +22,11 @@ if "bpy" in locals():
     import importlib
     # importlib.reload(preferences),
     importlib.reload(mastro_project_data),
-    importlib.reload(mastro_menu),
+    # importlib.reload(mastro_menu),
     # importlib.reload(mastro_keymaps),
     # importlib.reload(Icons),
     importlib.reload(mastro_xy_constraint_operators),
-    importlib.reload(mastro_wall),
+    # importlib.reload(mastro_wall),
     importlib.reload(mastro_street),
     # importlib.reload(mastro_massing),
     importlib.reload(mastro_schedule)
@@ -39,11 +39,11 @@ else:
     
     # from .UI.classes import preferences
     from . import mastro_project_data
-    from . import mastro_menu
+    # from . import mastro_menu
     # from . import mastro_keymaps
     # from . import Icons
     from . import mastro_xy_constraint_operators
-    from . import mastro_wall
+    # from . import mastro_wall
     from . import mastro_street
     # from . import mastro_massing
     from . import mastro_schedule
@@ -66,10 +66,12 @@ else:
     PREFS_KEY = __package__
 
 from . UI.properties.properties import register as register_properties, unregister as unregister_properties
+from . UI.utils.xy_constraint import register as register_ui_buttons, unregister as unregister_ui_buttons
 from . Icons import register as register_icons, unregister as unregister_icons
 from . Utils import modules
 from . Utils.init_lists import init_lists
-from . Handlers.definitions.updates import known_scenes as knownScenes
+from . Utils.init_nodes import init_nodes
+from . Handlers.utils.updates import known_scenes as knownScenes
 from . Keymaps.keymap import register as register_keymaps, unregister as unregister_keymaps
 from . Nodes.ui import register as register_gn_ui, unregister as unregister_gn_ui
   
@@ -77,7 +79,7 @@ from . Nodes.ui import register as register_gn_ui, unregister as unregister_gn_u
 # from . import Utils
 # from . import UI
 
-from .Nodes.GNodes.mastro_GN_separate_by_wall_type import mastro_GN_separate_by_wall_type
+# from .Nodes.GNodes.mastro_GN_separate_by_wall_type import mastro_GN_separate_by_wall_type
 # from bpy.types import(Scene)
 from bpy.app.handlers import persistent
 import math
@@ -144,21 +146,21 @@ classes = (
     mastro_project_data.FLOOR_LIST_OT_MoveItem,
     
     # mastro_menu.VIEW3D_MT_mastro_add,
-    mastro_menu.VIEW3D_PT_transform_orientations,
-    mastro_menu.VIEW3D_PT_MaStro_Panel,
-    mastro_menu.MaStro_MenuOperator_add_MaStro_mass,
-    mastro_menu.MaStro_MenuOperator_add_MaStro_block,
-    mastro_menu.MaStro_MenuOperator_add_MaStro_street,
-    mastro_menu.MaStro_MenuOperator_add_MaStro_dimension,
-    mastro_menu.MaStro_MenuOperator_convert_to_MaStro_mass,
-    mastro_menu.MaStro_MenuOperator_convert_to_MaStro_street,
-    # mastro_menu.MaStro_MenuOperator_PrintData,
-    # mastro_menu.MaStro_MenuOperator_ExportCSV,
-    mastro_menu.MaStro_Operator_transform_orientation,
-    # mastro_menu.VIEW3D_MT_orientations_pie,
-    # mastro_menu.MaStro_Menu,
-    mastro_menu.mastroAddonProperties,
-    mastro_menu.ConstraintXYSettings,
+    # mastro_menu.VIEW3D_PT_transform_orientations,
+    # # mastro_menu.VIEW3D_PT_Mastro_Panel,
+    # mastro_menu.MaStro_MenuOperator_add_MaStro_mass,
+    # mastro_menu.OBJECT_OT_Add_Mastro_Block,
+    # mastro_menu.OBJECT_OT_Add_Mastro_Street,
+    # mastro_menu.MaStro_MenuOperator_add_MaStro_dimension,
+    # mastro_menu.MaStro_MenuOperator_convert_to_MaStro_mass,
+    # mastro_menu.MaStro_MenuOperator_convert_to_MaStro_street,
+    # # mastro_menu.MaStro_MenuOperator_PrintData,
+    # # mastro_menu.MaStro_MenuOperator_ExportCSV,
+    # mastro_menu.MaStro_Operator_transform_orientation,
+    # # mastro_menu.VIEW3D_MT_orientations_pie,
+    # # mastro_menu.MaStro_Menu,
+    # mastro_menu.mastroAddonProperties,
+    # mastro_menu.ConstraintXYSettings,
 
     mastro_schedule.MaStroTree,
     mastro_schedule.MaStro_string_item,
@@ -229,8 +231,8 @@ classes = (
     # mastro_massing.OBJECT_OT_Set_Edge_Attribute_Uses,
     # mastro_massing.OBJECT_OT_Set_Edge_Attribute_Depth,
     # mastro_massing.obj_typology_uses_name_list,
-    # mastro_massing.VIEW3D_PT_MaStro_Mass,
-    # mastro_massing.VIEW3D_PT_MaStro_Block,
+    # mastro_massing.VIEW3D_PT_Mastro_Mass,
+    # mastro_massing.VIEW3D_PT_Mastro_Block,
     # mastro_massing.OBJECT_OT_Set_Block_Edge_Attribute_Normal,
     # mastro_massing.OBJECT_OT_Set_Block_Edge_Angle,
     
@@ -243,10 +245,10 @@ classes = (
     mastro_street.VIEW3D_PT_MaStro_Street,
     mastro_street.OBJECT_OT_SetStreetId,
     
-    mastro_wall.OBJECT_OT_SetWallId,
-    mastro_wall.OBJECT_OT_SetWallNormal,
-    mastro_wall.OBJECT_OT_SetFloorId,
-    mastro_wall.VIEW3D_PT_MaStro_Wall,
+    # mastro_wall.OBJECT_OT_SetWallId,
+    # mastro_wall.OBJECT_OT_SetWallNormal,
+    # mastro_wall.OBJECT_OT_SetFloorId,
+    # mastro_wall.VIEW3D_PT_MaStro_Wall,
     
     mastro_xy_constraint_operators.TRANSFORM_OT_translate_xy_constraint,
     mastro_xy_constraint_operators.TRANSFORM_OT_rotate_xy_constraint
@@ -271,25 +273,25 @@ classes = (
 #     return bpy.context.preferences.addons[__package__].preferences
     
 
-def initNodes():
-    # from .Nodes.GNodes.test_filter_by import mastro_GN_separate_by_wall_type
-    nt = bpy.data.node_groups.new("MasterUpdateTMP", "GeometryNodeTree")
-    separateByWallTypeNode = nt.nodes.new("separateByWallType")
-    # testNode.updates(bpy.context.scene)
-    mastro_GN_separate_by_wall_type.update_all(bpy.context.scene)
-    bpy.data.node_groups.remove(nt) 
+# def initNodes():
+#     # from .Nodes.GNodes.test_filter_by import mastro_GN_separate_by_wall_type
+#     nt = bpy.data.node_groups.new("MasterUpdateTMP", "GeometryNodeTree")
+#     separateByWallTypeNode = nt.nodes.new("separateByWallType")
+#     # testNode.updates(bpy.context.scene)
+#     mastro_GN_separate_by_wall_type.update_all(bpy.context.scene)
+#     bpy.data.node_groups.remove(nt) 
     
-    # bpy.ops.node.separate_geometry_by_factor()
-    bpy.ops.node.gn_filter_by(filter_name="use")
-    bpy.ops.node.gn_filter_by(filter_name="typology")
-    bpy.ops.node.gn_filter_by(filter_name="wall type")
-    bpy.ops.node.gn_filter_by(filter_name="street type")
-    bpy.ops.node.gn_filter_by(filter_name="block side")
+#     # bpy.ops.node.separate_geometry_by_factor()
+#     bpy.ops.node.mastro_gn_filter_by(filter_name="use")
+#     bpy.ops.node.mastro_gn_filter_by(filter_name="typology")
+#     bpy.ops.node.mastro_gn_filter_by(filter_name="wall type")
+#     bpy.ops.node.mastro_gn_filter_by(filter_name="street type")
+#     bpy.ops.node.mastro_gn_filter_by(filter_name="block side")
     
-    bpy.ops.node.update_shader_filter(filter_name="block")
-    bpy.ops.node.update_shader_filter(filter_name="building")
-    bpy.ops.node.update_shader_filter(filter_name="use")
-    bpy.ops.node.update_shader_filter(filter_name="typology")
+#     bpy.ops.node.update_shader_filter(filter_name="block")
+#     bpy.ops.node.update_shader_filter(filter_name="building")
+#     bpy.ops.node.update_shader_filter(filter_name="use")
+#     bpy.ops.node.update_shader_filter(filter_name="typology")
 
 
 
@@ -297,7 +299,7 @@ def initNodes():
 @persistent
 def onFileLoaded(scene):
     init_lists()
-    initNodes()
+    init_nodes()
     # bpy.context.scene.updating_mesh_attributes_is_active = False
     # bpy.context.scene.show_selection_overlay_is_active = False
     bpy.context.scene.previous_selection_object_name = ""
@@ -312,7 +314,7 @@ def onFileLoaded(scene):
 @persistent
 def onFileDefault(scene):
     init_lists()
-    initNodes()
+    init_nodes()
     # bpy.context.scene.show_selection_overlay_is_active = False
     bpy.context.scene.previous_selection_object_name = ""
     bpy.context.scene.previous_selection_face_id = -1
@@ -326,12 +328,13 @@ def onFileDefault(scene):
 
 def get_addon_classes(revert=False):
     from .UI.classes import classes as preference_classes
+    from .UI.properties import classes as property_classes
     from .Handlers.classes import classes as handler_classes
     from .Nodes.GNodes import classes as nodes_classes
     from .Nodes.ui import classes as ui_classes
     from .Operators import classes as operator_classes
     
-    classes = preference_classes + handler_classes + nodes_classes + ui_classes + operator_classes
+    classes = preference_classes + property_classes + handler_classes + nodes_classes + ui_classes + operator_classes
 
     if (revert):
         return reversed(classes)
@@ -343,10 +346,10 @@ def register():
     
     
     
-    ### registering icons ###
+    ### register icons ###
     register_icons()
         
-    ### registering classes ###
+    ### register classes ###
     from bpy.utils import register_class
     
     for cls in get_addon_classes():
@@ -355,18 +358,21 @@ def register():
     for cls in classes:
         register_class(cls)
         
-    ### registering properties ###
+    ### register properties ###
     register_properties()
         
-    ### registering modules ###
+    ### register modules ###
     for mod in modules:
         if hasattr(mod, "register"):
             mod.register()
     
-    ### registering nodes UI ###
+    ### register nodes UI ###
     register_gn_ui()
     
-    ### registering shortcuts ###
+    ### register UI  buttons
+    register_ui_buttons()
+        
+    ### register shortcuts ###
     register_keymaps()
     
     ############################################################
@@ -376,7 +382,7 @@ def register():
 
         
     # from .Handlers.classes.showAttributes import update_show_attributes as updateShowAttibutes
-    from .Handlers.definitions.updates import updates as handlerUpdates
+    from .Handlers.utils.updates import updates as handlerUpdates
 
     # from . import mastro_modal_operator
 
@@ -388,7 +394,7 @@ def register():
     nodeitems_utils.register_node_categories('MASTRO_NODES', mastro_schedule.node_categories) 
     
     # Add toggle to both tool header
-    bpy.types.VIEW3D_HT_tool_header.append(mastro_menu.constraint_xy_button)
+    # bpy.types.VIEW3D_HT_tool_header.append(mastro_menu.constraint_xy_button)
     
     
 
@@ -397,7 +403,7 @@ def register():
   
     
     bpy.app.timers.register(init_lists, first_interval=.1)
-    bpy.app.timers.register(initNodes, first_interval=.1)
+    bpy.app.timers.register(init_nodes, first_interval=.1)
     
     
     # bpy.app.timers.register(mastro_modal_operator.update_mesh_attributes_depsgraph, first_interval=.1)
@@ -430,7 +436,7 @@ def unregister():
     bpy.app.handlers.load_post.remove(onFileLoaded)
     bpy.app.handlers.load_factory_startup_post.remove(onFileDefault)
     
-    from .Handlers.definitions.updates import updates as handlerUpdates
+    from .Handlers.utils.updates import updates as handlerUpdates
 
     bpy.app.handlers.depsgraph_update_post.remove(handlerUpdates)
     
@@ -438,7 +444,7 @@ def unregister():
     nodeitems_utils.unregister_node_categories('MASTRO_NODES')
 
      
-    bpy.types.VIEW3D_HT_tool_header.remove(mastro_menu.constraint_xy_button)
+    # bpy.types.VIEW3D_HT_tool_header.remove(mastro_menu.constraint_xy_button)
     
     # # unload UI for custom nodes
     # from .Nodes.ui import unload_ui
@@ -448,21 +454,24 @@ def unregister():
 
     ############################################################
     
-    ### unregistering shortcuts ###
+    ### unregister shortcuts ###
     unregister_keymaps()
     
-    ### unregistering nodes UI ###
+    ### unregister UI  buttons
+    unregister_ui_buttons()
+   
+    ### unregister nodes UI ###
     unregister_gn_ui()
     
-    ### unregistering modules ###            
+    ### unregister modules ###            
     for mod in reversed(modules):
         if hasattr(mod, "register"):
             mod.unregister()
             
-    ### unregistering properties ###
+    ### unregister properties ###
     unregister_properties()
     
-    ### unregistering classes ###            
+    ### unregister classes ###            
     from bpy.utils import unregister_class
     
     for cls in reversed(classes):

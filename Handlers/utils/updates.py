@@ -11,7 +11,7 @@ from bpy.types import Operator
 from mathutils import Vector
 
 from ...mastro_schedule import MaStro_MathNode, execute_active_node_tree
-from ...Nodes.GNodes import mastro_GN_windowinfo
+from ...Nodes.GNodes import mastro_GN_window_info
 from ...Utils.read_storey_attribute import read_storey_attribute
 from ...Utils.read_use_attribute import read_use_attribute
 # from datetime import datetime
@@ -308,8 +308,8 @@ def updates(scene, depsgraph):
                         bMesh_storey_list_A = bm.edges.layers.int["mastro_list_storey_A_EDGE"]
                         bMesh_storey_list_B = bm.edges.layers.int["mastro_list_storey_B_EDGE"]
                         
-                        bMesh_block_normal = bm.edges.layers.bool["mastro_inverted_normal_EDGE"]
-                        bMesh_block_depth = bm.edges.layers.float["mastro_block_depth_EDGE"]
+                        bMesh_block_normal = bm.edges.layers.bool["mastro_inverted_normal"]
+                        bMesh_block_depth = bm.edges.layers.float["mastro_block_depth"]
                         
                         bMesh_typology = bm.edges.layers.int["mastro_typology_id_EDGE"]
                         bMesh_use_list_A   = bm.edges.layers.int["mastro_list_use_id_A_EDGE"]
@@ -485,8 +485,8 @@ def updates(scene, depsgraph):
                                         if bpy.context.scene.attribute_block_depth != block_depth:
                                             bpy.context.scene.attribute_block_depth = block_depth
                                             
-                                        if bpy.context.scene.attribute_block_normal != block_normal:
-                                            bpy.context.scene.attribute_block_normal = block_normal
+                                        if bpy.context.scene.attribute_wall_normal != block_normal:
+                                            bpy.context.scene.attribute_wall_normal = block_normal
                                     
                                     # typology name
                                     # since it is possible to sort typologies in the ui, it can be that the index of the element
@@ -605,8 +605,8 @@ def updates(scene, depsgraph):
             # add the uses stored in the typology to the current typology use UIList        
             selected_typology_index = scene.mastro_typology_name_list_index
             if len(scene.mastro_typology_name_list) > 0:
-                list = scene.mastro_typology_name_list[selected_typology_index].useList    
-                split_list = list.split(";")
+                name_list = scene.mastro_typology_name_list[selected_typology_index].useList    
+                split_list = name_list.split(";")
                 for el in split_list:
                     if el.strip() != '': # to avoid empty values which could append when the software starts
                         scene.mastro_typology_uses_name_list.add()
@@ -627,7 +627,7 @@ def updates(scene, depsgraph):
     #     print("cuao")
     #     if isinstance(update.id, bpy.types.Object):
     #         # update the nodes below
-    mastro_GN_windowinfo.update_all()
+    mastro_GN_window_info.update_all()
             # break
     
 

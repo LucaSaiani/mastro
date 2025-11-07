@@ -29,7 +29,7 @@ import math
 # from .Utils.update_attributes import update_attributes_mastro_mesh_storeys
 # from . Utils.set_face_attribute_storeys import set_face_attribute_storeys
 
-# class VIEW3D_PT_MaStro_Mass(Panel):
+# class VIEW3D_PT_Mastro_Mass(Panel):
 #     bl_space_type = "VIEW_3D"
 #     bl_region_type = "UI"
 #     bl_category = "MaStro"
@@ -163,7 +163,7 @@ import math
 #         pass
     
     
-# class VIEW3D_PT_MaStro_Block(Panel):
+# class VIEW3D_PT_Mastro_Block(Panel):
 #     bl_space_type = "VIEW_3D"
 #     bl_region_type = "UI"
 #     bl_category = "MaStro"

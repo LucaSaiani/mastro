@@ -21,7 +21,7 @@ class OBJECT_OT_Set_Edge_Attribute_Depth(Operator):
             edgeIndex = edge.index
             # data = update_mesh_edge_attributes_depth(context, mesh, edgeIndex)
             data = read_depth_attribute(context)
-            mesh.attributes["mastro_block_depth_EDGE"].data[edgeIndex].value = data["blockDepth"]
+            mesh.attributes["mastro_block_depth"].data[edgeIndex].value = data["blockDepth"]
         # else:
         #     active_vert = bpy.context.scene.previous_selection_vert_id
         #     active_edges =  [e for e in mesh.edges if active_vert in e.vertices]
