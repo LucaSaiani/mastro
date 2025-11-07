@@ -9,15 +9,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         console.log("Base path immagini:", basePath);
 
-        // Header
         const headerImg = container.querySelector('.auto-image-header');
         if (headerImg) headerImg.src = basePath + "icon.png";
 
-        // Top-right
         const topRightImg = container.querySelector('.auto-image-top-right');
         if (topRightImg) topRightImg.src = basePath + "thumbnail.png";
 
-        // Examples
         const exampleImgs = container.querySelectorAll('.auto-image-example');
         exampleImgs.forEach((img, index) => {
             const imageName = img.dataset.image || `example_0${index + 1}`;
@@ -25,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // ======================= Menu: Funzioni esistenti =======================
+    // ======================= Menu: Funzioni di gestione =======================
     function closeAllSubmenus(excludeLi = null) {
         menu.querySelectorAll(".has-submenu.open").forEach(openLi => {
             let isExcluded = false;
@@ -87,6 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // ======================= 🔹 Solo link in <h1> e <h2> =======================
     function recursivelyLoadSubmenu(parentLi, pageFile) {
         const submenuUl = parentLi.querySelector("ul.submenu");
         if (!submenuUl) return; 
@@ -96,7 +94,9 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(html => {
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, "text/html");
-                const links = doc.querySelectorAll("a[data-page]");
+
+                // 🔹 Solo link in h1 o h2
+                const links = doc.querySelectorAll("h1 a[data-page], h2 a[data-page]");
 
                 if (links.length > 0) {
                     parentLi.classList.add("has-submenu");
@@ -119,6 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         submenuUl.appendChild(newLi);
 
+                        // Ricorsione
                         recursivelyLoadSubmenu(newLi, newPage);
                     });
 
@@ -144,6 +145,41 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // ======================= FOOTER NAVIGATION =======================
+    const prevBtn = document.getElementById("prev-page");
+    const nextBtn = document.getElementById("next-page");
+
+    function getMenuPages() {
+        return Array.from(menuList.querySelectorAll("li[data-page]"))
+            .map(li => li.getAttribute("data-page"));
+    }
+
+    function updateFooterButtons(currentPage) {
+        const pages = getMenuPages();
+        const index = pages.indexOf(currentPage);
+
+        if (!prevBtn || !nextBtn) return; // evita errori se footer non esiste
+
+        prevBtn.disabled = index <= 0;
+        nextBtn.disabled = index === -1 || index >= pages.length - 1;
+
+        prevBtn.onclick = () => {
+            if (index > 0) {
+                const prevPage = pages[index - 1];
+                const li = menuList.querySelector(`li[data-page="${prevPage}"]`);
+                loadPage(prevPage, li);
+            }
+        };
+
+        nextBtn.onclick = () => {
+            if (index < pages.length - 1) {
+                const nextPage = pages[index + 1];
+                const li = menuList.querySelector(`li[data-page="${nextPage}"]`);
+                loadPage(nextPage, li);
+            }
+        };
+    }
+
     // ======================= Caricamento pagina =======================
     function loadPage(page, liToActivate = null) {
         menu.querySelectorAll("li[data-page].active").forEach(item => item.classList.remove("active"));
@@ -156,20 +192,25 @@ document.addEventListener("DOMContentLoaded", () => {
             closeAllSubmenus(liToActivate);
         }
 
+        const pageContentDiv = document.getElementById("page-content");
+
         fetch(page)
             .then(r => (r.ok ? r.text() : Promise.reject(`Page not found: ${page}`)))
             .then(html => {
-                pageDiv.innerHTML = html;
+                pageContentDiv.innerHTML = html; 
 
-                // 🔹 Legge il meta tag con il percorso base delle immagini
                 const meta = pageDiv.querySelector('meta[name="image-basepath"]');
                 const basePath = meta ? meta.content : "";
                 setImagePaths(basePath, pageDiv);
 
                 attachPageInternalLinks();
+
+                // ✅ aggiorna il footer dopo ogni caricamento
+                updateFooterButtons(page);
             })
             .catch(err => {
                 pageDiv.innerHTML = `<p style="color:red;">Error loading ${page}: ${err}</p>`;
+                updateFooterButtons(page);
             });
     }
 

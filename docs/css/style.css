@@ -6,6 +6,10 @@
     --menu-width: 250px;
     --default-padding-left: 0px;
     --default-padding-right: 20px;
+    --text-color: #DFD0B8;
+    --menu-background : #222831;
+    --page-background : #393E46;
+    --overlay: #1b222c;
 }
 
 /* --- BASE STYLES --- */
@@ -19,15 +23,14 @@ html, body {
 body {
   display: flex;
   flex-direction: column;
-  background-color: #948979;
+  background-color: var(--text-color);
   font-family: 'Open Sans', sans-serif;
-  color: #DFD0B8;
-  /* overflow: hidden; */
+  color: var(--text-color);
 }
 
 a { 
     text-decoration: none;
-    color: #DFD0B8;
+    color: var(--text-color);
 }
 
 p {
@@ -35,24 +38,16 @@ p {
     text-align: justify;
 }
 
-/* dl{
-    
-} */
-
 dt {
     font-weight:bolder;
 }
 
 dd {
     margin-top: -10px;
-   
 }
-
-
 
 h1, h2, h3 {
     font-weight: 600;
-    /* color: #222831; */
 }
 
 h4 {
@@ -60,43 +55,23 @@ h4 {
     font-weight: bold;
     font-size: 0.85rem;
     margin: 25px 0 10px 0;
-    color: #DFD0B8;
+    color: var(--text-color);
 }
 
-ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-li {
-    /* Il LI è un contenitore a blocco per l'Accordion. */
-    position: static; 
-    display: block; 
-    padding: 0; /* Il padding viene gestito da .menu-title-content */
-    margin: 0;
-    font-size: 0.95rem;
-    cursor: default;
-    transition: background-color 0.2s;
-}
-
-li:hover > .menu-title-content {
-    background-color: #222831;
-}
 
 /* ================= TITLE & LAYOUT ================= */
 
 .title {
     padding-left: 20px;
-    color: #222831;
+    color: var(--menu-background);
     flex: 0 0 auto;
 }
 
 .row {
     display: flex;
     flex: 1 1 auto;
-    height: 100%; /* <-- assicura che la riga prenda tutto lo spazio verticale */
-  overflow: hidden; /* <-- evita scroll indesiderati nella row */
+    height: 100%;
+    overflow: hidden;
 }
 
 /* ================= MENU ================= */
@@ -104,7 +79,7 @@ li:hover > .menu-title-content {
     flex: 0 0 auto;
     width: var(--menu-width);
     padding-left: 20px;
-    background-color: #1b222c;
+    background-color: var(--menu-background);
     overflow-y: auto;
     position: relative;
 }
@@ -113,44 +88,55 @@ li:hover > .menu-title-content {
     background-color: rgb(33, 38, 45);
 }
 
+.meny ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.menu li {
+    position: static; 
+    display: block; 
+    padding: 0;
+    margin: 0;
+    font-size: 0.95rem;
+    cursor: default;
+    transition: background-color 0.2s;
+}
+
+.menu li:hover > .menu-title-content {
+    background-color: var(--overlay);
+}
+
+
 .menu li.active > .menu-title-content {
-    background-color: #393E46;
+    background-color: var(--page-background);;
     font-weight: 600;
 }
 
-/* --- NUOVO CONTENITORE PER TESTO E FRECCIA --- */
 .menu-title-content {
-    /* Applichiamo padding e flex qui, dove vogliamo l'allineamento */
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 5px var(--default-padding-right) 5px var(--default-padding-left);
-    
-    /* Permette alla freccia di essere un figlio ben allineato */
     position: relative; 
     cursor: pointer;
 }
 
 /* --- ACCORDION SUBMENU LOGIC --- */
-
 .submenu {
-    display: none; /* Hidden by default, shown by JS */
-    
-    /* Applies indentation to the entire submenu block */
-    padding-left: var(--indentation-level); 
-    
-    /* Reset positioning */
+    display: none;
+    padding-left: var(--indentation-level);
     margin: 0; 
     position: static; 
     width: 100%; 
 }
 
-/* Show submenu only when the 'open' class is applied by JavaScript */
 .has-submenu.open > .submenu {
     display: block;
 }
 
-/* Freccia: Ora è un pseudo-elemento del menu-title-content */
+/* Freccia pseudo-elemento */
 .menu-title-content::after {
     content: "▶"; 
     font-size: 0.8em;
@@ -163,13 +149,11 @@ li:hover > .menu-title-content {
     content: "▼";
 }
 
-/* Il padding va riapplicato agli elementi LI annidati */
 .submenu li > .menu-title-content {
-    padding-left: 0; /* L'indentazione è già sul UL genitore */
+    padding-left: 0;
     padding-right: var(--default-padding-right);
 }
 
-/* Se l'elemento non ha un sottomenu, non visualizza la freccia */
 li:not(.has-submenu) > .menu-title-content::after {
     content: none;
 }
@@ -177,21 +161,20 @@ li:not(.has-submenu) > .menu-title-content::after {
 /* ================= MAIN PAGE ================= */
 .page {
     flex: 1 1 70%;
-    padding: 0px 40px 40px 40px ;
-    background-color: #393E46;
-    /* color: #EEEEEE; */
+    display: flex;
+    flex-direction: column;
+    padding: 0px 40px;
+    background-color: var(--page-background);;
+    height: 100%;
+}
+
+.page-content {
     overflow-y: auto;
-    text-align: left;
+    flex: 1 1 auto;
 }
 
 .content-wrapper {
-    /* width: 80%;  */
-    /* margin: 20px auto;  */
-    /* padding: 10px; */
-    /* border: 1px solid #ccc; */
     overflow: auto; 
-    /* margin-top: -20px; */
-    /* font-family: Arial, sans-serif; */
 }
 
 .title-container {
@@ -207,7 +190,7 @@ li:not(.has-submenu) > .menu-title-content::after {
 }
 
 .title-container .header-icon {
-    max-height: 60px;          /* dimensione massima, regola come vuoi */
+    max-height: 60px;
     width: auto;
 }
 
@@ -220,15 +203,118 @@ li:not(.has-submenu) > .menu-title-content::after {
 }
 
 .top-right-image {
-      float: right;
-      margin: 20px 0 15px 15px;
-      width: 250px;
-      height: auto;
-      border: 2px solid #333;
-      padding: 5px;
-    }
+    float: right;
+    margin: 20px 0 15px 15px;
+    width: 250px;
+    height: auto;
+    border: 2px solid #333;
+    padding: 5px;
+}
 
 .example {
     width: 100%;
     height: auto;
+}
+
+/* ================= FOOTER ================= */
+.page-footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 1em 0;
+    background-color: var(--menu-background);
+    /* border-top: 1px solid #555; */
+    /* color: #EEEEEE; */
+    flex-shrink: 0; /* evita che il footer sparisca */
+}
+
+.nav-arrow {
+    background-color: #444;
+    border: 0px solid #666;
+    /* border-radius: 6px; */
+    padding: 0.5em 1em;
+    font-size: 1em;
+    cursor: pointer;
+    /* color: #EEEEEE; */
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.nav-arrow:hover {
+    /* background-color: #555; */
+}
+
+.nav-arrow:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ==================== ARROWS ===================== */
+.arrow {
+  border: solid var(--text-color);
+  border-width: 0 3px 3px 0;
+  display: inline-block;
+  padding: 3px;
+  
+}
+
+.right {
+  transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+}
+
+.left {
+  transform: rotate(135deg);
+  -webkit-transform: rotate(135deg);
+}
+
+.up {
+  transform: rotate(-135deg);
+  -webkit-transform: rotate(-135deg);
+}
+
+.down {
+  transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+}
+
+/* ==================== NOTE ===================== */
+.note {
+    position: relative;
+    background-color: var(--menu-background); /* sfondo scuro simile a screenshot */
+    /* border: 1px solid #3a3a50;  */
+    border-radius: 6px;
+    padding: 1em 1.2em;
+    margin: 1em 0;
+    font-family: 'Open Sans', sans-serif;
+    /* color: #dcdce6;  */
+}
+
+.note p {
+    margin: 0.5em 0;
+}
+
+.note .note-icon {
+    position: absolute;
+    top: 1em;
+    left: 1em;
+    font-size: 1.2em;
+    color: #4fc3f7; /* colore icona (blu chiaro) */
+}
+
+.note .note-content {
+    margin-left: 2em; /* spazio per icona */
+}
+
+/* Opzione evidenza link */
+.note a { 
+    /* color: #7cbfff; */
+    text-decoration: underline;
+} 
+
+/* Iconi alternative */
+.note.tldr .note-icon::before {
+    content: "🔥"; /* TLDR icon */
+}
+
+.note.info .note-icon::before {
+    content: "ℹ️"; /* info icon */
 }
