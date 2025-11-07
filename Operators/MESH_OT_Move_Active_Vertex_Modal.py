@@ -3,7 +3,7 @@ import bmesh
 # from mathutils import Vector
 
 # --- Modal operator to move active vertex along the line to another vertex ---
-class MESH_OT_move_active_vertex_modal(bpy.types.Operator):
+class MESH_OT_Move_Active_Vertex_Modal(bpy.types.Operator):
     """Move the active vertex along the line to the other selected vertex using numeric input"""
     bl_idname = "mesh.move_active_vertex_modal"
     bl_label = "Move Active Vertex (Modal)"

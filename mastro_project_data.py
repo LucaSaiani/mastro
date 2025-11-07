@@ -32,10 +32,10 @@ from types import SimpleNamespace
 
 # from . mastro_massing import read_mesh_attributes_uses
 from .Utils.read_use_attribute import read_use_attribute
-from . mastro_wall import read_mesh_attributes_walls
+from .Utils.read_wall_attribute import read_wall_attribute
 from . mastro_street import read_mesh_attributes_streets
 
-from .Nodes.GNodes.mastro_GN_separate_by_wall_type import mastro_GN_separate_by_wall_type
+# from .Nodes.GNodes.mastro_GN_separate_by_wall_type import mastro_GN_separate_by_wall_type
 
 from .Utils.read_storey_attribute import read_storey_attribute
 
@@ -164,7 +164,7 @@ import random
     
 # class filter_by_OT(Operator):
 #     """Update the GN node Filter by Use"""
-#     bl_idname = "node.gn_filter_by"
+#     bl_idname = "node.mastro_gn_filter_by"
 #     bl_label = "Update the GN filter by Use"
     
 #     filter_name: bpy.props.StringProperty(name="Filter type name")
@@ -904,7 +904,7 @@ class building_name_list(PropertyGroup):
 # also updates the names of mastro_typology_uses_name_list_index  
 def update_mastro_filter_by_use(self, context):
     from . Utils.init_lists import init_lists
-    bpy.ops.node.gn_filter_by(filter_name="use")
+    bpy.ops.node.mastro_gn_filter_by(filter_name="use")
     bpy.ops.node.update_shader_filter(filter_name="use")
     
     # updating mastro_typology_uses_name_list_index
@@ -1131,7 +1131,7 @@ class TYPOLOGY_LIST_OT_DuplicateItem(Operator):
         context.scene.mastro_typology_name_list[last].useList = usesToCopy
         context.scene.mastro_typology_name_list[last].typologyEdgeColor = [random.random(), random.random(), random.random()]
         
-        bpy.ops.node.gn_filter_by(filter_name="typology")
+        bpy.ops.node.mastro_gn_filter_by(filter_name="typology")
         bpy.ops.node.update_shader_filter(filter_name="typology")
         return{'FINISHED'}
     
@@ -1171,7 +1171,7 @@ class TYPOLOGY_LIST_OT_MoveItem(Operator):
 # update the node "filter by typology" if a new typology is added or
 # a typology name has changed
 def update_mastro_filter_by_typology(self, context):
-    bpy.ops.node.gn_filter_by(filter_name="typology")
+    bpy.ops.node.mastro_gn_filter_by(filter_name="typology")
     bpy.ops.node.update_shader_filter(filter_name="typology")
     return None
 
@@ -1324,7 +1324,7 @@ class USE_LIST_OT_NewItem(Operator):
         context.scene.mastro_typology_uses_name_list[subIndex].id = id
         update_typology_uses_list(context)
         
-        bpy.ops.node.gn_filter_by(filter_name="use")
+        bpy.ops.node.mastro_gn_filter_by(filter_name="use")
         bpy.ops.node.update_shader_filter(filter_name="use")
         return{'FINISHED'}
 
@@ -1517,7 +1517,7 @@ class OBJECT_OT_update_all_MaStro_meshes_attributes(Operator):
                         for edge in edges:
                             edgeIndex = edge.index
                             wall_id = mesh.attributes["mastro_wall_id"].data[edgeIndex].value
-                            data = read_mesh_attributes_walls(context, mesh, edgeIndex, wallSet = wall_id)
+                            data = read_wall_attribute(context, mesh, edgeIndex, wallSet = wall_id)
                             if [i for i in ["wall_thickness"] if i in self.attributeToUpdate]:
                                 mesh.attributes["mastro_wall_thickness"].data[edgeIndex].value = data["wall_thickness"]
                             elif [i for i in ["wall_offset"] if i in self.attributeToUpdate]:
@@ -1761,7 +1761,9 @@ class WALL_LIST_OT_NewItem(Operator):
         context.scene.mastro_wall_name_list[last].id = max(temp_list)+1
         context.scene.mastro_wall_name_list[last].wallEdgeColor = [random.random(), random.random(), random.random()]
         
-        bpy.ops.node.gn_filter_by(filter_name="wall type")    
+        bpy.ops.node.mastro_gn_filter_by(filter_name="wall type")
+        bpy.ops.node.mastro_gn_separate_by(filter_name="wall type")
+        
         return{'FINISHED'}
     
 class WALL_LIST_OT_MoveItem(Operator):
@@ -1795,13 +1797,14 @@ class WALL_LIST_OT_MoveItem(Operator):
 # update the node "filter by wall type" if a new wall type is added or
 # a wall typey name has changed
 def update_mastro_filter_by_wall_type(self, context):
-    nt = bpy.data.node_groups.new("MasterUpdateTMP", "GeometryNodeTree")
-    # testNode = nt.nodes.new("separateByWallType")
-    # testNode.update_all(bpy.context.scene)
-    mastro_GN_separate_by_wall_type.update_all(bpy.context.scene)
-    bpy.data.node_groups.remove(nt) 
+    # nt = bpy.data.node_groups.new("MasterUpdateTMP", "GeometryNodeTree")
+    # # testNode = nt.nodes.new("separateByWallType")
+    # # testNode.update_all(bpy.context.scene)
+    # mastro_GN_separate_by_wall_type.update_all(bpy.context.scene)
+    # bpy.data.node_groups.remove(nt) 
     
-    bpy.ops.node.gn_filter_by(filter_name="wall type")
+    bpy.ops.node.mastro_gn_filter_by(filter_name="wall type")
+    bpy.ops.node.mastro_gn_separate_by(filter_name="wall type")
     # bpy.ops.node.update_shader_filter(filter_name="wall type")
     return None
             
@@ -2088,7 +2091,7 @@ class STREET_LIST_OT_NewItem(Operator):
         context.scene.mastro_street_name_list[last].id = max(temp_list)+1
         context.scene.mastro_street_name_list[last].streetEdgeColor = [random.random(), random.random(), random.random()]
         
-        bpy.ops.node.gn_filter_by(filter_name="street type")
+        bpy.ops.node.mastro_gn_filter_by(filter_name="street type")
             
         return{'FINISHED'}
     
@@ -2204,7 +2207,7 @@ class OBJECT_OT_update_all_MaStro_street_attributes(Operator):
 # update the node "filter by street type" if a new street type is added or
 # a street type name has changed
 def update_mastro_filter_by_street_type(self, context):
-    bpy.ops.node.gn_filter_by(filter_name="street type")
+    bpy.ops.node.mastro_gn_filter_by(filter_name="street type")
     # bpy.ops.node.update_shader_filter(filter_name="street type")
     return None
 

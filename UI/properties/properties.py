@@ -5,19 +5,26 @@ from ...Handlers.classes.showAttributes import update_show_attributes
 from ...Utils.get_names_from_list import get_names_from_list
 from ...Utils.update_attributes import (update_attributes_mastro_block_depth, 
                                         update_attributes_mastro_block_name_id, 
-                                        update_attributes_mastro_block_normal, 
+                                        update_attributes_mastro_wall_normal, 
                                         update_attributes_mastro_block_side_angle, 
                                         update_attributes_mastro_building_name_id, 
                                         update_attributes_mastro_mesh_storeys, 
-                                        update_attributes_mastro_mesh_typology)
+                                        update_attributes_mastro_mesh_typology,
+                                        update_attributes_mastro_wall_id,
+                                        update_attributes_mastro_floor_id,
+                                        update_attributes_wall,
+                                        update_extras_vertex,
+                                        update_extras_edge,
+                                        update_extras_face)
 from ..classes.obj_typology_uses_name_list import obj_typology_uses_name_list
 
+from . class_properties import mastroAddonProperties, constraintXYSettings
 
-from ... import mastro_wall
+# from ... import mastro_wall
 # from ... import mastro_massing
 from ... import mastro_geometryNodes
 from ... import mastro_project_data
-from ... import mastro_menu
+# from ... import mastro_menu
 from ... import mastro_schedule
 from ... import mastro_street
 
@@ -89,7 +96,7 @@ scene_props = [
     # Wall Properties
     # ------------------------------
     ("attribute_wall_id", bpy.props.IntProperty(
-        name="Wall Id", default=0, update=mastro_wall.update_attribute_wall_id
+        name="Wall Id", default=0, update=update_attributes_mastro_wall_id
     )),
     ("attribute_wall_thickness", bpy.props.FloatProperty(
         name="Wall thickness", default=0.300, precision=3, subtype="DISTANCE"
@@ -98,14 +105,14 @@ scene_props = [
         name="Wall offset", default=0, precision=3, subtype="DISTANCE"
     )),
     ("attribute_wall_normal", bpy.props.BoolProperty(
-        default=False, update=mastro_wall.update_wall_normal
+        default=False, update=update_attributes_mastro_wall_normal
     )),
 
     # ------------------------------
     # Floor Properties
     # ------------------------------
     ("attribute_floor_id", bpy.props.IntProperty(
-        name="Floor Id", default=0, update=mastro_wall.update_attribute_floor_id
+        name="Floor Id", default=0, update=update_attributes_mastro_floor_id
     )),
 
     # ------------------------------
@@ -128,9 +135,9 @@ scene_props = [
         subtype="DISTANCE",
         update=update_attributes_mastro_block_depth
     )),
-    ("attribute_block_normal", bpy.props.BoolProperty(
-        default=False, update=update_attributes_mastro_block_normal
-    )),
+    # ("attribute_block_normal", bpy.props.BoolProperty(
+    #     default=False, update=update_attributes_mastro_block_normal
+    # )),
 
     # ------------------------------
     # Geometry Nodes / Object Selection
@@ -162,6 +169,28 @@ scene_props = [
     ("previous_edge_number", bpy.props.IntProperty(
         name="Previously number of edges", default=-1,
         description="Store the number of edges of the previous selection"
+    )),
+    
+    # ------------------------------
+    # Mastro Extras
+    # ------------------------------
+    ("mastro_attribute_extra_vertex", bpy.props.FloatProperty(
+        name="Custom vertex value", 
+        default=0, 
+        step=100, 
+        update=update_extras_vertex,
+    )),
+    ("mastro_attribute_extra_edge", bpy.props.FloatProperty(
+        name="Custom edge value", 
+        default=0, 
+        step=100, 
+        update=update_extras_edge
+    )),
+    ("mastro_attribute_extra_face", bpy.props.FloatProperty(
+        name="Custom face value", 
+        default=0, 
+        step=100, 
+        update=update_extras_face
     )),
 
     # ------------------------------
@@ -224,7 +253,7 @@ scene_props = [
     ("mastro_wall_names", bpy.props.EnumProperty(
         name="Wall List", description="",
         items=lambda self, context: get_names_from_list(context.scene, context, "mastro_wall_name_list"),
-        update=mastro_wall.update_attributes_wall
+        update=update_attributes_wall
     )),
 
     ("mastro_floor_name_list", bpy.props.CollectionProperty(type=mastro_project_data.floor_name_list)),
@@ -240,12 +269,12 @@ scene_props = [
 # Object / Node Pointer Properties
 # =============================================================================
 object_props = [
-    ("mastro_props", bpy.props.PointerProperty(type=mastro_menu.mastroAddonProperties)),
+    ("mastro_props", bpy.props.PointerProperty(type=mastroAddonProperties)),
     ("sticky_note_props", bpy.props.PointerProperty(type=mastro_geometryNodes.StickyNoteProperties)),
 ]
 
 scene_pointer_props = [
-    ("constraint_xy_setting", bpy.props.PointerProperty(type=mastro_menu.ConstraintXYSettings)),
+    ("constraint_xy_setting", bpy.props.PointerProperty(type=constraintXYSettings)),
     ("mastroKeyDictionary", bpy.props.CollectionProperty(type=mastro_schedule.MaStro_string_item)),
 ]
 

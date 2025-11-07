@@ -3,8 +3,8 @@ from bpy_extras.view3d_utils import location_3d_to_region_2d
 
 from ..utils.node_utils import create_new_nodegroup, set_socket_defvalue
 
-class mastro_GN_windowinfo(bpy.types.GeometryNodeCustomGroup):
-    bl_idname = "MastroGNWindowInfo"
+class mastro_GN_window_info(bpy.types.GeometryNodeCustomGroup):
+    bl_idname = "mastro_gn_window_info"
     bl_label = "Window info"
 
     # use_scene_cam: bpy.props.BoolProperty(
