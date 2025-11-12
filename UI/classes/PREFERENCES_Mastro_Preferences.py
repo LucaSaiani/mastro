@@ -4,7 +4,7 @@ from bpy.types import AddonPreferences
 from ... import PREFS_KEY
 
 """User preference panel"""
-class MaStro_addon_preferences(AddonPreferences):
+class PREFERENCES_Mastro_Preferences(AddonPreferences):
     # this must match the add-on name, use '__package__'
     # when defining this in a submodule of a python package.
     # bl_idname = __package__

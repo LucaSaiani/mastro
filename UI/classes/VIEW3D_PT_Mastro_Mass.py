@@ -7,6 +7,7 @@ class VIEW3D_PT_Mastro_Mass(Panel):
     bl_region_type = "UI"
     bl_category = "MaStro"
     bl_label = "Mass"
+    # bl_parent_id = "VIEW3D_PT_Mastro_Panel"
     bl_order = 0
     #bl_idname = "MASTRO_PT_Mass"
     
@@ -73,15 +74,12 @@ class VIEW3D_PT_Mastro_Mass(Panel):
                 
          
                 ################ TYPOLOGY ######################
-                row = layout.row(align=True)
-                
                 # disable the number of storeys if there are no liquids
                 # current_typology = scene.mastro_typology_name_current[0]
-                
-                
                 # since it is possible to sort typologies in the ui, it can be that the index of the element
                 # in the list doesn't correspond to typology_id. Therefore it is necessary to find elements
                 # in the way below and not with use_list = bpy.context.scene.mastro_typology_name_list[typology_id].useList
+                row = layout.row(align=True)
                 item = next(i for i in bpy.context.scene.mastro_typology_name_list if i["id"] == scene.mastro_typology_name_current[0].id)
                 use_list = item.useList
                 uses = use_list.split(";")
@@ -92,17 +90,22 @@ class VIEW3D_PT_Mastro_Mass(Panel):
                         break
                 row.prop(context.scene, "attribute_mass_storeys", text="N° of storeys") 
                 row.enabled = tmp_enabled
-                
+                # -----------------------
                 row = layout.row(align=True)
                 row.prop(context.scene, "mastro_typology_names", icon="ASSET_MANAGER", icon_only=True, text="Typology")
                 if len(scene.mastro_typology_name_list) >0:
                     row.label(text=scene.mastro_typology_name_current[0].name)
+                # -----------------------
                 rows = 3
                 row = layout.row()
-                row.template_list("OBJECT_UL_OBJ_Typology_Uses", 
+                row.template_list("VIEW3D_UL_Typology_Uses", 
                                   "obj_typology_uses_list", 
                                   scene,
                                   "mastro_obj_typology_uses_name_list",
                                   scene,
                                   "mastro_obj_typology_uses_name_list_index",
                                   rows = rows)
+                # -----------------------
+                row = layout.row(align=True)
+                row.prop(context.scene, "attribute_mass_extend_uses", text="Top Floors") 
+                

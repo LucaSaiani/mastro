@@ -20,7 +20,6 @@ class mastro_GN_separate_by_OT(Operator):
 
         # group = bpy.data.node_groups.new(groupName,'GeometryNodeTree')
         
-        
         group = create_new_nodegroup(
                 groupName,
                 in_sockets={"Geometry": "NodeSocketGeometry"},
