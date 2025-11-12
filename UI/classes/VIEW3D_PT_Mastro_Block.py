@@ -96,7 +96,7 @@ class VIEW3D_PT_Mastro_Block(Panel):
                     row.label(text=scene.mastro_typology_name_current[0].name)
                 rows = 3
                 row = layout_1.row()
-                row.template_list("OBJECT_UL_OBJ_Typology_Uses", 
+                row.template_list("VIEW3D_UL_Typology_Uses", 
                                   "obj_typology_uses_list", 
                                   scene,
                                   "mastro_obj_typology_uses_name_list",

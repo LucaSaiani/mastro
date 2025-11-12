@@ -1,7 +1,7 @@
 import bpy
  
-from ..Operators.MESH_OT_Move_Active_Vertex_Modal import MESH_OT_Move_Active_Vertex_Modal
-from ..mastro_xy_constraint_operators import TRANSFORM_OT_rotate_xy_constraint, TRANSFORM_OT_translate_xy_constraint
+from ..Operators.MESH_OT_Move_Active_Vertex import MESH_OT_Move_Active_Vertex
+from .operators import TRANSFORM_OT_rotate_xy_constraint, TRANSFORM_OT_translate_xy_constraint
 
 addon_keymaps = []
 
@@ -23,7 +23,7 @@ def register():
     addon_keymaps.extend([
         (km, km.keymap_items.new(TRANSFORM_OT_translate_xy_constraint.bl_idname, 'G', 'PRESS')),
         (km, km.keymap_items.new(TRANSFORM_OT_rotate_xy_constraint.bl_idname, 'R', 'PRESS')),
-        (km, km.keymap_items.new(MESH_OT_Move_Active_Vertex_Modal.bl_idname, 'G', 'PRESS', alt=True)),
+        (km, km.keymap_items.new(MESH_OT_Move_Active_Vertex.bl_idname, 'G', 'PRESS', alt=True)),
     ])
         
 def unregister():

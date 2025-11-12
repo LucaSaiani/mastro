@@ -3,7 +3,7 @@ from bpy.types import UIList
 
 """UI List object used in the view 3D mass panel to show
 the assigned uses of the selected face"""
-class OBJECT_UL_OBJ_Typology_Uses(UIList):
+class VIEW3D_UL_Typology_Uses(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data,
                   active_propname, index):
         custom_icon = 'COMMUNITY'

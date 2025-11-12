@@ -55,7 +55,7 @@ class mastro_GN_separate_by_wall_type(GeometryNodeCustomGroup):
         self.node_tree = ng
         self.label = self.bl_label
    
-        self.width = 160
+        self.width = 280
 
         # Ensure the Group Input/Output nodes of the copy are updated
         for node in ng.nodes:

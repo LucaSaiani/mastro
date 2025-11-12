@@ -21,13 +21,13 @@
 if "bpy" in locals():
     import importlib
     # importlib.reload(preferences),
-    importlib.reload(mastro_project_data),
+    # importlib.reload(mastro_project_data),
     # importlib.reload(mastro_menu),
     # importlib.reload(mastro_keymaps),
     # importlib.reload(Icons),
-    importlib.reload(mastro_xy_constraint_operators),
+    # importlib.reload(mastro_xy_constraint_operators),
     # importlib.reload(mastro_wall),
-    importlib.reload(mastro_street),
+    # importlib.reload(mastro_street),
     # importlib.reload(mastro_massing),
     importlib.reload(mastro_schedule)
     # importlib.reload(mastro_modal_operator)
@@ -38,13 +38,13 @@ else:
     
     
     # from .UI.classes import preferences
-    from . import mastro_project_data
+    # from . import mastro_project_data
     # from . import mastro_menu
     # from . import mastro_keymaps
     # from . import Icons
-    from . import mastro_xy_constraint_operators
+    # from . import mastro_xy_constraint_operators
     # from . import mastro_wall
-    from . import mastro_street
+    # from . import mastro_street
     # from . import mastro_massing
     from . import mastro_schedule
     # from . import mastro_modal_operator
@@ -57,6 +57,7 @@ import nodeitems_utils
 
 #### IMPORT DA TENERE ASSOLUTAMENTE ####
 import bpy
+from bpy.utils import register_class, unregister_class
 
 # to set up __package__ when the extension starts from vs code
 IS_VSCODE_DEV = __package__ is not None and __package__.startswith("bl_ext.vscode_development.")
@@ -65,15 +66,16 @@ if IS_VSCODE_DEV:
 else:
     PREFS_KEY = __package__
 
-from . UI.properties.properties import register as register_properties, unregister as unregister_properties
-from . UI.utils.xy_constraint import register as register_ui_buttons, unregister as unregister_ui_buttons
-from . Icons import register as register_icons, unregister as unregister_icons
-from . Utils import modules
-from . Utils.init_lists import init_lists
-from . Utils.init_nodes import init_nodes
-from . Handlers.utils.updates import known_scenes as knownScenes
-from . Keymaps.keymap import register as register_keymaps, unregister as unregister_keymaps
-from . Nodes.ui import register as register_gn_ui, unregister as unregister_gn_ui
+from .UI.properties.properties import register as register_properties, unregister as unregister_properties
+from .UI.utils.xy_constraint import register as register_ui_buttons, unregister as unregister_ui_buttons
+from .UI.classes import register as register_ui_dynamic_classes, unregister as unregister_ui_dynamic_classes
+from .Icons import register as register_icons, unregister as unregister_icons
+from .Utils import modules
+from .Utils.init_lists import init_lists
+from .Utils.init_nodes import init_nodes
+from .Handlers.utils.updates import known_scenes as knownScenes
+from .Keymaps.keymap import register as register_keymaps, unregister as unregister_keymaps
+from .Nodes.ui import register as register_gn_ui, unregister as unregister_gn_ui
   
 ########################################
 # from . import Utils
@@ -98,52 +100,52 @@ classes = (
     mastro_geometryNodes.StickyNoteProperties,
         
     # mastro_project_data.filter_by_OT,
-    mastro_project_data.update_Shader_Filter_OT,
-    mastro_project_data.VIEW3D_PT_MaStro_project_data,
-    mastro_project_data.VIEW3D_PT_MaStro_show_data,
-    mastro_project_data.VIEW3D_PT_MaStro_mass_data,
-    mastro_project_data.VIEW3D_PT_MaStro_mass_block_data,
-    mastro_project_data.VIEW3D_PT_MaStro_mass_building_data,
-    mastro_project_data.VIEW3D_PT_MaStro_mass_typology_data,
-    mastro_project_data.VIEW3D_PT_MaStro_street_data,
-    mastro_project_data.VIEW3D_PT_MaStro_architecture_data,
-    mastro_project_data.VIEW3D_PT_MaStro_architecture_wall_data,
-    mastro_project_data.VIEW3D_PT_MaStro_architecture_floor_data,
-    mastro_project_data.name_with_id,
-    mastro_project_data.OBJECT_UL_Block,
-    mastro_project_data.block_name_list,
-    mastro_project_data.BLOCK_LIST_OT_NewItem,
-    mastro_project_data.BLOCK_LIST_OT_MoveItem,
-    mastro_project_data.OBJECT_UL_Building,
-    mastro_project_data.building_name_list,
-    mastro_project_data.BUILDING_LIST_OT_NewItem,
-    mastro_project_data.BUILDING_LIST_OT_MoveItem,
-    mastro_project_data.use_name_list,
-    mastro_project_data.USE_LIST_OT_NewItem,
-    mastro_project_data.OBJECT_UL_Typology,
-    mastro_project_data.typology_name_list,
-    mastro_project_data.TYPOLOGY_LIST_OT_NewItem,
-    mastro_project_data.TYPOLOGY_LIST_OT_MoveItem,
-    mastro_project_data.OBJECT_UL_Typology_Uses,
-    mastro_project_data.typology_uses_name_list,
-    mastro_project_data.TYPOLOGY_USES_LIST_OT_NewItem,
-    mastro_project_data.TYPOLOGY_LIST_OT_DuplicateItem,
-    mastro_project_data.TYPOLOGY_USES_LIST_OT_DeleteItem,
-    mastro_project_data.TYPOLOGY_USES_LIST_OT_MoveItem,
-    mastro_project_data.OBJECT_OT_update_all_MaStro_meshes_attributes,
-    mastro_project_data.OBJECT_OT_update_all_MaStro_street_attributes,
-    mastro_project_data.OBJECT_UL_Street,
-    mastro_project_data.street_name_list,
-    mastro_project_data.STREET_LIST_OT_NewItem,
-    mastro_project_data.STREET_LIST_OT_MoveItem,
-    mastro_project_data.OBJECT_UL_Wall,
-    mastro_project_data.wall_name_list,
-    mastro_project_data.WALL_LIST_OT_NewItem,
-    mastro_project_data.WALL_LIST_OT_MoveItem,
-    mastro_project_data.OBJECT_UL_Floor,
-    mastro_project_data.floor_name_list,
-    mastro_project_data.FLOOR_LIST_OT_NewItem,
-    mastro_project_data.FLOOR_LIST_OT_MoveItem,
+    # mastro_project_data.update_Shader_Filter_OT,
+    # mastro_project_data.VIEW3D_PT_MaStro_project_data,
+    # mastro_project_data.VIEW3D_PT_MaStro_show_data,
+    # mastro_project_data.VIEW3D_PT_MaStro_mass_data,
+    # mastro_project_data.VIEW3D_PT_MaStro_mass_block_data,
+    # mastro_project_data.VIEW3D_PT_MaStro_mass_building_data,
+    # mastro_project_data.VIEW3D_PT_MaStro_mass_typology_data,
+    # mastro_project_data.VIEW3D_PT_MaStro_street_data,
+    # mastro_project_data.VIEW3D_PT_MaStro_architecture_data,
+    # mastro_project_data.VIEW3D_PT_MaStro_architecture_wall_data,
+    # mastro_project_data.VIEW3D_PT_MaStro_architecture_floor_data,
+    # mastro_project_data.name_with_id,
+    # mastro_project_data.OBJECT_UL_Block,
+    # mastro_project_data.block_name_list,
+    # mastro_project_data.BLOCK_LIST_OT_NewItem,
+    # mastro_project_data.BLOCK_LIST_OT_MoveItem,
+    # mastro_project_data.OBJECT_UL_Building,
+    # mastro_project_data.building_name_list,
+    # mastro_project_data.BUILDING_LIST_OT_NewItem,
+    # mastro_project_data.BUILDING_LIST_OT_MoveItem,
+    # mastro_project_data.use_name_list,
+    # mastro_project_data.USE_LIST_OT_NewItem,
+    # mastro_project_data.OBJECT_UL_Typology,
+    # mastro_project_data.typology_name_list,
+    # mastro_project_data.TYPOLOGY_LIST_OT_NewItem,
+    # mastro_project_data.TYPOLOGY_LIST_OT_MoveItem,
+    # mastro_project_data.OBJECT_UL_Typology_Uses,
+    # mastro_project_data.typology_uses_name_list,
+    # mastro_project_data.TYPOLOGY_USES_LIST_OT_NewItem,
+    # mastro_project_data.TYPOLOGY_LIST_OT_DuplicateItem,
+    # mastro_project_data.TYPOLOGY_USES_LIST_OT_DeleteItem,
+    # mastro_project_data.TYPOLOGY_USES_LIST_OT_MoveItem,
+    # mastro_project_data.OBJECT_OT_update_all_MaStro_meshes_attributes,
+    # mastro_project_data.OBJECT_OT_update_all_MaStro_street_attributes,
+    # mastro_project_data.OBJECT_UL_Street,
+    # mastro_project_data.street_name_list,
+    # mastro_project_data.STREET_LIST_OT_NewItem,
+    # mastro_project_data.STREET_LIST_OT_MoveItem,
+    # mastro_project_data.OBJECT_UL_Wall,
+    # mastro_project_data.wall_name_list,
+    # mastro_project_data.WALL_LIST_OT_NewItem,
+    # mastro_project_data.WALL_LIST_OT_MoveItem,
+    # mastro_project_data.OBJECT_UL_Floor,
+    # mastro_project_data.floor_name_list,
+    # mastro_project_data.FLOOR_LIST_OT_NewItem,
+    # mastro_project_data.FLOOR_LIST_OT_MoveItem,
     
     # mastro_menu.VIEW3D_MT_mastro_add,
     # mastro_menu.VIEW3D_PT_transform_orientations,
@@ -242,16 +244,16 @@ classes = (
     # mastro_modal_operator.VIEW_3D_OT_update_all_meshes_attributes,
     # mastro_modal_operator.EventReporter,
 
-    mastro_street.VIEW3D_PT_MaStro_Street,
-    mastro_street.OBJECT_OT_SetStreetId,
+    # mastro_street.VIEW3D_PT_MaStro_Street,
+    # mastro_street.OBJECT_OT_SetStreetId,
     
     # mastro_wall.OBJECT_OT_SetWallId,
     # mastro_wall.OBJECT_OT_SetWallNormal,
     # mastro_wall.OBJECT_OT_SetFloorId,
     # mastro_wall.VIEW3D_PT_MaStro_Wall,
     
-    mastro_xy_constraint_operators.TRANSFORM_OT_translate_xy_constraint,
-    mastro_xy_constraint_operators.TRANSFORM_OT_rotate_xy_constraint
+    # mastro_xy_constraint_operators.TRANSFORM_OT_translate_xy_constraint,
+    # mastro_xy_constraint_operators.TRANSFORM_OT_rotate_xy_constraint
 )
 
 # MaStroGroupInputNode = mastro_schedule.MaStroGroupInputNode
@@ -288,10 +290,10 @@ classes = (
 #     bpy.ops.node.mastro_gn_filter_by(filter_name="street type")
 #     bpy.ops.node.mastro_gn_filter_by(filter_name="block side")
     
-#     bpy.ops.node.update_shader_filter(filter_name="block")
-#     bpy.ops.node.update_shader_filter(filter_name="building")
-#     bpy.ops.node.update_shader_filter(filter_name="use")
-#     bpy.ops.node.update_shader_filter(filter_name="typology")
+#     bpy.ops.node.mastro_shader_filter_by(filter_name="block")
+#     bpy.ops.node.mastro_shader_filter_by(filter_name="building")
+#     bpy.ops.node.mastro_shader_filter_by(filter_name="use")
+#     bpy.ops.node.mastro_shader_filter_by(filter_name="typology")
 
 
 
@@ -333,8 +335,9 @@ def get_addon_classes(revert=False):
     from .Nodes.GNodes import classes as nodes_classes
     from .Nodes.ui import classes as ui_classes
     from .Operators import classes as operator_classes
+    from .Keymaps import classes as keymap_classes
     
-    classes = preference_classes + property_classes + handler_classes + nodes_classes + ui_classes + operator_classes
+    classes = preference_classes + property_classes + handler_classes + nodes_classes + ui_classes + operator_classes + keymap_classes
 
     if (revert):
         return reversed(classes)
@@ -350,13 +353,13 @@ def register():
     register_icons()
         
     ### register classes ###
-    from bpy.utils import register_class
-    
     for cls in get_addon_classes():
         register_class(cls)
         
     for cls in classes:
         register_class(cls)
+        
+    register_ui_dynamic_classes()
         
     ### register properties ###
     register_properties()
@@ -472,7 +475,7 @@ def unregister():
     unregister_properties()
     
     ### unregister classes ###            
-    from bpy.utils import unregister_class
+    unregister_ui_dynamic_classes()
     
     for cls in reversed(classes):
         unregister_class(cls)

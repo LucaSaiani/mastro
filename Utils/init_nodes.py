@@ -17,7 +17,7 @@ def init_nodes():
     bpy.ops.node.mastro_gn_filter_by(filter_name="street type")
     bpy.ops.node.mastro_gn_filter_by(filter_name="block side")
     
-    bpy.ops.node.update_shader_filter(filter_name="block")
-    bpy.ops.node.update_shader_filter(filter_name="building")
-    bpy.ops.node.update_shader_filter(filter_name="use")
-    bpy.ops.node.update_shader_filter(filter_name="typology")
+    bpy.ops.node.mastro_shader_filter_by(filter_name="block")
+    bpy.ops.node.mastro_shader_filter_by(filter_name="building")
+    bpy.ops.node.mastro_shader_filter_by(filter_name="use")
+    bpy.ops.node.mastro_shader_filter_by(filter_name="typology")
