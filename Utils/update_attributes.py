@@ -87,6 +87,18 @@ def update_attributes_wall(self, context):
             scene.attribute_wall_id = n.id
             scene.mastro_wall_name_current[0].id = n.id
             break 
+
+# update the floor label in the UI and all the relative data in the selected faces
+def update_attributes_floor(self, context):
+    scene = context.scene
+    name = scene.mastro_floor_names
+    scene.mastro_floor_name_current[0].name = " " + name
+    for n in scene.mastro_floor_name_list:
+        if n.name == name:
+            scene.attribute_floor_id = n.id
+            scene.mastro_floor_name_current[0].id = n.id
+            break
+
         
 # def update_floor_name_label(self, context):
 #     scene = context.scene

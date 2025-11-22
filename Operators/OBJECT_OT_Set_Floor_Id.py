@@ -1,4 +1,4 @@
-import bpy 
+import bpy
 from bpy.types import Operator
 
 class OBJECT_OT_Set_Floor_Id(Operator):
@@ -8,29 +8,33 @@ class OBJECT_OT_Set_Floor_Id(Operator):
     bl_options = {'REGISTER', 'UNDO'}
     
     def execute(self, context):
-        obj = context.active_object
-        mesh = obj.data
-
-        attribute_floor_id = context.scene.attribute_floor_id
+        selected_objects = context.selected_objects
         
-        try:
-            mesh.attributes["mastro_floor_id"]
-            attribute_floor_id = context.scene.attribute_floor_id
+        for obj in selected_objects:
+            if (obj.type == "MESH" and 
+                "MaStro object" in context.object.data and
+                "MaStro mass" in context.object.data):
+                print(obj.name)
+                # obj = context.active_object
+                mesh = obj.data
+                mode = obj.mode
 
-            mode = obj.mode
-            bpy.ops.object.mode_set(mode='OBJECT')
-           
-            selected_faces = [f for f in bpy.context.active_object.data.polygons if f.select]
-            mesh_attributes_id = mesh.attributes["mastro_floor_id"].data.items()
-            for face in selected_faces:
-                index = face.index
-                for mesh_attribute in mesh_attributes_id:
-                    if mesh_attribute[0] == index:
-                        mesh_attribute[1].value = attribute_floor_id
+                mesh.attributes["mastro_floor_id"]
+                attribute_floor_id = context.scene.attribute_floor_id
+
                 
-            bpy.ops.object.mode_set(mode=mode)
+                bpy.ops.object.mode_set(mode='OBJECT')
+            
+                selected_faces = [f for f in bpy.context.active_object.data.polygons if f.select]
+                mesh_attributes_id = mesh.attributes["mastro_floor_id"].data.items()
+                for face in selected_faces:
+                    index = face.index
+                    for mesh_attribute in mesh_attributes_id:
+                        if mesh_attribute[0] == index:
+                            mesh_attribute[1].value = attribute_floor_id
                     
-            # self.report({'INFO'}, "Attribute set to face, use: "+str(attribute_mass_use_id))
-            return {'FINISHED'}
-        except:
-            return {'FINISHED'}
+                bpy.ops.object.mode_set(mode=mode)
+                        
+                    # self.report({'INFO'}, "Attribute set to face, use: "+str(attribute_mass_use_id))
+                    #return {'FINISHED'}
+        return {'FINISHED'}
