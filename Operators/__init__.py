@@ -6,7 +6,7 @@ from .OBJECT_OT_Add_Mastro_Street import OBJECT_OT_Add_Mastro_Street
 from .OBJECT_OT_Convert_to_Mastro import OBJECT_OT_Convert_to_Mastro_Mass, OBJECT_OT_Convert_to_Mastro_Street
 from .OBJECT_OT_Set_Edge_Attribute_Angle import OBJECT_OT_Set_Edge_Attribute_Angle
 from .OBJECT_OT_Set_Edge_Attribute_Depth import OBJECT_OT_Set_Edge_Attribute_Depth
-from .OBJECT_OT_Set_Edge_Attribute_Normal import OBJECT_OT_Set_Block_Edge_Attribute_Normal
+from .OBJECT_OT_Set_Edge_Attribute_Normal import OBJECT_OT_Set_Edge_Attribute_Normal
 from .OBJECT_OT_Set_Edge_Attribute_Storeys import OBJECT_OT_Set_Edge_Attribute_Storeys
 from .OBJECT_OT_Set_Edge_Attribute_Uses import OBJECT_OT_Set_Edge_Attribute_Uses
 from .OBJECT_OT_Set_Extras import OBJECT_OT_Set_Vertex_Extra, OBJECT_OT_Set_Edge_Extra, OBJECT_OT_Set_Face_Extra
@@ -33,7 +33,7 @@ classes = (
     OBJECT_OT_Set_Vertex_Extra, 
     OBJECT_OT_Set_Edge_Extra, 
     OBJECT_OT_Set_Face_Extra,
-    OBJECT_OT_Set_Block_Edge_Attribute_Normal,
+    OBJECT_OT_Set_Edge_Attribute_Normal,
     OBJECT_OT_Set_Edge_Attribute_Storeys,
     OBJECT_OT_Set_Edge_Attribute_Uses,
     OBJECT_OT_Set_Face_Attribute_Storeys,

@@ -272,6 +272,7 @@ scene_props = [
     ("mastro_floor_names", EnumProperty(
         name="Floor List", description="", 
         items=lambda self, context: get_names_from_list(context.scene, context, "mastro_floor_name_list"),
+        update=update_attributes_floor
     )),
 ]
 

@@ -346,6 +346,70 @@ class separate_geometry_by_factor_OT(GeometryNodeCustomGroup):
         return None
     
     
+    import bpy
+    
+    
+    
+##########################################
+#### SORT JOIN NODE #####################
+#########################################
+
+# # Configurazione: True = dall'alto verso il basso, False = dal basso verso l'alto
+# top_to_bottom = False
+
+# # Ottieni il node tree attivo (assume modifier node_group come prima)
+# nt = bpy.context.object.modifiers.active.node_group
+
+# # Trova il nodo Join Geometry selezionato
+# join_nodes = [n for n in nt.nodes if n.select and n.bl_idname == "GeometryNodeJoinGeometry"]
+# if not join_nodes:
+#     raise Exception("Seleziona un nodo Join Geometry")
+# old_join = join_nodes[0]
+
+# # Raccogli tutte le sorgenti collegate (node, socket)
+# incoming = []
+# for sock in old_join.inputs:
+#     for link in sock.links:
+#         incoming.append((link.from_node, link.from_socket))
+
+# if not incoming:
+#     raise Exception("Nessun input collegato al Join Geometry")
+
+# # Ordina per Y: se top_to_bottom True -> Y più grande prima
+# incoming_sorted = sorted(incoming, key=lambda x: x[0].location.y, reverse=top_to_bottom)
+
+# # Crea nuovo nodo Join Geometry
+# new_join = nt.nodes.new(type="GeometryNodeJoinGeometry")
+# new_join.location = old_join.location
+
+# # Collega gli input nell'ordine voluto.
+# # Nota: collegando a new_join.inputs[-1] Blender crea/usa l'ultimo socket multiplo,
+# # preservando la sequenza in cui colleghi gli elementi.
+# for src_node, src_socket in incoming_sorted:
+#     nt.links.new(src_socket, new_join.inputs[-1])
+
+# # Ricollega gli output originari (se c'erano) al nuovo nodo
+# for out_link in list(old_join.outputs[0].links):
+#     nt.links.new(new_join.outputs[0], out_link.to_socket)
+
+# # Rimuovi il vecchio nodo
+# nt.nodes.remove(old_join)
+
+# print("Ordinamento Join Geometry completato (top_to_bottom = {})".format(top_to_bottom))
+
+##########################################
+#### SORT JOIN NODE #####################
+#########################################
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     # def execute(self, context):
     #     name = "MaStro Separate Geometry by Factor"
     #     if name not in bpy.data.node_groups:

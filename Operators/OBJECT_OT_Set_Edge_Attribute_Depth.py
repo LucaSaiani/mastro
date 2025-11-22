@@ -10,26 +10,31 @@ class OBJECT_OT_Set_Edge_Attribute_Depth(Operator):
     bl_options = {'REGISTER', 'UNDO'}
     
     def execute(self, context):
-        obj = context.active_object
-        mesh = obj.data
-        # mesh.attributes["mastro_number_of_storeys"]
-        mode = obj.mode
-        bpy.ops.object.mode_set(mode='OBJECT')
-        selected_edges = [e for e in context.active_object.data.edges if e.select]
+        selected_objects = context.selected_objects
         
-        for edge in selected_edges:
-            edgeIndex = edge.index
-            # data = update_mesh_edge_attributes_depth(context, mesh, edgeIndex)
-            data = read_depth_attribute(context)
-            mesh.attributes["mastro_block_depth"].data[edgeIndex].value = data["blockDepth"]
-        # else:
-        #     active_vert = bpy.context.scene.previous_selection_vert_id
-        #     active_edges =  [e for e in mesh.edges if active_vert in e.vertices]
-        #     for edge in active_edges:
-        #         edgeIndex = edge.index
-        #         data = update_mesh_edge_attributes_depth(context)
-        #         mesh.attributes["mastro_block_depth_EDGE"].data[edgeIndex].value = data["blockDepth"]
+        for obj in selected_objects:
+            if (obj.type == "MESH" and 
+                "MaStro object" in context.object.data and
+                "MaStro block" in context.object.data):
+                mesh = obj.data
+                # mesh.attributes["mastro_number_of_storeys"]
+                mode = obj.mode
+                bpy.ops.object.mode_set(mode='OBJECT')
+                selected_edges = [e for e in context.active_object.data.edges if e.select]
+                
+                for edge in selected_edges:
+                    edgeIndex = edge.index
+                    # data = update_mesh_edge_attributes_depth(context, mesh, edgeIndex)
+                    data = read_depth_attribute(context)
+                    mesh.attributes["mastro_block_depth"].data[edgeIndex].value = data["blockDepth"]
+                # else:
+                #     active_vert = bpy.context.scene.previous_selection_vert_id
+                #     active_edges =  [e for e in mesh.edges if active_vert in e.vertices]
+                #     for edge in active_edges:
+                #         edgeIndex = edge.index
+                #         data = update_mesh_edge_attributes_depth(context)
+                #         mesh.attributes["mastro_block_depth_EDGE"].data[edgeIndex].value = data["blockDepth"]
 
-        bpy.ops.object.mode_set(mode=mode)
+                bpy.ops.object.mode_set(mode=mode)
        
         return {'FINISHED'}
