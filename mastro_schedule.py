@@ -178,10 +178,10 @@ def addKeysToNode(self,  **kwargs):
                         notify=execute_active_node_tree,
                         options={"PERSISTENT"}
                     )
-                #add the key to the mastroKeyDictionary
-                bpy.context.scene.mastroKeyDictionary.add()
-                last = len(bpy.context.scene.mastroKeyDictionary)-1
-                bpy.context.scene.mastroKeyDictionary[last].name = str(key)
+                #add the key to the mastro_key_dictionary
+                bpy.context.scene.mastro_key_dictionary.add()
+                last = len(bpy.context.scene.mastro_key_dictionary)-1
+                bpy.context.scene.mastro_key_dictionary[last].name = str(key)
                 # print("KEY", key)
         elif item_name == "outputs":
             for output in list:
@@ -193,10 +193,10 @@ def addKeysToNode(self,  **kwargs):
                         notify=execute_active_node_tree,
                         options={"PERSISTENT"}
                     )
-                #add the key to the mastroKeyDictionary
-                bpy.context.scene.mastroKeyDictionary.add()
-                last = len(bpy.context.scene.mastroKeyDictionary)-1
-                bpy.context.scene.mastroKeyDictionary[last].name = str(key)
+                #add the key to the mastro_key_dictionary
+                bpy.context.scene.mastro_key_dictionary.add()
+                last = len(bpy.context.scene.mastro_key_dictionary)-1
+                bpy.context.scene.mastro_key_dictionary[last].name = str(key)
                 # print("KEY", key)
         elif item_name == "key":
             key = self
@@ -207,10 +207,10 @@ def addKeysToNode(self,  **kwargs):
                     notify=execute_active_node_tree,
                     options={"PERSISTENT"}
                 )
-            #add the key to the mastroKeyDictionary
-            bpy.context.scene.mastroKeyDictionary.add()
-            last = len(bpy.context.scene.mastroKeyDictionary)-1
-            bpy.context.scene.mastroKeyDictionary[last].name = str(key)
+            #add the key to the mastro_key_dictionary
+            bpy.context.scene.mastro_key_dictionary.add()
+            last = len(bpy.context.scene.mastro_key_dictionary)-1
+            bpy.context.scene.mastro_key_dictionary[last].name = str(key)
             # print("KEY", key)
         
 # remove all the keys from the node
@@ -220,22 +220,22 @@ def removeKeyFromNode(self, **kwargs):
         if item_name == "inputs":
             for input in list:
                 key = self.path_resolve('inputs[\"'+input+'\"]')
-                for i, el in enumerate(bpy.context.scene.mastroKeyDictionary):
+                for i, el in enumerate(bpy.context.scene.mastro_key_dictionary):
                     if el.name == str(key):
-                        bpy.context.scene.mastroKeyDictionary.remove(i)
+                        bpy.context.scene.mastro_key_dictionary.remove(i)
                         break
         elif item_name == "outputs":
             for output in list:
                 key = self.path_resolve('outputs[\"'+output+'\"]')
-                for i, el in enumerate(bpy.context.scene.mastroKeyDictionary):
+                for i, el in enumerate(bpy.context.scene.mastro_key_dictionary):
                     if el.name == str(key):
-                        bpy.context.scene.mastroKeyDictionary.remove(i)
+                        bpy.context.scene.mastro_key_dictionary.remove(i)
                         break
         elif item_name == "key":
             key = self
-            for i, el in enumerate(bpy.context.scene.mastroKeyDictionary):
+            for i, el in enumerate(bpy.context.scene.mastro_key_dictionary):
                     if el.name == str(key):
-                        bpy.context.scene.mastroKeyDictionary.remove(i)
+                        bpy.context.scene.mastro_key_dictionary.remove(i)
                         break
 
 def cleanSocket(link, socketIdentifier, inputOutput):
@@ -407,7 +407,7 @@ def getAttributes(objNames, attrType):
                     data.append(tmpData)
                     level += 1
         
-            bm.free
+            bm.free()
         return(data)
     return
     
@@ -2292,7 +2292,7 @@ class MaStro_MathNode(MaStroTreeNode, Node):
                 removeKeyFromNode(self, inputs=[input.name])
                 # print("rimuovo")
             else:
-                keyList = bpy.context.scene.mastroKeyDictionary.items()
+                keyList = bpy.context.scene.mastro_key_dictionary.items()
                 madeUpKey = self.path_resolve('inputs[\"'+input.name+'\"]')
                 keyToTest = [key[0] for key in keyList]
                 if str(madeUpKey) not in map(str, keyToTest):

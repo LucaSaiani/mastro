@@ -52,8 +52,8 @@ class NODE_OT_sticky_note(Operator):
         if node_tree:
             activeNode = node_tree.nodes.active
             is_custom_note = False
-            if activeNode and hasattr(activeNode, "sticky_note_props"):
-                is_custom_note = activeNode.sticky_note_props.customNote
+            if activeNode and hasattr(activeNode, "mastro_sticky_note_props"):
+                is_custom_note = activeNode.mastro_sticky_note_props.customNote
                 
             # edit existing note
             if activeNode and activeNode.select and is_custom_note:
@@ -71,7 +71,7 @@ class NODE_OT_sticky_note(Operator):
                 # postIt.select = False
                 postIt.name = "MaStro note"
                 postIt.label = "Note"
-                postIt.sticky_note_props.customNote = True
+                postIt.mastro_sticky_note_props.customNote = True
            
                 postIt.use_custom_color = True
                 postIt.color = bpy.context.preferences.addons[__package__].preferences.noteColor
@@ -110,8 +110,8 @@ class VIEW_PT_MaStro_Node_Panel(Panel):
         if node_tree:
             activeNode = node_tree.nodes.active
             is_custom_note = False
-            if activeNode and hasattr(activeNode, "sticky_note_props"):
-                is_custom_note = activeNode.sticky_note_props.customNote
+            if activeNode and hasattr(activeNode, "mastro_sticky_note_props"):
+                is_custom_note = activeNode.mastro_sticky_note_props.customNote
             # activeNode = get_active_node(self)
             if activeNode and activeNode.select and is_custom_note:
                 layout.operator("node.sticky_note", text="Edit the Sticky Note")
@@ -154,7 +154,7 @@ class VIEW_PT_MaStro_GN_Panel(Panel):
                         layout.label(text="Subdivision:")
                         row = layout.row()
                         row.label(text="Subdivide by:")
-                        row.prop(scene, "geometryMenuSwitch", text="")
+                        row.prop(scene, "mastro_geometry_menu_switch", text="")
                         row = layout.row()
                         row.label(text="Number of subdivision:")
                         row.prop(context.scene, "mastro_group_node_number_of_split", text="")
@@ -595,7 +595,7 @@ class separate_geometry_by_factor_OT(GeometryNodeCustomGroup):
                         
     #                     # set what field to separate (point, edge, face)
     #                     groupNodes = nodeGroup.nodes
-    #                     selection = bpy.context.scene.geometryMenuSwitch
+    #                     selection = bpy.context.scene.mastro_geometry_menu_switch
     #                     for node in groupNodes:
     #                         if "Separate" in node.name or "Capture" in node.name or node.name == "Leftover":
     #                             node.domain = selection

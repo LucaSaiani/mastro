@@ -116,7 +116,7 @@ import math
 #                     if context.scene.mastro_use_name_list[int(useID)].liquid == True:
 #                         tmp_enabled = True
 #                         break
-#                 row.prop(context.scene, "attribute_mass_storeys", text="N° of storeys") 
+#                 row.prop(context.scene, "mastro_attribute_mass_storeys", text="N° of storeys") 
 #                 row.enabled = tmp_enabled
                 
 #                 row = layout.row(align=True)
@@ -229,9 +229,9 @@ import math
          
 #                 ################ TYPOLOGY ######################
 #                 row = layout_1.row(align=True)
-#                 row.prop(context.scene, "attribute_mass_storeys", text="N° of storeys") 
+#                 row.prop(context.scene, "mastro_attribute_mass_storeys", text="N° of storeys") 
 #                 row = layout_1.row(align=True)
-#                 row.prop(context.scene, "attribute_block_depth", text="Depth") 
+#                 row.prop(context.scene, "mastro_attribute_block_depth", text="Depth") 
 #                 # disable the number of storeys if there are no liquids
 #                 # current_typology = scene.mastro_typology_name_current[0]
                 
@@ -269,7 +269,7 @@ import math
 #                 row.prop(context.scene, "attribute_block_normal", text="Flip Normal") 
                 
 #                 row = layout_0.row(align=True)
-#                 row.prop(context.scene, "attribute_block_side_angle", text="Side rotation") 
+#                 row.prop(context.scene, "mastro_attribute_block_side_angle", text="Side rotation") 
     
     
 # class OBJECT_OT_SetTypologyId(Operator):
@@ -283,11 +283,11 @@ import math
         # obj = context.active_object
         # mesh = obj.data
 
-        # # attribute_mass_typology_id = context.scene.attribute_mass_typology_id
+        # # mastro_attribute_mass_typology_id = context.scene.mastro_attribute_mass_typology_id
         
         # try:
         #     mesh.attributes["mastro_typology_id"]
-        #     # attribute_mass_typology_id = context.scene.attribute_mass_typology_id
+        #     # mastro_attribute_mass_typology_id = context.scene.mastro_attribute_mass_typology_id
 
         #     mode = obj.mode
         #     bpy.ops.object.mode_set(mode='OBJECT')
@@ -300,7 +300,7 @@ import math
         #         index = face.index
         #         for mesh_attribute in mesh_attributes:
         #             if mesh_attribute[0] == index:
-        #                 mesh_attribute[1].value = context.scene.attribute_mass_typology_id
+        #                 mesh_attribute[1].value = context.scene.mastro_attribute_mass_typology_id
         #                 break
                
            
@@ -343,11 +343,11 @@ import math
 #     typology_id = mesh.attributes["mastro_typology_id"].data[faceIndex].value
 #     projectUses = context.scene.mastro_use_name_list
 #     # if the function is run once the user updates the number of storeys,
-#     # the number of storeys is read from context.scene.attribute_mass_storeys.
+#     # the number of storeys is read from context.scene.mastro_attribute_mass_storeys.
 #     # Else the function is run because the user is updating the typology list and
 #     # in this case the number of storeys used is the one stored in each face of the mesh
 #     if storeysSet == None:
-#         numberOfStoreys = context.scene.attribute_mass_storeys
+#         numberOfStoreys = context.scene.mastro_attribute_mass_storeys
 #     else:
 #         numberOfStoreys = storeysSet
 #     # since it is possible to sort typologies in the ui, it can be that the index of the element
@@ -451,7 +451,7 @@ import math
 #             mesh.attributes["mastro_list_storey_A_EDGE"].data[edgeIndex].value = data["storey_list_A"]
 #             mesh.attributes["mastro_list_storey_B_EDGE"].data[edgeIndex].value = data["storey_list_B"]
 #         # else:
-#         #     active_vert = bpy.context.scene.previous_selection_vert_id
+#         #     active_vert = bpy.context.scene.mastro_previous_selection_vert_id
 #         #     active_edges =  [e for e in mesh.edges if active_vert in e.vertices]
 #         #     for edge in active_edges:
 #         #         edgeIndex = edge.index
@@ -472,11 +472,11 @@ import math
 #         typology_id = context.scene.mastro_typology_name_current[0].id
 #     projectUses = context.scene.mastro_use_name_list
 #     # if the function is run once the user updates the number of storeys,
-#     # the number of storeys is read from context.scene.attribute_mass_storeys.
+#     # the number of storeys is read from context.scene.mastro_attribute_mass_storeys.
 #     # Else the function is run because the user is updating the typology list and
 #     # in this case the number of storeys used is the one stored in each edge of the mesh
 #     if storeysSet == None:
-#         numberOfStoreys = context.scene.attribute_mass_storeys
+#         numberOfStoreys = context.scene.mastro_attribute_mass_storeys
 #         if numberOfStoreys == 0:
 #             numberOfStoreys = 1
 #     else:
@@ -580,7 +580,7 @@ import math
 #             data = update_mesh_edge_attributes_depth(context)
 #             mesh.attributes["mastro_block_depth_EDGE"].data[edgeIndex].value = data["blockDepth"]
 #         # else:
-#         #     active_vert = bpy.context.scene.previous_selection_vert_id
+#         #     active_vert = bpy.context.scene.mastro_previous_selection_vert_id
 #         #     active_edges =  [e for e in mesh.edges if active_vert in e.vertices]
 #         #     for edge in active_edges:
 #         #         edgeIndex = edge.index
@@ -599,11 +599,11 @@ import math
 #     # projectUses = context.scene.mastro_use_name_list
 
 #     # if the function is run once the user updates the depth of the building,
-#     # the value is read from context.scene.attribute_block_depth.
+#     # the value is read from context.scene.mastro_attribute_block_depth.
 #     # Else the function is run because the user is updating the depth and
 #     # in this case the value used is the one stored in each edge of the mesh
 #     if depthSet == None:
-#         blockDepth = context.scene.attribute_block_depth
+#         blockDepth = context.scene.mastro_attribute_block_depth
 #         if blockDepth == 0:
 #             blockDepth = 18
 #     else:
@@ -716,7 +716,7 @@ import math
 #         mode = obj.mode
 #         bpy.ops.object.mode_set(mode='OBJECT')
 #         selected_verts = [v for v in context.active_object.data.vertices if v.select]
-#         angle = bpy.context.scene.attribute_block_side_angle
+#         angle = bpy.context.scene.mastro_attribute_block_side_angle
 #         for vert in selected_verts:
 #             vertIndex = vert.index
 #             mesh.attributes["mastro_side_angle"].data[vertIndex].value = angle
@@ -726,12 +726,12 @@ import math
     
 # # function to update the uses and their relative heights accordingly to the assigned typologySet:
 # # if the function is run by the user when in edit mode the typologyId is read from 
-# # context.scene.attribute_mass_typology_id, else the typology is updated from the
+# # context.scene.mastro_attribute_mass_typology_id, else the typology is updated from the
 # # typology panel and the typologyId used is the one stored in the face
 # # def read_mesh_attributes_uses(context, mesh, faceIndex, typologySet=None):
 # def read_mesh_attributes_uses(context, typologySet=None):
 #     if typologySet == None:
-#         typology_id = context.scene.attribute_mass_typology_id
+#         typology_id = context.scene.mastro_attribute_mass_typology_id
 #     else:
 #       typology_id = typologySet
 #     projectUses = context.scene.mastro_use_name_list
@@ -813,7 +813,7 @@ import math
     
     
 
-# class obj_typology_uses_name_list(PropertyGroup):
+# class mastro_obj_typology_uses_name_list(PropertyGroup):
 #     id: IntProperty(
 #            name="Id",
 #            description="Obj typology use name id",
@@ -860,7 +860,7 @@ import math
 #     scene.mastro_block_name_current[0].name = name
 #     for n in scene.mastro_block_name_list:
 #         if n.name == name:
-#             scene.attribute_mass_block_id = n.id
+#             scene.mastro_attribute_mass_block_id = n.id
 #             scene.mastro_block_name_current[0].id = n.id
             
 #             obj = context.active_object
@@ -874,7 +874,7 @@ import math
 #     scene.mastro_building_name_current[0].name = name
 #     for n in scene.mastro_building_name_list:
 #         if n.name == name:
-#             scene.attribute_mass_building_id = n.id
+#             scene.mastro_attribute_mass_building_id = n.id
 #             scene.mastro_building_name_current[0].id = n.id
             
 #             obj = context.active_object
@@ -889,7 +889,7 @@ import math
 #     if "MaStro mass" in context.object.data:
 #         for n in scene.mastro_typology_name_list:
 #             if n.name == name:
-#                 scene.attribute_mass_typology_id = n.id
+#                 scene.mastro_attribute_mass_typology_id = n.id
 #                 # update the data accordingly to the typology id
 #                 bpy.ops.object.set_face_attribute_uses()
 #                 scene.mastro_typology_name_current[0].id = n.id
@@ -898,7 +898,7 @@ import math
 #     elif "MaStro block" in context.object.data:
 #         for n in scene.mastro_typology_name_list:
 #             if n.name == name:
-#                 scene.attribute_mass_typology_id = n.id
+#                 scene.mastro_attribute_mass_typology_id = n.id
 #                 # update the data accordingly to the typology id
 #                 bpy.ops.object.set_edge_attribute_uses()
 #                 scene.mastro_typology_name_current[0].id = n.id

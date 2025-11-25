@@ -31,13 +31,13 @@ from types import SimpleNamespace
 # from bpy.app.handlers import persistent
 
 # from . mastro_massing import read_mesh_attributes_uses
-from .Utils.read_use_attribute import read_use_attribute
+from .Utils.ss_read_use_attribute import read_use_attribute
 from .Utils.read_wall_attribute import read_wall_attribute
 from .Utils.read_street_attribute import read_mesh_attributes_streets
 
 # from .Nodes.GNodes.mastro_GN_separate_by_wall_type import mastro_GN_separate_by_wall_type
 
-from .Utils.read_storey_attribute import read_storey_attribute
+from .Utils.read_write_bmesh_storey_attribute import read_storey_attribute
 
 import random
 # import decimal
@@ -465,50 +465,50 @@ import random
 #     bl_order = 0
     
 #     def draw_header(self, context):
-#         self.layout.prop(context.window_manager, "toggle_show_overlays", text="")
+#         self.layout.prop(context.window_manager, "mastro_toggle_show_overlays", text="")
         
 #     def draw(self, context):
 #         layout = self.layout
 #         layout.use_property_split = True
 #         layout.use_property_decorate = False  # No animation.
         
-#         layout.active = context.window_manager.toggle_show_overlays
+#         layout.active = context.window_manager.mastro_toggle_show_overlays
         
 #         # flow = layout.grid_flow(row_major=True, columns=0, even_columns=True, even_rows=False, align=True)
 
 #         # col = flow.column()
 #         # col = flow.column(heading="Mass", align = True)
 #         col = layout.column(heading="Edit Mode Overlays", align=True)
-#         col.prop(context.window_manager, 'toggle_show_data_edit_mode', icon_only=False)
+#         col.prop(context.window_manager, 'mastro_toggle_show_data_edit_mode', icon_only=False)
 #         col.separator()
 #         col = layout.column(heading="Block & Mass", align=True)
-#         col.prop(context.window_manager, 'toggle_storey_number', icon_only=False)
+#         col.prop(context.window_manager, 'mastro_toggle_storey_number', icon_only=False)
 #         col.separator()
-#         col.prop(context.window_manager, 'toggle_typology_name', icon_only=False)
-#         col.prop(context.window_manager, 'toggle_block_typology_color', icon_only=False)
+#         col.prop(context.window_manager, 'mastro_toggle_typology_name', icon_only=False)
+#         col.prop(context.window_manager, 'mastro_toggle_block_typology_color', icon_only=False)
 #         col.separator()
-#         col.prop(context.window_manager, 'toggle_block_normal', icon_only=False)
+#         col.prop(context.window_manager, 'mastro_toggle_block_normal', icon_only=False)
 #         col.separator()
-#         col.prop(context.window_manager, 'toggle_building_name', icon_only=False)
-#         col.prop(context.window_manager, 'toggle_block_name', icon_only=False)
+#         col.prop(context.window_manager, 'mastro_toggle_building_name', icon_only=False)
+#         col.prop(context.window_manager, 'mastro_toggle_block_name', icon_only=False)
         
 #         # col = layout.column(heading="Block", align=True)
         
         
-#         # col.prop(context.window_manager, 'toggle_storey_number', icon_only=False)
-#         # col.prop(context.window_manager, 'toggle_typology_name', icon_only=False)
-#         # col.prop(context.window_manager, 'toggle_building_name', icon_only=False)
-#         # col.prop(context.window_manager, 'toggle_block_name', icon_only=False)
+#         # col.prop(context.window_manager, 'mastro_toggle_storey_number', icon_only=False)
+#         # col.prop(context.window_manager, 'mastro_toggle_typology_name', icon_only=False)
+#         # col.prop(context.window_manager, 'mastro_toggle_building_name', icon_only=False)
+#         # col.prop(context.window_manager, 'mastro_toggle_block_name', icon_only=False)
         
 #         # col.separator()
 #         col = layout.column(heading="Wall", align = True)
-#         col.prop(context.window_manager, 'toggle_wall_type', icon_only=False)
-#         col.prop(context.window_manager, 'toggle_wall_normal', icon_only=False)
+#         col.prop(context.window_manager, 'mastro_toggle_wall_type', icon_only=False)
+#         col.prop(context.window_manager, 'mastro_toggle_wall_normal', icon_only=False)
 #         # col.separator()
 #         col = layout.column(heading="Floor", align = True)
-#         col.prop(context.window_manager, 'toggle_floor_name', icon_only=False)
+#         col.prop(context.window_manager, 'mastro_toggle_floor_name', icon_only=False)
 #         col = layout.column(heading="Street", align=True)
-#         col.prop(context.window_manager, 'toggle_street_color', icon_only=False)
+#         col.prop(context.window_manager, 'mastro_toggle_street_color', icon_only=False)
         
 ############################      ############################
 ############################ MASS ############################
@@ -534,7 +534,7 @@ import random
 #         # split = layout.split(factor=.9)
 #         row = layout.row()
 #         row.label(text="Mass")
-#         # row.prop(context.window_manager, "toggle_auto_update_mass_data", text="", icon="FILE_REFRESH")
+#         # row.prop(context.window_manager, "mastro_toggle_auto_update_mass_data", text="", icon="FILE_REFRESH")
         
         
 #     def draw(self, context):
@@ -736,7 +736,7 @@ import random
 #         row = layout.row()
         
 #         #row.label(text="Building")
-#         # row.prop(context.window_manager, 'toggle_building_name', toggle=True, icon="HIDE_OFF", icon_only=True)
+#         # row.prop(context.window_manager, 'mastro_toggle_building_name', toggle=True, icon="HIDE_OFF", icon_only=True)
         
 #         # is_sortable = len(scene.mastro_building_name_list) > 1
 #         rows = 3
@@ -1041,13 +1041,13 @@ import random
 #             sub.enabled = True
 #         layout.prop(context.scene.mastro_use_name_list[index],"void", text="Void")
 #         # sub = layout.row()
-#         # sub.active = not(context.window_manager.toggle_auto_update_mass_data)
+#         # sub.active = not(context.window_manager.mastro_toggle_auto_update_mass_data)
 #         # sub.prop(context.scene.mastro_use_name_list[index],"void", text="Update")
 #         # sub.operator("object.update_mastro_mesh_attributes").attributeToUpdate="all"
 #         row = layout.row(align=True)
         
 #         row.operator("object.update_mastro_mesh_attributes").attributeToUpdate="all"
-#         row.prop(context.window_manager, "toggle_auto_update_mass_data", text="", icon="FILE_REFRESH")
+#         row.prop(context.window_manager, "mastro_toggle_auto_update_mass_data", text="", icon="FILE_REFRESH")
         
             
             
@@ -1397,25 +1397,25 @@ import random
 # # to update all the existing MaStro meshes with the updated data
 # # this is for useList
 # def update_all_mastro_meshes_useList(self, context):
-#     if context.window_manager.toggle_auto_update_mass_data:
+#     if context.window_manager.mastro_toggle_auto_update_mass_data:
 #         updates = "all"
 #         bpy.ops.object.update_mastro_mesh_attributes(attributeToUpdate=updates)
 
 # # this is for the floor to floor height
 # def update_all_mastro_meshes_floorToFloor(self, context):
-#     if context.window_manager.toggle_auto_update_mass_data:
+#     if context.window_manager.mastro_toggle_auto_update_mass_data:
 #         updates = "floorToFloor"
 #         bpy.ops.object.update_mastro_mesh_attributes(attributeToUpdate=updates)
     
 # # this is for the number of storeys
 # def update_all_mastro_meshes_numberOfStoreys(self, context):
-#     if context.window_manager.toggle_auto_update_mass_data:
+#     if context.window_manager.mastro_toggle_auto_update_mass_data:
 #         updates = "numberOfStoreys"
 #         bpy.ops.object.update_mastro_mesh_attributes(attributeToUpdate=updates)
     
 # # this is for the void
 # def update_all_mastro_meshes_void(self, context):
-#     if context.window_manager.toggle_auto_update_mass_data:
+#     if context.window_manager.mastro_toggle_auto_update_mass_data:
 #         updates = "void"
 #         bpy.ops.object.update_mastro_mesh_attributes(attributeToUpdate=updates)
         
@@ -1979,7 +1979,7 @@ import random
 
 #         return{'FINISHED'}
             
-# class floor_name_list(PropertyGroup):
+# class mastro_floor_name_list(PropertyGroup):
 #     id: IntProperty(
 #            name="Id",
 #            description="Floor name id",
@@ -2253,7 +2253,7 @@ import random
 ##############################              #############################
 ############################## other stuff  #############################
 ##############################              #############################
-# class name_with_id(PropertyGroup):
+# class mastro_CL_name_with_id(PropertyGroup):
 #     id: IntProperty(
 #         name="Id",
 #         description="Name id",

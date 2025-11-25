@@ -88,13 +88,14 @@ class VIEW3D_PT_Mastro_Mass(Panel):
                     if context.scene.mastro_use_name_list[int(useID)].liquid == True:
                         tmp_enabled = True
                         break
-                row.prop(context.scene, "attribute_mass_storeys", text="N° of storeys") 
+                row.prop(context.scene, "mastro_attribute_mass_storeys", text="N° of storeys") 
                 row.enabled = tmp_enabled
                 # -----------------------
                 row = layout.row(align=True)
-                row.prop(context.scene, "mastro_typology_names", icon="ASSET_MANAGER", icon_only=True, text="Typology")
-                if len(scene.mastro_typology_name_list) >0:
-                    row.label(text=scene.mastro_typology_name_current[0].name)
+                # row.prop(context.scene, "mastro_typology_names", icon="ASSET_MANAGER", icon_only=True, text="Typology")
+                row.prop(context.scene, "mastro_typology_names", text="Typology")
+                # if len(scene.mastro_typology_name_list) >0:
+                #     row.label(text=scene.mastro_typology_name_current[0].name)
                 # -----------------------
                 rows = 3
                 row = layout.row()
@@ -107,5 +108,8 @@ class VIEW3D_PT_Mastro_Mass(Panel):
                                   rows = rows)
                 # -----------------------
                 row = layout.row(align=True)
-                row.prop(context.scene, "attribute_mass_extend_uses", text="Top Floors") 
+                row.prop(context.scene, "mastro_attribute_mass_extend_uses", text="Top Floors") 
+                
+                
+                
                 

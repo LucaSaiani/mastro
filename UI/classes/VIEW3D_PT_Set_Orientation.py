@@ -12,7 +12,7 @@ class VIEW3D_PT_set_orientation(Panel):
         
         obj = context.object
         
-        # constaint_xy_settings = context.scene.constraint_xy_setting
+        # constaint_xy_settings = context.scene.mastro_constraint_xy_setting
         # if obj is None or obj.type != 'MESH':
         #     self.report({'ERROR'}, "Select a mesh object")
         #     return {'CANCELLED'}

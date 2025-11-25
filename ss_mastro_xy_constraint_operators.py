@@ -104,7 +104,7 @@ class TRANSFORM_OT_translate_xy_constraint(bpy.types.Operator):
 
     def execute(self, context):
         # Run normal translate if auto-constraints are off
-        constaint_xy_settings = context.scene.constraint_xy_setting
+        constaint_xy_settings = context.scene.mastro_constraint_xy_setting
         if  not constaint_xy_settings.constraint_xy_on or context.mode not in context_modes:
             bpy.ops.transform.translate('INVOKE_DEFAULT')
             return {'FINISHED'}
@@ -139,7 +139,7 @@ class TRANSFORM_OT_rotate_xy_constraint(bpy.types.Operator):
     def execute(self, context):
         # Run normal rotate if auto_constraints are off
         # axis = get_view_axis(context)
-        constaint_xy_settings = context.scene.constraint_xy_setting
+        constaint_xy_settings = context.scene.mastro_constraint_xy_setting
         if  not constaint_xy_settings.constraint_xy_on or context.mode not in context_modes:
             bpy.ops.transform.rotate('INVOKE_DEFAULT')
             return {'FINISHED'}

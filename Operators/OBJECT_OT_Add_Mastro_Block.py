@@ -70,7 +70,7 @@ class OBJECT_OT_Add_Mastro_Block(Operator, AddObjectHelper):
         object_utils.object_data_add(context, mesh, operator=self)
         
         obj = bpy.context.active_object
-        obj.select_set(True)
+        
         
         add_block_attributes(obj)
             
@@ -95,4 +95,6 @@ class OBJECT_OT_Add_Mastro_Block(Operator, AddObjectHelper):
         group = bpy.data.node_groups["MaStro Mass"]
         obj.modifiers[geoName].node_group = group
         context.view_layer.objects.active = obj
+        
+        obj.select_set(True)
         return {'FINISHED'}

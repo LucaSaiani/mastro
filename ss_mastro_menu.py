@@ -323,7 +323,7 @@ from pathlib import Path
 # ]
 
 # # Defines class for custom properties
-# class mastroAddonProperties(bpy.types.PropertyGroup):
+# class mastro_addon_properties(bpy.types.PropertyGroup):
 #     # mastro_option_attribute: bpy.props.IntProperty(
 #     #     name="MaStro Option Attribute",
 #     #     default=1,
@@ -911,7 +911,7 @@ from pathlib import Path
 #         # if the typology has more storeys than the selected mass
 #         # some extra storeys are added
 #         if storeyCheck < 1: 
-#             bpy.context.scene.attribute_mass_storeys = fixedStoreys + len(liquidPosition)
+#             bpy.context.scene.mastro_attribute_mass_storeys = fixedStoreys + len(liquidPosition)
 #         storeyLeft = numberOfStoreys - fixedStoreys
         
 #         # the 1 at the start of the number is removed
@@ -1079,7 +1079,7 @@ from pathlib import Path
 #         # if the typology has more storeys than the selected mass
 #         # some extra storeys are added
 #         if storeyCheck < 1: 
-#             bpy.context.scene.attribute_mass_storeys = fixedStoreys + len(liquidPosition)
+#             bpy.context.scene.mastro_attribute_mass_storeys = fixedStoreys + len(liquidPosition)
 #         storeyLeft = numberOfStoreys - fixedStoreys
         
 #         # the 1 at the start of the number is removed
@@ -1421,7 +1421,7 @@ from pathlib import Path
         
 #         obj = context.object
         
-#         # constaint_xy_settings = context.scene.constraint_xy_setting
+#         # constaint_xy_settings = context.scene.mastro_constraint_xy_setting
 #         # if obj is None or obj.type != 'MESH':
 #         #     self.report({'ERROR'}, "Select a mesh object")
 #         #     return {'CANCELLED'}
@@ -1459,7 +1459,7 @@ from pathlib import Path
 #     layout = self.layout
 #     layout.operator("transform.set_orientation_from_selection", text="Set Orientation from Edge")
         
-# class ConstraintXYSettings(bpy.types.PropertyGroup):
+# class mastro_constraint_XY_settings(bpy.types.PropertyGroup):
 #     """Property Group for all xy constraint scene properties"""
 #     constraint_xy_on: bpy.props.BoolProperty(
 #         name = 'XY constraints',
@@ -1477,7 +1477,7 @@ from pathlib import Path
 #     """Draws the xy constraint toggle"""
 #     if context.mode not in contexts:
 #         return
-#     constaint_xy_settings = context.scene.constraint_xy_setting
+#     constaint_xy_settings = context.scene.mastro_constraint_xy_setting
 #     layout = self.layout
 #     row = layout.row(align=True)
 #     icon_value = icons.icon_id('xy_on') if constaint_xy_settings.constraint_xy_on else icons.icon_id('xy_off')

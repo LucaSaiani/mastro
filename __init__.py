@@ -73,7 +73,7 @@ from .Icons import register as register_icons, unregister as unregister_icons
 from .Utils import modules
 from .Utils.init_lists import init_lists
 from .Utils.init_nodes import init_nodes
-from .Handlers.utils.updates import known_scenes as knownScenes
+from .Handlers.utils.check_new_scenes import known_scenes as knownScenes
 from .Keymaps.keymap import register as register_keymaps, unregister as unregister_keymaps
 from .Nodes.ui import register as register_gn_ui, unregister as unregister_gn_ui
   
@@ -111,7 +111,7 @@ classes = (
     # mastro_project_data.VIEW3D_PT_MaStro_architecture_data,
     # mastro_project_data.VIEW3D_PT_MaStro_architecture_wall_data,
     # mastro_project_data.VIEW3D_PT_MaStro_architecture_floor_data,
-    # mastro_project_data.name_with_id,
+    # mastro_project_data.mastro_CL_name_with_id,
     # mastro_project_data.OBJECT_UL_Block,
     # mastro_project_data.block_name_list,
     # mastro_project_data.BLOCK_LIST_OT_NewItem,
@@ -143,7 +143,7 @@ classes = (
     # mastro_project_data.WALL_LIST_OT_NewItem,
     # mastro_project_data.WALL_LIST_OT_MoveItem,
     # mastro_project_data.OBJECT_UL_Floor,
-    # mastro_project_data.floor_name_list,
+    # mastro_project_data.mastro_floor_name_list,
     # mastro_project_data.FLOOR_LIST_OT_NewItem,
     # mastro_project_data.FLOOR_LIST_OT_MoveItem,
     
@@ -161,8 +161,8 @@ classes = (
     # mastro_menu.MaStro_Operator_transform_orientation,
     # # mastro_menu.VIEW3D_MT_orientations_pie,
     # # mastro_menu.MaStro_Menu,
-    # mastro_menu.mastroAddonProperties,
-    # mastro_menu.ConstraintXYSettings,
+    # mastro_menu.mastro_addon_properties,
+    # mastro_menu.mastro_constraint_XY_settings,
 
     mastro_schedule.MaStroTree,
     mastro_schedule.MaStro_string_item,
@@ -232,7 +232,7 @@ classes = (
     # mastro_massing.OBJECT_OT_Set_Face_Attribute_Uses,
     # mastro_massing.OBJECT_OT_Set_Edge_Attribute_Uses,
     # mastro_massing.OBJECT_OT_Set_Edge_Attribute_Depth,
-    # mastro_massing.obj_typology_uses_name_list,
+    # mastro_massing.mastro_obj_typology_uses_name_list,
     # mastro_massing.VIEW3D_PT_Mastro_Mass,
     # mastro_massing.VIEW3D_PT_Mastro_Block,
     # mastro_massing.OBJECT_OT_Set_Block_Edge_Attribute_Normal,
@@ -304,8 +304,8 @@ def onFileLoaded(scene):
     init_nodes()
     # bpy.context.scene.updating_mesh_attributes_is_active = False
     # bpy.context.scene.show_selection_overlay_is_active = False
-    bpy.context.scene.previous_selection_object_name = ""
-    bpy.context.scene.previous_selection_face_id = -1
+    bpy.context.scene.mastro_previous_selection_object_name = ""
+    bpy.context.scene.mastro_previous_selection_face_id = -1
     
     
     knownScenes.clear()
@@ -318,8 +318,8 @@ def onFileDefault(scene):
     init_lists()
     init_nodes()
     # bpy.context.scene.show_selection_overlay_is_active = False
-    bpy.context.scene.previous_selection_object_name = ""
-    bpy.context.scene.previous_selection_face_id = -1
+    bpy.context.scene.mastro_previous_selection_object_name = ""
+    bpy.context.scene.mastro_previous_selection_face_id = -1
     
     
     knownScenes.clear()

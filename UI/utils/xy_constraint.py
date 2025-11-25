@@ -8,7 +8,7 @@ def xy_constraint_button(self, context):
     """Draws the xy constraint toggle"""
     if context.mode not in contexts:
         return
-    constaint_xy_settings = context.scene.constraint_xy_setting
+    constaint_xy_settings = context.scene.mastro_constraint_xy_setting
     layout = self.layout
     row = layout.row(align=True)
     icon_value = icons.icon_id('xy_on') if constaint_xy_settings.constraint_xy_on else icons.icon_id('xy_off')
