@@ -96,11 +96,11 @@ from bpy.types import Operator, Panel
         
 # # function to read the streets parameters:
 # # if the function is run by the user when in edit mode the streetId is read from 
-# # context.scene.attribute_street_id, else the street id is updated from the
+# # context.scene.mastro_attribute_street_id, else the street id is updated from the
 # # street panel and the streetId used is the one stored in the edge
 # def read_mesh_attributes_streets(context, mesh, edgeIndex, streetSet=None):
 #     if streetSet == None:
-#         street_id = context.scene.attribute_street_id
+#         street_id = context.scene.mastro_attribute_street_id
 #     else:
 #       street_id = streetSet
 #     projectStreets = context.scene.mastro_street_name_list
@@ -118,7 +118,7 @@ from bpy.types import Operator, Panel
 #     name = scene.mastro_street_names
 #     for n in scene.mastro_street_name_list:
 #         if n.name == name:
-#             scene.attribute_street_id = n.id
+#             scene.mastro_attribute_street_id = n.id
 #             bpy.ops.object.set_attribute_street_id()
 #             scene.mastro_street_name_current[0].id = n.id
 #             scene.mastro_street_name_current[0].name = n.name

@@ -9,6 +9,11 @@ class OBJECT_OT_Set_Wall_Id(Operator):
     
     def execute(self, context):
         selected_objects = context.selected_objects
+        # if the active object is not selected, it is added to the list of the selected objects
+        if len(selected_objects) == 0:
+            active_object = context.view_layer.objects.active
+            if active_object and not active_object.select_get(): 
+                selected_objects.append(active_object)
         
         for obj in selected_objects:
             if (obj.type == "MESH" and 
@@ -19,8 +24,8 @@ class OBJECT_OT_Set_Wall_Id(Operator):
                 mesh = obj.data
 
                 mesh.attributes["mastro_wall_id"]
-                attribute_wall_id = context.scene.attribute_wall_id
-                thickness = context.scene.mastro_wall_name_list[attribute_wall_id].wallThickness
+                mastro_attribute_wall_id = context.scene.mastro_attribute_wall_id
+                thickness = context.scene.mastro_wall_name_list[mastro_attribute_wall_id].wallThickness
 
                 mode = obj.mode
                 bpy.ops.object.mode_set(mode='OBJECT')
@@ -32,7 +37,7 @@ class OBJECT_OT_Set_Wall_Id(Operator):
                     index = edge.index
                     for ind, mesh_attribute in enumerate(mesh_attributes_id):
                         if mesh_attribute[0] == index:
-                            mesh_attribute[1].value = attribute_wall_id
+                            mesh_attribute[1].value = mastro_attribute_wall_id
                             mesh_attributes_thickness[ind][1].value = thickness
                 bpy.ops.object.mode_set(mode=mode)
                     

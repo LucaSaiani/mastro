@@ -42,14 +42,14 @@ class VIEW3D_PT_Mastro_Architecture(Panel):
                     # thickness = round(scene.mastro_wall_name_list[wallId].wallThickness,3)
                     thickness = "%.3f" % scene.mastro_wall_name_list[wallId].wallThickness
                     # layout.label(text = str(thickness))
-                    # scene.attribute_wall_thickness = thickness
-                    # layout.prop(context.scene, 'attribute_wall_thickness', text="Thickness")
-                    # layout.prop(context.scene, 'attribute_wall_offset', text="Offset")
+                    # scene.mastro_attribute_wall_thickness = thickness
+                    # layout.prop(context.scene, 'mastro_attribute_wall_thickness', text="Thickness")
+                    # layout.prop(context.scene, 'mastro_attribute_wall_offset', text="Offset")
                 else:
                     row.label(text = "")
                 
                 row = layout.row(align=True)
-                row.prop(context.scene, 'attribute_wall_normal', text="Flip Normal")
+                row.prop(context.scene, 'mastro_attribute_wall_normal', text="Flip Normal")
                 
                 ################ FLOOR ######################
                 row = layout.row()

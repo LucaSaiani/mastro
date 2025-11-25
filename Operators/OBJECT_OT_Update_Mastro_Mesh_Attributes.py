@@ -1,9 +1,9 @@
 import bpy 
 from bpy.types import Operator
 
-from ..Utils.read_use_attribute import read_use_attribute
+from ..Utils.ss_read_use_attribute import read_use_attribute
 from ..Utils.read_wall_attribute import read_wall_attribute
-from ..Utils.read_storey_attribute import read_storey_attribute
+from ..Utils.read_write_bmesh_storey_attribute import read_storey_attribute
 
 # Operator to update the attributes of all the MaStro meshes in the scene        
 class OBJECT_OT_Update_Mastro_Mesh_Attributes(Operator):
@@ -15,6 +15,7 @@ class OBJECT_OT_Update_Mastro_Mesh_Attributes(Operator):
     attributeToUpdate: bpy.props.StringProperty(name="Attribute to update")
     
     def execute(self, context):
+        
         objs = bpy.data.objects
         # get the current active object
         activeObj = bpy.context.active_object
@@ -22,7 +23,10 @@ class OBJECT_OT_Update_Mastro_Mesh_Attributes(Operator):
             activeObjMode = activeObj.mode
             
         for obj in objs:
-            if obj is not None and obj.type == 'MESH' and "MaStro object" in obj.data and "MaStro mass" in obj.data:
+            if (obj is not None and 
+                obj.type == 'MESH' and 
+                "MaStro object" in obj.data and 
+                "MaStro mass" in obj.data):
                 # it is necessary to set the object to visibile in order to make it active
                 if obj.visible_get():
                     alreadyVisible = True

@@ -69,8 +69,7 @@ class OBJECT_OT_Add_Mastro_Street(Operator, AddObjectHelper):
         object_utils.object_data_add(context, mesh, operator=self)
         
         obj = bpy.context.active_object
-        obj.select_set(True)
-        
+
         add_street_attributes(obj)
             
         add_nodes()
@@ -85,5 +84,7 @@ class OBJECT_OT_Add_Mastro_Street(Operator, AddObjectHelper):
         group = bpy.data.node_groups["MaStro Street"]
         obj.modifiers[geoName].node_group = group
         context.view_layer.objects.active = obj
+        
+        obj.select_set(True)
         return {'FINISHED'}
     

@@ -60,14 +60,14 @@ from bpy.types import Operator, Panel
 #                     # thickness = round(scene.mastro_wall_name_list[wallId].wallThickness,3)
 #                     thickness = "%.3f" % scene.mastro_wall_name_list[wallId].wallThickness
 #                     # layout.label(text = str(thickness))
-#                     # scene.attribute_wall_thickness = thickness
-#                     # layout.prop(context.scene, 'attribute_wall_thickness', text="Thickness")
-#                     # layout.prop(context.scene, 'attribute_wall_offset', text="Offset")
+#                     # scene.mastro_attribute_wall_thickness = thickness
+#                     # layout.prop(context.scene, 'mastro_attribute_wall_thickness', text="Thickness")
+#                     # layout.prop(context.scene, 'mastro_attribute_wall_offset', text="Offset")
 #                 else:
 #                     row.label(text = "")
                 
 #                 row = layout.row(align=True)
-#                 row.prop(context.scene, 'attribute_wall_normal', text="Flip Normal")
+#                 row.prop(context.scene, 'mastro_attribute_wall_normal', text="Flip Normal")
                 
 #                 ################ FLOOR ######################
 #                 row = layout.row()
@@ -98,12 +98,12 @@ from bpy.types import Operator, Panel
 #         obj = context.active_object
 #         mesh = obj.data
 
-#         # attribute_wall_id = context.scene.attribute_wall_id
+#         # mastro_attribute_wall_id = context.scene.mastro_attribute_wall_id
         
 #         try:
 #             mesh.attributes["mastro_wall_id"]
-#             attribute_wall_id = context.scene.attribute_wall_id
-#             thickness = context.scene.mastro_wall_name_list[attribute_wall_id].wallThickness
+#             mastro_attribute_wall_id = context.scene.mastro_attribute_wall_id
+#             thickness = context.scene.mastro_wall_name_list[mastro_attribute_wall_id].wallThickness
 
 #             mode = obj.mode
 #             bpy.ops.object.mode_set(mode='OBJECT')
@@ -115,7 +115,7 @@ from bpy.types import Operator, Panel
 #                 index = edge.index
 #                 for ind, mesh_attribute in enumerate(mesh_attributes_id):
 #                     if mesh_attribute[0] == index:
-#                         mesh_attribute[1].value = attribute_wall_id
+#                         mesh_attribute[1].value = mastro_attribute_wall_id
 #                         mesh_attributes_thickness[ind][1].value = thickness
 #             bpy.ops.object.mode_set(mode=mode)
                     
@@ -136,14 +136,14 @@ from bpy.types import Operator, Panel
 #         mode = obj.mode
 #         bpy.ops.object.mode_set(mode='OBJECT')
 #         selected_edges = [e for e in context.active_object.data.edges if e.select]
-#         normal = bpy.context.scene.attribute_wall_normal
+#         normal = bpy.context.scene.mastro_attribute_wall_normal
 #         for edge in selected_edges:
 #             edgeIndex = edge.index
 #             mesh.attributes["mastro_inverted_normal"].data[edgeIndex].value = normal
 #         bpy.ops.object.mode_set(mode=mode)
 #         return {'FINISHED'}
 
-        # attribute_wall_normal = context.scene.attribute_wall_normal
+        # mastro_attribute_wall_normal = context.scene.mastro_attribute_wall_normal
         
         # try:
             # mesh.attributes["mastro_wall_id"]
@@ -157,8 +157,8 @@ from bpy.types import Operator, Panel
             #     index = edge.index
             #     for mesh_attribute in mesh_attributes_normals:
             #         if mesh_attribute[0] == index:
-            #             # mesh_attribute[1].value = attribute_wall_normal*1 # convert boolean to 0 or 1
-            #             if attribute_wall_normal:
+            #             # mesh_attribute[1].value = mastro_attribute_wall_normal*1 # convert boolean to 0 or 1
+            #             if mastro_attribute_wall_normal:
             #                 mesh_attribute[1].value = -1
             #             else:
             #                 mesh_attribute[1].value = 1
@@ -178,11 +178,11 @@ from bpy.types import Operator, Panel
     
 # # function to read the wall parameters:
 # # if the function is run by the user when in edit mode the wallId is read from 
-# # context.scene.attribute_wall_id, else the wall id is updated from the
+# # context.scene.mastro_attribute_wall_id, else the wall id is updated from the
 # # wall panel and the wallId used is the one stored in the edge
 # def read_mesh_attributes_walls(context, mesh, edgeIndex, wallSet=None):
 #     if wallSet == None:
-#         wall_id = context.scene.attribute_wall_id
+#         wall_id = context.scene.mastro_attribute_wall_id
 #     else:
 #       wall_id = wallSet
 #     projectWalls = context.scene.mastro_wall_name_list
@@ -201,7 +201,7 @@ from bpy.types import Operator, Panel
 #     scene.mastro_wall_name_current[0].name = " " + name
 #     for n in scene.mastro_wall_name_list:
 #         if n.name == name:
-#             scene.attribute_wall_id = n.id
+#             scene.mastro_attribute_wall_id = n.id
 #             scene.mastro_wall_name_current[0].id = n.id
 #             break 
         
@@ -219,11 +219,11 @@ from bpy.types import Operator, Panel
 #         obj = context.active_object
 #         mesh = obj.data
 
-#         attribute_floor_id = context.scene.attribute_floor_id
+#         mastro_attribute_floor_id = context.scene.mastro_attribute_floor_id
         
 #         try:
 #             mesh.attributes["mastro_floor_id"]
-#             attribute_floor_id = context.scene.attribute_floor_id
+#             mastro_attribute_floor_id = context.scene.mastro_attribute_floor_id
 
 #             mode = obj.mode
 #             bpy.ops.object.mode_set(mode='OBJECT')
@@ -234,7 +234,7 @@ from bpy.types import Operator, Panel
 #                 index = face.index
 #                 for mesh_attribute in mesh_attributes_id:
 #                     if mesh_attribute[0] == index:
-#                         mesh_attribute[1].value = attribute_floor_id
+#                         mesh_attribute[1].value = mastro_attribute_floor_id
                 
 #             bpy.ops.object.mode_set(mode=mode)
                     
@@ -253,6 +253,6 @@ from bpy.types import Operator, Panel
 #     scene.mastro_floor_name_current[0].name = " " + name
 #     for n in scene.mastro_floor_name_list:
 #         if n.name == name:
-#             scene.attribute_floor_id = n.id
+#             scene.mastro_attribute_floor_id = n.id
 #             scene.mastro_floor_name_current[0].id = n.id
 #             break 

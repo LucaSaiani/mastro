@@ -9,7 +9,7 @@ from .PROPERTIES_OT_Delete_Item import PROPERTIES_OT_Typology_Uses_List_Delete_I
 from .PROPERTIES_OT_Duplicate_Item import PROPERTIES_OT_Typology_List_Duplicate_Item
 from .PROPERTIES_OT_Update_List import PROPERTIES_OT_Update_Use_List
 from .VIEW3D_UL_Typology_Uses import VIEW3D_UL_Typology_Uses
-from ..properties.class_properties import obj_typology_uses_name_list
+from ..properties.property_classes import mastro_CL_obj_typology_uses_name_list
 from .PREFERENCES_Mastro_Preferences import PREFERENCES_Mastro_Preferences
 from .PROPERTIES_PT_Mastro_Project_Data import PROPERTIES_PT_Mastro_Project_Data
 from .PROPERTIES_PT_Mastro_Overlays import PROPERTIES_PT_Mastro_Overlay
@@ -42,7 +42,7 @@ classes = (
     PROPERTIES_OT_Typology_List_Duplicate_Item,
     PROPERTIES_OT_Update_Use_List,
     VIEW3D_UL_Typology_Uses,
-    obj_typology_uses_name_list,
+    mastro_CL_obj_typology_uses_name_list,
     PREFERENCES_Mastro_Preferences,
     PROPERTIES_PT_Mastro_Project_Data,
     PROPERTIES_PT_Mastro_Overlay,

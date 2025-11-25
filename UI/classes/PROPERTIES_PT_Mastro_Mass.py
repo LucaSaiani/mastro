@@ -21,7 +21,7 @@ class PROPERTIES_PT_Mastro_Mass(Panel):
         # split = layout.split(factor=.9)
         row = layout.row()
         row.label(text="Mass")
-        # row.prop(context.window_manager, "toggle_auto_update_mass_data", text="", icon="FILE_REFRESH")
+        # row.prop(context.window_manager, "mastro_toggle_auto_update_mass_data", text="", icon="FILE_REFRESH")
         
         
     def draw(self, context):

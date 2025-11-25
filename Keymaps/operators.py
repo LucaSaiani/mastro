@@ -16,7 +16,7 @@ class TRANSFORM_OT_translate_xy_constraint(Operator):
         return context.area.type == 'VIEW_3D' and context.region.type == 'WINDOW'
 
     def execute(self, context):
-        constaint_xy_settings = context.scene.constraint_xy_setting
+        constaint_xy_settings = context.scene.mastro_constraint_xy_setting
         if  not constaint_xy_settings.constraint_xy_on or context.mode not in context_modes:
             bpy.ops.transform.translate('INVOKE_DEFAULT')
             return {'FINISHED'}
@@ -40,7 +40,7 @@ class TRANSFORM_OT_rotate_xy_constraint(Operator):
         return context.area.type == 'VIEW_3D' and context.region.type == 'WINDOW'
 
     def execute(self, context):
-        constaint_xy_settings = context.scene.constraint_xy_setting
+        constaint_xy_settings = context.scene.mastro_constraint_xy_setting
         if  not constaint_xy_settings.constraint_xy_on or context.mode not in context_modes:
             bpy.ops.transform.rotate('INVOKE_DEFAULT')
             return {'FINISHED'}

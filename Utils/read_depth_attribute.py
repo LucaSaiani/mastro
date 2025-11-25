@@ -6,11 +6,11 @@ def read_depth_attribute(context, depthSet = None):
     # projectUses = context.scene.mastro_use_name_list
 
     # if the function is run once the user updates the depth of the building,
-    # the value is read from context.scene.attribute_block_depth.
+    # the value is read from context.scene.mastro_attribute_block_depth.
     # Else the function is run because the user is updating the depth and
     # in this case the value used is the one stored in each edge of the mesh
     if depthSet == None:
-        blockDepth = context.scene.attribute_block_depth
+        blockDepth = context.scene.mastro_attribute_block_depth
         if blockDepth == 0:
             blockDepth = 18
     else:

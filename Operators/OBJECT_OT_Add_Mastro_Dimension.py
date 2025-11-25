@@ -40,8 +40,7 @@ class OBJECT_OT_Add_Mastro_Dimension(Operator, AddObjectHelper):
         object_utils.object_data_add(context, mesh, operator=self)
         
         obj = bpy.context.active_object
-        obj.select_set(True)
-            
+        
         add_nodes()
 
         # add mastro dimension geo node to the created object
@@ -50,4 +49,6 @@ class OBJECT_OT_Add_Mastro_Dimension(Operator, AddObjectHelper):
         group = bpy.data.node_groups["MaStro Dimension"]
         obj.modifiers[geoName].node_group = group
         context.view_layer.objects.active = obj
+        
+        obj.select_set(True)
         return {'FINISHED'}

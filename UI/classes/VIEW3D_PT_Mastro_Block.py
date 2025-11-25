@@ -68,9 +68,9 @@ class VIEW3D_PT_Mastro_Block(Panel):
          
                 ################ TYPOLOGY ######################
                 row = layout_1.row(align=True)
-                row.prop(context.scene, "attribute_mass_storeys", text="N° of storeys") 
+                row.prop(context.scene, "mastro_attribute_mass_storeys", text="N° of storeys") 
                 row = layout_1.row(align=True)
-                row.prop(context.scene, "attribute_block_depth", text="Depth") 
+                row.prop(context.scene, "mastro_attribute_block_depth", text="Depth") 
                 # disable the number of storeys if there are no liquids
                 # current_typology = scene.mastro_typology_name_current[0]
                 
@@ -91,9 +91,10 @@ class VIEW3D_PT_Mastro_Block(Panel):
                 row.enabled = tmp_enabled
                 
                 row = layout_1.row(align=True)
-                row.prop(context.scene, "mastro_typology_names", icon="ASSET_MANAGER", icon_only=True, text="Typology")
-                if len(scene.mastro_typology_name_list) >0:
-                    row.label(text=scene.mastro_typology_name_current[0].name)
+                # row.prop(context.scene, "mastro_typology_names", icon="ASSET_MANAGER", icon_only=True, text="Typology")
+                row.prop(context.scene, "mastro_typology_names", text="Typology")
+                # if len(scene.mastro_typology_name_list) >0:
+                #     row.label(text=scene.mastro_typology_name_current[0].name)
                 rows = 3
                 row = layout_1.row()
                 row.template_list("VIEW3D_UL_Typology_Uses", 
@@ -105,7 +106,7 @@ class VIEW3D_PT_Mastro_Block(Panel):
                                   rows = rows)
                 
                 row = layout_1.row(align=True)
-                row.prop(context.scene, "attribute_wall_normal", text="Flip Normal") 
+                row.prop(context.scene, "mastro_attribute_wall_normal", text="Flip Normal") 
                 
                 row = layout_0.row(align=True)
-                row.prop(context.scene, "attribute_block_side_angle", text="Side rotation") 
+                row.prop(context.scene, "mastro_attribute_block_side_angle", text="Side rotation") 

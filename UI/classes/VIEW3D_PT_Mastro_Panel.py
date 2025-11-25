@@ -7,6 +7,7 @@ class VIEW3D_PT_Mastro_Panel(Panel):
     bl_category = "MaStro"
     bl_label = "MaStro"
     
+    
     @classmethod
     def poll(cls, context):
         return  (context.object is None or

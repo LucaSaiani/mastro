@@ -1,8 +1,8 @@
-import bpy 
+import bpy
 from bpy.types import UIList
 
-"""UI List object used in the view 3D mass panel to show
-the assigned uses of the selected face"""
+"""UI List object used in the view 3D mass and block panel to show
+the assigned uses of the selected faces or edges"""
 class VIEW3D_UL_Typology_Uses(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data,
                   active_propname, index):

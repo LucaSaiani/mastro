@@ -1,11 +1,11 @@
 # function to update the uses and their relative heights accordingly to the assigned typologySet:
 # if the function is run by the user when in edit mode the typologyId is read from 
-# context.scene.attribute_mass_typology_id, else the typology is updated from the
+# context.scene.mastro_attribute_mass_typology_id, else the typology is updated from the
 # typology panel and the typologyId used is the one stored in the face
 # def read_mesh_attributes_uses(context, mesh, faceIndex, typologySet=None):
 def read_use_attribute(context, typologySet=None):
     if typologySet == None:
-        typology_id = context.scene.attribute_mass_typology_id
+        typology_id = context.scene.mastro_attribute_mass_typology_id
     else:
       typology_id = typologySet
     projectUses = context.scene.mastro_use_name_list

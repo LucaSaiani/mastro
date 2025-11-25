@@ -418,7 +418,7 @@ def draw_main_show_attributes_2D(context):
             if "MaStro block" in obj.data:
                 idUse = bmEdge[bMesh_typology]
                 storey = bmEdge[bMesh_storey]
-                if bpy.context.window_manager.toggle_typology_name:   
+                if bpy.context.window_manager.mastro_toggle_typology_name:   
                     for n in scene.mastro_typology_name_list:
                         if n.id == idUse:
                             if n.name != "":
@@ -429,14 +429,14 @@ def draw_main_show_attributes_2D(context):
                                 text_edge.append(text_typology)
                                 text_edge.append(cr)           
                                 break
-                if bpy.context.window_manager.toggle_storey_number:  
+                if bpy.context.window_manager.mastro_toggle_storey_number:  
                     text_storey = (("N° of storeys: " + str(storey)), 0)
                     if blf.dimensions(font_id, text_storey[0])[0] > line_width:
                                 line_width = blf.dimensions(font_id, text_storey[0])[0]
                     vert_offset += half_line_height
                     text_edge.append(text_storey)
                     text_edge.append(cr)  
-                if bpy.context.window_manager.toggle_block_normal: 
+                if bpy.context.window_manager.mastro_toggle_block_normal: 
                     if normal == True:   
                         symbol = "⥌"
                         text_normal = (symbol, 0)
@@ -455,7 +455,7 @@ def draw_main_show_attributes_2D(context):
             #             text_edge.append(cr)
             #             break
             if "MaStro mass" in obj.data:
-                if bpy.context.window_manager.toggle_wall_normal:
+                if bpy.context.window_manager.mastro_toggle_wall_normal:
                     if normal == True:   
                         symbol = "⥌"
                         text_normal = (symbol, 0)
@@ -504,7 +504,7 @@ def draw_main_show_attributes_2D(context):
                 text_floor = ""
                 
                 # blockId
-                if bpy.context.window_manager.toggle_block_name:   
+                if bpy.context.window_manager.mastro_toggle_block_name:   
                     blockId = obj.mastro_props['mastro_block_attribute']
                     for n in scene.mastro_block_name_list:
                         if n.id == blockId:
@@ -517,7 +517,7 @@ def draw_main_show_attributes_2D(context):
                             break
                     
                 # buildingId
-                if bpy.context.window_manager.toggle_building_name:   
+                if bpy.context.window_manager.mastro_toggle_building_name:   
                     buildingId = obj.mastro_props['mastro_building_attribute']
                     for n in scene.mastro_building_name_list:
                         if n.id == buildingId:
@@ -530,7 +530,7 @@ def draw_main_show_attributes_2D(context):
                                 text_face.append(cr)
                             break
                     
-                # if bpy.context.window_manager.toggle_block_name:   
+                # if bpy.context.window_manager.mastro_toggle_block_name:   
                 #     for n in bpy.context.scene.mastro_block_name_list:
                 #         if n.id == idBlock:
                 #             text_block = (("Block: " + n.name), 0)
@@ -539,7 +539,7 @@ def draw_main_show_attributes_2D(context):
                 #             text.append(text_block)
                 #             text.append(cr)
                 #             break
-                # if bpy.context.window_manager.toggle_building_name:   
+                # if bpy.context.window_manager.mastro_toggle_building_name:   
                 #     for n in bpy.context.scene.mastro_building_name_list:
                 #         if n.id == idBuilding:
                 #             text_building = (("Building: " + n.name), 0)
@@ -549,7 +549,7 @@ def draw_main_show_attributes_2D(context):
                 #             text.append(text_building)
                 #             text.append(cr)
                 #             break
-                if bpy.context.window_manager.toggle_typology_name:   
+                if bpy.context.window_manager.mastro_toggle_typology_name:   
                     for n in scene.mastro_typology_name_list:
                         if n.id == idUse:
                             if n.name != "":
@@ -560,7 +560,7 @@ def draw_main_show_attributes_2D(context):
                                 text_face.append(text_typology)
                                 text_face.append(cr)           
                                 break
-                if bpy.context.window_manager.toggle_floor_name:   
+                if bpy.context.window_manager.mastro_toggle_floor_name:   
                     for n in scene.mastro_floor_name_list:
                         if n.id == idFloor:
                             text_floor = (("Floor: " + n.name), 0)
@@ -570,7 +570,7 @@ def draw_main_show_attributes_2D(context):
                             text_face.append(text_floor)
                             text_face.append(cr)           
                             break
-                if bpy.context.window_manager.toggle_storey_number:  
+                if bpy.context.window_manager.mastro_toggle_storey_number:  
                     text_storey = (("N° of storeys: " + str(storey)), 0)
                     if blf.dimensions(font_id, text_storey[0])[0] > line_width:
                                 line_width = blf.dimensions(font_id, text_storey[0])[0]
@@ -598,14 +598,14 @@ def draw_main_show_attributes_3D(context):
     obj = bpy.context.active_object
     if hasattr(obj, "data") and "MaStro object" in obj.data:
         mesh = obj.data
-        if mesh.is_editmode == True and bpy.context.window_manager.toggle_show_data_edit_mode:
+        if mesh.is_editmode == True and bpy.context.window_manager.mastro_toggle_show_data_edit_mode:
             draw_selection_overlay(obj)
         elif mesh.is_editmode == False:
-            if "MaStro street" in obj.data and bpy.context.window_manager.toggle_street_color:
+            if "MaStro street" in obj.data and bpy.context.window_manager.mastro_toggle_street_color:
                 show_street_overlay(obj)
-            if "MaStro mass" in obj.data and bpy.context.window_manager.toggle_wall_type:
+            if "MaStro mass" in obj.data and bpy.context.window_manager.mastro_toggle_wall_type:
                 show_wall_overlay(obj)
-            if "MaStro block" in obj.data and bpy.context.window_manager.toggle_block_typology_color:
+            if "MaStro block" in obj.data and bpy.context.window_manager.mastro_toggle_block_typology_color:
                 show_block_overlay(obj)
     
 def draw_callback_px_show_attributes_2D(self, context):
