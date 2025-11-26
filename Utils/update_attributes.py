@@ -85,8 +85,8 @@ def update_attributes_floor(self, context):
 def update_attributes_mastro_block_side_angle(self, context):
     bpy.ops.object.set_edge_attribute_angle() 
     
-def update_attributes_mastro_block_depth(self, context):
-    bpy.ops.object.set_edge_attribute_depth()
+# def update_attributes_mastro_block_depth(self, context):
+#     bpy.ops.object.set_edge_attribute_depth()
         
    
 # ------------------------------

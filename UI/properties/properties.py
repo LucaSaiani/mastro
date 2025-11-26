@@ -123,7 +123,9 @@ scene_props = [
         default=18,
         precision=3,
         subtype="DISTANCE",
-        update=update_attributes_mastro_block_depth
+        # update=update_attributes_mastro_block_depth
+        set = set_attribute_mastro_block_depth,
+        get = lambda self: get_attribute_mastro_mesh(self, "mastro_block_depth")
     )),
     
     # ------------------------------
