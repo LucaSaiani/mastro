@@ -4,6 +4,8 @@ import bmesh
 from ..Utils.read_write_bmesh_use_attribute import write_bmesh_use_attribute
 from ..Utils.read_write_bmesh_storey_attribute import write_bmesh_storey_attribute
 
+# Function to update the attributes that
+# masses and blocks have in common
 def update_bmesh_attributes(self, attribute_to_update):
     objects = bpy.data.objects
     for obj in objects:
