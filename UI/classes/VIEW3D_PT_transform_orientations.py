@@ -2,7 +2,7 @@ import bpy
 from bpy.types import Panel
 
 # Replace the existing Transform Orientations panel in the UI, adding "orientation from edge"
-class VIEW3D_PT_set_orientation(Panel):
+class VIEW3D_PT_transform_orientations(Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'HEADER'
     bl_label = "Transform Orientations"
