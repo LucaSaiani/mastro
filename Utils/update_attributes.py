@@ -2,6 +2,8 @@ import bpy
 import bmesh
 
 from ..Utils.init_lists import init_lists
+from ..Utils.update_bmesh_attributes import update_bmesh_attributes
+
 # from .write_storey_attribute import read_storey_attribute, write_bmesh_storey_attribute 
 
 # ------------------------------
@@ -181,25 +183,27 @@ def update_mastro_filter_by_building(self, context):
 # ------------------------------
 # Classes - Typology
 # ------------------------------  
+# def update_all_mastro_meshes(context, attributes_to_update):
+#     if context.window_manager.mastro_toggle_auto_update_mass_data:
+#         print("bau")
+#         update_bmesh_attributes(attributes_to_update)
+
 # this is for the floor to floor height
 def update_all_mastro_meshes_floorToFloor(self, context):
     if context.window_manager.mastro_toggle_auto_update_mass_data:
-        updates = "floorToFloor"
-        bpy.ops.object.update_mastro_mesh_attributes(attributeToUpdate=updates)
+        update_bmesh_attributes(context, "floor_to_floor")
         
         
 # this is for the number of storeys
 def update_all_mastro_meshes_numberOfStoreys(self, context):
     if context.window_manager.mastro_toggle_auto_update_mass_data:
-        updates = "numberOfStoreys"
-        bpy.ops.object.update_mastro_mesh_attributes(attributeToUpdate=updates)
-        
-        
-# this is for the void
-def update_all_mastro_meshes_void(self, context):
+        update_bmesh_attributes(context, "number_of_storeys")
+
+    
+# this is for the useList
+def update_all_mastro_meshes_useList(self, context):
     if context.window_manager.mastro_toggle_auto_update_mass_data:
-        updates = "void"
-        bpy.ops.object.update_mastro_mesh_attributes(attributeToUpdate=updates)
+        update_bmesh_attributes(context, "all")
         
         
 # update the node "filter by typology" if a new typology is added or
@@ -210,13 +214,7 @@ def update_mastro_filter_by_typology(self, context):
     return None
 
 
-# When typology or use is edited/changed in the UI, it is necessary
-# to update all the existing MaStro meshes with the updated data
-# this is for useList
-def update_all_mastro_meshes_useList(self, context):
-    if context.window_manager.mastro_toggle_auto_update_mass_data:
-        updates = "all"
-        bpy.ops.object.update_mastro_mesh_attributes(attributeToUpdate=updates)
+
         
         
 # when a use related to the current typology is updated in the UIList,
@@ -248,17 +246,6 @@ def update_mastro_filter_by_wall_type(self, context):
     bpy.ops.node.mastro_gn_separate_by(filter_name="wall type")
     # bpy.ops.node.mastro_shader_filter_by(filter_name="wall type")
     return None
-
-# this is for the wall thickness
-def update_all_mastro_wall_thickness(self, context):
-    updates = "wall_thickness"
-    bpy.ops.object.update_mastro_mesh_attributes(attributeToUpdate=updates)
-    
-# this is for the wall offset
-def update_all_mastro_wall_offset(self, context):
-    updates = "wall_offset"
-    bpy.ops.object.update_mastro_mesh_attributes(attributeToUpdate=updates)
-    
     
 # ------------------------------
 # Classes - Street
@@ -272,11 +259,11 @@ def update_mastro_filter_by_street_type(self, context):
 
 def update_all_mastro_street_width(self, context):
     updates = "width"
-    bpy.ops.object.update_all_mastro_street_attributes(attributeToUpdate=updates)
+    bpy.ops.object.update_all_mastro_street_attributes(attribute_to_update=updates)
     
 def update_all_mastro_street_radius(self, context):
     updates = "radius"
-    bpy.ops.object.update_all_mastro_street_attributes(attributeToUpdate=updates)
+    bpy.ops.object.update_all_mastro_street_attributes(attribute_to_update=updates)
   
 
 

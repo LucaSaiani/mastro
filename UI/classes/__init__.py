@@ -9,7 +9,7 @@ from .PROPERTIES_OT_Delete_Item import PROPERTIES_OT_Typology_Uses_List_Delete_I
 from .PROPERTIES_OT_Duplicate_Item import PROPERTIES_OT_Typology_List_Duplicate_Item
 from .PROPERTIES_OT_Update_List import PROPERTIES_OT_Update_Use_List
 from .VIEW3D_UL_Typology_Uses import VIEW3D_UL_Typology_Uses
-from ..properties.property_classes import mastro_CL_obj_typology_uses_name_list
+# from ..properties.property_classes import mastro_CL_obj_typology_uses_name_list
 from .PREFERENCES_Mastro_Preferences import PREFERENCES_Mastro_Preferences
 from .PROPERTIES_PT_Mastro_Project_Data import PROPERTIES_PT_Mastro_Project_Data
 from .PROPERTIES_PT_Mastro_Overlays import PROPERTIES_PT_Mastro_Overlay
@@ -27,7 +27,7 @@ from .VIEW3D_PT_Mastro_Block import VIEW3D_PT_Mastro_Block
 from .VIEW3D_PT_Mastro_Extras import VIEW3D_PT_Mastro_Extras
 from .VIEW3D_PT_Mastro_Mass import VIEW3D_PT_Mastro_Mass
 from .VIEW3D_PT_Mastro_Street import VIEW3D_PT_Mastro_Street
-from .VIEW3D_PT_Set_Orientation import VIEW3D_PT_set_orientation
+from .VIEW3D_PT_transform_orientations import VIEW3D_PT_transform_orientations
 
 
 classes = (
@@ -42,7 +42,7 @@ classes = (
     PROPERTIES_OT_Typology_List_Duplicate_Item,
     PROPERTIES_OT_Update_Use_List,
     VIEW3D_UL_Typology_Uses,
-    mastro_CL_obj_typology_uses_name_list,
+    # mastro_CL_obj_typology_uses_name_list,
     PREFERENCES_Mastro_Preferences,
     PROPERTIES_PT_Mastro_Project_Data,
     PROPERTIES_PT_Mastro_Overlay,
@@ -60,17 +60,17 @@ classes = (
     VIEW3D_PT_Mastro_Extras,
     VIEW3D_PT_Mastro_Mass,
     VIEW3D_PT_Mastro_Street,
-    VIEW3D_PT_set_orientation,
+    VIEW3D_PT_transform_orientations,
     )
 
 MASTRO_LISTS = [
-    # name,               icon,             color_attr,           filter_name
-    ("block",    "MOD_BOOLEAN",     None,                  "block"),
-    ("building", "HOME",            None,                  "building"),
-    ("typology", "ASSET_MANAGER",   "typologyEdgeColor",   "typology"),
-    ("wall",     "NODE_TEXTURE",    "wallEdgeColor",       "wall type"),
-    ("floor",    "VIEW_PERSPECTIVE", None,                 None),
-    ("street",   "NODE_TEXTURE",    "streetEdgeColor",     "street type"),
+    # name,       icon,             color_attr,           filter_name       extra_action
+    ("block",    "MOD_BOOLEAN",     None,                  "block",         None),
+    ("building", "HOME",            None,                  "building",      None),
+    ("typology", "ASSET_MANAGER",   "typologyEdgeColor",   "typology",      "add use"),
+    ("wall",     "NODE_TEXTURE",    "wallEdgeColor",       "wall type",     None),
+    ("floor",    "VIEW_PERSPECTIVE", None,                 None,            None),
+    ("street",   "NODE_TEXTURE",    "streetEdgeColor",     "street type",   None),
 ]
 
 # ============================================================
@@ -81,7 +81,7 @@ _dynamic_classes = []
 def dynamic_list_classes():
     dynamicClasses = []
     """Dynamically create and register UIList, NewItem, MoveItem for each type."""
-    for name, icon, color_attr, filter_name in MASTRO_LISTS:
+    for name, icon, color_attr, filter_name, extra_action in MASTRO_LISTS:
         list_name = f"mastro_{name}_name_list"
         index_name = f"mastro_{name}_name_list_index"
 
@@ -108,6 +108,7 @@ def dynamic_list_classes():
                 "list_name": list_name,
                 "color_attr": color_attr,
                 "filter_name": filter_name,
+                "extra_action": extra_action,
             }
         )
         dynamicClasses.append(op_new)
