@@ -99,70 +99,7 @@ classes = (
     mastro_geometryNodes.NODE_OT_sticky_note,
     mastro_geometryNodes.StickyNoteProperties,
         
-    # mastro_project_data.filter_by_OT,
-    # mastro_project_data.update_Shader_Filter_OT,
-    # mastro_project_data.VIEW3D_PT_MaStro_project_data,
-    # mastro_project_data.VIEW3D_PT_MaStro_show_data,
-    # mastro_project_data.VIEW3D_PT_MaStro_mass_data,
-    # mastro_project_data.VIEW3D_PT_MaStro_mass_block_data,
-    # mastro_project_data.VIEW3D_PT_MaStro_mass_building_data,
-    # mastro_project_data.VIEW3D_PT_MaStro_mass_typology_data,
-    # mastro_project_data.VIEW3D_PT_MaStro_street_data,
-    # mastro_project_data.VIEW3D_PT_MaStro_architecture_data,
-    # mastro_project_data.VIEW3D_PT_MaStro_architecture_wall_data,
-    # mastro_project_data.VIEW3D_PT_MaStro_architecture_floor_data,
-    # mastro_project_data.mastro_CL_name_with_id,
-    # mastro_project_data.OBJECT_UL_Block,
-    # mastro_project_data.block_name_list,
-    # mastro_project_data.BLOCK_LIST_OT_NewItem,
-    # mastro_project_data.BLOCK_LIST_OT_MoveItem,
-    # mastro_project_data.OBJECT_UL_Building,
-    # mastro_project_data.building_name_list,
-    # mastro_project_data.BUILDING_LIST_OT_NewItem,
-    # mastro_project_data.BUILDING_LIST_OT_MoveItem,
-    # mastro_project_data.use_name_list,
-    # mastro_project_data.USE_LIST_OT_NewItem,
-    # mastro_project_data.OBJECT_UL_Typology,
-    # mastro_project_data.typology_name_list,
-    # mastro_project_data.TYPOLOGY_LIST_OT_NewItem,
-    # mastro_project_data.TYPOLOGY_LIST_OT_MoveItem,
-    # mastro_project_data.OBJECT_UL_Typology_Uses,
-    # mastro_project_data.typology_uses_name_list,
-    # mastro_project_data.TYPOLOGY_USES_LIST_OT_NewItem,
-    # mastro_project_data.TYPOLOGY_LIST_OT_DuplicateItem,
-    # mastro_project_data.TYPOLOGY_USES_LIST_OT_DeleteItem,
-    # mastro_project_data.TYPOLOGY_USES_LIST_OT_MoveItem,
-    # mastro_project_data.OBJECT_OT_update_all_MaStro_meshes_attributes,
-    # mastro_project_data.OBJECT_OT_update_all_MaStro_street_attributes,
-    # mastro_project_data.OBJECT_UL_Street,
-    # mastro_project_data.street_name_list,
-    # mastro_project_data.STREET_LIST_OT_NewItem,
-    # mastro_project_data.STREET_LIST_OT_MoveItem,
-    # mastro_project_data.OBJECT_UL_Wall,
-    # mastro_project_data.wall_name_list,
-    # mastro_project_data.WALL_LIST_OT_NewItem,
-    # mastro_project_data.WALL_LIST_OT_MoveItem,
-    # mastro_project_data.OBJECT_UL_Floor,
-    # mastro_project_data.mastro_floor_name_list,
-    # mastro_project_data.FLOOR_LIST_OT_NewItem,
-    # mastro_project_data.FLOOR_LIST_OT_MoveItem,
     
-    # mastro_menu.VIEW3D_MT_mastro_add,
-    # mastro_menu.VIEW3D_PT_transform_orientations,
-    # # mastro_menu.VIEW3D_PT_Mastro_Panel,
-    # mastro_menu.MaStro_MenuOperator_add_MaStro_mass,
-    # mastro_menu.OBJECT_OT_Add_Mastro_Block,
-    # mastro_menu.OBJECT_OT_Add_Mastro_Street,
-    # mastro_menu.MaStro_MenuOperator_add_MaStro_dimension,
-    # mastro_menu.MaStro_MenuOperator_convert_to_MaStro_mass,
-    # mastro_menu.MaStro_MenuOperator_convert_to_MaStro_street,
-    # # mastro_menu.MaStro_MenuOperator_PrintData,
-    # # mastro_menu.MaStro_MenuOperator_ExportCSV,
-    # mastro_menu.MaStro_Operator_transform_orientation,
-    # # mastro_menu.VIEW3D_MT_orientations_pie,
-    # # mastro_menu.MaStro_Menu,
-    # mastro_menu.mastro_addon_properties,
-    # mastro_menu.mastro_constraint_XY_settings,
 
     mastro_schedule.MaStroTree,
     mastro_schedule.MaStro_string_item,
@@ -222,79 +159,10 @@ classes = (
     mastro_schedule.NODE_EDITOR_Mastro_Draw_Schedule,
     
     
-    # mastro_vertex.OBJECT_OT_SetVertexAttribute,
-    # mastro_vertex.VIEW3D_PT_MaStro_vertex,
     
-    # mastro_massing.OBJECT_OT_SetTypologyId,
-    # mastro_massing.OBJECT_UL_OBJ_Typology_Uses,
-    # mastro_massing.OBJECT_OT_Set_Face_Attribute_Storeys,
-    # mastro_massing.OBJECT_OT_Set_Edge_Attribute_Storeys,
-    # mastro_massing.OBJECT_OT_Set_Face_Attribute_Uses,
-    # mastro_massing.OBJECT_OT_Set_Edge_Attribute_Uses,
-    # mastro_massing.OBJECT_OT_Set_Edge_Attribute_Depth,
-    # mastro_massing.mastro_obj_typology_uses_name_list,
-    # mastro_massing.VIEW3D_PT_Mastro_Mass,
-    # mastro_massing.VIEW3D_PT_Mastro_Block,
-    # mastro_massing.OBJECT_OT_Set_Block_Edge_Attribute_Normal,
-    # mastro_massing.OBJECT_OT_Set_Block_Edge_Angle,
-    
-    # mastro_modal_operator.VIEW_3D_OT_show_mastro_overlay,
-    # mastro_modal_operator.VIEW_3D_OT_show_mastro_attributes,
-    # mastro_modal_operator.VIEW_3D_OT_update_mesh_attributes,
-    # mastro_modal_operator.VIEW_3D_OT_update_all_meshes_attributes,
-    # mastro_modal_operator.EventReporter,
-
-    # mastro_street.VIEW3D_PT_MaStro_Street,
-    # mastro_street.OBJECT_OT_SetStreetId,
-    
-    # mastro_wall.OBJECT_OT_SetWallId,
-    # mastro_wall.OBJECT_OT_SetWallNormal,
-    # mastro_wall.OBJECT_OT_SetFloorId,
-    # mastro_wall.VIEW3D_PT_MaStro_Wall,
-    
-    # mastro_xy_constraint_operators.TRANSFORM_OT_translate_xy_constraint,
-    # mastro_xy_constraint_operators.TRANSFORM_OT_rotate_xy_constraint
 )
 
-# MaStroGroupInputNode = mastro_schedule.MaStroGroupInputNode
-# MaStroViewerNode = mastro_schedule.MaStroViewerNode
-# CustomNodeText = mastro_schedule.CustomNodeText
-
-# MaStroNodeInteger = mastro_schedule.MaStroIntegerNode
-# MaStroNodeFloat = mastro_schedule.MaStroFloatNode
-# MaStroNodeCaptureAttribute = mastro_schedule.MaStroCaptureAttributeNode
-# MaStroNodeMath = mastro_schedule.MaStro_MathNode
-# CustomNodeJoin = mastro_schedule.CustomNodeJoin
-
-
-# MASTRO_NODE_CAPTURE_ATTRIBUTE_HANDLE = 0
-# MASTRO_NODE_INTEGER_HANDLE = 1
-# MASTRO_NODE_FLOAT_HANDLE = 2
-
-# def get_prefs():
-#     return bpy.context.preferences.addons[__package__].preferences
-    
-
-# def initNodes():
-#     # from .Nodes.GNodes.test_filter_by import mastro_GN_separate_by_wall_type
-#     nt = bpy.data.node_groups.new("MasterUpdateTMP", "GeometryNodeTree")
-#     separateByWallTypeNode = nt.nodes.new("separateByWallType")
-#     # testNode.updates(bpy.context.scene)
-#     mastro_GN_separate_by_wall_type.update_all(bpy.context.scene)
-#     bpy.data.node_groups.remove(nt) 
-    
-#     # bpy.ops.node.separate_geometry_by_factor()
-#     bpy.ops.node.mastro_gn_filter_by(filter_name="use")
-#     bpy.ops.node.mastro_gn_filter_by(filter_name="typology")
-#     bpy.ops.node.mastro_gn_filter_by(filter_name="wall type")
-#     bpy.ops.node.mastro_gn_filter_by(filter_name="street type")
-#     bpy.ops.node.mastro_gn_filter_by(filter_name="block side")
-    
-#     bpy.ops.node.mastro_shader_filter_by(filter_name="block")
-#     bpy.ops.node.mastro_shader_filter_by(filter_name="building")
-#     bpy.ops.node.mastro_shader_filter_by(filter_name="use")
-#     bpy.ops.node.mastro_shader_filter_by(filter_name="typology")
-
+#
 
 
 
@@ -343,12 +211,10 @@ def get_addon_classes(revert=False):
         return reversed(classes)
 
     return classes
+
     
 def register():
     ############################################################
-    
-    
-    
     ### register icons ###
     register_icons()
         
@@ -398,6 +264,7 @@ def register():
     
     # Add toggle to both tool header
     # bpy.types.VIEW3D_HT_tool_header.append(mastro_menu.constraint_xy_button)
+    # Aggiungi la funzione al pannello nativo
     
     
 
@@ -414,25 +281,7 @@ def register():
     
     
     
-    # # handle the keymap
-    # wm = bpy.context.window_manager
-    # # Note that in background mode (no GUI available), keyconfigs are not available either,
-    # # so we have to check this to avoid nasty errors in background case.
-    # kc = wm.keyconfigs.addon
-    # if kc:
-    #     km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
-    #     kmi = km.keymap_items.new(mastro_xy_constraint_operators.TRANSFORM_OT_translate_xy_constraint.bl_idname, 'G', 'PRESS', ctrl=False, shift=False)
-    #     addon_keymaps.append((km, kmi))
-        
-    #     kmi = km.keymap_items.new(mastro_xy_constraint_operators.TRANSFORM_OT_rotate_xy_constraint.bl_idname, 'R', 'PRESS', ctrl=False, shift=False)
-    #     addon_keymaps.append((km, kmi))
-        
-    #     km = wm.keyconfigs.addon.keymaps.new(name='Mesh', space_type='EMPTY')
-    #     kmi = km.keymap_items.new(mastro_xy_constraint_operators.TRANSFORM_OT_translate_xy_constraint.bl_idname, 'G', 'PRESS', ctrl=False, shift=False)
-    #     addon_keymaps.append((km, kmi))
-        
-    #     kmi = km.keymap_items.new(mastro_xy_constraint_operators.TRANSFORM_OT_rotate_xy_constraint.bl_idname, 'R', 'PRESS', ctrl=False, shift=False)
-    #     addon_keymaps.append((km, kmi))
+    
     
 
 def unregister():
@@ -447,11 +296,7 @@ def unregister():
     nodeitems_utils.unregister_node_categories('MASTRO_NODES')
 
      
-    # bpy.types.VIEW3D_HT_tool_header.remove(mastro_menu.constraint_xy_button)
     
-    # # unload UI for custom nodes
-    # from .Nodes.ui import unload_ui
-    # unload_ui()
     
   
 

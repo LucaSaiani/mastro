@@ -146,8 +146,7 @@ class mastro_CL_use_name_list(PropertyGroup):
     void: BoolProperty(
             name = "Void",
             description = "It indicates whether the use is considered to be a void volume in the mass, or not",
-            default = False,
-            update=update_all_mastro_meshes_void)
+            default = False)
     
 class mastro_CL_typology_name_list(PropertyGroup):
     id: IntProperty(
@@ -205,25 +204,25 @@ class mastro_CL_wall_name_list(PropertyGroup):
            default="Wall type...",
            update=update_mastro_filter_by_wall_type)
   
-    wallThickness: FloatProperty(
-        name="Wall thickness",
-        description="The thickness of the wall",
-        min=0,
-        #max=99,
-        precision=3,
-        default = 0.300,
-        update=update_all_mastro_wall_thickness
-        )
+    # wallThickness: FloatProperty(
+    #     name="Wall thickness",
+    #     description="The thickness of the wall",
+    #     min=0,
+    #     #max=99,
+    #     precision=3,
+    #     default = 0.300,
+    #     update=update_all_mastro_wall_thickness
+    #     )
     
-    wallOffset: FloatProperty(
-        name="Wall offset",
-        description="The offset of the wall from its center line",
-        min=0,
-        #max=99,
-        precision=3,
-        default = 0,
-        update=update_all_mastro_wall_offset
-        )
+    # wallOffset: FloatProperty(
+    #     name="Wall offset",
+    #     description="The offset of the wall from its center line",
+    #     min=0,
+    #     #max=99,
+    #     precision=3,
+    #     default = 0,
+    #     update=update_all_mastro_wall_offset
+    #     )
     
     normal: IntProperty(
            name="Wall Normal",

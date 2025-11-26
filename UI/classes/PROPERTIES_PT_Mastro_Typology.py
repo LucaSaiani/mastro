@@ -76,13 +76,13 @@ class PROPERTIES_PT_Mastro_Typology(Panel):
             sub.enabled = False
         else:
             sub.enabled = True
-        layout.prop(context.scene.mastro_use_name_list[index],"void", text="Void")
+        # layout.prop(context.scene.mastro_use_name_list[index],"void", text="Void")
         # sub = layout.row()
         # sub.active = not(context.window_manager.mastro_toggle_auto_update_mass_data)
         # sub.prop(context.scene.mastro_use_name_list[index],"void", text="Update")
-        # sub.operator("object.update_mastro_mesh_attributes").attributeToUpdate="all"
+        # sub.operator("object.update_mastro_mesh_attributes").attribute_to_update="all"
         row = layout.row(align=True)
         
-        row.operator("object.update_mastro_mesh_attributes").attributeToUpdate="all"
+        row.operator("object.update_mastro_mesh_attributes")
         row.prop(context.window_manager, "mastro_toggle_auto_update_mass_data", text="", icon="FILE_REFRESH")
  

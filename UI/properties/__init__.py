@@ -9,7 +9,8 @@ from .property_classes import (mastro_CL_addon_properties,
                                mastro_CL_use_name_list,
                                mastro_CL_typology_name_list,
                                mastro_CL_building_name_list,
-                               mastro_CL_block_name_list
+                               mastro_CL_block_name_list,
+                               mastro_CL_obj_typology_uses_name_list
 )
 
 classes = (
@@ -23,5 +24,6 @@ classes = (
     mastro_CL_use_name_list,
     mastro_CL_typology_name_list,
     mastro_CL_building_name_list,
-    mastro_CL_block_name_list
+    mastro_CL_block_name_list,
+    mastro_CL_obj_typology_uses_name_list
     )

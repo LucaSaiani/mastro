@@ -42,9 +42,7 @@ def write_bmesh_use_attribute(bm, selection, value, mode):
     numberOfStoreys = selection[bMesh_storeys]
     write_bmesh_storey_attribute(bm, selection, numberOfStoreys, mode)
     
-def read_bmesh_use_attribute(value):
-    typology_id = value
-    
+def read_bmesh_use_attribute(typology_id):
     projectUses = bpy.context.scene.mastro_use_name_list
     # since it is possible to sort typologies in the ui, it can be that the index of the element
     # in the list doesn't correspond to typology_id. Therefore it is necessary to find elements
@@ -77,7 +75,9 @@ def read_bmesh_use_attribute(value):
         ###setting the values for each use
         for use in projectUses:
             if use.id == int(el):
-                void += str(int(use.void))
+                
+                # void += str(int(use.void))
+                
                 #### floor to floor height for each use, stored in A, B, C, ...
                 #### due to the fact that arrays can't be used
                 #### and array like (3.555, 12.664, 0.123)

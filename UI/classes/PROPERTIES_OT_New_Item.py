@@ -12,6 +12,7 @@ class PROPERTIES_OT_New_Item(Operator):
     list_name: str
     filter_name: str = None
     color_attr: str = None
+    extra_action: str = None
 
     def execute(self, context):
         scene = context.scene
@@ -24,6 +25,12 @@ class PROPERTIES_OT_New_Item(Operator):
         # Assign progressive ID
         ids = [el.id for el in collection if hasattr(el, 'id')]
         collection[last].id = max(ids) + 1 if ids else 1
+        
+        if self.extra_action == "add use":
+            # add a use to the newly created typology
+            current_typology_id = context.scene.mastro_typology_name_list[last].id
+            bpy.context.scene.mastro_typology_name_list[current_typology_id].useList = "0"
+            
 
         # Optional random color attribute
         if self.color_attr and hasattr(collection[last], self.color_attr):

@@ -8,7 +8,7 @@ class OBJECT_OT_update_all_MaStro_street_attributes(Operator):
     bl_label = "Update"
     bl_options = {'REGISTER', 'UNDO'}
     
-    attributeToUpdate: bpy.props.StringProperty(name="Attribute to update")
+    attribute_to_update: bpy.props.StringProperty(name="Attribute to update")
     
     def execute(self, context):
         objs = bpy.data.objects
@@ -53,9 +53,9 @@ class OBJECT_OT_update_all_MaStro_street_attributes(Operator):
                         edgeIndex = edge.index
                         street_id = mesh.attributes["mastro_street_id"].data[edgeIndex].value
                         data = read_street_attribute(context, mesh, edgeIndex, streetSet = street_id)
-                        if [i for i in ["width"] if i in self.attributeToUpdate]:
+                        if [i for i in ["width"] if i in self.attribute_to_updatete]:
                             mesh.attributes["mastro_street_width"].data[edgeIndex].value = data["width"]/2
-                        elif [i for i in ["radius"] if i in self.attributeToUpdate]:
+                        elif [i for i in ["radius"] if i in self.attribute_to_update]:
                             mesh.attributes["mastro_street_radius"].data[edgeIndex].value = data["radius"]
                     bpy.ops.object.mode_set(mode=objMode)
                     
