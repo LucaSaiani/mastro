@@ -1,13 +1,13 @@
 
-from .mastro_GN_filter_by_OT import mastro_GN_filter_by_OT
-from .mastro_GN_separate_by_OT import mastro_GN_separate_by_OT
-from .mastro_Shader_filter_by_OT import mastro_Shader_filter_by_OT
+from .NODE_OT_GN_Filter_By import NODE_OT_mastro_filter_by
+from .NODE_OT_GN_Separate_Geometry_By import NODE_OT_mastro_separate_geometry_by
+from .NODE_OT_Shader_Filter_By import NODE_OT_mastro_shader_filter_by
 from .mastro_GN_window_info import mastro_GN_window_info
 
 classes = (
-    mastro_GN_filter_by_OT,
-    mastro_GN_separate_by_OT,
-    mastro_Shader_filter_by_OT,
+    NODE_OT_mastro_filter_by,
+    NODE_OT_mastro_separate_geometry_by,
+    NODE_OT_mastro_shader_filter_by,
     mastro_GN_window_info,
     )
 

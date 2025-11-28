@@ -11,6 +11,7 @@ class PROPERTIES_OT_New_Item(Operator):
     bl_label = "Generic operator to add a new item to a list."
     list_name: str
     filter_name: str = None
+    node_type: str = None
     color_attr: str = None
     extra_action: str = None
 
@@ -38,10 +39,11 @@ class PROPERTIES_OT_New_Item(Operator):
 
         # Optional shader filter operator
         if self.filter_name:
-            try:
+            if "gn" in self.node_type:
+                bpy.ops.node.mastro_gn_separate_geometry_by(filter_name=self.filter_name)
+                bpy.ops.node.mastro_gn_filter_by(filter_name=self.filter_name)
+            if "shader" in self.node_type:
                 bpy.ops.node.mastro_shader_filter_by(filter_name=self.filter_name)
-            except:
-                print(f"[WARN] Could not execute shader filter for {self.filter_name}")
 
         return {'FINISHED'}
     

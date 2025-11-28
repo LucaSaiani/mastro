@@ -64,13 +64,13 @@ classes = (
     )
 
 MASTRO_LISTS = [
-    # name,       icon,             color_attr,           filter_name       extra_action
-    ("block",    "MOD_BOOLEAN",     None,                  "block",         None),
-    ("building", "HOME",            None,                  "building",      None),
-    ("typology", "ASSET_MANAGER",   "typologyEdgeColor",   "typology",      "add use"),
-    ("wall",     "NODE_TEXTURE",    "wallEdgeColor",       "wall type",     None),
-    ("floor",    "VIEW_PERSPECTIVE", None,                 None,            None),
-    ("street",   "NODE_TEXTURE",    "streetEdgeColor",     "street type",   None),
+    # name,       icon,             color_attr,           filter_name       node type               extra_action
+    ("block",    "MOD_BOOLEAN",     None,                  "block",         ("shader",),            None),
+    ("building", "HOME",            None,                  "building",      ("shader",),            None),
+    ("typology", "ASSET_MANAGER",   "typologyEdgeColor",   "typology",      ("gn","shader"),        "add use"),
+    ("wall",     "NODE_TEXTURE",    "wallEdgeColor",       "wall type",     ("gn","shader"),        None),
+    ("floor",    "VIEW_PERSPECTIVE", None,                 None,            None,                   None),
+    ("street",   "NODE_TEXTURE",    "streetEdgeColor",     "street type",   ("gn", "shader"),       None),
 ]
 
 # ============================================================
@@ -81,7 +81,7 @@ _dynamic_classes = []
 def dynamic_list_classes():
     dynamicClasses = []
     """Dynamically create and register UIList, NewItem, MoveItem for each type."""
-    for name, icon, color_attr, filter_name, extra_action in MASTRO_LISTS:
+    for name, icon, color_attr, filter_name, node_type, extra_action in MASTRO_LISTS:
         list_name = f"mastro_{name}_name_list"
         index_name = f"mastro_{name}_name_list_index"
 
@@ -108,6 +108,7 @@ def dynamic_list_classes():
                 "list_name": list_name,
                 "color_attr": color_attr,
                 "filter_name": filter_name,
+                "node_type": node_type,
                 "extra_action": extra_action,
             }
         )
@@ -123,6 +124,8 @@ def dynamic_list_classes():
                 "bl_label": f"Move {name} in list",
                 "list_name": list_name,
                 "index_name": index_name,
+                "filter_name": filter_name,
+                "node_type": node_type
             }
         )
         dynamicClasses.append(op_move)
