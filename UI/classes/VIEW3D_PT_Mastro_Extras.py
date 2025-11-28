@@ -35,7 +35,7 @@ class VIEW3D_PT_Mastro_Extras(Panel):
                     row.enabled = True
                 else:
                     row.enabled = False
-                row.prop(context.scene, "mastro_attribute_extra_vertex", text="Vertex") 
+                row.prop(context.scene, "mastro_attribute_custom_vertex", text="Vertex") 
                 
                 ################ Edge ######################
                 row = layout.row()
@@ -45,7 +45,7 @@ class VIEW3D_PT_Mastro_Extras(Panel):
                     row.enabled = True
                 else:
                     row.enabled = False
-                row.prop(context.scene, "mastro_attribute_extra_edge", text="Edge") 
+                row.prop(context.scene, "mastro_attribute_custom_edge", text="Edge") 
                 
                 ################ Face ######################
                 row = layout.row()
@@ -55,4 +55,4 @@ class VIEW3D_PT_Mastro_Extras(Panel):
                     row.enabled = True
                 else:
                     row.enabled = False
-                row.prop(context.scene, "mastro_attribute_extra_face", text="Face") 
+                row.prop(context.scene, "mastro_attribute_custom_face", text="Face") 

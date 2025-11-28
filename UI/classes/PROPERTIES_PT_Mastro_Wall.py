@@ -29,7 +29,7 @@ class PROPERTIES_PT_Mastro_Wall(Panel):
         col.operator("mastro_wall_name_list.move_item", icon='TRIA_UP', text="").direction = 'UP'
         col.operator("mastro_wall_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
         
-        # index = context.scene.mastro_wall_name_list_index
-        # if len(context.scene.mastro_wall_name_list) > 0:
-        #     layout.prop(context.scene.mastro_wall_name_list[index], "wallThickness", text="Thickness")
-        #     layout.prop(context.scene.mastro_wall_name_list[index], "wallOffset", text="Offset")
+        index = context.scene.mastro_wall_name_list_index
+        if len(context.scene.mastro_wall_name_list) > 0:
+            layout.prop(context.scene.mastro_wall_name_list[index], "wallThickness", text="Thickness")
+            layout.prop(context.scene.mastro_wall_name_list[index], "wallOffset", text="Offset")

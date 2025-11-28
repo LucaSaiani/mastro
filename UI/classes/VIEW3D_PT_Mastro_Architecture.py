@@ -35,18 +35,19 @@ class VIEW3D_PT_Mastro_Architecture(Panel):
                     row.enabled = True
                 else:
                     row.enabled = False
-                row.prop(context.scene, "mastro_wall_names", icon="NODE_TEXTURE", icon_only=True, text="Wall Type")
-                if len(scene.mastro_wall_name_list) >0:
-                    row.label(text = scene.mastro_wall_name_current[0].name)
-                    wallId = scene.mastro_wall_name_current[0].id
-                    # thickness = round(scene.mastro_wall_name_list[wallId].wallThickness,3)
-                    thickness = "%.3f" % scene.mastro_wall_name_list[wallId].wallThickness
-                    # layout.label(text = str(thickness))
-                    # scene.mastro_attribute_wall_thickness = thickness
-                    # layout.prop(context.scene, 'mastro_attribute_wall_thickness', text="Thickness")
-                    # layout.prop(context.scene, 'mastro_attribute_wall_offset', text="Offset")
-                else:
-                    row.label(text = "")
+                # row.prop(context.scene, "mastro_wall_names", icon="NODE_TEXTURE", icon_only=True, text="Wall Type")
+                row.prop(context.scene, "mastro_wall_names", text="Wall Type")
+                # if len(scene.mastro_wall_name_list) >0:
+                #     row.label(text = scene.mastro_wall_name_current[0].name)
+                #     wallId = scene.mastro_wall_name_current[0].id
+                #     # thickness = round(scene.mastro_wall_name_list[wallId].wallThickness,3)
+                #     thickness = "%.3f" % scene.mastro_wall_name_list[wallId].wallThickness
+                #     # layout.label(text = str(thickness))
+                #     # scene.mastro_attribute_wall_thickness = thickness
+                #     # layout.prop(context.scene, 'mastro_attribute_wall_thickness', text="Thickness")
+                #     # layout.prop(context.scene, 'mastro_attribute_wall_offset', text="Offset")
+                # else:
+                #     row.label(text = "")
                 
                 row = layout.row(align=True)
                 row.prop(context.scene, 'mastro_attribute_wall_normal', text="Flip Normal")
@@ -60,8 +61,9 @@ class VIEW3D_PT_Mastro_Architecture(Panel):
                 else:
                     row.enabled = False
                 
-                row.prop(context.scene, "mastro_floor_names", icon="VIEW_PERSPECTIVE", icon_only=True, text="Floor Type")
-                if len(scene.mastro_floor_name_list) >0:
-                    row.label(text = scene.mastro_floor_name_current[0].name)
-                else:
-                    row.label(text = "")
+                row.prop(context.scene, "mastro_floor_names", text="Floor Type")
+                # row.prop(context.scene, "mastro_floor_names", icon="VIEW_PERSPECTIVE", icon_only=True, text="Floor Type")
+                # if len(scene.mastro_floor_name_list) >0:
+                #     row.label(text = scene.mastro_floor_name_current[0].name)
+                # else:
+                #     row.label(text = "")
