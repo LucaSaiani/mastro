@@ -14,16 +14,34 @@ class PROPERTIES_OT_Move_Item(Operator):
     )
     list_name: str
     index_name: str
+    filter_name: str = None
+    node_type: str = None
 
     def execute(self, context):
         scene = context.scene
         my_list = getattr(scene, self.list_name)
         index = getattr(scene, self.index_name)
-
+       
         neighbor = index + (-1 if self.direction == 'UP' else 1)
         if 0 <= neighbor < len(my_list):
             my_list.move(neighbor, index)
             setattr(scene, self.index_name, neighbor)
+            
+            if self.filter_name:
+                if "gn" in self.node_type:
+                    bpy.ops.node.mastro_gn_separate_geometry_by(filter_name=self.filter_name, 
+                                                                output_id = my_list[neighbor].id, 
+                                                                output_direction=self.direction)
+                    bpy.ops.node.mastro_gn_filter_by(filter_name=self.filter_name,
+                                                    output_id = my_list[neighbor].id, 
+                                                    output_direction=self.direction)
+            if "shader" in self.node_type:
+                bpy.ops.node.mastro_shader_filter_by(filter_name=self.filter_name,
+                                                    output_id = my_list[neighbor].id, 
+                                                    output_direction=self.direction)
+
+            
+            
         return {'FINISHED'}
 
 # Move the selected use up or down in the list

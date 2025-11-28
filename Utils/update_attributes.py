@@ -243,7 +243,7 @@ def update_mastro_filter_by_wall_type(self, context):
     # bpy.data.node_groups.remove(nt) 
     
     bpy.ops.node.mastro_gn_filter_by(filter_name="wall type")
-    bpy.ops.node.mastro_gn_separate_by(filter_name="wall type")
+    bpy.ops.node.mastro_gn_separate_geometry_by(filter_name="wall type")
     # bpy.ops.node.mastro_shader_filter_by(filter_name="wall type")
     return None
     
