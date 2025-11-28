@@ -81,8 +81,22 @@ scene_props = [
     # ------------------------------
     # Block and building IDs
     # ------------------------------
-    ("mastro_attribute_mass_block_id", IntProperty(name="Block Id", default=0)),
-    ("mastro_attribute_mass_building_id", IntProperty(name="Building Id", default=0)),
+    # ("mastro_attribute_mass_block_id", IntProperty(name="Block Id", default=0)),
+    # ("mastro_attribute_mass_building_id", IntProperty(name="Building Id", default=0)),
+    ("mastro_block_name", EnumProperty(
+        name="Block name", description="Current block name",
+        items=lambda self, context: get_names_from_list(context.scene, context, "mastro_block_name_list"),
+        # update=update_attributes_mastro_block_name_id
+        set = set_attribute_mastro_object_block,
+        get = lambda self: get_attribute_mastro_object(self, "block")
+    )),
+    ("mastro_building_name", EnumProperty(
+        name="Building name", description="Current building name",
+        items=lambda self, context: get_names_from_list(context.scene, context, "mastro_building_name_list"),
+        # update=update_attributes_mastro_building_name_id
+        set = set_attribute_mastro_object_building,
+        get = lambda self: get_attribute_mastro_object(self, "building")
+    )),
     # ------------------------------
     # Mass / Storey Properties
     # ------------------------------
@@ -94,6 +108,7 @@ scene_props = [
         set = set_attribute_mastro_mesh_storeys,
         get = lambda self: get_attribute_mastro_mesh(self, "mastro_number_of_storeys")
     )),
+    # the dropdown menu in the mass VIEW3D panel
     ("mastro_typology_names", EnumProperty(
         name="Typology List",
         items=lambda self, context: get_names_from_list(context.scene, context, "mastro_typology_name_list"),
@@ -115,7 +130,10 @@ scene_props = [
         default=0,
         precision=2,
         subtype='ANGLE',
-        update=update_attributes_mastro_block_side_angle
+        # update=update_attributes_mastro_block_side_angle
+        set = set_attribute_mastro_block_side_angle,
+        get = lambda self: get_attribute_mastro_mesh(self, "mastro_side_angle")
+        
     )),
     ("mastro_attribute_block_depth", FloatProperty(
         name="The depth of the building",
@@ -131,46 +149,62 @@ scene_props = [
     # ------------------------------
     # Wall Properties
     # ------------------------------
-    ("mastro_attribute_wall_id", IntProperty(
-        name="Wall Id", default=0, update=update_attributes_mastro_wall_id
-    )),
-    ("mastro_attribute_wall_thickness", FloatProperty(
-        name="Wall thickness", default=0.300, precision=3, subtype="DISTANCE"
-    )),
-    ("mastro_attribute_wall_offset", FloatProperty(
-        name="Wall offset", default=0, precision=3, subtype="DISTANCE"
+    # the dropdown menu in the architecture VIEW3D panel
+    ("mastro_wall_names", EnumProperty(
+        name="Wall List", description="",
+        items=lambda self, context: get_names_from_list(context.scene, context, "mastro_wall_name_list"),
+        # update=update_attributes_wall
+        set = set_attribute_mastro_wall_id,
+        get = lambda self: get_attribute_mastro_mesh(self, "mastro_wall_id")
     )),
     ("mastro_attribute_wall_normal", BoolProperty(
-        default=False, update=update_attributes_mastro_wall_normal
+        default=False, 
+        # update=update_attributes_mastro_wall_normal
+        set = set_attribute_mastro_wall_normal,
+        get = lambda self: get_attribute_mastro_mesh(self, "mastro_inverted_normal")
+        
     )),
 
     # ------------------------------
     # Floor Properties
     # ------------------------------
-    ("mastro_attribute_floor_id", IntProperty(
-        name="Floor Id", default=0, update=update_attributes_mastro_floor_id
-    )),
+    # ("mastro_attribute_floor_id", IntProperty(
+    #     name="Floor Id", 
+    #     default=0, 
+    #     # update=update_attributes_mastro_floor_id
+    #     set = set_attribute_mastro_floor_id,
+    #     get = lambda self: get_attribute_mastro_mesh(self, "mastro_floor_id")
+    # )),
  
+    ("mastro_floor_names", EnumProperty(
+        name="Floor List", description="", 
+        items=lambda self, context: get_names_from_list(context.scene, context, "mastro_floor_name_list"),
+        set = set_attribute_mastro_floor_id,
+        get = lambda self: get_attribute_mastro_mesh(self, "mastro_floor_id")
+    )),
     # ------------------------------
     # Mastro Extras
     # ------------------------------
-    ("mastro_attribute_extra_vertex", FloatProperty(
+    ("mastro_attribute_custom_vertex", FloatProperty(
         name="Custom vertex value", 
         default=0, 
         step=100, 
-        update=update_extras_vertex,
+        set = set_attribute_custom_vert,
+        get = lambda self: get_attribute_mastro_mesh(self, "mastro_custom_vert")
     )),
-    ("mastro_attribute_extra_edge", FloatProperty(
+    ("mastro_attribute_custom_edge", FloatProperty(
         name="Custom edge value", 
         default=0, 
         step=100, 
-        update=update_extras_edge
+        set = set_attribute_custom_edge,
+        get = lambda self: get_attribute_mastro_mesh(self, "mastro_custom_edge")
     )),
-    ("mastro_attribute_extra_face", FloatProperty(
+    ("mastro_attribute_custom_face", FloatProperty(
         name="Custom face value", 
         default=0, 
         step=100, 
-        update=update_extras_face
+        set = set_attribute_custom_face,
+        get = lambda self: get_attribute_mastro_mesh(self, "mastro_custom_face")
     )),
     
     # ------------------------------
@@ -221,27 +255,19 @@ scene_props = [
     # Mastro Project Data (Collections & EnumProperties)
     # ------------------------------
     ("mastro_block_name_list", CollectionProperty(type=mastro_CL_block_name_list)),
-    ("mastro_block_name_current", CollectionProperty(type=mastro_CL_name_with_id)),
+    # ("mastro_block_name_current", CollectionProperty(type=mastro_CL_name_with_id)),
     ("mastro_block_name_list_index", IntProperty(name="Block Name", default=0)),
-    ("mastro_block_names", EnumProperty(
-        name="Block names", description="Current block name",
-        items=lambda self, context: get_names_from_list(context.scene, context, "mastro_block_name_list"),
-        update=update_attributes_mastro_block_name_id
-    )),
+    
 
     ("mastro_building_name_list", CollectionProperty(type=mastro_CL_building_name_list)),
-    ("mastro_building_name_current", CollectionProperty(type=mastro_CL_name_with_id)),
+    # ("mastro_building_name_current", CollectionProperty(type=mastro_CL_name_with_id)),
     ("mastro_building_name_list_index", IntProperty(name="Building Name", default=0)),
-    ("mastro_building_names", EnumProperty(
-        name="Building names", description="Current building name",
-        items=lambda self, context: get_names_from_list(context.scene, context, "mastro_building_name_list"),
-        update=update_attributes_mastro_building_name_id
-    )),
+    
 
     ("mastro_use_name_list", CollectionProperty(type=mastro_CL_use_name_list)),
 
     ("mastro_typology_name_list", CollectionProperty(type=mastro_CL_typology_name_list)),
-    ("mastro_typology_name_current", CollectionProperty(type=mastro_CL_name_with_id)),
+    # ("mastro_typology_name_current", CollectionProperty(type=mastro_CL_name_with_id)),
     ("mastro_typology_name_list_index", IntProperty(name="Typology Name", default=0)),
     
     ("mastro_typology_uses_name_list", CollectionProperty(type=mastro_CL_typology_uses_name_list)),
@@ -259,25 +285,29 @@ scene_props = [
     )),
 
     ("mastro_wall_name_list", CollectionProperty(type=mastro_CL_wall_name_list)),
-    ("mastro_wall_name_current", CollectionProperty(type=mastro_CL_name_with_id)),
+    # ("mastro_wall_name_current", CollectionProperty(type=mastro_CL_name_with_id)),
     ("mastro_wall_name_list_index", IntProperty(name="Wall Name", default=0)),
-    ("mastro_wall_names", EnumProperty(
-        name="Wall List", description="",
-        items=lambda self, context: get_names_from_list(context.scene, context, "mastro_wall_name_list"),
-        update=update_attributes_wall
+    # ("mastro_attribute_wall_id", IntProperty(
+    #     name="Wall Id", 
+    #     default=0, 
+        # update=update_attributes_mastro_wall_id
+        # set = set_attribute_mastro_wall_id,
+        # get = lambda self: get_attribute_mastro_mesh(self, "mastro_wall_id")
+    # )),
+    ("mastro_attribute_wall_thickness", FloatProperty(
+        name="Wall thickness", default=0.300, precision=3, subtype="DISTANCE"
+    )),
+    ("mastro_attribute_wall_offset", FloatProperty(
+        name="Wall offset", default=0, precision=3, subtype="DISTANCE"
     )),
 
     ("mastro_floor_name_list", CollectionProperty(type=mastro_CL_floor_name_list)),
-    ("mastro_floor_name_current", CollectionProperty(type=mastro_CL_name_with_id)),
+    # ("mastro_floor_name_current", CollectionProperty(type=mastro_CL_name_with_id)),
     ("mastro_floor_name_list_index", IntProperty(name="Floor Name", default=0)),
-    ("mastro_floor_names", EnumProperty(
-        name="Floor List", description="", 
-        items=lambda self, context: get_names_from_list(context.scene, context, "mastro_floor_name_list"),
-        update=update_attributes_floor
-    )),
+ 
     
     ("mastro_street_name_list", CollectionProperty(type=mastro_CL_street_name_list)),
-    ("mastro_street_name_current", CollectionProperty(type=mastro_CL_name_with_id)),
+    # ("mastro_street_name_current", CollectionProperty(type=mastro_CL_name_with_id)),
     ("mastro_street_name_list_index", IntProperty(name="Street Name", default=0)),
     ("mastro_street_names", EnumProperty(
         name="Street List", description="",

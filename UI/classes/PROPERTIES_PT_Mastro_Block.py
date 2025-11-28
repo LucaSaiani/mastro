@@ -34,7 +34,7 @@ class PROPERTIES_PT_Mastro_Block(Panel):
         
         # row = layout.row()
         # row = layout.row(align=True)
-        # row.prop(context.scene, "mastro_block_names", icon="MOD_BOOLEAN", icon_only=True, text="")
+        # row.prop(context.scene, "mastro_block_name", icon="MOD_BOOLEAN", icon_only=True, text="")
         # row.operator("scene.add_block_name", icon="ADD", text="New")
         
         # if scene.mastro_block_name_list_index >= 0 and scene.mastro_block_name_list:

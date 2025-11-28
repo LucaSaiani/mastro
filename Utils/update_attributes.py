@@ -9,33 +9,33 @@ from ..Utils.update_bmesh_attributes import update_bmesh_attributes
 # ------------------------------
 # Mastro Project Data
 # ------------------------------
-def update_attributes_mastro_block_name_id(self, context):
-    scene = context.scene
-    name = scene.mastro_block_names
-    # scene.mastro_block_name_current[0].name = " " + name
-    scene.mastro_block_name_current[0].name = name
-    for n in scene.mastro_block_name_list:
-        if n.name == name:
-            scene.mastro_attribute_mass_block_id = n.id
-            scene.mastro_block_name_current[0].id = n.id
+# def update_attributes_mastro_block_name_id(self, context):
+#     scene = context.scene
+#     name = scene.mastro_block_name
+#     # scene.mastro_block_name_current[0].name = " " + name
+#     scene.mastro_block_name_current[0].name = name
+#     for n in scene.mastro_block_name_list:
+#         if n.name == name:
+#             scene.mastro_attribute_mass_block_id = n.id
+#             scene.mastro_block_name_current[0].id = n.id
             
-            obj = context.active_object
-            obj.mastro_props['mastro_block_attribute'] = n.id
-            break 
+#             obj = context.active_object
+#             obj.mastro_props['mastro_block_attribute'] = n.id
+#             break 
         
         
-def update_attributes_mastro_building_name_id(self, context):
-    scene = context.scene
-    name = scene.mastro_building_names
-    scene.mastro_building_name_current[0].name = name
-    for n in scene.mastro_building_name_list:
-        if n.name == name:
-            scene.mastro_attribute_mass_building_id = n.id
-            scene.mastro_building_name_current[0].id = n.id
+# def update_attributes_mastro_building_name_id(self, context):
+#     scene = context.scene
+#     name = scene.mastro_building_name
+#     scene.mastro_building_name_current[0].name = name
+#     for n in scene.mastro_building_name_list:
+#         if n.name == name:
+#             scene.mastro_attribute_mass_building_id = n.id
+#             scene.mastro_building_name_current[0].id = n.id
             
-            obj = context.active_object
-            obj.mastro_props['mastro_building_attribute'] = n.id
-            break 
+#             obj = context.active_object
+#             obj.mastro_props['mastro_building_attribute'] = n.id
+#             break 
         
         
 # update the typology use in the UIList with the name selected
@@ -55,35 +55,35 @@ def update_typology_uses_name_label(self, context):
                 break
             
         
-# Update the wall label in the UI and all the relative data in the selected edges
-def update_attributes_wall(self, context):
-    scene = context.scene
-    name = scene.mastro_wall_names
-    scene.mastro_wall_name_current[0].name = " " + name
-    for n in scene.mastro_wall_name_list:
-        if n.name == name:
-            scene.mastro_attribute_wall_id = n.id
-            scene.mastro_wall_name_current[0].id = n.id
-            break
+# # Update the wall label in the UI and all the relative data in the selected edges
+# def update_attributes_wall(self, context):
+#     scene = context.scene
+#     name = scene.mastro_wall_names
+#     scene.mastro_wall_name_current[0].name = " " + name
+#     for n in scene.mastro_wall_name_list:
+#         if n.name == name:
+#             scene.mastro_attribute_wall_id = n.id
+#             scene.mastro_wall_name_current[0].id = n.id
+#             break
         
 
 # update the floor label in the UI and all the relative data in the selected faces
-def update_attributes_floor(self, context):
-    scene = context.scene
-    name = scene.mastro_floor_names
-    scene.mastro_floor_name_current[0].name = " " + name
-    for n in scene.mastro_floor_name_list:
-        if n.name == name:
-            scene.mastro_attribute_floor_id = n.id
-            scene.mastro_floor_name_current[0].id = n.id
-            break
+# def update_attributes_floor(self, context):
+#     scene = context.scene
+#     name = scene.mastro_floor_names
+#     scene.mastro_floor_name_current[0].name = " " + name
+#     for n in scene.mastro_floor_name_list:
+#         if n.name == name:
+#             scene.mastro_attribute_floor_id = n.id
+#             scene.mastro_floor_name_current[0].id = n.id
+#             break
         
         
 # ------------------------------
 # Block / Building Properties
 # ------------------------------
-def update_attributes_mastro_block_side_angle(self, context):
-    bpy.ops.object.set_edge_attribute_angle() 
+# def update_attributes_mastro_block_side_angle(self, context):
+#     bpy.ops.object.set_edge_attribute_angle() 
     
 # def update_attributes_mastro_block_depth(self, context):
 #     bpy.ops.object.set_edge_attribute_depth()
@@ -92,30 +92,30 @@ def update_attributes_mastro_block_side_angle(self, context):
 # ------------------------------
 # Wall Properties
 # ------------------------------
-def update_attributes_mastro_wall_id(self, context):
-    bpy.ops.object.set_attribute_wall_id()
+# def update_attributes_mastro_wall_id(self, context):
+#     bpy.ops.object.set_attribute_wall_id()
     
 # update the wall normal
-def update_attributes_mastro_wall_normal(self, context):
-    bpy.ops.object.set_edge_attribute_normal()
+# def update_attributes_mastro_wall_normal(self, context):
+#     bpy.ops.object.set_edge_attribute_normal()
         
 # ------------------------------
 # Floor Properties
 # ------------------------------        
-def update_attributes_mastro_floor_id(self, context):
-    bpy.ops.object.set_attribute_floor_id()
+# def update_attributes_mastro_floor_id(self, context):
+#     bpy.ops.object.set_attribute_floor_id()
 
 # ------------------------------
 # Mastro Extras
 # ------------------------------
-def update_extras_vertex(self, context):
-    bpy.ops.object.set_extras_vertex_value()
+# def update_extras_vertex(self, context):
+#     bpy.ops.object.set_extras_vertex_value()
 
-def update_extras_edge(self, context):
-    bpy.ops.object.set_extras_edge_value()
+# def update_extras_edge(self, context):
+#     bpy.ops.object.set_extras_edge_value()
     
-def update_extras_face(self, context):
-    bpy.ops.object.set_extras_face_value()
+# def update_extras_face(self, context):
+#     bpy.ops.object.set_extras_face_value()
     
 # ------------------------------
 # Street Properties

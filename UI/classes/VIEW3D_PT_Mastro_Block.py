@@ -29,13 +29,10 @@ class VIEW3D_PT_Mastro_Block(Panel):
                 
                 row = layout.row(align=True)
                 
-                row.prop(context.scene, "mastro_block_names", icon="MOD_BOOLEAN", icon_only=True, text="Block")
-                if scene.mastro_block_name_list and len(scene.mastro_block_name_list) >0:
-                    row.label(text = scene.mastro_block_name_current[0].name)
-                # row = layout.row(align=True)
-                # row.prop(context.scene, "mastro_building_names", icon="HOME", icon_only=True, text="Building")
-                # if scene.mastro_building_name_list and len(scene.mastro_building_name_list) >0:
-                #     row.label(text = scene.mastro_building_name_current[0].name)
+                row.prop(context.scene, "mastro_block_name", text="Block")
+                # row.prop(context.scene, "mastro_block_name", icon="MOD_BOOLEAN", icon_only=True, text="Block")
+                # if scene.mastro_block_name_list and len(scene.mastro_block_name_list) >0:
+                #     row.label(text = scene.mastro_block_name_current[0].name)
                 
                     
             elif mode == "EDIT":      
@@ -79,16 +76,16 @@ class VIEW3D_PT_Mastro_Block(Panel):
                 # in the list doesn't correspond to typology_id. Therefore it is necessary to find elements
                 # in the way below and not with use_list = bpy.context.scene.mastro_typology_name_list[typology_id].useList
                 row = layout_1.row(align=True)
-                item = next(i for i in bpy.context.scene.mastro_typology_name_list if i["id"] == scene.mastro_typology_name_current[0].id)
-                use_list = item.useList
-                uses = use_list.split(";")
-                tmp_enabled = False
-                for useID in uses:
-                    if context.scene.mastro_use_name_list[int(useID)].liquid == True:
-                        tmp_enabled = True
-                        break
+                # item = next(i for i in bpy.context.scene.mastro_typology_name_list if i["id"] == scene.mastro_typology_name_current[0].id)
+                # use_list = item.useList
+                # uses = use_list.split(";")
+                # tmp_enabled = False
+                # for useID in uses:
+                #     if context.scene.mastro_use_name_list[int(useID)].liquid == True:
+                #         tmp_enabled = True
+                #         break
                 
-                row.enabled = tmp_enabled
+                # row.enabled = tmp_enabled
                 
                 row = layout_1.row(align=True)
                 # row.prop(context.scene, "mastro_typology_names", icon="ASSET_MANAGER", icon_only=True, text="Typology")

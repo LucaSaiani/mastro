@@ -47,9 +47,10 @@ class VIEW3D_PT_Mastro_Street(Panel):
                 
                 row = layout.row(align=True)
 
-                row.prop(context.scene, "mastro_street_names", icon="NODE_TEXTURE", icon_only=True, text="Street Type")
-                if len(scene.mastro_street_name_list) >0:
-                    row.label(text = scene.mastro_street_name_current[0].name)
-                    # streetId = scene.mastro_street_name_current[0].id
-                else:
-                    row.label(text = "")
+                row.prop(context.scene, "mastro_street_names", text="Street Type")
+                # row.prop(context.scene, "mastro_street_names", icon="NODE_TEXTURE", icon_only=True, text="Street Type")
+                # if len(scene.mastro_street_name_list) >0:
+                #     row.label(text = scene.mastro_street_name_current[0].name)
+                #     # streetId = scene.mastro_street_name_current[0].id
+                # else:
+                #     row.label(text = "")

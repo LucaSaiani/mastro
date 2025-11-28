@@ -19,30 +19,41 @@ def init_lists(scene=None):
                 setattr(item, attr, value)
 
     # --- Internal helper: ensures the 'current' collection mirrors the first element ---
-    def ensure_current(current_collection, name):
-        """Ensure the 'current' collection exists and mirrors the first name from the base list."""
-        if len(current_collection) == 0:
-            item = current_collection.add()
-            item.id = 0
-            item.name = name
+    # def ensure_current(current_collection, name):
+    #     """Ensure the 'current' collection exists and mirrors the first name from the base list."""
+    #     if len(current_collection) == 0:
+    #         item = current_collection.add()
+    #         item.id = 0
+    #         item.name = name
 
     # --- Configuration of all list types ---
+    # configs = [
+    #     ("mastro_block_name_list", "mastro_block_name_current", {"name": "Block type... "}),
+    #     ("mastro_building_name_list", "mastro_building_name_current", {"name": "Building name... "}),
+    #     ("mastro_use_name_list", None, {"name": "Use name... ", "storeys": 3, "liquid": True}),
+    #     ("mastro_typology_name_list", "mastro_typology_name_current", {"name": "Typology name... ", "useList": "0"}),
+    #     ("mastro_typology_uses_name_list", None, {"name": "Use name... "}),
+    #     ("mastro_street_name_list", "mastro_street_name_current", {"name": "Street type... "}),
+    #     ("mastro_wall_name_list", None, {"name": "Wall type... ", "normal": 0}),
+    #     ("mastro_floor_name_list", "mastro_floor_name_current", {"name": "Floor type... "}),
+    # ]
+    
     configs = [
-        ("mastro_block_name_list", "mastro_block_name_current", {"name": "Block type... "}),
-        ("mastro_building_name_list", "mastro_building_name_current", {"name": "Building name... "}),
-        ("mastro_use_name_list", None, {"name": "Use name... ", "storeys": 3, "liquid": True}),
-        ("mastro_typology_name_list", "mastro_typology_name_current", {"name": "Typology name... ", "useList": "0"}),
-        ("mastro_typology_uses_name_list", None, {"name": "Use name... "}),
-        ("mastro_street_name_list", "mastro_street_name_current", {"name": "Street type... "}),
-        ("mastro_wall_name_list", "mastro_wall_name_current", {"name": "Wall type... ", "normal": 0}),
-        ("mastro_floor_name_list", "mastro_floor_name_current", {"name": "Floor type... "}),
+        ("mastro_block_name_list", {"name": "Block type... "}),
+        ("mastro_building_name_list", {"name": "Building name... "}),
+        ("mastro_use_name_list", {"name": "Use name... ", "storeys": 3, "liquid": True}),
+        ("mastro_typology_name_list", {"name": "Typology name... ", "useList": "0"}),
+        ("mastro_typology_uses_name_list", {"name": "Use name... "}),
+        ("mastro_street_name_list", {"name": "Street type... "}),
+        ("mastro_wall_name_list", {"name": "Wall type... ", "normal": 0}),
+        ("mastro_floor_name_list", {"name": "Floor type... "}),
     ]
 
     # --- Apply initialization logic for all configured collections ---
-    for main_name, current_name, defaults in configs:
+    for main_name, defaults in configs:
         main_list = getattr(s, main_name)
         ensure_item(main_list, defaults)
 
-        if current_name:
-            current_list = getattr(s, current_name)
-            ensure_current(current_list, main_list[0].name)
+        # if current_name:
+        #     current_list = getattr(s, current_name)
+        #     ensure_current(current_list, main_list[0].name)
