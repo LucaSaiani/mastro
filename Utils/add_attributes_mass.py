@@ -157,7 +157,7 @@ def add_mass_attributes(obj):
     liquidPosition = []
     fixedStoreys = 0
     numberOfStoreys = 3 # default value for initial number of storeys
-    void = "1"
+    void = 0
     
     for enum,el in enumerate(useSplit):
         if int(el) < 10:
@@ -187,7 +187,7 @@ def add_mass_attributes(obj):
                 storey_list_A += storeys[0]
                 storey_list_B += storeys[1]
                 
-                void += str(int(use.void))
+                # void += str(int(use.void))
                 
                 height = str(round(use.floorToFloor,3))
                 if use.floorToFloor < 10:
@@ -282,7 +282,7 @@ def add_mass_attributes(obj):
                                 elif a["attr"] == "mastro_list_height_E":
                                     mesh_attribute[1].value = int(height_E)
                                 elif a["attr"] == "mastro_list_void":
-                                    mesh_attribute[1].value = int(void)
+                                    mesh_attribute[1].value = void
                                 elif a["attr"] == "mastro_floor_id":
                                     mesh_attribute[1].value = int(0)
                                 elif a["attr"] == "mastro_number_of_storeys":

@@ -25,8 +25,8 @@ class NODE_OT_mastro_filter_by(Operator):
         # GN group
         group = bpy.data.node_groups.new(groupName,'GeometryNodeTree')
         
-        # group_input = group.nodes.new("NodeGroupInput")
-        # group_output = group.nodes.new('NodeGroupOutput')
+        group_input = group.nodes.new("NodeGroupInput")
+        group_output = group.nodes.new('NodeGroupOutput')
         
         # Add named attribute
         named_attribute_node = group.nodes.new(type="GeometryNodeInputNamedAttribute")

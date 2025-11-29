@@ -3,8 +3,8 @@ from bpy.types import UIList
 
 class PROPERTIES_UL_List(UIList):
     """Generic reusable UIList base class."""
-    icon: str = 'DOT'
     list_name: str = ""
+    color_attr: str = ""
 
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         """Draws an item with an icon and ID."""
@@ -16,8 +16,14 @@ class PROPERTIES_UL_List(UIList):
 
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
             split = layout.split(factor=0.4)
-            split.label(text=f"Id: {item.id}")
-            split.prop(collection[index], "name", icon_only=True, icon=custom_icon)
+            if self.color_attr:
+                sub = split.split()
+                sub.label(text="Id: %d" % (item.id)) 
+                sub.prop(collection[index], self.color_attr, text="")
+            else:
+                split.label(text=f"Id: {item.id}")
+            split.prop(collection[index], "name", text="")
+            
         elif self.layout_type in {'GRID'}:
             layout.alignment = 'CENTER'
             layout.label(text="", icon=custom_icon)
@@ -35,7 +41,6 @@ class PROPERTIES_UL_List(UIList):
 class PROPERTIES_UL_Typology_Uses(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data,
                   active_propname, index):
-        custom_icon = 'COMMUNITY'
 
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
             id = item.id

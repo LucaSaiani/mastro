@@ -268,14 +268,18 @@ scene_props = [
 
     ("mastro_typology_name_list", CollectionProperty(type=mastro_CL_typology_name_list)),
     # ("mastro_typology_name_current", CollectionProperty(type=mastro_CL_name_with_id)),
-    ("mastro_typology_name_list_index", IntProperty(name="Typology Name", default=0)),
+    ("mastro_typology_name_list_index", IntProperty(name="Typology Name",
+                                                    default=0,
+                                                    update=update_uses_of_typology)),
     
     ("mastro_typology_uses_name_list", CollectionProperty(type=mastro_CL_typology_uses_name_list)),
-    ("mastro_typology_uses_name_list_index", IntProperty(name="Typology Use Name", default=0)),
-    ("mastro_previous_selected_typology", IntProperty(name="Previous Typology Id", default=-1)),
+    ("mastro_typology_uses_name_list_index", IntProperty(
+        name="Typology Use Name", 
+        default=0)),
+    # ("mastro_previous_selected_typology", IntProperty(name="Previous Typology Id", default=-1)),
     ("mastro_typology_uses_name", EnumProperty(
-        name="Typology uses drop down menu",
-        description="Typology use drop down list in the Typology Uses UI",
+        name="Uses",
+        description="Select uses to add to the current typology",
         items=lambda self, context: get_names_from_list(context.scene, context, "mastro_use_name_list"),
         update=update_typology_uses_name_label
     )),

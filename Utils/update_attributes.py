@@ -4,11 +4,82 @@ import bmesh
 from ..Utils.init_lists import init_lists
 from ..Utils.update_bmesh_attributes import update_bmesh_attributes
 
-# from .write_storey_attribute import read_storey_attribute, write_bmesh_storey_attribute 
 
+def test(self, context):
+    print("ciao")
 # ------------------------------
 # Mastro Project Data
 # ------------------------------
+
+# ------------------------------
+# Typology and uses panels
+# -----------------------------
+
+# When a typology is selected in the panel, the UIList of the related uses
+# is updated in the panel below
+def update_uses_of_typology(self, context):
+    # empty the use name list
+    index = context.scene.mastro_typology_uses_name_list_index
+    use_name_list = context.scene.mastro_typology_uses_name_list
+    use_name_list.clear()
+    context.scene.mastro_typology_uses_name_list_index = min(max(0, index - 1), len(use_name_list) - 1)
+         
+    # add the uses stored in the typology to the current typology use UIList
+    selected_typology_index = context.scene.mastro_typology_name_list_index
+    if len(context.scene.mastro_typology_name_list) > 0:
+        name_list = context.scene.mastro_typology_name_list[selected_typology_index].useList    
+        split_list = name_list.split(";")
+        for el in split_list:
+            if el.strip() != '': # to avoid empty values which could happend when the software starts
+                context.scene.mastro_typology_uses_name_list.add()
+                temp_list = []    
+                temp_list.append(int(el))
+                last = len(context.scene.mastro_typology_uses_name_list)-1
+                # search for the correspondent use name in mastro_use_name_list
+                for use in context.scene.mastro_use_name_list:
+                    if int(el) == use.id:
+                        context.scene.mastro_typology_uses_name_list[last].id = use.id
+                        context.scene.mastro_typology_uses_name_list[last].name = use.name 
+                        context.scene.mastro_typology_uses_name_list_index = 0
+                        break
+
+
+# When in the a use related to the current typology is updated in the UIList,
+# it is necessary to update the relative use list in Scene.mastro_typology_uses_name_list
+def update_typology_uses_list(context):
+    selected_typology_index = context.scene.mastro_typology_name_list_index
+    # the exististing list is replaced with what is in the UiList
+    # the format of the list is 2;5;1 with numbers indicating the Id of the use
+    tmp = ""
+    for el in context.scene.mastro_typology_uses_name_list:
+        tmp += str(el.id) + ";"
+    # remove the last ";" in the string
+    tmp = tmp[:-1]
+    context.scene.mastro_typology_name_list[selected_typology_index].useList = tmp
+
+    
+# update the typology use in the UIList, in the scene panel,
+# with the name selected in the drop down menu in the Typology Uses UI
+def update_typology_uses_name_label(self, context):
+    scene = context.scene
+    name = scene.mastro_typology_uses_name
+    # if the typology is newly created, the index is equal to -1 and 
+    # therefore there is an out of range error
+    # Also, in this case, there are no values to update
+    if scene.mastro_typology_uses_name_list_index > -1:
+        scene.mastro_typology_uses_name_list[scene.mastro_typology_uses_name_list_index].name = name
+        for n in scene.mastro_use_name_list:
+            if n.name == name:
+                scene.mastro_typology_uses_name_list[scene.mastro_typology_uses_name_list_index].id = n.id
+                update_typology_uses_list(context)
+                return None
+            
+
+            
+
+# from .write_storey_attribute import read_storey_attribute, write_bmesh_storey_attribute 
+
+
 # def update_attributes_mastro_block_name_id(self, context):
 #     scene = context.scene
 #     name = scene.mastro_block_name
@@ -38,21 +109,7 @@ from ..Utils.update_bmesh_attributes import update_bmesh_attributes
 #             break 
         
         
-# update the typology use in the UIList with the name selected
-# in the drop down menu in the Typology Uses UI
-def update_typology_uses_name_label(self, context):
-    scene = context.scene
-    name = scene.mastro_typology_uses_name
-    # if the typology is newly created, the index is equal to -1 and 
-    # therefore there is an out of range error
-    # Also, in this case, there are no values to update
-    if scene.mastro_typology_uses_name_list_index > -1:
-        scene.mastro_typology_uses_name_list[scene.mastro_typology_uses_name_list_index].name = name
-        for n in scene.mastro_use_name_list:
-            if n.name == name:
-                scene.mastro_typology_uses_name_list[scene.mastro_typology_uses_name_list_index].id = n.id
-                update_typology_uses_list(context)
-                break
+
             
         
 # # Update the wall label in the UI and all the relative data in the selected edges
@@ -130,7 +187,7 @@ def update_attributes_street(self, context):
             bpy.ops.object.set_attribute_street_id()
             scene.mastro_street_name_current[0].id = n.id
             scene.mastro_street_name_current[0].name = n.name
-            break 
+            return None 
         
         
 # ------------------------------
@@ -139,7 +196,8 @@ def update_attributes_street(self, context):
 # update the node "filter by use" if a new use is added or
 # a use name has changed
 # also updates the names of mastro_typology_uses_name_list_index  
-def update_mastro_filter_by_use(self, context):
+def update_mastro_nodes_by_use(self, context):
+    bpy.ops.node.mastro_gn_separate_geometry_by(filter_name="use")
     bpy.ops.node.mastro_gn_filter_by(filter_name="use")
     bpy.ops.node.mastro_shader_filter_by(filter_name="use")
     
@@ -159,7 +217,7 @@ def update_mastro_filter_by_use(self, context):
     for use in usesUiList:
         if use.nameId == useIndex:
             use.name = subName
-            break
+            return None
     return None
 
 
@@ -217,18 +275,7 @@ def update_mastro_filter_by_typology(self, context):
 
         
         
-# when a use related to the current typology is updated in the UIList,
-# it is necessary to update the relative list in Scene.mastro_typology_uses_name_list
-def update_typology_uses_list(context):
-    selected_typology_index = context.scene.mastro_typology_name_list_index
-    # the exististing list is replaced with what is in the UiList
-    # the format of the list is 2;5;1 with numbers indicating the Id of the use
-    tmp = ""
-    for el in context.scene.mastro_typology_uses_name_list:
-        tmp += str(el.id) + ";"
-    # remove the last ";" in the string
-    tmp = tmp[:-1]
-    context.scene.mastro_typology_name_list[selected_typology_index].useList = tmp
+
 
 # ------------------------------
 # Classes - Wall
