@@ -83,6 +83,32 @@ class mastro_CL_block_name_list(PropertyGroup):
 # ------------------------------
 # Typology Properties
 # ------------------------------  
+class mastro_CL_typology_name_list(PropertyGroup):
+    id: IntProperty(
+           name="Id",
+           description="Typology id",
+           default = 0)
+    
+    name: StringProperty(
+           name="Name",
+           description="",
+           default="Typology name...",
+           update=update_mastro_filter_by_typology)
+    
+    useList: StringProperty(
+            name="Use",
+            description="The uses for the typology",
+            default="",
+            update=update_all_mastro_meshes_useList)
+    
+    typologyEdgeColor: bpy.props.FloatVectorProperty(
+        name = "Color of the edges of the typology to be shown in the overlay",
+        subtype = "COLOR",
+        size = 3,
+        min = 0.0,
+        max = 1.0,
+        default = (0.0, 0.7, 0.0))
+    
 class mastro_CL_obj_typology_uses_name_list(PropertyGroup): 
     id: IntProperty( name="Id",
                     description="Obj typology use name id", 
@@ -118,7 +144,7 @@ class mastro_CL_use_name_list(PropertyGroup):
            name="Name",
            description="The name of the use",
            default = "Use name...",
-           update=update_mastro_filter_by_use)
+           update=update_mastro_nodes_by_use)
     
     floorToFloor: FloatProperty(
         name="Height",
@@ -143,36 +169,12 @@ class mastro_CL_use_name_list(PropertyGroup):
             default = False,
             update=update_all_mastro_meshes_numberOfStoreys)
     
-    void: BoolProperty(
-            name = "Void",
-            description = "It indicates whether the use is considered to be a void volume in the mass, or not",
-            default = False)
+    # void: BoolProperty(
+    #         name = "Void",
+    #         description = "It indicates whether the use is considered to be a void volume in the mass, or not",
+    #         default = False)
     
-class mastro_CL_typology_name_list(PropertyGroup):
-    id: IntProperty(
-           name="Id",
-           description="Typology id",
-           default = 0)
-    
-    name: StringProperty(
-           name="Name",
-           description="The name of the typology",
-           default="Typology name...",
-           update=update_mastro_filter_by_typology)
-    
-    useList: StringProperty(
-            name="Use",
-            description="The uses for the typology",
-            default="",
-            update=update_all_mastro_meshes_useList)
-    
-    typologyEdgeColor: bpy.props.FloatVectorProperty(
-        name = "Color of the edges of the typology to be shown in the overlay",
-        subtype = "COLOR",
-        size = 3,
-        min = 0.0,
-        max = 1.0,
-        default = (0.0, 0.7, 0.0))
+
 
     
 # ------------------------------

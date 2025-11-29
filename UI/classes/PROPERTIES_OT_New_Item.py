@@ -10,6 +10,7 @@ class PROPERTIES_OT_New_Item(Operator):
     bl_idname = "properties.new_item"
     bl_label = "Generic operator to add a new item to a list."
     list_name: str
+    index_name: str
     filter_name: str = None
     node_type: str = None
     color_attr: str = None
@@ -27,11 +28,12 @@ class PROPERTIES_OT_New_Item(Operator):
         ids = [el.id for el in collection if hasattr(el, 'id')]
         collection[last].id = max(ids) + 1 if ids else 1
         
+        # select the newly added element
+        setattr(scene, self.index_name, last)
+        
+        # if a new tipology, a new use is added as well
         if self.extra_action == "add use":
-            # add a use to the newly created typology
-            current_typology_id = context.scene.mastro_typology_name_list[last].id
-            bpy.context.scene.mastro_typology_name_list[current_typology_id].useList = "0"
-            
+            bpy.ops.mastro_typology_uses_name_list.new_item()
 
         # Optional random color attribute
         if self.color_attr and hasattr(collection[last], self.color_attr):
@@ -67,7 +69,12 @@ The number of uses is limited to 7 for each typology'''
         last = len(context.scene.mastro_typology_uses_name_list)-1
         
         context.scene.mastro_typology_uses_name_list[last].id = max(temp_list)+1
-        context.scene.mastro_typology_uses_name_list[last].typologyEdgeColor = [random.random(), random.random(), random.random()]
+        
+        # assign the first use as default
+        context.scene.mastro_typology_uses_name_list[last].name = context.scene.mastro_use_name_list[0].name
+        # select the newly created use
+        bpy.context.scene.mastro_typology_uses_name_list_index = last
+        
         return{'FINISHED'}
     
 # Add a new use to the list of the uses for the current project
@@ -91,6 +98,7 @@ class PROPERTIES_OT_Use_List_New_Item(Operator):
         context.scene.mastro_typology_uses_name_list[subIndex].id = id
         update_typology_uses_list(context)
         
+        bpy.ops.node.mastro_gn_separate_geometry_by(filter_name="use")
         bpy.ops.node.mastro_gn_filter_by(filter_name="use")
         bpy.ops.node.mastro_shader_filter_by(filter_name="use")
         return{'FINISHED'}

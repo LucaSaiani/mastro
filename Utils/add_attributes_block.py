@@ -132,7 +132,7 @@ def add_block_attributes(obj):
     liquidPosition = []
     fixedStoreys = 0
     numberOfStoreys = 3 # default value for initial number of storeys
-    void = "1"
+    void = 0
     
     for enum,el in enumerate(useSplit):
         if int(el) < 10:
@@ -162,7 +162,7 @@ def add_block_attributes(obj):
                 storey_list_A += storeys[0]
                 storey_list_B += storeys[1]
                 
-                void += str(int(use.void))
+                # void += str(int(use.void))
                 
                 height = str(round(use.floorToFloor,3))
                 if use.floorToFloor < 10:
@@ -273,7 +273,7 @@ def add_block_attributes(obj):
                                 elif a["attr"] == "mastro_list_height_E":
                                     mesh_attribute[1].value = int(height_E)
                                 elif a["attr"] == "mastro_list_void":
-                                    mesh_attribute[1].value = int(void)
+                                    mesh_attribute[1].value = void
                                 else:
                                     mesh_attribute[1].value = a["attr_default"]
                                 break

@@ -7,7 +7,7 @@ from .PROPERTIES_OT_New_Item import PROPERTIES_OT_New_Item, PROPERTIES_OT_Typolo
 from .PROPERTIES_OT_Move_Item import PROPERTIES_OT_Move_Item, PROPERTIES_OT_Typology_Uses_List_Move_Item
 from .PROPERTIES_OT_Delete_Item import PROPERTIES_OT_Typology_Uses_List_Delete_Item
 from .PROPERTIES_OT_Duplicate_Item import PROPERTIES_OT_Typology_List_Duplicate_Item
-from .PROPERTIES_OT_Update_List import PROPERTIES_OT_Update_Use_List
+# from .ss_PROPERTIES_OT_Update_List import PROPERTIES_OT_Update_Use_List
 from .VIEW3D_UL_Typology_Uses import VIEW3D_UL_Typology_Uses
 # from ..properties.property_classes import mastro_CL_obj_typology_uses_name_list
 from .PREFERENCES_Mastro_Preferences import PREFERENCES_Mastro_Preferences
@@ -28,6 +28,7 @@ from .VIEW3D_PT_Mastro_Extras import VIEW3D_PT_Mastro_Extras
 from .VIEW3D_PT_Mastro_Mass import VIEW3D_PT_Mastro_Mass
 from .VIEW3D_PT_Mastro_Street import VIEW3D_PT_Mastro_Street
 from .VIEW3D_PT_transform_orientations import VIEW3D_PT_transform_orientations
+from .VIEW3D_PT_Mastro_Override import VIEW3D_PT_Mastro_Mass_Override, VIEW3D_PT_Mastro_Block_Override
 
 
 classes = (
@@ -40,7 +41,7 @@ classes = (
     PROPERTIES_UL_List,
     PROPERTIES_UL_Typology_Uses,
     PROPERTIES_OT_Typology_List_Duplicate_Item,
-    PROPERTIES_OT_Update_Use_List,
+    # PROPERTIES_OT_Update_Use_List,
     VIEW3D_UL_Typology_Uses,
     # mastro_CL_obj_typology_uses_name_list,
     PREFERENCES_Mastro_Preferences,
@@ -61,16 +62,18 @@ classes = (
     VIEW3D_PT_Mastro_Mass,
     VIEW3D_PT_Mastro_Street,
     VIEW3D_PT_transform_orientations,
+    VIEW3D_PT_Mastro_Mass_Override, 
+    VIEW3D_PT_Mastro_Block_Override
     )
 
 MASTRO_LISTS = [
-    # name,       icon,             color_attr,           filter_name       node type               extra_action
-    ("block",    "MOD_BOOLEAN",     None,                  "block",         ("shader",),            None),
-    ("building", "HOME",            None,                  "building",      ("shader",),            None),
-    ("typology", "ASSET_MANAGER",   "typologyEdgeColor",   "typology",      ("gn","shader"),        "add use"),
-    ("wall",     "NODE_TEXTURE",    "wallEdgeColor",       "wall type",     ("gn","shader"),        None),
-    ("floor",    "VIEW_PERSPECTIVE", None,                 None,            None,                   None),
-    ("street",   "NODE_TEXTURE",    "streetEdgeColor",     "street type",   ("gn", "shader"),       None),
+    # name,         color_attr,             filter_name       node type               extra_action
+    ("block",       None,                   "block",         ("shader",),            None),
+    ("building",    None,                   "building",      ("shader",),            None),
+    ("typology",    "typologyEdgeColor",    "typology",      ("gn","shader"),        "add use"),
+    ("wall",        "wallEdgeColor",        "wall type",     ("gn","shader"),        None),
+    ("floor",       None,                   None,            None,                   None),
+    ("street",      "streetEdgeColor",      "street type",   ("gn", "shader"),       None),
 ]
 
 # ============================================================
@@ -81,7 +84,7 @@ _dynamic_classes = []
 def dynamic_list_classes():
     dynamicClasses = []
     """Dynamically create and register UIList, NewItem, MoveItem for each type."""
-    for name, icon, color_attr, filter_name, node_type, extra_action in MASTRO_LISTS:
+    for name, color_attr, filter_name, node_type, extra_action in MASTRO_LISTS:
         list_name = f"mastro_{name}_name_list"
         index_name = f"mastro_{name}_name_list_index"
 
@@ -92,7 +95,7 @@ def dynamic_list_classes():
             {
                 "bl_idname": f"PROPERTIES_UL_{name.capitalize()}",
                 "list_name": list_name,
-                "icon": icon,
+                "color_attr" : color_attr,
             }
         )
         dynamicClasses.append(ui_class)
@@ -104,8 +107,10 @@ def dynamic_list_classes():
             (PROPERTIES_OT_New_Item,),
             {
                 "bl_idname": f"{list_name}.new_item",
-                "bl_label": f"Add new {name}",
+                "bl_label": f"Add {name}",
+                "bl_description" : f"Add a new {name} to the scene",
                 "list_name": list_name,
+                "index_name": index_name,
                 "color_attr": color_attr,
                 "filter_name": filter_name,
                 "node_type": node_type,

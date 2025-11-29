@@ -104,8 +104,7 @@ class VIEW3D_PT_Mastro_Mass(Panel):
                                   "mastro_obj_typology_uses_name_list_index",
                                   rows = rows)
                 # -----------------------
-                row = layout.row(align=True)
-                row.prop(context.scene, "mastro_attribute_mass_extend_uses", text="Top Floors") 
+                
                 
                 
                 
