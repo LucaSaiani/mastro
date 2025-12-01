@@ -47,26 +47,23 @@ class PROPERTIES_UL_Typology_Uses(UIList):
             if item.name != "...":
                 for el in context.scene.mastro_use_name_list:
                     if id == el.id:
-                        # floorToFloor = round(el.floorToFloor,3)
                         storeys = el.storeys
                         liquid = el.liquid
+                        
+                        split = layout.split(factor=0.4)
+                        col1 = split.column()
+                        col2 = split.column()
+                        subSplit = col1.split(factor=0.4)
+                        subSplit1 = subSplit.column()
+                        subSplit2 = subSplit.column()
+                        if liquid:
+                            subSplit1.label(text="Id: %d" % (item.id))
+                            subSplit2.label(text="Storeys: variable")
+                        else:
+                            subSplit1.label(text="Id: %d" % (item.id))
+                            subSplit2.label(text="Storeys: %s" % (storeys))
+                        col2.label(text=item.name)
                         break
-                split = layout.split(factor=0.4)
-                col1 = split.column()
-                col2 = split.column()
-                subSplit = col1.split(factor=0.4)
-                subSplit1 = subSplit.column()
-                subSplit2 = subSplit.column()
-                if liquid:
-                    subSplit1.label(text="Id: %d" % (item.id))
-                    subSplit2.label(text="Storeys: variable")
-                    # split.label(text="", icon = "MOD_LENGTH")
-                else:
-                    subSplit1.label(text="Id: %d" % (item.id))
-                    subSplit2.label(text="Storeys: %s" % (storeys))
-#             split.label(text=item.name, icon=custom_icon) 
-                    
-                col2.label(text=item.name)
             else:
                 split = layout.split(factor=0.4)
                 split.label(text="")
@@ -75,7 +72,7 @@ class PROPERTIES_UL_Typology_Uses(UIList):
 
         elif self.layout_type in {'GRID'}:
             layout.alignment = 'CENTER'
-            layout.label(text="", icon = custom_icon)
+            # layout.label(text="", icon = custom_icon)
 
     def filter_items(self, context, data, propname):
         filtered = []

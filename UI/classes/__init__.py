@@ -32,7 +32,7 @@ from .VIEW3D_PT_Mastro_Override import VIEW3D_PT_Mastro_Mass_Override, VIEW3D_PT
 
 
 classes = (
-    PROPERTIES_OT_New_Item, 
+    # PROPERTIES_OT_New_Item, 
     PROPERTIES_OT_Typology_Uses_List_New_Item,
     PROPERTIES_OT_Use_List_New_Item,
     PROPERTIES_OT_Move_Item, 

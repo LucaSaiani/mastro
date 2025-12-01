@@ -10,7 +10,9 @@ def get_names_from_list(scene, context, collection):
     """
     items = []
     # Iterate over each element in the specified collection
-    for el in getattr(scene, collection, []):
+    for idx, el in enumerate(getattr(scene, collection, [])):
         # Create a tuple (id, name, description) for each element
-        items.append((el.name, el.name, ""))
+        # identifier = el.name.replace(" ", "_").lower()
+        items.append((el.name, el.name, "", idx))
+        
     return items

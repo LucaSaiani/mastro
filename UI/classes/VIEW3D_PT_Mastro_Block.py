@@ -28,12 +28,8 @@ class VIEW3D_PT_Mastro_Block(Panel):
                 layout.use_property_decorate = False  # No animation.
                 
                 row = layout.row(align=True)
-                
                 row.prop(context.scene, "mastro_block_name", text="Block")
-                # row.prop(context.scene, "mastro_block_name", icon="MOD_BOOLEAN", icon_only=True, text="Block")
-                # if scene.mastro_block_name_list and len(scene.mastro_block_name_list) >0:
-                #     row.label(text = scene.mastro_block_name_current[0].name)
-                
+                 
                     
             elif mode == "EDIT":      
                 scene = context.scene
@@ -45,12 +41,6 @@ class VIEW3D_PT_Mastro_Block(Panel):
                 layout_1 = layout.column()
                 layout_0 = layout.column()
                
-                # layout_0 = self.layout
-                # layout_0.use_property_split = True    
-                # layout_0.use_property_decorate = False  # No animation. 
-                # layout_1 = self.layout
-                # layout_1.use_property_split = True    
-                # layout_1.use_property_decorate = False  # No animation.
                
                 if tuple(bpy.context.scene.tool_settings.mesh_select_mode)[0] == True: #we are selecting edges
                     layout_0.enabled = True
@@ -65,9 +55,8 @@ class VIEW3D_PT_Mastro_Block(Panel):
          
                 ################ TYPOLOGY ######################
                 row = layout_1.row(align=True)
-                row.prop(context.scene, "mastro_attribute_mass_storeys", text="N° of storeys") 
-                row = layout_1.row(align=True)
-                row.prop(context.scene, "mastro_attribute_block_depth", text="Depth") 
+                row.prop(context.scene, "mastro_attribute_mass_storeys", text="N° of Storeys") 
+                
                 # disable the number of storeys if there are no liquids
                 # current_typology = scene.mastro_typology_name_current[0]
                 
@@ -103,7 +92,10 @@ class VIEW3D_PT_Mastro_Block(Panel):
                                   rows = rows)
                 
                 row = layout_1.row(align=True)
-                row.prop(context.scene, "mastro_attribute_wall_normal", text="Flip Normal") 
+                row.prop(context.scene, "mastro_attribute_block_depth", text="Depth") 
                 
                 row = layout_0.row(align=True)
-                row.prop(context.scene, "mastro_attribute_block_side_angle", text="Side rotation") 
+                row.prop(context.scene, "mastro_attribute_block_side_angle", text="Side Rotation") 
+                
+                row = layout_1.row(align=True)
+                row.prop(context.scene, "mastro_attribute_wall_normal", text="Flip Normal") 

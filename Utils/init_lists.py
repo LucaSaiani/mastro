@@ -39,14 +39,14 @@ def init_lists(scene=None):
     # ]
     
     configs = [
-        ("mastro_block_name_list", {"name": "Block type... "}),
-        ("mastro_building_name_list", {"name": "Building name... "}),
-        ("mastro_use_name_list", {"name": "Use name... ", "storeys": 3, "liquid": True}),
-        ("mastro_typology_name_list", {"name": "Typology name... ", "useList": "0"}),
-        ("mastro_typology_uses_name_list", {"name": "Use name... "}),
-        ("mastro_street_name_list", {"name": "Street type... "}),
-        ("mastro_wall_name_list", {"name": "Wall type... ", "normal": 0}),
-        ("mastro_floor_name_list", {"name": "Floor type... "}),
+        ("mastro_block_name_list", {"name": "Block name"}),
+        ("mastro_building_name_list", {"name": "Building name"}),
+        ("mastro_use_name_list", {"name": "Use name", "storeys": 3, "liquid": True}),
+        ("mastro_typology_name_list", {"name": "Typology name", "useList": "0"}),
+        ("mastro_typology_uses_name_list", {"name": "Use name"}),
+        ("mastro_street_name_list", {"name": "Street type"}),
+        ("mastro_wall_name_list", {"name": "Wall type", "normal": 0}),
+        ("mastro_floor_name_list", {"name": "Floor type"}),
     ]
 
     # --- Apply initialization logic for all configured collections ---

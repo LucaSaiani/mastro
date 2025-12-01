@@ -90,10 +90,10 @@ class NODE_OT_mastro_filter_by(Operator):
                     
                     #Add the Output Sockets and change their Default Value
                     if el.name == "":
-                        if self.filter_name == "use": elName = "Use name..."
-                        elif self.filter_name == "typology": elName = "Typology name..."
-                        elif self.filter_name == "wall type": elName = "Wall name..."
-                        elif self.filter_name == "steet type": elName = "Street name..."
+                        if self.filter_name == "use": elName = "Use name"
+                        elif self.filter_name == "typology": elName = "Typology name"
+                        elif self.filter_name == "wall type": elName = "Wall name"
+                        elif self.filter_name == "steet type": elName = "Street name"
                     else:
                         elName = el.name
                     descr = "id: " + str(el.id) + " - " + elName

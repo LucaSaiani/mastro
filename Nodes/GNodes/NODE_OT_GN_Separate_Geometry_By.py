@@ -26,7 +26,7 @@ class NODE_OT_mastro_separate_geometry_by(Operator):
         group = create_new_nodegroup(
                 groupName,
                 in_sockets={"Geometry": "NodeSocketGeometry"},
-                out_sockets={"Wall type... ": "NodeSocketGeometry"}
+                out_sockets={"Wall type": "NodeSocketGeometry"}
             )
        
         named_attribute_node = group.nodes.new(type="GeometryNodeInputNamedAttribute")
@@ -47,7 +47,7 @@ class NODE_OT_mastro_separate_geometry_by(Operator):
         
         # Get the relevant sockets
         geom_input = group_input.outputs.get("Geometry")
-        geom_output_0 = group_output.inputs.get("Wall type... ")
+        geom_output_0 = group_output.inputs.get("Wall type")
         
          # Connect nodes
         group.links.new(geom_input, separate_geometry_node.inputs[0])
@@ -121,10 +121,10 @@ class NODE_OT_mastro_separate_geometry_by(Operator):
                     
                     #Add the Output Sockets and change their Default Value
                     if el.name == "":
-                        if self.filter_name == "use": elName = "Use name..."
-                        elif self.filter_name == "typology": elName = "Typology name..."
-                        elif self.filter_name == "wall type": elName = "Wall name..."
-                        elif self.filter_name == "steet type": elName = "Street name..."
+                        if self.filter_name == "use": elName = "Use name"
+                        elif self.filter_name == "typology": elName = "Typology name"
+                        elif self.filter_name == "wall type": elName = "Wall name"
+                        elif self.filter_name == "steet type": elName = "Street name"
                     else:
                         elName = el.name
                     descr = "id: " + str(el.id) + " - " + elName

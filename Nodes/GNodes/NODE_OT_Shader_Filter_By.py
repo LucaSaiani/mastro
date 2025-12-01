@@ -7,7 +7,7 @@ import re
 class NODE_OT_mastro_shader_filter_by(Operator):
     """Update the shader node Filter by... based on the passed type value"""
     bl_idname = "node.mastro_shader_filter_by"
-    bl_label = "Update the Shader filter by..."
+    bl_label = "Update the Shader filter by"
     
     filter_name: bpy.props.StringProperty(name="Filter type name")
     output_id: bpy.props.IntProperty(name="Neighbor")
@@ -98,7 +98,7 @@ class NODE_OT_mastro_shader_filter_by(Operator):
                     
                     #Add the Output Sockets and change their Default Value
                     if el.name == "":
-                        elName = self.filter_name + " name..."
+                        elName = self.filter_name + " name"
                     else:
                         elName = el.name
                     descr = "id: " + str(el.id) + " - " + elName

@@ -37,7 +37,7 @@ from ... import mastro_geometryNodes
 # from ... import mastro_menu
 from ... import mastro_schedule
 # from ... import mastro_street
-
+    
 # =============================================================================
 # WindowManager Properties
 # =============================================================================
@@ -118,7 +118,18 @@ scene_props = [
     )),
     
     ("mastro_attribute_mass_typology_id", IntProperty(name="Typology Id", default=0)),
-    ("mastro_attribute_mass_extend_uses", IntProperty(name="Top Floors to Match", default=0, description="Updates the use of the selected top floors to match the one below")),
+    ("mastro_attribute_mass_extend_uses", IntProperty(name="Top Floors to Match", 
+                                                      min=0,
+                                                      default=0, 
+                                                      description="Updates the use of the selected top floors to match the one below"
+    )),
+    ("mastro_attribute_mass_undercroft", IntProperty(name="N° of Undercroft Floors", 
+                                                     min=0,
+                                                     default=0, 
+                                                     description="The number of floors to count from the ground floor level and designate as undercroft",
+                                                     set = set_attribute_mastro_undercroft,
+                                                     get = lambda self: get_attribute_mastro_mesh(self, "mastro_list_void")
+    )),
 
     # ------------------------------
     # Block / Building Properties
@@ -151,7 +162,7 @@ scene_props = [
     # ------------------------------
     # the dropdown menu in the architecture VIEW3D panel
     ("mastro_wall_names", EnumProperty(
-        name="Wall List", description="",
+        name="Wall List", 
         items=lambda self, context: get_names_from_list(context.scene, context, "mastro_wall_name_list"),
         # update=update_attributes_wall
         set = set_attribute_mastro_wall_id,
@@ -177,7 +188,7 @@ scene_props = [
     # )),
  
     ("mastro_floor_names", EnumProperty(
-        name="Floor List", description="", 
+        name="Floor List", 
         items=lambda self, context: get_names_from_list(context.scene, context, "mastro_floor_name_list"),
         set = set_attribute_mastro_floor_id,
         get = lambda self: get_attribute_mastro_mesh(self, "mastro_floor_id")
@@ -267,7 +278,6 @@ scene_props = [
     ("mastro_use_name_list", CollectionProperty(type=mastro_CL_use_name_list)),
 
     ("mastro_typology_name_list", CollectionProperty(type=mastro_CL_typology_name_list)),
-    # ("mastro_typology_name_current", CollectionProperty(type=mastro_CL_name_with_id)),
     ("mastro_typology_name_list_index", IntProperty(name="Typology Name",
                                                     default=0,
                                                     update=update_uses_of_typology)),
@@ -289,15 +299,7 @@ scene_props = [
     )),
 
     ("mastro_wall_name_list", CollectionProperty(type=mastro_CL_wall_name_list)),
-    # ("mastro_wall_name_current", CollectionProperty(type=mastro_CL_name_with_id)),
     ("mastro_wall_name_list_index", IntProperty(name="Wall Name", default=0)),
-    # ("mastro_attribute_wall_id", IntProperty(
-    #     name="Wall Id", 
-    #     default=0, 
-        # update=update_attributes_mastro_wall_id
-        # set = set_attribute_mastro_wall_id,
-        # get = lambda self: get_attribute_mastro_mesh(self, "mastro_wall_id")
-    # )),
     ("mastro_attribute_wall_thickness", FloatProperty(
         name="Wall thickness", default=0.300, precision=3, subtype="DISTANCE"
     )),
