@@ -71,5 +71,7 @@ def drawingUI(layout, context):
             
         row = layout.row(align=True)
         row.prop(context.scene, "mastro_attribute_mass_extend_uses", text="Top Floors") 
-                
+        
+        row = layout.row(align=True)
+        row.prop(context.scene, "mastro_attribute_mass_undercroft", text="Undercroft") 
                 

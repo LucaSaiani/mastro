@@ -4,9 +4,6 @@ import bmesh
 from ..Utils.init_lists import init_lists
 from ..Utils.update_bmesh_attributes import update_bmesh_attributes
 
-
-def test(self, context):
-    print("ciao")
 # ------------------------------
 # Mastro Project Data
 # ------------------------------
@@ -44,7 +41,7 @@ def update_uses_of_typology(self, context):
                         break
 
 
-# When in the a use related to the current typology is updated in the UIList,
+# When a use related to the current typology is updated in the UIList,
 # it is necessary to update the relative use list in Scene.mastro_typology_uses_name_list
 def update_typology_uses_list(context):
     selected_typology_index = context.scene.mastro_typology_name_list_index

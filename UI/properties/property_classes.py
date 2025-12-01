@@ -62,7 +62,7 @@ class mastro_CL_building_name_list(PropertyGroup):
     name: StringProperty(
            name="Building Name",
            description="The name of the building",
-           default="Building name...",
+           default="Building name",
            update=update_mastro_filter_by_building)
 
 # ------------------------------
@@ -77,7 +77,7 @@ class mastro_CL_block_name_list(PropertyGroup):
     name: StringProperty(
            name="Block Name",
            description="The name of the block",
-           default="Block name...",
+           default="Block name",
            update=update_mastro_filter_by_block)
     
 # ------------------------------
@@ -92,7 +92,7 @@ class mastro_CL_typology_name_list(PropertyGroup):
     name: StringProperty(
            name="Name",
            description="",
-           default="Typology name...",
+           default="Typology name",
            update=update_mastro_filter_by_typology)
     
     useList: StringProperty(
@@ -143,7 +143,7 @@ class mastro_CL_use_name_list(PropertyGroup):
     name: StringProperty(
            name="Name",
            description="The name of the use",
-           default = "Use name...",
+           default = "Use name",
            update=update_mastro_nodes_by_use)
     
     floorToFloor: FloatProperty(
@@ -189,7 +189,7 @@ class mastro_CL_floor_name_list(PropertyGroup):
     name: StringProperty(
            name="Floor Name",
            description="The name of the floor",
-           default="")
+           default="Floor type")
     
 # ------------------------------
 # Wall Properties
@@ -203,7 +203,7 @@ class mastro_CL_wall_name_list(PropertyGroup):
     name: StringProperty(
            name="Wall Name",
            description="The name of the wall",
-           default="Wall type...",
+           default="Wall type",
            update=update_mastro_filter_by_wall_type)
   
     wallThickness: FloatProperty(
@@ -252,7 +252,7 @@ class mastro_CL_street_name_list(PropertyGroup):
     name: StringProperty(
            name="Street type Name",
            description="The type name of the street",
-           default="Street type...",
+           default="Street type",
            update=update_mastro_filter_by_street_type)
     
     streetWidth: FloatProperty(

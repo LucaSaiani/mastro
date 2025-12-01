@@ -3,6 +3,7 @@ import bpy
 from ...Utils.read_write_bmesh_storey_attribute import read_bmesh_storey_attribute
 from ...Utils.get_names_from_list import get_names_from_list
 
+# Update the UIList in VIEW3D of uses of the selected face or edge 
 def update_view3D_panels(scene):
     obj = bpy.context.active_object
     if obj is None:
@@ -15,7 +16,7 @@ def update_view3D_panels(scene):
     if ("MaStro mass" in obj.data or
         "MaStro block" in obj.data):
         
-        #---  Update the UIList of uses of the selected face or edge ---#
+        
         numberOfStoreys = scene.mastro_attribute_mass_storeys
         
         current_value = scene.mastro_typology_names

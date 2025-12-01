@@ -61,7 +61,7 @@ def read_bmesh_use_attribute(typology_id):
     height_C = "1"
     height_D = "1"
     height_E = "1"
-    void = "1"
+    void = 0
     
     for enum, el in enumerate(useSplit):
         ### list_use_id
@@ -118,8 +118,9 @@ def read_bmesh_use_attribute(typology_id):
             "height_C" : int(height_C),
             "height_D" : int(height_D),
             "height_E" : int(height_E),
-            "void" : int(void)
+            "void" :void
             }
+    
     return data
     
     

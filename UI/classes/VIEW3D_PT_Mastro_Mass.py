@@ -85,7 +85,7 @@ class VIEW3D_PT_Mastro_Mass(Panel):
                 #     if context.scene.mastro_use_name_list[int(useID)].liquid == True:
                 #         tmp_enabled = True
                 #         break
-                row.prop(context.scene, "mastro_attribute_mass_storeys", text="N° of storeys") 
+                row.prop(context.scene, "mastro_attribute_mass_storeys", text="N° of Storeys") 
                 # row.enabled = tmp_enabled
                 # -----------------------
                 row = layout.row(align=True)

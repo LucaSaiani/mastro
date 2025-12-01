@@ -91,7 +91,7 @@ mass_attribute_set = [
             "attr" :  "mastro_list_void",
             "attr_type" :  "INT",
             "attr_domain" :  "FACE",
-            # "attr_default" : 0
+            "attr_default" : 0
             },
             {
             "attr" :  "mastro_floor_id",
@@ -284,7 +284,7 @@ def add_mass_attributes(obj):
                                 elif a["attr"] == "mastro_list_void":
                                     mesh_attribute[1].value = void
                                 elif a["attr"] == "mastro_floor_id":
-                                    mesh_attribute[1].value = int(0)
+                                    mesh_attribute[1].value = 0
                                 elif a["attr"] == "mastro_number_of_storeys":
                                     mesh_attribute[1].value = 3
                                 break
