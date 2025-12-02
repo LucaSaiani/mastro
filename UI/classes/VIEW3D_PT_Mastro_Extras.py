@@ -6,7 +6,7 @@ class VIEW3D_PT_Mastro_Extras(Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "MaStro"
-    bl_label = "Extras"
+    bl_label = "Extra"
     bl_order = 2
     bl_options = {'DEFAULT_CLOSED'} 
     
