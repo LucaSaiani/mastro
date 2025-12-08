@@ -3,20 +3,20 @@ import bmesh
 
 from .read_write_bmesh_storey_attribute import write_bmesh_storey_attribute
 from .read_write_bmesh_use_attribute import write_bmesh_use_attribute
-from .get_names_from_list import get_names_from_list
+from .write_bmesh_overlay_uses import overlay_bmesh_uses
 
-point_only_attributes = [("mastro_side_angle","FLOAT", ("MaStro block",)),
-                        ("mastro_custom_vert","FLOAT",("MaStro mass", "MaStro block"))]
+point_only_attributes = [("mastro_side_angle",      "FLOAT",    ("MaStro block",)),
+                        ("mastro_custom_vert",      "FLOAT",    ("MaStro mass", "MaStro block"))]
     
-edge_only_attributes = [("mastro_block_depth","FLOAT", ("MaStro block",)),
-                        ("mastro_inverted_normal","BOOL", ("MaStro mass", "MaStro block")),
-                        ("mastro_custom_edge","FLOAT", ("MaStro mass", "MaStro block")),
-                        ("mastro_wall_id","INT", ("MaStro mass", "MaStro block")),
-                        ("mastro_wall_thickness","FLOAT", ("MaStro mass", "MaStro block")),
-                        ("mastro_wall_offset", "FLOAT", ("MaStro mass", "MaStro block"))]
+edge_only_attributes = [("mastro_block_depth",      "FLOAT",    ("MaStro block",)),
+                        ("mastro_inverted_normal",  "BOOL",     ("MaStro mass", "MaStro block")),
+                        ("mastro_custom_edge",      "FLOAT",    ("MaStro mass", "MaStro block")),
+                        ("mastro_wall_id",          "INT",      ("MaStro mass", )),
+                        ("mastro_wall_thickness",   "FLOAT",    ("MaStro mass", "MaStro block")),
+                        ("mastro_wall_offset",      "FLOAT",    ("MaStro mass", "MaStro block"))]
     
-face_only_attributes = [("mastro_custom_face","FLOAT", ("MaStro mass", "MaStro block")),
-                        ("mastro_floor_id", "INT", ("MaStro mass",))]
+face_only_attributes = [("mastro_custom_face",      "FLOAT",    ("MaStro mass", "MaStro block")),
+                        ("mastro_floor_id",         "INT",      ("MaStro mass",))]
 
 
 # this dictionary is used in get_attribute_mastro_mesh to identify those
@@ -32,7 +32,7 @@ attribute_map = {
  
 # this dictionary is used in set_attribute_mastro_generic 
 layer_map = {
-    "mastro_wall_id": ("edges", "INT", ("MaStro mass", "MaStro block")),
+    "mastro_wall_id": ("edges", "INT", ("MaStro mass")),
     "mastro_inverted_normal": ("edges", "BOOL", ("MaStro mass", "MaStro block")),
     "mastro_block_depth": ("edges", "FLOAT", ("MaStro block",)),
     "mastro_side_angle": ("verts", "FLOAT", ("MaStro block",)),
@@ -60,8 +60,14 @@ def set_attribute_mastro_mesh_storeys(self, value):
         if ("MaStro mass" not in obj.data and
             "MaStro block" not in obj.data):
             continue
-            
-        bm = bmesh.from_edit_mesh(obj.data)
+        
+        
+        mesh = obj.data
+        if mesh.is_editmode:
+            bm = bmesh.from_edit_mesh(mesh)
+        else:
+            bm = bmesh.new()
+            bm.from_mesh(mesh)
         
         try:
             if "MaStro mass" in obj.data:
@@ -73,7 +79,12 @@ def set_attribute_mastro_mesh_storeys(self, value):
 
             for selection in selection_set:
                 write_bmesh_storey_attribute(bm, selection, value, mode)
-            bmesh.update_edit_mesh(obj.data)
+            
+            if mesh.is_editmode:
+                bmesh.update_edit_mesh(mesh)
+            else:
+                bm.to_mesh(mesh)
+            
         finally:
             bm.free()
         
@@ -86,7 +97,7 @@ def set_attribute_mastro_mesh_storeys(self, value):
 
 # set the uses and relative heights for both masses and blocks
 def set_attribute_mastro_mesh_uses(self, value):
-    active_object = bpy.context.view_layer.objects.active
+    active_object = bpy.context.view_layer.objects.active   
     selected_objects = bpy.context.selected_objects
     if len(selected_objects) == 0:
         selected_objects.append(active_object)
@@ -107,7 +118,13 @@ def set_attribute_mastro_mesh_uses(self, value):
                     "MaStro block" not in obj.data):
                     continue
                     
-                bm = bmesh.from_edit_mesh(obj.data)
+                mesh = obj.data
+                if mesh.is_editmode:
+                    bm = bmesh.from_edit_mesh(mesh)
+                else:
+                    bm = bmesh.new()
+                    bm.from_mesh(mesh)
+                    
                 try:
                     if "MaStro mass" in obj.data:
                         selection_set = [f for f in bm.faces if f.select]
@@ -118,7 +135,11 @@ def set_attribute_mastro_mesh_uses(self, value):
 
                     for selection in selection_set:
                         write_bmesh_use_attribute(bm, selection, value, mode)
-                    bmesh.update_edit_mesh(obj.data)
+                        
+                    if mesh.is_editmode:
+                        bmesh.update_edit_mesh(mesh)
+                    else:
+                        bm.to_mesh(mesh)
                 finally:
                     bm.free()
                 
@@ -130,8 +151,107 @@ def set_attribute_mastro_mesh_uses(self, value):
                 bpy.context.view_layer.objects.active = active_object
             break  
         
-def set_attribute_mastro_undercroft(value, bm_layer):
-    pass
+def set_attribute_mastro_overlay_uses(self, value):
+    active_object = bpy.context.view_layer.objects.active
+    selected_objects = bpy.context.selected_objects
+    
+    if len(selected_objects) == 0:
+        selected_objects.append(active_object)
+        
+    for obj in selected_objects:
+        if obj is None:
+            continue
+        if obj.type != "MESH": 
+            continue
+        if "MaStro object" not in obj.data: 
+            continue
+        if ("MaStro mass" not in obj.data and
+            "MaStro block" not in obj.data):
+            continue
+            
+        mesh = obj.data
+        if mesh.is_editmode:
+            bm = bmesh.from_edit_mesh(mesh)
+        else:
+            bm = bmesh.new()
+            bm.from_mesh(mesh)
+        
+        try:
+            if "MaStro mass" in obj.data:
+                selection_set = [f for f in bm.faces if f.select]
+                mode = "FACE"
+            else: # mastro block
+                selection_set = [e for e in bm.edges if e.select]
+                mode = "EDGE"
+
+            for selection in selection_set:
+                overlay_bmesh_uses(bm, selection, value, mode)
+                
+            if mesh.is_editmode:
+                bmesh.update_edit_mesh(mesh)
+            else:
+                bm.to_mesh(mesh)
+        finally:
+            bm.free()
+        
+        bpy.context.view_layer.objects.active = obj
+        bpy.ops.object.mode_set(mode='OBJECT')
+        bpy.ops.object.mode_set(mode='EDIT')
+            
+    if active_object:
+        bpy.context.view_layer.objects.active = active_object
+        
+        
+def set_attribute_mastro_undercroft(self, value):
+    active_object = bpy.context.view_layer.objects.active
+    selected_objects = bpy.context.selected_objects
+    
+    if len(selected_objects) == 0:
+        selected_objects.append(active_object)
+        
+    for obj in selected_objects:
+        if obj is None:
+            continue
+        if obj.type != "MESH": 
+            continue
+        if "MaStro object" not in obj.data: 
+            continue
+        if ("MaStro mass" not in obj.data and
+            "MaStro block" not in obj.data):
+            continue
+            
+        mesh = obj.data
+        if mesh.is_editmode:
+            bm = bmesh.from_edit_mesh(mesh)
+        else:
+            bm = bmesh.new()
+            bm.from_mesh(mesh)
+        
+        try:
+            if "MaStro mass" in obj.data:
+                selection_set = [f for f in bm.faces if f.select]
+                layer = bm.faces.layers.int["mastro_undercroft"]
+            else: # mastro block
+                selection_set = [e for e in bm.edges if e.select]
+                layer = bm.edges.layers.int["mastro_undercroft_EDGE"]
+
+            for selection in selection_set:
+                selection[layer] = value
+                
+            if mesh.is_editmode:
+                bmesh.update_edit_mesh(mesh)
+            else:
+                bm.to_mesh(mesh)
+        finally:
+            bm.free()
+        
+        bpy.context.view_layer.objects.active = obj
+        bpy.ops.object.mode_set(mode='OBJECT')
+        bpy.ops.object.mode_set(mode='EDIT')
+            
+    if active_object:
+        bpy.context.view_layer.objects.active = active_object
+            
         
 def set_attribute_mastro_generic(value, bm_layer):
     if bm_layer in layer_map:
@@ -150,7 +270,14 @@ def set_attribute_mastro_generic(value, bm_layer):
                 continue
             if not any(t in obj.data for t in mastro_types):
                 continue
-            bm = bmesh.from_edit_mesh(obj.data)
+            
+            mesh = obj.data
+            if mesh.is_editmode:
+                bm = bmesh.from_edit_mesh(mesh)
+            else:
+                bm = bmesh.new()
+                bm.from_mesh(mesh)
+            
             try:
                 field = getattr(bm, field_name)
                 if type == "FLOAT":
@@ -163,6 +290,11 @@ def set_attribute_mastro_generic(value, bm_layer):
                     selection_set = [s for s in field if s.select]
                     for selection in selection_set:
                         selection[layer] = value
+                        
+                    if mesh.is_editmode:
+                        bmesh.update_edit_mesh(mesh)
+                    else:
+                        bm.to_mesh(mesh)
             finally:
                 bm.free()
             bpy.context.view_layer.objects.active = obj
@@ -171,10 +303,15 @@ def set_attribute_mastro_generic(value, bm_layer):
         
         if active_object:
             bpy.context.view_layer.objects.active = active_object
+            
+            
         
 # read attributes for both masses and blocks at mesh level          
 def get_attribute_mastro_mesh(self, bm_layer):
     obj = bpy.context.view_layer.objects.active
+    
+    if obj is None:
+        return 0
     
     if not (obj.type == "MESH" and 
             obj.mode == "EDIT" and 
@@ -185,7 +322,13 @@ def get_attribute_mastro_mesh(self, bm_layer):
             "MaStro block" in obj.data):
         return 0
         
-    bm = bmesh.from_edit_mesh(obj.data)
+    mesh = obj.data
+    if mesh.is_editmode:
+        bm = bmesh.from_edit_mesh(mesh)
+    else:
+        bm = bmesh.new()
+        bm.from_mesh(mesh)
+            
     try:
         layer = None
         field = None
@@ -202,20 +345,30 @@ def get_attribute_mastro_mesh(self, bm_layer):
                 return 0
  
             field = getattr(bm, field_name)
-            if type == "FLOAT":
-                layer = field.layers.float[bm_layer]
-            elif type == "INT":
-                layer = field.layers.int[bm_layer]
-            else:
-                layer = field.layers.bool[bm_layer]
+            
+            try:
+                if type == "FLOAT":
+                    layer = field.layers.float[bm_layer]
+                elif type == "INT":
+                    layer = field.layers.int[bm_layer]
+                else:
+                    layer = field.layers.bool[bm_layer]
+            except:
+                return 0
+                
         # if the above is false, it means that the bm_layer can be either
         # an edge or a face layer, accordingly to the mastro type (block, or mass)
-        elif "MaStro mass" in obj.data:
-            field = bm.faces
-            layer = field.layers.int[bm_layer]
-        else: # mastro block
-            field = bm.edges
-            layer = field.layers.int[f"{bm_layer}_EDGE"]
+        else:
+            try:
+                if "MaStro mass" in obj.data:
+                    field = bm.faces
+                    layer = field.layers.int[bm_layer]
+                else: # mastro block
+                    field = bm.edges
+                    layer = field.layers.int[f"{bm_layer}_EDGE"]
+            except:
+                return 0
+        
         if not layer or not field:
             return 0
         
@@ -225,8 +378,11 @@ def get_attribute_mastro_mesh(self, bm_layer):
                 return(el[layer])
     finally:
         bm.free()
+        
 
     return 0
+
+
 
 
 def set_attribute_mastro_block_depth(self, value):
@@ -235,7 +391,7 @@ def set_attribute_mastro_block_depth(self, value):
         
 def set_attribute_mastro_block_side_angle(self, value):
     set_attribute_mastro_generic(value, "mastro_side_angle")
-        
+
     
 def set_attribute_mastro_wall_id(self, value):
     set_attribute_mastro_generic(value, "mastro_wall_id")
@@ -293,6 +449,9 @@ def set_attribute_mastro_object(value, attribute):
 # read attributes for both masses and blocks at object level  
 def get_attribute_mastro_object(self, attribute):
     obj = bpy.context.view_layer.objects.active
+    if obj is None:
+        return 0
+
     if not (obj.type == "MESH" and 
             obj.mode == "OBJECT" and 
             "MaStro object" in obj.data):

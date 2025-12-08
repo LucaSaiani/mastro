@@ -7,7 +7,7 @@ class PROPERTIES_PT_Mastro_Block(Panel):
     bl_label = "Block"
     bl_parent_id = "PROPERTIES_PT_Mastro_Mass"
     bl_options = {'DEFAULT_CLOSED'}
-    bl_order = 0
+    bl_order = 1
     
     def draw(self, context):
         scene = context.scene

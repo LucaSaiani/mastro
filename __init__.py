@@ -163,17 +163,14 @@ classes = (
 )
 
 #
-
-
-
 @persistent
 def onFileLoaded(scene):
     init_lists()
     init_nodes()
     # bpy.context.scene.updating_mesh_attributes_is_active = False
     # bpy.context.scene.show_selection_overlay_is_active = False
-    bpy.context.scene.mastro_previous_selection_object_name = ""
-    bpy.context.scene.mastro_previous_selection_face_id = -1
+    # bpy.context.scene.mastro_previous_selection_object_name = ""
+    # bpy.context.scene.mastro_previous_selection_face_id = -1
     
     
     knownScenes.clear()
@@ -186,8 +183,8 @@ def onFileDefault(scene):
     init_lists()
     init_nodes()
     # bpy.context.scene.show_selection_overlay_is_active = False
-    bpy.context.scene.mastro_previous_selection_object_name = ""
-    bpy.context.scene.mastro_previous_selection_face_id = -1
+    # bpy.context.scene.mastro_previous_selection_object_name = ""
+    # bpy.context.scene.mastro_previous_selection_face_id = -1
     
     
     knownScenes.clear()
@@ -278,9 +275,7 @@ def register():
     
     # bpy.app.timers.register(mastro_modal_operator.update_mesh_attributes_depsgraph, first_interval=.1)
     bpy.app.handlers.depsgraph_update_post.append(handlerUpdates)
-    
-    
-    
+   
     
     
 

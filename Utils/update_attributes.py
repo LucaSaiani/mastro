@@ -43,6 +43,7 @@ def update_uses_of_typology(self, context):
 
 # When a use related to the current typology is updated in the UIList,
 # it is necessary to update the relative use list in Scene.mastro_typology_uses_name_list
+# and also update the uses in the mastro objects
 def update_typology_uses_list(context):
     selected_typology_index = context.scene.mastro_typology_name_list_index
     # the exististing list is replaced with what is in the UiList
@@ -192,7 +193,7 @@ def update_attributes_street(self, context):
 # ------------------------------  
 # update the node "filter by use" if a new use is added or
 # a use name has changed
-# also updates the names of mastro_typology_uses_name_list_index  
+# also update the names of mastro_typology_uses_name_list_index  
 def update_mastro_nodes_by_use(self, context):
     bpy.ops.node.mastro_gn_separate_geometry_by(filter_name="use")
     bpy.ops.node.mastro_gn_filter_by(filter_name="use")
@@ -248,12 +249,10 @@ def update_all_mastro_meshes_floorToFloor(self, context):
     if context.window_manager.mastro_toggle_auto_update_mass_data:
         update_bmesh_attributes(context, "floor_to_floor")
         
-        
 # this is for the number of storeys
 def update_all_mastro_meshes_numberOfStoreys(self, context):
     if context.window_manager.mastro_toggle_auto_update_mass_data:
         update_bmesh_attributes(context, "number_of_storeys")
-
     
 # this is for the useList
 def update_all_mastro_meshes_useList(self, context):

@@ -2,7 +2,7 @@ import bpy
 from bpy.types import Operator
 from bpy.props import EnumProperty
 
-from ...Utils.update_attributes import update_typology_uses_list
+from ...Utils.update_attributes import update_typology_uses_list, update_all_mastro_meshes_useList
 
 class PROPERTIES_OT_Move_Item(Operator):
     """Generic operator to move items up or down."""
@@ -35,10 +35,10 @@ class PROPERTIES_OT_Move_Item(Operator):
                     bpy.ops.node.mastro_gn_filter_by(filter_name=self.filter_name,
                                                     output_id = my_list[neighbor].id, 
                                                     output_direction=self.direction)
-            if "shader" in self.node_type:
-                bpy.ops.node.mastro_shader_filter_by(filter_name=self.filter_name,
-                                                    output_id = my_list[neighbor].id, 
-                                                    output_direction=self.direction)
+                if "shader" in self.node_type:
+                    bpy.ops.node.mastro_shader_filter_by(filter_name=self.filter_name,
+                                                        output_id = my_list[neighbor].id, 
+                                                        output_direction=self.direction)
 
             
             
@@ -73,4 +73,5 @@ class PROPERTIES_OT_Typology_Uses_List_Move_Item(Operator):
         self.move_index()
         
         update_typology_uses_list(context)
+        update_all_mastro_meshes_useList(self, context)
         return{'FINISHED'}

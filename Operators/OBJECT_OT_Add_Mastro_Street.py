@@ -29,7 +29,10 @@ class OBJECT_OT_Add_Mastro_Street(Operator, AddObjectHelper):
     #     default=16,
     # )
     
-  
+    @classmethod
+    def poll(cls, context):
+        return context.mode == 'OBJECT'
+    
     def execute(self, context):
         verts = [
         (+0.0, +0.0, +0.0),

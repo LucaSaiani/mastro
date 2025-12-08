@@ -327,7 +327,7 @@ def getAttributes(objNames, attrType):
             bMesh_height_C = bm.faces.layers.int["mastro_list_height_C"]
             bMesh_height_D = bm.faces.layers.int["mastro_list_height_D"]
             bMesh_height_E = bm.faces.layers.int["mastro_list_height_E"]
-            bMesh_void = bm.faces.layers.int["mastro_list_void"]
+            bMesh_undercroft = bm.faces.layers.int["mastro_undercroft"]
     
             for f in bm.faces:
                 polyId = f.index
@@ -367,7 +367,7 @@ def getAttributes(objNames, attrType):
                         height_E = int((f[bMesh_height_E] / 10 ** pos) % 10)
                         height = height_A * 10 + height_B + height_C * 0.1 + height_D * 0.01 + height_E * 0.001
 
-                    void = int((f[bMesh_void] / 10 ** pos) % 10)
+                    undercroft = int((f[bMesh_undercroft] / 10 ** pos) % 10)
                     
                     storeyGroup = (storey_A * 10 + storey_B) + storeyPreviousGroup
                     # print(f"Storeygroup {storeyGroup}       storey {storey}")
@@ -377,7 +377,7 @@ def getAttributes(objNames, attrType):
                     
                     if attrType in ("all", "area"):
                         area = round(f.calc_area(),2)
-                        if void == 1:
+                        if undercroft == 1:
                             area = 0
                     
                     id = f"{meshName}_{polyId}_{level}"
@@ -389,7 +389,7 @@ def getAttributes(objNames, attrType):
                                     "area"          : area,
                                     "useId"         : useId,
                                     "height"        : height,
-                                    "void"          : void,
+                                    "undercroft"          : undercroft,
                                     "building"         : building,
                                     "block"          : block
                         }

@@ -11,6 +11,10 @@ class OBJECT_OT_Add_Mastro_Dimension(Operator, AddObjectHelper):
     bl_idname = "object.mastro_add_mastro_dimension"
     bl_label = "Dimension"
     bl_options = {'REGISTER', 'UNDO'}
+    
+    @classmethod
+    def poll(cls, context):
+        return context.mode == 'OBJECT'
       
     def execute(self, context):
         verts = [

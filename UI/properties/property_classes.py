@@ -169,9 +169,9 @@ class mastro_CL_use_name_list(PropertyGroup):
             default = False,
             update=update_all_mastro_meshes_numberOfStoreys)
     
-    # void: BoolProperty(
-    #         name = "Void",
-    #         description = "It indicates whether the use is considered to be a void volume in the mass, or not",
+    # undercroft: BoolProperty(
+    #         name = "undercroft",
+    #         description = "It indicates whether the use is considered to be a undercroft volume in the mass, or not",
     #         default = False)
     
 

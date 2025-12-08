@@ -1,7 +1,8 @@
 import bpy 
 from bpy.types import Operator
 
-from ...Utils.update_attributes import update_typology_uses_list
+from ...Utils.update_attributes import update_typology_uses_list, update_all_mastro_meshes_useList
+
 class PROPERTIES_OT_Typology_Uses_List_Delete_Item(Operator):
     '''Remove the use from the current typology'''
     bl_idname = "mastro_typology_uses_name_list.delete_item"
@@ -19,4 +20,5 @@ class PROPERTIES_OT_Typology_Uses_List_Delete_Item(Operator):
         context.scene.mastro_typology_uses_name_list_index = min(max(0, index - 1), len(my_list) - 1)
         
         update_typology_uses_list(context)
+        update_all_mastro_meshes_useList(self, context)
         return{'FINISHED'}
