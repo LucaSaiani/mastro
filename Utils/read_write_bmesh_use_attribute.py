@@ -14,7 +14,7 @@ def write_bmesh_use_attribute(bm, selection, value, mode):
         bMesh_height_C     = bm.faces.layers.int["mastro_list_height_C"]
         bMesh_height_D     = bm.faces.layers.int["mastro_list_height_D"]
         bMesh_height_E     = bm.faces.layers.int["mastro_list_height_E"]
-        bMesh_void         = bm.faces.layers.int["mastro_list_void"]
+        # bMesh_undercroft   = bm.faces.layers.int["mastro_undercroft"]
         bMesh_storeys      = bm.faces.layers.int["mastro_number_of_storeys"]
     else: # mastro block
         bMesh_typology     = bm.edges.layers.int["mastro_typology_id_EDGE"]
@@ -25,7 +25,7 @@ def write_bmesh_use_attribute(bm, selection, value, mode):
         bMesh_height_C     = bm.edges.layers.int["mastro_list_height_C_EDGE"]
         bMesh_height_D     = bm.edges.layers.int["mastro_list_height_D_EDGE"]
         bMesh_height_E     = bm.edges.layers.int["mastro_list_height_E_EDGE"]
-        bMesh_void         = bm.edges.layers.int["mastro_list_void_EDGE"]
+        # bMesh_undercroft   = bm.edges.layers.int["mastro_undercroft_EDGE"]
         bMesh_storeys      = bm.edges.layers.int["mastro_number_of_storeys_EDGE"]
 
      # --- writing to bmesh ---
@@ -37,7 +37,7 @@ def write_bmesh_use_attribute(bm, selection, value, mode):
     selection[bMesh_height_C] = data["height_C"]
     selection[bMesh_height_D] = data["height_D"]
     selection[bMesh_height_E] = data["height_E"]
-    selection[bMesh_void] = data["void"]
+    # selection[bMesh_undercroft] = data["undercroft"]
     
     numberOfStoreys = selection[bMesh_storeys]
     write_bmesh_storey_attribute(bm, selection, numberOfStoreys, mode)
@@ -61,7 +61,7 @@ def read_bmesh_use_attribute(typology_id):
     height_C = "1"
     height_D = "1"
     height_E = "1"
-    void = 0
+    # undercroft = 0
     
     for enum, el in enumerate(useSplit):
         ### list_use_id
@@ -76,7 +76,7 @@ def read_bmesh_use_attribute(typology_id):
         for use in projectUses:
             if use.id == int(el):
                 
-                # void += str(int(use.void))
+                # undercroft += str(int(use.undercroft))
                 
                 #### floor to floor height for each use, stored in A, B, C, ...
                 #### due to the fact that arrays can't be used
@@ -118,7 +118,7 @@ def read_bmesh_use_attribute(typology_id):
             "height_C" : int(height_C),
             "height_D" : int(height_D),
             "height_E" : int(height_E),
-            "void" :void
+            # "undercroft" :undercroft
             }
     
     return data

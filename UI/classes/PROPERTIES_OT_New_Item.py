@@ -3,7 +3,7 @@ from bpy.types import Operator
 
 import random
 
-from ...Utils.update_attributes import update_typology_uses_list
+from ...Utils.update_attributes import update_typology_uses_list, update_all_mastro_meshes_useList
 
 class PROPERTIES_OT_New_Item(Operator):
     """Generic operator to add a new item to a list."""
@@ -68,12 +68,16 @@ The number of uses is limited to 7 for each typology'''
             temp_list.append(el.id)
         last = len(context.scene.mastro_typology_uses_name_list)-1
         
-        context.scene.mastro_typology_uses_name_list[last].id = max(temp_list)+1
+        # context.scene.mastro_typology_uses_name_list[last].id = max(temp_list)+1
         
         # assign the first use as default
+        context.scene.mastro_typology_uses_name_list[last].id = context.scene.mastro_use_name_list[0].id
         context.scene.mastro_typology_uses_name_list[last].name = context.scene.mastro_use_name_list[0].name
+
         # select the newly created use
         bpy.context.scene.mastro_typology_uses_name_list_index = last
+        update_typology_uses_list(context)
+        update_all_mastro_meshes_useList(self, context)
         
         return{'FINISHED'}
     
@@ -96,7 +100,8 @@ class PROPERTIES_OT_Use_List_New_Item(Operator):
         subIndex = context.scene.mastro_typology_uses_name_list_index
         context.scene.mastro_typology_uses_name_list[subIndex].name = context.scene.mastro_use_name_list[last].name
         context.scene.mastro_typology_uses_name_list[subIndex].id = id
-        update_typology_uses_list(context)
+        # update_typology_uses_list(context)
+        # update_all_mastro_meshes_useList(self, context)
         
         bpy.ops.node.mastro_gn_separate_geometry_by(filter_name="use")
         bpy.ops.node.mastro_gn_filter_by(filter_name="use")

@@ -118,17 +118,19 @@ scene_props = [
     )),
     
     ("mastro_attribute_mass_typology_id", IntProperty(name="Typology Id", default=0)),
-    ("mastro_attribute_mass_extend_uses", IntProperty(name="Top Floors to Match", 
+    ("mastro_attribute_mass_overlay_uses", IntProperty(name="Top Floors to Match", 
                                                       min=0,
                                                       default=0, 
-                                                      description="Updates the use of the selected top floors to match the one below"
+                                                      description="Updates the use of the selected top floors to match the one below",
+                                                      set = set_attribute_mastro_overlay_uses,
+                                                      get = lambda self: get_attribute_mastro_mesh(self, "mastro_overlay_top" )
     )),
     ("mastro_attribute_mass_undercroft", IntProperty(name="N° of Undercroft Floors", 
                                                      min=0,
                                                      default=0, 
                                                      description="The number of floors to count from the ground floor level and designate as undercroft",
                                                      set = set_attribute_mastro_undercroft,
-                                                     get = lambda self: get_attribute_mastro_mesh(self, "mastro_list_void")
+                                                     get = lambda self: get_attribute_mastro_mesh(self, "mastro_undercroft")
     )),
 
     # ------------------------------
@@ -179,20 +181,13 @@ scene_props = [
     # ------------------------------
     # Floor Properties
     # ------------------------------
-    # ("mastro_attribute_floor_id", IntProperty(
-    #     name="Floor Id", 
-    #     default=0, 
-    #     # update=update_attributes_mastro_floor_id
-    #     set = set_attribute_mastro_floor_id,
-    #     get = lambda self: get_attribute_mastro_mesh(self, "mastro_floor_id")
-    # )),
- 
     ("mastro_floor_names", EnumProperty(
         name="Floor List", 
         items=lambda self, context: get_names_from_list(context.scene, context, "mastro_floor_name_list"),
         set = set_attribute_mastro_floor_id,
         get = lambda self: get_attribute_mastro_mesh(self, "mastro_floor_id")
     )),
+    
     # ------------------------------
     # Mastro Extras
     # ------------------------------
@@ -241,26 +236,26 @@ scene_props = [
     ("mastro_group_node_number_of_split", IntProperty(
         name="Number of split", default=1, min=1, update=mastro_geometryNodes.updateGroup
     )),
-    ("mastro_previous_selection_object_name", bpy.props.StringProperty(
-        name="Previously selected object name", default="",
-        description="Store the name of the previous selected object"
-    )),
-    ("mastro_previous_selection_face_id", IntProperty(
-        name="Previously selected face Id", default=-1,
-        description="Store the id of the previous selected face"
-    )),
-    ("mastro_previous_selection_edge_id", IntProperty(
-        name="Previously selected edge Id", default=-1,
-        description="Store the id of the previous selected edge"
-    )),
-    ("mastro_previous_selection_vert_id", IntProperty(
-        name="Previously selected vert Id", default=-1,
-        description="Store the id of the previous selected vertex"
-    )),
-    ("mastro_previous_edge_number", IntProperty(
-        name="Previously number of edges", default=-1,
-        description="Store the number of edges of the previous selection"
-    )),
+    # ("mastro_previous_selection_object_name", bpy.props.StringProperty(
+    #     name="Previously selected object name", default="",
+    #     description="Store the name of the previous selected object"
+    # )),
+    # ("mastro_previous_selection_face_id", IntProperty(
+    #     name="Previously selected face Id", default=-1,
+    #     description="Store the id of the previous selected face"
+    # )),
+    # ("mastro_previous_selection_edge_id", IntProperty(
+    #     name="Previously selected edge Id", default=-1,
+    #     description="Store the id of the previous selected edge"
+    # )),
+    # ("mastro_previous_selection_vert_id", IntProperty(
+    #     name="Previously selected vert Id", default=-1,
+    #     description="Store the id of the previous selected vertex"
+    # )),
+    # ("mastro_previous_edge_number", IntProperty(
+    #     name="Previously number of edges", default=-1,
+    #     description="Store the number of edges of the previous selection"
+    # )),
     
     # ------------------------------
     # Mastro Project Data (Collections & EnumProperties)
@@ -308,12 +303,10 @@ scene_props = [
     )),
 
     ("mastro_floor_name_list", CollectionProperty(type=mastro_CL_floor_name_list)),
-    # ("mastro_floor_name_current", CollectionProperty(type=mastro_CL_name_with_id)),
     ("mastro_floor_name_list_index", IntProperty(name="Floor Name", default=0)),
  
     
     ("mastro_street_name_list", CollectionProperty(type=mastro_CL_street_name_list)),
-    # ("mastro_street_name_current", CollectionProperty(type=mastro_CL_name_with_id)),
     ("mastro_street_name_list_index", IntProperty(name="Street Name", default=0)),
     ("mastro_street_names", EnumProperty(
         name="Street List", description="",

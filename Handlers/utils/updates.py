@@ -247,7 +247,7 @@ def updates(scene, depsgraph):
     #                     bMesh_height_C     = bm.edges.layers.int["mastro_list_height_C_EDGE"]
     #                     bMesh_height_D     = bm.edges.layers.int["mastro_list_height_D_EDGE"]
     #                     bMesh_height_E     = bm.edges.layers.int["mastro_list_height_E_EDGE"]
-    #                     bMesh_void         = bm.edges.layers.int["mastro_list_void_EDGE"]
+    #                     bMesh_undercroft         = bm.edges.layers.int["mastro_list_void_EDGE"]
                         
     #                     bMesh_angle = bm.verts.layers.float["mastro_side_angle"]
                         
@@ -302,7 +302,7 @@ def updates(scene, depsgraph):
     #                                         connected_edge[bMesh_height_C] = data["height_C"]
     #                                         connected_edge[bMesh_height_D] = data["height_D"]
     #                                         connected_edge[bMesh_height_E] = data["height_E"]
-    #                                         connected_edge[bMesh_void] = data["void"]
+    #                                         connected_edge[bMesh_undercroft] = data["void"]
                                             
     #                                         # update the side angle ------------------------------------
     #                                         active_vert[bMesh_angle] = 0
@@ -348,7 +348,7 @@ def updates(scene, depsgraph):
     #                                             last_edge[bMesh_height_C] = data["height_C"]
     #                                             last_edge[bMesh_height_D] = data["height_D"]
     #                                             last_edge[bMesh_height_E] = data["height_E"]
-    #                                             last_edge[bMesh_void] = data["void"]
+    #                                             last_edge[bMesh_undercroft] = data["void"]
 
     #                                             bmesh.update_edit_mesh(mesh)
                                                 
@@ -402,7 +402,7 @@ def updates(scene, depsgraph):
     #                                     active_edge[bMesh_height_C] = data["height_C"]
     #                                     active_edge[bMesh_height_D] = data["height_D"]
     #                                     active_edge[bMesh_height_E] = data["height_E"]
-    #                                     active_edge[bMesh_void] = data["void"]
+    #                                     active_edge[bMesh_undercroft] = data["void"]
                                         
     #                                     bmesh.update_edit_mesh(mesh)
                                     

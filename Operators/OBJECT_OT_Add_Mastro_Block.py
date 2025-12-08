@@ -4,8 +4,9 @@ from bpy.types import Operator
 from bpy_extras.object_utils import AddObjectHelper
 from bpy_extras import object_utils
 
-from ..Utils.add_attributes_block import add_block_attributes
+from ..Utils.add_attributes_mass import add_mass_attributes
 from ..Utils.add_nodes import add_nodes
+
 
 class OBJECT_OT_Add_Mastro_Block(Operator, AddObjectHelper):
     """Add a MaStro mablockss"""
@@ -35,6 +36,9 @@ class OBJECT_OT_Add_Mastro_Block(Operator, AddObjectHelper):
     #         min = 1,
     #         default = 3)
     
+    @classmethod
+    def poll(cls, context):
+        return context.mode == 'OBJECT'
     
     def execute(self, context):
 
@@ -72,18 +76,23 @@ class OBJECT_OT_Add_Mastro_Block(Operator, AddObjectHelper):
         obj = bpy.context.active_object
         
         
-        add_block_attributes(obj)
+        
             
         add_nodes()
         
-        mesh_attributes = obj.data.attributes["mastro_number_of_storeys_EDGE"].data.items()
-        for edge in mesh.edges:
-            index = edge.index
-            for mesh_attribute in mesh_attributes:
-                if mesh_attribute[0]  == index:
-                    mesh_attribute[1].value = 3
+        # mesh_attributes = obj.data.attributes["mastro_number_of_storeys_EDGE"].data.items()
+        # for edge in mesh.edges:
+        #     index = edge.index
+        #     for mesh_attribute in mesh_attributes:
+        #         if mesh_attribute[0]  == index:
+        #             mesh_attribute[1].value = 3
+        # write_bmesh_storey_attribute(bm, bm.edges, 3, "EDGE")
+        # typology_id = bpy.context.scene.mastro_typology_name_list_index
+        # write_bmesh_use_attribute(bm, bm.edges, typology_id , "EDGE")
+        
 
         # add mastro block and mastro mass geo node to the created object
+        bm.free
         geoName = "MaStro Block"
         obj.modifiers.new(geoName, "NODES")
         group = bpy.data.node_groups["MaStro Block"]
@@ -97,4 +106,7 @@ class OBJECT_OT_Add_Mastro_Block(Operator, AddObjectHelper):
         context.view_layer.objects.active = obj
         
         obj.select_set(True)
+        
+        add_mass_attributes(obj, "MaStro block")
+        
         return {'FINISHED'}

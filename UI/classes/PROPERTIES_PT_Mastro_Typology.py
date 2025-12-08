@@ -7,7 +7,7 @@ class PROPERTIES_PT_Mastro_Typology(Panel):
     bl_label = "Typology"
     bl_parent_id = "PROPERTIES_PT_Mastro_Mass"
     bl_options = {'DEFAULT_CLOSED'}
-    bl_order = 2
+    bl_order = 0
     
     def draw(self, context):
         scene = context.scene

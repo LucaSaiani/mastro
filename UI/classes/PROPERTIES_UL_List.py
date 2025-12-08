@@ -41,9 +41,9 @@ class PROPERTIES_UL_List(UIList):
 class PROPERTIES_UL_Typology_Uses(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data,
                   active_propname, index):
-
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
             id = item.id
+           
             if item.name != "...":
                 for el in context.scene.mastro_use_name_list:
                     if id == el.id:
@@ -79,10 +79,7 @@ class PROPERTIES_UL_Typology_Uses(UIList):
         ordered = []
         items = getattr(data, propname)
         filtered = [self.bitflag_filter_item] * len(items)
-        
-        # for i, item in enumerate(items):
-        #     if item.id == 0:
-        #         filtered[i] &= ~self.bitflag_filter_item
+
         return filtered, ordered
 
     def draw_filter(self, context, layout):

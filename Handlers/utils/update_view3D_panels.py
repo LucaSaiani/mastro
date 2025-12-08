@@ -15,9 +15,10 @@ def update_view3D_panels(scene):
 
     if ("MaStro mass" in obj.data or
         "MaStro block" in obj.data):
-        
-        
         numberOfStoreys = scene.mastro_attribute_mass_storeys
+        numberOfUndercroft = scene.mastro_attribute_mass_undercroft
+        if numberOfUndercroft > numberOfStoreys:
+            numberOfUndercroft = numberOfStoreys
         
         current_value = scene.mastro_typology_names
         enum_items = get_names_from_list(scene, bpy.context, "mastro_typology_name_list")
@@ -44,24 +45,117 @@ def update_view3D_panels(scene):
         
         list_storey_A = str(data["storey_list_A"])[1:]
         list_storey_B = str(data["storey_list_B"])[1:]
-        list_storey_A = list_storey_A[::-1]
-        list_storey_B = list_storey_B[::-1]
         
-        useSplit = use_list.split(";") 
+        if numberOfUndercroft > 0:
+            reversed_use_list = use_list[::-1].split(";")
+            undercroft_levels = numberOfUndercroft
+            index_to_insert = None
+            index_to_stop = None
+            for enum, use in enumerate(reversed_use_list):
+                
+                # when a new face is added in edit mode
+                # no storeys are assigned to the newly created face
+                # therefore the system returns an indexError
+                try:
+                    storeys = int(list_storey_A[enum] + list_storey_B[enum])
+                except IndexError:
+                    storeys = 1
+                
+                if undercroft_levels > storeys:
+                    undercroft_levels = undercroft_levels - storeys
+                else:
+                    # you insert only when the undercroft levels is not equal to 
+                    # the number of storeys of that use
+                    if undercroft_levels < storeys:
+                        index_to_insert = enum
+                    index_to_stop = enum
+                    break
+                    
+            # set to undercroft all the uses underneath the index
+            # and groups all the "undecroft uses"
+            grouped_list = []
+            storey_left = 0
+            for i, use in enumerate(reversed_use_list):
+                if i == index_to_stop:
+                    grouped_list.append(-1)
+                elif i > index_to_stop:
+                    grouped_list.append(use)
+            
+            if index_to_insert is not None:
+                duplicate_use = reversed_use_list[index_to_insert]
+                grouped_list.insert(1, duplicate_use)
+                
+                storeys = int(list_storey_A[index_to_insert] + list_storey_B[index_to_insert])
+                storey_left = storeys - undercroft_levels
+                
+                if storey_left > 9:
+                    storey_left_str = str(storey_left)
+                else:
+                    storey_left_str = "0" + str(storey_left)
+            
+            if numberOfUndercroft > 9:
+                str_undercroft_levels = str(numberOfUndercroft)
+            else:
+                str_undercroft_levels = "0" + str(numberOfUndercroft)
+                
+            # clip the lists
+            list_storey_A = list_storey_A[index_to_stop+1:]
+            list_storey_B = list_storey_B[index_to_stop+1:]
+            
+            # add the number of undercroft storeys
+            new_list_storey_A = str_undercroft_levels[0]
+            new_list_storey_B = str_undercroft_levels[1]
+
+            if storey_left > 0:            
+                # update the number of leftover storeys                
+                new_list_storey_A += storey_left_str[0]
+                new_list_storey_B += storey_left_str[1]
+                
+            new_list_storey_A += new_list_storey_A + list_storey_A
+            new_list_storey_B += new_list_storey_B + list_storey_B
+            
+            # invert the lists
+            grouped_list.reverse()
+            list_storey_A = new_list_storey_A[::-1]
+            list_storey_B = new_list_storey_B[::-1]
+            useSplit = list(grouped_list)
+            
+        else:
+            useSplit = use_list.split(";") 
+            # invert the lists
+            list_storey_A = list_storey_A[::-1]
+            list_storey_B = list_storey_B[::-1]
+            
         for enum, el in enumerate(useSplit):
             id = int(el)
             usesUiList.add()
             usesUiList[enum].id = enum + 1
-            for use in bpy.context.scene.mastro_use_name_list:
-                if id == use.id:
-                    usesUiList[enum].name = use.name
-                    usesUiList[enum].nameId = use.id
-                    # when a new face is added in edit mode
-                    # no storeys are assigned to the newly created face
-                    # therefore the system returns an indexError
-                    try:
-                        storeys = list_storey_A[enum] + list_storey_B[enum]
-                    except IndexError:
-                        storeys = 1
-                    usesUiList[enum].storeys = int(storeys)     
-                    break
+            
+            # if the use is -1, it means it is undercroft
+            if id == -1:
+                usesUiList[enum].name = "undercroft"
+                usesUiList[enum].nameId = -1
+                # when a new face is added in edit mode
+                # no storeys are assigned to the newly created face
+                # therefore the system returns an indexError
+                try:
+                    storeys = list_storey_A[enum] + list_storey_B[enum]
+                except IndexError:
+                    storeys = 1
+                usesUiList[enum].storeys = int(storeys)
+            
+            else:
+                for use in bpy.context.scene.mastro_use_name_list:
+                    if id == use.id:
+                        usesUiList[enum].name = use.name
+                        usesUiList[enum].nameId = use.id
+                        # when a new face is added in edit mode
+                        # no storeys are assigned to the newly created face
+                        # therefore the system returns an indexError
+                        try:
+                            storeys = list_storey_A[enum] + list_storey_B[enum]
+                        except IndexError:
+                            storeys = 1
+                        usesUiList[enum].storeys = int(storeys)
+                            
+                        break

@@ -9,10 +9,7 @@ def get_names_from_list(scene, context, collection):
     :return: list of tuples suitable for EnumProperty items
     """
     items = []
-    # Iterate over each element in the specified collection
-    for idx, el in enumerate(getattr(scene, collection, [])):
-        # Create a tuple (id, name, description) for each element
-        # identifier = el.name.replace(" ", "_").lower()
+    for el in getattr(scene, collection, []):
         items.append((el.name, el.name, "", el.id))
         
     return items

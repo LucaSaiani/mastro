@@ -73,14 +73,16 @@ class OBJECT_OT_Add_Mastro_Mass(Operator, AddObjectHelper):
         obj = bpy.context.active_object
         
         
-        add_mass_attributes(obj)
+        
             
         add_nodes()
         
-        mesh_attributes = obj.data.attributes["mastro_number_of_storeys"].data.items()
+        # mesh_attributes = obj.data.attributes["mastro_number_of_storeys"].data.items()
         # mesh_attributes[0][1].value = self.storeys
-        mesh_attributes[0][1].value = 3
+        # mesh_attributes[0][1].value = 3
 
+    
+        bm.free
         # add mastro mass geo node to the created object
         geoName = "MaStro Mass"
         obj.modifiers.new(geoName, "NODES")
@@ -89,5 +91,8 @@ class OBJECT_OT_Add_Mastro_Mass(Operator, AddObjectHelper):
         context.view_layer.objects.active = obj
         
         obj.select_set(True)
+        
+        add_mass_attributes(obj, "MaStro mass")
+
         return {'FINISHED'}
     
