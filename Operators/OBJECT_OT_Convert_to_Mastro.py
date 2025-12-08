@@ -28,7 +28,7 @@ class OBJECT_OT_Convert_to_Mastro_Mass(Operator):
         selected_meshes = [obj for obj in selected_objects if obj.type == 'MESH']
         # mode = None
         for obj in selected_meshes:
-            add_mass_attributes(obj)
+            add_mass_attributes(obj, "MaStro mass")
             
         add_nodes()
         return {'FINISHED'}
