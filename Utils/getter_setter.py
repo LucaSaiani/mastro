@@ -32,7 +32,7 @@ attribute_map = {
  
 # this dictionary is used in set_attribute_mastro_generic 
 layer_map = {
-    "mastro_wall_id": ("edges", "INT", ("MaStro mass")),
+    "mastro_wall_id": ("edges", "INT", ("MaStro mass",)),
     "mastro_inverted_normal": ("edges", "BOOL", ("MaStro mass", "MaStro block")),
     "mastro_block_depth": ("edges", "FLOAT", ("MaStro block",)),
     "mastro_side_angle": ("verts", "FLOAT", ("MaStro block",)),
@@ -256,7 +256,7 @@ def set_attribute_mastro_undercroft(self, value):
 def set_attribute_mastro_generic(value, bm_layer):
     if bm_layer in layer_map:
         field_name, type, mastro_types = layer_map[bm_layer]
-                
+        
         active_object = bpy.context.view_layer.objects.active
         selected_objects = bpy.context.selected_objects
         
@@ -290,6 +290,7 @@ def set_attribute_mastro_generic(value, bm_layer):
                     selection_set = [s for s in field if s.select]
                     for selection in selection_set:
                         selection[layer] = value
+                        print(value)
                         
                     if mesh.is_editmode:
                         bmesh.update_edit_mesh(mesh)
