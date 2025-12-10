@@ -6,7 +6,7 @@ class VIEW3D_PT_Mastro_Panel(Panel):
     bl_region_type = "UI"
     bl_category = "MaStro"
     bl_label = "MaStro"
-    
+    bl_order = 0
     
     @classmethod
     def poll(cls, context):
@@ -17,7 +17,7 @@ class VIEW3D_PT_Mastro_Panel(Panel):
         )
     
     def draw(self, context):
-        scene = context.scene
+        # scene = context.scene
         layout = self.layout
         # layout.operator(MaStro_MenuOperator_add_MaStro_mass.bl_idname)
         layout.operator("object.mastro_convert_to_mastro_mass")

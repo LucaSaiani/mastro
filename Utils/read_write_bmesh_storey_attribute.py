@@ -22,6 +22,8 @@ def write_bmesh_storey_attribute(bm, selection, numberOfStoreys, mode):
     selection[bMesh_storey_list_A] = data["storey_list_A"]
     selection[bMesh_storey_list_B] = data["storey_list_B"]
     
+    return data
+    
 
 def read_bmesh_storey_attribute(numberOfStoreys, typology_id):
     projectUses = bpy.context.scene.mastro_use_name_list
