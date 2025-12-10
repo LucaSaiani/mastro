@@ -29,6 +29,7 @@ from .VIEW3D_PT_Mastro_Mass import VIEW3D_PT_Mastro_Mass
 from .VIEW3D_PT_Mastro_Street import VIEW3D_PT_Mastro_Street
 from .VIEW3D_PT_transform_orientations import VIEW3D_PT_transform_orientations
 from .VIEW3D_PT_Mastro_Override import VIEW3D_PT_Mastro_Mass_Override, VIEW3D_PT_Mastro_Block_Override
+from .VIEW3D_PT_Mastro_Export import VIEW3D_PT_Mastro_Export
 
 
 classes = (
@@ -63,7 +64,8 @@ classes = (
     VIEW3D_PT_Mastro_Street,
     VIEW3D_PT_transform_orientations,
     VIEW3D_PT_Mastro_Mass_Override, 
-    VIEW3D_PT_Mastro_Block_Override
+    VIEW3D_PT_Mastro_Block_Override,
+    VIEW3D_PT_Mastro_Export
     )
 
 MASTRO_LISTS = [

@@ -18,6 +18,7 @@ from .OBJECT_OT_Set_Street_Id import OBJECT_OT_Set_Street_Id
 from .OBJECT_OT_Update_Mastro_Mesh_Attributes import OBJECT_OT_Update_Mastro_Mesh_Attributes
 from .OBJECT_OT_Update_Street_Attributes import OBJECT_OT_update_all_MaStro_street_attributes
 from .TRANSFORM_OT_Set_Orientation import TRANSFORM_OT_Mastro_Set_Orientation
+from .OBJECT_OT_Export import OBEJCT_OT_Mastro_Export_CSV, OBJECT_OT_MaStro_Print_Data
 
 
 classes = (
@@ -44,4 +45,6 @@ classes = (
     OBJECT_OT_Update_Mastro_Mesh_Attributes,
     OBJECT_OT_update_all_MaStro_street_attributes,
     TRANSFORM_OT_Mastro_Set_Orientation,
+    OBEJCT_OT_Mastro_Export_CSV,
+    OBJECT_OT_MaStro_Print_Data,
     )

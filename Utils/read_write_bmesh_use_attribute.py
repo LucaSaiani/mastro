@@ -40,7 +40,10 @@ def write_bmesh_use_attribute(bm, selection, value, mode):
     # selection[bMesh_undercroft] = data["undercroft"]
     
     numberOfStoreys = selection[bMesh_storeys]
-    write_bmesh_storey_attribute(bm, selection, numberOfStoreys, mode)
+    data_storey = write_bmesh_storey_attribute(bm, selection, numberOfStoreys, mode)
+    
+    joined_data = {**data_storey, **data} 
+    return(joined_data)
     
 def read_bmesh_use_attribute(typology_id):
     projectUses = bpy.context.scene.mastro_use_name_list
