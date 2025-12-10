@@ -92,7 +92,12 @@ mass_attribute_set = [
             "attr_domain" :  "FACE",
             "attr_default" : 1
             },
-            
+            {
+            "attr" :  "mastro_inverted_normal",
+            "attr_type" :  "BOOLEAN",
+            "attr_domain" :  "EDGE",
+            "attr_default" : 0
+            },
             {
             "attr" : "mastro_custom_vert",
             "attr_type" :  "FLOAT",
