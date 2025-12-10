@@ -7,8 +7,30 @@ from bpy.props import StringProperty
 import csv
 from decimal import Decimal
 
-header_aggregateData = ["Option", "Phase", "Block Name", "Building Name", "Use", "N. of Storeys", "Footprint", "Perimeter", "Wall area", "GEA"]
-header_granularData = ["Block Name", "Building Name", "Use", "Floor", "Level", "GEA", "Perimeter", "Wall area"]
+# header_aggregateData = ["Option", "Phase", "Block Name", "Building Name", "Use", "N. of Storeys", "Footprint", "Perimeter", "Wall area", "GEA"]
+# header_granularData = ["Block Name", "Building Name", "Use", "Floor", "Level", "GEA", "Perimeter", "Wall area"]
+header_aggregateData = ["Block Name", 
+                        "Building Name", 
+                        "Use", 
+                        "Floor", 
+                        "Number of Storeys", 
+                        "Footprint", 
+                        "Perimeter", 
+                        "Wall Area", 
+                        "GEA"]
+
+header_granularData = ["Block Name", 
+                  "Building Name",
+                  "Typology Name",
+                  "Number of Storeys",
+                  "Use", 
+                  "Floor", 
+                  "Level", 
+                  "GEA",
+                  "Footprint",
+                  "Perimeter", 
+                  "Wall Area"]
+
 floorToFloorLevel = 4.5
  
 class OBEJCT_OT_Mastro_Export_CSV(Operator, ExportHelper):
@@ -39,30 +61,45 @@ class OBJECT_OT_MaStro_Print_Data(Operator):
     )
 
     def execute(self, context):
-        roughData = []
-        csvData = []
-        csvTemp = []
         objects = [obj for obj in bpy.context.scene.objects]
+        data = []
+        roughData = []
+        # data = []
+        # roughData = []
+        # csvData = []
+        # csvTemp = []
+        
         for obj in objects:
             if obj.visible_get() and obj.type == "MESH" and "MaStro object" in obj.data:
-                csvTemp.append(get_mass_data(obj))
-        for sublist in csvTemp:
-            roughData.extend(sublist)
-            
-        if self.text == "aggregate":
-            csvData = aggregateData(roughData)
-        else:
-            csvData = granularData(roughData)
+                # csvTemp.append(get_mass_data(obj))
+                roughData.append(get_mass_data(obj))
+        # for sublist in csvTemp:
+        #     roughData.extend(sublist)
         
-        print("")
-        print("")
+        data = roughData[:]
+        
+        if self.text == "aggregate":
+            dataDict = aggregateData(data)
+            header = header_aggregateData
+        else:
+            dataDict = granularData(data)
+            header = header_granularData
+        
         tab = "\t"
-        for r, row in enumerate(csvData):
+        print("\n")
+        print(tab.join(header))
+        print("-" * 150)
+        
+        total_perimeter = 0
+        total_wall = 0
+        total_gea = 0
+        
+        for r, row in enumerate(dataDict):
             string = ""
-            for el in row:
+            for key in header:
+                el = row.get(key, "")
                 if isinstance(el, float): # if the entry is a float, it is rounded
-                     el = Decimal(el)
-                     el = el.quantize(Decimal('0.001'))
+                     el = Decimal(el).quantize(Decimal('0.001'))
                      
                 i = 1
                 tabs = tab
@@ -82,8 +119,22 @@ class OBJECT_OT_MaStro_Print_Data(Operator):
         
                     
                 string = string + str(el) + tabs
-            if r == 1: print("--------------------------------------------------------------------------------------------------------------------------------------------------------------")
+            if r == 1: 
+                print("--------------------------------------------------------------------------------------------------------------------------------------------------------------")
             print(f"{string}")
+            
+            # calculate the totals
+            total_perimeter += row.get("Perimeter", 0)
+            total_wall      += row.get("Wall Area", 0)
+            total_gea       += row.get("GEA", 0)
+            
+        print("")
+        
+        print("\n")
+        print("=== TOTALS ===")
+        print(f"Perimeter:\t{Decimal(total_perimeter).quantize(Decimal('0.001'))}")
+        print(f"Wall Area:\t{Decimal(total_wall).quantize(Decimal('0.001'))}")
+        print(f"GEA:\t\t{Decimal(total_gea).quantize(Decimal('0.001'))}")
         print("")
         
         return {'FINISHED'}
@@ -99,37 +150,22 @@ class faceEdge():
          self.perimeter = perimeter
     
 def writeCSV(context, filepath):
-    csvData = []
+    # csvData = []
     data = []
-    dataRough = []
+    roughData = []
 
     objects = [obj for obj in bpy.context.scene.objects]
 
     for obj in objects:
         if obj.visible_get() and obj.type == "MESH" and "MaStro object" in obj.data:
-            dataRough.append(get_mass_data(obj))
+            roughData.append(get_mass_data(obj))
 
-    # for sublist in dataRough:
-    #     data.extend(sublist)
-    data = dataRough[:]
+    data = roughData[:]
 
     granularDataDict = granularData(data)
-    
-    fieldnames = ["Block Name", 
-                  "Building Name",
-                  "Typology Name",
-                  "Number of Storeys",
-                  "Use", 
-                  "Floor", 
-                  "Level", 
-                  "GEA",
-                  "Footprint",
-                  "Perimeter", 
-                  "Wall Area"]
-
 
     with open(filepath, 'w', newline='') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer = csv.DictWriter(csvfile, fieldnames=header_granularData)
         writer.writeheader()
         writer.writerows(granularDataDict)
 
@@ -139,12 +175,15 @@ def writeCSV(context, filepath):
 
 def get_mass_data(obj):
     data = []
+    projectUses = bpy.context.scene.mastro_use_name_list
     
     mesh = obj.data
     bm = bmesh.new()
     bm.from_mesh(mesh)
     bMesh_typology = bm.faces.layers.int["mastro_typology_id"]
     bMesh_storeys = bm.faces.layers.int["mastro_number_of_storeys"]
+    # bMesh_use_list_A   = bm.faces.layers.int["mastro_list_use_id_A"]
+    # bMesh_use_list_B   = bm.faces.layers.int["mastro_list_use_id_B"]
     
     for face in bm.faces:
         edges = []
@@ -165,7 +204,13 @@ def get_mass_data(obj):
         for typology in bpy.context.scene.mastro_typology_name_list:
             if typology.id == face[bMesh_typology]:
                 typology_name = typology.name
+                typology_id = typology.id
+                # item = next(i for i in bpy.context.scene.mastro_typology_name_list if i["id"] == typology_id)
+                # use_list = item.useList
+                # useSplit = use_list.split(";")    
                 break
+            
+        
 
         number_of_storeys = face[bMesh_storeys]
 
@@ -240,11 +285,11 @@ def get_mass_data(obj):
         # level = Decimal(level)
         # level = level.quantize(Decimal('0.001'))
         
-        # data.append([block_name, building_name, typology_name, number_of_storeys, level, footprint, perimeter, wall_area, GEA, edges])
         entry = {
             "Block Name": block_name,
             "Building Name": building_name,
             "Typology Name": typology_name,
+            "Typology Id" : typology_id,
             "Number of Storeys": number_of_storeys,
             "Level": level,
             "Footprint": footprint,
@@ -258,38 +303,92 @@ def get_mass_data(obj):
 
 
 def aggregateData(roughData):
-    roughData = sorted(roughData, key=lambda x:(x[0], x[1], x[2], x[3], x[4]))
-        
-    data = []
-    data.append(roughData[0])
+    roughData_flat = [entry for sublist in roughData for entry in sublist]
+    roughData_sorted = sorted(
+        roughData_flat,
+        key=lambda x: (
+            x["Block Name"],
+            x["Building Name"],
+            x["Typology Name"],
+            x["Level"]
+        )
+    )
+    
+    data = [roughData_sorted[0]]
+    
+    for el in roughData_sorted[1:]:
+        last = data[-1]
+        if (
+            el["Block Name"] == last["Block Name"] and
+            el["Building Name"] == last["Building Name"] and
+            el["Typology Name"] == last["Typology Name"] and
+            el["Number of Storeys"] == last["Number of Storeys"] and
+            el.get("Floor", None) == last.get("Floor", None)
+        ):
+            # update number of storeys, if necessary
+            if el["Number of Storeys"] > last["Number of Storeys"]:
+                last["Number of Storeys"] = el["Number of Storeys"]
 
-    for el in roughData[1:]:
-        if el[:5] == data[-1][:5]:
-            prev_storeys = data[-1][5]
-            # update number of storeys
-            storeys = el[5]
-            if storeys > prev_storeys:
-                data[-1][5] = storeys
-            # sum footprint
-            data[-1][7] += el[7]
-            # sum perimeter
-            data[-1][8] += el[8]
-            # sum wall
-            data[-1][9] += el[9]
-            # sum GEA
-            data[-1][10] += el[10]
+            # summing footprint, perimeter, wall area, GEA
+            last["Footprint"] += el.get("Footprint", 0)
+            last["Perimeter"] += el.get("Perimeter", 0)
+            last["Wall Area"] += el.get("Wall Area", 0)
+            last["GEA"] += el.get("GEA", 0)
         else:
             data.append(el)
-            
-    # remove unwanted elements
-    for index, el in enumerate(data):
-        del data[index][11] #edge
-        del data[index][6] #level
-        
-    data = sorted(data, key=lambda x:(x[0], x[1], x[2], x[3], x[4]))
-    data.insert(0, header_aggregateData)
 
-    return(data)
+    # remove unwanted keys
+    for el in data:
+        el.pop("Edges", None)  
+        el.pop("Level", None)  
+
+    # Final sorting
+    data_sorted = sorted(
+        data,
+        key=lambda x: (
+            x["Block Name"],
+            x["Building Name"],
+            x["Typology Name"],
+            x.get("Floor", x["Number of Storeys"])
+        )
+    )
+
+    return data_sorted
+
+
+# def aggregateData(roughData):
+#     roughData = sorted(roughData, key=lambda x:(x[0], x[1], x[2], x[3], x[4]))
+        
+#     data = []
+#     data.append(roughData[0])
+
+#     for el in roughData[1:]:
+#         if el[:5] == data[-1][:5]:
+#             prev_storeys = data[-1][5]
+#             # update number of storeys
+#             storeys = el[5]
+#             if storeys > prev_storeys:
+#                 data[-1][5] = storeys
+#             # sum footprint
+#             data[-1][7] += el[7]
+#             # sum perimeter
+#             data[-1][8] += el[8]
+#             # sum wall
+#             data[-1][9] += el[9]
+#             # sum GEA
+#             data[-1][10] += el[10]
+#         else:
+#             data.append(el)
+            
+#     # remove unwanted elements
+#     for index, el in enumerate(data):
+#         del data[index][11] #edge
+#         del data[index][6] #level
+        
+#     data = sorted(data, key=lambda x:(x[0], x[1], x[2], x[3], x[4]))
+#     data.insert(0, header_aggregateData)
+
+#     return(data)
 
 
 def granularData(roughData):
