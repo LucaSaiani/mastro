@@ -53,7 +53,7 @@ class OBJECT_OT_update_all_MaStro_street_attributes(Operator):
                         edgeIndex = edge.index
                         street_id = mesh.attributes["mastro_street_id"].data[edgeIndex].value
                         data = read_street_attribute(context, mesh, edgeIndex, streetSet = street_id)
-                        if [i for i in ["width"] if i in self.attribute_to_updatete]:
+                        if [i for i in ["width"] if i in self.attribute_to_update]:
                             mesh.attributes["mastro_street_width"].data[edgeIndex].value = data["width"]/2
                         elif [i for i in ["radius"] if i in self.attribute_to_update]:
                             mesh.attributes["mastro_street_radius"].data[edgeIndex].value = data["radius"]
