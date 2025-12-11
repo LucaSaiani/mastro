@@ -1,5 +1,4 @@
 import bpy 
-import bmesh
 
 from ..Utils.init_lists import init_lists
 from ..Utils.update_bmesh_attributes import update_bmesh_attributes
@@ -54,7 +53,7 @@ def update_typology_uses_list(context):
     # remove the last ";" in the string
     tmp = tmp[:-1]
     context.scene.mastro_typology_name_list[selected_typology_index].useList = tmp
-
+    
     
 # update the typology use in the UIList, in the scene panel,
 # with the name selected in the drop down menu in the Typology Uses UI
