@@ -100,8 +100,8 @@ class PROPERTIES_OT_Use_List_New_Item(Operator):
         subIndex = context.scene.mastro_typology_uses_name_list_index
         context.scene.mastro_typology_uses_name_list[subIndex].name = context.scene.mastro_use_name_list[last].name
         context.scene.mastro_typology_uses_name_list[subIndex].id = id
-        # update_typology_uses_list(context)
-        # update_all_mastro_meshes_useList(self, context)
+        update_typology_uses_list(context)
+        update_all_mastro_meshes_useList(self, context)
         
         bpy.ops.node.mastro_gn_separate_geometry_by(filter_name="use")
         bpy.ops.node.mastro_gn_filter_by(filter_name="use")
