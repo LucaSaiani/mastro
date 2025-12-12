@@ -290,7 +290,7 @@ def set_attribute_mastro_generic(value, bm_layer):
                     selection_set = [s for s in field if s.select]
                     for selection in selection_set:
                         selection[layer] = value
-                        print(value)
+                        # print(value)
                         
                     if mesh.is_editmode:
                         bmesh.update_edit_mesh(mesh)
