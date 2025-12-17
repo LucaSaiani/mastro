@@ -60,8 +60,8 @@ def update_view3D_panels(scene):
         active = None
         
         if "MaStro mass" in obj.data:
-            active_face_index = obj.data.polygons.active
             bm.faces.ensure_lookup_table()
+            active_face_index = obj.data.polygons.active
             active = bm.faces[active_face_index]
             
             bMesh_typology     = bm.faces.layers.int["mastro_typology_id"]
@@ -77,8 +77,8 @@ def update_view3D_panels(scene):
             bMesh_storey_list_B = bm.faces.layers.int["mastro_list_storey_B"]
             # bmesh_overlay_top    = bm.faces.layers.int["mastro_overlay_top"]
         else: # mastro block
-            active_edge_index = obj.data.edges.active
             bm.edges.ensure_lookup_table()
+            active_edge_index = obj.data.edges.active
             active = bm.edges[active_edge_index]
             
             bMesh_typology     = bm.edges.layers.int["mastro_typology_id_EDGE"]
