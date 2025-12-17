@@ -1,7 +1,10 @@
 import bpy
  
 from ..Operators.MESH_OT_Move_Active_Vertex import MESH_OT_Move_Active_Vertex
+from ..Operators.TRANSFORM_OT_Set_Orientation import TRANSFORM_OT_Mastro_Set_Orientation
+
 from .operators import TRANSFORM_OT_rotate_xy_constraint, TRANSFORM_OT_translate_xy_constraint
+
 
 addon_keymaps = []
 
@@ -24,6 +27,7 @@ def register():
         (km, km.keymap_items.new(TRANSFORM_OT_translate_xy_constraint.bl_idname, 'G', 'PRESS')),
         (km, km.keymap_items.new(TRANSFORM_OT_rotate_xy_constraint.bl_idname, 'R', 'PRESS')),
         (km, km.keymap_items.new(MESH_OT_Move_Active_Vertex.bl_idname, 'G', 'PRESS', alt=True)),
+        (km, km.keymap_items.new(TRANSFORM_OT_Mastro_Set_Orientation.bl_idname, 'COMMA', 'PRESS', alt=True)),
     ])
         
 def unregister():
