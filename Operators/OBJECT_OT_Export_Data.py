@@ -83,58 +83,61 @@ class OBJECT_OT_MaStro_Print_Data(Operator):
             dataDict = granularData(data)
             header = header_granularData
         
-        tab = "\t"
-        print("\n")
-        print(tab.join(header))
-        print("-" * 150)
+        # tab = "\t"
+        COL_WIDTH = 20
+
+        print_ui("\n")
+        # print_ui(tab.join(header))
+        # print_ui("-" * 150)
+        header_string = "".join([f"{h:<{COL_WIDTH}}" for h in header])
+        print_ui(header_string)
+        print_ui("-" * len(header_string))
         
         total_perimeter = 0
         total_wall = 0
         total_gea = 0
         
         for r, row in enumerate(dataDict):
-            string = ""
+            row_string = ""
             for key in header:
                 el = row.get(key, "")
                 if isinstance(el, float): # if the entry is a float, it is rounded
                      el = Decimal(el).quantize(Decimal('0.001'))
+                elif isinstance(el, Decimal):
+                    el = el.quantize(Decimal('0.001'))
+
+                row_string += f"{str(el):<{COL_WIDTH}}"
                      
-                i = 1
-                tabs = tab
-                while i < 3:
-                    if len(str(el) + tabs) >= 9:
-                        break
-                    else:
-                        i += 1
-                        t = 1
-                        while t < i-1:
-                            tabs = tabs + tab
-                            t += 1
-                
-        
-        # level = Decimal(level)
-        # level = level.quantize(Decimal('0.001'))
-        
+                # i = 1
+                # tabs = tab
+                # while i < 3:
+                #     if len(str(el) + tabs) >= 9:
+                #         break
+                #     else:
+                #         i += 1
+                #         t = 1
+                #         while t < i-1:
+                #             tabs = tabs + tab
+                #             t += 1
                     
-                string = string + str(el) + tabs
+                # string = string + str(el) + tabs
             if r == 1: 
-                print("--------------------------------------------------------------------------------------------------------------------------------------------------------------")
-            print(f"{string}")
+                print_ui("-" * len(header_string))
+            print_ui(row_string)
             
             # calculate the totals
             total_perimeter += row.get("Perimeter", 0)
             total_wall      += row.get("Wall Area", 0)
             total_gea       += row.get("GEA", 0)
             
-        print("")
+        print_ui("")
         
-        print("\n")
-        print("=== TOTALS ===")
-        print(f"Perimeter:\t{Decimal(total_perimeter).quantize(Decimal('0.001'))}")
-        print(f"Wall Area:\t{Decimal(total_wall).quantize(Decimal('0.001'))}")
-        print(f"GEA:\t\t{Decimal(total_gea).quantize(Decimal('0.001'))}")
-        print("")
-        
+        print_ui("\n")
+        print_ui("=== TOTALS ===")
+        print_ui(f"Perimeter:\t{Decimal(total_perimeter).quantize(Decimal('0.001'))}")
+        print_ui(f"Wall Area:\t{Decimal(total_wall).quantize(Decimal('0.001'))}")
+        print_ui(f"GEA:\t\t{Decimal(total_gea).quantize(Decimal('0.001'))}")
+        print_ui("")
         return {'FINISHED'}
     
 class faceEdge():
@@ -163,7 +166,10 @@ def writeCSV(context, filepath):
     granularDataDict = granularData(data)
 
     with open(filepath, 'w', newline='') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=header_granularData)
+        writer = csv.DictWriter(csvfile, 
+                                fieldnames=header_granularData,
+                                extrasaction="ignore"
+                                )
         writer.writeheader()
         writer.writerows(granularDataDict)
 
@@ -500,6 +506,10 @@ def granularData(roughData):
     # add expanded data
     data.extend(expandedData)
 
+    for x in data:
+        if "Floor Number" not in x:
+            x["Floor Number"] = x["Number of Storeys"]
+
     # second aggregate
     data = sorted(
         data,
@@ -507,7 +517,7 @@ def granularData(roughData):
             x["Block Name"],
             x["Building Name"],
             x["Typology"],
-            x.get("Floor Number", x["Number of Storeys"]),
+            x["Floor Number"],
             x["Level"]
         )
     )
@@ -531,3 +541,16 @@ def granularData(roughData):
 
     # print(granularData)
     return granularData
+
+
+# to print text in the python console
+def print_ui(text):
+    # Get the CONSOLE area
+    for area in bpy.context.screen.areas:
+        if area.type == 'CONSOLE':
+            with bpy.context.temp_override(area=area):
+                bpy.ops.console.scrollback_append(text=str(text), type="OUTPUT")
+            return
+            
+    print(f"[System Console Fallback]: {text}")
+
