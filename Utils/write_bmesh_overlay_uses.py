@@ -120,7 +120,7 @@ def override_uses(bm, selection, mode, uses_to_remove, updated_storeys_per_use, 
     # update the liquid storeys list
     for index, use in enumerate(uses):
         use_id = int(use)
-        if use_id == liquid_ids[0]:
+        if use_id == liquid_ids[-1]: # add storeys to the latest liquid storey
             liquid_storeys_A = storey_list_A[index]
             liquid_storeys_B = storey_list_B[index]
             liquid_storeys = int(liquid_storeys_A + liquid_storeys_B)
