@@ -40,6 +40,7 @@ ad620ac8-6a6e-41b1-a5d7-e94d9f67732f:MaStro/Curve:MaStro-Curve
 ba1a3696-9dc6-44d7-8384-5d5281480941:MaStro/Curve/Primitives:MaStro-Curve-Primitives
 048bb430-702f-4b63-9fd8-29c78e7bcf01:MaStro/Indices:MaStro-Indices
 5fdecf71-a6cc-472a-9298-6d4a67e0d834:MaStro/Instances:MaStro-Instances
+e6646823-b8da-4ae8-8a3e-df985ab2fa1c:MaStro/Landscape:MaStro-Landscape
 f849bd86-5298-407b-9e04-1e7681dd6062:MaStro/Materials:MaStro-Materials
 87599df8-9659-4869-9539-61b197945762:MaStro/Materials/Shaders:MaStro-Materials-Shaders
 fa7bef10-8469-46d3-a137-6a29858f7709:MaStro/Materials/Textures:MaStro-Materials-Textures
