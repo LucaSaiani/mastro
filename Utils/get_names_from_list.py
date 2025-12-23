@@ -13,6 +13,6 @@ def get_names_from_list(scene, context, collection):
 
     items = []
     for el in sorted(getattr(scene, collection, []), key=lambda e: e.name):
-        items.append((el.name, el.name, f"Id. {el.id} - {el.name}"))
+        items.append((el.name, el.name, f"Id. {el.id} - {el.name}", el.id))
     return items
 
