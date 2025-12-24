@@ -57,43 +57,41 @@ def update_view3D_panels(scene):
             bm = bmesh.new()
             bm.from_mesh(mesh)
        
+        # active_index = None
         active = None
         
         if "MaStro mass" in obj.data:
             bm.faces.ensure_lookup_table()
-            active_face_index = obj.data.polygons.active
-            active = bm.faces[active_face_index]
-            
-            bMesh_typology     = bm.faces.layers.int["mastro_typology_id"]
-            bMesh_use_list_A   = bm.faces.layers.int["mastro_list_use_id_A"]
-            bMesh_use_list_B   = bm.faces.layers.int["mastro_list_use_id_B"]
-            # bMesh_height_A     = bm.faces.layers.int["mastro_list_height_A"]
-            # bMesh_height_B     = bm.faces.layers.int["mastro_list_height_B"]
-            # bMesh_height_C     = bm.faces.layers.int["mastro_list_height_C"]
-            # bMesh_height_D     = bm.faces.layers.int["mastro_list_height_D"]
-            # bMesh_height_E     = bm.faces.layers.int["mastro_list_height_E"]
-            bMesh_storeys      = bm.faces.layers.int["mastro_number_of_storeys"]
-            bMesh_storey_list_A = bm.faces.layers.int["mastro_list_storey_A"]
-            bMesh_storey_list_B = bm.faces.layers.int["mastro_list_storey_B"]
-            # bmesh_overlay_top    = bm.faces.layers.int["mastro_overlay_top"]
+            field = bm.faces
+            suffix = ""
+            if isinstance(bm.select_history.active, bmesh.types.BMFace):
+                active = bm.select_history.active
+            # if obj.data.polygons.active:
+            #     active_index = obj.data.polygons.active
         else: # mastro block
             bm.edges.ensure_lookup_table()
-            active_edge_index = obj.data.edges.active
-            active = bm.edges[active_edge_index]
-            
-            bMesh_typology     = bm.edges.layers.int["mastro_typology_id_EDGE"]
-            bMesh_use_list_A   = bm.edges.layers.int["mastro_list_use_id_A_EDGE"]
-            bMesh_use_list_B   = bm.edges.layers.int["mastro_list_use_id_B_EDGE"]
-            # bMesh_height_A     = bm.edges.layers.int["mastro_list_height_A_EDGE"]
-            # bMesh_height_B     = bm.edges.layers.int["mastro_list_height_B_EDGE"]
-            # bMesh_height_C     = bm.edges.layers.int["mastro_list_height_C_EDGE"]
-            # bMesh_height_D     = bm.edges.layers.int["mastro_list_height_D_EDGE"]
-            # bMesh_height_E     = bm.edges.layers.int["mastro_list_height_E_EDGE"]
-            bMesh_storeys      = bm.edges.layers.int["mastro_number_of_storeys_EDGE"]
-            bMesh_storey_list_A = bm.edges.layers.int["mastro_list_storey_A_EDGE"]
-            bMesh_storey_list_B = bm.edges.layers.int["mastro_list_storey_B_EDGE"]
-            # bmesh_overlay_top   = bm.edges.layers.int["mastro_overlay_top_EDGE"]
+            # if obj.data.edges.active:
+            #     active_index = obj.data.edges.active
+            field = bm.edges
+            suffix = "_EDGE"
+            if isinstance(bm.select_history.active, bmesh.types.BMEdge):
+                active = bm.select_history.active
    
+        # bMesh_typology     = field.layers.int[f"mastro_typology_id{suffix}"]
+        bMesh_use_list_A   = field.layers.int[f"mastro_list_use_id_A{suffix}"]
+        bMesh_use_list_B   = field.layers.int[f"mastro_list_use_id_B{suffix}"]
+        # bMesh_height_A     = field.layers.int[f"mastro_list_height_A{suffix}"]
+        # bMesh_height_B     = field.layers.int[f"mastro_list_height_B{suffix}"]
+        # bMesh_height_C     = field.layers.int[f"mastro_list_height_C{suffix}"]
+        # bMesh_height_D     = field.layers.int[f"mastro_list_height_D{suffix}"]
+        # bMesh_height_E     = field.layers.int[f"mastro_list_height_E{suffix}"]
+        # bMesh_storeys      = field.layers.int[f"mastro_number_of_storeys{suffix}"]
+        bMesh_storey_list_A = field.layers.int[f"mastro_list_storey_A{suffix}"]
+        bMesh_storey_list_B = field.layers.int[f"mastro_list_storey_B{suffix}"]
+        # bmesh_overlay_top    = field.layers.int[f"mastro_overlay_top{suffix}"]
+
+        # if active_index is not None:
+        #     active = field[active_index]
         if active is not None:
             use_id_list_A = str(active[bMesh_use_list_A])[1:]
             use_id_list_B = str(active[bMesh_use_list_B])[1:]
