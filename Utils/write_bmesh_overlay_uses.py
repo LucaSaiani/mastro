@@ -93,7 +93,7 @@ def override_uses(bm, selection, mode, uses_to_remove, updated_storeys_per_use, 
         field = bm.faces
         suffix = ""
     else: # mastro block
-        bm.edges.ensure_lookp_table()
+        bm.edges.ensure_lookup_table()
         field = bm.edges
         suffix = "_EDGE"
 
