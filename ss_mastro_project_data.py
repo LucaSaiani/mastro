@@ -32,7 +32,7 @@ from types import SimpleNamespace
 
 # from . mastro_massing import read_mesh_attributes_uses
 from .Utils.ss_read_use_attribute import read_use_attribute
-from .Utils.read_wall_attribute import read_wall_attribute
+from .Utils.ss_read_wall_attribute import read_wall_attribute
 from .Utils.read_street_attribute import read_mesh_attributes_streets
 
 # from .Nodes.GNodes.mastro_GN_separate_by_wall_type import mastro_GN_separate_by_wall_type

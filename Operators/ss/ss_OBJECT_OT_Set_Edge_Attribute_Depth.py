@@ -1,7 +1,7 @@
 import bpy 
 from bpy.types import Operator
 
-from ..Utils.read_depth_attribute import read_depth_attribute
+from ..Utils.ss_read_depth_attribute import read_depth_attribute
 
 '''Set the depth of the building of the selected edge attribute of the MaStro block'''
 class OBJECT_OT_Set_Edge_Attribute_Depth(Operator):
