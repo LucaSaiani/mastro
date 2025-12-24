@@ -3,6 +3,7 @@ import bmesh
 
 from ..Utils.read_write_bmesh_use_attribute import write_bmesh_use_attribute
 from ..Utils.read_write_bmesh_storey_attribute import write_bmesh_storey_attribute
+from ..Utils.write_bmesh_overlay_uses import overlay_bmesh_uses
 
 # Function to update the attributes that
 # masses and blocks have in common
@@ -32,14 +33,17 @@ def update_bmesh_attributes(self, attribute_to_update):
         if "MaStro mass" in obj.data:
             mode = "FACE"
             field = bm.faces
-            bMesh_typology = field.layers.int["mastro_typology_id"]
-            bMesh_storeys = field.layers.int["mastro_number_of_storeys"]
+            suffix = ""
             
         else:
             mode="EGDE"
             field = bm.edges
-            bMesh_typology = field.layers.int["mastro_typology_id_EDGE"]
-            bMesh_storeys = field.layers.int["mastro_number_of_storeys_EDGE"]
+            suffix = "_EDGE"
+
+        bMesh_typology = field.layers.int[f"mastro_typology_id{suffix}"]
+        bMesh_storeys = field.layers.int[f"mastro_number_of_storeys{suffix}"]
+        bmesh_overlay_top = field.layers.int[f"mastro_overlay_top{suffix}"]
+   
         
         for selection in field:
             if attribute_to_update == "all":
@@ -51,6 +55,11 @@ def update_bmesh_attributes(self, attribute_to_update):
             elif attribute_to_update == "number_of_storeys":
                 numberOfStoreys = selection[bMesh_storeys]
                 write_bmesh_storey_attribute(bm, selection, numberOfStoreys, mode)
+            
+            if selection[bmesh_overlay_top] > 0:
+                value = selection[bmesh_overlay_top]
+                overlay_bmesh_uses(bm, selection, value, mode)
+
 
         if object_mode == "EDIT":
             bmesh.update_edit_mesh(mesh)

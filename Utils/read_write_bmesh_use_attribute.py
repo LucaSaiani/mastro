@@ -6,27 +6,23 @@ def write_bmesh_use_attribute(bm, selection, value, mode):
     data = read_bmesh_use_attribute(value)
     
     if mode == "FACE": # mastro mass
-        bMesh_typology     = bm.faces.layers.int["mastro_typology_id"]
-        bMesh_use_list_A   = bm.faces.layers.int["mastro_list_use_id_A"]
-        bMesh_use_list_B   = bm.faces.layers.int["mastro_list_use_id_B"]
-        bMesh_height_A     = bm.faces.layers.int["mastro_list_height_A"]
-        bMesh_height_B     = bm.faces.layers.int["mastro_list_height_B"]
-        bMesh_height_C     = bm.faces.layers.int["mastro_list_height_C"]
-        bMesh_height_D     = bm.faces.layers.int["mastro_list_height_D"]
-        bMesh_height_E     = bm.faces.layers.int["mastro_list_height_E"]
-        # bMesh_undercroft   = bm.faces.layers.int["mastro_undercroft"]
-        bMesh_storeys      = bm.faces.layers.int["mastro_number_of_storeys"]
+        field = bm.faces
+        suffix = ""
+        
     else: # mastro block
-        bMesh_typology     = bm.edges.layers.int["mastro_typology_id_EDGE"]
-        bMesh_use_list_A   = bm.edges.layers.int["mastro_list_use_id_A_EDGE"]
-        bMesh_use_list_B   = bm.edges.layers.int["mastro_list_use_id_B_EDGE"]
-        bMesh_height_A     = bm.edges.layers.int["mastro_list_height_A_EDGE"]
-        bMesh_height_B     = bm.edges.layers.int["mastro_list_height_B_EDGE"]
-        bMesh_height_C     = bm.edges.layers.int["mastro_list_height_C_EDGE"]
-        bMesh_height_D     = bm.edges.layers.int["mastro_list_height_D_EDGE"]
-        bMesh_height_E     = bm.edges.layers.int["mastro_list_height_E_EDGE"]
-        # bMesh_undercroft   = bm.edges.layers.int["mastro_undercroft_EDGE"]
-        bMesh_storeys      = bm.edges.layers.int["mastro_number_of_storeys_EDGE"]
+        field = bm.edges
+        suffix = "_EDGE"
+
+    bMesh_typology     = field.layers.int[f"mastro_typology_id{suffix}"]
+    bMesh_use_list_A   = field.layers.int[f"mastro_list_use_id_A{suffix}"]
+    bMesh_use_list_B   = field.layers.int[f"mastro_list_use_id_B{suffix}"]
+    bMesh_height_A     = field.layers.int[f"mastro_list_height_A{suffix}"]
+    bMesh_height_B     = field.layers.int[f"mastro_list_height_B{suffix}"]
+    bMesh_height_C     = field.layers.int[f"mastro_list_height_C{suffix}"]
+    bMesh_height_D     = field.layers.int[f"mastro_list_height_D{suffix}"]
+    bMesh_height_E     = field.layers.int[f"mastro_list_height_E{suffix}"]
+    # bMesh_undercroft   = field.layers.int[f"mastro_undercroft{suffix}"]
+    bMesh_storeys      = field.layers.int[f"mastro_number_of_storeys{suffix}"]
 
      # --- writing to bmesh ---
     selection[bMesh_typology] = data["typology_id"]
