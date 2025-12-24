@@ -73,13 +73,22 @@ def set_attribute_mastro_mesh_storeys(self, value):
             if "MaStro mass" in obj.data:
                 selection_set = [f for f in bm.faces if f.select]
                 mode = "FACE"
+                field = bm.faces
+                suffix = ""
             else: # mastro block
                 selection_set = [e for e in bm.edges if e.select]
                 mode = "EDGE"
+                field = bm.edges
+                suffix = "_EDGE"
+
+            bmesh_overlay_top = field.layers.int[f"mastro_overlay_top{suffix}"]
 
             for selection in selection_set:
                 write_bmesh_storey_attribute(bm, selection, value, mode)
-            
+                if selection[bmesh_overlay_top] > 0:
+                    value = selection[bmesh_overlay_top]
+                    overlay_bmesh_uses(bm, selection, value, mode)
+
             if mesh.is_editmode:
                 bmesh.update_edit_mesh(mesh)
             else:
@@ -129,12 +138,20 @@ def set_attribute_mastro_mesh_uses(self, value):
                     if "MaStro mass" in obj.data:
                         selection_set = [f for f in bm.faces if f.select]
                         mode = "FACE"
+                        field = bm.faces
+                        suffix = ""
                     else: #mastro block
                         selection_set = [e for e in bm.edges if e.select]
                         mode = "EDGE"
+                        field = bm.edges
+                        suffix = "_EDGE"
+
+                    bmesh_overlay_top = field.layers.int[f"mastro_overlay_top{suffix}"]
 
                     for selection in selection_set:
                         write_bmesh_use_attribute(bm, selection, value, mode)
+                        # reset the top floor overlay
+                        selection[bmesh_overlay_top] = 0
                         
                     if mesh.is_editmode:
                         bmesh.update_edit_mesh(mesh)
@@ -180,12 +197,25 @@ def set_attribute_mastro_overlay_uses(self, value):
             if "MaStro mass" in obj.data:
                 selection_set = [f for f in bm.faces if f.select]
                 mode = "FACE"
+                field = bm.faces
+                suffix = ""
+  
             else: # mastro block
                 selection_set = [e for e in bm.edges if e.select]
                 mode = "EDGE"
+                field = bm.edges
+                suffix = "_EDGE"
+
+            bmesh_overlay_top = field.layers.int[f"mastro_overlay_top{suffix}"]
+            bMesh_typology = field.layers.int[f"mastro_typology_id{suffix}"]
 
             for selection in selection_set:
-                overlay_bmesh_uses(bm, selection, value, mode)
+                selection[bmesh_overlay_top] = value
+                if value == 0:
+                    typology_id = selection[bMesh_typology]
+                    write_bmesh_use_attribute(bm, selection, typology_id, mode)
+                else:
+                    overlay_bmesh_uses(bm, selection, value, mode)
                 
             if mesh.is_editmode:
                 bmesh.update_edit_mesh(mesh)
@@ -230,13 +260,17 @@ def set_attribute_mastro_undercroft(self, value):
         try:
             if "MaStro mass" in obj.data:
                 selection_set = [f for f in bm.faces if f.select]
-                layer = bm.faces.layers.int["mastro_undercroft"]
+                field = bm.faces
+                suffix = ""
+                
             else: # mastro block
                 selection_set = [e for e in bm.edges if e.select]
-                layer = bm.edges.layers.int["mastro_undercroft_EDGE"]
+                field = bm.edges
+                suffix = "_EDGE"
 
+            bMesh_undercroft = field.layers.int[f"mastro_undercroft{suffix}"]
             for selection in selection_set:
-                selection[layer] = value
+                selection[bMesh_undercroft] = value
                 
             if mesh.is_editmode:
                 bmesh.update_edit_mesh(mesh)

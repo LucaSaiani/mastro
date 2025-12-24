@@ -3,15 +3,16 @@ import math
 
 def write_bmesh_storey_attribute(bm, selection, numberOfStoreys, mode):
     if mode == "FACE": # mastro mass
-        bMesh_storeys = bm.faces.layers.int["mastro_number_of_storeys"]
-        bMesh_storey_list_A = bm.faces.layers.int["mastro_list_storey_A"]
-        bMesh_storey_list_B = bm.faces.layers.int["mastro_list_storey_B"]
-        bMesh_typology = bm.faces.layers.int["mastro_typology_id"]
+        field = bm.faces
+        suffix = ""
     else: # mastro block
-        bMesh_storeys = bm.edges.layers.int["mastro_number_of_storeys_EDGE"]
-        bMesh_storey_list_A = bm.edges.layers.int["mastro_list_storey_A_EDGE"]
-        bMesh_storey_list_B = bm.edges.layers.int["mastro_list_storey_B_EDGE"]
-        bMesh_typology = bm.edges.layers.int["mastro_typology_id_EDGE"]
+        field = bm.edges
+        suffix = "_EDGE"
+    
+    bMesh_storeys = field.layers.int[f"mastro_number_of_storeys{suffix}"]
+    bMesh_storey_list_A = field.layers.int[f"mastro_list_storey_A{suffix}"]
+    bMesh_storey_list_B = field.layers.int[f"mastro_list_storey_B{suffix}"]
+    bMesh_typology = field.layers.int[f"mastro_typology_id{suffix}"]
     
     typology_id = selection[bMesh_typology]
     
