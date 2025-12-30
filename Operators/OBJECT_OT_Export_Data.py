@@ -69,10 +69,16 @@ class OBJECT_OT_MaStro_Print_Data(Operator):
         
         for obj in objects:
             if obj.visible_get() and obj.type == "MESH" and "MaStro object" in obj.data:
-                # csvTemp.append(get_mass_data(obj))
-                roughData.append(get_mass_data(obj))
-        # for sublist in csvTemp:
-        #     roughData.extend(sublist)
+                if "MaStro mass" in obj.data:
+                    mastro_type = "mass"
+                else:
+                    mastro_type = "block"
+                roughData.append(get_mass_data(obj, mastro_type))
+
+                # delete the copy of the mesh
+                # if "MaStro block" in obj.data:
+                #     bpy.data.meshes.remove(mesh)
+       
         
         data = roughData[:]
         
@@ -159,7 +165,15 @@ def writeCSV(context, filepath):
 
     for obj in objects:
         if obj.visible_get() and obj.type == "MESH" and "MaStro object" in obj.data:
-            roughData.append(get_mass_data(obj))
+            if "MaStro mass" in obj.data:
+                mastro_type = "mass"
+            else:
+                mastro_type = "block"
+            roughData.append(get_mass_data(obj, mastro_type))
+
+            # delete the copy of the mesh
+            # if "MaStro block" in obj.data:
+            #     bpy.data.meshes.remove(mesh)
 
     data = roughData[:]
 
@@ -177,11 +191,47 @@ def writeCSV(context, filepath):
     return {'FINISHED'}
 
 
-def get_mass_data(obj):
+# in case of masttro block, the mesh is evaluated in order to get areas
+def evaluate_mastro_obj(obj):
+    # get the list of modifiers, keep on only the first one, the others
+    # are switched off
+    modifiers_to_restore = []
+    found_first = False
+
+    for mod in obj.modifiers:
+        if mod.type == 'NODES':
+            if not found_first:
+                found_first = True
+                continue
+            else:
+                modifiers_to_restore.append((mod, mod.show_viewport))
+                mod.show_viewport = False
+
+    bpy.context.view_layer.update() 
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    # Invoke to_mesh() for evaluated object.
+    object_eval = obj.evaluated_get(depsgraph)
+    # mesh_from_eval = object_eval.to_mesh()
+    # a copy of the mesh is necessary to be processed as bMesh
+    mesh_from_eval = bpy.data.meshes.new_from_object(object_eval)
+    object_eval.to_mesh_clear()
+
+    # modifiers asre turned bakc on
+    for mod, state in modifiers_to_restore:
+        mod.show_viewport = state
+   
+    return mesh_from_eval
+
+
+def get_mass_data(obj, mastro_type):
     data = []
     # projectUses = bpy.context.scene.mastro_use_name_list
-    
-    mesh = obj.data
+
+    if mastro_type == "mass":
+        mesh = obj.data
+    else:
+        mesh = evaluate_mastro_obj(obj)
+        
     bm = bmesh.new()
     bm.from_mesh(mesh)
     
@@ -198,6 +248,7 @@ def get_mass_data(obj):
     bMesh_height_E = bm.faces.layers.int["mastro_list_height_E"]
     
     face_list = list(bm.faces)
+    
     for face in face_list:
         edges = []
         block_name = ""
@@ -360,6 +411,9 @@ def get_mass_data(obj):
         data.append(entry)
 
     bm.free()
+
+    if mastro_type == "block":
+        bpy.data.meshes.remove(mesh)
     return data
 
 
