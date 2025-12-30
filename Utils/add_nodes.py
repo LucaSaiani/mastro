@@ -6,7 +6,7 @@ def clear_asset_status(data_block):
     """Clears the asset status of any data block (NodeTree, Material, etc.)"""
     if data_block and hasattr(data_block, "asset_data") and data_block.asset_data:
         data_block.asset_clear()
-        print(f"MaStro: Asset status cleared for {type(data_block).__name__}: '{data_block.name}'")
+        # print(f"MaStro: Asset status cleared for {type(data_block).__name__}: '{data_block.name}'")
 
 def clean_tree_recursive(tree, processed_trees):
     """
