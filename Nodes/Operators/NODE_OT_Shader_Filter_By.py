@@ -23,15 +23,32 @@ class NODE_OT_mastro_shader_filter_by(Operator):
         
         # shader group
         group = bpy.data.node_groups.new(groupName,'ShaderNodeTree')
-        #Add Group Output
-        group_output = group.nodes.new('NodeGroupOutput')
+        
         # Add named attribute
         named_attribute_node = group.nodes.new(type="ShaderNodeAttribute")
         named_attribute_node.attribute_type = 'GEOMETRY'
         named_attribute_node.attribute_name = attributeName
         named_attribute_node.name = "Named Attribute" # this to keep more generic the following code
         named_attribute_node.label = "Named Attribute"
+        # Add Map range
+        map_range = group.nodes.new(type="ShaderNodeMapRange")
+        map_range.name = "Factor"
+        map_range.inputs[2].default_value = 0
+        #Add Group Output
+        group_output = group.nodes.new('NodeGroupOutput')
+
+        socket = group.interface.new_socket(
+                    name="Factor",
+                    description="Normalized factor of the IDs",
+                    in_out="OUTPUT",
+                    socket_type="NodeSocketFloat"
+                    )
         
+        group.links.new(named_attribute_node.outputs[0],
+                        map_range.inputs[0])
+        group.links.new(map_range.outputs[0],
+                        group_output.inputs["Factor"])
+            
         return(group)
         
         
@@ -47,6 +64,7 @@ class NODE_OT_mastro_shader_filter_by(Operator):
         nodes = filterBy_Group.nodes
         
         group_output = nodes["Group Output"]
+        map_range = nodes["Factor"]
         named_attribute_node = nodes["Named Attribute"]
         # nodeName = self.filter_name + " number"
         # value_attribute_node = nodes[nodeName]
@@ -120,6 +138,9 @@ class NODE_OT_mastro_shader_filter_by(Operator):
                                              compare_node.inputs[0])
                     filterBy_Group.links.new(compare_node.outputs[0],
                                              group_output.inputs[socket.name])
+                    
+                    # update the map range
+                    map_range.inputs[2].default_value = len(listToLoop)
 
                 # a name has been renamed
                 # elif ("id: " + str(el.id) + " - " + str(el.name)) not in filterNodeDescriptions:
@@ -185,7 +206,7 @@ class NODE_OT_mastro_shader_filter_by(Operator):
                 socket_by_id[int(match.group(1))] = socket
 
         # Reorder sockets following sorted use names
-        target_index = 0
+        target_index = 1
         for use in sorted_uses:
             socket = socket_by_id.get(use.id)
             if socket:
