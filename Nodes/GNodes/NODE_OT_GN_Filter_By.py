@@ -38,7 +38,8 @@ class NODE_OT_mastro_filter_by(Operator):
         
     def execute(self, context):
         name = "MaStro Filter by " + self.filter_name.title()
-                    
+        pattern = r"id: (.*?) -"
+
         if name not in bpy.data.node_groups:
             filterBy_Group = self.newGroup(name, "GN")
         else:
@@ -51,17 +52,17 @@ class NODE_OT_mastro_filter_by(Operator):
         named_attribute_node = nodes["Named Attribute"]
                     
         filterNodeIds = []
-        filterNodeDescriptions = []
+        # filterNodeDescriptions = []
         for node in nodes:
             if node.type == "COMPARE":
                 tmpId = node.inputs[3].default_value
                 filterNodeIds.append(tmpId)
-                filterNodeDescriptions.append(filterBy_Group.interface.items_tree[tmpId].description)
+                # filterNodeDescriptions.append(filterBy_Group.interface.items_tree[tmpId].description)
             
-        if len(filterNodeIds) == 0:
-            lastId = -1           
-        else:
-            lastId = max(filterNodeIds)
+        # if len(filterNodeIds) == 0:
+        #     lastId = -1           
+        # else:
+        #     lastId = max(filterNodeIds)
             
         if self.filter_name == "use": listToLoop = bpy.context.scene.mastro_use_name_list
         elif self.filter_name == "typology": listToLoop = bpy.context.scene.mastro_typology_name_list
@@ -86,7 +87,7 @@ class NODE_OT_mastro_filter_by(Operator):
                     compare_node.hide = True
                     compare_node.label="="+str(el.id)
                     compare_node.name="Compare "+str(el.id)
-                    lastId = el.id
+                    # lastId = el.id
                     
                     #Add the Output Sockets and change their Default Value
                     if el.name == "":
@@ -97,23 +98,39 @@ class NODE_OT_mastro_filter_by(Operator):
                     else:
                         elName = el.name
                     descr = "id: " + str(el.id) + " - " + elName
-                    filterBy_Group.interface.new_socket(name=elName,description=descr,in_out ="OUTPUT", socket_type="NodeSocketBool")
+                    # filterBy_Group.interface.new_socket(name=elName,description=descr,in_out ="OUTPUT", socket_type="NodeSocketBool")
+                    socket = filterBy_Group.interface.new_socket(name=elName,
+                                                                 description=descr,
+                                                                 in_out ="OUTPUT", 
+                                                                 socket_type="NodeSocketBool"
+                    )
+            
             
                     #Add Links
-                    index = len(group_output.inputs) -2
-                    filterBy_Group.links.new(named_attribute_node.outputs[0], compare_node.inputs[2])
-                    filterBy_Group.links.new(compare_node.outputs[0], group_output.inputs[index])
+                    # index = len(group_output.inputs) -2
+                    filterBy_Group.links.new(named_attribute_node.outputs[0], 
+                                             compare_node.inputs[2])
+                    filterBy_Group.links.new(compare_node.outputs[0], 
+                                             group_output.inputs[socket.name])
 
                 # a name has been renamed
-                elif ("id: " + str(el.id) + " - " + str(el.name)) not in filterNodeDescriptions:
-                    for i, desc in enumerate(filterNodeDescriptions):
-                        if i == int(el.id):
-                            filterBy_Group.interface.items_tree[i].name = str(el.name)
-                            filterBy_Group.interface.items_tree[i].description = "id: " + str(el.id) + " - " + str(el.name)
+                # elif ("id: " + str(el.id) + " - " + str(el.name)) not in filterNodeDescriptions:
+                #     for i, desc in enumerate(filterNodeDescriptions):
+                #         if i == int(el.id):
+                #             filterBy_Group.interface.items_tree[i].name = str(el.name)
+                #             filterBy_Group.interface.items_tree[i].description = "id: " + str(el.id) + " - " + str(el.name)
+                expected_descr = f"id: {el.id} - {el.name}"
+                for socket in filterBy_Group.interface.items_tree:
+                    match = re.search(pattern, socket.description)
+                    if match and int(match.group(1)) == el.id:
+                        if socket.description != expected_descr:
+                            socket.name = el.name
+                            socket.description = expected_descr
+                        break
         
         # the name has been moven up and down in the list
         if self.output_direction != "None":
-            pattern = r"id: (.*?) -"
+            
 
             interface = filterBy_Group.interface
             sockets = interface.items_tree
