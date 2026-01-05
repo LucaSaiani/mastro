@@ -1,6 +1,6 @@
 import bpy 
 
-from ..GNodes import classes as MASTROCUSTOMCLASSES
+from ..Operators import classes as MASTROCUSTOMCLASSES
 
 class MASTRO_MT_add_gn_menu(bpy.types.Menu):
 

@@ -197,7 +197,7 @@ def get_addon_classes(revert=False):
     from .UI.classes import classes as preference_classes
     from .UI.properties import classes as property_classes
     from .Handlers.classes import classes as handler_classes
-    from .Nodes.GNodes import classes as nodes_classes
+    from .Nodes.Operators import classes as nodes_classes
     from .Nodes.ui import classes as ui_classes
     from .Operators import classes as operator_classes
     from .Keymaps import classes as keymap_classes
