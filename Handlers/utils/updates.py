@@ -16,7 +16,7 @@ from .update_view3D_panels import update_view3D_panels
 # from mathutils import Vector
 
 from ...mastro_schedule import MaStro_MathNode, execute_active_node_tree
-from ...Nodes.GNodes import mastro_GN_window_info
+from ...Nodes.Operators import mastro_GN_window_info
 # from ...Utils.read_storey_attribute import read_storey_attribute
 # from ...Utils.read_use_attribute import read_use_attribute
 # from datetime import datetime
