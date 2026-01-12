@@ -184,35 +184,37 @@ def update_view3D_panels(scene):
                 list_storey_B = list_storey_B[::-1]
                 
             for enum, el in enumerate(useSplit):
-                id = int(el)
-                usesUiList.add()
-                usesUiList[enum].id = enum + 1
-                
-                # if the use is -1, it means it is undercroft
-                if id == -1:
-                    usesUiList[enum].name = "undercroft"
-                    usesUiList[enum].nameId = -1
-                    # when a new face is added in edit mode
-                    # no storeys are assigned to the newly created face
-                    # therefore the system returns an indexError
-                    try:
-                        storeys = list_storey_A[enum] + list_storey_B[enum]
-                    except IndexError:
-                        storeys = 1
-                    usesUiList[enum].storeys = int(storeys)
-                
-                else:
-                    for use in bpy.context.scene.mastro_use_name_list:
-                        if id == use.id:
-                            usesUiList[enum].name = use.name
-                            usesUiList[enum].nameId = use.id
-                            # when a new face is added in edit mode
-                            # no storeys are assigned to the newly created face
-                            # therefore the system returns an indexError
-                            try:
-                                storeys = list_storey_A[enum] + list_storey_B[enum]
-                            except IndexError:
-                                storeys = 1
-                            usesUiList[enum].storeys = int(storeys)
-                                
-                            break
+                if el:  # to avoid error  --> id = int(el)ValueError: invalid literal for int() with base 10: ''
+                        # error caused, I guess, when a new face is added and there are no attributes assigned
+                    id = int(el)
+                    usesUiList.add()
+                    usesUiList[enum].id = enum + 1
+                    
+                    # if the use is -1, it means it is undercroft
+                    if id == -1:
+                        usesUiList[enum].name = "undercroft"
+                        usesUiList[enum].nameId = -1
+                        # when a new face is added in edit mode
+                        # no storeys are assigned to the newly created face
+                        # therefore the system returns an indexError
+                        try:
+                            storeys = list_storey_A[enum] + list_storey_B[enum]
+                        except IndexError:
+                            storeys = 1
+                        usesUiList[enum].storeys = int(storeys)
+                    
+                    else:
+                        for use in bpy.context.scene.mastro_use_name_list:
+                            if id == use.id:
+                                usesUiList[enum].name = use.name
+                                usesUiList[enum].nameId = use.id
+                                # when a new face is added in edit mode
+                                # no storeys are assigned to the newly created face
+                                # therefore the system returns an indexError
+                                try:
+                                    storeys = list_storey_A[enum] + list_storey_B[enum]
+                                except IndexError:
+                                    storeys = 1
+                                usesUiList[enum].storeys = int(storeys)
+                                    
+                                break
