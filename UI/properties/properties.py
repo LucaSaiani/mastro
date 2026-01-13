@@ -16,7 +16,7 @@ from ...Utils.getter_setter import *
 
 from .property_classes import ( mastro_CL_addon_properties,
                                 mastro_CL_constraint_XY_settings,
-                                mastro_CL_name_with_id,
+                                # mastro_CL_name_with_id,
                                 mastro_CL_street_name_list,
                                 mastro_CL_floor_name_list,
                                 mastro_CL_wall_name_list,
@@ -25,14 +25,16 @@ from .property_classes import ( mastro_CL_addon_properties,
                                 mastro_CL_typology_name_list,
                                 mastro_CL_building_name_list,
                                 mastro_CL_block_name_list,
-                                mastro_CL_obj_typology_uses_name_list
-)
+                                mastro_CL_obj_typology_uses_name_list,
+                                mastro_CL_Sticky_Note
                                 
+)
+
                                 
 
 # from ... import mastro_wall
 # from ... import mastro_massing
-from ... import mastro_geometryNodes
+# from ... import mastro_geometryNodes
 # from ... import mastro_project_data
 # from ... import mastro_menu
 from ... import mastro_schedule
@@ -228,14 +230,14 @@ scene_props = [
     # ------------------------------
     # Geometry Nodes / Object Selection
     # ------------------------------
-    ("mastro_geometry_menu_switch", EnumProperty(
-        items=(("POINT", "Point", ""), ("EDGE", "Edge", ""), ("FACE", "Face", "")),
-        default="EDGE",
-        update=mastro_geometryNodes.updateGroup
-    )),
-    ("mastro_group_node_number_of_split", IntProperty(
-        name="Number of split", default=1, min=1, update=mastro_geometryNodes.updateGroup
-    )),
+    # ("mastro_geometry_menu_switch", EnumProperty(
+    #     items=(("POINT", "Point", ""), ("EDGE", "Edge", ""), ("FACE", "Face", "")),
+    #     default="EDGE",
+    #     update=mastro_geometryNodes.updateGroup
+    # )),
+    # ("mastro_group_node_number_of_split", IntProperty(
+    #     name="Number of split", default=1, min=1, update=mastro_geometryNodes.updateGroup
+    # )),
     # ("mastro_previous_selection_object_name", bpy.props.StringProperty(
     #     name="Previously selected object name", default="",
     #     description="Store the name of the previous selected object"
@@ -320,12 +322,15 @@ scene_props = [
 # =============================================================================
 object_props = [
     ("mastro_props", PointerProperty(type=mastro_CL_addon_properties)),
-    ("mastro_sticky_note_props", PointerProperty(type=mastro_geometryNodes.StickyNoteProperties)),
+    
 ]
 
 scene_pointer_props = [
     ("mastro_constraint_xy_setting", PointerProperty(type=mastro_CL_constraint_XY_settings)),
-    ("mastro_key_dictionary", CollectionProperty(type=mastro_schedule.MaStro_string_item)),
+    # ("mastro_key_dictionary", CollectionProperty(type=mastro_schedule.MaStro_string_item)),
+]
+node_frame_props = [
+    ("mastro_sticky_note_props", PointerProperty(type=mastro_CL_Sticky_Note)),
 ]
 
 # =============================================================================
@@ -340,6 +345,8 @@ def register():
         setattr(bpy.types.Object, name, prop)
     for name, prop in scene_pointer_props:
         setattr(bpy.types.Scene, name, prop)
+    for name, prop in node_frame_props:
+        setattr(bpy.types.NodeFrame, name, prop)
 
 
 def unregister():
@@ -351,3 +358,6 @@ def unregister():
         delattr(bpy.types.Object, name)
     for name, _ in scene_pointer_props:
         delattr(bpy.types.Scene, name)
+    for name, _ in node_frame_props:
+        delattr(bpy.types.NodeFrame, name)
+        

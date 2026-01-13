@@ -18,21 +18,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-if "bpy" in locals():
-    import importlib
-    # importlib.reload(preferences),
-    # importlib.reload(mastro_project_data),
-    # importlib.reload(mastro_menu),
-    # importlib.reload(mastro_keymaps),
-    # importlib.reload(Icons),
-    # importlib.reload(mastro_xy_constraint_operators),
-    # importlib.reload(mastro_wall),
-    # importlib.reload(mastro_street),
-    # importlib.reload(mastro_massing),
-    importlib.reload(mastro_schedule)
-    # importlib.reload(mastro_modal_operator)
-    importlib.reload(mastro_geometryNodes)
-else:
+# if "bpy" in locals():
+#     import importlib
+#     # importlib.reload(preferences),
+#     # importlib.reload(mastro_project_data),
+#     # importlib.reload(mastro_menu),
+#     # importlib.reload(mastro_keymaps),
+#     # importlib.reload(Icons),
+#     # importlib.reload(mastro_xy_constraint_operators),
+#     # importlib.reload(mastro_wall),
+#     # importlib.reload(mastro_street),
+#     # importlib.reload(mastro_massing),
+#     # importlib.reload(mastro_schedule)
+#     # importlib.reload(mastro_modal_operator)
+#     # importlib.reload(mastro_geometryNodes)
+# else:
     
     
     
@@ -46,9 +46,9 @@ else:
     # from . import mastro_wall
     # from . import mastro_street
     # from . import mastro_massing
-    from . import mastro_schedule
+    # from . import mastro_schedule
     # from . import mastro_modal_operator
-    from . import mastro_geometryNodes
+    # from . import mastro_geometryNodes
     
 
 import nodeitems_utils
@@ -90,77 +90,77 @@ import math
 # addon_keymaps = []
 
 
-classes = (
-    # preferences.mastro_addon_preferences,
+# classes = (
+#     # preferences.mastro_addon_preferences,
     
-    mastro_geometryNodes.VIEW_PT_MaStro_Node_Panel,
-    mastro_geometryNodes.VIEW_PT_MaStro_GN_Panel,
-    mastro_geometryNodes.separate_geometry_by_factor_OT,
-    mastro_geometryNodes.NODE_OT_sticky_note,
-    mastro_geometryNodes.StickyNoteProperties,
+#     # mastro_geometryNodes.VIEW_PT_MaStro_Node_Panel,
+#     # mastro_geometryNodes.VIEW_PT_MaStro_GN_Panel,
+#     # mastro_geometryNodes.separate_geometry_by_factor_OT,
+#     # mastro_geometryNodes.NODE_OT_sticky_note,
+#     # mastro_geometryNodes.mastro_CL_Sticky_Note,
         
     
 
-    mastro_schedule.MaStroTree,
-    mastro_schedule.MaStro_string_item,
-    mastro_schedule.MaStro_keyValueItem,
-    mastro_schedule.MaStro_attribute_collectionItem,
-    mastro_schedule.MaStro_attribute_propertyGroup,
-    mastro_schedule.MaStro_stringCollection_Socket,
-    # mastro_schedule.MaStroTreeNode,
-    # mastro_schedule.MaStroInterfaceSocket,
-    # mastro_schedule.MaStro_attributesCollectionAndFloat_Socket,
-    mastro_schedule.MaStro_attributesCollection_Socket,
-    mastro_schedule.MaStro_data_collectionItem,
-    mastro_schedule.MaStro_data_propertyGroup,
-    mastro_schedule.MaStro_dataCollection_Socket,
-    # mastro_schedule.MaStro_dataOperation_Socket,
-    # mastro_schedule.MaStro_attribute_addItemOperator,
-    # mastro_schedule.MaStro_attribute_removeItemOperator,
-    # mastro_schedule.MaStro_attribute_addKeyValueItemOperator,
-    # mastro_schedule.MaStro_attribute_removeKeyValueItemOperator,
-    # mastro_schedule.MaStro_attribute_deleteItemOperator,
-    mastro_schedule.MaStroGroupInputNode,
-    mastro_schedule.MaStroSelectedInputNode,
-    mastro_schedule.MaStroCaptureAttributeNode,
-    mastro_schedule.MaStroAllAttributesNode,
-    mastro_schedule.MaStroAreaAttributeNode,
-    mastro_schedule.MaStroUseAttributeNode,
-    # mastro_schedule.Mastro_MathSubMenuEntries,
-    mastro_schedule.MaStroIntegerNode,
-    mastro_schedule.MaStroFloatNode,
-    # mastro_schedule.MaStro_MathMenu,
-    # mastro_schedule.MaStro_MathSubMenuFunctions,
-    # mastro_schedule.MaStro_MathSubMenuComparisons,
-    mastro_schedule.MaStro_MathNode,
-    mastro_schedule.MaStro_key_name_list,
-    mastro_schedule.NODE_UL_key_filter,
-    mastro_schedule.NODE_UL_key_filter_NewItem,
-    mastro_schedule.NODE_UL_key_filter_DeleteItem,
-    mastro_schedule.NODE_UL_key_MoveItem,
-    mastro_schedule.MaStroTableNode,
-    # mastro_schedule.MaStroTableByNode,
-    # mastro_schedule.MaStroGetUniqueNode,
-    mastro_schedule.MaStroDataNode,
-    mastro_schedule.MastroDataMathFunction,
+#     mastro_schedule.MaStroTree,
+#     mastro_schedule.MaStro_string_item,
+#     mastro_schedule.MaStro_keyValueItem,
+#     mastro_schedule.MaStro_attribute_collectionItem,
+#     mastro_schedule.MaStro_attribute_propertyGroup,
+#     mastro_schedule.MaStro_stringCollection_Socket,
+#     # mastro_schedule.MaStroTreeNode,
+#     # mastro_schedule.MaStroInterfaceSocket,
+#     # mastro_schedule.MaStro_attributesCollectionAndFloat_Socket,
+#     mastro_schedule.MaStro_attributesCollection_Socket,
+#     mastro_schedule.MaStro_data_collectionItem,
+#     mastro_schedule.MaStro_data_propertyGroup,
+#     mastro_schedule.MaStro_dataCollection_Socket,
+#     # mastro_schedule.MaStro_dataOperation_Socket,
+#     # mastro_schedule.MaStro_attribute_addItemOperator,
+#     # mastro_schedule.MaStro_attribute_removeItemOperator,
+#     # mastro_schedule.MaStro_attribute_addKeyValueItemOperator,
+#     # mastro_schedule.MaStro_attribute_removeKeyValueItemOperator,
+#     # mastro_schedule.MaStro_attribute_deleteItemOperator,
+#     mastro_schedule.MaStroGroupInputNode,
+#     mastro_schedule.MaStroSelectedInputNode,
+#     mastro_schedule.MaStroCaptureAttributeNode,
+#     mastro_schedule.MaStroAllAttributesNode,
+#     mastro_schedule.MaStroAreaAttributeNode,
+#     mastro_schedule.MaStroUseAttributeNode,
+#     # mastro_schedule.Mastro_MathSubMenuEntries,
+#     mastro_schedule.MaStroIntegerNode,
+#     mastro_schedule.MaStroFloatNode,
+#     # mastro_schedule.MaStro_MathMenu,
+#     # mastro_schedule.MaStro_MathSubMenuFunctions,
+#     # mastro_schedule.MaStro_MathSubMenuComparisons,
+#     mastro_schedule.MaStro_MathNode,
+#     mastro_schedule.MaStro_key_name_list,
+#     mastro_schedule.NODE_UL_key_filter,
+#     mastro_schedule.NODE_UL_key_filter_NewItem,
+#     mastro_schedule.NODE_UL_key_filter_DeleteItem,
+#     mastro_schedule.NODE_UL_key_MoveItem,
+#     mastro_schedule.MaStroTableNode,
+#     # mastro_schedule.MaStroTableByNode,
+#     # mastro_schedule.MaStroGetUniqueNode,
+#     mastro_schedule.MaStroDataNode,
+#     mastro_schedule.MastroDataMathFunction,
    
     
-    # mastro_schedule.MaStroAddColumn,
+#     # mastro_schedule.MaStroAddColumn,
     
-    # mastro_schedule.MyCustomNode,
-    # mastro_schedule.CustomNodeText,
-    # mastro_schedule.CustomNodeFloat,
-    # mastro_schedule.CustomNodeJoin,
-    # mastro_schedule.CustomNodePrint,
-    mastro_schedule.MaStroViewerNode,
-    # mastro_schedule.MaStroAttributeToColumnNode,
-    # mastro_schedule.MaStro_Schedule_Panel,
+#     # mastro_schedule.MyCustomNode,
+#     # mastro_schedule.CustomNodeText,
+#     # mastro_schedule.CustomNodeFloat,
+#     # mastro_schedule.CustomNodeJoin,
+#     # mastro_schedule.CustomNodePrint,
+#     mastro_schedule.MaStroViewerNode,
+#     # mastro_schedule.MaStroAttributeToColumnNode,
+#     # mastro_schedule.MaStro_Schedule_Panel,
  
-    mastro_schedule.NODE_EDITOR_Mastro_Draw_Schedule,
+#     mastro_schedule.NODE_EDITOR_Mastro_Draw_Schedule,
     
     
     
-)
+# )
 
 #
 @persistent
@@ -219,8 +219,8 @@ def register():
     for cls in get_addon_classes():
         register_class(cls)
         
-    for cls in classes:
-        register_class(cls)
+    # for cls in classes:
+    #     register_class(cls)
         
     register_ui_dynamic_classes()
         
@@ -317,8 +317,8 @@ def unregister():
     ### unregister classes ###            
     unregister_ui_dynamic_classes()
     
-    for cls in reversed(classes):
-        unregister_class(cls)
+    # for cls in reversed(classes):
+    #     unregister_class(cls)
         
     for cls in reversed(get_addon_classes()):
         unregister_class(cls)

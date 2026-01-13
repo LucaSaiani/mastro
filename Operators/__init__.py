@@ -20,7 +20,6 @@ from .OBJECT_OT_Update_Street_Attributes import OBJECT_OT_update_all_MaStro_stre
 from .TRANSFORM_OT_Set_Orientation import TRANSFORM_OT_Mastro_Set_Orientation
 from .OBJECT_OT_Export_Data import OBEJCT_OT_Mastro_Export_CSV, OBJECT_OT_MaStro_Print_Data
 
-
 classes = (
     MESH_OT_Move_Active_Vertex,
     OBJECT_OT_Add_Mastro_Block,
@@ -47,4 +46,5 @@ classes = (
     TRANSFORM_OT_Mastro_Set_Orientation,
     OBEJCT_OT_Mastro_Export_CSV,
     OBJECT_OT_MaStro_Print_Data,
+    
     )

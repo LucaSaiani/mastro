@@ -30,6 +30,7 @@ from .VIEW3D_PT_Mastro_Street import VIEW3D_PT_Mastro_Street
 from .VIEW3D_PT_transform_orientations import VIEW3D_PT_transform_orientations
 from .VIEW3D_PT_Mastro_Override import VIEW3D_PT_Mastro_Mass_Override, VIEW3D_PT_Mastro_Block_Override
 from .VIEW3D_PT_Mastro_Export import VIEW3D_PT_Mastro_Export
+from .NODE_EDITOR_PT_Mastro_Node import NODE_EDITOR_PT_Mastro_Node
 
 
 classes = (
@@ -65,7 +66,8 @@ classes = (
     VIEW3D_PT_transform_orientations,
     VIEW3D_PT_Mastro_Mass_Override, 
     VIEW3D_PT_Mastro_Block_Override,
-    VIEW3D_PT_Mastro_Export
+    VIEW3D_PT_Mastro_Export,
+    NODE_EDITOR_PT_Mastro_Node
     )
 
 MASTRO_LISTS = [

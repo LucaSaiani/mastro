@@ -16,337 +16,314 @@ from bpy.props import BoolProperty
 def updateGroup(self, context):
     bpy.ops.node.separate_geometry_by_factor()
     
-# to open a new window, the preferences window 
-# is opened and then the area type is changed to text editor
-def openTextEditor(text):
-    bpy.ops.screen.userpref_show("INVOKE_DEFAULT")
-    window = bpy.context.window_manager.windows[-1]
-    area = window.screen.areas[0]
-    area.type = "TEXT_EDITOR"
-    area.spaces[0].show_region_header = False
-    area.spaces[0].show_region_footer = False
-    area.spaces[0].show_line_numbers = False
-    area.spaces[0].show_syntax_highlight = False
-    area.spaces[0].show_word_wrap = True
-    area.spaces[0].text = text
+# # to open a new window, the preferences window 
+# # is opened and then the area type is changed to text editor
+# def openTextEditor(text):
+#     bpy.ops.screen.userpref_show("INVOKE_DEFAULT")
+#     window = bpy.context.window_manager.windows[-1]
+#     area = window.screen.areas[0]
+#     area.type = "TEXT_EDITOR"
+#     area.spaces[0].show_region_header = False
+#     area.spaces[0].show_region_footer = False
+#     area.spaces[0].show_line_numbers = False
+#     area.spaces[0].show_syntax_highlight = False
+#     area.spaces[0].show_word_wrap = True
+#     area.spaces[0].text = text
     
-# a class to define a custom property "custom note"
-class StickyNoteProperties(PropertyGroup):
-    customNote: BoolProperty(
-        name="Custom Note",
-        description="Indicates if this NodeFrame is a custom sticky note",
-        default=False
-    )
+# # a class to define a custom property "custom note"
+# class StickyNoteProperties(PropertyGroup):
+#     customNote: BoolProperty(
+#         name="Custom Note",
+#         description="Indicates if this NodeFrame is a custom sticky note",
+#         default=False
+#     )
     
-# to create a sticky note
-class NODE_OT_sticky_note(Operator):
-    bl_idname = "node.sticky_note"
-    bl_label = "sticky Note"
-    bl_description = "MaStro Sticky Note"
-    bl_options = {'REGISTER', 'UNDO'}
+# # to create a sticky note
+# class NODE_OT_Sticky_Note(Operator):
+#     bl_idname = "node.sticky_note"
+#     bl_label = "sticky Note"
+#     bl_description = "MaStro Sticky Note"
+#     bl_options = {'REGISTER', 'UNDO'}
 
 
-    def execute(self, context):
-        #get the list of all selected nodes
-        node_tree = bpy.context.space_data.edit_tree
-        if node_tree:
-            activeNode = node_tree.nodes.active
-            is_custom_note = False
-            if activeNode and hasattr(activeNode, "mastro_sticky_note_props"):
-                is_custom_note = activeNode.mastro_sticky_note_props.customNote
+#     def execute(self, context):
+#         #get the list of all selected nodes
+#         node_tree = bpy.context.space_data.edit_tree
+#         if node_tree:
+#             activeNode = node_tree.nodes.active
+#             is_custom_note = False
+#             if activeNode and hasattr(activeNode, "mastro_sticky_note_props"):
+#                 is_custom_note = activeNode.mastro_sticky_note_props.customNote
                 
-            # edit existing note
-            if activeNode and activeNode.select and is_custom_note:
-                postIt = activeNode
-                if hasattr(postIt, 'text') and postIt.text:
-                    textName = postIt.text.name
-                    note_text = bpy.data.texts[textName]
-                    openTextEditor(note_text)
-                # else:
-                #     self.report({'WARNING'}, "Selected node is a custom note but has no linked text data.")
-                    # return {'CANCELLED'} # Or handle gracefully
-            # create a new note
-            else:
-                postIt = node_tree.nodes.new("NodeFrame")
-                # postIt.select = False
-                postIt.name = "MaStro note"
-                postIt.label = "Note"
-                postIt.mastro_sticky_note_props.customNote = True
+#             # edit existing note
+#             if activeNode and activeNode.select and is_custom_note:
+#                 postIt = activeNode
+#                 if hasattr(postIt, 'text') and postIt.text:
+#                     textName = postIt.text.name
+#                     note_text = bpy.data.texts[textName]
+#                     openTextEditor(note_text)
+#                 # else:
+#                 #     self.report({'WARNING'}, "Selected node is a custom note but has no linked text data.")
+#                     # return {'CANCELLED'} # Or handle gracefully
+#             # create a new note
+#             else:
+#                 postIt = node_tree.nodes.new("NodeFrame")
+#                 # postIt.select = False
+#                 postIt.name = "MaStro note"
+#                 postIt.label = "Note"
+#                 postIt.mastro_sticky_note_props.customNote = True
            
-                postIt.use_custom_color = True
-                postIt.color = bpy.context.preferences.addons[__package__].preferences.noteColor
-                postIt.label_size = bpy.context.preferences.addons[__package__].preferences.noteSize
-                postIt.shrink = False
-                if activeNode and activeNode.select:
-                    postIt.location = activeNode.location
-                    postIt.location.y = activeNode.height + 20
-                else:
-                    postIt.location = node_tree.view_center
-                postIt.width = 200
-                postIt.height = 200
-                note_text = bpy.data.texts.new("MaStro note")
-                note_text.use_fake_user = False
+#                 postIt.use_custom_color = True
+#                 postIt.color = bpy.context.preferences.addons[__package__].preferences.noteColor
+#                 postIt.label_size = bpy.context.preferences.addons[__package__].preferences.noteSize
+#                 postIt.shrink = False
+#                 if activeNode and activeNode.select:
+#                     postIt.location = activeNode.location
+#                     postIt.location.y = activeNode.height + 20
+#                 else:
+#                     postIt.location = node_tree.view_center
+#                 postIt.width = 200
+#                 postIt.height = 200
+#                 note_text = bpy.data.texts.new("MaStro note")
+#                 note_text.use_fake_user = False
       
-                postIt.text = bpy.data.texts[note_text.name]
-                openTextEditor(note_text)
+#                 postIt.text = bpy.data.texts[note_text.name]
+#                 openTextEditor(note_text)
             
-        return {'FINISHED'}
+#         return {'FINISHED'}
 
 
-class VIEW_PT_MaStro_Node_Panel(Panel):
-    bl_space_type = 'NODE_EDITOR'
-    bl_region_type = "UI"
-    bl_category = "Node"
-    bl_label = "MaStro Note"
+
+
+    
+# class VIEW_PT_MaStro_GN_Panel(Panel):
+#     bl_space_type = 'NODE_EDITOR'
+#     bl_region_type = "UI"
+#     bl_category = "MaStro"
+#     bl_label = "MaStro Note"
   
-    # @classmethod
-    # def poll(cls, context):
-    #     return context.space_data.tree_type == 'GeometryNodeTree'    
+#     @classmethod
+#     def poll(cls, context):
+#         return context.space_data.tree_type == 'GeometryNodeTree'
     
-    def draw(self, context):
-        # scene = context.scene
-        layout = self.layout
-        node_tree = bpy.context.space_data.edit_tree
-        if node_tree:
-            activeNode = node_tree.nodes.active
-            is_custom_note = False
-            if activeNode and hasattr(activeNode, "mastro_sticky_note_props"):
-                is_custom_note = activeNode.mastro_sticky_note_props.customNote
-            # activeNode = get_active_node(self)
-            if activeNode and activeNode.select and is_custom_note:
-                layout.operator("node.sticky_note", text="Edit the Sticky Note")
-            else:
-                layout.operator("node.sticky_note", text="Add a Sticky Note")
+#     def draw(self, context):
+#         scene = context.scene
+#         layout = self.layout
+#         node_tree = bpy.context.space_data.node_tree
+#         if node_tree:
+#             node_tree = bpy.context.space_data.node_tree
+#             activeNode = node_tree.nodes.active
+#             # activeNode = get_active_node(self)
 
-    
-class VIEW_PT_MaStro_GN_Panel(Panel):
-    bl_space_type = 'NODE_EDITOR'
-    bl_region_type = "UI"
-    bl_category = "MaStro"
-    bl_label = "MaStro Note"
-  
-    @classmethod
-    def poll(cls, context):
-        return context.space_data.tree_type == 'GeometryNodeTree'
-    
-    def draw(self, context):
-        scene = context.scene
-        layout = self.layout
-        node_tree = bpy.context.space_data.node_tree
-        if node_tree:
-            node_tree = bpy.context.space_data.node_tree
-            activeNode = node_tree.nodes.active
-            # activeNode = get_active_node(self)
-
-            # if activeNode and activeNode.select and "customNote" in activeNode:
-            #     selectedNote = activeNode.name
-            #     layout.label(text=selectedNote)
-            #     # mastro_props.noteText = readText
-            # else:
-            #     # layout.operator("node.post_it_note", text="Add a sticky note")
-            #     # row = layout.row()
-            #     # row.enabled = bool(mastro_props.noteText.strip())
+#             # if activeNode and activeNode.select and "customNote" in activeNode:
+#             #     selectedNote = activeNode.name
+#             #     layout.label(text=selectedNote)
+#             #     # mastro_props.noteText = readText
+#             # else:
+#             #     # layout.operator("node.post_it_note", text="Add a sticky note")
+#             #     # row = layout.row()
+#             #     # row.enabled = bool(mastro_props.noteText.strip())
                 
-            #     layout.operator("node.sticky_note", text="Add a sticky note")
+#             #     layout.operator("node.sticky_note", text="Add a sticky note")
                     
-            if activeNode and hasattr(activeNode, "node_tree"):
-                if activeNode.node_tree.bl_description == "MaStro Geometry By Factor":
-                        layout.label(text="Subdivision:")
-                        row = layout.row()
-                        row.label(text="Subdivide by:")
-                        row.prop(scene, "mastro_geometry_menu_switch", text="")
-                        row = layout.row()
-                        row.label(text="Number of subdivision:")
-                        row.prop(context.scene, "mastro_group_node_number_of_split", text="")
+#             if activeNode and hasattr(activeNode, "node_tree"):
+#                 if activeNode.node_tree.bl_description == "MaStro Geometry By Factor":
+#                         layout.label(text="Subdivision:")
+#                         row = layout.row()
+#                         row.label(text="Subdivide by:")
+#                         row.prop(scene, "mastro_geometry_menu_switch", text="")
+#                         row = layout.row()
+#                         row.label(text="Number of subdivision:")
+#                         row.prop(context.scene, "mastro_group_node_number_of_split", text="")
             
                 
-def create_new_nodegroup (groupName):
-        nodeGroup = bpy.data.node_groups.new(groupName,'GeometryNodeTree')
-        nodeGroup.bl_description = "MaStro Geometry By Factor"
+# def create_new_nodegroup (groupName):
+#         nodeGroup = bpy.data.node_groups.new(groupName,'GeometryNodeTree')
+#         nodeGroup.bl_description = "MaStro Geometry By Factor"
         
-        nodeGroup.interface.new_socket(name='Geometry', description='', in_out = 'INPUT', socket_type='NodeSocketGeometry')
+#         nodeGroup.interface.new_socket(name='Geometry', description='', in_out = 'INPUT', socket_type='NodeSocketGeometry')
         
-        nodeGroup.interface.new_socket(name='Seed', description='Seed for the random value', in_out = 'INPUT', socket_type='NodeSocketInt')
+#         nodeGroup.interface.new_socket(name='Seed', description='Seed for the random value', in_out = 'INPUT', socket_type='NodeSocketInt')
         
-        nodeGroup.interface.new_socket(name='Subdivisions', description='The number of subdivisions. This is used only to store data. To plug the socket does nothing. If you want to change the number of subdivisions use the panel Node->MaStro', in_out = 'INPUT', socket_type='NodeSocketInt')
-        nodeGroup.interface.items_tree[2].default_value = bpy.context.scene.mastro_group_node_number_of_split
-        nodeGroup.interface.items_tree[2].min_value = 2
-        nodeGroup.interface.items_tree[2].force_non_field = True
-        nodeGroup.interface.items_tree[2].hide_value = True
+#         nodeGroup.interface.new_socket(name='Subdivisions', description='The number of subdivisions. This is used only to store data. To plug the socket does nothing. If you want to change the number of subdivisions use the panel Node->MaStro', in_out = 'INPUT', socket_type='NodeSocketInt')
+#         nodeGroup.interface.items_tree[2].default_value = bpy.context.scene.mastro_group_node_number_of_split
+#         nodeGroup.interface.items_tree[2].min_value = 2
+#         nodeGroup.interface.items_tree[2].force_non_field = True
+#         nodeGroup.interface.items_tree[2].hide_value = True
         
-        nodeGroup.interface.new_socket(name='Split 0', description='The number of subdivisions', in_out = 'INPUT', socket_type='NodeSocketInt')
-        nodeGroup.interface.items_tree[3].default_value = 0
-        nodeGroup.interface.items_tree[3].min_value = 0
-        nodeGroup.interface.items_tree[3].max_value = 100
-        nodeGroup.interface.items_tree[3].force_non_field = True
-        nodeGroup.interface.items_tree[3].subtype = 'PERCENTAGE'
+#         nodeGroup.interface.new_socket(name='Split 0', description='The number of subdivisions', in_out = 'INPUT', socket_type='NodeSocketInt')
+#         nodeGroup.interface.items_tree[3].default_value = 0
+#         nodeGroup.interface.items_tree[3].min_value = 0
+#         nodeGroup.interface.items_tree[3].max_value = 100
+#         nodeGroup.interface.items_tree[3].force_non_field = True
+#         nodeGroup.interface.items_tree[3].subtype = 'PERCENTAGE'
         
-        nodeGroup.interface.new_socket(name='Selection 0', description='', in_out = 'OUTPUT', socket_type='NodeSocketGeometry')
-        nodeGroup.interface.new_socket(name='Remaining', description='', in_out = 'OUTPUT', socket_type='NodeSocketGeometry')
+#         nodeGroup.interface.new_socket(name='Selection 0', description='', in_out = 'OUTPUT', socket_type='NodeSocketGeometry')
+#         nodeGroup.interface.new_socket(name='Remaining', description='', in_out = 'OUTPUT', socket_type='NodeSocketGeometry')
        
-        group_input = nodeGroup.nodes.new('NodeGroupInput')
-        group_input.location = (-100, -300)
+#         group_input = nodeGroup.nodes.new('NodeGroupInput')
+#         group_input.location = (-100, -300)
        
-        group_output = nodeGroup.nodes.new('NodeGroupOutput')
-        group_output.location = (600, 450)
+#         group_output = nodeGroup.nodes.new('NodeGroupOutput')
+#         group_output.location = (600, 450)
         
-        split_edges = nodeGroup.nodes.new(type='GeometryNodeSplitEdges')
-        split_edges.location = (150, 0)
+#         split_edges = nodeGroup.nodes.new(type='GeometryNodeSplitEdges')
+#         split_edges.location = (150, 0)
 
-        capture_attribute = nodeGroup.nodes.new(type='GeometryNodeCaptureAttribute')
-        capture_attribute.domain = "EDGE"
-        capture_attribute.name = "Capture"
-        capture_attribute.capture_items.new(socket_type="INT", name="RND")
-        capture_attribute.location = (150, -150)        
+#         capture_attribute = nodeGroup.nodes.new(type='GeometryNodeCaptureAttribute')
+#         capture_attribute.domain = "EDGE"
+#         capture_attribute.name = "Capture"
+#         capture_attribute.capture_items.new(socket_type="INT", name="RND")
+#         capture_attribute.location = (150, -150)        
 
-        random_value = nodeGroup.nodes.new(type='FunctionNodeRandomValue')
-        random_value.data_type = 'INT'
-        random_value.inputs[4].default_value = 0
-        random_value.inputs[5].default_value = 100
-        random_value.location = (150, -300)
+#         random_value = nodeGroup.nodes.new(type='FunctionNodeRandomValue')
+#         random_value.data_type = 'INT'
+#         random_value.inputs[4].default_value = 0
+#         random_value.inputs[5].default_value = 100
+#         random_value.location = (150, -300)
         
-        less_than_node = nodeGroup.nodes.new(type='FunctionNodeCompare')
-        less_than_node.name = "Compare 0"
-        less_than_node.operation = 'LESS_EQUAL'
-        less_than_node.location = (400, 0)
+#         less_than_node = nodeGroup.nodes.new(type='FunctionNodeCompare')
+#         less_than_node.name = "Compare 0"
+#         less_than_node.operation = 'LESS_EQUAL'
+#         less_than_node.location = (400, 0)
 
-        # not_node = nodeGroup.nodes.new(type='FunctionNodeBooleanMath')
-        # not_node.operation = 'NOT'
-        # not_node.name = "Boolean not 0"
-        # not_node.location = (400, 150)
+#         # not_node = nodeGroup.nodes.new(type='FunctionNodeBooleanMath')
+#         # not_node.operation = 'NOT'
+#         # not_node.name = "Boolean not 0"
+#         # not_node.location = (400, 150)
 
-        separate_geometry_node = nodeGroup.nodes.new(type='GeometryNodeSeparateGeometry')
-        separate_geometry_node.name = "Separate 0"
-        separate_geometry_node.domain = 'EDGE'
-        separate_geometry_node.location = (400, 150)
+#         separate_geometry_node = nodeGroup.nodes.new(type='GeometryNodeSeparateGeometry')
+#         separate_geometry_node.name = "Separate 0"
+#         separate_geometry_node.domain = 'EDGE'
+#         separate_geometry_node.location = (400, 150)
 
-        # delete_geometry_node = nodeGroup.nodes.new(type='GeometryNodeDeleteGeometry')
-        # delete_geometry_node.name = "Separate 0"
-        # delete_geometry_node.domain = 'EDGE'
-        # delete_geometry_node.location = (400, 300)
+#         # delete_geometry_node = nodeGroup.nodes.new(type='GeometryNodeDeleteGeometry')
+#         # delete_geometry_node.name = "Separate 0"
+#         # delete_geometry_node.domain = 'EDGE'
+#         # delete_geometry_node.location = (400, 300)
         
-        merge_node = nodeGroup.nodes.new(type='GeometryNodeMergeByDistance')
-        merge_node.name = "Merge 0"
-        merge_node.location = (400, 300)
+#         merge_node = nodeGroup.nodes.new(type='GeometryNodeMergeByDistance')
+#         merge_node.name = "Merge 0"
+#         merge_node.location = (400, 300)
         
-        leftover_greater_than_node = nodeGroup.nodes.new(type='FunctionNodeCompare')
-        leftover_greater_than_node.name = "Leftover compare"
-        leftover_greater_than_node.operation = 'GREATER_THAN'
-        leftover_greater_than_node.location = (600, 0)
+#         leftover_greater_than_node = nodeGroup.nodes.new(type='FunctionNodeCompare')
+#         leftover_greater_than_node.name = "Leftover compare"
+#         leftover_greater_than_node.operation = 'GREATER_THAN'
+#         leftover_greater_than_node.location = (600, 0)
         
-        # leftover_not_node = nodeGroup.nodes.new(type='FunctionNodeBooleanMath')
-        # leftover_not_node.operation = 'NOT'
-        # leftover_not_node.name = "Leftover not"
-        # leftover_not_node.location = (600, 150)
+#         # leftover_not_node = nodeGroup.nodes.new(type='FunctionNodeBooleanMath')
+#         # leftover_not_node.operation = 'NOT'
+#         # leftover_not_node.name = "Leftover not"
+#         # leftover_not_node.location = (600, 150)
         
-        leftover_separate_geometry_node = nodeGroup.nodes.new(type='GeometryNodeSeparateGeometry')
-        leftover_separate_geometry_node.name = "Leftover"
-        leftover_separate_geometry_node.domain = 'EDGE'
-        leftover_separate_geometry_node.location = (600, 150)
+#         leftover_separate_geometry_node = nodeGroup.nodes.new(type='GeometryNodeSeparateGeometry')
+#         leftover_separate_geometry_node.name = "Leftover"
+#         leftover_separate_geometry_node.domain = 'EDGE'
+#         leftover_separate_geometry_node.location = (600, 150)
         
-        # leftover_delete_geometry_node = nodeGroup.nodes.new(type='GeometryNodeDeleteGeometry')
-        # leftover_delete_geometry_node.name = "Leftover"
-        # leftover_delete_geometry_node.domain = 'EDGE'
-        # leftover_delete_geometry_node.location = (600, 300)
+#         # leftover_delete_geometry_node = nodeGroup.nodes.new(type='GeometryNodeDeleteGeometry')
+#         # leftover_delete_geometry_node.name = "Leftover"
+#         # leftover_delete_geometry_node.domain = 'EDGE'
+#         # leftover_delete_geometry_node.location = (600, 300)
         
-        leftover_merge_node = nodeGroup.nodes.new(type='GeometryNodeMergeByDistance')
-        leftover_merge_node.name = "Leftover merge"
-        leftover_merge_node.location = (600, 300)
+#         leftover_merge_node = nodeGroup.nodes.new(type='GeometryNodeMergeByDistance')
+#         leftover_merge_node.name = "Leftover merge"
+#         leftover_merge_node.location = (600, 300)
         
-        # nodeGroup input links
-        nodeGroup.links.new(group_input.outputs['Geometry'], capture_attribute.inputs['Geometry'])
-        nodeGroup.links.new(group_input.outputs['Seed'], random_value.inputs[8])
-        nodeGroup.links.new(group_input.outputs['Split 0'], less_than_node.inputs[1])
-        nodeGroup.links.new(group_input.outputs['Split 0'], leftover_greater_than_node.inputs[1])
+#         # nodeGroup input links
+#         nodeGroup.links.new(group_input.outputs['Geometry'], capture_attribute.inputs['Geometry'])
+#         nodeGroup.links.new(group_input.outputs['Seed'], random_value.inputs[8])
+#         nodeGroup.links.new(group_input.outputs['Split 0'], less_than_node.inputs[1])
+#         nodeGroup.links.new(group_input.outputs['Split 0'], leftover_greater_than_node.inputs[1])
         
-        # random node links
-        nodeGroup.links.new(random_value.outputs['Value'], capture_attribute.inputs['RND'])
+#         # random node links
+#         nodeGroup.links.new(random_value.outputs['Value'], capture_attribute.inputs['RND'])
         
-        # capture node links
-        nodeGroup.links.new(capture_attribute.outputs['Geometry'], split_edges.inputs['Mesh'])
-        nodeGroup.links.new(capture_attribute.outputs['RND'], less_than_node.inputs[0])
-        nodeGroup.links.new(capture_attribute.outputs['RND'], leftover_greater_than_node.inputs[0])
+#         # capture node links
+#         nodeGroup.links.new(capture_attribute.outputs['Geometry'], split_edges.inputs['Mesh'])
+#         nodeGroup.links.new(capture_attribute.outputs['RND'], less_than_node.inputs[0])
+#         nodeGroup.links.new(capture_attribute.outputs['RND'], leftover_greater_than_node.inputs[0])
         
-        # split edges links
-        nodeGroup.links.new(split_edges.outputs['Mesh'], separate_geometry_node.inputs['Geometry'])
-        # nodeGroup.links.new(split_edges.outputs['Mesh'], leftover_separate_geometry_node.inputs['Geometry'])
+#         # split edges links
+#         nodeGroup.links.new(split_edges.outputs['Mesh'], separate_geometry_node.inputs['Geometry'])
+#         # nodeGroup.links.new(split_edges.outputs['Mesh'], leftover_separate_geometry_node.inputs['Geometry'])
         
-        # less than links
-        nodeGroup.links.new(less_than_node.outputs[0], separate_geometry_node.inputs[1])
+#         # less than links
+#         nodeGroup.links.new(less_than_node.outputs[0], separate_geometry_node.inputs[1])
         
-        # not links
-        # nodeGroup.links.new(not_node.outputs[0], delete_geometry_node.inputs[1])
+#         # not links
+#         # nodeGroup.links.new(not_node.outputs[0], delete_geometry_node.inputs[1])
         
-        # separate geometry links
-        nodeGroup.links.new(separate_geometry_node.outputs[0], merge_node.inputs[0])
-        nodeGroup.links.new(separate_geometry_node.outputs[1], leftover_separate_geometry_node.inputs[0])
+#         # separate geometry links
+#         nodeGroup.links.new(separate_geometry_node.outputs[0], merge_node.inputs[0])
+#         nodeGroup.links.new(separate_geometry_node.outputs[1], leftover_separate_geometry_node.inputs[0])
         
-        # merge links
-        nodeGroup.links.new(merge_node.outputs[0], group_output.inputs[0])
+#         # merge links
+#         nodeGroup.links.new(merge_node.outputs[0], group_output.inputs[0])
         
-        # leftover more than links
-        nodeGroup.links.new(leftover_greater_than_node.outputs[0], leftover_separate_geometry_node.inputs[1])
+#         # leftover more than links
+#         nodeGroup.links.new(leftover_greater_than_node.outputs[0], leftover_separate_geometry_node.inputs[1])
         
-        # leftover not links
-        # nodeGroup.links.new(leftover_not_node.outputs[0], leftover_delete_geometry_node.inputs[1])
+#         # leftover not links
+#         # nodeGroup.links.new(leftover_not_node.outputs[0], leftover_delete_geometry_node.inputs[1])
         
-        # leftover geometry links
-        nodeGroup.links.new(leftover_separate_geometry_node.outputs[0], leftover_merge_node.inputs[0])
+#         # leftover geometry links
+#         nodeGroup.links.new(leftover_separate_geometry_node.outputs[0], leftover_merge_node.inputs[0])
         
-        # leftover merge links
-        nodeGroup.links.new(leftover_merge_node.outputs[0], group_output.inputs["Remaining"])
+#         # leftover merge links
+#         nodeGroup.links.new(leftover_merge_node.outputs[0], group_output.inputs["Remaining"])
       
 
-        return(nodeGroup)       
+#         return(nodeGroup)       
 
-class separate_geometry_by_factor_OT(GeometryNodeCustomGroup):
-    '''Separate geometry in geometry node by factor'''
-    bl_idname = "node.separate_geometry_by_factor"
-    bl_label = "Separate geometry by factor"
+# class separate_geometry_by_factor_OT(GeometryNodeCustomGroup):
+#     '''Separate geometry in geometry node by factor'''
+#     bl_idname = "node.separate_geometry_by_factor"
+#     bl_label = "Separate geometry by factor"
     
-    def update_signal(self, context):
-        print("PIEROOO")
-        return None
+#     def update_signal(self, context):
+#         print("PIEROOO")
+#         return None
     
-    @classmethod
-    def poll(cls, context):
-        """mandatory poll"""
-        return True
+#     @classmethod
+#     def poll(cls, context):
+#         """mandatory poll"""
+#         return True
     
-    def init(self, context,):        
-        """this fct run when appending the node for the first time"""
+#     def init(self, context,):        
+#         """this fct run when appending the node for the first time"""
 
-        name = f".{self.bl_idname}"
+#         name = f".{self.bl_idname}"
         
-        nodeGroup = bpy.data.node_groups.get(name)
-        if (nodeGroup is None):
-            nodeGroup = create_new_nodegroup(name,
-                out_sockets={
-                    "Result" : "NodeSocketFloat",
-                },
-            )
+#         nodeGroup = bpy.data.node_groups.get(name)
+#         if (nodeGroup is None):
+#             nodeGroup = create_new_nodegroup(name,
+#                 out_sockets={
+#                     "Result" : "NodeSocketFloat",
+#                 },
+#             )
          
-        nodeGroup = nodeGroup.copy() #always using a copy of the original nodeGroup
+#         nodeGroup = nodeGroup.copy() #always using a copy of the original nodeGroup
 
-        self.node_tree = nodeGroup
-        self.width = 250
-        self.label = self.bl_label
+#         self.node_tree = nodeGroup
+#         self.width = 250
+#         self.label = self.bl_label
 
-        #initialize default expression
-        self.user_mathexp = self.user_mathexp
+#         #initialize default expression
+#         self.user_mathexp = self.user_mathexp
 
-        return None 
+#         return None 
 
-    def draw_label(self,):
-        """node label"""
-        return self.bl_label
+#     def draw_label(self,):
+#         """node label"""
+#         return self.bl_label
     
-    def draw_buttons(self, context, layout,):
-        """node interface drawing"""
-        return None
+#     def draw_buttons(self, context, layout,):
+#         """node interface drawing"""
+#         return None
     
     
-    import bpy
+#     import bpy
     
     
     
