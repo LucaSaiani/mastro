@@ -280,3 +280,14 @@ class mastro_CL_street_name_list(PropertyGroup):
         min = 0.0,
         max = 1.0,
         default = (1.0, 0.0, 0.0))
+
+# ------------------------------
+# Node editor Properties
+# ------------------------------ 
+# a class to define a custom property "custom note"
+class mastro_CL_Sticky_Note(PropertyGroup):
+    customNote: BoolProperty(
+        name="Custom Note",
+        description="Indicates if this NodeFrame is a custom sticky note",
+        default=False
+    )
