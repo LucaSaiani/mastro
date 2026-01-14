@@ -2,7 +2,7 @@ import bpy
 from bpy.types import Operator 
 
 class NODE_OT_mastro_rename_reroute(Operator):
-    '''Rename the selected reroute node using the name of the linked output socket'''
+    '''Rename the selected reroute node based on its source socket'''
     bl_idname = "node.rename_reroute_from_source_socket"
     bl_label = "Rename Reroute from Source Socket"
     bl_options = {'REGISTER', 'UNDO'}
