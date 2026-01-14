@@ -5,7 +5,7 @@ import math
 class NODE_OT_sort_multiple_input(Operator):
     bl_idname = "node.sort_multiple_input"
     bl_label = "Sort Join / Geometry to Instance"
-    bl_description = "Sort Multiple Geometry Input"
+    bl_description = "Sort Multiple Geometry Inputs"
     bl_options = {'REGISTER', 'UNDO'}
     
     def execute(self, context):
@@ -70,4 +70,5 @@ class NODE_OT_sort_multiple_input(Operator):
             # remove the old node
             tree.nodes.remove(old_node)
                 
+        self.report({'INFO'}, "Node inputs have been sorted.")
         return {'FINISHED'}

@@ -28,4 +28,4 @@ class NODE_EDITOR_PT_Mastro_Panel(Panel):
                            }
 
             if activeNode.type in valid_types:
-                layout.operator("node.sort_multiple_input", text="Sort Join")
+                layout.operator("node.sort_multiple_input", text="Sort Multiple Inputs")
