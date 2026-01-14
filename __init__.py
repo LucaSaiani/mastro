@@ -197,12 +197,11 @@ def get_addon_classes(revert=False):
     from .UI.classes import classes as preference_classes
     from .UI.properties import classes as property_classes
     from .Handlers.classes import classes as handler_classes
-    from .Nodes.Operators import classes as nodes_classes
+    from .Nodes.operators import classes as nodes_classes
     from .Nodes.ui import classes as ui_classes
     from .Operators import classes as operator_classes
-    from .Keymaps import classes as keymap_classes
     
-    classes = preference_classes + property_classes + handler_classes + nodes_classes + ui_classes + operator_classes + keymap_classes
+    classes = preference_classes + property_classes + handler_classes + nodes_classes + ui_classes + operator_classes
 
     if (revert):
         return reversed(classes)
