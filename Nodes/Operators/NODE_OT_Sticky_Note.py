@@ -20,7 +20,7 @@ def openTextEditor(text):
 
     
         
-class NODE_OT_Sticky_Note(Operator):
+class NODE_OT_mastro_sticky_note(Operator):
     bl_idname = "node.sticky_note"
     bl_label = "sticky Note"
     bl_description = "MaStro Sticky Note"
