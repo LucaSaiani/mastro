@@ -10,10 +10,22 @@ class NODE_EDITOR_PT_Mastro_Panel(Panel):
     
     def draw(self, context):
         layout = self.layout
-        node_tree = bpy.context.space_data.edit_tree
+        node_tree = context.space_data.edit_tree
         if node_tree:
             activeNode = node_tree.nodes.active
         
             # Rename Reroute
-            if activeNode.select and activeNode.type == "REROUTE":
+            if not activeNode:
+                return
+            if not activeNode.select:
+                return
+            
+            if activeNode.type == "REROUTE":
                 layout.operator("node.rename_reroute_from_source_socket", text="Rename Reroute")
+            
+            valid_types = {'JOIN_GEOMETRY', 
+                           'GEOMETRY_TO_INSTANCE',
+                           }
+
+            if activeNode.type in valid_types:
+                layout.operator("node.sort_multiple_input", text="Sort Join")
