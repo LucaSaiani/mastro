@@ -8,53 +8,94 @@
 </head>
 
 <body>
+
 <div class="title-container">
   <h1>Dimension</h1>
-  <img class="header-icon auto-image-header" alt="Icon">
+  <img class="header-icon auto-image-header" alt="Dimension node icon">
 </div>
 
 <div class="content-wrapper">
-  <img class="top-right-image auto-image-top-right" alt="Thumbnail">
-  
-  <p>Qui c'è il tuo testo principale. Grazie alla proprietà float, questo paragrafo (e qualsiasi altro testo che segue) avvolgerà automaticamente l'immagine, fluendo attorno ai suoi lati sinistro e inferiore, lasciando l'angolo in alto a destra occupato dall'immagine stessa. Aggiungendo altro testo, si vedrà chiaramente come il flusso si adatta.</p>
+  <img class="top-right-image auto-image-top-right" alt="Dimension node preview">
+
+  <p>
+    The <strong>Dimension</strong> node generates linear dimensions from the input geometry.
+    Dimension values are calculated based on the length of the referenced geometry edges and are intended
+    for architectural and technical annotations.
+  </p>
 
   <h2>Inputs</h2>
   <dl>
     <dt>Geometry</dt>
-    <dd><P>Standard geometry input.</P></dd>
-    <dt>B</dt>
-    <dd><P>Ciao Mamma</P></dd>
-    <dt>C</dt>
-    <dd><P>Ciao Mamma</P></dd>
-  </dl>
-  
+    <dd>
+      <p>Input geometry used to generate the dimensions.</p>
+    </dd>
 
-  <h2>Properties</h2>
+    <dt>Units</dt>
+    <dd>
+      <p>Units used for the dimension values: meters, decimeters, centimeters, or millimeters.</p>
+    </dd>
+
+    <dt>Show Units</dt>
+    <dd>
+      <p>Displays a unit suffix next to the dimension value.</p>
+    </dd>
+    
+    <dt>Font Size</dt>
+    <dd>
+      <p>Size of the dimension text.</p>
+    </dd>
+
+    <dt>Decimals</dt>
+    <dd>
+      <p>Number of decimal places displayed in the dimension value.</p>
+    </dd>
+
+    <dt>Offset</dt>
+    <dd>
+      <p>Distance between the dimension text and the dimension line.</p>
+    </dd>
+
+    <dt>Font Color</dt>
+    <dd>
+      <p>Material applied to the dimension text.</p>
+    </dd>
+  </dl>
+
+  <h2>Dimension Line</h2>
   <dl>
-    <dt>A</dt>
-    <dd><P>Ciao Mamma</P></dd>
-    <dt>B</dt>
-    <dd><P>Ciao Mamma</P></dd>
-    <dt>C</dt>
-    <dd><P>Ciao Mamma</P></dd>
+    <dt>Symbol Size</dt>
+    <dd>
+      <p>Size of the dimension symbols.</p>
+    </dd>
+
+    <dt>Line Offset</dt>
+    <dd>
+      <p>Distance between the dimension line and the referenced geometry edge.</p>
+    </dd>
+
+    <dt>Extension Line</dt>
+    <dd>
+      <p>Toggles the visibility of the extension lines.</p>
+    </dd>
+
+    <dt>Dimension Color</dt>
+    <dd>
+      <p>Color of the dimension line.</p>
+    </dd>
   </dl>
 
   <h2>Outputs</h2>
   <dl>
-    <dt>A</dt>
-    <dd><P>Ciao Mamma</P></dd>
-    <dt>B</dt>
-    <dd><P>Ciao Mamma</P></dd>
-    <dt>C</dt>
-    <dd><P>Ciao Mamma</P></dd>
+    <dt>Geometry</dt>
+    <dd>
+      <p>
+        The generated dimension geometry. Dimension lines are created as Grease Pencil objects,
+        while the numeric values are generated as mesh objects.
+      </p>
+    </dd>
   </dl>
 
-  <h2>Examples</h2>
-  <img class="example auto-image-example" data-image="example_01" alt="Example">
-
-  <p>Questo è un secondo paragrafo che continua a fluire attorno all'immagine. Il browser gestisce automaticamente lo spazio, garantendo che il testo non si sovrapponga all'immagine flottante.</p>
 </div>
-
 
 </body>
 </html>
