@@ -3,58 +3,146 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="image-basepath" content="gnodes/architecture/annotation/read_slope/images/">  
+  <meta name="image-basepath" content="gnodes/architecture/annotation/read_slope/images/">  
   <title>MaStro</title>
 </head>
 
 <body>
+
 <div class="title-container">
   <h1>Read Slope</h1>
-  <img class="header-icon auto-image-header" alt="Icon">
+  <img class="header-icon auto-image-header" alt="Read Slope node icon">
 </div>
 
 <div class="content-wrapper">
-  <img class="top-right-image auto-image-top-right" alt="Thumbnail">
-  
-  <p>Qui c'è il tuo testo principale. Grazie alla proprietà float, questo paragrafo (e qualsiasi altro testo che segue) avvolgerà automaticamente l'immagine, fluendo attorno ai suoi lati sinistro e inferiore, lasciando l'angolo in alto a destra occupato dall'immagine stessa. Aggiungendo altro testo, si vedrà chiaramente come il flusso si adatta.</p>
+  <img class="top-right-image auto-image-top-right" alt="Read Slope node preview">
+
+  <p>
+    The <strong>Read Slope</strong> node analyzes the inclination of a surface and outputs its slope
+    as numeric values and visual indicators. It is designed for architectural and technical workflows,
+    allowing slopes to be read either as ratios or as angular values.
+  </p>
 
   <h2>Inputs</h2>
   <dl>
     <dt>Geometry</dt>
-    <dd><P>Standard geometry input.</P></dd>
-    <dt>B</dt>
-    <dd><P>Ciao Mamma</P></dd>
-    <dt>C</dt>
-    <dd><P>Ciao Mamma</P></dd>
-  </dl>
-  
+    <dd>
+      <p>Input geometry used to evaluate the slope.</p>
+    </dd>
 
-  <h2>Properties</h2>
-  <dl>
-    <dt>A</dt>
-    <dd><P>Ciao Mamma</P></dd>
-    <dt>B</dt>
-    <dd><P>Ciao Mamma</P></dd>
-    <dt>C</dt>
-    <dd><P>Ciao Mamma</P></dd>
+    <dt>Representation Type</dt>
+    <dd>
+      <p>Defines how the slope is measured: either as a ratio or in degrees.</p>
+    </dd>
+
+    <dt>Triangulate</dt>
+    <dd>
+      <p>Triangulates the input geometry to improve measurement accuracy.</p>
+    </dd>
+
+    <dt>Show Geometry</dt>
+    <dd>
+      <p>Displays the input geometry together with the slope annotations.</p>
+    </dd>
+
+    <dt>Text</dt>
+    <dd>
+      <p>Displays the numeric slope values.</p>
+    </dd>
+
+    <dt>Font Size</dt>
+    <dd>
+      <p>Size of the slope text.</p>
+    </dd>
+
+    <dt>Decimals</dt>
+    <dd>
+      <p>Number of decimal places displayed in the slope value.</p>
+    </dd>
+
+    <dt>Offset from Geometry</dt>
+    <dd>
+      <p>Distance between the numeric value, the arrow, and the surface.</p>
+    </dd>
+
+    <dt>Offset from Arrow</dt>
+    <dd>
+      <p>Distance between the numeric value and the arrow.</p>
+    </dd>
+
+    <dt>Text Color</dt>
+    <dd>
+      <p>Color of the slope value text.</p>
+    </dd>
+
+    <dt>Arrow</dt>
+    <dd>
+      <p>Displays an arrow indicating the direction of the slope.</p>
+    </dd>
+
+    <dt>Length</dt>
+    <dd>
+      <p>Length of the slope arrow.</p>
+    </dd>
+
+    <dt>Radius</dt>
+    <dd>
+      <p>Radius of the arrow shaft.</p>
+    </dd>
+
+    <dt>Vertices</dt>
+    <dd>
+      <p>Resolution of the arrow geometry.</p>
+    </dd>
+
+    <dt>Tip Scale</dt>
+    <dd>
+      <p>Scale of the arrow tip.</p>
+    </dd>
+
+    <dt>Stem Factor</dt>
+    <dd>
+      <p>Controls the proportion between the arrow shaft and its tip.</p>
+    </dd>
+
+    <dt>Arrow Color</dt>
+    <dd>
+      <p>Color of the slope arrow.</p>
+    </dd>
   </dl>
 
   <h2>Outputs</h2>
   <dl>
-    <dt>A</dt>
-    <dd><P>Ciao Mamma</P></dd>
-    <dt>B</dt>
-    <dd><P>Ciao Mamma</P></dd>
-    <dt>C</dt>
-    <dd><P>Ciao Mamma</P></dd>
+    <dt>Geometry</dt>
+    <dd>
+      <p>
+        Output geometry containing the slope annotations. This includes arrows and numeric values,
+        and optionally the original input geometry.
+      </p>
+    </dd>
+
+    <dt>Arrows</dt>
+    <dd>
+      <p>Geometry representing the slope arrows.</p>
+    </dd>
+
+    <dt>Text</dt>
+    <dd>
+      <p>Geometry representing the numeric slope values.</p>
+    </dd>
+
+    <dt>Slope Ratio</dt>
+    <dd>
+      <p>Computed slope value expressed as a ratio.</p>
+    </dd>
+
+    <dt>Slope Degrees</dt>
+    <dd>
+      <p>Computed slope value expressed in degrees.</p>
+    </dd>
   </dl>
 
-  <h2>Examples</h2>
-  <img class="example auto-image-example" data-image="example_01" alt="Example">
-
-  <p>Questo è un secondo paragrafo che continua a fluire attorno all'immagine. Il browser gestisce automaticamente lo spazio, garantendo che il testo non si sovrapponga all'immagine flottante.</p>
 </div>
-
 
 </body>
 </html>
