@@ -1,5 +1,21 @@
 site_name: MaStro
 nav:
   - Home: index.md
+  - Introduction: introduction.md
+  - Install: install.md
+  - User Interface: ui.md
+  - Nodes: 
+    - Overview: gnodes.md
+    - Architecture: test.md
+    - Curve: test.md
+    - Indices: test.md
+    - Instances: test.md
+    - Materials: test.md
+    - Mesh: test.md
+    - Street: test.md
+    - Utilities: test.md
+  - Acknowledgement: acknowledgement.md
+  - Copyright: copyright.md
   - About: about.md
+
 theme: material
