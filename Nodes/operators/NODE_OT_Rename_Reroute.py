@@ -13,9 +13,11 @@ class NODE_OT_mastro_rename_reroute(Operator):
         while True:
             node = current_socket.node
 
+            # If not reroute, this is the oring
             if node.type != 'REROUTE':
                 return current_socket.name
 
+            # If reroute is already labelled, this label is returned
             if node.label:
                 return node.label
 
@@ -23,28 +25,30 @@ class NODE_OT_mastro_rename_reroute(Operator):
             if not in_socket.is_linked:
                 return current_socket.name
 
+            # recursive research
             current_socket = in_socket.links[0].from_socket
 
-
     def execute(self, context):
-        space = context.space_data
-        tree = space.node_tree
+        tree = context.active_node.id_data if context.active_node else context.space_data.edit_tree
         
-        for node in tree.nodes:
-            if node.select and node.type == 'REROUTE':
-                in_socket = node.inputs[0]
+        if not tree:
+            return {'CANCELLED'}
+        
+        selected_reroutes = [n for n in tree.nodes if n.select and n.type == 'REROUTE']
+        
+        if not selected_reroutes:
+            return {'FINISHED'}
 
-                if in_socket.is_linked:
-                    source_name = self.find_source_socket(
-                        in_socket.links[0].from_socket
-                    )
-                    
-                    # link = in_socket.links[0]
-                    # source_socket = link.from_socket
+        for node in selected_reroutes:
+            in_socket = node.inputs[0]
 
-                    # socket_name = source_socket.name
-                    node.label = source_name
-                    node.name = f"Reroute_{source_name}"
+            if in_socket.is_linked:
+                source_name = self.find_source_socket(
+                    in_socket.links[0].from_socket
+                )
+                
+                node.label = source_name
+                node.name = f"Reroute_{source_name}"
 
         return {'FINISHED'}
 
