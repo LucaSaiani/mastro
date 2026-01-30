@@ -38,6 +38,7 @@ a3f2d709-4bae-4a9a-8533-6ffb0c083b23:MaStro/Architecture/Mass:MaStro-Architectur
 ad620ac8-6a6e-41b1-a5d7-e94d9f67732f:MaStro/Curve:MaStro-Curve
 21927b53-55eb-4db2-b4c2-3b70562a9aee:MaStro/Curve/Operations:MaStro-Curve-Operations
 ba1a3696-9dc6-44d7-8384-5d5281480941:MaStro/Curve/Primitives:MaStro-Curve-Primitives
+06ff3190-9047-4b4d-99c9-193230edbbef:MaStro/Enviroment Studies:MaStro-Enviroment Studies
 048bb430-702f-4b63-9fd8-29c78e7bcf01:MaStro/Indices:MaStro-Indices
 5fdecf71-a6cc-472a-9298-6d4a67e0d834:MaStro/Instances:MaStro-Instances
 e6646823-b8da-4ae8-8a3e-df985ab2fa1c:MaStro/Landscape:MaStro-Landscape
