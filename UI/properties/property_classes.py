@@ -153,6 +153,7 @@ class mastro_CL_use_name_list(PropertyGroup):
         max=99,
         precision=3,
         default = 3.150,
+        unit='LENGTH',
         update=update_all_mastro_meshes_floorToFloor)
 
     storeys:IntProperty(
@@ -213,6 +214,7 @@ class mastro_CL_wall_name_list(PropertyGroup):
         #max=99,
         precision=3,
         default = 0.300,
+        unit='LENGTH',
         # update=update_all_mastro_wall_thickness
         )
     
@@ -223,6 +225,7 @@ class mastro_CL_wall_name_list(PropertyGroup):
         #max=99,
         precision=3,
         default = 0,
+        unit='LENGTH',
         # update=update_all_mastro_wall_offset
         )
     
@@ -262,6 +265,7 @@ class mastro_CL_street_name_list(PropertyGroup):
         #max=99,
         precision=3,
         default = 8,
+        unit='LENGTH',
         update=update_all_mastro_street_width)
     
     streetRadius: FloatProperty(
@@ -271,6 +275,7 @@ class mastro_CL_street_name_list(PropertyGroup):
         #max=99,
         precision=3,
         default = 16,
+        unit='LENGTH',
         update=update_all_mastro_street_radius)
     
     streetEdgeColor: FloatVectorProperty(
