@@ -6,7 +6,7 @@ from ...Utils.update_attributes import update_typology_uses_list, update_all_mas
 
 class PROPERTIES_OT_Move_Item(Operator):
     """Generic operator to move items up or down."""
-    bl_idname = "generic.move_item"
+    bl_idname = "generic.mastro_move_item"
     bl_label = "Generic operator to move items in a UI list"
     
     direction: EnumProperty(
