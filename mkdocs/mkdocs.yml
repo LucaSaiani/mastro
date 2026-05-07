@@ -1,8 +1,8 @@
 site_name: MaStro
 nav:
-  - Home: index.md
-  - Introduction: introduction.md
-  - Install: install.md
+  - Home: 
+    - Introduction: index.md
+    - Install: install.md
   - User Interface: ui.md
   - Nodes: 
     - Overview: gnodes.md
