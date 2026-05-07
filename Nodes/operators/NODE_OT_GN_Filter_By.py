@@ -55,8 +55,10 @@ class NODE_OT_mastro_filter_by(Operator):
         # filterNodeDescriptions = []
         for node in nodes:
             if node.type == "COMPARE":
-                tmpId = node.inputs[3].default_value
-                filterNodeIds.append(tmpId)
+                input_b = node.inputs.get('B')
+                if input_b:
+                    tmpId = input_b.default_value
+                    filterNodeIds.append(tmpId)
                 # filterNodeDescriptions.append(filterBy_Group.interface.items_tree[tmpId].description)
             
         # if len(filterNodeIds) == 0:
@@ -82,7 +84,7 @@ class NODE_OT_mastro_filter_by(Operator):
                     compare_node = filterBy_Group.nodes.new(type="FunctionNodeCompare")
                     compare_node.data_type = 'INT'
                     compare_node.operation = 'EQUAL'
-                    compare_node.inputs[3].default_value = el.id
+                    compare_node.inputs['B'].default_value = el.id
                         
                     compare_node.hide = True
                     compare_node.label="="+str(el.id)
@@ -109,7 +111,7 @@ class NODE_OT_mastro_filter_by(Operator):
                     #Add Links
                     # index = len(group_output.inputs) -2
                     filterBy_Group.links.new(named_attribute_node.outputs[0], 
-                                             compare_node.inputs[2])
+                                             compare_node.inputs['A'])
                     filterBy_Group.links.new(compare_node.outputs[0], 
                                              group_output.inputs[socket.name])
 

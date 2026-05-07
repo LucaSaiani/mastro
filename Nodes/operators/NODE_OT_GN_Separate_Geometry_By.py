@@ -51,10 +51,10 @@ class NODE_OT_mastro_separate_geometry_by(Operator):
         
          # Connect nodes
         group.links.new(geom_input, separate_geometry_node.inputs[0])
-        group.links.new(named_attribute_node.outputs[0], compare_node.inputs[2])
-        compare_node.inputs[3].default_value = 0
-        group.links.new(compare_node.outputs[0], separate_geometry_node.inputs[1])
-        group.links.new(separate_geometry_node.outputs[0], geom_output_0)
+        group.links.new(named_attribute_node.outputs["Attribute"], compare_node.inputs["A"])
+        compare_node.inputs["B"].default_value = 0
+        group.links.new(compare_node.outputs["Result"], separate_geometry_node.inputs["Selection"])
+        group.links.new(geom_input, separate_geometry_node.inputs["Geometry"])
         
         group.default_group_node_width = 160
         
@@ -113,7 +113,7 @@ class NODE_OT_mastro_separate_geometry_by(Operator):
                     compare_node = group.nodes.new(type="FunctionNodeCompare")
                     compare_node.data_type = 'INT'
                     compare_node.operation = 'EQUAL'
-                    compare_node.inputs[3].default_value = el.id
+                    compare_node.inputs["B"].default_value = el.id
                         
                     separate_geometry_node = group.nodes.new(type="GeometryNodeSeparateGeometry")
                     separate_geometry_node.domain = "EDGE"
@@ -134,11 +134,11 @@ class NODE_OT_mastro_separate_geometry_by(Operator):
                                                socket_type="NodeSocketGeometry")
             
                     #Add Links
-                    index = len(group_output.inputs) -2
-                    group.links.new(named_attribute_node.outputs[0], compare_node.inputs[2])
-                    group.links.new(compare_node.outputs[0], separate_geometry_node.inputs[1])
-                    group.links.new(lastOutput.outputs[1], separate_geometry_node.inputs[0])
-                    group.links.new(separate_geometry_node.outputs[0], group_output.inputs[index])
+                    index = len(group_output.inputs) - 2
+                    group.links.new(named_attribute_node.outputs["Attribute"], compare_node.inputs["A"])
+                    group.links.new(compare_node.outputs["Result"], separate_geometry_node.inputs["Selection"])
+                    group.links.new(lastOutput.outputs["Inverted"], separate_geometry_node.inputs["Geometry"])
+                    group.links.new(separate_geometry_node.outputs["Selection"], group_output.inputs[index])
                     lastOutput = separate_geometry_node
 
                 # a name has been renamed
