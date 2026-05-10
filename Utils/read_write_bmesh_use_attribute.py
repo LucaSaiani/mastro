@@ -46,7 +46,9 @@ def read_bmesh_use_attribute(typology_id):
     # since it is possible to sort typologies in the ui, it can be that the index of the element
     # in the list doesn't correspond to typology_id. Therefore it is necessary to find elements
     # in the way below and not with use_list = bpy.context.scene.mastro_typology_name_list[typology_id].useList
-    item = next(i for i in bpy.context.scene.mastro_typology_name_list if i["id"] == typology_id)
+    item = next((i for i in bpy.context.scene.mastro_typology_name_list if i["id"] == typology_id), None)
+    if item is None:
+        return
     use_list = item.useList
     # uses are listed top to bottom, but they need to
     # be added bottom to top           

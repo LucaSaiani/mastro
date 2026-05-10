@@ -82,7 +82,7 @@ class OBJECT_OT_Add_Mastro_Mass(Operator, AddObjectHelper):
         # mesh_attributes[0][1].value = 3
 
     
-        bm.free
+        bm.free()
         # add mastro mass geo node to the created object
         geoName = "MaStro Mass"
         obj.modifiers.new(geoName, "NODES")

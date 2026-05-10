@@ -31,7 +31,7 @@ header_granularData = ["Block Name",
 
 floorToFloorLevel = 4.5
  
-class OBEJCT_OT_Mastro_Export_CSV(Operator, ExportHelper):
+class OBJECT_OT_Mastro_Export_CSV(Operator, ExportHelper):
     """Export the data of the visibile MaStro Objects as a CSV file"""
     bl_idname = "object.mastro_export_csv"
     bl_label = "Export data as CSV"

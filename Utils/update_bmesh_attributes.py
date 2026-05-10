@@ -36,7 +36,7 @@ def update_bmesh_attributes(self, attribute_to_update):
             suffix = ""
             
         else:
-            mode="EGDE"
+            mode="EDGE"
             field = bm.edges
             suffix = "_EDGE"
 
@@ -66,5 +66,5 @@ def update_bmesh_attributes(self, attribute_to_update):
         else:
             bm.to_mesh(mesh)
             
-        bm.free
-        
+        bm.free()
+

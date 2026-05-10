@@ -31,7 +31,9 @@ def update_view3D_panels(scene):
         # since it is possible to sort typologies in the ui, it can be that the index of the element
         # in the list doesn't correspond to typology_id. Therefore it is necessary to find elements
         # in the way below and not with use_list = bpy.context.scene.mastro_typology_name_list[typology_id].useList
-        item = next(i for i in bpy.context.scene.mastro_typology_name_list if i["id"] == typology_index)
+        item = next((i for i in bpy.context.scene.mastro_typology_name_list if i["id"] == typology_index), None)
+        if item is None:
+            return
         # bpy.context.scene.mastro_typology_name_current[0].name = item.name
                                     
         usesUiList = bpy.context.scene.mastro_obj_typology_uses_name_list 
