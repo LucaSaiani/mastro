@@ -92,7 +92,7 @@ class OBJECT_OT_Add_Mastro_Block(Operator, AddObjectHelper):
         
 
         # add mastro block and mastro mass geo node to the created object
-        bm.free
+        bm.free()
         geoName = "MaStro Block"
         obj.modifiers.new(geoName, "NODES")
         group = bpy.data.node_groups["MaStro Block"]

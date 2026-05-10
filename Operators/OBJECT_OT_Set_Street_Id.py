@@ -18,13 +18,13 @@ class OBJECT_OT_Set_Street_Id(Operator):
                 selected_objects.append(active_object)
         
         for obj in selected_objects:
-            if (obj.type == "MESH" and 
-                "MaStro object" in context.object.data and
-                "MaStro street" in context.object.data):
+            if (obj.type == "MESH" and
+                "MaStro object" in obj.data and
+                "MaStro street" in obj.data):
                 mesh = obj.data
                 mode = obj.mode
                 bpy.ops.object.mode_set(mode='OBJECT')
-                selected_edges = [e for e in bpy.context.active_object.data.edges if e.select]
+                selected_edges = [e for e in obj.data.edges if e.select]
                 for edge in selected_edges:
                     edgeIndex = edge.index
                     data = read_street_attribute(context, mesh, edgeIndex)

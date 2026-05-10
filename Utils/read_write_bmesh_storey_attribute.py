@@ -35,7 +35,9 @@ def read_bmesh_storey_attribute(numberOfStoreys, typology_id):
     numberOfWantedStoreys = numberOfStoreys
     
     # --- Find the typology item safely (cannot rely on list index) ---
-    item = next(i for i in bpy.context.scene.mastro_typology_name_list if i["id"] == typology_id)
+    item = next((i for i in bpy.context.scene.mastro_typology_name_list if i["id"] == typology_id), None)
+    if item is None:
+        return
     use_list = item.useList
     useSplit = use_list.split(";")
     useSplit.reverse()  # uses listed top-to-bottom in UI
