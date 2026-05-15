@@ -1,5 +1,4 @@
 import bpy
-import bpy
 import blf
 import bmesh
 import gpu
@@ -12,13 +11,13 @@ from mathutils import Vector
 from ...Utils.get_preferences  import get_prefs
 
 
-# show the overlayed attributes (type, number of storeys, etc...)
 class VIEW_3D_OT_show_mastro_attributes(Operator):
+    """Toggle the viewport attribute overlays (typology, storeys, normals, etc.)."""
     bl_idname = "wm.show_mastro_attributes"
     bl_label = "Show MaStro attributes"
-    
-    _handle_2D = None  # keep function handler
-    _handle_3D = None
+
+    _handle_2D = None  # 2D text overlay drawn in pixel-space (POST_PIXEL)
+    _handle_3D = None  # 3D geometry overlay drawn in world-space (POST_VIEW)
     
     @staticmethod
     def handle_add_2D(self, context):
@@ -63,6 +62,7 @@ class VIEW_3D_OT_show_mastro_attributes(Operator):
         return {'FINISHED'}
     
 def draw_selection_overlay(context):
+    """Draw a colored edge/face overlay on the active MaStro object in edit mode."""
     obj = bpy.context.active_object
     if hasattr(obj, "data") and obj.data is not None and "MaStro object" in obj.data:
         prefs = get_prefs()
@@ -126,6 +126,7 @@ def draw_selection_overlay(context):
                 show_street_overlay(obj)
 
 def show_block_overlay(obj):
+    """Draw typology-colored edges for a MaStro block object, respecting selection highlight."""
     theme = bpy.context.preferences.themes[0].view_3d
     color_editmesh_active = theme.editmesh_active
     color_edge_mode_select = theme.edge_mode_select
@@ -187,8 +188,8 @@ def show_block_overlay(obj):
     bm.free()
     
     
-# a function to show wall overlays
 def show_wall_overlay(obj):
+    """Draw wall-type-colored edges for a MaStro mass object in edge select mode."""
     theme = bpy.context.preferences.themes[0].view_3d
     color_editmesh_active = theme.editmesh_active
     color_edge_mode_select = theme.edge_mode_select
@@ -246,8 +247,8 @@ def show_wall_overlay(obj):
     bm.free()
 
 
-# a function to show the street overlays
 def show_street_overlay(obj):
+    """Draw street-type-colored edges for a MaStro street object."""
     theme = bpy.context.preferences.themes[0].view_3d
     color_editmesh_active = theme.editmesh_active
     color_edge_mode_select = theme.edge_mode_select
@@ -313,6 +314,7 @@ def show_street_overlay(obj):
     bm.free()
 
 def draw_main_show_attributes_2D(context):
+    """Draw text labels (typology, storeys, normals) at each edge/face centre in pixel-space."""
     obj = bpy.context.active_object
     if obj is None:
         return
@@ -606,6 +608,7 @@ def draw_main_show_attributes_2D(context):
     bm.free()
 
 def draw_main_show_attributes_3D(context):
+    """Dispatch the correct geometry overlay (block/wall/street) based on object type and mode."""
     obj = bpy.context.active_object
 
     if obj is None:

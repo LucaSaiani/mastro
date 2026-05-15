@@ -9,7 +9,7 @@ from ..Utils.add_nodes import add_nodes
 
 
 class OBJECT_OT_Add_Mastro_Block(Operator, AddObjectHelper):
-    """Add a MaStro mablockss"""
+    """Add a MaStro block"""
     bl_idname = "object.mastro_add_mastro_block"
     bl_label = "Block"
     bl_options = {'REGISTER', 'UNDO'}

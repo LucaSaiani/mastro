@@ -1,8 +1,11 @@
-import bpy 
-from bpy.types import Panel 
+import bpy
+from bpy.types import Panel
 
-"""View 3D panel to show the mass related UI"""
 class VIEW3D_PT_Mastro_Mass(Panel):
+    """VIEW3D sidebar panel for mass objects.
+    In OBJECT mode shows block/building assignment.
+    In EDIT mode (face select) shows typology, storey count, and use breakdown.
+    """
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "MaStro"
@@ -33,11 +36,12 @@ class VIEW3D_PT_Mastro_Mass(Panel):
         
             mode = obj.mode
             if mode == "OBJECT":
+                # --- OBJECT MODE: assign block and building ---
                 scene = context.scene
-                
+
                 layout = self.layout
-                layout.use_property_split = True    
-                layout.use_property_decorate = False  # No animation.
+                layout.use_property_split = True
+                layout.use_property_decorate = False
                 
                 row = layout.row(align=True)
 
@@ -52,14 +56,15 @@ class VIEW3D_PT_Mastro_Mass(Panel):
                 #     row.label(text = scene.mastro_building_name_current[0].name)
                 
                     
-            elif mode == "EDIT":      
+            elif mode == "EDIT":
+                # --- EDIT MODE: typology, storeys, and per-face use breakdown ---
                 scene = context.scene
-                
+
                 layout = self.layout
-                layout.use_property_split = True    
-                layout.use_property_decorate = False  # No animation.
-                
-                if tuple(bpy.context.scene.tool_settings.mesh_select_mode)[2] == True: #we are selecting faces
+                layout.use_property_split = True
+                layout.use_property_decorate = False
+
+                if tuple(bpy.context.scene.tool_settings.mesh_select_mode)[2] == True:  # face select mode
                     layout.enabled = True
                 else:
                     layout.enabled = False

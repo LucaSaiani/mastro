@@ -1,6 +1,8 @@
 import bpy 
 
 def init_nodes():
+    # Maps each filter category to the node types that need a corresponding group:
+    # "gn" = Geometry Nodes (filter + separate geometry), "shader" = Shader Nodes (filter by)
     names = {
         "block": ("shader",),
         "building": ("shader",),

@@ -4,8 +4,10 @@ from bpy_extras.view3d_utils import location_3d_to_region_2d
 from ..utils.node_utils import create_new_nodegroup, set_socket_defvalue
 
 class mastro_GN_window_info(bpy.types.GeometryNodeCustomGroup):
+    """Custom Geometry Node that outputs the current 3D viewport orientation.
+    Used to keep GN-based architectural dimensions always readable as the user rotates the view."""
     bl_idname = "mastro_gn_window_info"
-    bl_label = "Window info"
+    bl_label = "Viewport Orientation"
 
     # use_scene_cam: bpy.props.BoolProperty(
     #     default=True,

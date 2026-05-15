@@ -3,16 +3,15 @@ import addon_utils
 from pathlib import Path
 
 def clear_asset_status(data_block):
-    """Clears the asset status of any data block (NodeTree, Material, etc.)"""
+    """Clear the asset status of a data block. Appended node groups are marked as assets,
+    which causes them to appear in the asset browser and interfere with searches."""
     if data_block and hasattr(data_block, "asset_data") and data_block.asset_data:
         data_block.asset_clear()
         # print(f"MaStro: Asset status cleared for {type(data_block).__name__}: '{data_block.name}'")
 
 def clean_tree_recursive(tree, processed_trees):
-    """
-    Recursively scans a node tree (Geometry Nodes or Shader Nodes) 
-    to clear asset status from nested groups and materials.
-    """
+    """Recursively clear asset status from a node tree and all nested groups/materials.
+    The processed_trees set prevents re-visiting shared node groups."""
     if not tree or tree in processed_trees:
         return
     

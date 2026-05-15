@@ -24,8 +24,10 @@ from ...Nodes.operators import mastro_GN_window_info
 
 
 
+# Tracks the set of selected MaStro objects from the previous depsgraph tick
+# so we can detect selection changes without comparing the full depsgraph.
 previous_selection = {}
-        
+
 @persistent
 def updates(scene, depsgraph):
     check_new_scenes()
@@ -596,6 +598,5 @@ def updates(scene, depsgraph):
                         for group in groupInput:
                             group.update_selected_objects()
                         # execute the node tree
-                        print(f"updating tree from modalllllllllllllllllllllllllllllllllllllllll")
                         tree.execute()
     

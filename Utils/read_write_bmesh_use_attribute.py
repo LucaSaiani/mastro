@@ -79,16 +79,10 @@ def read_bmesh_use_attribute(typology_id):
                 
                 # undercroft += str(int(use.undercroft))
                 
-                #### floor to floor height for each use, stored in A, B, C, ...
-                #### due to the fact that arrays can't be used
-                #### and array like (3.555, 12.664, 0.123)
-                #### is saved as
-                #### A (1010) tens
-                #### B (1320) units
-                #### C (1561) first decimal
-                #### D (1562) second decimal
-                #### E (1543) third decimal
-                #### each array starting with 1 since a number can't start with 0
+                # Heights are encoded as parallel digit strings (A–E) because GN attributes
+                # don't support arrays. Each string holds one digit position of the value
+                # across all uses, e.g. 3.555 → tens=3, units=5, dec1=5, dec2=5, dec3=5.
+                # All strings are prefixed with "1" so they never start with a leading zero.
                 height = str(round(use.floorToFloor,3))
                 if use.floorToFloor < 10:
                     height = "0" + height

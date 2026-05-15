@@ -55,7 +55,7 @@ import nodeitems_utils
 
 
 
-#### IMPORT DA TENERE ASSOLUTAMENTE ####
+# bpy must be imported here (not at the top) to ensure Blender's API is ready
 import bpy
 from bpy.utils import register_class, unregister_class
 

@@ -26,7 +26,7 @@ def update_uses_of_typology(self, context):
         name_list = context.scene.mastro_typology_name_list[selected_typology_index].useList    
         split_list = name_list.split(";")
         for el in split_list:
-            if el.strip() != '': # to avoid empty values which could happend when the software starts
+            if el.strip() != '': # useList can contain a trailing ";" that produces an empty string
                 context.scene.mastro_typology_uses_name_list.add()
                 temp_list = []    
                 temp_list.append(int(el))
@@ -45,8 +45,7 @@ def update_uses_of_typology(self, context):
 # and also update the uses in the mastro objects
 def update_typology_uses_list(context):
     selected_typology_index = context.scene.mastro_typology_name_list_index
-    # the exististing list is replaced with what is in the UiList
-    # the format of the list is 2;5;1 with numbers indicating the Id of the use
+    # Serialize the UIList back to the semicolon-separated string stored in useList (e.g. "2;5;1")
     tmp = ""
     for el in context.scene.mastro_typology_uses_name_list:
         tmp += str(el.id) + ";"
@@ -60,9 +59,7 @@ def update_typology_uses_list(context):
 def update_typology_uses_name_label(self, context):
     scene = context.scene
     name = scene.mastro_typology_uses_name
-    # if the typology is newly created, the index is equal to -1 and 
-    # therefore there is an out of range error
-    # Also, in this case, there are no values to update
+    # index is -1 when the list is empty (e.g. a just-created typology); skip update
     if scene.mastro_typology_uses_name_list_index > -1:
         scene.mastro_typology_uses_name_list[scene.mastro_typology_uses_name_list_index].name = name
         for n in scene.mastro_use_name_list:
