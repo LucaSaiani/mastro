@@ -79,29 +79,29 @@ def update_view3D_panels(scene):
             if isinstance(bm.select_history.active, bmesh.types.BMEdge):
                 active = bm.select_history.active
    
-        # bMesh_typology     = field.layers.int[f"mastro_typology_id{suffix}"]
-        bMesh_use_list_A   = field.layers.int[f"mastro_list_use_id_A{suffix}"]
-        bMesh_use_list_B   = field.layers.int[f"mastro_list_use_id_B{suffix}"]
-        # bMesh_height_A     = field.layers.int[f"mastro_list_height_A{suffix}"]
-        # bMesh_height_B     = field.layers.int[f"mastro_list_height_B{suffix}"]
-        # bMesh_height_C     = field.layers.int[f"mastro_list_height_C{suffix}"]
-        # bMesh_height_D     = field.layers.int[f"mastro_list_height_D{suffix}"]
-        # bMesh_height_E     = field.layers.int[f"mastro_list_height_E{suffix}"]
-        # bMesh_storeys      = field.layers.int[f"mastro_number_of_storeys{suffix}"]
-        bMesh_storey_list_A = field.layers.int[f"mastro_list_storey_A{suffix}"]
-        bMesh_storey_list_B = field.layers.int[f"mastro_list_storey_B{suffix}"]
+        # bm_typology     = field.layers.int[f"mastro_typology_id{suffix}"]
+        bm_use_list_A   = field.layers.int[f"mastro_list_use_id_A{suffix}"]
+        bm_use_list_B   = field.layers.int[f"mastro_list_use_id_B{suffix}"]
+        # bm_height_A     = field.layers.int[f"mastro_list_height_A{suffix}"]
+        # bm_height_B     = field.layers.int[f"mastro_list_height_B{suffix}"]
+        # bm_height_C     = field.layers.int[f"mastro_list_height_C{suffix}"]
+        # bm_height_D     = field.layers.int[f"mastro_list_height_D{suffix}"]
+        # bm_height_E     = field.layers.int[f"mastro_list_height_E{suffix}"]
+        # bm_storeys      = field.layers.int[f"mastro_number_of_storeys{suffix}"]
+        bm_storey_list_A = field.layers.int[f"mastro_list_storey_A{suffix}"]
+        bm_storey_list_B = field.layers.int[f"mastro_list_storey_B{suffix}"]
         # bmesh_overlay_top    = field.layers.int[f"mastro_overlay_top{suffix}"]
 
         # if active_index is not None:
         #     active = field[active_index]
         if active is not None:
-            use_id_list_A = str(active[bMesh_use_list_A])[1:]
-            use_id_list_B = str(active[bMesh_use_list_B])[1:]
+            use_id_list_A = str(active[bm_use_list_A])[1:]
+            use_id_list_B = str(active[bm_use_list_B])[1:]
             use_id_list = [a + b for a, b in zip(use_id_list_A, use_id_list_B)]
             use_list = ';'.join(str(int(x)) for x in use_id_list)
             use_list = use_list[::-1]
-            list_storey_A = str(active[bMesh_storey_list_A])[1:]
-            list_storey_B = str(active[bMesh_storey_list_B])[1:]
+            list_storey_A = str(active[bm_storey_list_A])[1:]
+            list_storey_B = str(active[bm_storey_list_B])[1:]
             
             bm.free()
             

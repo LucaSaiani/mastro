@@ -40,20 +40,20 @@ def update_bmesh_attributes(self, attribute_to_update):
             field = bm.edges
             suffix = "_EDGE"
 
-        bMesh_typology = field.layers.int[f"mastro_typology_id{suffix}"]
-        bMesh_storeys = field.layers.int[f"mastro_number_of_storeys{suffix}"]
+        bm_typology = field.layers.int[f"mastro_typology_id{suffix}"]
+        bm_storeys = field.layers.int[f"mastro_number_of_storeys{suffix}"]
         bmesh_overlay_top = field.layers.int[f"mastro_overlay_top{suffix}"]
    
         
         for selection in field:
             if attribute_to_update == "all":
-                typology_id = selection[bMesh_typology]
+                typology_id = selection[bm_typology]
                 write_bmesh_use_attribute(bm, selection, typology_id, mode)
             elif attribute_to_update == "floor_to_floor":
-                typology_id = selection[bMesh_typology]
+                typology_id = selection[bm_typology]
                 write_bmesh_use_attribute(bm, selection, typology_id, mode)
             elif attribute_to_update == "number_of_storeys":
-                numberOfStoreys = selection[bMesh_storeys]
+                numberOfStoreys = selection[bm_storeys]
                 write_bmesh_storey_attribute(bm, selection, numberOfStoreys, mode)
             
             if selection[bmesh_overlay_top] > 0:

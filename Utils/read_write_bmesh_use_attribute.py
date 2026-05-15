@@ -13,29 +13,29 @@ def write_bmesh_use_attribute(bm, selection, value, mode):
         field = bm.edges
         suffix = "_EDGE"
 
-    bMesh_typology     = field.layers.int[f"mastro_typology_id{suffix}"]
-    bMesh_use_list_A   = field.layers.int[f"mastro_list_use_id_A{suffix}"]
-    bMesh_use_list_B   = field.layers.int[f"mastro_list_use_id_B{suffix}"]
-    bMesh_height_A     = field.layers.int[f"mastro_list_height_A{suffix}"]
-    bMesh_height_B     = field.layers.int[f"mastro_list_height_B{suffix}"]
-    bMesh_height_C     = field.layers.int[f"mastro_list_height_C{suffix}"]
-    bMesh_height_D     = field.layers.int[f"mastro_list_height_D{suffix}"]
-    bMesh_height_E     = field.layers.int[f"mastro_list_height_E{suffix}"]
-    # bMesh_undercroft   = field.layers.int[f"mastro_undercroft{suffix}"]
-    bMesh_storeys      = field.layers.int[f"mastro_number_of_storeys{suffix}"]
+    bm_typology     = field.layers.int[f"mastro_typology_id{suffix}"]
+    bm_use_list_A   = field.layers.int[f"mastro_list_use_id_A{suffix}"]
+    bm_use_list_B   = field.layers.int[f"mastro_list_use_id_B{suffix}"]
+    bm_height_A     = field.layers.int[f"mastro_list_height_A{suffix}"]
+    bm_height_B     = field.layers.int[f"mastro_list_height_B{suffix}"]
+    bm_height_C     = field.layers.int[f"mastro_list_height_C{suffix}"]
+    bm_height_D     = field.layers.int[f"mastro_list_height_D{suffix}"]
+    bm_height_E     = field.layers.int[f"mastro_list_height_E{suffix}"]
+    # bm_undercroft   = field.layers.int[f"mastro_undercroft{suffix}"]
+    bm_storeys      = field.layers.int[f"mastro_number_of_storeys{suffix}"]
 
      # --- writing to bmesh ---
-    selection[bMesh_typology] = data["typology_id"]
-    selection[bMesh_use_list_A] = data["use_id_list_A"]
-    selection[bMesh_use_list_B] = data["use_id_list_B"]
-    selection[bMesh_height_A] = data["height_A"]
-    selection[bMesh_height_B] = data["height_B"]
-    selection[bMesh_height_C] = data["height_C"]
-    selection[bMesh_height_D] = data["height_D"]
-    selection[bMesh_height_E] = data["height_E"]
-    # selection[bMesh_undercroft] = data["undercroft"]
+    selection[bm_typology] = data["typology_id"]
+    selection[bm_use_list_A] = data["use_id_list_A"]
+    selection[bm_use_list_B] = data["use_id_list_B"]
+    selection[bm_height_A] = data["height_A"]
+    selection[bm_height_B] = data["height_B"]
+    selection[bm_height_C] = data["height_C"]
+    selection[bm_height_D] = data["height_D"]
+    selection[bm_height_E] = data["height_E"]
+    # selection[bm_undercroft] = data["undercroft"]
     
-    numberOfStoreys = selection[bMesh_storeys]
+    numberOfStoreys = selection[bm_storeys]
     data_storey = write_bmesh_storey_attribute(bm, selection, numberOfStoreys, mode)
     
     joined_data = {**data_storey, **data} 

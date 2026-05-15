@@ -3,7 +3,7 @@ from bpy.types import Operator
 
 from ..Utils.read_street_attribute import read_street_attribute
 # Operator to update the attributes of all the MaStro streets in the scene        
-class OBJECT_OT_update_all_MaStro_street_attributes(Operator):
+class OBJECT_OT_Mastro_Update_All_Street_Attributes(Operator):
     bl_idname = "object.update_all_mastro_street_attributes"
     bl_label = "Update"
     bl_options = {'REGISTER', 'UNDO'}
@@ -19,7 +19,7 @@ class OBJECT_OT_update_all_MaStro_street_attributes(Operator):
             
         for obj in objs:
             if obj is not None and obj.type == 'MESH' and "MaStro object" in obj.data and "MaStro street" in obj.data:
-                # it is necessary to set the object to visibile in order to make it active
+                # it is necessary to set the object to visible in order to make it active
                 if obj.visible_get():
                     alreadyVisible = True
                 else:

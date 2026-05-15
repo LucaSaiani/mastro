@@ -316,26 +316,26 @@ def getAttributes(objNames, attrType):
             # bm.faces.ensure_lookup_table()    
            
          
-            bMesh_typology = bm.faces.layers.int["mastro_typology_id"]
-            bMesh_use_id_list_A = bm.faces.layers.int["mastro_list_use_id_A"]
-            bMesh_use_id_list_B = bm.faces.layers.int["mastro_list_use_id_B"]
-            bMesh_storeys = bm.faces.layers.int["mastro_number_of_storeys"]
-            bMesh_storey_list_A = bm.faces.layers.int["mastro_list_storey_A"]
-            bMesh_storey_list_B = bm.faces.layers.int["mastro_list_storey_B"]
-            bMesh_height_A = bm.faces.layers.int["mastro_list_height_A"]
-            bMesh_height_B = bm.faces.layers.int["mastro_list_height_B"]
-            bMesh_height_C = bm.faces.layers.int["mastro_list_height_C"]
-            bMesh_height_D = bm.faces.layers.int["mastro_list_height_D"]
-            bMesh_height_E = bm.faces.layers.int["mastro_list_height_E"]
-            bMesh_undercroft = bm.faces.layers.int["mastro_undercroft"]
+            bm_typology = bm.faces.layers.int["mastro_typology_id"]
+            bm_use_id_list_A = bm.faces.layers.int["mastro_list_use_id_A"]
+            bm_use_id_list_B = bm.faces.layers.int["mastro_list_use_id_B"]
+            bm_storeys = bm.faces.layers.int["mastro_number_of_storeys"]
+            bm_storey_list_A = bm.faces.layers.int["mastro_list_storey_A"]
+            bm_storey_list_B = bm.faces.layers.int["mastro_list_storey_B"]
+            bm_height_A = bm.faces.layers.int["mastro_list_height_A"]
+            bm_height_B = bm.faces.layers.int["mastro_list_height_B"]
+            bm_height_C = bm.faces.layers.int["mastro_list_height_C"]
+            bm_height_D = bm.faces.layers.int["mastro_list_height_D"]
+            bm_height_E = bm.faces.layers.int["mastro_list_height_E"]
+            bm_undercroft = bm.faces.layers.int["mastro_undercroft"]
     
             for f in bm.faces:
                 polyId = f.index
-                storeys = f[bMesh_storeys]
+                storeys = f[bm_storeys]
                 # get typology name
                 if attrType in ("all", "typology"):
                     for n in bpy.context.scene.mastro_typology_name_list:
-                        if n.id == f[bMesh_typology]:
+                        if n.id == f[bm_typology]:
                             typologyId = n.id
                             typologyName = n.name
                             break
@@ -343,14 +343,14 @@ def getAttributes(objNames, attrType):
                 indexList = 1
                 storeyPreviousGroup = 0
                 while level < storeys:
-                    length = int(math.log10(f[bMesh_storey_list_A])) +1
+                    length = int(math.log10(f[bm_storey_list_A])) +1
                     pos = length - indexList -1
-                    storey_A = int((f[bMesh_storey_list_A] / 10 ** pos) % 10)
-                    storey_B = int((f[bMesh_storey_list_B] / 10 ** pos) % 10)
+                    storey_A = int((f[bm_storey_list_A] / 10 ** pos) % 10)
+                    storey_B = int((f[bm_storey_list_B] / 10 ** pos) % 10)
                     # print(f"{storey_A} {storey_B}  storey {storey_A * 10 + storey_B}")
                     if attrType in ("all", "use"):
-                        use_A = int((f[bMesh_use_id_list_A] / 10 ** pos) % 10)
-                        use_B = int((f[bMesh_use_id_list_B] / 10 ** pos) % 10)
+                        use_A = int((f[bm_use_id_list_A] / 10 ** pos) % 10)
+                        use_B = int((f[bm_use_id_list_B] / 10 ** pos) % 10)
                         useId = use_A * 10 + use_B
                         # get use name
                         for n in bpy.context.scene.mastro_use_name_list:
@@ -360,14 +360,14 @@ def getAttributes(objNames, attrType):
 
                     # print(f"{use_A} {use_B} {use}")
                     if attrType in ("all", "height"):
-                        height_A = int((f[bMesh_height_A] / 10 ** pos) % 10)
-                        height_B = int((f[bMesh_height_B] / 10 ** pos) % 10)
-                        height_C = int((f[bMesh_height_C] / 10 ** pos) % 10)
-                        height_D = int((f[bMesh_height_D] / 10 ** pos) % 10)
-                        height_E = int((f[bMesh_height_E] / 10 ** pos) % 10)
+                        height_A = int((f[bm_height_A] / 10 ** pos) % 10)
+                        height_B = int((f[bm_height_B] / 10 ** pos) % 10)
+                        height_C = int((f[bm_height_C] / 10 ** pos) % 10)
+                        height_D = int((f[bm_height_D] / 10 ** pos) % 10)
+                        height_E = int((f[bm_height_E] / 10 ** pos) % 10)
                         height = height_A * 10 + height_B + height_C * 0.1 + height_D * 0.01 + height_E * 0.001
 
-                    undercroft = int((f[bMesh_undercroft] / 10 ** pos) % 10)
+                    undercroft = int((f[bm_undercroft] / 10 ** pos) % 10)
                     
                     storeyGroup = (storey_A * 10 + storey_B) + storeyPreviousGroup
                     # print(f"Storeygroup {storeyGroup}       storey {storey}")

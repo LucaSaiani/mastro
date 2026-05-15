@@ -32,7 +32,7 @@ header_granularData = ["Block Name",
 floorToFloorLevel = 4.5
  
 class OBJECT_OT_Mastro_Export_CSV(Operator, ExportHelper):
-    """Export the data of the visibile MaStro Objects as a CSV file"""
+    """Export the data of the visible MaStro Objects as a CSV file"""
     bl_idname = "object.mastro_export_csv"
     bl_label = "Export data as CSV"
     
@@ -49,7 +49,7 @@ class OBJECT_OT_Mastro_Export_CSV(Operator, ExportHelper):
         return writeCSV(context, self.filepath)
     
     
-class OBJECT_OT_MaStro_Print_Data(Operator):
+class OBJECT_OT_Mastro_Print_Data(Operator):
     bl_idname = "object.mastro_print_data"
     bl_label = "Print the data of the mass"
     
@@ -191,7 +191,7 @@ def writeCSV(context, filepath):
     return {'FINISHED'}
 
 
-# in case of masttro block, the mesh is evaluated in order to get areas
+# in case of mastro block, the mesh is evaluated in order to get areas
 def evaluate_mastro_obj(obj):
     # get the list of modifiers, keep on only the first one, the others
     # are switched off
@@ -216,7 +216,7 @@ def evaluate_mastro_obj(obj):
     mesh_from_eval = bpy.data.meshes.new_from_object(object_eval)
     object_eval.to_mesh_clear()
 
-    # modifiers asre turned bakc on
+    # modifiers are turned back on
     for mod, state in modifiers_to_restore:
         mod.show_viewport = state
    
@@ -235,17 +235,17 @@ def get_mass_data(obj, mastro_type):
     bm = bmesh.new()
     bm.from_mesh(mesh)
     
-    bMesh_typology = bm.faces.layers.int["mastro_typology_id"]
-    bMesh_storeys = bm.faces.layers.int["mastro_number_of_storeys"]
-    bMesh_use_list_A   = bm.faces.layers.int["mastro_list_use_id_A"]
-    bMesh_use_list_B   = bm.faces.layers.int["mastro_list_use_id_B"]
-    bMesh_storey_list_A = bm.faces.layers.int["mastro_list_storey_A"]
-    bMesh_storey_list_B = bm.faces.layers.int["mastro_list_storey_B"]
-    bMesh_height_A = bm.faces.layers.int["mastro_list_height_A"]
-    bMesh_height_B = bm.faces.layers.int["mastro_list_height_B"]
-    bMesh_height_C = bm.faces.layers.int["mastro_list_height_C"]
-    bMesh_height_D = bm.faces.layers.int["mastro_list_height_D"]
-    bMesh_height_E = bm.faces.layers.int["mastro_list_height_E"]
+    bm_typology = bm.faces.layers.int["mastro_typology_id"]
+    bm_storeys = bm.faces.layers.int["mastro_number_of_storeys"]
+    bm_use_list_A   = bm.faces.layers.int["mastro_list_use_id_A"]
+    bm_use_list_B   = bm.faces.layers.int["mastro_list_use_id_B"]
+    bm_storey_list_A = bm.faces.layers.int["mastro_list_storey_A"]
+    bm_storey_list_B = bm.faces.layers.int["mastro_list_storey_B"]
+    bm_height_A = bm.faces.layers.int["mastro_list_height_A"]
+    bm_height_B = bm.faces.layers.int["mastro_list_height_B"]
+    bm_height_C = bm.faces.layers.int["mastro_list_height_C"]
+    bm_height_D = bm.faces.layers.int["mastro_list_height_D"]
+    bm_height_E = bm.faces.layers.int["mastro_list_height_E"]
     
     face_list = list(bm.faces)
     
@@ -269,7 +269,7 @@ def get_mass_data(obj, mastro_type):
 
         # typology name
         for typology in bpy.context.scene.mastro_typology_name_list:
-            if typology.id == face[bMesh_typology]:
+            if typology.id == face[bm_typology]:
                 typology_name = typology.name
                 typology_id = typology.id
                 # item = next(i for i in bpy.context.scene.mastro_typology_name_list if i["id"] == typology_id)
@@ -278,8 +278,8 @@ def get_mass_data(obj, mastro_type):
                 break
 
         # use list
-        use_id_list_A = face[bMesh_use_list_A]
-        use_id_list_B = face[bMesh_use_list_B]
+        use_id_list_A = face[bm_use_list_A]
+        use_id_list_B = face[bm_use_list_B]
 
         use_id_list_A = str(use_id_list_A)[1:]
         use_id_list_B = str(use_id_list_B)[1:]
@@ -295,19 +295,19 @@ def get_mass_data(obj, mastro_type):
             use_name_list.append(use_name)
 
         # storey list
-        storey_list_A = face[bMesh_storey_list_A]
-        storey_list_B = face[bMesh_storey_list_B]
+        storey_list_A = face[bm_storey_list_A]
+        storey_list_B = face[bm_storey_list_B]
 
         storey_list_A = str(storey_list_A)[1:]
         storey_list_B = str(storey_list_B)[1:]
         storey_list = [a + b for a, b in zip(storey_list_A, storey_list_B)]
 
         # height list
-        height_list_A = face[bMesh_height_A]
-        height_list_B = face[bMesh_height_B]
-        height_list_C = face[bMesh_height_C]
-        height_list_D = face[bMesh_height_D]
-        height_list_E = face[bMesh_height_E]
+        height_list_A = face[bm_height_A]
+        height_list_B = face[bm_height_B]
+        height_list_C = face[bm_height_C]
+        height_list_D = face[bm_height_D]
+        height_list_E = face[bm_height_E]
 
         height_list_A = str(height_list_A)[1:]
         height_list_B = str(height_list_B)[1:]
@@ -317,7 +317,7 @@ def get_mass_data(obj, mastro_type):
         height_list = [a + b + c + d + e for a, b, c, d, e in zip(height_list_A, height_list_B, height_list_C, height_list_D, height_list_E)]
 
         # number of storeys
-        number_of_storeys = face[bMesh_storeys]
+        number_of_storeys = face[bm_storeys]
 
         # Floor Area
         floor_area = face.calc_area()
@@ -357,8 +357,8 @@ def get_mass_data(obj, mastro_type):
                 if face.index != fa.index: #there is no point in evaluating the same face
                     for ed in fa.edges:
                         if index == ed.index:
-                            if face[bMesh_storeys] > fa[bMesh_storeys]:
-                                diff = face[bMesh_storeys] - fa[bMesh_storeys]
+                            if face[bm_storeys] > fa[bm_storeys]:
+                                diff = face[bm_storeys] - fa[bm_storeys]
                                 length = ed.calc_length()
                                 wall_area += length * diff * floorToFloorLevel
                                 for ed in edges:
@@ -367,7 +367,7 @@ def get_mass_data(obj, mastro_type):
                                         break
         
         # removes the edges marked as not perimeter 
-        # and are duplicates of the edges that are visibile
+        # and are duplicates of the edges that are visible
         for index, edge in reversed(list(enumerate(edges))):
             if edge.storeys == None:
                 edges.pop(index)
@@ -535,7 +535,7 @@ def granularData(roughData):
                     if edge.perimeter is True:
                         perimeter += edge.length
                     else:
-                        # edge.storeys is the number of visibile storeys
+                        # edge.storeys is the number of visible storeys
                         if floor >= (edge.topStorey - edge.storeys + 1):
                             perimeter += edge.length
 

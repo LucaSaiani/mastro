@@ -7,11 +7,11 @@ from .OBJECT_OT_Add_Mastro_Street import OBJECT_OT_Add_Mastro_Street
 from .OBJECT_OT_Convert_to_Mastro import OBJECT_OT_Convert_to_Mastro_Mass, OBJECT_OT_Convert_to_Mastro_Street
 from .OBJECT_OT_Set_Street_Id import OBJECT_OT_Set_Street_Id
 from .OBJECT_OT_Update_Mastro_Mesh_Attributes import OBJECT_OT_Update_Mastro_Mesh_Attributes
-from .OBJECT_OT_Update_Street_Attributes import OBJECT_OT_update_all_MaStro_street_attributes
-from .OBJECT_OT_Export_Data import OBJECT_OT_Mastro_Export_CSV, OBJECT_OT_MaStro_Print_Data
+from .OBJECT_OT_Update_Street_Attributes import OBJECT_OT_Mastro_Update_All_Street_Attributes
+from .OBJECT_OT_Export_Data import OBJECT_OT_Mastro_Export_CSV, OBJECT_OT_Mastro_Print_Data
 
 from .TRANSFORM_OT_Set_Orientation import TRANSFORM_OT_Mastro_Set_Orientation
-from .TRANSFORM_OT_XY_Constraint import TRANSFORM_OT_rotate_xy_constraint, TRANSFORM_OT_translate_xy_constraint
+from .TRANSFORM_OT_XY_Constraint import TRANSFORM_OT_Mastro_Rotate_XY_Constraint, TRANSFORM_OT_Mastro_Translate_XY_Constraint
 
 
 classes = (
@@ -25,11 +25,11 @@ classes = (
     OBJECT_OT_Convert_to_Mastro_Street,
     OBJECT_OT_Set_Street_Id,
     OBJECT_OT_Update_Mastro_Mesh_Attributes,
-    OBJECT_OT_update_all_MaStro_street_attributes,
+    OBJECT_OT_Mastro_Update_All_Street_Attributes,
     OBJECT_OT_Mastro_Export_CSV,
-    OBJECT_OT_MaStro_Print_Data,
+    OBJECT_OT_Mastro_Print_Data,
 
     TRANSFORM_OT_Mastro_Set_Orientation,
-    TRANSFORM_OT_translate_xy_constraint,
-    TRANSFORM_OT_rotate_xy_constraint
+    TRANSFORM_OT_Mastro_Translate_XY_Constraint,
+    TRANSFORM_OT_Mastro_Rotate_XY_Constraint
     )

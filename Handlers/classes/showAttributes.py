@@ -151,7 +151,7 @@ def show_block_overlay(obj):
         bm.edges.ensure_lookup_table()    
         # bm.faces.ensure_lookup_table()  
         
-    bMesh_block_id_layer = bm.edges.layers.int["mastro_typology_id_EDGE"]
+    bm_block_id_layer = bm.edges.layers.int["mastro_typology_id_EDGE"]
     projectTypologies = bpy.context.scene.mastro_typology_name_list
     
     # matrix = bpy.context.region_data.perspective_matrix
@@ -161,7 +161,7 @@ def show_block_overlay(obj):
         coords = [v1, v2]
         indices = [(0, 1)]
         
-        typology_id = edge[bMesh_block_id_layer]
+        typology_id = edge[bm_block_id_layer]
         index = next((i for i, elem in enumerate(projectTypologies) if elem.id == typology_id), None)
         if 0 <= typology_id < len(bpy.context.scene.mastro_typology_name_list):
             if mesh.is_editmode:
@@ -216,7 +216,7 @@ def show_wall_overlay(obj):
         bm.edges.ensure_lookup_table()    
         active_edge = None
         
-    bMesh_wall_id_layer = bm.edges.layers.int["mastro_wall_id"]
+    bm_wall_id_layer = bm.edges.layers.int["mastro_wall_id"]
     projectWalls = bpy.context.scene.mastro_wall_name_list
     
     # matrix = bpy.context.region_data.perspective_matrix
@@ -226,7 +226,7 @@ def show_wall_overlay(obj):
         coords = [v1, v2]
         indices = [(0, 1)]
         
-        wall_id = edge[bMesh_wall_id_layer]
+        wall_id = edge[bm_wall_id_layer]
         index = next((i for i, elem in enumerate(projectWalls) if elem.id == wall_id), None)
         if 0 <= wall_id < len(bpy.context.scene.mastro_wall_name_list):
             if edge is active_edge:
@@ -273,7 +273,7 @@ def show_street_overlay(obj):
         bm.verts.ensure_lookup_table()
         bm.edges.ensure_lookup_table()    
         
-    bMesh_street_id_layer = bm.edges.layers.int["mastro_street_id"]
+    bm_street_id_layer = bm.edges.layers.int["mastro_street_id"]
     projectStreets = bpy.context.scene.mastro_street_name_list
 
     for edge in bm.edges:
@@ -282,7 +282,7 @@ def show_street_overlay(obj):
         coords = [v1, v2]
         indices = [(0, 1)]
         
-        street_id = edge[bMesh_street_id_layer]
+        street_id = edge[bm_street_id_layer]
         index = next((i for i, elem in enumerate(projectStreets) if elem.id == street_id), None)
         if 0 <= street_id < len(bpy.context.scene.mastro_street_name_list):
             if mesh.is_editmode:
@@ -344,18 +344,18 @@ def draw_main_show_attributes_2D(context):
     bm.faces.ensure_lookup_table()      
     
     if "MaStro mass" in obj.data:
-        # bMesh_wall = bm.edges.layers.int["mastro_wall_id"]
-        bMesh_normal = bm.edges.layers.bool["mastro_inverted_normal"]
+        # bm_wall = bm.edges.layers.int["mastro_wall_id"]
+        bm_normal = bm.edges.layers.bool["mastro_inverted_normal"]
     
-        # bMesh_block = bm.faces.layers.int["mastro_block_id"]
-        # bMesh_building = bm.faces.layers.int["mastro_building_id"]
-        bMesh_typology = bm.faces.layers.int["mastro_typology_id"]
-        bMesh_storey = bm.faces.layers.int["mastro_number_of_storeys"]
-        bMesh_floor = bm.faces.layers.int["mastro_floor_id"]
+        # bm_block = bm.faces.layers.int["mastro_block_id"]
+        # bm_building = bm.faces.layers.int["mastro_building_id"]
+        bm_typology = bm.faces.layers.int["mastro_typology_id"]
+        bm_storey = bm.faces.layers.int["mastro_number_of_storeys"]
+        bm_floor = bm.faces.layers.int["mastro_floor_id"]
     elif "MaStro block" in obj.data:
-        bMesh_normal = bm.edges.layers.bool["mastro_inverted_normal_EDGE"]
-        bMesh_typology = bm.edges.layers.int["mastro_typology_id_EDGE"]
-        bMesh_storey = bm.edges.layers.int["mastro_number_of_storeys_EDGE"]
+        bm_normal = bm.edges.layers.bool["mastro_inverted_normal_EDGE"]
+        bm_typology = bm.edges.layers.int["mastro_typology_id_EDGE"]
+        bm_storey = bm.edges.layers.int["mastro_number_of_storeys_EDGE"]
         
 
     region = bpy.context.region
@@ -418,8 +418,8 @@ def draw_main_show_attributes_2D(context):
         line_width = 0
         vert_offset = 0
         
-        # idWall = bmEdge[bMesh_wall]
-        normal = bmEdge[bMesh_normal]
+        # idWall = bmEdge[bm_wall]
+        normal = bmEdge[bm_normal]
         
         text_edge = []
         text_typology = ""
@@ -427,8 +427,8 @@ def draw_main_show_attributes_2D(context):
         text_storey = ""
         
         if "MaStro block" in obj.data:
-            idUse = bmEdge[bMesh_typology]
-            storey = bmEdge[bMesh_storey]
+            idUse = bmEdge[bm_typology]
+            storey = bmEdge[bm_storey]
             if bpy.context.window_manager.mastro_toggle_typology_name:   
                 for n in scene.mastro_typology_name_list:
                     if n.id == idUse:
@@ -498,11 +498,11 @@ def draw_main_show_attributes_2D(context):
             center_local = bmFace.calc_center_median()
             
             center = matrix @ center_local # convert the coordinates from local to world
-            # idBlock = bmFace[bMesh_block]
-            # idBuilding = bmFace[bMesh_building]
-            idUse = bmFace[bMesh_typology]
-            idFloor = bmFace[bMesh_floor]
-            storey = bmFace[bMesh_storey]
+            # idBlock = bmFace[bm_block]
+            # idBuilding = bmFace[bm_building]
+            idUse = bmFace[bm_typology]
+            idFloor = bmFace[bm_floor]
+            storey = bmFace[bm_storey]
             
             line_width = 0
             vert_offset = 0

@@ -2,7 +2,7 @@ import bpy
 from bpy.types import Operator 
 import math
 
-class NODE_OT_sort_multiple_input(Operator):
+class NODE_OT_Mastro_Sort_Multi_Input(Operator):
     bl_idname = "node.sort_multiple_input"
     bl_label = "Sort Join / Geometry to Instance"
     bl_description = "Sort Multiple Geometry Inputs by Position"

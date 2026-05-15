@@ -5,7 +5,7 @@ import re
 
 from ..utils.node_utils import create_new_nodegroup
 
-class NODE_OT_mastro_separate_geometry_by(Operator):
+class NODE_OT_Mastro_Separate_Geometry_By(Operator):
     """Update the Geometry Nodes 'Separate By' node group outputs"""
     bl_idname = "node.mastro_gn_separate_geometry_by"
     bl_label = "Update the GN separate by group"
@@ -124,7 +124,7 @@ class NODE_OT_mastro_separate_geometry_by(Operator):
                         if self.filter_name == "use": elName = "Use name"
                         elif self.filter_name == "typology": elName = "Typology name"
                         elif self.filter_name == "wall type": elName = "Wall name"
-                        elif self.filter_name == "steet type": elName = "Street name"
+                        elif self.filter_name == "street type": elName = "Street name"
                     else:
                         elName = el.name
                     descr = "id: " + str(el.id) + " - " + elName
@@ -148,7 +148,7 @@ class NODE_OT_mastro_separate_geometry_by(Operator):
                             group.interface.items_tree[i].name = str(el.name)
                             group.interface.items_tree[i].description = "id: " + str(el.id) + " - " + str(el.name)
             
-        # the name has been moven up and down in the list
+        # the name has been moved up and down in the list
         if self.output_direction != "None":
             pattern = r"id: (.*?) -"
 

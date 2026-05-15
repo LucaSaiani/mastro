@@ -9,19 +9,19 @@ def write_bmesh_storey_attribute(bm, selection, numberOfStoreys, mode):
         field = bm.edges
         suffix = "_EDGE"
     
-    bMesh_storeys = field.layers.int[f"mastro_number_of_storeys{suffix}"]
-    bMesh_storey_list_A = field.layers.int[f"mastro_list_storey_A{suffix}"]
-    bMesh_storey_list_B = field.layers.int[f"mastro_list_storey_B{suffix}"]
-    bMesh_typology = field.layers.int[f"mastro_typology_id{suffix}"]
+    bm_storeys = field.layers.int[f"mastro_number_of_storeys{suffix}"]
+    bm_storey_list_A = field.layers.int[f"mastro_list_storey_A{suffix}"]
+    bm_storey_list_B = field.layers.int[f"mastro_list_storey_B{suffix}"]
+    bm_typology = field.layers.int[f"mastro_typology_id{suffix}"]
     
-    typology_id = selection[bMesh_typology]
+    typology_id = selection[bm_typology]
     
     data = read_bmesh_storey_attribute(numberOfStoreys, typology_id)
 
     # --- writing to bmesh ---
-    selection[bMesh_storeys] = data["numberOfStoreys"]
-    selection[bMesh_storey_list_A] = data["storey_list_A"]
-    selection[bMesh_storey_list_B] = data["storey_list_B"]
+    selection[bm_storeys] = data["numberOfStoreys"]
+    selection[bm_storey_list_A] = data["storey_list_A"]
+    selection[bm_storey_list_B] = data["storey_list_B"]
     
     return data
     
