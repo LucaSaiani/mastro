@@ -4,9 +4,10 @@ def init_lists(scene=None):
     """Initialize all MaStro name lists with default values if empty."""
     s = bpy.data.scenes[scene] if scene else bpy.context.scene
 
-    # --- Internal helper: ensures a list has an item with id=0 ---
     def ensure_item(collection, defaults):
-        """Ensure the collection has an element with id=0, setting default values if needed."""
+        """Ensure the collection has a fallback element with id=0.
+        id=0 is the default for all mesh attributes, so a missing entry would
+        cause empty labels and broken lookups throughout the addon."""
         if not any(el.id == 0 for el in collection):
             item = collection.add()
             item.id = 0
@@ -34,7 +35,8 @@ def init_lists(scene=None):
         main_list = getattr(s, main_name)
         ensure_item(main_list, defaults)
     
-    # update the depending lists to avoid weird strings in the ui        
+    # Access enum properties to force their internal item cache to refresh,
+    # preventing stale or empty strings in the UI dropdowns on first load
     bpy.context.scene.mastro_block_name
     bpy.context.scene.mastro_building_name
     bpy.context.scene.mastro_wall_names

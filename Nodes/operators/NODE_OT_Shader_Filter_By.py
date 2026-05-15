@@ -7,7 +7,7 @@ import re
 class NODE_OT_Mastro_Shader_Filter_By(Operator):
     """Update the shader node Filter by... based on the passed type value"""
     bl_idname = "node.mastro_shader_filter_by"
-    bl_label = "Update the Shader filter by"
+    bl_label = "Update the Shader Filter By group"
     
     filter_name: bpy.props.StringProperty(name="Filter type name")
     output_id: bpy.props.IntProperty(name="Neighbor")

@@ -3,7 +3,7 @@ import bpy
 def create_socket(ng, in_out='OUTPUT', socket_type="NodeSocketFloat", socket_name="Value",):
     """create a new socket output of given type for given nodegroup"""
     
-    #naive support for strandard socket.type notation
+    # Accept short uppercase type names (e.g. "FLOAT") and expand to full API name
     if (socket_type.isupper()):
         socket_type = f'NodeSocket{socket_type.title()}'
     

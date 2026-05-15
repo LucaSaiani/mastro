@@ -72,6 +72,12 @@ classes = (
     NODE_EDITOR_PT_Mastro_Node
     )
 
+# Each row: (name, color_attr, filter_name, node_type, extra_action)
+# - name: used to build list/index property names and dynamic class names
+# - color_attr: PropertyGroup attribute for the overlay color (None if no color)
+# - filter_name: argument passed to GN/shader filter operators (None to skip)
+# - node_type: tuple of node categories ("gn", "shader") to update on add/move
+# - extra_action: "add use" triggers a linked use entry; None for no side-effect
 MASTRO_LISTS = [
     # name,         color_attr,             filter_name       node type               extra_action
     ("block",       None,                   "block",         ("shader",),            None),
@@ -86,10 +92,10 @@ MASTRO_LISTS = [
 #  DYNAMIC CLASS GENERATION
 # ============================================================
 
-_dynamic_classes = []
+_dynamic_classes = []  # populated at register time; kept module-level for unregister
 def dynamic_list_classes():
+    """Build UIList, NewItem, and MoveItem classes for every entry in MASTRO_LISTS."""
     dynamicClasses = []
-    """Dynamically create and register UIList, NewItem, MoveItem for each type."""
     for name, color_attr, filter_name, node_type, extra_action in MASTRO_LISTS:
         list_name = f"mastro_{name}_name_list"
         index_name = f"mastro_{name}_name_list_index"

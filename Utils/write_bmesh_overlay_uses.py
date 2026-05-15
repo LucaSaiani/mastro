@@ -3,6 +3,12 @@ import bpy
 from .read_write_bmesh_use_attribute import write_bmesh_use_attribute
 
 def overlay_bmesh_uses(bm, selection, value, mode):
+    """Apply the typology's use stack to `selection`, then trim the top `value` storeys.
+
+    `value` is the number of storeys to remove from the top (used when the
+    overlay cap is lower than the total typology height). Liquid uses absorb
+    the removed storeys rather than being deleted.
+    """
     if mode == "FACE":
         bm.faces.ensure_lookup_table()
         field = bm.faces
@@ -88,6 +94,11 @@ def overlay_bmesh_uses(bm, selection, value, mode):
                 return
                     
 def override_uses(bm, selection, mode, uses_to_remove, updated_storeys_per_use, liquid_ids, removed_storeys):
+    """Write the trimmed use/storey lists back to the bmesh element.
+
+    Drops the top-most uses in `uses_to_remove` from the encoded digit strings
+    and redistributes the freed storeys to the highest liquid use.
+    """
     if mode == "FACE": # mastro mass
         bm.faces.ensure_lookup_table()
         field = bm.faces

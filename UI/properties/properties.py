@@ -151,7 +151,7 @@ scene_props = [
         
     )),
     ("mastro_attribute_block_depth", FloatProperty(
-        name="The depth of the building",
+        name="Building Depth",
         min=0,
         default=18,
         precision=3,
@@ -292,7 +292,7 @@ scene_props = [
     )),
     ("mastro_obj_typology_uses_name_list", CollectionProperty(type=mastro_CL_obj_typology_uses_name_list)),
     ("mastro_obj_typology_uses_name_list_index", IntProperty(
-        name="Typology Use Name of the selected object", default=0
+        name="Selected Object Typology Uses", default=0
     )),
 
     ("mastro_wall_name_list", CollectionProperty(type=mastro_CL_wall_name_list)),
@@ -311,7 +311,7 @@ scene_props = [
     ("mastro_street_name_list", CollectionProperty(type=mastro_CL_street_name_list)),
     ("mastro_street_name_list_index", IntProperty(name="Street Name", default=0)),
     ("mastro_street_names", EnumProperty(
-        name="Street List", description="",
+        name="Street List", description="Street type assigned to the selected edge",
         items=lambda self, context: get_names_from_list(context.scene, context, "mastro_street_name_list"),
         update=update_attributes_street
     )),

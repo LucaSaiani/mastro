@@ -19,18 +19,16 @@ face_only_attributes = [("mastro_custom_face",      "FLOAT",    ("MaStro mass", 
                         ("mastro_floor_id",         "INT",      ("MaStro mass",))]
 
 
-# this dictionary is used in get_attribute_mastro_mesh to identify those
-# attributes that are specific to point, edge or face. If an
-# attribute is in common between face and edges, as the majority of the
-# attributes of masses and blocks, the attribute is handled by the 
-# function witho no need to reference to the dictionary
+# Attributes shared between faces and edges (most mass/block attributes) are handled
+# directly by the getter/setter. This map covers the exceptions: attributes that live
+# exclusively on vertices, edges, or faces.
 attribute_map = {
     **{name: ("verts", typ, mastro_type) for name, typ, mastro_type in point_only_attributes},
     **{name: ("edges", typ, mastro_type) for name, typ, mastro_type in edge_only_attributes},
     **{name: ("faces", typ, mastro_type) for name, typ, mastro_type in face_only_attributes}
 } 
  
-# this dictionary is used in set_attribute_mastro_generic 
+# Maps attribute names to their domain and type; used by set_attribute_mastro_generic
 layer_map = {
     "mastro_wall_id": ("edges", "INT", ("MaStro mass",)),
     "mastro_inverted_normal": ("edges", "BOOL", ("MaStro mass", "MaStro block")),

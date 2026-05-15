@@ -22,8 +22,8 @@ def openTextEditor(text):
         
 class NODE_OT_Mastro_Sticky_Note(Operator):
     bl_idname = "node.sticky_note"
-    bl_label = "sticky Note"
-    bl_description = "MaStro Sticky Note"
+    bl_label = "Sticky Note"
+    bl_description = "Create a sticky note in the node editor, or edit an existing one"
     bl_options = {'REGISTER', 'UNDO'}
 
 

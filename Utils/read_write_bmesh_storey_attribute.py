@@ -2,6 +2,7 @@ import bpy
 import math
 
 def write_bmesh_storey_attribute(bm, selection, numberOfStoreys, mode):
+    """Compute and write storey distribution for `selection` to the bmesh layers."""
     if mode == "FACE": # mastro mass
         field = bm.faces
         suffix = ""
@@ -27,6 +28,15 @@ def write_bmesh_storey_attribute(bm, selection, numberOfStoreys, mode):
     
 
 def read_bmesh_storey_attribute(numberOfStoreys, typology_id):
+    """Compute storey distribution for the given typology and total storey count.
+
+    Uses marked as "liquid" fill the remaining floors after fixed uses are placed,
+    distributed as evenly as possible (any remainder goes to the last liquid use).
+    If the requested storey count is less than the typology minimum, top uses are
+    clipped until the count fits.
+
+    Returns a dict: {numberOfStoreys, storey_list_A, storey_list_B}.
+    """
     projectUses = bpy.context.scene.mastro_use_name_list
     
     # number of storeys

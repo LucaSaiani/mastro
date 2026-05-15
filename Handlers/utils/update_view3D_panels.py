@@ -4,7 +4,8 @@ import bmesh
 from ...Utils.read_write_bmesh_storey_attribute import read_bmesh_storey_attribute
 from ...Utils.get_names_from_list import get_names_from_list
 
-# Update the UIList in VIEW3D of uses of the selected face or edge 
+# Rebuild the VIEW3D use/storey UIList to reflect the active face or edge's attributes.
+# Called from the depsgraph handler on every selection change.
 def update_view3D_panels(scene):
     obj = bpy.context.active_object
     
@@ -27,10 +28,7 @@ def update_view3D_panels(scene):
         typology_index = next(i for i, item in enumerate(enum_items) if item[0] == current_value)
         
         data = read_bmesh_storey_attribute(numberOfStoreys, typology_index)
-        # typology name
-        # since it is possible to sort typologies in the ui, it can be that the index of the element
-        # in the list doesn't correspond to typology_id. Therefore it is necessary to find elements
-        # in the way below and not with use_list = bpy.context.scene.mastro_typology_name_list[typology_id].useList
+        # Typologies can be reordered in the UI; list index != id, so search by id
         item = next((i for i in bpy.context.scene.mastro_typology_name_list if i["id"] == typology_index), None)
         if item is None:
             return
@@ -112,26 +110,22 @@ def update_view3D_panels(scene):
                 index_to_stop = None
                 for enum, use in enumerate(reversed_use_list):
                     
-                    # when a new face is added in edit mode
-                    # no storeys are assigned to the newly created face
-                    # therefore the system returns an indexError
+                    # New faces in edit mode have no storey data yet; default to 1
                     try:
                         storeys = int(list_storey_A[enum] + list_storey_B[enum])
                     except IndexError:
                         storeys = 1
-                    
+
                     if undercroft_levels > storeys:
                         undercroft_levels = undercroft_levels - storeys
                     else:
-                        # you insert only when the undercroft levels is not equal to 
-                        # the number of storeys of that use
+                        # Insert a split entry only when undercroft doesn't fill the entire use
                         if undercroft_levels < storeys:
                             index_to_insert = enum
                         index_to_stop = enum
                         break
-                        
-                # set to undercroft all the uses underneath the index
-                # and groups all the "undecroft uses"
+
+                # Collect uses below the undercroft boundary; group them under a single undercroft entry
                 grouped_list = []
                 storey_left = 0
                 for i, use in enumerate(reversed_use_list):

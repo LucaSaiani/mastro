@@ -237,8 +237,13 @@ block_attribute_set = [
 ]
 
 
-# assign the mass attributes to the selected object
 def add_mass_attributes(obj, mastro_type):
+    """Initialise all MaStro mesh attributes on `obj` for the given type.
+
+    Creates every attribute in mass_attribute_set / block_attribute_set (both
+    EDGE and FACE variants where attr_domain is a tuple), then writes the
+    initial values derived from the currently selected typology.
+    """
     
     # mesh.update()
     # bpy.context.view_layer.update()
@@ -293,15 +298,18 @@ def add_mass_attributes(obj, mastro_type):
             tmpUse = "0" + el
         else:
             tmpUse = str(el)
-       
+
+        # Encode use id as two parallel digit characters (see height encoding note below)
         use_id_list_A += tmpUse[0]
         use_id_list_B += tmpUse[1]
-            
+
         for use in projectUses:
             if use.id == int(el):
-                # number of storeys for the use
-                # if a use is "liquid" the number of storeys is set as 00
-                if use.liquid: 
+                # Heights are encoded as parallel digit strings (A–E) because GN attributes
+                # don't support arrays. Each string holds one digit position across all uses,
+                # e.g. 3.555 → A=3, B=5, C=5, D=5, E=5. Prefixed with "1" to avoid leading zeros.
+                # Liquid uses receive "00" storeys; the actual count is resolved below.
+                if use.liquid:
                     storeys = "00"
                     liquidPosition.append(enum)
                 else:

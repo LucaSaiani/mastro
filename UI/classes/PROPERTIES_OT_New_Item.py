@@ -24,14 +24,15 @@ class PROPERTIES_OT_New_Item(Operator):
         collection.add()
         last = len(collection) - 1
 
-        # Assign progressive ID
+        # Assign an ID one higher than the current maximum so IDs are stable
+        # even when items are reordered or deleted (list index != id).
         ids = [el.id for el in collection if hasattr(el, 'id')]
         collection[last].id = max(ids) + 1 if ids else 1
         
         # select the newly added element
         setattr(scene, self.index_name, last)
         
-        # if a new tipology, a new use is added as well
+        # Typologies always need at least one use; create a default one automatically.
         if self.extra_action == "add use":
             bpy.ops.mastro_typology_uses_name_list.new_item()
 

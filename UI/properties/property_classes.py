@@ -11,9 +11,9 @@ from ...Utils.update_attributes import *
 
 # ------------------------------
 # Addon Properties
-# ------------------------------   
-# Defines class for custom properties
+# ------------------------------
 class mastro_CL_addon_properties(PropertyGroup):
+    """Per-object custom properties stored in obj.mastro_props."""
     mastro_block_attribute: IntProperty(
         name="MaStro Block Attribute",
         default=1,
@@ -29,7 +29,7 @@ class mastro_CL_addon_properties(PropertyGroup):
     )
     
 class mastro_CL_constraint_XY_settings(PropertyGroup):
-    """Property Group for all xy constraint scene properties"""
+    """Scene-level toggle for the XY translation/rotation constraint operators."""
     constraint_xy_on: BoolProperty(
         name = 'XY constraints',
         default = False,
@@ -40,20 +40,22 @@ class mastro_CL_constraint_XY_settings(PropertyGroup):
 # Generic Properties
 # ------------------------------   
 class mastro_CL_name_with_id(PropertyGroup):
+    """Generic (name, id) pair used for single-item current-selection trackers."""
     id: IntProperty(
         name="Id",
         description="Name id",
         default = 0)
-    
+
     name: StringProperty(
         name="Name",
         description="Name",
-        default = "")    
+        default = "")
     
 # ------------------------------
 # Building Properties
-# ------------------------------ 
+# ------------------------------
 class mastro_CL_building_name_list(PropertyGroup):
+    """One entry in the project's building list."""
     id: IntProperty(
            name="Id",
            description="Building name id",
@@ -67,8 +69,9 @@ class mastro_CL_building_name_list(PropertyGroup):
 
 # ------------------------------
 # Block Properties
-# ------------------------------ 
+# ------------------------------
 class mastro_CL_block_name_list(PropertyGroup):
+    """One entry in the project's block list."""
     id: IntProperty(
            name="Id",
            description="Block name id",
@@ -82,8 +85,9 @@ class mastro_CL_block_name_list(PropertyGroup):
     
 # ------------------------------
 # Typology Properties
-# ------------------------------  
+# ------------------------------
 class mastro_CL_typology_name_list(PropertyGroup):
+    """One entry in the project's typology list. useList encodes the ordered sequence of use IDs as a semicolon-separated string (e.g. '2;1;3'), listed top-to-bottom."""
     id: IntProperty(
            name="Id",
            description="Typology id",
@@ -109,7 +113,8 @@ class mastro_CL_typology_name_list(PropertyGroup):
         max = 1.0,
         default = (0.0, 0.7, 0.0))
     
-class mastro_CL_obj_typology_uses_name_list(PropertyGroup): 
+class mastro_CL_obj_typology_uses_name_list(PropertyGroup):
+    """Transient per-face/per-edge use breakdown shown in the VIEW3D panel."""
     id: IntProperty( name="Id",
                     description="Obj typology use name id", 
                     default = 0) 
@@ -124,6 +129,7 @@ class mastro_CL_obj_typology_uses_name_list(PropertyGroup):
                          default = 1)
     
 class mastro_CL_typology_uses_name_list(PropertyGroup):
+    """Editable sub-list of uses shown in the typology panel."""
     id: IntProperty(
            name="Id",
            description="The typology use name id",
@@ -135,6 +141,7 @@ class mastro_CL_typology_uses_name_list(PropertyGroup):
            default="...")
     
 class mastro_CL_use_name_list(PropertyGroup):
+    """One use type (e.g. Residential, Office) with its floor-to-floor height and storey rules."""
     id: IntProperty(
            name="Id",
            description="Use name id",
@@ -165,8 +172,8 @@ class mastro_CL_use_name_list(PropertyGroup):
         update=update_all_mastro_meshes_numberOfStoreys)
     
     liquid: BoolProperty(
-            name = "Liquid number of storeys",
-            description = "It indicates whether the number of storeys is fixed or variable\nIf selected it has the priority on \"Number of storeys\"",
+            name = "Variable storeys",
+            description = "When enabled, the number of storeys for this use is distributed dynamically to fill the remaining floors after fixed uses are placed. Takes priority over the fixed storey count.",
             default = False,
             update=update_all_mastro_meshes_numberOfStoreys)
     
@@ -179,9 +186,10 @@ class mastro_CL_use_name_list(PropertyGroup):
 
     
 # ------------------------------
-# Flooor Properties
-# ------------------------------ 
+# Floor Properties
+# ------------------------------
 class mastro_CL_floor_name_list(PropertyGroup):
+    """One entry in the project's floor-type list."""
     id: IntProperty(
            name="Id",
            description="Floor name id",
@@ -194,8 +202,9 @@ class mastro_CL_floor_name_list(PropertyGroup):
     
 # ------------------------------
 # Wall Properties
-# ------------------------------ 
+# ------------------------------
 class mastro_CL_wall_name_list(PropertyGroup):
+    """One wall type with thickness, offset, normal direction, and overlay color."""
     id: IntProperty(
            name="Id",
            description="Wall name id",
@@ -245,8 +254,9 @@ class mastro_CL_wall_name_list(PropertyGroup):
 
 # ------------------------------
 # Street Properties
-# ------------------------------ 
+# ------------------------------
 class mastro_CL_street_name_list(PropertyGroup):
+    """One street type with width, corner radius, and overlay color."""
     id: IntProperty(
            name="Id",
            description="Street name id",
@@ -288,9 +298,9 @@ class mastro_CL_street_name_list(PropertyGroup):
 
 # ------------------------------
 # Node editor Properties
-# ------------------------------ 
-# a class to define a custom property "custom note"
+# ------------------------------
 class mastro_CL_Sticky_Note(PropertyGroup):
+    """Marks a NodeFrame as a MaStro sticky note so it can be styled and identified."""
     customNote: BoolProperty(
         name="Custom Note",
         description="Indicates if this NodeFrame is a custom sticky note",
