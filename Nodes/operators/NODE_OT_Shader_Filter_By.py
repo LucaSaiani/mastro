@@ -4,7 +4,7 @@ from bpy.types import Operator
 import re
 
 
-class NODE_OT_mastro_shader_filter_by(Operator):
+class NODE_OT_Mastro_Shader_Filter_By(Operator):
     """Update the shader node Filter by... based on the passed type value"""
     bl_idname = "node.mastro_shader_filter_by"
     bl_label = "Update the Shader filter by"
@@ -159,7 +159,7 @@ class NODE_OT_mastro_shader_filter_by(Operator):
                                 self.sort_alphabetically(name)
                         break
         
-        # the name has been moven up and down in the list
+        # the name has been moved up and down in the list
         if self.output_direction != "None":
             interface = filterBy_Group.interface
             sockets = interface.items_tree

@@ -4,7 +4,7 @@ from types import SimpleNamespace
 
 import re
 
-class NODE_OT_mastro_filter_by(Operator):
+class NODE_OT_Mastro_Filter_By(Operator):
     """Update the Geometry Nodes 'Filter By' node group outputs"""
     bl_idname = "node.mastro_gn_filter_by"
     bl_label = "Update the GN filter by group"
@@ -96,7 +96,7 @@ class NODE_OT_mastro_filter_by(Operator):
                         if self.filter_name == "use": elName = "Use name"
                         elif self.filter_name == "typology": elName = "Typology name"
                         elif self.filter_name == "wall type": elName = "Wall name"
-                        elif self.filter_name == "steet type": elName = "Street name"
+                        elif self.filter_name == "street type": elName = "Street name"
                     else:
                         elName = el.name
                     descr = "id: " + str(el.id) + " - " + elName
@@ -130,7 +130,7 @@ class NODE_OT_mastro_filter_by(Operator):
                             socket.description = expected_descr
                         break
         
-        # the name has been moven up and down in the list
+        # the name has been moved up and down in the list
         if self.output_direction != "None":
             
 

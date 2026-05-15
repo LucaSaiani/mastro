@@ -12,10 +12,10 @@ def overlay_bmesh_uses(bm, selection, value, mode):
         field = bm.edges
         suffix = "_EDGE"
 
-    bMesh_typology = field.layers.int[f"mastro_typology_id{suffix}"]
+    bm_typology = field.layers.int[f"mastro_typology_id{suffix}"]
     # bmesh_overlay_top   = field.layers.int[f"mastro_overlay_top{suffix}"]
     
-    typology_id = selection[bMesh_typology]
+    typology_id = selection[bm_typology]
 
     list_of_layers = write_bmesh_use_attribute(bm, selection, typology_id, mode)
         
@@ -42,17 +42,17 @@ def overlay_bmesh_uses(bm, selection, value, mode):
         updated_storeys_per_use = 0
         storey_list_A = str(storey_list_A)[1:]
         storey_list_B = str(storey_list_B)[1:]
-        bMesh_storeys = [int(a + b) for a, b in zip(storey_list_A, storey_list_B)]
+        bm_storeys = [int(a + b) for a, b in zip(storey_list_A, storey_list_B)]
         
         # reverse the lists since we need to start from the top
-        bMesh_storeys.reverse()
+        bm_storeys.reverse()
         storey_list_A = storey_list_A[::-1]
         storey_list_B = storey_list_B[::-1]
         uses.reverse()
         uses_to_remove = []
         for index, use in enumerate(uses):
             use_id = int(use)
-            storeys_per_use = bMesh_storeys[index]
+            storeys_per_use = bm_storeys[index]
             
             if use_id in liquid_ids:
                 is_liquid = True
@@ -97,25 +97,25 @@ def override_uses(bm, selection, mode, uses_to_remove, updated_storeys_per_use, 
         field = bm.edges
         suffix = "_EDGE"
 
-    bMesh_storey_list_A = field.layers.int[f"mastro_list_storey_A{suffix}"]
-    bMesh_storey_list_B = field.layers.int[f"mastro_list_storey_B{suffix}"]
-    bMesh_use_list_A   = field.layers.int[f"mastro_list_use_id_A{suffix}"]
-    bMesh_use_list_B   = field.layers.int[f"mastro_list_use_id_B{suffix}"]
-    bMesh_height_A     = field.layers.int[f"mastro_list_height_A{suffix}"]
-    bMesh_height_B     = field.layers.int[f"mastro_list_height_B{suffix}"]
-    bMesh_height_C     = field.layers.int[f"mastro_list_height_C{suffix}"]
-    bMesh_height_D     = field.layers.int[f"mastro_list_height_D{suffix}"]
-    bMesh_height_E     = field.layers.int[f"mastro_list_height_E{suffix}"]
+    bm_storey_list_A = field.layers.int[f"mastro_list_storey_A{suffix}"]
+    bm_storey_list_B = field.layers.int[f"mastro_list_storey_B{suffix}"]
+    bm_use_list_A   = field.layers.int[f"mastro_list_use_id_A{suffix}"]
+    bm_use_list_B   = field.layers.int[f"mastro_list_use_id_B{suffix}"]
+    bm_height_A     = field.layers.int[f"mastro_list_height_A{suffix}"]
+    bm_height_B     = field.layers.int[f"mastro_list_height_B{suffix}"]
+    bm_height_C     = field.layers.int[f"mastro_list_height_C{suffix}"]
+    bm_height_D     = field.layers.int[f"mastro_list_height_D{suffix}"]
+    bm_height_E     = field.layers.int[f"mastro_list_height_E{suffix}"]
 
-    use_list_A = str(selection[bMesh_use_list_A])
-    use_list_B = str(selection[bMesh_use_list_B])
-    height_A = str(selection[bMesh_height_A])
-    height_B = str(selection[bMesh_height_B])
-    height_C = str(selection[bMesh_height_C])
-    height_D = str(selection[bMesh_height_D])
-    height_E = str(selection[bMesh_height_E])
-    storey_list_A = str(selection[bMesh_storey_list_A])
-    storey_list_B = str(selection[bMesh_storey_list_B])
+    use_list_A = str(selection[bm_use_list_A])
+    use_list_B = str(selection[bm_use_list_B])
+    height_A = str(selection[bm_height_A])
+    height_B = str(selection[bm_height_B])
+    height_C = str(selection[bm_height_C])
+    height_D = str(selection[bm_height_D])
+    height_E = str(selection[bm_height_E])
+    storey_list_A = str(selection[bm_storey_list_A])
+    storey_list_B = str(selection[bm_storey_list_B])
 
     uses = [a + b for a, b in zip(use_list_A, use_list_B)]
 
@@ -138,19 +138,19 @@ def override_uses(bm, selection, mode, uses_to_remove, updated_storeys_per_use, 
     # remove the unnecessary uses and related data
     number_of_uses = len(uses_to_remove)
     if number_of_uses > 0:
-        selection[bMesh_use_list_A] = int(use_list_A[:-number_of_uses])
-        selection[bMesh_use_list_B] = int(use_list_B[:-number_of_uses])
-        selection[bMesh_height_A] = int(height_A[:-number_of_uses])
-        selection[bMesh_height_B] = int(height_B[:-number_of_uses])
-        selection[bMesh_height_C] = int(height_C[:-number_of_uses])
-        selection[bMesh_height_D] = int(height_D[:-number_of_uses])
-        selection[bMesh_height_E] = int(height_E[:-number_of_uses])
-        selection[bMesh_storey_list_A] = int(storey_list_A[:-number_of_uses])
-        selection[bMesh_storey_list_B] = int(storey_list_B[:-number_of_uses])
+        selection[bm_use_list_A] = int(use_list_A[:-number_of_uses])
+        selection[bm_use_list_B] = int(use_list_B[:-number_of_uses])
+        selection[bm_height_A] = int(height_A[:-number_of_uses])
+        selection[bm_height_B] = int(height_B[:-number_of_uses])
+        selection[bm_height_C] = int(height_C[:-number_of_uses])
+        selection[bm_height_D] = int(height_D[:-number_of_uses])
+        selection[bm_height_E] = int(height_E[:-number_of_uses])
+        selection[bm_storey_list_A] = int(storey_list_A[:-number_of_uses])
+        selection[bm_storey_list_B] = int(storey_list_B[:-number_of_uses])
     else:
         # still need to update the number of storeys
-        selection[bMesh_storey_list_A] = int(storey_list_A)
-        selection[bMesh_storey_list_B] = int(storey_list_B)
+        selection[bm_storey_list_A] = int(storey_list_A)
+        selection[bm_storey_list_B] = int(storey_list_B)
 
     # update the number of storeys of the use, if any
     if updated_storeys_per_use > 0:
@@ -159,7 +159,7 @@ def override_uses(bm, selection, mode, uses_to_remove, updated_storeys_per_use, 
         else:
             new_storey_value = "0" + str(updated_storeys_per_use)
         
-        list_A = str(selection[bMesh_storey_list_A])[:-1] + new_storey_value[0]
-        list_B = str(selection[bMesh_storey_list_B])[:-1] + new_storey_value[1]
-        selection[bMesh_storey_list_A] = int(list_A)
-        selection[bMesh_storey_list_B] = int(list_B)
+        list_A = str(selection[bm_storey_list_A])[:-1] + new_storey_value[0]
+        list_B = str(selection[bm_storey_list_B])[:-1] + new_storey_value[1]
+        selection[bm_storey_list_A] = int(list_A)
+        selection[bm_storey_list_B] = int(list_B)

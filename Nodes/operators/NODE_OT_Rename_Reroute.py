@@ -1,7 +1,7 @@
 import bpy
 from bpy.types import Operator 
 
-class NODE_OT_mastro_rename_reroute(Operator):
+class NODE_OT_Mastro_Rename_Reroute(Operator):
     '''Rename the selected reroute node based on its source socket'''
     bl_idname = "node.rename_reroute_from_source_socket"
     bl_label = "Rename Reroute from Source Socket"
@@ -13,7 +13,7 @@ class NODE_OT_mastro_rename_reroute(Operator):
         while True:
             node = current_socket.node
 
-            # If not reroute, this is the oring
+            # If not reroute, this is the origin
             if node.type != 'REROUTE':
                 return current_socket.name
 

@@ -207,12 +207,12 @@ def set_attribute_mastro_overlay_uses(self, value):
                 suffix = "_EDGE"
 
             bmesh_overlay_top = field.layers.int[f"mastro_overlay_top{suffix}"]
-            bMesh_typology = field.layers.int[f"mastro_typology_id{suffix}"]
+            bm_typology = field.layers.int[f"mastro_typology_id{suffix}"]
 
             for selection in selection_set:
                 selection[bmesh_overlay_top] = value
                 if value == 0:
-                    typology_id = selection[bMesh_typology]
+                    typology_id = selection[bm_typology]
                     write_bmesh_use_attribute(bm, selection, typology_id, mode)
                 else:
                     overlay_bmesh_uses(bm, selection, value, mode)
@@ -268,9 +268,9 @@ def set_attribute_mastro_undercroft(self, value):
                 field = bm.edges
                 suffix = "_EDGE"
 
-            bMesh_undercroft = field.layers.int[f"mastro_undercroft{suffix}"]
+            bm_undercroft = field.layers.int[f"mastro_undercroft{suffix}"]
             for selection in selection_set:
-                selection[bMesh_undercroft] = value
+                selection[bm_undercroft] = value
                 
             if mesh.is_editmode:
                 bmesh.update_edit_mesh(mesh)
