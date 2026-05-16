@@ -26,8 +26,8 @@ from .property_classes import ( mastro_CL_addon_properties,
                                 mastro_CL_building_name_list,
                                 mastro_CL_block_name_list,
                                 mastro_CL_obj_typology_uses_name_list,
-                                mastro_CL_Sticky_Note
-                                
+                                mastro_CL_Sticky_Note,
+                                mastro_CL_layer_manager_props,
 )
 
                                 
@@ -327,6 +327,7 @@ object_props = [
 
 scene_pointer_props = [
     ("mastro_constraint_xy_setting", PointerProperty(type=mastro_CL_constraint_XY_settings)),
+    ("mastro_layer_manager_props", PointerProperty(type=mastro_CL_layer_manager_props)),
     # ("mastro_key_dictionary", CollectionProperty(type=mastro_schedule.MaStro_string_item)),
 ]
 node_frame_props = [

@@ -13,6 +13,10 @@ from .OBJECT_OT_Export_Data import OBJECT_OT_Mastro_Export_CSV, OBJECT_OT_Mastro
 from .TRANSFORM_OT_Set_Orientation import TRANSFORM_OT_Mastro_Set_Orientation
 from .TRANSFORM_OT_XY_Constraint import TRANSFORM_OT_Mastro_Rotate_XY_Constraint, TRANSFORM_OT_Mastro_Translate_XY_Constraint
 
+from .LAYER_MANAGER_OT_Set_Active import LAYER_MANAGER_OT_SetActive
+from .LAYER_MANAGER_OT_Add_Layer import LAYER_MANAGER_OT_AddLayer
+from .LAYER_MANAGER_OT_Add_Layer_Popup import LAYER_MANAGER_OT_AddLayer_Popup
+
 
 classes = (
     MESH_OT_Move_Active_Vertex,
@@ -31,5 +35,9 @@ classes = (
 
     TRANSFORM_OT_Mastro_Set_Orientation,
     TRANSFORM_OT_Mastro_Translate_XY_Constraint,
-    TRANSFORM_OT_Mastro_Rotate_XY_Constraint
+    TRANSFORM_OT_Mastro_Rotate_XY_Constraint,
+
+    LAYER_MANAGER_OT_SetActive,
+    LAYER_MANAGER_OT_AddLayer,
+    LAYER_MANAGER_OT_AddLayer_Popup,
     )

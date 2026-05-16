@@ -32,6 +32,10 @@ from .VIEW3D_PT_Mastro_Override import VIEW3D_PT_Mastro_Mass_Override, VIEW3D_PT
 from .VIEW3D_PT_Mastro_Export import VIEW3D_PT_Mastro_Export
 from .NODE_EDITOR_PT_Mastro_Panel import NODE_EDITOR_PT_Mastro_Panel
 from .NODE_EDITOR_PT_Mastro_Node import NODE_EDITOR_PT_Mastro_Node
+from .LAYER_MANAGER_PT_Popup import LAYER_MANAGER_PT_Popup
+from .LAYER_MANAGER_UL_Layer_List import LAYER_MANAGER_UL_Layer_List
+from .LAYER_MANAGER_OT_Move_Item import LAYER_MANAGER_OT_Move_Item
+from .LAYER_MANAGER_OT_Sort_Layers import LAYER_MANAGER_OT_SortLayers
 
 
 classes = (
@@ -69,7 +73,11 @@ classes = (
     VIEW3D_PT_Mastro_Block_Override,
     VIEW3D_PT_Mastro_Export,
     NODE_EDITOR_PT_Mastro_Panel,
-    NODE_EDITOR_PT_Mastro_Node
+    NODE_EDITOR_PT_Mastro_Node,
+    LAYER_MANAGER_PT_Popup,
+    LAYER_MANAGER_UL_Layer_List,
+    LAYER_MANAGER_OT_Move_Item,
+    LAYER_MANAGER_OT_SortLayers,
     )
 
 # Each row: (name, color_attr, filter_name, node_type, extra_action)

@@ -1,13 +1,15 @@
-import bpy 
+import bpy
 from bpy.types import PropertyGroup
-from bpy.props import (IntProperty, 
-                       FloatProperty, 
-                       FloatVectorProperty, 
-                       BoolProperty, 
-                       StringProperty
+from bpy.props import (IntProperty,
+                       FloatProperty,
+                       FloatVectorProperty,
+                       BoolProperty,
+                       StringProperty,
+                       CollectionProperty,
 )
 
 from ...Utils.update_attributes import *
+from ...Utils.on_active_layer_changed import on_active_layer_changed
 
 # ------------------------------
 # Addon Properties
@@ -305,4 +307,36 @@ class mastro_CL_Sticky_Note(PropertyGroup):
         name="Custom Note",
         description="Indicates if this NodeFrame is a custom sticky note",
         default=False
+    )
+
+
+# ------------------------------
+# View Layer Manager Properties
+# ------------------------------
+
+def _on_slot_name_changed(self, context):
+    """Propagate a user rename of a shadow slot to the actual Blender view layer."""
+    scene = context.scene
+    # If a view layer with the new name already exists, this is a sync update — not a rename.
+    if scene.view_layers.get(self.name):
+        self.prev_name = self.name
+        return
+    old_vl = scene.view_layers.get(self.prev_name)
+    if old_vl:
+        old_vl.name = self.name
+        self.prev_name = self.name
+
+
+class mastro_CL_layer_slot(PropertyGroup):
+    """One entry in the view-layer shadow list — stores the layer name and its previous name for rename detection."""
+    name: StringProperty(update=_on_slot_name_changed)
+    prev_name: StringProperty()
+
+
+class mastro_CL_layer_manager_props(PropertyGroup):
+    """Scene-level container for the view-layer shadow list and its active index."""
+    layer_slots: CollectionProperty(type=mastro_CL_layer_slot)
+    active_index: IntProperty(
+        default=0,
+        update=on_active_layer_changed,
     )
