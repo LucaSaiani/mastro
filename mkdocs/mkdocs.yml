@@ -1,19 +1,46 @@
 site_name: MaStro
 nav:
-  - Home: 
+  - Home:
     - Introduction: index.md
     - Install: install.md
-  - User Interface: ui.md
-  - Nodes: 
-    - Overview: gnodes.md
-    - Architecture: test.md
-    - Curve: test.md
-    - Indices: test.md
-    - Instances: test.md
-    - Materials: test.md
-    - Mesh: test.md
-    - Street: test.md
-    - Utilities: test.md
+  - Getting Started:
+    - Core Concepts: getting-started/core-concepts.md
+    - Object Types: getting-started/object-types.md
+    - Typologies and Uses: getting-started/typologies-and-uses.md
+    - The Attribute System: getting-started/attribute-system.md
+  - User Interface:
+    - Viewport Sidebar:
+      - MaStro Panel: ui/sidebar-main-panel.md
+      - Mass: ui/sidebar-mass.md
+      - Block: ui/sidebar-block.md
+      - Street: ui/sidebar-street.md
+      - Architecture: ui/sidebar-architecture.md
+      - Extras: ui/sidebar-extras.md
+      - Export: ui/sidebar-export.md
+    - Properties Editor:
+      - Project Data: ui/properties-project-data.md
+      - Typology: ui/properties-typology.md
+      - Overlays: ui/properties-overlays.md
+    - Tools:
+      - XY Constraint: ui/xy-constraint.md
+      - Transform Orientation: ui/transform-orientation.md
+      - Move Active Vertex: ui/move-active-vertex.md
+    - Node Editor: ui/node-editor.md
+    - View Layer Manager: ui/view-layer-manager.md
+    - Preferences: ui/preferences.md
+  - Nodes:
+    - Overview: nodes/overview.md
+    - Architecture: nodes/architecture.md
+    - Curve: nodes/curve.md
+    - Indices: nodes/indices.md
+    - Instances: nodes/instances.md
+    - Materials: nodes/materials.md
+    - Mesh: nodes/mesh.md
+    - Street: nodes/street.md
+    - Utilities: nodes/utilities.md
+  - Reference:
+    - Operators: reference/operators.md
+    - Custom Attributes: reference/custom-attributes.md
   - Acknowledgement: acknowledgement.md
   - Copyright: copyright.md
   - About: about.md
