@@ -195,11 +195,13 @@ def update_mastro_nodes_by_use(self, context):
     bpy.ops.node.mastro_gn_filter_by(filter_name="use")
     bpy.ops.node.mastro_shader_filter_by(filter_name="use")
     
-    # updating mastro_typology_uses_name_list_index
+    # Sync names in mastro_typology_uses_name_list from the authoritative use list.
+    # Search by id, not by index, because the two lists may not be in the same order.
     current_list = context.scene.mastro_typology_uses_name_list
     for i, el in enumerate(current_list):
-        name = context.scene.mastro_use_name_list[el.id].name
-        context.scene.mastro_typology_uses_name_list[i].name = name
+        use = next((u for u in context.scene.mastro_use_name_list if u.id == el.id), None)
+        if use is not None:
+            context.scene.mastro_typology_uses_name_list[i].name = use.name
     # updating the names in bpy.context.scene.mastro_obj_typology_uses_name_list
     # if they are shown in the MaStro panel in the 3dView
     usesUiList = context.scene.mastro_obj_typology_uses_name_list

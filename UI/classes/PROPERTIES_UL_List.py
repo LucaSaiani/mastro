@@ -22,7 +22,7 @@ class PROPERTIES_UL_List(UIList):
                 sub.prop(collection[index], self.color_attr, text="")
             else:
                 split.label(text=f"Id: {item.id}")
-            split.prop(collection[index], "name", text="")
+            split.prop(collection[index], "name", text="", emboss=False)
             
         elif self.layout_type in {'GRID'}:
             layout.alignment = 'CENTER'
@@ -62,7 +62,7 @@ class PROPERTIES_UL_Typology_Uses(UIList):
                         else:
                             subSplit1.label(text="Id: %d" % (item.id))
                             subSplit2.label(text="Storeys: %s" % (storeys))
-                        col2.label(text=item.name)
+                        col2.prop(el, "name", text="", emboss=False)
                         break
             else:
                 split = layout.split(factor=0.4)
