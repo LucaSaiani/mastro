@@ -76,6 +76,8 @@ from .Utils.init_nodes import init_nodes
 from .Handlers.utils.check_new_scenes import known_scenes as knownScenes
 from .Keymaps.keymap import register as register_keymaps, unregister as unregister_keymaps
 from .Nodes.ui import register as register_gn_ui, unregister as unregister_gn_ui
+from .Utils.sync_layer_slots import sync_layer_slots
+from .UI.utils.layer_manager_button import draw_layer_manager_header_button
   
 ########################################
 # from . import Utils
@@ -85,9 +87,51 @@ from .Nodes.ui import register as register_gn_ui, unregister as unregister_gn_ui
 # from bpy.types import(Scene)
 from bpy.app.handlers import persistent
 import math
+import time
 
 # store keymaps here to access after registration
 # addon_keymaps = []
+
+# --- View Layer Manager state ---
+_lm_original_draw_right = None
+_lm_last_depsgraph_check = 0.0
+_LM_DEPSGRAPH_INTERVAL = 0.3  # seconds between shadow-list name-set checks
+
+
+@persistent
+def _lm_on_depsgraph_update(scene, depsgraph):
+    """Sync the active_index to the window's current view layer; throttled shadow-list sync."""
+    window = bpy.context.window
+    if window and window.scene == scene:
+        props = scene.mastro_layer_manager_props
+        active_vl_name = window.view_layer.name
+        for i, slot in enumerate(props.layer_slots):
+            if slot.name == active_vl_name:
+                if props.active_index != i:
+                    props.active_index = i
+                break
+
+    global _lm_last_depsgraph_check
+    now = time.time()
+    if now - _lm_last_depsgraph_check < _LM_DEPSGRAPH_INTERVAL:
+        return
+    _lm_last_depsgraph_check = now
+
+    props = scene.mastro_layer_manager_props
+    real_names = {vl.name for vl in scene.view_layers}
+    slot_names = {s.name for s in props.layer_slots}
+    if real_names != slot_names:
+        sync_layer_slots(scene)
+
+
+@persistent
+def _lm_on_load_post(filepath):
+    """Defer shadow-list sync until bpy.data is fully accessible after file load."""
+    def _deferred():
+        for scene in bpy.data.scenes:
+            sync_layer_slots(scene)
+        return None  # one-shot timer
+    bpy.app.timers.register(_deferred, first_interval=0.0)
 
 
 # classes = (
@@ -270,10 +314,23 @@ def register():
     
     bpy.app.timers.register(init_lists, first_interval=.1)
     bpy.app.timers.register(init_nodes, first_interval=.1)
-    
-    
+
     # bpy.app.timers.register(mastro_modal_operator.update_mesh_attributes_depsgraph, first_interval=.1)
     bpy.app.handlers.depsgraph_update_post.append(handlerUpdates)
+
+    # --- View Layer Manager ---
+    bpy.app.handlers.depsgraph_update_post.append(_lm_on_depsgraph_update)
+    bpy.app.handlers.load_post.append(_lm_on_load_post)
+
+    global _lm_original_draw_right
+    _lm_original_draw_right = bpy.types.TOPBAR_HT_upper_bar.draw_right
+    bpy.types.TOPBAR_HT_upper_bar.draw_right = draw_layer_manager_header_button
+
+    def _lm_initial_sync():
+        for scene in bpy.data.scenes:
+            sync_layer_slots(scene)
+        return None  # one-shot timer
+    bpy.app.timers.register(_lm_initial_sync, first_interval=0.0)
    
     
     
@@ -281,12 +338,18 @@ def register():
 def unregister():
     bpy.app.handlers.load_post.remove(onFileLoaded)
     bpy.app.handlers.load_factory_startup_post.remove(onFileDefault)
-    
-    from .Handlers.utils.updates import updates as handlerUpdates
 
+    from .Handlers.utils.updates import updates as handlerUpdates
     bpy.app.handlers.depsgraph_update_post.remove(handlerUpdates)
-    
-       
+
+    # --- View Layer Manager ---
+    if _lm_on_depsgraph_update in bpy.app.handlers.depsgraph_update_post:
+        bpy.app.handlers.depsgraph_update_post.remove(_lm_on_depsgraph_update)
+    if _lm_on_load_post in bpy.app.handlers.load_post:
+        bpy.app.handlers.load_post.remove(_lm_on_load_post)
+    if _lm_original_draw_right is not None:
+        bpy.types.TOPBAR_HT_upper_bar.draw_right = _lm_original_draw_right
+
     nodeitems_utils.unregister_node_categories('MASTRO_NODES')
 
      
