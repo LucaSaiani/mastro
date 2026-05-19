@@ -1,3 +1,4 @@
+import math
 import bpy
 from bpy.types import PropertyGroup
 from bpy.props import (IntProperty,
@@ -6,6 +7,8 @@ from bpy.props import (IntProperty,
                        BoolProperty,
                        StringProperty,
                        CollectionProperty,
+                       EnumProperty,
+                       PointerProperty,
 )
 
 from ...Utils.update_attributes import *
@@ -340,3 +343,245 @@ class mastro_CL_layer_manager_props(PropertyGroup):
         default=0,
         update=on_active_layer_changed,
     )
+
+
+# ------------------------------
+# Projector Properties
+# ------------------------------
+
+class mastro_CL_projector_properties(PropertyGroup):
+    # ── Sampling ──────────────────────────────────────────────────────────────
+
+    sampling_method: EnumProperty(
+        name        = "Sampling Method",
+        default     = 'UNIFORM',
+        description = "Visibility sampling strategy along each projected edge",
+        items       = [
+            ('UNIFORM',  "Uniform",
+             "Sample visibility at evenly spaced intervals along each edge. "
+             "Reliable and predictable — recommended for most scenes"),
+        ]
+    )
+    segment_length: FloatProperty(
+        name        = "Segment Length",
+        default     = 0.02,
+        min         = 0.001,
+        soft_max    = 0.5,
+        precision   = 3,
+        description = (
+            "Sampling precision in NDC screen space (range 0..2 per axis). "
+            "Smaller = more samples, more accurate visibility transitions. "
+            "Independent of object size or distance from camera"
+        ),
+    )
+    ray_offset: FloatProperty(
+        name        = "Ray Offset",
+        default     = 1e-4,
+        min         = 0.0,
+        precision   = 6,
+        unit        = 'LENGTH',
+        description = "World-space offset applied to ray origins to avoid self-intersection"
+    )
+
+    # ── Output ────────────────────────────────────────────────────────────────
+
+    include_hidden: BoolProperty(
+        name        = "Include Hidden",
+        default     = False,
+        description = "Also include hidden lines (as separate edges in a dedicated empty)"
+    )
+    only_selected_objects: BoolProperty(
+        name        = "Only Selected Objects",
+        default     = False,
+        description = (
+            "Project only the selected objects. All visible objects still "
+            "participate in occlusion calculations"
+        )
+    )
+    place_on_camera_plane: BoolProperty(
+        name        = "Place on Camera Plane",
+        default     = False,
+        description = "Place the result in front of the camera plane"
+    )
+    flat_angle_threshold: FloatProperty(
+        name        = "Flat Angle Threshold",
+        default     = math.radians(5.0),
+        min         = 0.0,
+        max         = math.radians(180.0),
+        soft_max    = math.radians(90.0),
+        precision   = 1,
+        unit        = 'ROTATION',
+        description = (
+            "Edges shared by two nearly-parallel faces of the SAME object "
+            "are hidden when the angle between their normals is below this "
+            "threshold. Edges between different materials or different objects "
+            "are always shown regardless of this setting"
+        )
+    )
+    remove_overlapping_boundary: BoolProperty(
+        name        = "Remove Overlapping Boundary",
+        default     = True,
+        description = (
+            "Remove overlapping portions of boundary edges (single-face edges) "
+            "within the same object before projection. "
+            "Only active when Flat Angle Threshold is greater than 0"
+        )
+    )
+    compute_silhouette: BoolProperty(
+        name        = "Compute Silhouette",
+        default     = False,
+        description = (
+            "Identify and tag silhouette edges — edges on the boundary between "
+            "camera-facing and back-facing faces (or mesh boundary edges). "
+            "Silhouette edges are always included regardless of Flat Angle Threshold "
+            "and are assigned to dedicated vertex groups on the output mesh"
+        )
+    )
+    projection_suffix: StringProperty(
+        name        = "Projection Suffix",
+        default     = "_hiddenLines_Projection",
+        description = "Suffix for each 2D object and for the empty"
+    )
+
+    # ── Shadow / Light ────────────────────────────────────────────────────────
+
+    cutter_detection: EnumProperty(
+        name        = "Cutter Detection",
+        description = "Spatial acceleration used to find camera-facing occluders for each shadow polygon",
+        default     = 'AABB',
+        items       = [
+            ('AABB', "AABB",
+             "Bounding-box pre-filter: skip polygons whose UV bounding boxes do not "
+             "overlap the shadow polygon. Fast and simple — recommended for most scenes"),
+            ('BVH',  "BVH Tree",
+             "Build a BVH tree of all camera-facing polygons and query only the "
+             "candidates that overlap each shadow polygon. Best for scenes with "
+             "many polygons"),
+        ],
+    )
+
+    grid_subdivisions: IntProperty(
+        name        = "Grid Subdivisions",
+        description = (
+            "Number of tiles along the camera's longest axis. "
+            "Each tile is 256 px; more tiles = higher total resolution"
+        ),
+        default     = 10,
+        min         = 1,
+        max         = 100,
+    )
+    render_boundary_res: IntProperty(
+        name        = "Boundary Resolution",
+        description = (
+            "Target pixels on the short side when sampling the shadow boundary. "
+            "Higher = finer border detail, more vertices"
+        ),
+        default     = 400,
+        min         = 50,
+        max         = 2000,
+    )
+    render_interior_res: IntProperty(
+        name        = "Interior Resolution",
+        description = (
+            "Target pixels on the short side when sampling the shadow interior. "
+            "Lower = fewer interior triangles, faster"
+        ),
+        default     = 100,
+        min         = 20,
+        max         = 500,
+    )
+
+    def _light_poll(self, obj):
+        return obj.type == 'LIGHT' and obj.data.type in ('SUN', 'AREA')
+
+    light_source: bpy.props.PointerProperty(
+        name        = "Light",
+        type        = bpy.types.Object,
+        poll        = _light_poll,
+        description = "Sun or Area light used as the parallel shadow caster",
+    )
+    run_projection: BoolProperty(
+        name        = "2D Projection",
+        description = "Run the 2D projection when clicking Run",
+        default     = True,
+    )
+    run_shadows: BoolProperty(
+        name        = "Shadows",
+        description = "Run the shadow bake when clicking Run",
+        default     = True,
+    )
+    active_for_batch: BoolProperty(
+        name        = "Active",
+        default     = True,
+        description = "Include this camera in batch calculation",
+    )
+
+    # ── Advanced ──────────────────────────────────────────────────────────────
+
+    camera_clipping: BoolProperty(
+        name        = "Camera Clipping",
+        default     = False,
+        description = (
+            "Clip projected geometry using the camera clipping planes. "
+            "Edges beyond the far clip plane are truncated at the boundary; "
+            "faces that straddle it generate an additional section line"
+        )
+    )
+    compute_intersections: BoolProperty(
+        name        = "Compute Intersections",
+        default     = False,
+        description = (
+            "Calculate and project the intersection curves between "
+            "interpenetrating objects. Enable only when objects overlap in 3D"
+        )
+    )
+    snap_orphans: BoolProperty(
+        name        = "Snap Orphans",
+        default     = True,
+        description = (
+            "Move each orphan endpoint to the nearest point on the projected "
+            "wire of the occluder that caused the cut"
+        )
+    )
+    merge_by_distance: BoolProperty(
+        name        = "Merge by Distance",
+        default     = True,
+        description = (
+            "Merge vertices closer than the specified threshold before snapping. "
+            "Helps clean up near-coincident vertices produced by the projection"
+        )
+    )
+    merge_distance: FloatProperty(
+        name        = "Merge Distance",
+        default     = 1e-5,
+        min         = 0.0,
+        precision   = 6,
+        soft_max    = 0.01,
+        unit        = 'LENGTH',
+        description = (
+            "Maximum distance between vertices to be merged. "
+            "Operates in 2D projection space — values smaller than "
+            "segment_length are typical"
+        )
+    )
+
+
+class mastro_CL_projector_batch_item(PropertyGroup):
+    camera_name: StringProperty()
+
+
+class mastro_CL_projector_scene_props(PropertyGroup):
+    # ── Runtime state ─────────────────────────────────────────────────────────
+    is_running:       BoolProperty(default=False)
+    proj_is_running:  BoolProperty(default=False)
+
+    # ── Batch queue ───────────────────────────────────────────────────────────
+    batch_queue:  bpy.props.CollectionProperty(type=mastro_CL_projector_batch_item)
+    batch_cursor: IntProperty(default=0)
+
+    # ── Last-run stats ────────────────────────────────────────────────────────
+    last_op_time:    FloatProperty(default=0.0)
+    last_cell_count: IntProperty(default=0)
+    last_shadow_pts: IntProperty(default=0)
+    last_proj_time:  FloatProperty(default=0.0)
+    last_proj_edges: IntProperty(default=0)
