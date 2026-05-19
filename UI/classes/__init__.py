@@ -37,6 +37,11 @@ from .LAYER_MANAGER_UL_Layer_List import LAYER_MANAGER_UL_Layer_List
 from .LAYER_MANAGER_OT_Move_Item import LAYER_MANAGER_OT_Move_Item
 from .LAYER_MANAGER_OT_Sort_Layers import LAYER_MANAGER_OT_SortLayers
 
+from .PROPERTIES_PT_Mastro_2D_Projection import PROPERTIES_PT_Mastro_2D_Projection
+from .PROPERTIES_PT_Mastro_2D_Projection_Proj import PROPERTIES_PT_Mastro_2D_Projection_Proj
+from .PROPERTIES_PT_Mastro_2D_Projection_Shadow import PROPERTIES_PT_Mastro_2D_Projection_Shadow
+from .PROPERTIES_PT_Projector_Cameras import PROPERTIES_PT_Projector_Cameras
+
 
 classes = (
     # PROPERTIES_OT_New_Item, 
@@ -78,6 +83,11 @@ classes = (
     LAYER_MANAGER_UL_Layer_List,
     LAYER_MANAGER_OT_Move_Item,
     LAYER_MANAGER_OT_SortLayers,
+
+    PROPERTIES_PT_Mastro_2D_Projection,
+    PROPERTIES_PT_Mastro_2D_Projection_Proj,
+    PROPERTIES_PT_Mastro_2D_Projection_Shadow,
+    PROPERTIES_PT_Projector_Cameras,
     )
 
 # Each row: (name, color_attr, filter_name, node_type, extra_action)

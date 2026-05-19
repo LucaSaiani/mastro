@@ -17,6 +17,11 @@ from .LAYER_MANAGER_OT_Set_Active import LAYER_MANAGER_OT_SetActive
 from .LAYER_MANAGER_OT_Add_Layer import LAYER_MANAGER_OT_AddLayer
 from .LAYER_MANAGER_OT_Add_Layer_Popup import LAYER_MANAGER_OT_AddLayer_Popup
 
+from .OBJECT_OT_run_all import OBJECT_OT_RunAll, OBJECT_OT_CancelAll
+from .OBJECT_OT_run_batch import OBJECT_OT_RunBatch
+from .OBJECT_OT_bidimensional_Lines_Projection import OBJECT_OT_bidimensional_Lines_Projection
+from ..Utils.projection.shadow_render import MASTRO_OT_RenderShadowModal
+
 
 classes = (
     MESH_OT_Move_Active_Vertex,
@@ -25,7 +30,7 @@ classes = (
     OBJECT_OT_Add_Mastro_Dimension,
     OBJECT_OT_Add_Mastro_Mass,
     OBJECT_OT_Add_Mastro_Street,
-    OBJECT_OT_Convert_to_Mastro_Mass, 
+    OBJECT_OT_Convert_to_Mastro_Mass,
     OBJECT_OT_Convert_to_Mastro_Street,
     OBJECT_OT_Set_Street_Id,
     OBJECT_OT_Update_Mastro_Mesh_Attributes,
@@ -40,4 +45,10 @@ classes = (
     LAYER_MANAGER_OT_SetActive,
     LAYER_MANAGER_OT_AddLayer,
     LAYER_MANAGER_OT_AddLayer_Popup,
+
+    OBJECT_OT_RunAll,
+    OBJECT_OT_CancelAll,
+    OBJECT_OT_RunBatch,
+    OBJECT_OT_bidimensional_Lines_Projection,
+    MASTRO_OT_RenderShadowModal,
     )

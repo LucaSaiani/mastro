@@ -14,6 +14,9 @@ from .property_classes import (mastro_CL_addon_properties,
                                mastro_CL_Sticky_Note,
                                mastro_CL_layer_slot,
                                mastro_CL_layer_manager_props,
+                               mastro_CL_projector_properties,
+                               mastro_CL_projector_batch_item,
+                               mastro_CL_projector_scene_props,
 )
 
 classes = (
@@ -34,4 +37,8 @@ classes = (
     # because the latter uses it as a CollectionProperty type
     mastro_CL_layer_slot,
     mastro_CL_layer_manager_props,
+    # mastro_CL_projector_batch_item must be registered before mastro_CL_projector_scene_props
+    mastro_CL_projector_properties,
+    mastro_CL_projector_batch_item,
+    mastro_CL_projector_scene_props,
 )

@@ -67,6 +67,7 @@ else:
     PREFS_KEY = __package__
 
 from .UI.properties.properties import register as register_properties, unregister as unregister_properties
+from .Handlers import register as register_handlers, unregister as unregister_handlers
 from .UI.utils.xy_constraint import register as register_ui_buttons, unregister as unregister_ui_buttons
 from .UI.classes import register as register_ui_dynamic_classes, unregister as unregister_ui_dynamic_classes
 from .Icons import register as register_icons, unregister as unregister_icons
@@ -318,6 +319,9 @@ def register():
     # bpy.app.timers.register(mastro_modal_operator.update_mesh_attributes_depsgraph, first_interval=.1)
     bpy.app.handlers.depsgraph_update_post.append(handlerUpdates)
 
+    ### register handlers (light_source_guard, etc.) ###
+    register_handlers()
+
     # --- View Layer Manager ---
     bpy.app.handlers.depsgraph_update_post.append(_lm_on_depsgraph_update)
     bpy.app.handlers.load_post.append(_lm_on_load_post)
@@ -347,6 +351,10 @@ def unregister():
         bpy.app.handlers.depsgraph_update_post.remove(_lm_on_depsgraph_update)
     if _lm_on_load_post in bpy.app.handlers.load_post:
         bpy.app.handlers.load_post.remove(_lm_on_load_post)
+
+    ### unregister handlers (light_source_guard, etc.) ###
+    unregister_handlers()
+
     if _lm_original_draw_right is not None:
         bpy.types.TOPBAR_HT_upper_bar.draw_right = _lm_original_draw_right
 

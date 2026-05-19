@@ -28,6 +28,9 @@ from .property_classes import ( mastro_CL_addon_properties,
                                 mastro_CL_obj_typology_uses_name_list,
                                 mastro_CL_Sticky_Note,
                                 mastro_CL_layer_manager_props,
+                                mastro_CL_projector_properties,
+                                mastro_CL_projector_batch_item,
+                                mastro_CL_projector_scene_props,
 )
 
                                 
@@ -322,13 +325,18 @@ scene_props = [
 # =============================================================================
 object_props = [
     ("mastro_props", PointerProperty(type=mastro_CL_addon_properties)),
-    
+
 ]
 
 scene_pointer_props = [
     ("mastro_constraint_xy_setting", PointerProperty(type=mastro_CL_constraint_XY_settings)),
     ("mastro_layer_manager_props", PointerProperty(type=mastro_CL_layer_manager_props)),
     # ("mastro_key_dictionary", CollectionProperty(type=mastro_schedule.MaStro_string_item)),
+    ("mastro_projector_props", PointerProperty(type=mastro_CL_projector_scene_props)),
+]
+
+camera_props = [
+    ("mastro_projector_cl", PointerProperty(type=mastro_CL_projector_properties)),
 ]
 node_frame_props = [
     ("mastro_sticky_note_props", PointerProperty(type=mastro_CL_Sticky_Note)),
@@ -348,6 +356,8 @@ def register():
         setattr(bpy.types.Scene, name, prop)
     for name, prop in node_frame_props:
         setattr(bpy.types.NodeFrame, name, prop)
+    for name, prop in camera_props:
+        setattr(bpy.types.Camera, name, prop)
 
 
 def unregister():
@@ -361,4 +371,6 @@ def unregister():
         delattr(bpy.types.Scene, name)
     for name, _ in node_frame_props:
         delattr(bpy.types.NodeFrame, name)
+    for name, _ in camera_props:
+        delattr(bpy.types.Camera, name)
         
