@@ -121,6 +121,36 @@ def _get_or_create_empty_keep(name, scene, parent=None):
     return empty
 
 
+_GP_TYPES = {'GPENCIL', 'GREASEPENCIL'}
+_GP_TARGET = 'GREASEPENCIL' if bpy.app.version >= (4, 3, 0) else 'GPENCIL'
+
+
+def convert_objects_to_grease_pencil(objects):
+    """Convert a list of mesh objects to Grease Pencil in-place.
+
+    The objects must all be in the current view layer. After conversion the
+    original mesh data blocks are removed; the resulting GP objects keep the
+    same names and parent.
+    """
+    if not objects:
+        return
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj in objects:
+        try:
+            obj.select_set(True)
+        except Exception:
+            pass
+    bpy.context.view_layer.objects.active = objects[0]
+    try:
+        bpy.ops.object.convert(target=_GP_TARGET)
+    except Exception:
+        alt = 'GPENCIL' if _GP_TARGET == 'GREASEPENCIL' else 'GREASEPENCIL'
+        try:
+            bpy.ops.object.convert(target=alt)
+        except Exception:
+            pass
+
+
 def apply_depth_offset(obj, camera, delta):
     """Translate obj by delta along the camera forward axis and apply perspective scale correction.
 

@@ -30,3 +30,4 @@ class PROPERTIES_PT_Mastro_2D_Projection(Panel):
         col   = layout.column()
         col.prop(props, "place_on_camera_plane")
         col.prop(props, "camera_clipping")
+        col.prop(props, "convert_to_grease_pencil")

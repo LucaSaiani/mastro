@@ -19,7 +19,7 @@ from .snap_orphans import _snap_orphans_in_bmeshes
 from .deduplicate_merged import _deduplicate_merged_edges
 from .write_merged import _write_merged_object
 from .section_outline import _compute_and_write_section_outline
-from .scene_graph_helpers import apply_depth_offset
+from .scene_graph_helpers import apply_depth_offset, convert_objects_to_grease_pencil
 
 _proj_state = {}
 
@@ -129,6 +129,10 @@ def _run_projection(s):
             created.append(sec_obj)
 
         n_edges = sum(len(o.data.edges) for o in created)
+
+        if props.convert_to_grease_pencil and created:
+            convert_objects_to_grease_pencil(created)
+
         _finalize_proj(s, len(created), n_edges, merged_verts, snapped, dedup,
                        time.perf_counter() - t_start)
 

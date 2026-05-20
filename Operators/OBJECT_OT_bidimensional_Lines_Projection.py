@@ -12,7 +12,9 @@ from ..Utils.projection.merge_by_distance import _merge_bmeshes_by_distance
 from ..Utils.projection.scene_graph_helpers import (_get_or_create_empty_keep,
                                          _get_or_create_empty,
                                          _detach_user_edits,
-                                         apply_depth_offset)
+                                         apply_depth_offset,
+                                         convert_objects_to_grease_pencil,
+                                         _GP_TYPES)
 from ..Utils.projection.snap_orphans import _snap_orphans_in_bmeshes
 from ..Utils.projection.deduplicate_merged import _deduplicate_merged_edges
 from ..Utils.projection.write_merged import _write_merged_object
@@ -55,20 +57,25 @@ class OBJECT_OT_bidimensional_Lines_Projection(Operator):
             selected_names = {obj.name for obj in scene.objects if obj.select_get()}
             for src_name in selected_names:
                 proj_name = src_name + get_prefs().projection_suffix
-                if proj_name in bpy.data.objects:
-                    bpy.data.meshes.remove(
-                        bpy.data.objects[proj_name].data, do_unlink=True
-                    )
+                obj = bpy.data.objects.get(proj_name)
+                if obj is not None:
+                    if obj.type == 'MESH':
+                        bpy.data.meshes.remove(obj.data, do_unlink=True)
+                    else:
+                        bpy.data.objects.remove(obj, do_unlink=True)
                 excluded_names.add(proj_name)
         else:
             to_delete = [
                 obj for obj in scene.objects
                 if obj.name.endswith(get_prefs().projection_suffix)
-                and obj.type == 'MESH'
+                and (obj.type == 'MESH' or obj.type in _GP_TYPES)
             ]
             for obj in to_delete:
                 excluded_names.add(obj.name)
-                bpy.data.meshes.remove(obj.data, do_unlink=True)
+                if obj.type == 'MESH':
+                    bpy.data.meshes.remove(obj.data, do_unlink=True)
+                else:
+                    bpy.data.objects.remove(obj, do_unlink=True)
 
         # ── Collect names of hidden objects / disabled collections ────────────
         def get_disabled_collections(layer_collection, disabled_set):
@@ -308,10 +315,13 @@ class OBJECT_OT_bidimensional_Lines_Projection(Operator):
             self.report({'WARNING'}, "No geometry produced.")
             return {'CANCELLED'}
 
+        total_edges = sum(len(o.data.edges) for o in created_objects)
+
+        if props.convert_to_grease_pencil:
+            convert_objects_to_grease_pencil(created_objects)
+
         empty.select_set(True)
         context.view_layer.objects.active = empty
-
-        total_edges = sum(len(o.data.edges) for o in created_objects)
         t_elapsed = time.perf_counter() - t_start
         msg = (
             f"Projection done: {len(created_objects)} object(s), "
