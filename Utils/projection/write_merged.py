@@ -2,6 +2,7 @@ import bpy
 from .category_map import _CATEGORY_MAP
 from .scene_graph_helpers import (link_to_projection_collection,
                                    register_projection_output)
+from ..get_preferences import get_prefs
 
 # =============================================================================
 #  Write merged bmesh to scene as a single object with vertex groups
@@ -27,7 +28,7 @@ def _write_merged_object(src_name, bm_merged, category_verts, scene, props,
                 (int(v.co.x * 1e5), int(v.co.y * 1e5)) for v in vset
             }
 
-    obj_name = src_name + props.projection_suffix
+    obj_name = src_name + get_prefs().projection_suffix
     if obj_name in bpy.data.objects:
         old_obj = bpy.data.objects[obj_name]
         if parent is not None and old_obj.parent == parent:

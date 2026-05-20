@@ -47,7 +47,7 @@ class OBJECT_OT_RunBatch(Operator):
             obj for obj in sorted(scene.objects, key=lambda o: o.name)
             if obj.type == 'CAMERA'
             and obj.data is not None
-            and (obj.data.mastro_projector_cl.run_projection or obj.data.mastro_projector_cl.run_shadows)
+            and obj.data.mastro_projector_cl.enabled
             and obj.data.mastro_projector_cl.active_for_batch
         ]
 

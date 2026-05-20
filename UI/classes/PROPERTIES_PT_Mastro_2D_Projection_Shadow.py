@@ -15,7 +15,10 @@ class PROPERTIES_PT_Mastro_2D_Projection_Shadow(Panel):
         return context.camera is not None
 
     def draw_header(self, context):
-        self.layout.prop(context.camera.mastro_projector_cl, "run_shadows", text="")
+        cam = context.camera
+        props = cam.mastro_projector_cl
+        self.layout.active = props.enabled
+        self.layout.prop(props, "run_shadows", text="")
 
     def draw(self, context):
         layout = self.layout
@@ -30,14 +33,17 @@ class PROPERTIES_PT_Mastro_2D_Projection_Shadow(Panel):
         any_running = ssp.is_running or ssp.proj_is_running if ssp else False
 
         layout.use_property_split = True
-        layout.active = props.run_shadows
+        layout.active = props.enabled and props.run_shadows
 
         # ── Light source ──────────────────────────────────────────────────────
         col = layout.column()
         col.enabled = not any_running
         col.prop(props, "light_source")
         if not light:
-            col.label(text="Select a Sun or Area light", icon='ERROR')
+            sub = col.column()
+            sub.prop(props, "light_space",       text="Space")
+            sub.prop(props, "virtual_azimuth",   text="Azimuth")
+            sub.prop(props, "virtual_elevation",  text="Elevation")
 
         layout.separator()
 

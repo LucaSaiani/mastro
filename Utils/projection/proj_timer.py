@@ -6,7 +6,7 @@ Phase 'run':   run the full projection synchronously and finalize.
 import bpy
 from mathutils import Vector
 
-
+from ..get_preferences import get_prefs
 from .shadow_helpers import (_set_header, _clear_header, fmt_time,
                              clear_stash, unhide_empty_children,
                              is_shadow_helper)
@@ -47,7 +47,7 @@ def _run_projection(s):
     scene     = s["scene"]
     camera    = s["camera"]
     props     = camera.data.mastro_projector_cl
-    empty_name = camera.name + props.projection_suffix
+    empty_name = camera.name + get_prefs().projection_suffix
     empty      = bpy.data.objects.get(empty_name) or s.get("empty")
     depsgraph = bpy.context.evaluated_depsgraph_get()
     # Extend excluded set with any shadow helpers that may have been created
@@ -142,8 +142,7 @@ def _finalize_proj(s, n_objs, n_edges, merged_v, snapped, dedup, elapsed):
     camera = s.get("camera")
     empty  = None
     if camera:
-        proj_suffix = camera.data.mastro_projector_cl.projection_suffix
-        empty = bpy.data.objects.get(camera.name + proj_suffix) or s.get("empty")
+        empty = bpy.data.objects.get(camera.name + get_prefs().projection_suffix) or s.get("empty")
 
     if empty:
         bpy.ops.object.select_all(action="DESELECT")

@@ -15,7 +15,10 @@ class PROPERTIES_PT_Mastro_2D_Projection_Proj(Panel):
         return context.camera is not None
 
     def draw_header(self, context):
-        self.layout.prop(context.camera.mastro_projector_cl, "run_projection", text="")
+        cam = context.camera
+        props = cam.mastro_projector_cl
+        self.layout.active = props.enabled
+        self.layout.prop(props, "run_projection", text="")
 
     def draw(self, context):
         layout = self.layout
@@ -25,7 +28,7 @@ class PROPERTIES_PT_Mastro_2D_Projection_Proj(Panel):
 
         props = cam.mastro_projector_cl
         layout.use_property_split = True
-        layout.active = props.run_projection
+        layout.active = props.enabled and props.run_projection
 
         # ── Quality ───────────────────────────────────────────────────────────
         col = layout.column(heading="Quality")

@@ -145,14 +145,15 @@ def _restore_state(scene, saved):
 # Public entry point  (called from OBJECT_OT_RunAll)
 # ─────────────────────────────────────────────────────────────────────────────
 
-def run_render_shadow(context, light, empty, camera):
+def run_render_shadow(context, light, empty, camera, light_dir=None):
     _DBG.write_text("")
     _dbg("=== run_render_shadow START ===")
 
     scene     = context.scene
     cam_cl    = camera.data.mastro_projector_cl
-    light_dir = sun_direction(light)
-    _dbg(f"camera={camera.name}  light={light.name}")
+    if light_dir is None:
+        light_dir = sun_direction(light)
+    _dbg(f"camera={camera.name}  light={light.name if light else 'virtual'}")
     _dbg(f"light_dir={tuple(round(x,4) for x in light_dir)}")
 
     render = scene.render

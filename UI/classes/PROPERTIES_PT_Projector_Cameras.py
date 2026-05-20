@@ -20,11 +20,11 @@ class PROPERTIES_PT_Projector_Cameras(Panel):
             obj for obj in sorted(scene.objects, key=lambda o: o.name)
             if obj.type == 'CAMERA'
             and obj.data is not None
-            and (obj.data.mastro_projector_cl.run_projection or obj.data.mastro_projector_cl.run_shadows)
+            and obj.data.mastro_projector_cl.enabled
         ]
 
         if not cameras:
-            layout.label(text="No cameras with projection or shadow enabled", icon='INFO')
+            layout.label(text="No cameras with projection enabled", icon='INFO')
         else:
             box = layout.box()
             col = box.column(align=True)
