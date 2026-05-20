@@ -249,14 +249,60 @@ class _Projector:
     # ── Bounding-box frustum cull ─────────────────────────────────────────────
 
     @staticmethod
-    def bbox_in_frustum(obj, view_matrix):
-        mat = obj.matrix_world
-        for corner in obj.bound_box:
-            co_world = mat @ Vector(corner)
-            co_view  = view_matrix @ co_world.to_4d()
-            if co_view.z < 0:
-                return True
-        return False
+    def bbox_in_frustum(obj, vp_matrix):
+        """Return True if the object's bounding box intersects the view frustum.
+
+        Tests all 6 clip planes in homogeneous clip space.  If all 8 corners
+        are on the outside of any single plane the object is culled.
+        """
+        mat     = obj.matrix_world
+        corners = [vp_matrix @ (mat @ Vector(c)).to_4d() for c in obj.bound_box]
+        for nx, ny, nz, nw in (
+            ( 1,  0,  0, 1),   # left
+            (-1,  0,  0, 1),   # right
+            ( 0,  1,  0, 1),   # bottom
+            ( 0, -1,  0, 1),   # top
+            ( 0,  0,  1, 1),   # near
+            ( 0,  0, -1, 1),   # far
+        ):
+            if all(nx*c.x + ny*c.y + nz*c.z + nw*c.w < 0 for c in corners):
+                return False
+        return True
+
+    # ── Lateral frustum clip (Liang-Barsky in clip space) ─────────────────────
+
+    @staticmethod
+    def _clip_segment_lateral(p0, p1, vp_matrix):
+        """Clip world-space segment [p0, p1] against the 4 lateral frustum planes
+        (x=±1, y=±1 in NDC) using Liang-Barsky in homogeneous clip space.
+
+        A straight 3D line maps linearly to clip space, so the parameter t found
+        here can be used directly with p0.lerp(p1, t) to recover world-space
+        clip points for correct visibility ray casting.
+
+        Returns (p0_clipped, p1_clipped, visible).
+        """
+        c0 = vp_matrix @ p0.to_4d()
+        c1 = vp_matrix @ p1.to_4d()
+        dc = c1 - c0
+        t0, t1 = 0.0, 1.0
+        for nx, ny, nw in ((1, 0, 1), (-1, 0, 1), (0, 1, 1), (0, -1, 1)):
+            p_val = nx * c0.x + ny * c0.y + nw * c0.w
+            d_val = nx * dc.x + ny * dc.y + nw * dc.w
+            if abs(d_val) < 1e-12:
+                if p_val < 0:
+                    return p0, p1, False
+                continue
+            t = -p_val / d_val
+            if d_val < 0:
+                t1 = min(t1, t)
+            else:
+                t0 = max(t0, t)
+            if t0 > t1:
+                return p0, p1, False
+        p0_out = p0.lerp(p1, t0) if t0 > 1e-9       else p0
+        p1_out = p0.lerp(p1, t1) if t1 < 1.0 - 1e-9 else p1
+        return p0_out, p1_out, True
 
     # ── Emit a single visibility run into the correct bmeshes ─────────────────
 
@@ -321,6 +367,7 @@ class _Projector:
         view_matrix, proj_matrix, aspect = self.get_camera_matrices(
             scene, camera, depsgraph
         )
+        vp_matrix    = proj_matrix @ view_matrix
         cam_location = camera.matrix_world.translation.copy()
         adaptive     = False  # (props.sampling_method == 'ADAPTIVE')  — Adaptive disabled
 
@@ -356,7 +403,7 @@ class _Projector:
                 continue
             if selected_names is not None and obj.name not in selected_names:
                 continue
-            if not self.bbox_in_frustum(obj, view_matrix):
+            if not self.bbox_in_frustum(obj, vp_matrix):
                 continue
 
             obj_eval  = obj.evaluated_get(depsgraph)
@@ -502,6 +549,10 @@ class _Projector:
                     if not visible:
                         continue
 
+                p0, p1, visible = self._clip_segment_lateral(p0, p1, vp_matrix)
+                if not visible:
+                    continue
+
                 ndc0 = self.world_to_ndc(p0, view_matrix, proj_matrix)
                 ndc1 = self.world_to_ndc(p1, view_matrix, proj_matrix)
                 if ndc0 is None or ndc1 is None:
@@ -518,6 +569,9 @@ class _Projector:
                         p0, p1, d0, d1, clip_start, clip_end)
                     if not visible:
                         continue
+                p0, p1, visible = self._clip_segment_lateral(p0, p1, vp_matrix)
+                if not visible:
+                    continue
                 ndc0 = self.world_to_ndc(p0, view_matrix, proj_matrix)
                 ndc1 = self.world_to_ndc(p1, view_matrix, proj_matrix)
                 if ndc0 is None or ndc1 is None:
@@ -544,6 +598,9 @@ class _Projector:
                             p0, p1, d0, d1, clip_start, clip_end)
                         if not visible:
                             continue
+                    p0, p1, visible = self._clip_segment_lateral(p0, p1, vp_matrix)
+                    if not visible:
+                        continue
                     ndc0 = self.world_to_ndc(p0, view_matrix, proj_matrix)
                     ndc1 = self.world_to_ndc(p1, view_matrix, proj_matrix)
                     if ndc0 is None or ndc1 is None:
@@ -555,6 +612,9 @@ class _Projector:
             # geometry that would otherwise occlude them, so no ray casting
             # is needed. They go directly into bm_visible and bm_section.
             for p0, p1 in section_lines:
+                p0, p1, visible = self._clip_segment_lateral(p0, p1, vp_matrix)
+                if not visible:
+                    continue
                 ndc0 = self.world_to_ndc(p0, view_matrix, proj_matrix)
                 ndc1 = self.world_to_ndc(p1, view_matrix, proj_matrix)
                 if ndc0 is None or ndc1 is None:
