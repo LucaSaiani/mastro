@@ -66,7 +66,11 @@
       "Bash(aspell dump *)",
       "Bash(aspell dicts *)",
       "Bash(pdflatex -interaction=nonstopmode CoverLetters/CL_Birkhauser_EN.tex)",
-      "Bash([ -f \"/home/luca/Software/projector/Utils/$f\" ])"
+      "Bash([ -f \"/home/luca/Software/projector/Utils/$f\" ])",
+      "Bash(ls /home/luca/Software/projector/ 2>/dev/null || echo \"not found\")",
+      "Read(//home/luca/Software/projector/**)",
+      "Bash(sed -n '45,55p' /home/luca/Software/mastro/Utils/projection/proj_timer.py)",
+      "Bash(sed -n '140,150p' /home/luca/Software/mastro/Utils/projection/proj_timer.py)"
     ],
     "additionalDirectories": [
       "/home/luca/Documents/Tesi_eng",

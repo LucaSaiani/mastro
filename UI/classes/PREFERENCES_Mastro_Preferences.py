@@ -110,6 +110,12 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
     #             description = "Show selection overlay when the MaStro mass, block or street is in edit mode"
     #             )
     
+    projection_suffix: bpy.props.StringProperty(
+        name="Projection Suffix",
+        default="_projection",
+        description="Suffix appended to each 2D projected object and to the parent empty"
+    )
+
     show_overlay_settings: bpy.props.BoolProperty(
         name="Overlay Settings",
         default=False
@@ -117,6 +123,11 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
 
     show_note_settings: bpy.props.BoolProperty(
         name="Note Settings",
+        default=False
+    )
+
+    show_projection_settings: bpy.props.BoolProperty(
+        name="Projection Settings",
         default=False
     )
 
@@ -213,7 +224,7 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
                  icon='TRIA_DOWN' if self.show_note_settings else 'TRIA_RIGHT', 
                  emboss=False)
         if self.show_note_settings:
-            col = box.column(align=True) 
+            col = box.column(align=True)
             row = col.row()
             row.label(text="Font:")
 
@@ -224,6 +235,19 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
             row = col.row()
             row.label(text = "Color:")
             row.prop(self, "noteColor",icon_only=True)
+
+        # Section: Projection
+        box = layout.box()
+        box.prop(self,
+                 "show_projection_settings",
+                 text="2D Projection",
+                 icon='TRIA_DOWN' if self.show_projection_settings else 'TRIA_RIGHT',
+                 emboss=False)
+        if self.show_projection_settings:
+            col = box.column(align=True)
+            row = col.row()
+            row.label(text="Projection Suffix:")
+            row.prop(self, "projection_suffix", text="")
 
 
 

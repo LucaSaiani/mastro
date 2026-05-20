@@ -8,7 +8,7 @@ _STASH_SUFFIX  = "__stash__"
 
 
 def get_light_source(context):
-    """Return the selected SUN/AREA light from the active camera's properties."""
+    """Return the selected SUN/AREA light from the active camera's properties, or None."""
     cam = context.scene.camera
     if cam is None:
         return None
@@ -20,6 +20,38 @@ def get_light_source(context):
 
 def sun_direction(light_obj):
     return (light_obj.matrix_world.to_3x3() @ Vector((0, 0, -1))).normalized()
+
+
+def sun_direction_from_props(props, camera=None):
+    """Return a sun direction vector (points toward the ground, i.e. where light travels).
+
+    Uses a real light when assigned; otherwise computes from virtual azimuth/elevation.
+
+    Convention: azimuth = shadow direction, counterclockwise from North (+Y).
+      0° = shadow North, 90° = shadow West, 180° = shadow South, 270° = shadow East.
+      315° = shadow NE (upper-right in top view) — same as 45° clockwise from North.
+
+    In CAMERA mode the same convention applies relative to camera-up, then the
+    direction is rotated into world space via the camera matrix.
+    """
+    light = props.light_source
+    if light and light.type == 'LIGHT' and light.data.type in ('SUN', 'AREA'):
+        return sun_direction(light)
+
+    az = props.virtual_azimuth
+    el = props.virtual_elevation
+    # Counterclockwise from +Y (North): x = -sin(az), y = cos(az).
+    x_base = -math.sin(az) * math.cos(el)
+    y_base =  math.cos(az) * math.cos(el)
+    z_base = -math.sin(el)
+
+    if props.light_space == 'CAMERA' and camera is not None:
+        # Same formula in camera local space (up=+Y_cam, right=+X_cam, into-scene=-Z_cam),
+        # then rotated to world via the camera's rotation matrix.
+        dir_cam = Vector((x_base, y_base, z_base))
+        return (camera.matrix_world.to_3x3() @ dir_cam).normalized()
+
+    return Vector((x_base, y_base, z_base)).normalized()
 
 
 def is_shadow_helper(obj):

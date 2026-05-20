@@ -3,7 +3,10 @@ import math
 import time
 from bpy.types import Operator
 
+from ..Utils.get_preferences import get_prefs
+
 from ..Utils.projection.shadow_helpers  import (get_light_source, sun_direction,
+                                      sun_direction_from_props,
                                       scene_mesh_objects, collect_world_vertices,
                                       build_sun_visible_faces, get_scene_extent,
                                       purge_shadow_helpers, _clear_header,
@@ -23,7 +26,7 @@ from ..Utils.projection.scene_graph_helpers import (_get_or_create_empty,
 
 def _setup_shared_empty(camera, scene, proj_props):
     """Create/position the shared empty for this camera, return it."""
-    empty_name = camera.name + proj_props.projection_suffix
+    empty_name = camera.name + get_prefs().projection_suffix
 
     if proj_props.only_selected_objects and empty_name in bpy.data.objects:
         return _get_or_create_empty_keep(empty_name, scene)
@@ -88,7 +91,7 @@ def _collect_excluded_names(scene, camera, proj_props):
     if proj_props.only_selected_objects:
         selected = {o.name for o in scene.objects if o.select_get()}
         for src in selected:
-            excluded.add(src + proj_props.projection_suffix)
+            excluded.add(src + get_prefs().projection_suffix)
 
     def _get_disabled(lc, out):
         if lc.exclude or lc.hide_viewport or lc.collection.hide_viewport:
@@ -133,12 +136,8 @@ class OBJECT_OT_RunAll(Operator):
 
         # ── Shadow bake ───────────────────────────────────────────────────────
         if proj_props.run_shadows:
-            sun = get_light_source(context)
-            if not sun:
-                self.report({"ERROR"}, "No light source selected.")
-                return {"CANCELLED"}
-
-            sun_dir   = sun_direction(sun)
+            sun     = get_light_source(context)
+            sun_dir = sun_direction_from_props(proj_props, camera=camera)
             mesh_objs = scene_mesh_objects(context, sun)
             if not mesh_objs:
                 self.report({"ERROR"}, "No visible mesh found.")
@@ -161,7 +160,7 @@ class OBJECT_OT_RunAll(Operator):
             sun_vis = build_sun_visible_faces(eval_objs, sun_dir)
 
             try:
-                run_render_shadow(context, sun, empty, camera)
+                run_render_shadow(context, sun, empty, camera, light_dir=sun_dir)
             except Exception as exc:
                 self.report({"ERROR"}, f"Render shadow failed: {exc}")
                 return {"CANCELLED"}

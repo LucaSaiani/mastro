@@ -350,6 +350,14 @@ class mastro_CL_layer_manager_props(PropertyGroup):
 # ------------------------------
 
 class mastro_CL_projector_properties(PropertyGroup):
+    # ── Enable ────────────────────────────────────────────────────────────────
+
+    enabled: BoolProperty(
+        name        = "Projection",
+        default     = False,
+        description = "Enable this camera for 2D projection and shadow bake",
+    )
+
     # ── Sampling ──────────────────────────────────────────────────────────────
 
     sampling_method: EnumProperty(
@@ -437,12 +445,6 @@ class mastro_CL_projector_properties(PropertyGroup):
             "and are assigned to dedicated vertex groups on the output mesh"
         )
     )
-    projection_suffix: StringProperty(
-        name        = "Projection Suffix",
-        default     = "_hiddenLines_Projection",
-        description = "Suffix for each 2D object and for the empty"
-    )
-
     # ── Shadow / Light ────────────────────────────────────────────────────────
 
     cutter_detection: EnumProperty(
@@ -491,6 +493,32 @@ class mastro_CL_projector_properties(PropertyGroup):
         max         = 500,
     )
 
+    virtual_azimuth: FloatProperty(
+        name        = "Azimuth",
+        default     = math.radians(315.0),
+        min         = 0.0,
+        max         = math.radians(360.0),
+        subtype     = 'ANGLE',
+        description = "Shadow direction, counterclockwise",
+    )
+    virtual_elevation: FloatProperty(
+        name        = "Elevation",
+        default     = math.radians(45.0),
+        min         = math.radians(0.1),
+        max         = math.radians(90.0),
+        subtype     = 'ANGLE',
+        description = "Angle of the virtual light source above the horizon",
+    )
+    light_space: EnumProperty(
+        name        = "Space",
+        default     = 'WORLD',
+        description = "Reference frame for the virtual light direction",
+        items       = [
+            ('WORLD',  "World",  "Azimuth and elevation are in world space"),
+            ('CAMERA', "Camera", "Azimuth and elevation are relative to the camera view — useful for consistent shadow direction across all elevations"),
+        ],
+    )
+
     def _light_poll(self, obj):
         return obj.type == 'LIGHT' and obj.data.type in ('SUN', 'AREA')
 
@@ -498,7 +526,7 @@ class mastro_CL_projector_properties(PropertyGroup):
         name        = "Light",
         type        = bpy.types.Object,
         poll        = _light_poll,
-        description = "Sun or Area light used as the parallel shadow caster",
+        description = "Sun or Area light. When set, overrides the virtual light source",
     )
     run_projection: BoolProperty(
         name        = "2D Projection",

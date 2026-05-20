@@ -3,6 +3,7 @@ import math
 from bpy.types import Operator
 from mathutils import Vector
 
+from ..Utils.get_preferences import get_prefs
 from ..Utils.projection.projector import _Projector
 from ..Utils.projection.build_global_bvh import _build_global_bvh
 from ..Utils.projection.intersection_curve_merge_projected import _merge_intersections_into_results
@@ -35,7 +36,7 @@ class OBJECT_OT_bidimensional_Lines_Projection(Operator):
 
         props      = camera.data.mastro_projector_cl
         depsgraph  = context.evaluated_depsgraph_get()
-        empty_name = camera.name + props.projection_suffix
+        empty_name = camera.name + get_prefs().projection_suffix
 
         # ── Delete previously projected objects ───────────────────────────────
         excluded_names = set()
@@ -52,7 +53,7 @@ class OBJECT_OT_bidimensional_Lines_Projection(Operator):
         if props.only_selected_objects:
             selected_names = {obj.name for obj in scene.objects if obj.select_get()}
             for src_name in selected_names:
-                proj_name = src_name + props.projection_suffix
+                proj_name = src_name + get_prefs().projection_suffix
                 if proj_name in bpy.data.objects:
                     bpy.data.meshes.remove(
                         bpy.data.objects[proj_name].data, do_unlink=True
@@ -61,7 +62,7 @@ class OBJECT_OT_bidimensional_Lines_Projection(Operator):
         else:
             to_delete = [
                 obj for obj in scene.objects
-                if obj.name.endswith(props.projection_suffix)
+                if obj.name.endswith(get_prefs().projection_suffix)
                 and obj.type == 'MESH'
             ]
             for obj in to_delete:
@@ -217,7 +218,7 @@ class OBJECT_OT_bidimensional_Lines_Projection(Operator):
             user_edits = []
             if empty_name in bpy.data.objects:
                 user_edits = _detach_user_edits(
-                    bpy.data.objects[empty_name], props.projection_suffix
+                    bpy.data.objects[empty_name], get_prefs().projection_suffix
                 )
             empty = _get_or_create_empty(empty_name, scene)
             for ch in user_edits:
@@ -270,7 +271,7 @@ class OBJECT_OT_bidimensional_Lines_Projection(Operator):
             existing = bpy.data.objects.get(empty_name)
             if existing is not None and existing.get("projector_on_camera_plane"):
                 # Previous run used place_on_camera_plane — start fresh.
-                user_edits = _detach_user_edits(existing, props.projection_suffix)
+                user_edits = _detach_user_edits(existing, get_prefs().projection_suffix)
                 empty = _get_or_create_empty(empty_name, scene)
                 for ch in user_edits:
                     ch.parent = empty
