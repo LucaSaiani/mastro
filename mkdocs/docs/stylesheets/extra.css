@@ -1,0 +1,14 @@
+/* Sticky footer navigation ------------------------------------------------- */
+
+.md-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+/* Prevent page content from being hidden behind the fixed footer */
+.md-main {
+  padding-bottom: 8rem;
+}
