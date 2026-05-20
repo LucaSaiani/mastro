@@ -157,8 +157,6 @@ def _finalize_proj(s, n_objs, n_edges, merged_v, snapped, dedup, elapsed):
 
     props = bpy.context.scene.mastro_projector_props
     props.proj_is_running = False
-    props.last_proj_time  = elapsed
-    props.last_proj_edges = n_edges
 
     if not props.is_running and empty:
         clear_stash(empty)
