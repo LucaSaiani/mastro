@@ -24,7 +24,7 @@ from .shadow_helpers import (_set_header, _clear_header, fmt_time,
                               create_shadow_cam_mesh, sun_direction,
                               clear_stash, unhide_empty_children)
 from .proj_timer import _proj_state, _tick_projection
-from .scene_graph_helpers import apply_depth_offset
+from .scene_graph_helpers import apply_depth_offset, convert_objects_to_grease_pencil
 from ..get_preferences import get_prefs
 
 _DBG = pathlib.Path(__file__).parent.parent / "shadow_render_debug.log"
@@ -540,6 +540,8 @@ def _finalize(s):
 
     if obj:
         apply_depth_offset(obj, camera, -get_prefs().shadow_offset)
+        if camera.data.mastro_projector_cl.convert_to_grease_pencil:
+            convert_objects_to_grease_pencil([obj])
 
     elapsed = time.time() - s['t0']
     _dbg(f"mesh created: {obj.name if obj else 'None'}  ({fmt_time(elapsed)})")
