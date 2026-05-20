@@ -11,7 +11,8 @@ from ..Utils.projection.merge_per_category import _merge_category_bmeshes
 from ..Utils.projection.merge_by_distance import _merge_bmeshes_by_distance
 from ..Utils.projection.scene_graph_helpers import (_get_or_create_empty_keep,
                                          _get_or_create_empty,
-                                         _detach_user_edits)
+                                         _detach_user_edits,
+                                         apply_depth_offset)
 from ..Utils.projection.snap_orphans import _snap_orphans_in_bmeshes
 from ..Utils.projection.deduplicate_merged import _deduplicate_merged_edges
 from ..Utils.projection.write_merged import _write_merged_object
@@ -297,6 +298,7 @@ class OBJECT_OT_bidimensional_Lines_Projection(Operator):
         # ── STEP 6b: write global section outline + fill ──────────────────────
         for section_obj in _compute_and_write_section_outline(
                 section_segs, scene, camera.name, parent=empty):
+            apply_depth_offset(section_obj, camera, get_prefs().section_offset)
             section_obj.select_set(True)
             created_objects.append(section_obj)
 

@@ -1,4 +1,5 @@
 import bpy
+from mathutils import Matrix
 
 # =============================================================================
 #  Scene-graph helpers
@@ -118,3 +119,34 @@ def _get_or_create_empty_keep(name, scene, parent=None):
     if parent is not None:
         empty.parent = parent
     return empty
+
+
+def apply_depth_offset(obj, camera, delta):
+    """Translate obj by delta along the camera forward axis and apply perspective scale correction.
+
+    delta > 0 moves toward the camera, delta < 0 moves away.
+    When the camera is perspective and place_on_camera_plane is active, the object
+    is also scaled uniformly so its apparent size in the render remains unchanged.
+    """
+    from mathutils import Vector
+    cam_mat = camera.matrix_world
+    cam_fwd = -Vector(cam_mat.col[2][:3]).normalized()
+
+    # Translate in world space along cam_fwd.
+    obj.matrix_parent_inverse = (
+        Matrix.Translation(cam_fwd * delta) @ obj.matrix_parent_inverse
+    )
+
+    # Perspective scale correction: only needed for perspective camera on cam plane.
+    cam_data = camera.data
+    if cam_data.type == 'PERSP' and cam_data.mastro_projector_cl.place_on_camera_plane:
+        # Distance from camera to the object's world origin after translation.
+        obj_world_loc = obj.matrix_world.translation
+        cam_loc       = cam_mat.translation
+        d = (obj_world_loc - cam_loc).dot(cam_fwd)
+        if d > 1e-6:
+            # Original distance before the offset.
+            d_orig = d - delta
+            if abs(d_orig) > 1e-6:
+                scale_factor = d / d_orig
+                obj.scale = (scale_factor,) * 3

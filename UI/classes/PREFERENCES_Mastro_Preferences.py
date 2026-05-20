@@ -116,6 +116,26 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
         description="Suffix appended to each 2D projected object and to the parent empty"
     )
 
+    section_offset: bpy.props.FloatProperty(
+        name="Section Offset",
+        default=0.01,
+        min=0.0,
+        soft_max=0.1,
+        precision=4,
+        unit='LENGTH',
+        description="Section mesh is moved this distance toward the camera, so it masks projection lines behind it"
+    )
+
+    shadow_offset: bpy.props.FloatProperty(
+        name="Shadow Offset",
+        default=0.01,
+        min=0.0,
+        soft_max=0.1,
+        precision=4,
+        unit='LENGTH',
+        description="Shadow mesh is moved this distance away from the camera, so it does not mask projection lines"
+    )
+
     show_overlay_settings: bpy.props.BoolProperty(
         name="Overlay Settings",
         default=False
@@ -248,6 +268,12 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
             row = col.row()
             row.label(text="Projection Suffix:")
             row.prop(self, "projection_suffix", text="")
+            row = col.row()
+            row.label(text="Section Offset:")
+            row.prop(self, "section_offset", text="")
+            row = col.row()
+            row.label(text="Shadow Offset:")
+            row.prop(self, "shadow_offset", text="")
 
 
 

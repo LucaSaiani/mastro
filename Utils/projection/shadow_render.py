@@ -24,6 +24,8 @@ from .shadow_helpers import (_set_header, _clear_header, fmt_time,
                               create_shadow_cam_mesh, sun_direction,
                               clear_stash, unhide_empty_children)
 from .proj_timer import _proj_state, _tick_projection
+from .scene_graph_helpers import apply_depth_offset
+from ..get_preferences import get_prefs
 
 _DBG = pathlib.Path(__file__).parent.parent / "shadow_render_debug.log"
 
@@ -82,7 +84,7 @@ _DISP_SHADING_ATTRS = ('type', 'light', 'color_type', 'single_color',
                        'background_color')
 
 
-def _save_state(scene):
+def _save_state(scene, camera=None):
     r  = scene.render
     ds = scene.display.shading
     vs = scene.view_settings
@@ -102,6 +104,9 @@ def _save_state(scene):
         'shadow_shift':    scene.display.shadow_shift,
         'view_transform':  vs.view_transform,
         'exposure':        vs.exposure,
+        'clip_start':      camera.data.clip_start if camera else None,
+        'clip_end':        camera.data.clip_end   if camera else None,
+        'camera':          camera,
     }
     sh_saved = {}
     for attr in _DISP_SHADING_ATTRS:
@@ -133,6 +138,11 @@ def _restore_state(scene, saved):
     scene.display.shadow_shift    = saved['shadow_shift']
     vs.view_transform             = saved['view_transform']
     vs.exposure                   = saved['exposure']
+    if saved['clip_start'] is not None:
+        s_camera = saved.get('camera')
+        if s_camera:
+            s_camera.data.clip_start = saved['clip_start']
+            s_camera.data.clip_end   = saved['clip_end']
     for attr, val in saved['display_shading'].items():
         if hasattr(ds, attr):
             try:
@@ -180,7 +190,11 @@ def run_render_shadow(context, light, empty, camera, light_dir=None):
     from_sun = -light_dir
     display_light_dir = Vector((from_sun.x, from_sun.z, -from_sun.y))
 
-    saved = _save_state(scene)
+    saved = _save_state(scene, camera)
+
+    if not cam_cl.camera_clipping:
+        camera.data.clip_start = 0.001
+        camera.data.clip_end   = 1e9
 
     render.engine               = 'BLENDER_WORKBENCH'
     render.film_transparent     = True
@@ -523,6 +537,9 @@ def _finalize(s):
         bm.free()
         obj.data.update()
         _dbg(f"dissolve → {len(obj.data.polygons)} polygons")
+
+    if obj:
+        apply_depth_offset(obj, camera, -get_prefs().shadow_offset)
 
     elapsed = time.time() - s['t0']
     _dbg(f"mesh created: {obj.name if obj else 'None'}  ({fmt_time(elapsed)})")

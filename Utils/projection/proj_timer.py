@@ -19,6 +19,7 @@ from .snap_orphans import _snap_orphans_in_bmeshes
 from .deduplicate_merged import _deduplicate_merged_edges
 from .write_merged import _write_merged_object
 from .section_outline import _compute_and_write_section_outline
+from .scene_graph_helpers import apply_depth_offset
 
 _proj_state = {}
 
@@ -123,6 +124,7 @@ def _run_projection(s):
                 created.append(obj)
         for sec_obj in _compute_and_write_section_outline(
                 section_segs, scene, camera.name, parent=empty):
+            apply_depth_offset(sec_obj, camera, get_prefs().section_offset)
             sec_obj.select_set(True)
             created.append(sec_obj)
 
