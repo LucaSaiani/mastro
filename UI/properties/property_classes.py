@@ -615,9 +615,3 @@ class mastro_CL_projector_scene_props(PropertyGroup):
     batch_queue:  bpy.props.CollectionProperty(type=mastro_CL_projector_batch_item)
     batch_cursor: IntProperty(default=0)
 
-    # ── Last-run stats ────────────────────────────────────────────────────────
-    last_op_time:    FloatProperty(default=0.0)
-    last_cell_count: IntProperty(default=0)
-    last_shadow_pts: IntProperty(default=0)
-    last_proj_time:  FloatProperty(default=0.0)
-    last_proj_edges: IntProperty(default=0)
