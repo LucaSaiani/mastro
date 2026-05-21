@@ -13,9 +13,8 @@ A modal operator is used so that bpy.ops.render.render() has a valid window cont
 import os
 import math
 import time
-import pathlib
-import tempfile
 import traceback
+import tempfile
 import numpy as np
 import bpy
 from mathutils import Vector, Matrix
@@ -26,14 +25,6 @@ from .shadow_helpers import (_set_header, _clear_header, fmt_time,
 from .proj_timer import _proj_state, _tick_projection
 from .scene_graph_helpers import apply_depth_offset, convert_objects_to_grease_pencil
 from ..get_preferences import get_prefs
-
-_DBG = pathlib.Path(__file__).parent.parent / "shadow_render_debug.log"
-
-
-def _dbg(*args):
-    msg = " ".join(str(a) for a in args)
-    with _DBG.open("a") as f:
-        f.write(msg + "\n")
 
 
 # ── Global state shared between run_render_shadow and the modal operator ──────
@@ -85,7 +76,6 @@ _DISP_SHADING_ATTRS = ('type', 'light', 'color_type', 'single_color',
 
 
 def _all_view3d_shadings():
-    """Return shading objects for every VIEW_3D area in every screen."""
     shadings = []
     for window in bpy.context.window_manager.windows:
         for area in window.screen.areas:
@@ -134,8 +124,7 @@ def _save_state(scene, camera=None):
     return saved
 
 
-def _apply_workbench_shading(ds, light_dir=None):
-    """Apply flat-lit shadow shading to a View3DShading object."""
+def _apply_workbench_shading(ds):
     ds.type             = 'SOLID'
     ds.light            = 'FLAT'
     ds.color_type       = 'SINGLE'
@@ -189,15 +178,10 @@ def _restore_state(scene, saved):
 # ─────────────────────────────────────────────────────────────────────────────
 
 def run_render_shadow(context, light, empty, camera, light_dir=None):
-    _DBG.write_text("")
-    _dbg("=== run_render_shadow START ===")
-
     scene     = context.scene
     cam_cl    = camera.data.mastro_projector_cl
     if light_dir is None:
         light_dir = sun_direction(light)
-    _dbg(f"camera={camera.name}  light={light.name if light else 'virtual'}")
-    _dbg(f"light_dir={tuple(round(x,4) for x in light_dir)}")
 
     render = scene.render
     aspect = ((render.resolution_x * render.pixel_aspect_x) /
@@ -208,9 +192,6 @@ def run_render_shadow(context, light, empty, camera, light_dir=None):
     tile_px   = 256
     full_w    = n_sub_x * tile_px
     full_h    = max(16, round(full_w / aspect))
-
-    _dbg(f"n_sub={n_sub_x}x{n_sub_y} tile_px={tile_px} "
-         f"full={full_w}x{full_h} aspect={aspect:.3f}")
 
     cam_mat   = camera.matrix_world
     cam_loc   = cam_mat.translation.copy()
@@ -224,10 +205,6 @@ def run_render_shadow(context, light, empty, camera, light_dir=None):
     display_light_dir = Vector((from_sun.x, from_sun.z, -from_sun.y))
 
     saved = _save_state(scene, camera)
-
-    if not cam_cl.camera_clipping:
-        camera.data.clip_start = 0.001
-        camera.data.clip_end   = 1e9
 
     render.engine               = 'BLENDER_WORKBENCH'
     render.film_transparent     = True
@@ -245,9 +222,6 @@ def run_render_shadow(context, light, empty, camera, light_dir=None):
     scene.view_settings.exposure       = 2.0
 
     _apply_workbench_shading(scene.display.shading)
-    for ds in _all_view3d_shadings():
-        _apply_workbench_shading(ds)
-    _dbg(f"viewports with shading applied: {len(_all_view3d_shadings())}")
 
     tiles   = [(i, j) for j in range(n_sub_y) for i in range(n_sub_x)]
     n_tiles = len(tiles)
@@ -329,8 +303,9 @@ class MASTRO_OT_RenderShadowModal(bpy.types.Operator):
             try:
                 _finalize(s)
             except Exception as exc:
-                _dbg(f"FINALIZE ERROR: {exc}")
-                _dbg(traceback.format_exc())
+                import sys
+                print(f"[mastro] shadow finalize error: {exc}", file=sys.stderr)
+                print(traceback.format_exc(), file=sys.stderr)
             self._finish(context, s, cancelled=False)
             return {'FINISHED'}
 
@@ -366,9 +341,6 @@ class MASTRO_OT_RenderShadowModal(bpy.types.Operator):
             unhide_empty_children(empty)
 
         _clear_header()
-        if cancelled:
-            _dbg("run_render_shadow CANCELLED")
-        _dbg("=== run_render_shadow END ===")
         _state.clear()
 
 
@@ -380,7 +352,6 @@ def _render_tile(s, i, j, context=None):
     scene   = s['scene']
     render  = scene.render
     nx, ny  = s['n_sub_x'], s['n_sub_y']
-    tile_px = s['tile_px']
 
     render.border_min_x = i       / nx
     render.border_max_x = (i + 1) / nx
@@ -390,27 +361,7 @@ def _render_tile(s, i, j, context=None):
     path = os.path.join(s['tmp_dir'], f"projector_tile_{i}_{j}.png")
     render.filepath = path
 
-    # Re-apply every tile: Blender may reset shading between timer events.
     _apply_workbench_shading(scene.display.shading)
-    for vds in _all_view3d_shadings():
-        _apply_workbench_shading(vds)
-
-    if i == 0 and j == 0:
-        ds = scene.display.shading
-        _dbg(f"tile(0,0) pre-render: engine={render.engine} "
-             f"film_transparent={render.film_transparent} "
-             f"use_border={render.use_border}")
-        _dbg(f"  scene.display.shading: type={ds.type} light={ds.light} "
-             f"color_type={ds.color_type} show_shadows={ds.show_shadows} "
-             f"shadow_intensity={getattr(ds,'shadow_intensity',None)}")
-        _dbg(f"  light_direction={tuple(round(v,4) for v in scene.display.light_direction)}")
-        _dbg(f"  resolution={render.resolution_x}x{render.resolution_y} "
-             f"border=({render.border_min_x:.3f},{render.border_max_x:.3f},"
-             f"{render.border_min_y:.3f},{render.border_max_y:.3f})")
-        vp_shadings = _all_view3d_shadings()
-        for k, vds in enumerate(vp_shadings):
-            _dbg(f"  viewport[{k}]: type={vds.type} light={vds.light} "
-                 f"show_shadows={vds.show_shadows}")
 
     override = {}
     if context is not None:
@@ -424,8 +375,6 @@ def _render_tile(s, i, j, context=None):
                         override['region'] = region
                         break
                 break
-        if i == 0 and j == 0:
-            _dbg(f"  render override keys: {list(override.keys())}")
 
     if override:
         with bpy.context.temp_override(**override):
@@ -434,21 +383,11 @@ def _render_tile(s, i, j, context=None):
         bpy.ops.render.render(write_still=True)
 
     if not os.path.exists(path):
-        _dbg(f"  tile({i},{j}) WARNING: no file written")
-        _dbg(f"  WARNING: tile render produced no file: {path}")
         return
 
     img = bpy.data.images.load(path, check_existing=False)
     iw, ih = img.size
     arr = np.array(img.pixels[:], dtype=np.float32).reshape(ih, iw, 4)
-    if i == 0 and j == 0:
-        alpha = arr[:, :, 3]
-        brightness = arr[:, :, :3].mean(axis=2)
-        n_shadow = int(((alpha > 0.5) & (brightness < 0.95)).sum())
-        _dbg(f"  tile(0,0) result ({iw}x{ih}): "
-             f"alpha=[{float(alpha.min()):.3f},{float(alpha.max()):.3f}] "
-             f"bright=[{float(brightness.min()):.3f},{float(brightness.max()):.3f}] "
-             f"shadow_px={n_shadow}/{iw*ih}")
     bpy.data.images.remove(img)
 
     x0 = round(render.border_min_x * s['full_w'])
@@ -460,7 +399,6 @@ def _render_tile(s, i, j, context=None):
 # Finalize — build shadow mesh from rendered pixels
 # ─────────────────────────────────────────────────────────────────────────────
 
-
 def _extract_contour_pts(shadow_mask, w, h, s):
     from scipy.ndimage import binary_erosion
 
@@ -469,17 +407,13 @@ def _extract_contour_pts(shadow_mask, w, h, s):
     int_res = cam_cl.render_interior_res
     short   = min(h, w)
 
-    # ── Boundary: midpoint degli edge dove il pixel cambia stato ─────────────
-    # Questi punti sono subpixel-accurate e non hanno scaletta.
     fb       = max(1, short // bnd_res)
     sb       = shadow_mask[::fb, ::fb]
     sbh, sbw = sb.shape
 
-    # Edge orizzontali: tra riga i e i+1
     he_r, he_c = np.where(sb[:-1, :] != sb[1:, :])
     h_pts = np.column_stack([he_r + 0.5, he_c.astype(np.float64)])
 
-    # Edge verticali: tra colonna j e j+1
     ve_r, ve_c = np.where(sb[:, :-1] != sb[:, 1:])
     v_pts = np.column_stack([ve_r.astype(np.float64), ve_c + 0.5])
 
@@ -491,7 +425,6 @@ def _extract_contour_pts(shadow_mask, w, h, s):
         2.0 * (1.0 - bnd_rc[:, 0] / sbh) - 1.0,
     ])
 
-    # ── Interior: coarse downsample ───────────────────────────────────────────
     fi       = max(1, short // int_res)
     si       = shadow_mask[::fi, ::fi]
     sih, siw = si.shape
@@ -505,8 +438,6 @@ def _extract_contour_pts(shadow_mask, w, h, s):
         2.0 * i_cols / siw - 1.0,
         2.0 * (1.0 - i_rows / sih) - 1.0,
     ]) if len(i_rows) else None
-
-    _dbg(f"boundary pts={len(bnd_ndc)} (factor={fb})  interior pts={len(i_rows)} (factor={fi})")
 
     parts = [bnd_ndc] + ([int_ndc] if int_ndc is not None else [])
     all_ndc = np.vstack(parts)
@@ -528,21 +459,15 @@ def _finalize(s):
     full_w    = s['full_w']
     full_h    = s['full_h']
 
-    px_on = s['px_on'][::-1, :, :]   # flip to top-down
+    px_on = s['px_on'][::-1, :, :]
 
     alpha       = px_on[:, :, 3]
     brightness  = px_on[:, :, :3].mean(axis=2)
 
     _THRESHOLD  = 0.95
     shadow_mask = (alpha > 0.5) & (brightness < _THRESHOLD)
-    n_shadow    = int(shadow_mask.sum())
-    w, h        = full_w, full_h
-
-    _dbg(f"brightness min={float(brightness.min()):.3f} max={float(brightness.max()):.3f}")
-    _dbg(f"shadow pixels: {n_shadow}/{w*h} ({100*n_shadow/(w*h):.1f}%)")
 
     if not shadow_mask.any():
-        _dbg("no shadow pixels — no mesh created")
         return
 
     _set_header("Shadow [Render] — Triangulating…")
@@ -553,15 +478,13 @@ def _finalize(s):
     except ImportError as exc:
         raise RuntimeError(f"scipy required: {exc}")
 
-    # Smooth mask slightly to reduce pixel-staircase before contouring
     smooth      = gaussian_filter(shadow_mask.astype(np.float32), sigma=1.0)
     shadow_mask = smooth > 0.5
 
-    pts_ndc     = _extract_contour_pts(shadow_mask, w, h, s)
+    w, h    = full_w, full_h
+    pts_ndc = _extract_contour_pts(shadow_mask, w, h, s)
     if pts_ndc is None or len(pts_ndc) < 3:
-        _dbg("too few contour points")
         return
-    _dbg(f"contour points after simplification: {len(pts_ndc)}")
 
     if on_cam:
         near   = camera.data.clip_start * 1.01
@@ -584,22 +507,15 @@ def _finalize(s):
     final_faces = []
     try:
         tri  = Delaunay(pts_ndc)
-        kept = 0
         for simplex in tri.simplices:
             cx = pts_ndc[simplex, 0].mean()
             cy = pts_ndc[simplex, 1].mean()
             px_col = max(0, min(w - 1, int((cx + 1.0) / 2.0 * w)))
             px_row = max(0, min(h - 1, int((1.0 - (cy + 1.0) / 2.0) * h)))
-            if not shadow_mask[px_row, px_col]:
-                continue
-            final_faces.append(list(map(int, simplex)))
-            kept += 1
-        _dbg(f"triangles: {len(tri.simplices)} → {kept} kept")
+            if shadow_mask[px_row, px_col]:
+                final_faces.append(list(map(int, simplex)))
     except Exception as exc:
-        _dbg(f"Delaunay error: {exc}")
-        _dbg(traceback.format_exc())
-
-    _dbg(f"final_verts={len(local_verts)}  final_faces={len(final_faces)}")
+        raise RuntimeError(f"Delaunay error: {exc}")
 
     obj = create_shadow_cam_mesh(
         local_verts, camera, scene, empty,
@@ -616,13 +532,9 @@ def _finalize(s):
         bm.to_mesh(obj.data)
         bm.free()
         obj.data.update()
-        _dbg(f"dissolve → {len(obj.data.polygons)} polygons")
 
     if obj:
         apply_depth_offset(obj, camera, -get_prefs().shadow_offset)
         obj.hide_viewport = False
         if camera.data.mastro_projector_cl.convert_to_grease_pencil:
             convert_objects_to_grease_pencil([obj])
-
-    elapsed = time.time() - s['t0']
-    _dbg(f"mesh created: {obj.name if obj else 'None'}  ({fmt_time(elapsed)})")

@@ -30,10 +30,16 @@ def link_to_projection_collection(obj, scene):
 def _delete_hierarchy(obj):
     for child in list(obj.children):
         _delete_hierarchy(child)
-    if obj.data is not None:
-        bpy.data.meshes.remove(obj.data, do_unlink=True)
-    else:
-        bpy.data.objects.remove(obj, do_unlink=True)
+    data = obj.data
+    bpy.data.objects.remove(obj, do_unlink=True)
+    if data is not None and data.users == 0:
+        if isinstance(data, bpy.types.Mesh):
+            bpy.data.meshes.remove(data)
+        elif hasattr(bpy.data, 'grease_pencils') and isinstance(data, bpy.types.GreasePencil):
+            bpy.data.grease_pencils.remove(data)
+        elif hasattr(bpy.data, 'grease_pencils_v3') and hasattr(bpy.types, 'GreasePencilv3') \
+                and isinstance(data, bpy.types.GreasePencilv3):
+            bpy.data.grease_pencils_v3.remove(data)
 
 
 _PROJECTOR_EMPTY_TAG   = "projector_empty"
