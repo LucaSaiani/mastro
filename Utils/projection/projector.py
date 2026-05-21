@@ -5,6 +5,7 @@ from mathutils import Vector
 from .remove_overlapping_boundary_edges import _remove_overlapping_boundary_edges
 from .tolerance_constants import _TOL_DEGENERATE
 from .projection_result import ObjectProjection
+from .close_boundary_cuts import close_boundary_cuts
 
 # =============================================================================
 #  Camera-clipping helper
@@ -632,6 +633,12 @@ class _Projector:
                             bm.edges.new((v0, v1))
                         except ValueError:
                             pass
+
+            close_boundary_cuts(
+                bm_visible, aspect,
+                vp_matrix=vp_matrix,
+                obj_eval=obj_eval,
+            )
 
             bm_src.free()
             obj_eval.to_mesh_clear()
