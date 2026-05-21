@@ -447,6 +447,16 @@ class mastro_CL_projector_properties(PropertyGroup):
     )
     # ── Shadow / Light ────────────────────────────────────────────────────────
 
+    shadow_method: EnumProperty(
+        name        = "Method",
+        description = "Algorithm used to compute shadows",
+        default     = 'RENDER',
+        items       = [
+            ('RENDER',     "Render",     "Bake shadows by rendering with the Workbench engine"),
+            ('SILHOUETTE', "Silhouette", "Compute shadows geometrically by projecting sun-visible faces"),
+        ],
+    )
+
     cutter_detection: EnumProperty(
         name        = "Cutter Detection",
         description = "Spatial acceleration used to find camera-facing occluders for each shadow polygon",

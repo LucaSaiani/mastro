@@ -15,7 +15,7 @@ from ..Utils.projection.shadow_helpers  import (get_light_source, sun_direction,
                                       collect_projector_empty_children)
 # from ..Utils.projection.ss_shadow_grid       import build_plane_axes, make_base_grid     # Adaptive Grid disabled
 # from ..Utils.projection.ss_shadow_timer      import _state as _shadow_state, _tick_grid  # Adaptive Grid disabled
-# from ..Utils.projection.ss_shadow_silhouette import _sil_state, _tick_sil_shadow         # Silhouette disabled
+from ..Utils.projection.shadow_silhouette import _sil_state, _tick_sil_shadow
 from ..Utils.projection.shadow_render     import run_render_shadow
 from ..Utils.projection.proj_timer        import _proj_state, _tick_projection
 from ..Utils.projection.scene_graph_helpers import (_get_or_create_empty,
@@ -134,7 +134,7 @@ class OBJECT_OT_RunAll(Operator):
         delete_projection_outputs(empty)
         stash_children(empty)
 
-        # ── Shadow bake ───────────────────────────────────────────────────────
+        # ── Shadow ────────────────────────────────────────────────────────────
         if proj_props.run_shadows:
             sun     = get_light_source(context)
             sun_dir = sun_direction_from_props(proj_props, camera=camera)
@@ -159,14 +159,44 @@ class OBJECT_OT_RunAll(Operator):
             extent  = get_scene_extent(world_verts, sun_dir)
             sun_vis = build_sun_visible_faces(eval_objs, sun_dir)
 
-            try:
-                run_render_shadow(context, sun, empty, camera, light_dir=sun_dir)
-            except Exception as exc:
-                self.report({"ERROR"}, f"Render shadow failed: {exc}")
-                return {"CANCELLED"}
-            if not props.proj_is_running:
-                clear_stash(empty)
-                unhide_empty_children(empty)
+            if proj_props.shadow_method == 'SILHOUETTE':
+                _sil_state.clear()
+                _sil_state.update({
+                    "running":        True,
+                    "phase":          "setup",
+                    "scene":          scene,
+                    "camera":         camera,
+                    "empty_name":     empty.name,
+                    "sun_dir":        sun_dir,
+                    "sun_vis":        sun_vis,
+                    "extent":         extent,
+                    "base_obj_names": [o.name for o in mesh_objs],
+                })
+                props.is_running = True
+                if proj_props.run_projection:
+                    excluded = _collect_excluded_names(scene, camera, proj_props)
+                    _proj_state.clear()
+                    _proj_state.update({
+                        "running":        True,
+                        "phase":          "setup",
+                        "scene":          scene,
+                        "camera":         camera,
+                        "empty":          empty,
+                        "excluded_names": excluded,
+                    })
+                    props.proj_is_running = True
+                bpy.app.timers.register(_tick_sil_shadow, first_interval=0.0, persistent=False)
+                # projection timer (if enabled) is started by _finalize_sil once done
+                return {"FINISHED"}
+            else:
+                try:
+                    run_render_shadow(context, sun, empty, camera, light_dir=sun_dir)
+                except Exception as exc:
+                    self.report({"ERROR"}, f"Render shadow failed: {exc}")
+                    return {"CANCELLED"}
+                if not props.proj_is_running:
+                    clear_stash(empty)
+                    unhide_empty_children(empty)
 
         # ── 2D Projection ─────────────────────────────────────────────────────
         if proj_props.run_projection:
@@ -200,7 +230,7 @@ class OBJECT_OT_CancelAll(Operator):
 
     def execute(self, context):
         # _shadow_state["running"] = False  # Adaptive Grid disabled
-        # _sil_state["running"]    = False  # Silhouette disabled
+        _sil_state["running"]    = False
         _proj_state["running"]   = False
         props = context.scene.mastro_projector_props
         props.is_running      = False

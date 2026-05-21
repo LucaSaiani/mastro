@@ -39,17 +39,29 @@ class PROPERTIES_PT_Mastro_2D_Projection_Shadow(Panel):
         col = layout.column()
         col.enabled = not any_running
         col.prop(props, "light_source")
-        if not light:
-            sub = col.column()
-            sub.prop(props, "light_space",       text="Space")
-            sub.prop(props, "virtual_azimuth",   text="Azimuth")
-            sub.prop(props, "virtual_elevation",  text="Elevation")
+        sub = col.column()
+        sub.active = not bool(light)   # disabled (greyed) when a real light is assigned
+        sub.prop(props, "light_space",       text="Space")
+        sub.prop(props, "virtual_azimuth",   text="Azimuth")
+        sub.prop(props, "virtual_elevation",  text="Elevation")
 
         layout.separator()
 
-        # ── Quality ───────────────────────────────────────────────────────────
-        col = layout.column(heading="Quality")
+        # ── Method ────────────────────────────────────────────────────────────
+        col = layout.column()
         col.enabled = not any_running
-        col.prop(props, "grid_subdivisions")
-        col.prop(props, "render_boundary_res")
-        col.prop(props, "render_interior_res")
+        col.prop(props, "shadow_method")
+
+        layout.separator()
+
+        # ── Quality (render-specific) ─────────────────────────────────────────
+        if props.shadow_method == 'RENDER':
+            col = layout.column(heading="Quality")
+            col.enabled = not any_running
+            col.prop(props, "grid_subdivisions")
+            col.prop(props, "render_boundary_res")
+            col.prop(props, "render_interior_res")
+        else:
+            col = layout.column(heading="Quality")
+            col.enabled = not any_running
+            col.prop(props, "cutter_detection")
