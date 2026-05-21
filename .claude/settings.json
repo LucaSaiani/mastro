@@ -83,7 +83,10 @@
       "Bash(python3 -c \"import ast; ast.parse\\(open\\('Utils/projection/shadow_helpers.py'\\).read\\(\\)\\); print\\('OK'\\)\")",
       "WebFetch(domain:docs.blender.org)",
       "WebFetch(domain:developer.blender.org)",
-      "WebFetch(domain:projects.blender.org)"
+      "WebFetch(domain:projects.blender.org)",
+      "Bash(find /home/luca/Software/ -name \"ss_shadow*\" 2>/dev/null *)",
+      "Read(//home/luca/Software/**)",
+      "Bash(python3 -c ' *)"
     ],
     "additionalDirectories": [
       "/home/luca/Documents/Tesi_eng",
