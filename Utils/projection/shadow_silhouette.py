@@ -127,6 +127,13 @@ def _sil_phase_init(s):
         v_max  = 1.0
     s["frame_uv"] = (-u_max, u_max, -v_max, v_max)
 
+    # Camera clipping params.
+    cam_clipping = cam_cl.camera_clipping
+    clip_start   = camera.data.clip_start if cam_clipping else None
+    clip_end     = camera.data.clip_end   if cam_clipping else None
+    s["clip_start"] = clip_start
+    s["clip_end"]   = clip_end
+
     # Build VP matrix for frustum culling of receiver objects.
     render      = scene.render
     view_matrix = camera.matrix_world.inverted()
@@ -138,7 +145,10 @@ def _sil_phase_init(s):
     vp_matrix = proj_matrix @ view_matrix
     receiver_obj_names = {
         obj.name for obj in eval_objs
-        if _Projector.bbox_in_frustum(obj, vp_matrix, view_matrix)
+        if _Projector.bbox_in_frustum(obj, vp_matrix, view_matrix,
+                                      camera_clipping=cam_clipping,
+                                      clip_start=clip_start or 0.0,
+                                      clip_end=clip_end or 1e9)
     }
     s["receiver_obj_names"] = receiver_obj_names
     s["light_name"]   = cam_cl.light_source.name if cam_cl.light_source else None
@@ -269,6 +279,8 @@ def _sil_phase_section_b(s):
     proj_params  = s["proj_params"]
     camera       = s["camera"]
     shadow_polys = s["shadow_polys"]
+    clip_start   = s["clip_start"]
+    clip_end     = s["clip_end"]
 
     # Ombre proprie: dark faces that face the camera.
     for obj in eval_objs:
@@ -311,7 +323,7 @@ def _sil_phase_section_b(s):
             key = _vkey(v3)
             if key not in vert_cache:
                 uv, _ = _uv_project(v3, on_cam, cam_loc, cam_fwd, cam_right, cam_up,
-                                     proj_params, camera)
+                                     proj_params, camera, clip_start, clip_end)
                 vert_cache[key] = (uv, (v3 - cam_loc).dot(cam_fwd))
             vert_to_polys.setdefault(key, set()).add(p_idx)
     s["vert_cache"]    = vert_cache
@@ -384,6 +396,8 @@ def _sil_phase_section_c(s):
     final_verts      = s["final_verts"]
     final_faces      = s["final_faces"]
     frame_uv         = s["frame_uv"]
+    clip_start       = s["clip_start"]
+    clip_end         = s["clip_end"]
 
     def _uv_to_pt3d(uv):
         if on_cam:
@@ -395,7 +409,7 @@ def _sil_phase_section_c(s):
         s_uv = []; s_dep = []; skip = False
         for v3 in shadow_poly_3d:
             uv, _ = _uv_project(v3, on_cam, cam_loc, cam_fwd, cam_right, cam_up,
-                                 proj_params, camera)
+                                 proj_params, camera, clip_start, clip_end)
             if uv is None:
                 skip = True; break
             s_uv.append(uv)
@@ -474,7 +488,7 @@ def _sil_phase_section_c(s):
             c_uv2 = []; skip_c = False
             for v3 in cam_polys_3d[p_idx]:
                 uv, _ = _uv_project(v3, on_cam, cam_loc, cam_fwd, cam_right, cam_up,
-                                     proj_params, camera)
+                                     proj_params, camera, clip_start, clip_end)
                 if uv is None:
                     skip_c = True; break
                 c_uv2.append(uv)
@@ -613,9 +627,13 @@ def _finalize_sil(s, pts_3d, faces, t0):
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _uv_project(hit_pos, on_cam, cam_loc, cam_fwd, cam_right, cam_up,
-                proj_params, camera):
+                proj_params, camera, clip_start=None, clip_end=None):
     depth = (hit_pos - cam_loc).dot(cam_fwd)
     if depth <= 0:
+        return None, None
+    if clip_start is not None and depth < clip_start:
+        return None, None
+    if clip_end is not None and depth > clip_end:
         return None, None
 
     if on_cam:
@@ -626,7 +644,6 @@ def _uv_project(hit_pos, on_cam, cam_loc, cam_fwd, cam_right, cam_up,
         pt3d = cam_loc + cam_fwd * pd + cam_right * (u * pd) + cam_up * (v * pd)
         return (u, v), pt3d
     else:
-        from .projector import _Projector
         view_m, proj_m, aspect = proj_params
         ndc = _Projector.world_to_ndc(hit_pos, view_m, proj_m)
         if ndc is None:
