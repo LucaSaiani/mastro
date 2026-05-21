@@ -47,9 +47,9 @@ def remove_menus():
     menus = (bpy.types.NODE_MT_add, bpy.types.NODE_MT_node,)
     for menu in menus:
         for f in menu._dyn_ui_initialize().copy():
-            if (f.__name__=='mastro_addGNmenu_append'):
+            if f.__name__ == 'mastro_addGNmenu_append':
                 menu.remove(f)
-            if (f.__name__=='mastro_addGNmenu_append'):
+            elif f.__name__ == 'mastro_nodemenu_append':
                 menu.remove(f)
 
     return None

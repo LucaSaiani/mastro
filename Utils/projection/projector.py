@@ -40,7 +40,6 @@ def _clip_segment_to_planes(p0, p1, d0, d1, clip_start, clip_end):
 # =============================================================================
 
 class _Projector:
-    """Container for calculation functions, parameterized by properties."""
 
     def __init__(self, props, global_bvh=None, poly_to_obj=None):
         self.props       = props
@@ -249,24 +248,41 @@ class _Projector:
     # ── Bounding-box frustum cull ─────────────────────────────────────────────
 
     @staticmethod
-    def bbox_in_frustum(obj, vp_matrix):
+    def bbox_in_frustum(obj, vp_matrix, view_matrix, camera_clipping=False,
+                        clip_start=0.0, clip_end=1e9):
         """Return True if the object's bounding box intersects the view frustum.
 
-        Tests all 6 clip planes in homogeneous clip space.  If all 8 corners
-        are on the outside of any single plane the object is culled.
+        Always tests the 4 lateral clip planes. Near/far depth planes are only
+        tested when camera_clipping is True — otherwise large scenes with
+        clip_end smaller than the scene extent would incorrectly cull objects.
         """
         mat     = obj.matrix_world
-        corners = [vp_matrix @ (mat @ Vector(c)).to_4d() for c in obj.bound_box]
-        for nx, ny, nz, nw in (
-            ( 1,  0,  0, 1),   # left
-            (-1,  0,  0, 1),   # right
-            ( 0,  1,  0, 1),   # bottom
-            ( 0, -1,  0, 1),   # top
-            ( 0,  0,  1, 1),   # near
-            ( 0,  0, -1, 1),   # far
+        corners = [mat @ Vector(c) for c in obj.bound_box]
+
+        # Lateral cull: if all corners are outside any one lateral plane, skip.
+        clip_corners = [vp_matrix @ co.to_4d() for co in corners]
+        for nx, ny, nw in (
+            ( 1,  0, 1),   # left
+            (-1,  0, 1),   # right
+            ( 0,  1, 1),   # bottom
+            ( 0, -1, 1),   # top
         ):
-            if all(nx*c.x + ny*c.y + nz*c.z + nw*c.w < 0 for c in corners):
+            if all(nx*c.x + ny*c.y + nw*c.w < 0 for c in clip_corners):
                 return False
+
+        if camera_clipping:
+            # Depth cull using view-space z depths.
+            depths = [-(view_matrix @ co.to_4d()).z for co in corners]
+            if all(d < clip_start for d in depths):
+                return False
+            if all(d > clip_end for d in depths):
+                return False
+        else:
+            # Without depth clipping, only exclude objects entirely behind camera.
+            depths = [-(view_matrix @ co.to_4d()).z for co in corners]
+            if all(d <= 0 for d in depths):
+                return False
+
         return True
 
     # ── Lateral frustum clip (Liang-Barsky in clip space) ─────────────────────
@@ -369,8 +385,6 @@ class _Projector:
         )
         vp_matrix    = proj_matrix @ view_matrix
         cam_location = camera.matrix_world.translation.copy()
-        adaptive     = False  # (props.sampling_method == 'ADAPTIVE')  — Adaptive disabled
-
         # For orthographic cameras, visibility rays must be parallel to the
         # camera forward axis rather than converging toward cam_location.
         # This avoids direction errors for points far from the image centre.
@@ -380,14 +394,13 @@ class _Projector:
             ortho_direction = (camera.matrix_world.col[2].xyz).normalized()
         else:
             ortho_direction = None
-        min_len      = props.segment_length * 0.5
         results      = {}
 
         camera_clipping = props.camera_clipping
+        clip_start = camera.data.clip_start
+        clip_end   = camera.data.clip_end
         if camera_clipping:
-            cam_fwd    = (-camera.matrix_world.col[2].xyz).normalized()
-            clip_start = camera.data.clip_start
-            clip_end   = camera.data.clip_end
+            cam_fwd = (-camera.matrix_world.col[2].xyz).normalized()
 
         selected_names = (
             {obj.name for obj in scene.objects if obj.select_get()}
@@ -403,7 +416,8 @@ class _Projector:
                 continue
             if selected_names is not None and obj.name not in selected_names:
                 continue
-            if not self.bbox_in_frustum(obj, vp_matrix):
+            if not self.bbox_in_frustum(obj, vp_matrix, view_matrix,
+                                        camera_clipping, clip_start, clip_end):
                 continue
 
             obj_eval  = obj.evaluated_get(depsgraph)
@@ -411,7 +425,6 @@ class _Projector:
             if mesh_data is None:
                 continue
 
-            # Cache frequently accessed properties.
             materials = mesh_data.materials
             scale     = 1.0
 
@@ -471,7 +484,6 @@ class _Projector:
                 silhouette_boundary, internal_boundary, boundary_edge_ids = \
                     _remove_overlapping_boundary_edges(bm_src, props)
 
-            # Shared emit kwargs.
             emit_kwargs = dict(
                 bm_visible           = bm_visible,
                 vc_visible           = vc_visible,
@@ -486,23 +498,6 @@ class _Projector:
             )
 
             def process_segment(p0, p1, ndc0, ndc1, edge_is_sil):
-                """
-                Sample visibility for world-space segment [p0, p1] and emit
-                the resulting runs into the appropriate bmeshes.
-                """
-                # Adaptive sampling disabled — always use uniform.
-                # if adaptive:
-                #     runs = self.sample_visibility_adaptive(
-                #         scene, depsgraph, cam_location,
-                #         p0, p1, obj_eval, ndc0, ndc1, min_len,
-                #         max_depth=props.adaptive_max_depth,
-                #         ortho_direction=ortho_direction,
-                #     )
-                #     for ndc_s, ndc_e, is_vis in runs:
-                #         self._emit_run(
-                #             ndc_s, ndc_e, is_vis, edge_is_sil, **emit_kwargs
-                #         )
-                # else:
                 N   = self.compute_segments(ndc0, ndc1)
                 vis = [
                     self.sample_visible(

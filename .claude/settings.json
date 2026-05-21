@@ -70,7 +70,20 @@
       "Bash(ls /home/luca/Software/projector/ 2>/dev/null || echo \"not found\")",
       "Read(//home/luca/Software/projector/**)",
       "Bash(sed -n '45,55p' /home/luca/Software/mastro/Utils/projection/proj_timer.py)",
-      "Bash(sed -n '140,150p' /home/luca/Software/mastro/Utils/projection/proj_timer.py)"
+      "Bash(sed -n '140,150p' /home/luca/Software/mastro/Utils/projection/proj_timer.py)",
+      "Bash(grep -r \"^[[:space:]]*return None[[:space:]]*$\" --include=\"*.py\")",
+      "Bash(grep -v \"^\\\\s*$\")",
+      "Bash(awk -F: '{print $1}')",
+      "Bash(git checkout *)",
+      "Bash(find /home/luca/.config/blender -name \"shadow_render_debug.log\" 2>/dev/null | head -3)",
+      "Read(//home/luca/.config/blender/**)",
+      "Bash(python3 -c \"import ast; ast.parse\\(open\\('Utils/projection/projector.py'\\).read\\(\\)\\); print\\('OK'\\)\")",
+      "Bash(python3 -c \"import ast; ast.parse\\(open\\('Utils/projection/scene_graph_helpers.py'\\).read\\(\\)\\); print\\('OK'\\)\")",
+      "Bash(python3 -c \"import ast; ast.parse\\(open\\('Utils/projection/shadow_render.py'\\).read\\(\\)\\); print\\('OK'\\)\")",
+      "Bash(python3 -c \"import ast; ast.parse\\(open\\('Utils/projection/shadow_helpers.py'\\).read\\(\\)\\); print\\('OK'\\)\")",
+      "WebFetch(domain:docs.blender.org)",
+      "WebFetch(domain:developer.blender.org)",
+      "WebFetch(domain:projects.blender.org)"
     ],
     "additionalDirectories": [
       "/home/luca/Documents/Tesi_eng",
