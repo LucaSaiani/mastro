@@ -382,10 +382,8 @@ def create_shadow_cam_mesh(positions, camera, scene, empty,
         if old_data and old_data.users == 0:
             if old_type == 'MESH':
                 bpy.data.meshes.remove(old_data)
-            elif old_type == 'GPENCIL' and hasattr(bpy.data, 'grease_pencils'):
+            elif old_type == 'GREASEPENCIL':
                 bpy.data.grease_pencils.remove(old_data)
-            elif old_type == 'GREASEPENCIL' and hasattr(bpy.data, 'grease_pencils_v3'):
-                bpy.data.grease_pencils_v3.remove(old_data)
 
     # ── For on-cam world-space verts: project onto exact near plane ───────────
     # (silhouette / adaptive-grid paths — eliminates floating-point drift)

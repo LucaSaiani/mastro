@@ -176,6 +176,7 @@ class OBJECT_OT_bidimensional_Lines_Projection(Operator):
                 snap_bms,
                 sync_bm_list=sync_bms,
                 max_snap_distance=max_dist,
+                frame_bounds=(-aspect, aspect, -1.0, 1.0),
             )
         wm.progress_update(75)
 

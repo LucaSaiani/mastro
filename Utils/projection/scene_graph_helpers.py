@@ -121,34 +121,95 @@ def _get_or_create_empty_keep(name, scene, parent=None):
     return empty
 
 
-_GP_TYPES = {'GPENCIL', 'GREASEPENCIL'}
-_GP_TARGET = 'GREASEPENCIL' if bpy.app.version >= (4, 3, 0) else 'GPENCIL'
+_GP_TYPES = {'GREASEPENCIL'}
+
+
+
+
+def _mesh_to_grease_pencil_v3(mesh_obj):
+    """Convert a mesh to a Grease Pencil object using the direct API.
+
+    Face meshes (shadow, section fill) get one cyclic filled stroke per polygon.
+    Wire meshes (projection lines) get one stroke per edge.
+    """
+    mesh      = mesh_obj.data
+    orig_name = mesh_obj.name
+    parent    = mesh_obj.parent
+    mpi       = mesh_obj.matrix_parent_inverse.copy()
+    hide_vp   = mesh_obj.hide_viewport
+
+    has_faces = len(mesh.polygons) > 0
+
+    # Free the name so the GP object can claim it without a .001 suffix.
+    mesh_obj.name = orig_name + "__gp_tmp"
+
+    gp_data = bpy.data.grease_pencils.new(orig_name)
+
+    if has_faces:
+        # Shadow / filled mesh: one cyclic stroke per polygon.
+        # In Blender 5.2 fill is per-stroke: stroke.fill_id != 0 enables fill,
+        # stroke.fill_color sets the fill colour.
+        layer   = gp_data.layers.new("Fill")
+        frame   = layer.frames.new(1)
+        drawing = frame.drawing
+
+        polys = mesh.polygons
+        verts = mesh.vertices
+        drawing.add_strokes([len(p.vertices) for p in polys])
+        for i, poly in enumerate(polys):
+            stroke = drawing.strokes[i]
+            stroke.cyclic     = True
+            stroke.fill_id    = 1
+            stroke.fill_color = (0.0, 0.0, 0.0, 1.0)
+            stroke.hide_stroke = True
+            for j, vi in enumerate(poly.vertices):
+                stroke.points[j].position = verts[vi].co.copy()
+    else:
+        # Projection lines: one open stroke per edge.
+        layer   = gp_data.layers.new("Lines")
+        frame   = layer.frames.new(1)
+        drawing = frame.drawing
+        edges = mesh.edges
+        verts = mesh.vertices
+        drawing.add_strokes([2] * len(edges))
+        for i, edge in enumerate(edges):
+            stroke = drawing.strokes[i]
+            stroke.points[0].position = verts[edge.vertices[0]].co.copy()
+            stroke.points[1].position = verts[edge.vertices[1]].co.copy()
+
+    gp_obj                       = bpy.data.objects.new(orig_name, gp_data)
+    gp_obj.hide_viewport         = hide_vp
+    gp_obj.matrix_parent_inverse = mpi
+    gp_obj.parent                = parent
+
+    for col in mesh_obj.users_collection:
+        col.objects.link(gp_obj)
+
+    for key, val in mesh_obj.items():
+        try:
+            gp_obj[key] = val
+        except Exception:
+            pass
+
+    old_mesh = mesh_obj.data
+    bpy.data.objects.remove(mesh_obj, do_unlink=True)
+    if old_mesh.users == 0:
+        bpy.data.meshes.remove(old_mesh)
+
+    return gp_obj
 
 
 def convert_objects_to_grease_pencil(objects):
-    """Convert a list of mesh objects to Grease Pencil in-place.
-
-    The objects must all be in the current view layer. After conversion the
-    original mesh data blocks are removed; the resulting GP objects keep the
-    same names and parent.
-    """
-    if not objects:
-        return
-    bpy.ops.object.select_all(action='DESELECT')
+    """Convert a list of mesh objects to Grease Pencil objects in-place."""
+    result = []
     for obj in objects:
+        if obj is None:
+            continue
         try:
-            obj.select_set(True)
-        except Exception:
-            pass
-    bpy.context.view_layer.objects.active = objects[0]
-    try:
-        bpy.ops.object.convert(target=_GP_TARGET)
-    except Exception:
-        alt = 'GPENCIL' if _GP_TARGET == 'GREASEPENCIL' else 'GREASEPENCIL'
-        try:
-            bpy.ops.object.convert(target=alt)
-        except Exception:
-            pass
+            result.append(_mesh_to_grease_pencil_v3(obj))
+        except Exception as exc:
+            print(f"[Projector] GP conversion failed for '{obj.name}': {exc}")
+    return result
 
 
 def apply_depth_offset(obj, camera, delta):

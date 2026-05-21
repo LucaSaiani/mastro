@@ -21,10 +21,7 @@ class PROPERTIES_PT_Mastro_Building(Panel):
         #row.label(text="Building")
         # row.prop(context.window_manager, 'mastro_toggle_building_name', toggle=True, icon="HIDE_OFF", icon_only=True)
         
-        # is_sortable = len(scene.mastro_building_name_list) > 1
         rows = 3
-        # if is_sortable:
-        #     rows = 5
             
         row = layout.row()
         row.template_list("PROPERTIES_UL_Building", "building_list", scene,

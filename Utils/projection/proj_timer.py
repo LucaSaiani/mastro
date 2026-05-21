@@ -71,7 +71,7 @@ def _run_projection(s):
         global_bvh, poly_to_obj = _build_global_bvh(scene, depsgraph, excluded, **clip_kw)
         projector = _Projector(props, global_bvh=global_bvh, poly_to_obj=poly_to_obj)
 
-        results, _aspect = projector.build_projection_per_object(
+        results, aspect = projector.build_projection_per_object(
             scene, depsgraph, camera, excluded
         )
         if not results:
@@ -95,7 +95,8 @@ def _run_projection(s):
                        [(d.bm_section,            {}) for d in results.values()]
             max_d = None  # props.snap_max_distance if props.sampling_method == "ADAPTIVE" else None  — Adaptive disabled
             snapped = _snap_orphans_in_bmeshes(snap_bms, sync_bm_list=sync_bms,
-                                               max_snap_distance=max_d)
+                                               max_snap_distance=max_d,
+                                               frame_bounds=(-aspect, aspect, -1.0, 1.0))
 
         section_segs = []
         for data in results.values():
@@ -139,7 +140,13 @@ def _run_projection(s):
     except Exception as exc:
         print(f"[Projector] Error during projection: {exc}")
         import traceback; traceback.print_exc()
-        bpy.context.scene.mastro_projector_props.proj_is_running = False
+        props = bpy.context.scene.mastro_projector_props
+        props.proj_is_running = False
+        empty = bpy.data.objects.get(s.get("camera").name + get_prefs().projection_suffix) \
+                if s.get("camera") else None
+        if not props.is_running and empty:
+            clear_stash(empty)
+            unhide_empty_children(empty)
         _clear_header()
         _proj_state.clear()
 

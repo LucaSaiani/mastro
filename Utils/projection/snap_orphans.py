@@ -105,7 +105,7 @@ def _query_grid(grid, origin, direction, cell_size, search_radius):
 
 
 def _snap_orphans_in_bmeshes(snap_bm_list, sync_bm_list=None,
-                              max_snap_distance=None):
+                              max_snap_distance=None, frame_bounds=None):
     """
     Snap orphan (degree-1) vertices across a list of (bmesh, _) pairs,
     operating in 2D (XY only, Z=0).
@@ -177,8 +177,21 @@ def _snap_orphans_in_bmeshes(snap_bm_list, sync_bm_list=None,
 
     moves_per_bm  = {id(bm): [] for bm, _ in active}
     splits_per_bm = {id(bm): [] for bm, _ in active}
-    #T_SELF_SKIP   = _TOL_SNAP_SELF
     snapped       = 0
+
+    # Pre-compute boundary check if frame limits are provided.
+    # Clipped vertices land exactly on a frustum boundary plane; snapping them
+    # would move them off the boundary, producing incorrect geometry.
+    _fb_tol = 1e-4
+    if frame_bounds is not None:
+        fb_xmin, fb_xmax, fb_ymin, fb_ymax = frame_bounds
+        def _on_boundary(v):
+            x, y = v.co.x, v.co.y
+            return (abs(x - fb_xmin) < _fb_tol or abs(x - fb_xmax) < _fb_tol or
+                    abs(y - fb_ymin) < _fb_tol or abs(y - fb_ymax) < _fb_tol)
+    else:
+        def _on_boundary(v):
+            return False
 
     for bm, _vc in active:
         adjacency = adjacencies[id(bm)]
@@ -191,6 +204,10 @@ def _snap_orphans_in_bmeshes(snap_bm_list, sync_bm_list=None,
             # Global degree must also be 1 — not connected in other bmeshes.
             key = (int(vert.co.x * _COORD_QUANTIZE), int(vert.co.y * _COORD_QUANTIZE))
             if pos_degree.get(key, 0) != 1:
+                continue
+
+            # Skip vertices produced by lateral frustum clipping.
+            if _on_boundary(vert):
                 continue
 
             v_co             = Vector((vert.co.x, vert.co.y, 0.0))

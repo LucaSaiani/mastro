@@ -84,9 +84,20 @@ _DISP_SHADING_ATTRS = ('type', 'light', 'color_type', 'single_color',
                        'background_color')
 
 
+def _all_view3d_shadings():
+    """Return shading objects for every VIEW_3D area in every screen."""
+    shadings = []
+    for window in bpy.context.window_manager.windows:
+        for area in window.screen.areas:
+            if area.type == 'VIEW_3D':
+                for space in area.spaces:
+                    if space.type == 'VIEW_3D':
+                        shadings.append(space.shading)
+    return shadings
+
+
 def _save_state(scene, camera=None):
     r  = scene.render
-    ds = scene.display.shading
     vs = scene.view_settings
     saved = {
         'engine':          r.engine,
@@ -108,19 +119,35 @@ def _save_state(scene, camera=None):
         'clip_end':        camera.data.clip_end   if camera else None,
         'camera':          camera,
     }
-    sh_saved = {}
-    for attr in _DISP_SHADING_ATTRS:
-        if hasattr(ds, attr):
-            val = getattr(ds, attr)
-            sh_saved[attr] = tuple(val) if hasattr(val, '__iter__') and \
-                             not isinstance(val, str) else val
-    saved['display_shading'] = sh_saved
+
+    def _save_shading(ds):
+        sh = {}
+        for attr in _DISP_SHADING_ATTRS:
+            if hasattr(ds, attr):
+                val = getattr(ds, attr)
+                sh[attr] = tuple(val) if hasattr(val, '__iter__') and \
+                            not isinstance(val, str) else val
+        return sh
+
+    saved['display_shading'] = _save_shading(scene.display.shading)
+    saved['viewport_shadings'] = [_save_shading(ds) for ds in _all_view3d_shadings()]
     return saved
+
+
+def _apply_workbench_shading(ds, light_dir=None):
+    """Apply flat-lit shadow shading to a View3DShading object."""
+    ds.type             = 'SOLID'
+    ds.light            = 'FLAT'
+    ds.color_type       = 'SINGLE'
+    if hasattr(ds, 'single_color'):
+        ds.single_color = (1.0, 1.0, 1.0)
+    ds.show_shadows     = True
+    if hasattr(ds, 'shadow_intensity'):
+        ds.shadow_intensity = 1.0
 
 
 def _restore_state(scene, saved):
     r  = scene.render
-    ds = scene.display.shading
     vs = scene.view_settings
     r.engine               = saved['engine']
     r.film_transparent     = saved['film_transparent']
@@ -143,12 +170,18 @@ def _restore_state(scene, saved):
         if s_camera:
             s_camera.data.clip_start = saved['clip_start']
             s_camera.data.clip_end   = saved['clip_end']
-    for attr, val in saved['display_shading'].items():
-        if hasattr(ds, attr):
-            try:
-                setattr(ds, attr, val)
-            except Exception:
-                pass
+
+    def _restore_shading(ds, sh_saved):
+        for attr, val in sh_saved.items():
+            if hasattr(ds, attr):
+                try:
+                    setattr(ds, attr, val)
+                except Exception:
+                    pass
+
+    _restore_shading(scene.display.shading, saved['display_shading'])
+    for ds, sh_saved in zip(_all_view3d_shadings(), saved['viewport_shadings']):
+        _restore_shading(ds, sh_saved)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -211,13 +244,10 @@ def run_render_shadow(context, light, empty, camera, light_dir=None):
     scene.view_settings.view_transform = 'Standard'
     scene.view_settings.exposure       = 2.0
 
-    ds = scene.display.shading
-    ds.type             = 'SOLID'
-    ds.light            = 'FLAT'
-    ds.color_type       = 'SINGLE'
-    ds.single_color     = (1.0, 1.0, 1.0)
-    ds.show_shadows     = True
-    ds.shadow_intensity = 1.0
+    _apply_workbench_shading(scene.display.shading)
+    for ds in _all_view3d_shadings():
+        _apply_workbench_shading(ds)
+    _dbg(f"viewports with shading applied: {len(_all_view3d_shadings())}")
 
     tiles   = [(i, j) for j in range(n_sub_y) for i in range(n_sub_x)]
     n_tiles = len(tiles)
@@ -288,7 +318,7 @@ class MASTRO_OT_RenderShadowModal(bpy.types.Operator):
                 return {'RUNNING_MODAL'}
 
             i, j = tiles[idx]
-            _render_tile(s, i, j)
+            _render_tile(s, i, j, context)
             s['tile_idx'] = idx + 1
 
             pct = int(100 * (idx + 1) / n_tiles)
@@ -346,7 +376,7 @@ class MASTRO_OT_RenderShadowModal(bpy.types.Operator):
 # Tile rendering
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _render_tile(s, i, j):
+def _render_tile(s, i, j, context=None):
     scene   = s['scene']
     render  = scene.render
     nx, ny  = s['n_sub_x'], s['n_sub_y']
@@ -360,15 +390,65 @@ def _render_tile(s, i, j):
     path = os.path.join(s['tmp_dir'], f"projector_tile_{i}_{j}.png")
     render.filepath = path
 
-    bpy.ops.render.render(write_still=True)
+    # Re-apply every tile: Blender may reset shading between timer events.
+    _apply_workbench_shading(scene.display.shading)
+    for vds in _all_view3d_shadings():
+        _apply_workbench_shading(vds)
+
+    if i == 0 and j == 0:
+        ds = scene.display.shading
+        _dbg(f"tile(0,0) pre-render: engine={render.engine} "
+             f"film_transparent={render.film_transparent} "
+             f"use_border={render.use_border}")
+        _dbg(f"  scene.display.shading: type={ds.type} light={ds.light} "
+             f"color_type={ds.color_type} show_shadows={ds.show_shadows} "
+             f"shadow_intensity={getattr(ds,'shadow_intensity',None)}")
+        _dbg(f"  light_direction={tuple(round(v,4) for v in scene.display.light_direction)}")
+        _dbg(f"  resolution={render.resolution_x}x{render.resolution_y} "
+             f"border=({render.border_min_x:.3f},{render.border_max_x:.3f},"
+             f"{render.border_min_y:.3f},{render.border_max_y:.3f})")
+        vp_shadings = _all_view3d_shadings()
+        for k, vds in enumerate(vp_shadings):
+            _dbg(f"  viewport[{k}]: type={vds.type} light={vds.light} "
+                 f"show_shadows={vds.show_shadows}")
+
+    override = {}
+    if context is not None:
+        override['window'] = context.window
+        override['screen'] = context.screen
+        for area in context.screen.areas:
+            if area.type == 'VIEW_3D':
+                override['area'] = area
+                for region in area.regions:
+                    if region.type == 'WINDOW':
+                        override['region'] = region
+                        break
+                break
+        if i == 0 and j == 0:
+            _dbg(f"  render override keys: {list(override.keys())}")
+
+    if override:
+        with bpy.context.temp_override(**override):
+            bpy.ops.render.render(write_still=True)
+    else:
+        bpy.ops.render.render(write_still=True)
 
     if not os.path.exists(path):
+        _dbg(f"  tile({i},{j}) WARNING: no file written")
         _dbg(f"  WARNING: tile render produced no file: {path}")
         return
 
     img = bpy.data.images.load(path, check_existing=False)
     iw, ih = img.size
     arr = np.array(img.pixels[:], dtype=np.float32).reshape(ih, iw, 4)
+    if i == 0 and j == 0:
+        alpha = arr[:, :, 3]
+        brightness = arr[:, :, :3].mean(axis=2)
+        n_shadow = int(((alpha > 0.5) & (brightness < 0.95)).sum())
+        _dbg(f"  tile(0,0) result ({iw}x{ih}): "
+             f"alpha=[{float(alpha.min()):.3f},{float(alpha.max()):.3f}] "
+             f"bright=[{float(brightness.min()):.3f},{float(brightness.max()):.3f}] "
+             f"shadow_px={n_shadow}/{iw*ih}")
     bpy.data.images.remove(img)
 
     x0 = round(render.border_min_x * s['full_w'])
@@ -540,6 +620,7 @@ def _finalize(s):
 
     if obj:
         apply_depth_offset(obj, camera, -get_prefs().shadow_offset)
+        obj.hide_viewport = False
         if camera.data.mastro_projector_cl.convert_to_grease_pencil:
             convert_objects_to_grease_pencil([obj])
 

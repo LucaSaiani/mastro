@@ -18,39 +18,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-# if "bpy" in locals():
-#     import importlib
-#     # importlib.reload(preferences),
-#     # importlib.reload(mastro_project_data),
-#     # importlib.reload(mastro_menu),
-#     # importlib.reload(mastro_keymaps),
-#     # importlib.reload(Icons),
-#     # importlib.reload(mastro_xy_constraint_operators),
-#     # importlib.reload(mastro_wall),
-#     # importlib.reload(mastro_street),
-#     # importlib.reload(mastro_massing),
-#     # importlib.reload(mastro_schedule)
-#     # importlib.reload(mastro_modal_operator)
-#     # importlib.reload(mastro_geometryNodes)
-# else:
-    
-    
-    
-    
-    # from .UI.classes import preferences
-    # from . import mastro_project_data
-    # from . import mastro_menu
-    # from . import mastro_keymaps
-    # from . import Icons
-    # from . import mastro_xy_constraint_operators
-    # from . import mastro_wall
-    # from . import mastro_street
-    # from . import mastro_massing
-    # from . import mastro_schedule
-    # from . import mastro_modal_operator
-    # from . import mastro_geometryNodes
-    
-
 import nodeitems_utils
 
 
@@ -87,7 +54,6 @@ from .UI.utils.layer_manager_button import draw_layer_manager_header_button
 # from .Nodes.GNodes.mastro_GN_separate_by_wall_type import mastro_GN_separate_by_wall_type
 # from bpy.types import(Scene)
 from bpy.app.handlers import persistent
-import math
 import time
 
 # store keymaps here to access after registration
