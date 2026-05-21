@@ -28,6 +28,7 @@ from .shadow_helpers import (
 )
 from .scene_graph_helpers import link_to_projection_collection, PROJECTION_COLLECTION
 from .proj_timer import _tick_projection
+from .projector import _Projector
 
 _sil_state = {}
 
@@ -116,25 +117,53 @@ def _sil_phase_init(s):
         )
     s["proj_params"]      = proj_params
     s["cutter_detection"] = cam_cl.cutter_detection
+
+    if on_cam:
+        u_max = math.tan(camera.data.angle_x / 2)
+        v_max = math.tan(camera.data.angle_y / 2)
+    else:
+        aspect = proj_params[2]
+        u_max  = aspect
+        v_max  = 1.0
+    s["frame_uv"] = (-u_max, u_max, -v_max, v_max)
+
+    # Build VP matrix for frustum culling of receiver objects.
+    render      = scene.render
+    view_matrix = camera.matrix_world.inverted()
+    proj_matrix = camera.calc_matrix_camera(
+        depsgraph,
+        x=render.resolution_x, y=render.resolution_y,
+        scale_x=render.pixel_aspect_x, scale_y=render.pixel_aspect_y,
+    )
+    vp_matrix = proj_matrix @ view_matrix
+    receiver_obj_names = {
+        obj.name for obj in eval_objs
+        if _Projector.bbox_in_frustum(obj, vp_matrix, view_matrix)
+    }
+    s["receiver_obj_names"] = receiver_obj_names
     s["light_name"]   = cam_cl.light_source.name if cam_cl.light_source else None
     s["shadow_polys"] = []
 
     cache_name = (_CACHE_PREFIX + s["light_name"]) if s["light_name"] else None
     s["cache_name"] = cache_name
 
-    caster_faces = []
+    caster_faces    = []
+    receiver_mask   = []   # True if this face is from a camera-visible object
     for obj in eval_objs:
-        me  = obj.data
-        mw  = obj.matrix_world
-        mwn = mw.to_3x3().inverted().transposed()
+        me       = obj.data
+        mw       = obj.matrix_world
+        mwn      = mw.to_3x3().inverted().transposed()
+        is_recv  = obj.name in receiver_obj_names
         for poly in me.polygons:
             if (obj.name, poly.index) not in s["sun_vis"]:
                 continue
             verts = [mw @ me.vertices[vi].co for vi in poly.vertices]
             n_ws  = (mwn @ poly.normal).normalized()
             caster_faces.append((verts, n_ws))
+            receiver_mask.append(is_recv)
 
-    s["caster_faces"] = caster_faces
+    s["caster_faces"]  = caster_faces
+    s["receiver_mask"] = receiver_mask
     s["fp_aabbs"], s["fp_grid"], s["fp_cell"] = \
         _build_shadow_footprint_index(caster_faces, sun_dir)
     s["r_cursor"] = 0
@@ -144,17 +173,20 @@ def _sil_phase_init(s):
 
 
 def _sil_phase_section_a(s):
-    caster_faces = s["caster_faces"]
-    total        = len(caster_faces)
-    cursor       = s["r_cursor"]
-    end          = min(cursor + _CHUNK_A, total)
-    sun_dir      = s["sun_dir"]
-    fp_aabbs     = s["fp_aabbs"]
-    fp_grid      = s["fp_grid"]
-    fp_cell      = s["fp_cell"]
-    shadow_polys = s["shadow_polys"]
+    caster_faces  = s["caster_faces"]
+    receiver_mask = s["receiver_mask"]
+    total         = len(caster_faces)
+    cursor        = s["r_cursor"]
+    end           = min(cursor + _CHUNK_A, total)
+    sun_dir       = s["sun_dir"]
+    fp_aabbs      = s["fp_aabbs"]
+    fp_grid       = s["fp_grid"]
+    fp_cell       = s["fp_cell"]
+    shadow_polys  = s["shadow_polys"]
 
     for r_idx in range(cursor, end):
+        if not receiver_mask[r_idx]:
+            continue
         recv_verts, recv_n = caster_faces[r_idx]
         denom = sun_dir.dot(recv_n)
         if abs(denom) < 1e-9:
@@ -351,6 +383,7 @@ def _sil_phase_section_c(s):
     cutter_detection = s["cutter_detection"]
     final_verts      = s["final_verts"]
     final_faces      = s["final_faces"]
+    frame_uv         = s["frame_uv"]
 
     def _uv_to_pt3d(uv):
         if on_cam:
@@ -498,7 +531,15 @@ def _sil_phase_section_c(s):
                     new_result.extend(gh_out)
                 result_polys = new_result
 
+        fu_min, fu_max, fv_min, fv_max = frame_uv
+        frame_clip = [(fu_min, fv_min), (fu_max, fv_min),
+                      (fu_max, fv_max), (fu_min, fv_max)]
+
         for poly_uv in result_polys:
+            if len(poly_uv) < 3:
+                continue
+            # Clip to camera frame before dedup/area check
+            poly_uv = _sutherland_hodgman(poly_uv, frame_clip)
             if len(poly_uv) < 3:
                 continue
             _DUP  = 1e-3
