@@ -132,6 +132,24 @@ _GP_TYPES = {'GREASEPENCIL'}
 
 
 
+def _get_or_create_gp_material(name, src_material_name):
+    """Return a GP material named `name`, creating it from the diffuse_color of
+    `src_material_name` if it doesn't exist yet."""
+    gp_mat = bpy.data.materials.get(name)
+    if gp_mat and gp_mat.is_grease_pencil:
+        return gp_mat
+    gp_mat = bpy.data.materials.new(name)
+    bpy.data.materials.create_gpencil_data(gp_mat)
+    src = bpy.data.materials.get(src_material_name)
+    if src:
+        c = src.diffuse_color
+        gp_mat.grease_pencil.color      = (c[0], c[1], c[2], 1.0)
+        gp_mat.grease_pencil.fill_color = (c[0], c[1], c[2], 1.0)
+    gp_mat.grease_pencil.show_stroke = False
+    gp_mat.grease_pencil.show_fill   = True
+    return gp_mat
+
+
 def _mesh_to_grease_pencil_v3(mesh_obj):
     """Convert a mesh to a Grease Pencil object using the direct API.
 
@@ -143,8 +161,20 @@ def _mesh_to_grease_pencil_v3(mesh_obj):
     parent    = mesh_obj.parent
     mpi       = mesh_obj.matrix_parent_inverse.copy()
     hide_vp   = mesh_obj.hide_viewport
+    loc       = mesh_obj.location.copy()
+    rot       = mesh_obj.rotation_euler.copy()
+    scl       = mesh_obj.scale.copy()
 
     has_faces = len(mesh.polygons) > 0
+
+    # Pick GP material based on object type.
+    if has_faces:
+        is_shadow  = "_shadow" in orig_name.lower() or orig_name.endswith("_shadow")
+        gp_mat_name = "MaStro Shadow Colour GP" if is_shadow else "MaStro Section Colour GP"
+        src_mat     = "MaStro Shadow Colour"     if is_shadow else "MaStro Section Colour"
+        gp_mat      = _get_or_create_gp_material(gp_mat_name, src_mat)
+    else:
+        gp_mat = None
 
     # Free the name so the GP object can claim it without a .001 suffix.
     mesh_obj.name = orig_name + "__gp_tmp"
@@ -185,8 +215,13 @@ def _mesh_to_grease_pencil_v3(mesh_obj):
 
     gp_obj                       = bpy.data.objects.new(orig_name, gp_data)
     gp_obj.hide_viewport         = hide_vp
+    gp_obj.location              = loc
+    gp_obj.rotation_euler        = rot
+    gp_obj.scale                 = scl
     gp_obj.matrix_parent_inverse = mpi
     gp_obj.parent                = parent
+    if gp_mat:
+        gp_data.materials.append(gp_mat)
 
     for col in mesh_obj.users_collection:
         col.objects.link(gp_obj)

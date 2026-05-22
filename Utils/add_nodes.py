@@ -76,8 +76,8 @@ def add_materials():
         return
 
     blend_file     = str(mastro_path / "mastro.blend")
-    mats_to_import = {"MaStro Mass", "MaStro Mass Floor", "MaStro Section Colour"}
-    ngs_to_import  = {"Section RGB"}
+    mats_to_import = {"MaStro Mass", "MaStro Mass Floor", "MaStro Section Colour", "MaStro Shadow Colour"}
+    ngs_to_import  = {"Section RGB", "Shadow RGB"}
 
     try:
         with bpy.data.libraries.load(blend_file) as (data_from, data_to):
@@ -93,6 +93,7 @@ def add_materials():
         # Deduplicate: if a canonical group and a numbered copy both exist,
         # reroute all nodes pointing at the copy to the canonical and remove it.
         _deduplicate_node_group("Section RGB")
+        _deduplicate_node_group("Shadow RGB")
 
         processed = set()
         for ng in data_to.node_groups:
@@ -104,6 +105,7 @@ def add_materials():
                 if mat.node_tree:
                     clean_tree_recursive(mat.node_tree, processed)
         apply_section_color(get_prefs().section_color)
+        apply_shadow_color(get_prefs().shadow_color)
     except Exception as e:
         print(f"MaStro Error (add_materials): {e}")
 
@@ -117,6 +119,19 @@ def apply_section_color(color):
     if node:
         node.outputs[0].default_value = (color[0], color[1], color[2], 1.0)
     mat = bpy.data.materials.get("MaStro Section Colour")
+    if mat:
+        mat.diffuse_color = (color[0], color[1], color[2], 1.0)
+
+
+def apply_shadow_color(color):
+    """Push an RGB value into the 'Shadow RGB' node group."""
+    ng = bpy.data.node_groups.get("Shadow RGB")
+    if ng is None:
+        return
+    node = ng.nodes.get("RGB")
+    if node:
+        node.outputs[0].default_value = (color[0], color[1], color[2], 1.0)
+    mat = bpy.data.materials.get("MaStro Shadow Colour")
     if mat:
         mat.diffuse_color = (color[0], color[1], color[2], 1.0)
 

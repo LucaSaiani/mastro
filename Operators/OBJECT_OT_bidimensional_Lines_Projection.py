@@ -217,7 +217,8 @@ class OBJECT_OT_bidimensional_Lines_Projection(Operator):
         # ── STEP 6: write merged bmeshes to the scene ─────────────────────────
         bpy.ops.object.select_all(action='DESELECT')
 
-        if props.only_selected_objects and empty_name in bpy.data.objects:
+        if props.only_selected_objects and empty_name in bpy.data.objects \
+                and not props.place_on_camera_plane:
             # Incremental mode: always preserve the existing empty.
             empty = _get_or_create_empty_keep(empty_name, scene)
 

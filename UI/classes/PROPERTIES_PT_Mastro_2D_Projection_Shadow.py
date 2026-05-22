@@ -1,5 +1,9 @@
+import math
+
 import bpy
 from bpy.types import Panel
+
+from ...Utils.projection.shadow_silhouette import _CACHE_PREFIX
 
 
 class PROPERTIES_PT_Mastro_2D_Projection_Shadow(Panel):
@@ -65,4 +69,21 @@ class PROPERTIES_PT_Mastro_2D_Projection_Shadow(Panel):
             col = layout.column(heading="Quality")
             col.enabled = not any_running
             col.prop(props, "cutter_detection")
-            col.prop(props, "use_cast_shadow_cache")
+            if props.light_source:
+                light_key = props.light_source.name
+            elif not props.light_camera_lock:
+                az_deg = round(math.degrees(props.virtual_azimuth))
+                el_deg = round(math.degrees(props.virtual_elevation))
+                light_key = f"virtual_world_{az_deg}_{el_deg}"
+            else:
+                light_key = None
+            cache_name = (_CACHE_PREFIX + light_key) if light_key else None
+            cache_exists = cache_name and bpy.data.objects.get(cache_name) is not None
+            row = col.row(align=True)
+            row.prop(props, "use_cast_shadow_cache")
+            if cache_exists:
+                op = row.operator(
+                    "object.mastro_clear_shadow_cache",
+                    text="", icon="TRASH"
+                )
+                op.cache_name = cache_name

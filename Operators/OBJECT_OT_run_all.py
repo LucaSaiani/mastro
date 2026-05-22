@@ -28,7 +28,8 @@ def _setup_shared_empty(camera, scene, proj_props):
     """Create/position the shared empty for this camera, return it."""
     empty_name = camera.name + get_prefs().projection_suffix
 
-    if proj_props.only_selected_objects and empty_name in bpy.data.objects:
+    if proj_props.only_selected_objects and empty_name in bpy.data.objects \
+            and not proj_props.place_on_camera_plane:
         return _get_or_create_empty_keep(empty_name, scene)
 
     if proj_props.place_on_camera_plane:

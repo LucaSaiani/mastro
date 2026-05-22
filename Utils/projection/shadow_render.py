@@ -534,10 +534,21 @@ def _finalize(s):
         obj.data.update()
 
     if obj:
-        prefs  = get_prefs()
-        on_cam = camera.data.mastro_projector_cl.place_on_camera_plane
-        shadow_delta = -(prefs.section_offset + prefs.shadow_offset) if on_cam else -prefs.shadow_offset
-        apply_depth_offset(obj, camera, shadow_delta)
+        mat = bpy.data.materials.get("MaStro Shadow Colour")
+        if mat:
+            obj.data.materials.append(mat)
+        prefs = get_prefs()
+        if on_cam:
+            # The shadow object is created with plane_matrix as matrix_parent_inverse,
+            # so its local +Z = cam_fwd (away from camera).  Moving away = positive delta.
+            world_offset = prefs.section_offset + prefs.shadow_offset
+            obj.location.z += world_offset
+            if camera.data.type == 'PERSP':
+                d_new = near + world_offset
+                if near > 1e-6 and d_new > 1e-6:
+                    obj.scale = (d_new / near,) * 3
+        else:
+            apply_depth_offset(obj, camera, -prefs.shadow_offset)
         obj.hide_viewport = False
         if camera.data.mastro_projector_cl.convert_to_grease_pencil:
             convert_objects_to_grease_pencil([obj])

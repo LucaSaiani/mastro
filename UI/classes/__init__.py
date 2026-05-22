@@ -41,6 +41,7 @@ from .PROPERTIES_PT_Mastro_2D_Projection import PROPERTIES_PT_Mastro_2D_Projecti
 from .PROPERTIES_PT_Mastro_2D_Projection_Proj import PROPERTIES_PT_Mastro_2D_Projection_Proj
 from .PROPERTIES_PT_Mastro_2D_Projection_Shadow import PROPERTIES_PT_Mastro_2D_Projection_Shadow
 from .PROPERTIES_PT_Projector_Cameras import PROPERTIES_PT_Projector_Cameras
+from .PROPERTIES_UL_Camera_Sets import PROPERTIES_UL_Camera_Sets
 
 
 classes = (
@@ -88,6 +89,7 @@ classes = (
     PROPERTIES_PT_Mastro_2D_Projection_Proj,
     PROPERTIES_PT_Mastro_2D_Projection_Shadow,
     PROPERTIES_PT_Projector_Cameras,
+    PROPERTIES_UL_Camera_Sets,
     )
 
 # Each row: (name, color_attr, filter_name, node_type, extra_action)

@@ -2,6 +2,7 @@ import bpy
 from bpy.types import AddonPreferences
 
 from ... import PREFS_KEY
+from ...Utils.add_nodes import apply_shadow_color
 
 """User preference panel"""
 class PREFERENCES_Mastro_Preferences(AddonPreferences):
@@ -134,6 +135,16 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
         max         = 1.0,
         default     = (0.8, 0.1, 0.1),
         description = "Initial color set on the MaStro Section Colour node group when materials are first appended",
+    )
+
+    shadow_color: bpy.props.FloatVectorProperty(
+        name        = "Shadow Color",
+        subtype     = "COLOR",
+        size        = 3,
+        min         = 0.0,
+        max         = 1.0,
+        default     = (0.1, 0.1, 0.1),
+        description = "Initial color set on the MaStro Shadow Colour node group when materials are first appended",
     )
 
     shadow_offset: bpy.props.FloatProperty(
@@ -287,6 +298,9 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
             row = col.row()
             row.label(text="Section Color:")
             row.prop(self, "section_color", text="")
+            row = col.row()
+            row.label(text="Shadow Color:")
+            row.prop(self, "shadow_color", text="")
 
 
 
