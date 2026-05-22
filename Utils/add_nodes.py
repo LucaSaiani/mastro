@@ -51,7 +51,7 @@ def add_materials():
         return
 
     blend_file     = str(mastro_path / "mastro.blend")
-    mats_to_import = {"MaStro Mass", "MaStro Mass Floor"}
+    mats_to_import = {"MaStro Mass", "MaStro Mass Floor", "MaStro Section Colour"}
 
     try:
         with bpy.data.libraries.load(blend_file) as (data_from, data_to):
@@ -70,13 +70,16 @@ def add_materials():
 
 
 def apply_section_color(color):
-    """Push an RGB value into the 'MaStro Section Colour' node group."""
-    ng = bpy.data.node_groups.get("MaStro Section Colour")
+    """Push an RGB value into the 'Section RGB' node group."""
+    ng = bpy.data.node_groups.get("Section RGB")
     if ng is None:
         return
     node = ng.nodes.get("RGB")
     if node:
         node.outputs[0].default_value = (color[0], color[1], color[2], 1.0)
+    mat = bpy.data.materials.get("MaStro Section Colour")
+    if mat:
+        mat.diffuse_color = (color[0], color[1], color[2], 1.0)
 
 
 def add_nodes():
@@ -93,7 +96,7 @@ def add_nodes():
         return
 
     blend_file = str(mastro_path / "mastro.blend")
-    nodes_to_import = {"MaStro Mass", "MaStro Block", "MaStro Street", "MaStro Dimension"}
+    nodes_to_import = {"MaStro Mass", "MaStro Block", "MaStro Street", "MaStro Dimension", "Section RGB"}
 
     try:
         # Append node groups

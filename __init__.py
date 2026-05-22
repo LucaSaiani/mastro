@@ -45,6 +45,7 @@ from .Handlers.utils.check_new_scenes import known_scenes as knownScenes
 from .Keymaps.keymap import register as register_keymaps, unregister as unregister_keymaps
 from .Nodes.ui import register as register_gn_ui, unregister as unregister_gn_ui
 from .Utils.sync_layer_slots import sync_layer_slots
+from .Utils.add_nodes import add_nodes, add_materials
 from .UI.utils.layer_manager_button import draw_layer_manager_header_button
   
 ########################################
@@ -97,6 +98,8 @@ def _lm_on_load_post(filepath):
     def _deferred():
         for scene in bpy.data.scenes:
             sync_layer_slots(scene)
+        add_nodes()
+        add_materials()
         return None  # one-shot timer
     bpy.app.timers.register(_deferred, first_interval=0.0)
 

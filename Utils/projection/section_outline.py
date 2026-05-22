@@ -252,6 +252,9 @@ def _write_obj(bm, obj_name, scene, parent):
     mesh.update()
     obj = bpy.data.objects.new(obj_name, mesh)
     obj.hide_viewport = True
+    mat = bpy.data.materials.get("MaStro Section Colour")
+    if mat:
+        obj.data.materials.append(mat)
     link_to_projection_collection(obj, scene)
     if parent is not None:
         obj.parent = parent
