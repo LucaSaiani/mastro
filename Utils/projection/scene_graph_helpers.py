@@ -219,31 +219,33 @@ def convert_objects_to_grease_pencil(objects):
 
 
 def apply_depth_offset(obj, camera, delta):
-    """Translate obj by delta along the camera forward axis and apply perspective scale correction.
+    """Translate obj by delta (world units) along its local Z axis and apply
+    perspective scale correction so the projected size is preserved.
 
     delta > 0 moves toward the camera, delta < 0 moves away.
-    When the camera is perspective and place_on_camera_plane is active, the object
-    is also scaled uniformly so its apparent size in the render remains unchanged.
+    Scale correction is only applied for perspective cameras with place_on_camera_plane.
     """
     from mathutils import Vector
-    cam_mat = camera.matrix_world
-    cam_fwd = -Vector(cam_mat.col[2][:3]).normalized()
 
-    # Translate in world space along cam_fwd.
-    obj.matrix_parent_inverse = (
-        Matrix.Translation(cam_fwd * delta) @ obj.matrix_parent_inverse
-    )
+    cam_data     = camera.data
+    on_cam_plane = (cam_data.type == 'PERSP' and
+                    cam_data.mastro_projector_cl.place_on_camera_plane)
 
-    # Perspective scale correction: only needed for perspective camera on cam plane.
-    cam_data = camera.data
-    if cam_data.type == 'PERSP' and cam_data.mastro_projector_cl.place_on_camera_plane:
-        # Distance from camera to the object's world origin after translation.
-        obj_world_loc = obj.matrix_world.translation
-        cam_loc       = cam_mat.translation
-        d = (obj_world_loc - cam_loc).dot(cam_fwd)
-        if d > 1e-6:
-            # Original distance before the offset.
-            d_orig = d - delta
-            if abs(d_orig) > 1e-6:
-                scale_factor = d / d_orig
-                obj.scale = (scale_factor,) * 3
+    if on_cam_plane and obj.parent:
+        # Convert world-space delta to local space (parent may have a non-unit scale).
+        z_scale = obj.parent.matrix_world.col[2].xyz.length
+        obj.location.z += delta / z_scale if z_scale > 1e-6 else delta
+    else:
+        obj.location.z += delta
+
+    if on_cam_plane:
+        cam_mat = camera.matrix_world
+        cam_fwd = -Vector(cam_mat.col[2][:3]).normalized()
+        cam_loc = cam_mat.translation
+        # Use parent (empty) world position as the reference — matrix_world of the
+        # child is not yet updated at this point in the evaluation.
+        ref_loc = obj.parent.matrix_world.translation if obj.parent else cam_loc
+        d_orig  = (ref_loc - cam_loc).dot(cam_fwd)
+        d_new   = d_orig - delta   # delta<0 → d_new > d_orig (moved away)
+        if d_orig > 1e-6 and d_new > 1e-6:
+            obj.scale = (d_new / d_orig,) * 3

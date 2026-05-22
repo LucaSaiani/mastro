@@ -304,9 +304,11 @@ class OBJECT_OT_bidimensional_Lines_Projection(Operator):
                 created_objects.append(obj)
 
         # ── STEP 6b: write global section outline + fill ──────────────────────
+        on_cam = camera.data.mastro_projector_cl.place_on_camera_plane
         for section_obj in _compute_and_write_section_outline(
                 section_segs, scene, camera.name, parent=empty):
-            apply_depth_offset(section_obj, camera, get_prefs().section_offset)
+            if not on_cam:
+                apply_depth_offset(section_obj, camera, get_prefs().section_offset)
             section_obj.select_set(True)
             created_objects.append(section_obj)
 
