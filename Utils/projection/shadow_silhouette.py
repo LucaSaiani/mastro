@@ -151,10 +151,19 @@ def _sil_phase_init(s):
                                       clip_end=clip_end or 1e9)
     }
     s["receiver_obj_names"] = receiver_obj_names
-    s["light_name"]   = cam_cl.light_source.name if cam_cl.light_source else None
+    if cam_cl.light_source:
+        light_key = cam_cl.light_source.name
+    elif not cam_cl.light_camera_lock:
+        az_deg = round(math.degrees(cam_cl.virtual_azimuth))
+        el_deg = round(math.degrees(cam_cl.virtual_elevation))
+        light_key = f"virtual_world_{az_deg}_{el_deg}"
+    else:
+        light_key = None
+    s["light_name"]   = light_key
     s["shadow_polys"] = []
 
-    cache_name = (_CACHE_PREFIX + s["light_name"]) if s["light_name"] else None
+    use_cache  = cam_cl.use_cast_shadow_cache
+    cache_name = (_CACHE_PREFIX + light_key) if (light_key and use_cache) else None
     s["cache_name"] = cache_name
 
     caster_faces    = []

@@ -45,7 +45,7 @@ def sun_direction_from_props(props, camera=None):
     y_base =  math.cos(az) * math.cos(el)
     z_base = -math.sin(el)
 
-    if props.light_space == 'CAMERA' and camera is not None:
+    if props.light_camera_lock and camera is not None:
         # Same formula in camera local space (up=+Y_cam, right=+X_cam, into-scene=-Z_cam),
         # then rotated to world via the camera's rotation matrix.
         dir_cam = Vector((x_base, y_base, z_base))

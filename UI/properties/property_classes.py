@@ -472,6 +472,12 @@ class mastro_CL_projector_properties(PropertyGroup):
         ],
     )
 
+    use_cast_shadow_cache: BoolProperty(
+        name        = "Cache Shadows",
+        description = "Re-use previously computed cast-shadow polygons when the light and geometry have not changed",
+        default     = True,
+    )
+
     grid_subdivisions: IntProperty(
         name        = "Grid Subdivisions",
         description = (
@@ -519,14 +525,10 @@ class mastro_CL_projector_properties(PropertyGroup):
         subtype     = 'ANGLE',
         description = "Angle of the virtual light source above the horizon",
     )
-    light_space: EnumProperty(
-        name        = "Space",
-        default     = 'WORLD',
-        description = "Reference frame for the virtual light direction",
-        items       = [
-            ('WORLD',  "World",  "Azimuth and elevation are in world space"),
-            ('CAMERA', "Camera", "Azimuth and elevation are relative to the camera view — useful for consistent shadow direction across all elevations"),
-        ],
+    light_camera_lock: BoolProperty(
+        name        = "Camera Lock",
+        description = "Azimuth and elevation are relative to the camera view — useful for consistent shadow direction across all elevations. When off, the direction is in world space",
+        default     = False,
     )
 
     def _light_poll(self, obj):
