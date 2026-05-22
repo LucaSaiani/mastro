@@ -2,7 +2,6 @@ import bpy
 from bpy.types import AddonPreferences
 
 from ... import PREFS_KEY
-from ...Utils.add_nodes import apply_section_color
 
 """User preference panel"""
 class PREFERENCES_Mastro_Preferences(AddonPreferences):
@@ -127,9 +126,6 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
         description="Section mesh is moved this distance toward the camera, so it masks projection lines behind it"
     )
 
-    def _update_section_color(self, context):
-        apply_section_color(self.section_color)
-
     section_color: bpy.props.FloatVectorProperty(
         name        = "Section Color",
         subtype     = "COLOR",
@@ -137,8 +133,7 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
         min         = 0.0,
         max         = 1.0,
         default     = (0.8, 0.1, 0.1),
-        update      = _update_section_color,
-        description = "Color applied to the MaStro Section Color node group (affects all section materials)",
+        description = "Initial color set on the MaStro Section Colour node group when materials are first appended",
     )
 
     shadow_offset: bpy.props.FloatProperty(
