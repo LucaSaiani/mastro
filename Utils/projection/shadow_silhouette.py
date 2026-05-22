@@ -128,7 +128,7 @@ def _sil_phase_init(s):
         )
     s["proj_params"]           = proj_params
     s["cutter_detection"]      = cam_cl.cutter_detection
-    s["intersecting_objects"]  = cam_cl.intersecting_objects
+    s["intersecting_objects"]  = cam_cl.compute_intersections
 
     if on_cam:
         u_max = math.tan(camera.data.angle_x / 2)
