@@ -509,6 +509,41 @@ class mastro_CL_projector_properties(PropertyGroup):
         max         = 500,
     )
 
+    def _light_poll(self, obj):
+        return obj.type == 'LIGHT' and obj.data.type in ('SUN', 'AREA')
+
+    def _drop_orphan_cache(self, old_key):
+        from ...Utils.projection.shadow_silhouette import _CACHE_PREFIX, _light_key_for
+        cache_name = _CACHE_PREFIX + old_key
+        if bpy.data.objects.get(cache_name) is None:
+            return
+        for cam_obj in bpy.data.objects:
+            if cam_obj.type != 'CAMERA':
+                continue
+            if cam_obj.data is self.id_data:
+                continue
+            if _light_key_for(cam_obj.data.mastro_projector_cl) == old_key:
+                return
+        bpy.data.meshes.remove(bpy.data.objects[cache_name].data, do_unlink=True)
+
+    def _on_light_source_changed(self, context):
+        old_key = self.get("_prev_light_key", "")
+        if old_key:
+            self._drop_orphan_cache(old_key)
+        from ...Utils.projection.shadow_silhouette import _light_key_for
+        new_key = _light_key_for(self) or ""
+        self["_prev_light_key"] = new_key
+
+    def _on_virtual_light_changed(self, context):
+        from ...Utils.projection.shadow_silhouette import _light_key_for
+        new_key = _light_key_for(self) or ""
+        old_key = self.get("_prev_light_key", "")
+        if new_key == old_key:
+            return
+        if old_key:
+            self._drop_orphan_cache(old_key)
+        self["_prev_light_key"] = new_key
+
     virtual_azimuth: FloatProperty(
         name        = "Azimuth",
         default     = math.radians(315.0),
@@ -516,6 +551,7 @@ class mastro_CL_projector_properties(PropertyGroup):
         max         = math.radians(360.0),
         subtype     = 'ANGLE',
         description = "Shadow direction, counterclockwise",
+        update      = _on_virtual_light_changed,
     )
     virtual_elevation: FloatProperty(
         name        = "Elevation",
@@ -524,20 +560,20 @@ class mastro_CL_projector_properties(PropertyGroup):
         max         = math.radians(90.0),
         subtype     = 'ANGLE',
         description = "Angle of the virtual light source above the horizon",
+        update      = _on_virtual_light_changed,
     )
     light_camera_lock: BoolProperty(
         name        = "Camera Lock",
         description = "Azimuth and elevation are relative to the camera view — useful for consistent shadow direction across all elevations. When off, the direction is in world space",
         default     = False,
+        update      = _on_virtual_light_changed,
     )
-
-    def _light_poll(self, obj):
-        return obj.type == 'LIGHT' and obj.data.type in ('SUN', 'AREA')
 
     light_source: bpy.props.PointerProperty(
         name        = "Light",
         type        = bpy.types.Object,
         poll        = _light_poll,
+        update      = _on_light_source_changed,
         description = "Sun or Area light. When set, overrides the virtual light source",
     )
     run_projection: BoolProperty(
@@ -565,6 +601,15 @@ class mastro_CL_projector_properties(PropertyGroup):
             "Clip projected geometry using the camera clipping planes. "
             "Edges beyond the far clip plane are truncated at the boundary; "
             "faces that straddle it generate an additional section line"
+        )
+    )
+    intersecting_objects: BoolProperty(
+        name        = "Intersecting Objects",
+        default     = False,
+        description = (
+            "Correctly handle shadows from objects that physically intersect "
+            "other objects. Clips each caster face against the receiver plane "
+            "before projecting, so partial intersections produce correct shadows"
         )
     )
     compute_intersections: BoolProperty(
@@ -618,6 +663,16 @@ class mastro_CL_projector_batch_item(PropertyGroup):
     camera_name: StringProperty()
 
 
+class mastro_CL_camera_set_item(PropertyGroup):
+    camera_name: StringProperty()
+
+
+class mastro_CL_camera_set(PropertyGroup):
+    name:       StringProperty(name="Name", default="Set")
+    is_default: BoolProperty(default=False)
+    cameras:    bpy.props.CollectionProperty(type=mastro_CL_camera_set_item)
+
+
 class mastro_CL_projector_scene_props(PropertyGroup):
     # ── Runtime state ─────────────────────────────────────────────────────────
     is_running:       BoolProperty(default=False)
@@ -626,4 +681,8 @@ class mastro_CL_projector_scene_props(PropertyGroup):
     # ── Batch queue ───────────────────────────────────────────────────────────
     batch_queue:  bpy.props.CollectionProperty(type=mastro_CL_projector_batch_item)
     batch_cursor: IntProperty(default=0)
+
+    # ── Camera sets ───────────────────────────────────────────────────────────
+    camera_sets:       bpy.props.CollectionProperty(type=mastro_CL_camera_set)
+    active_set_index:  IntProperty(default=0, min=0)
 

@@ -20,6 +20,15 @@ from .LAYER_MANAGER_OT_Add_Layer_Popup import LAYER_MANAGER_OT_AddLayer_Popup
 from .OBJECT_OT_run_all import OBJECT_OT_RunAll, OBJECT_OT_CancelAll
 from .OBJECT_OT_run_batch import OBJECT_OT_RunBatch
 from .OBJECT_OT_bidimensional_Lines_Projection import OBJECT_OT_bidimensional_Lines_Projection
+from .OBJECT_OT_clear_shadow_cache import OBJECT_OT_ClearShadowCache
+from .OBJECT_OT_camera_sets import (
+    MASTRO_OT_CameraSetAdd,
+    MASTRO_OT_CameraSetRemove,
+    MASTRO_OT_CameraSetDuplicate,
+    MASTRO_OT_CameraSetMoveUp,
+    MASTRO_OT_CameraSetMoveDown,
+    MASTRO_OT_CameraSetToggleCamera,
+)
 from ..Utils.projection.shadow_render import MASTRO_OT_RenderShadowModal
 
 
@@ -50,5 +59,12 @@ classes = (
     OBJECT_OT_CancelAll,
     OBJECT_OT_RunBatch,
     OBJECT_OT_bidimensional_Lines_Projection,
+    OBJECT_OT_ClearShadowCache,
+    MASTRO_OT_CameraSetAdd,
+    MASTRO_OT_CameraSetRemove,
+    MASTRO_OT_CameraSetDuplicate,
+    MASTRO_OT_CameraSetMoveUp,
+    MASTRO_OT_CameraSetMoveDown,
+    MASTRO_OT_CameraSetToggleCamera,
     MASTRO_OT_RenderShadowModal,
     )

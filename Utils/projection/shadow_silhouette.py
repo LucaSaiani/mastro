@@ -40,6 +40,17 @@ _TICK_BUDGET  = 0.05
 _CACHE_PREFIX = "_cast_shadows_"
 
 
+def _light_key_for(cam_cl):
+    """Return the cache key string for the given camera projector properties, or None."""
+    if cam_cl.light_source:
+        return cam_cl.light_source.name
+    if not cam_cl.light_camera_lock:
+        az_deg = round(math.degrees(cam_cl.virtual_azimuth))
+        el_deg = round(math.degrees(cam_cl.virtual_elevation))
+        return f"virtual_world_{az_deg}_{el_deg}"
+    return None
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Timer entry point
 # ─────────────────────────────────────────────────────────────────────────────
@@ -115,8 +126,9 @@ def _sil_phase_init(s):
             render.resolution_x * render.pixel_aspect_x /
             render.resolution_y / render.pixel_aspect_y,
         )
-    s["proj_params"]      = proj_params
-    s["cutter_detection"] = cam_cl.cutter_detection
+    s["proj_params"]           = proj_params
+    s["cutter_detection"]      = cam_cl.cutter_detection
+    s["intersecting_objects"]  = cam_cl.intersecting_objects
 
     if on_cam:
         u_max = math.tan(camera.data.angle_x / 2)
@@ -151,14 +163,7 @@ def _sil_phase_init(s):
                                       clip_end=clip_end or 1e9)
     }
     s["receiver_obj_names"] = receiver_obj_names
-    if cam_cl.light_source:
-        light_key = cam_cl.light_source.name
-    elif not cam_cl.light_camera_lock:
-        az_deg = round(math.degrees(cam_cl.virtual_azimuth))
-        el_deg = round(math.degrees(cam_cl.virtual_elevation))
-        light_key = f"virtual_world_{az_deg}_{el_deg}"
-    else:
-        light_key = None
+    light_key = _light_key_for(cam_cl)
     s["light_name"]   = light_key
     s["shadow_polys"] = []
 
@@ -192,16 +197,17 @@ def _sil_phase_init(s):
 
 
 def _sil_phase_section_a(s):
-    caster_faces  = s["caster_faces"]
-    receiver_mask = s["receiver_mask"]
-    total         = len(caster_faces)
-    cursor        = s["r_cursor"]
-    end           = min(cursor + _CHUNK_A, total)
-    sun_dir       = s["sun_dir"]
-    fp_aabbs      = s["fp_aabbs"]
-    fp_grid       = s["fp_grid"]
-    fp_cell       = s["fp_cell"]
-    shadow_polys  = s["shadow_polys"]
+    caster_faces         = s["caster_faces"]
+    receiver_mask        = s["receiver_mask"]
+    total                = len(caster_faces)
+    cursor               = s["r_cursor"]
+    end                  = min(cursor + _CHUNK_A, total)
+    sun_dir              = s["sun_dir"]
+    fp_aabbs             = s["fp_aabbs"]
+    fp_grid              = s["fp_grid"]
+    fp_cell              = s["fp_cell"]
+    shadow_polys         = s["shadow_polys"]
+    intersecting_objects = s["intersecting_objects"]
 
     for r_idx in range(cursor, end):
         if not receiver_mask[r_idx]:
@@ -217,10 +223,14 @@ def _sil_phase_section_a(s):
         all_segs = []
         for c_idx in _shadow_footprint_candidates(fp_aabbs, fp_grid, fp_cell, r_idx):
             cast_verts, _ = caster_faces[c_idx]
+            if intersecting_objects:
+                cast_verts = _clip_caster_to_halfspace(cast_verts, origin, recv_n)
+                if len(cast_verts) < 3:
+                    continue
             proj = []; skip = False
             for v in cast_verts:
                 t = (origin - v).dot(recv_n) / denom
-                if t < _EPS:
+                if t < -_EPS:
                     skip = True; break
                 proj.append(((v + sun_dir * t - origin).dot(u_ax),
                               (v + sun_dir * t - origin).dot(v_ax)))
@@ -606,6 +616,9 @@ def _sil_phase_finalize(s):
 # Finalise
 # ─────────────────────────────────────────────────────────────────────────────
 
+
+
+
 def _finalize_sil(s, pts_3d, faces, t0):
     cam_obj = s.get("camera")
     props   = bpy.context.scene.mastro_projector_props
@@ -917,6 +930,34 @@ def _shadow_union_loops(segs_2d):
         if len(bnd) >= 3:
             loops.append([(verts[i].x, verts[i].y) for i in bnd])
     return loops
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Caster half-space clip
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _clip_caster_to_halfspace(cast_verts, origin, recv_n):
+    """Clip cast_verts to the half-space origin·recv_n >= 0 (above receiver plane).
+
+    Returns the clipped polygon as a list of Vector, or [] if nothing remains.
+    Uses Sutherland-Hodgman with a single half-space plane.
+    """
+    def signed_dist(v):
+        return (v - origin).dot(recv_n)
+
+    out = []
+    n = len(cast_verts)
+    for i in range(n):
+        a = cast_verts[i]
+        b = cast_verts[(i + 1) % n]
+        da = signed_dist(a)
+        db = signed_dist(b)
+        if da >= 0:
+            out.append(a)
+        if (da >= 0) != (db >= 0):
+            t = da / (da - db)
+            out.append(a.lerp(b, t))
+    return out
 
 
 # ─────────────────────────────────────────────────────────────────────────────
