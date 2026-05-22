@@ -1,5 +1,6 @@
 import bpy
 from bpy.types import Operator
+from bpy.props import IntProperty
 
 _POLL_INTERVAL = 0.25  # seconds between checks
 
@@ -37,11 +38,24 @@ def _tick_batch_queue():
 class OBJECT_OT_RunBatch(Operator):
     bl_idname      = "object.mastro_projector_run_batch"
     bl_label       = "Calculate"
-    bl_description = "Run projection and/or shadow for all active cameras"
+    bl_description = "Run projection and/or shadow for the cameras in the active set"
+
+    set_index: IntProperty(default=-1)
 
     def execute(self, context):
         scene = context.scene
         ssp   = scene.mastro_projector_props
+
+        # Resolve which camera names belong to the requested set
+        idx = self.set_index if self.set_index >= 0 else ssp.active_set_index
+        if 0 <= idx < len(ssp.camera_sets):
+            active_set = ssp.camera_sets[idx]
+            if active_set.is_default:
+                allowed = None  # all enabled cameras
+            else:
+                allowed = {item.camera_name for item in active_set.cameras}
+        else:
+            allowed = None
 
         cameras = [
             obj for obj in sorted(scene.objects, key=lambda o: o.name)
@@ -49,6 +63,7 @@ class OBJECT_OT_RunBatch(Operator):
             and obj.data is not None
             and obj.data.mastro_projector_cl.enabled
             and obj.data.mastro_projector_cl.active_for_batch
+            and (allowed is None or obj.name in allowed)
         ]
 
         if not cameras:

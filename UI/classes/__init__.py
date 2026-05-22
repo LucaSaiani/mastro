@@ -40,8 +40,9 @@ from .LAYER_MANAGER_OT_Sort_Layers import LAYER_MANAGER_OT_SortLayers
 from .PROPERTIES_PT_Mastro_2D_Projection import PROPERTIES_PT_Mastro_2D_Projection
 from .PROPERTIES_PT_Mastro_2D_Projection_Proj import PROPERTIES_PT_Mastro_2D_Projection_Proj
 from .PROPERTIES_PT_Mastro_2D_Projection_Shadow import PROPERTIES_PT_Mastro_2D_Projection_Shadow
-from .PROPERTIES_PT_Projector_Cameras import PROPERTIES_PT_Projector_Cameras
+from .PROPERTIES_PT_Mastro_Camera_Sets import PROPERTIES_PT_Mastro_Camera_Sets
 from .PROPERTIES_UL_Camera_Sets import PROPERTIES_UL_Camera_Sets
+from .PROPERTIES_UL_Set_Cameras import PROPERTIES_UL_Set_Cameras
 
 
 classes = (
@@ -88,8 +89,9 @@ classes = (
     PROPERTIES_PT_Mastro_2D_Projection,
     PROPERTIES_PT_Mastro_2D_Projection_Proj,
     PROPERTIES_PT_Mastro_2D_Projection_Shadow,
-    PROPERTIES_PT_Projector_Cameras,
+    PROPERTIES_PT_Mastro_Camera_Sets,
     PROPERTIES_UL_Camera_Sets,
+    PROPERTIES_UL_Set_Cameras,
     )
 
 # Each row: (name, color_attr, filter_name, node_type, extra_action)

@@ -16,7 +16,7 @@ from ..Utils.projection.shadow_helpers  import (get_light_source, sun_direction,
 # from ..Utils.projection.ss_shadow_grid       import build_plane_axes, make_base_grid     # Adaptive Grid disabled
 # from ..Utils.projection.ss_shadow_timer      import _state as _shadow_state, _tick_grid  # Adaptive Grid disabled
 from ..Utils.projection.shadow_silhouette import _sil_state, _tick_sil_shadow
-from ..Utils.projection.shadow_render     import run_render_shadow
+from ..Utils.projection.shadow_render     import run_render_shadow, _state as _render_state
 from ..Utils.projection.proj_timer        import _proj_state, _tick_projection
 from ..Utils.projection.scene_graph_helpers import (_get_or_create_empty,
                                           _get_or_create_empty_keep,
@@ -230,14 +230,15 @@ class OBJECT_OT_CancelAll(Operator):
     bl_options     = {"INTERNAL"}
 
     def execute(self, context):
-        # _shadow_state["running"] = False  # Adaptive Grid disabled
         _sil_state["running"]    = False
+        _render_state["running"] = False
         _proj_state["running"]   = False
         props = context.scene.mastro_projector_props
         props.is_running      = False
         props.proj_is_running = False
+        props.batch_queue.clear()
+        props.batch_cursor = 0
         _clear_header()
-        # empty_name = _shadow_state.get("empty_name")  # Adaptive Grid disabled
         empty = _proj_state.get("empty")
         if empty:
             restore_stash(empty)

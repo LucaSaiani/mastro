@@ -291,6 +291,10 @@ class MASTRO_OT_RenderShadowModal(bpy.types.Operator):
                 s['phase'] = 'finalize'
                 return {'RUNNING_MODAL'}
 
+            if not s.get('running'):
+                self._finish(context, s, cancelled=True)
+                return {'CANCELLED'}
+
             i, j = tiles[idx]
             _render_tile(s, i, j, context)
             s['tile_idx'] = idx + 1
