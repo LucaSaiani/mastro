@@ -8,9 +8,12 @@ class PROPERTIES_UL_Camera_Sets(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data,
                   active_propname, index):
         row = layout.row(align=True)
-        if item.is_default:
-            row.label(text="", icon='LOCKED')
-        else:
-            row.label(text="", icon='NONE')
+
+        # Column 1: collection icon + set name
+        row.label(text="", icon='DOCUMENTS')
         row.prop(item, "name", text="", emboss=False)
-        row.label(text=str(len(item.cameras)), icon='CAMERA_DATA')
+
+        # Right: camera count
+        sub = row.row(align=True)
+        sub.alignment = 'RIGHT'
+        sub.label(text=str(len(item.cameras)))

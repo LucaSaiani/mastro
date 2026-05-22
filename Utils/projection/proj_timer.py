@@ -57,6 +57,13 @@ def _run_projection(s):
     shadow_names = {o.name for o in scene.objects if is_shadow_helper(o)}
     excluded = s["excluded_names"] | shadow_names
 
+    if not s.get("running"):
+        props = bpy.context.scene.mastro_projector_props
+        props.proj_is_running = False
+        _clear_header()
+        _proj_state.clear()
+        return
+
     _set_header("2D Projection [Running]…")
 
     try:

@@ -174,6 +174,8 @@ def _sil_phase_init(s):
     caster_faces    = []
     receiver_mask   = []   # True if this face is from a camera-visible object
     for obj in eval_objs:
+        if not s.get("running"):
+            return
         me       = obj.data
         mw       = obj.matrix_world
         mwn      = mw.to_3x3().inverted().transposed()
@@ -303,6 +305,8 @@ def _sil_phase_section_b(s):
 
     # Ombre proprie: dark faces that face the camera.
     for obj in eval_objs:
+        if not s.get("running"):
+            return
         me  = obj.data
         mw  = obj.matrix_world
         mwn = mw.to_3x3().inverted().transposed()
@@ -314,6 +318,9 @@ def _sil_phase_section_b(s):
                 continue
             shadow_polys.append([mw @ me.vertices[vi].co for vi in poly.vertices])
 
+    if not s.get("running"):
+        return
+
     if not shadow_polys:
         s["final_verts"] = []
         s["final_faces"] = []
@@ -322,6 +329,8 @@ def _sil_phase_section_b(s):
 
     cam_polys_3d = []
     for obj in eval_objs:
+        if not s.get("running"):
+            return
         me  = obj.data
         mw  = obj.matrix_world
         mwn = mw.to_3x3().inverted().transposed()
@@ -338,6 +347,8 @@ def _sil_phase_section_b(s):
     vert_cache    = {}
     vert_to_polys = {}
     for p_idx, poly_verts in enumerate(cam_polys_3d):
+        if not s.get("running"):
+            return
         for v3 in poly_verts:
             key = _vkey(v3)
             if key not in vert_cache:
@@ -347,6 +358,9 @@ def _sil_phase_section_b(s):
             vert_to_polys.setdefault(key, set()).add(p_idx)
     s["vert_cache"]    = vert_cache
     s["vert_to_polys"] = vert_to_polys
+
+    if not s.get("running"):
+        return
 
     cam_poly_uvdep = []
     for poly_verts in cam_polys_3d:

@@ -683,6 +683,12 @@ class mastro_CL_projector_scene_props(PropertyGroup):
     batch_cursor: IntProperty(default=0)
 
     # ── Camera sets ───────────────────────────────────────────────────────────
-    camera_sets:       bpy.props.CollectionProperty(type=mastro_CL_camera_set)
-    active_set_index:  IntProperty(default=0, min=0)
+    camera_sets:              bpy.props.CollectionProperty(type=mastro_CL_camera_set)
+    active_set_index:         IntProperty(default=0, min=0)
+    active_camera_index:      IntProperty(default=0, min=0)
+    filter_set_members_only:  BoolProperty(
+        name        = "Show assigned only",
+        default     = False,
+        description = "Show only cameras assigned to this set",
+    )
 

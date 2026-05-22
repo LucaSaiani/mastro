@@ -46,7 +46,7 @@ from .Keymaps.keymap import register as register_keymaps, unregister as unregist
 from .Nodes.ui import register as register_gn_ui, unregister as unregister_gn_ui
 from .Utils.sync_layer_slots import sync_layer_slots
 from .Utils.add_nodes import add_nodes, add_materials
-from .UI.utils.layer_manager_button import draw_layer_manager_header_button
+from .UI.utils.layer_manager_button import draw_layer_manager_header_button, draw_viewlayer_context_panel
   
 ########################################
 # from . import Utils
@@ -62,6 +62,7 @@ import time
 
 # --- View Layer Manager state ---
 _lm_original_draw_right = None
+_lm_original_viewlayer_draw = None
 _lm_last_depsgraph_check = 0.0
 _LM_DEPSGRAPH_INTERVAL = 0.3  # seconds between shadow-list name-set checks
 
@@ -295,9 +296,12 @@ def register():
     bpy.app.handlers.depsgraph_update_post.append(_lm_on_depsgraph_update)
     bpy.app.handlers.load_post.append(_lm_on_load_post)
 
-    global _lm_original_draw_right
+    global _lm_original_draw_right, _lm_original_viewlayer_draw
     _lm_original_draw_right = bpy.types.TOPBAR_HT_upper_bar.draw_right
     bpy.types.TOPBAR_HT_upper_bar.draw_right = draw_layer_manager_header_button
+
+    _lm_original_viewlayer_draw = bpy.types.VIEWLAYER_PT_context_layer.draw
+    bpy.types.VIEWLAYER_PT_context_layer.draw = draw_viewlayer_context_panel
 
     def _lm_initial_sync():
         for scene in bpy.data.scenes:
@@ -326,6 +330,9 @@ def unregister():
 
     if _lm_original_draw_right is not None:
         bpy.types.TOPBAR_HT_upper_bar.draw_right = _lm_original_draw_right
+
+    if _lm_original_viewlayer_draw is not None:
+        bpy.types.VIEWLAYER_PT_context_layer.draw = _lm_original_viewlayer_draw
 
     nodeitems_utils.unregister_node_categories('MASTRO_NODES')
 

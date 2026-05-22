@@ -452,11 +452,29 @@ def fmt_time(seconds):
     return f"{seconds:.2f}s" if seconds < 60 else f"{int(seconds//60)}m {seconds%60:.1f}s"
 
 
+def _batch_prefix():
+    """Return 'CameraName (N/M) — ' if a batch is running, else ''."""
+    try:
+        ssp = bpy.context.scene.mastro_projector_props
+        q   = ssp.batch_queue
+        n   = len(q)
+        if n <= 1:
+            # Single camera: still show its name
+            cam = bpy.context.scene.camera
+            return f"{cam.name} — " if cam else ""
+        idx  = ssp.batch_cursor
+        name = q[idx].camera_name if 0 <= idx < n else ""
+        return f"{name} ({idx + 1}/{n}) — "
+    except Exception:
+        return ""
+
+
 def _set_header(text):
+    full = _batch_prefix() + text
     for window in bpy.context.window_manager.windows:
         for area in window.screen.areas:
             if area.type == "VIEW_3D":
-                area.header_text_set(text)
+                area.header_text_set(full)
                 area.tag_redraw()
                 return
 
