@@ -5,7 +5,7 @@ from bpy_extras.object_utils import AddObjectHelper
 from bpy_extras import object_utils
 
 from ..Utils.add_attributes_mass import add_mass_attributes
-from ..Utils.add_nodes import add_nodes
+from ..Utils.add_nodes import add_nodes, add_materials
 
 
 class OBJECT_OT_Add_Mastro_Block(Operator, AddObjectHelper):
@@ -79,6 +79,7 @@ class OBJECT_OT_Add_Mastro_Block(Operator, AddObjectHelper):
         
             
         add_nodes()
+        add_materials()
         
         # mesh_attributes = obj.data.attributes["mastro_number_of_storeys_EDGE"].data.items()
         # for edge in mesh.edges:

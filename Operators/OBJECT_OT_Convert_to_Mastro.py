@@ -3,7 +3,7 @@ from bpy.types import Operator
 
 from ..Utils.add_attributes_mass import add_mass_attributes
 from ..Utils.add_attributes_street import add_street_attributes
-from ..Utils.add_nodes import add_nodes
+from ..Utils.add_nodes import add_nodes, add_materials
 
 class OBJECT_OT_Convert_to_Mastro_Mass(Operator):
     bl_idname = "object.mastro_convert_to_mastro_mass"
@@ -31,6 +31,7 @@ class OBJECT_OT_Convert_to_Mastro_Mass(Operator):
             add_mass_attributes(obj, "MaStro mass")
             
         add_nodes()
+        add_materials()
         return {'FINISHED'}
 
 class OBJECT_OT_Convert_to_Mastro_Street(Operator):
@@ -59,4 +60,5 @@ class OBJECT_OT_Convert_to_Mastro_Street(Operator):
             add_street_attributes(obj)
             
         add_nodes()
+        add_materials()
         return {'FINISHED'}
