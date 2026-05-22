@@ -41,7 +41,7 @@ class PROPERTIES_PT_Mastro_2D_Projection_Shadow(Panel):
         col.prop(props, "light_source")
         sub = col.column()
         sub.active = not bool(light)   # disabled (greyed) when a real light is assigned
-        sub.prop(props, "light_space",       text="Space")
+        sub.prop(props, "light_camera_lock", text="Camera Lock")
         sub.prop(props, "virtual_azimuth",   text="Azimuth")
         sub.prop(props, "virtual_elevation",  text="Elevation")
 
@@ -65,3 +65,4 @@ class PROPERTIES_PT_Mastro_2D_Projection_Shadow(Panel):
             col = layout.column(heading="Quality")
             col.enabled = not any_running
             col.prop(props, "cutter_detection")
+            col.prop(props, "use_cast_shadow_cache")

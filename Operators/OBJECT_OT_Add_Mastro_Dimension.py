@@ -4,7 +4,7 @@ from bpy.types import Operator
 from bpy_extras.object_utils import AddObjectHelper
 from bpy_extras import object_utils
 
-from ..Utils.add_nodes import add_nodes
+from ..Utils.add_nodes import add_nodes, add_materials
 
 class OBJECT_OT_Add_Mastro_Dimension(Operator, AddObjectHelper):
     """Add a MaStro linear dimension"""
@@ -46,6 +46,7 @@ class OBJECT_OT_Add_Mastro_Dimension(Operator, AddObjectHelper):
         obj = bpy.context.active_object
         
         add_nodes()
+        add_materials()
 
         # add mastro dimension geo node to the created object
         geoName = "MaStro Dimension"

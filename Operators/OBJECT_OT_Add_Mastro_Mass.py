@@ -5,7 +5,7 @@ from bpy_extras.object_utils import AddObjectHelper
 from bpy_extras import object_utils
 
 from ..Utils.add_attributes_mass import add_mass_attributes
-from ..Utils.add_nodes import add_nodes
+from ..Utils.add_nodes import add_nodes, add_materials
 
 class OBJECT_OT_Add_Mastro_Mass(Operator, AddObjectHelper):
     """Add a MaStro mass"""
@@ -76,6 +76,7 @@ class OBJECT_OT_Add_Mastro_Mass(Operator, AddObjectHelper):
         
             
         add_nodes()
+        add_materials()
         
         # mesh_attributes = obj.data.attributes["mastro_number_of_storeys"].data.items()
         # mesh_attributes[0][1].value = self.storeys

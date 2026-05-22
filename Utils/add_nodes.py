@@ -1,6 +1,7 @@
 import bpy
 import addon_utils
 from pathlib import Path
+from .get_preferences import get_prefs
 
 def clear_asset_status(data_block):
     """Clear the asset status of a data block. Appended node groups are marked as assets,
@@ -37,6 +38,46 @@ def clean_tree_recursive(tree, processed_trees):
                 clear_asset_status(mat)
                 if mat.node_tree:
                     clean_tree_recursive(mat.node_tree, processed_trees)
+
+def add_materials():
+    """Append MaStro section materials from mastro.blend (skips if already present)."""
+    mastro_path = None
+    for mod in addon_utils.modules():
+        if mod.bl_info.get('name') == 'MaStro':
+            mastro_path = Path(mod.__file__).parent.resolve()
+            break
+
+    if not mastro_path:
+        return
+
+    blend_file     = str(mastro_path / "mastro.blend")
+    mats_to_import = {"MaStro Mass", "MaStro Mass Floor"}
+
+    try:
+        with bpy.data.libraries.load(blend_file) as (data_from, data_to):
+            data_to.materials = [
+                name for name in data_from.materials
+                if name in mats_to_import and name not in bpy.data.materials
+            ]
+        for mat in data_to.materials:
+            if mat:
+                clear_asset_status(mat)
+                if mat.node_tree:
+                    clean_tree_recursive(mat.node_tree, set())
+        apply_section_color(get_prefs().section_color)
+    except Exception as e:
+        print(f"MaStro Error (add_materials): {e}")
+
+
+def apply_section_color(color):
+    """Push an RGB value into the 'MaStro Section Colour' node group."""
+    ng = bpy.data.node_groups.get("MaStro Section Colour")
+    if ng is None:
+        return
+    node = ng.nodes.get("RGB")
+    if node:
+        node.outputs[0].default_value = (color[0], color[1], color[2], 1.0)
+
 
 def add_nodes():
     """Main function to append nodes and clean all dependencies."""
