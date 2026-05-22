@@ -116,16 +116,22 @@ def _run_projection(s):
 
         dedup = _deduplicate_merged_edges(merged)
 
+        prefs  = get_prefs()
+        on_cam = camera.data.mastro_projector_cl.place_on_camera_plane
+
         bpy.ops.object.select_all(action="DESELECT")
         created = []
         for src_name, (bm_m, cat_v) in merged.items():
             obj = _write_merged_object(src_name, bm_m, cat_v, scene, props, parent=empty)
             if obj:
+                if on_cam:
+                    apply_depth_offset(obj, camera, -prefs.section_offset)
                 obj.select_set(True)
                 created.append(obj)
         for sec_obj in _compute_and_write_section_outline(
                 section_segs, scene, camera.name, parent=empty):
-            apply_depth_offset(sec_obj, camera, get_prefs().section_offset)
+            if not on_cam:
+                apply_depth_offset(sec_obj, camera, prefs.section_offset)
             sec_obj.select_set(True)
             created.append(sec_obj)
 

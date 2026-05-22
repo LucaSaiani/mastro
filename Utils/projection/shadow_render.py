@@ -534,7 +534,10 @@ def _finalize(s):
         obj.data.update()
 
     if obj:
-        apply_depth_offset(obj, camera, -get_prefs().shadow_offset)
+        prefs  = get_prefs()
+        on_cam = camera.data.mastro_projector_cl.place_on_camera_plane
+        shadow_delta = -(prefs.section_offset + prefs.shadow_offset) if on_cam else -prefs.shadow_offset
+        apply_depth_offset(obj, camera, shadow_delta)
         obj.hide_viewport = False
         if camera.data.mastro_projector_cl.convert_to_grease_pencil:
             convert_objects_to_grease_pencil([obj])

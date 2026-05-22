@@ -39,8 +39,33 @@ def clean_tree_recursive(tree, processed_trees):
                 if mat.node_tree:
                     clean_tree_recursive(mat.node_tree, processed_trees)
 
+def _deduplicate_node_group(canonical_name):
+    """Replace all uses of '<canonical_name>.001', '.002', … with the canonical
+    group and remove the duplicates."""
+    import re
+    canonical = bpy.data.node_groups.get(canonical_name)
+    if canonical is None:
+        return
+    pattern = re.compile(r"^" + re.escape(canonical_name) + r"\.\d+$")
+    duplicates = [ng for ng in bpy.data.node_groups if pattern.match(ng.name)]
+    if not duplicates:
+        return
+    for dup in duplicates:
+        for tree in bpy.data.node_groups:
+            for node in tree.nodes:
+                if node.type == 'GROUP' and node.node_tree == dup:
+                    node.node_tree = canonical
+        for mat in bpy.data.materials:
+            if mat.node_tree:
+                for node in mat.node_tree.nodes:
+                    if node.type == 'GROUP' and node.node_tree == dup:
+                        node.node_tree = canonical
+        bpy.data.node_groups.remove(dup)
+
+
 def add_materials():
-    """Append MaStro section materials from mastro.blend (skips if already present)."""
+    """Append MaStro materials from mastro.blend in a single load call so shared
+    node groups (e.g. Section RGB) are not duplicated."""
     mastro_path = None
     for mod in addon_utils.modules():
         if mod.bl_info.get('name') == 'MaStro':
@@ -52,18 +77,32 @@ def add_materials():
 
     blend_file     = str(mastro_path / "mastro.blend")
     mats_to_import = {"MaStro Mass", "MaStro Mass Floor", "MaStro Section Colour"}
+    ngs_to_import  = {"Section RGB"}
 
     try:
         with bpy.data.libraries.load(blend_file) as (data_from, data_to):
+            # Import node groups first so materials find them already present.
+            data_to.node_groups = [
+                name for name in data_from.node_groups
+                if name in ngs_to_import and name not in bpy.data.node_groups
+            ]
             data_to.materials = [
                 name for name in data_from.materials
                 if name in mats_to_import and name not in bpy.data.materials
             ]
+        # Deduplicate: if a canonical group and a numbered copy both exist,
+        # reroute all nodes pointing at the copy to the canonical and remove it.
+        _deduplicate_node_group("Section RGB")
+
+        processed = set()
+        for ng in data_to.node_groups:
+            if ng:
+                clean_tree_recursive(ng, processed)
         for mat in data_to.materials:
             if mat:
                 clear_asset_status(mat)
                 if mat.node_tree:
-                    clean_tree_recursive(mat.node_tree, set())
+                    clean_tree_recursive(mat.node_tree, processed)
         apply_section_color(get_prefs().section_color)
     except Exception as e:
         print(f"MaStro Error (add_materials): {e}")
@@ -96,7 +135,7 @@ def add_nodes():
         return
 
     blend_file = str(mastro_path / "mastro.blend")
-    nodes_to_import = {"MaStro Mass", "MaStro Block", "MaStro Street", "MaStro Dimension", "Section RGB"}
+    nodes_to_import = {"MaStro Mass", "MaStro Block", "MaStro Street", "MaStro Dimension"}
 
     try:
         # Append node groups
