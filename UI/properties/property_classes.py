@@ -317,21 +317,20 @@ class mastro_CL_Sticky_Note(PropertyGroup):
 # View Layer Manager Properties
 # ------------------------------
 
-def _on_slot_name_changed(self, context):
-    """Propagate a user rename of a shadow slot to the actual Blender view layer."""
-    scene = context.scene
-    # If a view layer with the new name already exists, this is a sync update — not a rename.
-    if scene.view_layers.get(self.name):
-        self.prev_name = self.name
-        return
-    old_vl = scene.view_layers.get(self.prev_name)
-    if old_vl:
-        old_vl.name = self.name
-        self.prev_name = self.name
-
-
 class mastro_CL_layer_slot(PropertyGroup):
     """One entry in the view-layer shadow list — stores the layer name and its previous name for rename detection."""
+
+    def _on_slot_name_changed(self, context):
+        """Propagate a user rename of a shadow slot to the actual Blender view layer."""
+        scene = context.scene
+        if scene.view_layers.get(self.name):
+            self.prev_name = self.name
+            return
+        old_vl = scene.view_layers.get(self.prev_name)
+        if old_vl:
+            old_vl.name = self.name
+            self.prev_name = self.name
+
     name: StringProperty(update=_on_slot_name_changed)
     prev_name: StringProperty()
 
@@ -596,28 +595,20 @@ class mastro_CL_projector_properties(PropertyGroup):
 
     camera_clipping: BoolProperty(
         name        = "Camera Clipping",
-        default     = False,
+        default     = True,
         description = (
             "Clip projected geometry using the camera clipping planes. "
             "Edges beyond the far clip plane are truncated at the boundary; "
             "faces that straddle it generate an additional section line"
         )
     )
-    intersecting_objects: BoolProperty(
-        name        = "Intersecting Objects",
-        default     = False,
-        description = (
-            "Correctly handle shadows from objects that physically intersect "
-            "other objects. Clips each caster face against the receiver plane "
-            "before projecting, so partial intersections produce correct shadows"
-        )
-    )
     compute_intersections: BoolProperty(
-        name        = "Compute Intersections",
+        name        = "Intersections",
         default     = False,
         description = (
-            "Calculate and project the intersection curves between "
-            "interpenetrating objects. Enable only when objects overlap in 3D"
+            "Handle objects that physically intersect each other: clips shadow "
+            "caster faces against the receiver plane and projects the intersection "
+            "curves between interpenetrating volumes. Enable only when objects overlap in 3D"
         )
     )
     snap_orphans: BoolProperty(
@@ -654,7 +645,7 @@ class mastro_CL_projector_properties(PropertyGroup):
 
     convert_to_grease_pencil: BoolProperty(
         name        = "Convert to Grease Pencil",
-        default     = False,
+        default     = True,
         description = "Convert all projection and shadow output meshes to Grease Pencil objects after generation",
     )
 

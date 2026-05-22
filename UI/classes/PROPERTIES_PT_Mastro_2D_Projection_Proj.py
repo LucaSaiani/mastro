@@ -34,21 +34,18 @@ class PROPERTIES_PT_Mastro_2D_Projection_Proj(Panel):
         col = layout.column(heading="Quality")
         col.prop(props, "segment_length")
         col.prop(props, "ray_offset")
+        col.prop(props, "flat_angle_threshold")
 
-        # ── Output ────────────────────────────────────────────────────────────
-        col = layout.column(heading="Output")
+        col = layout.column()
         col.prop(props, "only_selected_objects")
         col.prop(props, "include_hidden")
-        col.prop(props, "flat_angle_threshold")
-        col.prop(props, "compute_silhouette")
-        col.prop(props, "compute_intersections")
-
-        # ── Cleanup ───────────────────────────────────────────────────────────
-        col = layout.column(heading="Cleanup")
+        col.prop(props, "compute_silhouette", text="Silhouette")
         col.prop(props, "snap_orphans")
-        col.prop(props, "merge_by_distance")
-        if props.merge_by_distance:
-            col.prop(props, "merge_distance")
+        row = col.row(align=True, heading="Merge by Distance")
+        row.prop(props, "merge_by_distance", text="")
+        sub = row.row()
+        sub.active = props.merge_by_distance
+        sub.prop(props, "merge_distance", text="")
         row = col.row()
         row.enabled = props.flat_angle_threshold > 0.0
         row.prop(props, "remove_overlapping_boundary")
