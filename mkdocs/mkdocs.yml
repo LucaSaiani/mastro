@@ -28,6 +28,7 @@ nav:
     - Node Editor: ui/node-editor.md
     - View Layer Manager: ui/view-layer-manager.md
     - 2D Projection: ui/projection.md
+    - Import: ui/import.md
     - Preferences: ui/preferences.md
   - Nodes:
     - Overview: nodes/overview.md
