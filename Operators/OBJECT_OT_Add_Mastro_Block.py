@@ -1,11 +1,12 @@
-import bpy 
-import bmesh 
+import bpy
+import bmesh
 from bpy.types import Operator
 from bpy_extras.object_utils import AddObjectHelper
 from bpy_extras import object_utils
 
 from ..Utils.add_attributes_mass import add_mass_attributes
 from ..Utils.add_nodes import add_nodes, add_materials
+from .OBJECT_OT_Update_Mastro_Custom_Properties import add_custom_properties_to_object
 
 
 class OBJECT_OT_Add_Mastro_Block(Operator, AddObjectHelper):
@@ -109,5 +110,6 @@ class OBJECT_OT_Add_Mastro_Block(Operator, AddObjectHelper):
         obj.select_set(True)
         
         add_mass_attributes(obj, "MaStro block")
-        
+        add_custom_properties_to_object(obj, is_street=False)
+
         return {'FINISHED'}

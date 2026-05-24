@@ -298,13 +298,13 @@ def update_mastro_filter_by_street_type(self, context):
     # bpy.ops.node.mastro_shader_filter_by(filter_name="street type")
     return None
 
-def update_all_mastro_street_width(self, context):
+def update_mastro_street_width(self, context):
     updates = "width"
-    bpy.ops.object.update_all_mastro_street_attributes(attribute_to_update=updates)
-    
-def update_all_mastro_street_radius(self, context):
+    bpy.ops.object.update_mastro_street_attributes(attribute_to_update=updates)
+
+def update_mastro_street_radius(self, context):
     updates = "radius"
-    bpy.ops.object.update_all_mastro_street_attributes(attribute_to_update=updates)
+    bpy.ops.object.update_mastro_street_attributes(attribute_to_update=updates)
   
 
 

@@ -4,6 +4,7 @@ from bpy.types import Operator
 from ..Utils.add_attributes_mass import add_mass_attributes
 from ..Utils.add_attributes_street import add_street_attributes
 from ..Utils.add_nodes import add_nodes, add_materials
+from .OBJECT_OT_Update_Mastro_Custom_Properties import add_custom_properties_to_object
 
 class OBJECT_OT_Convert_to_Mastro_Mass(Operator):
     bl_idname = "object.mastro_convert_to_mastro_mass"
@@ -29,7 +30,8 @@ class OBJECT_OT_Convert_to_Mastro_Mass(Operator):
         # mode = None
         for obj in selected_meshes:
             add_mass_attributes(obj, "MaStro mass")
-            
+            add_custom_properties_to_object(obj, is_street=False)
+
         add_nodes()
         add_materials()
         return {'FINISHED'}
@@ -58,7 +60,8 @@ class OBJECT_OT_Convert_to_Mastro_Street(Operator):
         # mode = None
         for obj in selected_meshes:
             add_street_attributes(obj)
-            
+            add_custom_properties_to_object(obj, is_street=True)
+
         add_nodes()
         add_materials()
         return {'FINISHED'}

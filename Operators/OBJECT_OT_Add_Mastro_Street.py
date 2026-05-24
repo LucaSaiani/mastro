@@ -6,6 +6,7 @@ from bpy_extras import object_utils
 
 from ..Utils.add_attributes_street import add_street_attributes
 from ..Utils.add_nodes import add_nodes, add_materials
+from .OBJECT_OT_Update_Mastro_Custom_Properties import add_custom_properties_to_object
 
 class OBJECT_OT_Add_Mastro_Street(Operator, AddObjectHelper):
     """Add a MaStro street"""
@@ -90,5 +91,6 @@ class OBJECT_OT_Add_Mastro_Street(Operator, AddObjectHelper):
         context.view_layer.objects.active = obj
         
         obj.select_set(True)
+        add_custom_properties_to_object(obj, is_street=True)
         return {'FINISHED'}
     

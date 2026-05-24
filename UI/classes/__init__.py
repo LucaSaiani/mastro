@@ -5,6 +5,7 @@ from bpy.utils import register_class, unregister_class
 from .PROPERTIES_UL_List import PROPERTIES_UL_List, PROPERTIES_UL_Typology_Uses
 from .PROPERTIES_OT_New_Item import PROPERTIES_OT_New_Item, PROPERTIES_OT_Typology_Uses_List_New_Item, PROPERTIES_OT_Use_List_New_Item
 from .PROPERTIES_OT_Move_Item import PROPERTIES_OT_Move_Item, PROPERTIES_OT_Typology_Uses_List_Move_Item
+from .PROPERTIES_OT_Remove_Item import PROPERTIES_OT_Remove_Item
 from .PROPERTIES_OT_Delete_Item import PROPERTIES_OT_Typology_Uses_List_Delete_Item
 from .PROPERTIES_OT_Duplicate_Item import PROPERTIES_OT_Typology_List_Duplicate_Item
 # from .ss_PROPERTIES_OT_Update_List import PROPERTIES_OT_Update_Use_List
@@ -36,13 +37,14 @@ from .LAYER_MANAGER_PT_Popup import LAYER_MANAGER_PT_Popup
 from .LAYER_MANAGER_UL_Layer_List import LAYER_MANAGER_UL_Layer_List
 from .LAYER_MANAGER_OT_Move_Item import LAYER_MANAGER_OT_Move_Item
 from .LAYER_MANAGER_OT_Sort_Layers import LAYER_MANAGER_OT_SortLayers
-
 from .PROPERTIES_PT_Mastro_2D_Projection import PROPERTIES_PT_Mastro_2D_Projection
 from .PROPERTIES_PT_Mastro_2D_Projection_Proj import PROPERTIES_PT_Mastro_2D_Projection_Proj
 from .PROPERTIES_PT_Mastro_2D_Projection_Shadow import PROPERTIES_PT_Mastro_2D_Projection_Shadow
 from .PROPERTIES_PT_Mastro_Camera_Sets import PROPERTIES_PT_Mastro_Camera_Sets
 from .PROPERTIES_UL_Camera_Sets import PROPERTIES_UL_Camera_Sets
 from .PROPERTIES_UL_Set_Cameras import PROPERTIES_UL_Set_Cameras
+from .PROPERTIES_PT_Mastro_Custom_Properties import PROPERTIES_PT_Mastro_Custom_Properties
+from .VIEW3D_PT_Mastro_Custom_Properties import VIEW3D_PT_Mastro_Custom_Properties
 
 
 classes = (
@@ -92,6 +94,8 @@ classes = (
     PROPERTIES_PT_Mastro_Camera_Sets,
     PROPERTIES_UL_Camera_Sets,
     PROPERTIES_UL_Set_Cameras,
+    PROPERTIES_PT_Mastro_Custom_Properties,
+    VIEW3D_PT_Mastro_Custom_Properties,
     )
 
 # Each row: (name, color_attr, filter_name, node_type, extra_action)
@@ -101,13 +105,14 @@ classes = (
 # - node_type: tuple of node categories ("gn", "shader") to update on add/move
 # - extra_action: "add use" triggers a linked use entry; None for no side-effect
 MASTRO_LISTS = [
-    # name,         color_attr,             filter_name       node type               extra_action
-    ("block",       None,                   "block",         ("shader",),            None),
-    ("building",    None,                   "building",      ("shader",),            None),
-    ("typology",    "typologyEdgeColor",    "typology",      ("gn","shader"),        "add use"),
-    ("wall",        "wallEdgeColor",        "wall type",     ("gn","shader"),        None),
-    ("floor",       None,                   None,            None,                   None),
-    ("street",      "streetEdgeColor",      "street type",   ("gn", "shader"),       None),
+    # name,             color_attr,             filter_name       node type             extra_action
+    ("block",           None,                   "block",        ("shader",),            None),
+    ("building",        None,                   "building",     ("shader",),            None),
+    ("typology",        "typologyEdgeColor",    "typology",     ("gn","shader"),        "add use"),
+    ("wall",            "wallEdgeColor",        "wall type",    ("gn","shader"),        None),
+    ("floor",           None,                   None,           None,                   None),
+    ("street",          "streetEdgeColor",      "street type",  ("gn", "shader"),       None),
+    ("custom_property", None,                   None,           None,                   None),
 ]
 
 # ============================================================
@@ -152,7 +157,19 @@ def dynamic_list_classes():
             }
         )
         dynamicClasses.append(op_new)
-        # bpy.utils.register_class(op_new)
+
+        # --- Remove Item Operator ---
+        op_remove = type(
+            f"{name.upper()}_LIST_OT_RemoveItem",
+            (PROPERTIES_OT_Remove_Item,),
+            {
+                "bl_idname":   f"{list_name}.remove_item",
+                "bl_label":    f"Remove {name}",
+                "list_name":   list_name,
+                "index_name":  index_name,
+            }
+        )
+        dynamicClasses.append(op_remove)
 
         # --- Move Item Operator ---
         op_move = type(

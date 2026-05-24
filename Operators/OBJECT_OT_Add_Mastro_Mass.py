@@ -1,8 +1,9 @@
-import bpy 
+import bpy
 import bmesh
 from bpy.types import Operator
 from bpy_extras.object_utils import AddObjectHelper
 from bpy_extras import object_utils
+from .OBJECT_OT_Update_Mastro_Custom_Properties import add_custom_properties_to_object
 
 from ..Utils.add_attributes_mass import add_mass_attributes
 from ..Utils.add_nodes import add_nodes, add_materials
@@ -94,6 +95,7 @@ class OBJECT_OT_Add_Mastro_Mass(Operator, AddObjectHelper):
         obj.select_set(True)
         
         add_mass_attributes(obj, "MaStro mass")
+        add_custom_properties_to_object(obj, is_street=False)
 
         return {'FINISHED'}
     

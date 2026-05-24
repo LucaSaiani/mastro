@@ -48,6 +48,8 @@ class PROPERTIES_OT_New_Item(Operator):
             if "shader" in self.node_type:
                 bpy.ops.node.mastro_shader_filter_by(filter_name=self.filter_name)
 
+        for area in context.screen.areas:
+            area.tag_redraw()
         return {'FINISHED'}
     
 # Add a new use to the list of uses of the selected typology. 

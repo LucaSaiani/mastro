@@ -29,8 +29,9 @@ from .property_classes import ( mastro_CL_addon_properties,
                                 mastro_CL_Sticky_Note,
                                 mastro_CL_layer_manager_props,
                                 mastro_CL_projector_properties,
-                                mastro_CL_projector_batch_item,
+                                # mastro_CL_projector_batch_item,
                                 mastro_CL_projector_scene_props,
+                                mastro_CL_custom_property_name_list,
 )
 
                                 
@@ -218,6 +219,7 @@ scene_props = [
         get = lambda self: get_attribute_mastro_mesh(self, "mastro_custom_face")
     )),
     
+   
     # ------------------------------
     # Street Properties
     # ------------------------------
@@ -318,6 +320,9 @@ scene_props = [
         items=lambda self, context: get_names_from_list(context.scene, context, "mastro_street_name_list"),
         update=update_attributes_street
     )),
+    
+    ("mastro_custom_property_name_list", CollectionProperty(type=mastro_CL_custom_property_name_list)),
+    ("mastro_custom_property_name_list_index", IntProperty(name="Custom Property Name", default=0)),
 ]
 
 # =============================================================================

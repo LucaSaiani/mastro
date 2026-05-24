@@ -9,7 +9,7 @@ class PROPERTIES_PT_Mastro_Camera_Sets(Panel):
     bl_label       = "Camera Sets"
     bl_parent_id   = "PROPERTIES_PT_Mastro_Project_Data"
     bl_options     = {"DEFAULT_CLOSED"}
-    bl_order       =  4
+    bl_order       =  5
 
     def draw(self, context):
         layout = self.layout

@@ -18,11 +18,19 @@ class PROPERTIES_UL_List(UIList):
             split = layout.split(factor=0.4)
             if self.color_attr:
                 sub = split.split()
-                sub.label(text="Id: %d" % (item.id)) 
+                sub.label(text="Id: %d" % (item.id))
                 sub.prop(collection[index], self.color_attr, text="")
             else:
                 split.label(text=f"Id: {item.id}")
-            split.prop(collection[index], "name", text="", emboss=False)
+            row = split.row(align=True)
+            row.prop(collection[index], "name", text="", emboss=False)
+            if hasattr(item, "committed"):
+                icon = 'FILE_REFRESH' if item.committed else 'ADD'
+                op = row.operator("object.update_mastro_custom_properties",
+                                  text="", icon=icon, emboss=False)
+                op.property_id = item.id
+                op.property_to_update = "all"
+                op.remove = False
             
         elif self.layout_type in {'GRID'}:
             layout.alignment = 'CENTER'
