@@ -8,7 +8,7 @@ MaStro can generate a 2D line-drawing representation of the 3D scene as seen thr
 
 The projection system is activated per-camera in the **Properties Editor → Object Data Properties** (camera icon). Open the **MaStro Projection** panel. The checkbox next to the panel label enables or disables the camera for projection and shadow baking.
 
-When disabled, all sub-panels are grayed out and the camera does not appear in the Calculate panel.
+When disabled, all sub-panels are grayed out and the camera does not appear in the Calculate panel or in any Camera Set.
 
 ---
 
@@ -18,9 +18,11 @@ These settings apply to both projection and shadow output for the selected camer
 
 | Setting | Description |
 |---|---|
-| **Place on Camera Plane** | Position the output empty (and all its children) in front of the camera at the near clip plane. When disabled, the empty can be moved freely in the scene. |
+| **Source Collection** | Collection of objects to project and cast shadows from. When empty, all visible objects in the scene are used. This setting is shared between projection and shadow baking. |
 | **Camera Clipping** | Restrict projected geometry to the camera clipping volume. Edges beyond the far clip plane are truncated; faces that straddle it generate an additional section line. Also applied to shadow baking. |
+| **Intersections** | Calculate and project the intersection curves between interpenetrating objects. Enabled by default; disable only when no objects overlap in 3D, for a small performance gain. |
 | **Convert to Grease Pencil** | After generation, convert all projection and shadow output meshes to Grease Pencil objects. Subsequent runs automatically replace existing Grease Pencil outputs. |
+| **Place on Camera Plane** | Position the output empty (and all its children) in front of the camera at the near clip plane. When disabled, the empty can be moved freely in the scene. |
 
 ---
 
@@ -34,16 +36,14 @@ Controls the line-drawing projection. Enable with the checkbox in the sub-panel 
 |---|---|
 | **Segment Length** | Sampling precision in NDC screen space (range 0–2 per axis). Smaller values produce more accurate visibility transitions at the cost of performance. Independent of object size or distance from camera. |
 | **Ray Offset** | World-space offset applied to ray origins to avoid self-intersection artefacts. |
+| **Flat Angle Threshold** | Edges shared by two nearly-parallel faces of the same object are hidden when the angle between their normals is below this threshold. Edges between different materials or objects are always shown. |
 
 ### Output
 
 | Setting | Description |
 |---|---|
-| **Only Selected Objects** | Project only the selected objects. All visible objects still participate in occlusion. Useful for incremental updates without recalculating the entire scene. |
 | **Include Hidden** | Include hidden (back-facing or occluded) lines as separate edges in a dedicated vertex group on the output mesh. |
-| **Flat Angle Threshold** | Edges shared by two nearly-parallel faces of the same object are hidden when the angle between their normals is below this threshold. Edges between different materials or objects are always shown. |
 | **Compute Silhouette** | Identify silhouette edges (boundary between camera-facing and back-facing faces). Silhouette edges are always included regardless of the flat angle threshold and are assigned to dedicated vertex groups. |
-| **Compute Intersections** | Calculate and project the intersection curves between interpenetrating objects. Enable only when objects overlap in 3D. |
 
 ### Cleanup
 
@@ -100,8 +100,40 @@ This panel lists all cameras that have projection **enabled** and provides a sin
 | Element | Description |
 |---|---|
 | Camera list | Shows all enabled cameras sorted by name. Each row displays the camera type (perspective/orthographic icon), the camera name, and icons indicating which operations are active (projection and/or shadow). |
-| **Active** toggle | The checkbox at the left of each row controls whether that camera is included in the next batch calculation. |
+| **Active** toggle | The camera icon at the right of each row controls whether that camera is included in the next batch calculation. |
 | **Calculate (N)** | Runs projection and/or shadow baking for all active cameras in the list. The number in parentheses shows how many cameras will be processed. Disabled when no cameras are active. |
 | **Cancel** | Appears while a calculation is running. Stops all active operations. |
 
 > **Tip:** Individual camera calculations can also be triggered from each camera's own MaStro Projection panel using the **Run Projection** operator, which processes only the active camera.
+
+---
+
+## Camera Sets
+
+Camera Sets allow grouping enabled cameras into named subsets for targeted batch calculations. The panel is found in **Properties Editor → Scene Properties → Project Data → Camera Sets** and is visible only when at least one camera has projection enabled.
+
+**Set 0** is a built-in set that always contains all enabled cameras and cannot be deleted or modified.
+
+### Set List
+
+The upper list shows all camera sets. Use the buttons on the right to:
+
+| Button | Description |
+|---|---|
+| **+** | Add a new empty set |
+| **−** | Remove the selected set (Set 0 cannot be removed) |
+| Duplicate | Duplicate the selected set with all its camera assignments |
+| ↑ / ↓ | Move the selected set up or down (Set 0 stays fixed at the top) |
+
+### Camera List
+
+The lower list shows all enabled cameras. For each row:
+
+- The **checkbox** at the right adds or removes the camera from the selected set. In Set 0 membership is automatic and the checkbox is read-only.
+- The **camera icon** (render toggle) controls whether the camera is included when the **Bake** button is pressed.
+
+The list supports **filtering by name** and **sorting alphabetically**. When a non-default set is selected, the **filter** button restricts the list to cameras that belong to that set.
+
+### Bake
+
+Runs projection and shadow baking for all cameras in the selected set that have the render toggle enabled. The button shows the count of cameras that will be processed and is disabled when none are active.
