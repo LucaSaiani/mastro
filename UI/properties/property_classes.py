@@ -604,7 +604,7 @@ class mastro_CL_projector_properties(PropertyGroup):
     )
     compute_intersections: BoolProperty(
         name        = "Intersections",
-        default     = False,
+        default     = True,
         description = (
             "Handle objects that physically intersect each other: clips shadow "
             "caster faces against the receiver plane and projects the intersection "
