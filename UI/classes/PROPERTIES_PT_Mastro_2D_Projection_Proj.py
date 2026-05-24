@@ -37,7 +37,7 @@ class PROPERTIES_PT_Mastro_2D_Projection_Proj(Panel):
         col.prop(props, "flat_angle_threshold")
 
         col = layout.column()
-        col.prop(props, "only_selected_objects")
+        col.prop(props, "source_collection")
         col.prop(props, "include_hidden")
         col.prop(props, "compute_silhouette", text="Silhouette")
         col.prop(props, "snap_orphans")

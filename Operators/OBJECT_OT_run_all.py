@@ -12,7 +12,8 @@ from ..Utils.projection.shadow_helpers  import (get_light_source, sun_direction,
                                       purge_shadow_helpers, _clear_header,
                                       stash_children, restore_stash, clear_stash,
                                       unhide_empty_children,
-                                      collect_projector_empty_children)
+                                      collect_projector_empty_children,
+                                      collect_collection_objects)
 # from ..Utils.projection.ss_shadow_grid       import build_plane_axes, make_base_grid     # Adaptive Grid disabled
 # from ..Utils.projection.ss_shadow_timer      import _state as _shadow_state, _tick_grid  # Adaptive Grid disabled
 from ..Utils.projection.shadow_silhouette import _sil_state, _tick_sil_shadow
@@ -27,10 +28,6 @@ from ..Utils.projection.scene_graph_helpers import (_get_or_create_empty,
 def _setup_shared_empty(camera, scene, proj_props):
     """Create/position the shared empty for this camera, return it."""
     empty_name = camera.name + get_prefs().projection_suffix
-
-    if proj_props.only_selected_objects and empty_name in bpy.data.objects \
-            and not proj_props.place_on_camera_plane:
-        return _get_or_create_empty_keep(empty_name, scene)
 
     if proj_props.place_on_camera_plane:
         user_edits = []
@@ -85,14 +82,9 @@ def _setup_shared_empty(camera, scene, proj_props):
     return empty
 
 
-def _collect_excluded_names(scene, camera, proj_props):
+def _collect_excluded_names(scene, camera, proj_props, allowed_names=None):
     # Children of ALL projector empties are always excluded from projection.
     excluded = collect_projector_empty_children(scene)
-
-    if proj_props.only_selected_objects:
-        selected = {o.name for o in scene.objects if o.select_get()}
-        for src in selected:
-            excluded.add(src + get_prefs().projection_suffix)
 
     def _get_disabled(lc, out):
         if lc.exclude or lc.hide_viewport or lc.collection.hide_viewport:
@@ -105,6 +97,10 @@ def _collect_excluded_names(scene, camera, proj_props):
     for o in scene.objects:
         if o.hide_get() or o.hide_viewport or any(c.name in disabled for c in o.users_collection):
             excluded.add(o.name)
+
+    # Objects explicitly chosen via source_collection bypass view-layer visibility.
+    if allowed_names:
+        excluded -= allowed_names
 
     return excluded
 
@@ -135,11 +131,20 @@ class OBJECT_OT_RunAll(Operator):
         delete_projection_outputs(empty)
         stash_children(empty)
 
+        # ── Resolve source collection filter ──────────────────────────────────
+        src_coll = proj_props.source_collection
+        allowed_objects = (
+            collect_collection_objects(src_coll) if src_coll is not None else None
+        )
+        allowed_names = (
+            {o.name for o in allowed_objects} if allowed_objects is not None else None
+        )
+
         # ── Shadow ────────────────────────────────────────────────────────────
         if proj_props.run_shadows:
             sun     = get_light_source(context)
             sun_dir = sun_direction_from_props(proj_props, camera=camera)
-            mesh_objs = scene_mesh_objects(context, sun)
+            mesh_objs = scene_mesh_objects(context, sun, allowed_objects=allowed_objects)
             if not mesh_objs:
                 self.report({"ERROR"}, "No visible mesh found.")
                 return {"CANCELLED"}
@@ -175,7 +180,7 @@ class OBJECT_OT_RunAll(Operator):
                 })
                 props.is_running = True
                 if proj_props.run_projection:
-                    excluded = _collect_excluded_names(scene, camera, proj_props)
+                    excluded = _collect_excluded_names(scene, camera, proj_props, allowed_names=allowed_names)
                     _proj_state.clear()
                     _proj_state.update({
                         "running":        True,
@@ -184,6 +189,7 @@ class OBJECT_OT_RunAll(Operator):
                         "camera":         camera,
                         "empty":          empty,
                         "excluded_names": excluded,
+                        "allowed_names":  allowed_names,
                     })
                     props.proj_is_running = True
                 bpy.app.timers.register(_tick_sil_shadow, first_interval=0.0, persistent=False)
@@ -201,7 +207,7 @@ class OBJECT_OT_RunAll(Operator):
 
         # ── 2D Projection ─────────────────────────────────────────────────────
         if proj_props.run_projection:
-            excluded = _collect_excluded_names(scene, camera, proj_props)
+            excluded = _collect_excluded_names(scene, camera, proj_props, allowed_names=allowed_names)
             _proj_state.clear()
             _proj_state.update({
                 "running":        True,
@@ -210,6 +216,7 @@ class OBJECT_OT_RunAll(Operator):
                 "camera":         camera,
                 "empty":          empty,
                 "excluded_names": excluded,
+                "allowed_names":  allowed_names,
             })
             props.proj_is_running = True
             # If render shadow is running concurrently, it temporarily changes

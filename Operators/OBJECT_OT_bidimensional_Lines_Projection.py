@@ -6,6 +6,7 @@ from mathutils import Vector
 from ..Utils.get_preferences import get_prefs
 from ..Utils.projection.projector import _Projector
 from ..Utils.projection.build_global_bvh import _build_global_bvh
+from ..Utils.projection.shadow_helpers import collect_collection_objects
 from ..Utils.projection.intersection_curve_merge_projected import _merge_intersections_into_results
 from ..Utils.projection.merge_per_category import _merge_category_bmeshes
 from ..Utils.projection.merge_by_distance import _merge_bmeshes_by_distance
@@ -53,29 +54,17 @@ class OBJECT_OT_bidimensional_Lines_Projection(Operator):
                     _add_descendants(child)
             _add_descendants(bpy.data.objects[empty_name])
 
-        if props.only_selected_objects:
-            selected_names = {obj.name for obj in scene.objects if obj.select_get()}
-            for src_name in selected_names:
-                proj_name = src_name + get_prefs().projection_suffix
-                obj = bpy.data.objects.get(proj_name)
-                if obj is not None:
-                    if obj.type == 'MESH':
-                        bpy.data.meshes.remove(obj.data, do_unlink=True)
-                    else:
-                        bpy.data.objects.remove(obj, do_unlink=True)
-                excluded_names.add(proj_name)
-        else:
-            to_delete = [
-                obj for obj in scene.objects
-                if obj.name.endswith(get_prefs().projection_suffix)
-                and (obj.type == 'MESH' or obj.type in _GP_TYPES)
-            ]
-            for obj in to_delete:
-                excluded_names.add(obj.name)
-                if obj.type == 'MESH':
-                    bpy.data.meshes.remove(obj.data, do_unlink=True)
-                else:
-                    bpy.data.objects.remove(obj, do_unlink=True)
+        to_delete = [
+            obj for obj in scene.objects
+            if obj.name.endswith(get_prefs().projection_suffix)
+            and (obj.type == 'MESH' or obj.type in _GP_TYPES)
+        ]
+        for obj in to_delete:
+            excluded_names.add(obj.name)
+            if obj.type == 'MESH':
+                bpy.data.meshes.remove(obj.data, do_unlink=True)
+            else:
+                bpy.data.objects.remove(obj, do_unlink=True)
 
         # ── Collect names of hidden objects / disabled collections ────────────
         def get_disabled_collections(layer_collection, disabled_set):
@@ -99,6 +88,18 @@ class OBJECT_OT_bidimensional_Lines_Projection(Operator):
             if is_hidden_direct or in_disabled_coll:
                 excluded_names.add(obj.name)
 
+        # ── Resolve source collection filter ──────────────────────────────────
+        src_coll = props.source_collection
+        allowed_names = (
+            {o.name for o in collect_collection_objects(src_coll)}
+            if src_coll is not None else None
+        )
+        # Objects explicitly chosen via source_collection bypass view-layer
+        # visibility: remove them from the exclusion set so hidden/disabled
+        # collections don't silently suppress the projection.
+        if allowed_names:
+            excluded_names -= allowed_names
+
         # ── Build the global BVHTree ONCE ─────────────────────────────────────
         clip_bvh_kwargs = {}
         if props.camera_clipping:
@@ -109,7 +110,8 @@ class OBJECT_OT_bidimensional_Lines_Projection(Operator):
                 'clip_end':     camera.data.clip_end,
             }
         global_bvh, poly_to_obj = _build_global_bvh(
-            scene, depsgraph, excluded_names, **clip_bvh_kwargs
+            scene, depsgraph, excluded_names, **clip_bvh_kwargs,
+            allowed_names=allowed_names
         )
         projector = _Projector(props, global_bvh=global_bvh, poly_to_obj=poly_to_obj)
 
@@ -118,7 +120,7 @@ class OBJECT_OT_bidimensional_Lines_Projection(Operator):
         wm.progress_begin(0, 100)
 
         results, aspect = projector.build_projection_per_object(
-            scene, depsgraph, camera, excluded_names
+            scene, depsgraph, camera, excluded_names, allowed_names=allowed_names
         )
         wm.progress_update(40)
 
@@ -217,12 +219,7 @@ class OBJECT_OT_bidimensional_Lines_Projection(Operator):
         # ── STEP 6: write merged bmeshes to the scene ─────────────────────────
         bpy.ops.object.select_all(action='DESELECT')
 
-        if props.only_selected_objects and empty_name in bpy.data.objects \
-                and not props.place_on_camera_plane:
-            # Incremental mode: always preserve the existing empty.
-            empty = _get_or_create_empty_keep(empty_name, scene)
-
-        elif props.place_on_camera_plane:
+        if props.place_on_camera_plane:
             # Place on camera plane: recreate and reposition the empty every run.
             # Detach user edits first so _delete_hierarchy does not remove them.
             user_edits = []

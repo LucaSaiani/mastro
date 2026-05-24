@@ -397,12 +397,12 @@ class mastro_CL_projector_properties(PropertyGroup):
         default     = False,
         description = "Also include hidden lines (as separate edges in a dedicated empty)"
     )
-    only_selected_objects: BoolProperty(
-        name        = "Only Selected Objects",
-        default     = False,
+    source_collection: PointerProperty(
+        name        = "Source Collection",
+        type        = bpy.types.Collection,
         description = (
-            "Project only the selected objects. All visible objects still "
-            "participate in occlusion calculations"
+            "Limit projection and shadows to objects in this collection "
+            "(and its sub-collections). Leave empty to use all visible scene objects"
         )
     )
     place_on_camera_plane: BoolProperty(
