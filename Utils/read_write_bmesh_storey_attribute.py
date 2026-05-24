@@ -49,7 +49,7 @@ def read_bmesh_storey_attribute(numberOfStoreys, typology_id):
     if item is None:
         return
     use_list = item.useList
-    useSplit = use_list.split(";")
+    useSplit = [el for el in use_list.split(";") if el.strip()]
     useSplit.reverse()  # uses listed top-to-bottom in UI
     
     # --- Init values ---
