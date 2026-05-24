@@ -371,7 +371,8 @@ class _Projector:
 
     # ── Main projection loop ──────────────────────────────────────────────────
 
-    def build_projection_per_object(self, scene, depsgraph, camera, excluded_names):
+    def build_projection_per_object(self, scene, depsgraph, camera, excluded_names,
+                                    allowed_names=None):
         """
         Returns:
             results – dict { src_obj_name: { "bm_visible":           BMesh | None,
@@ -403,19 +404,14 @@ class _Projector:
         if camera_clipping:
             cam_fwd = (-camera.matrix_world.col[2].xyz).normalized()
 
-        selected_names = (
-            {obj.name for obj in scene.objects if obj.select_get()}
-            if props.only_selected_objects else None
-        )
-
         for obj in scene.objects:
             if obj.type != 'MESH':
                 continue
             if obj.name in excluded_names:
                 continue
-            if not obj.visible_get():
+            if not obj.visible_get() and (allowed_names is None or obj.name not in allowed_names):
                 continue
-            if selected_names is not None and obj.name not in selected_names:
+            if allowed_names is not None and obj.name not in allowed_names:
                 continue
             if not self.bbox_in_frustum(obj, vp_matrix, view_matrix,
                                         camera_clipping, clip_start, clip_end):

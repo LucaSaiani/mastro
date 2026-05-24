@@ -35,7 +35,8 @@ def _clip_polygon_to_plane(verts_ws, vert_ds, clip_val, keep_above):
 
 def _build_global_bvh(scene, depsgraph, excluded_names,
                       cam_location=None, cam_fwd=None,
-                      clip_start=None, clip_end=None):
+                      clip_start=None, clip_end=None,
+                      allowed_names=None):
     """
     Build a global BVHTree from all evaluated meshes in the scene.
     Much faster than scene.ray_cast for repeated queries on static geometry.
@@ -45,6 +46,9 @@ def _build_global_bvh(scene, depsgraph, excluded_names,
     faces clipped (Sutherland-Hodgman) so the BVH contains only geometry
     that exists within the clip volume — preventing ghost occlusion from
     faces that were cut away.
+
+    If *allowed_names* is provided, only objects whose names are in that set
+    are included (still subject to excluded_names filtering).
 
     Returns:
         bvh          – BVHTree with all geometry in world space (or None)
@@ -63,6 +67,8 @@ def _build_global_bvh(scene, depsgraph, excluded_names,
         if obj.type != 'MESH':
             continue
         if obj.name in excluded_names:
+            continue
+        if allowed_names is not None and obj.name not in allowed_names:
             continue
 
         obj_eval  = obj.evaluated_get(depsgraph)

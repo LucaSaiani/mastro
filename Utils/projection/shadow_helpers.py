@@ -58,7 +58,30 @@ def is_shadow_helper(obj):
     return bool(obj.get(_SHADOW_TAG))
 
 
-def scene_mesh_objects(context, light_obj):
+def collect_collection_objects(collection):
+    """Return all objects in *collection* and its sub-collections (recursive)."""
+    objs = set()
+    def _recurse(col):
+        for obj in col.objects:
+            objs.add(obj)
+        for child in col.children:
+            _recurse(child)
+    _recurse(collection)
+    return objs
+
+
+def scene_mesh_objects(context, light_obj, allowed_objects=None):
+    """Return mesh objects for shadow computation.
+
+    If *allowed_objects* is provided (a set of bpy.types.Object), only objects
+    in that set are returned and view-layer visibility is bypassed (the caller
+    explicitly chose these objects). Otherwise all visible scene meshes are used.
+    """
+    if allowed_objects is not None:
+        return [
+            o for o in allowed_objects
+            if o != light_obj and o.type == "MESH" and not is_shadow_helper(o)
+        ]
     return [
         o for o in context.scene.objects
         if o != light_obj and o.type == "MESH"

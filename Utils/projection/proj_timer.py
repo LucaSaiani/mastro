@@ -56,6 +56,7 @@ def _run_projection(s):
     # set was computed before the shadow timer fired).
     shadow_names = {o.name for o in scene.objects if is_shadow_helper(o)}
     excluded = s["excluded_names"] | shadow_names
+    allowed_names = s.get("allowed_names")
 
     if not s.get("running"):
         props = bpy.context.scene.mastro_projector_props
@@ -75,11 +76,13 @@ def _run_projection(s):
                 "clip_start":   camera.data.clip_start,
                 "clip_end":     camera.data.clip_end,
             }
-        global_bvh, poly_to_obj = _build_global_bvh(scene, depsgraph, excluded, **clip_kw)
+        global_bvh, poly_to_obj = _build_global_bvh(
+            scene, depsgraph, excluded, **clip_kw, allowed_names=allowed_names
+        )
         projector = _Projector(props, global_bvh=global_bvh, poly_to_obj=poly_to_obj)
 
         results, aspect = projector.build_projection_per_object(
-            scene, depsgraph, camera, excluded
+            scene, depsgraph, camera, excluded, allowed_names=allowed_names
         )
         if not results:
             _finalize_proj(s, 0, 0, 0, 0, 0, time.perf_counter() - t_start)
