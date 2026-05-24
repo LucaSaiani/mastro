@@ -9,23 +9,25 @@
       
       
       
+        <link rel="prev" href="../move-active-vertex/">
       
-        <link rel="next" href="install/">
+      
+        <link rel="next" href="../view-layer-manager/">
       
       
         
       
       
-      <link rel="icon" href="assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>Introduction - MaStro</title>
+        <title>Node Editor - MaStro</title>
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
       
 
@@ -44,9 +46,9 @@
       
     
     
-      <link rel="stylesheet" href="stylesheets/extra.css">
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -64,7 +66,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#introduction" class="md-skip">
+        <a href="#node-editor" class="md-skip">
           Skip to content
         </a>
       
@@ -80,7 +82,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="." title="MaStro" class="md-header__button md-logo" aria-label="MaStro" data-md-component="logo">
+    <a href="../.." title="MaStro" class="md-header__button md-logo" aria-label="MaStro" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -100,7 +102,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Introduction
+              Node Editor
             
           </span>
         </div>
@@ -178,7 +180,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="." title="MaStro" class="md-nav__button md-logo" aria-label="MaStro" data-md-component="logo">
+    <a href="../.." title="MaStro" class="md-nav__button md-logo" aria-label="MaStro" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -193,20 +195,18 @@
       
   
   
-    
   
   
-  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
         
           
           <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
@@ -227,7 +227,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1">
             <span class="md-nav__icon md-icon"></span>
             
@@ -242,37 +242,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Introduction
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="." class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -288,37 +261,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#key-features" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Key Features
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -331,7 +273,7 @@
   
   
     <li class="md-nav__item">
-      <a href="install/" class="md-nav__link">
+      <a href="../../install/" class="md-nav__link">
         
   
   
@@ -413,7 +355,7 @@
   
   
     <li class="md-nav__item">
-      <a href="getting-started/core-concepts/" class="md-nav__link">
+      <a href="../../getting-started/core-concepts/" class="md-nav__link">
         
   
   
@@ -441,7 +383,7 @@
   
   
     <li class="md-nav__item">
-      <a href="getting-started/object-types/" class="md-nav__link">
+      <a href="../../getting-started/object-types/" class="md-nav__link">
         
   
   
@@ -469,7 +411,7 @@
   
   
     <li class="md-nav__item">
-      <a href="getting-started/typologies-and-uses/" class="md-nav__link">
+      <a href="../../getting-started/typologies-and-uses/" class="md-nav__link">
         
   
   
@@ -497,7 +439,7 @@
   
   
     <li class="md-nav__item">
-      <a href="getting-started/attribute-system/" class="md-nav__link">
+      <a href="../../getting-started/attribute-system/" class="md-nav__link">
         
   
   
@@ -529,18 +471,20 @@
       
   
   
+    
   
   
+  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
           <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
@@ -561,7 +505,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -626,7 +570,7 @@
   
   
     <li class="md-nav__item">
-      <a href="ui/sidebar-main-panel/" class="md-nav__link">
+      <a href="../sidebar-main-panel/" class="md-nav__link">
         
   
   
@@ -654,7 +598,7 @@
   
   
     <li class="md-nav__item">
-      <a href="ui/sidebar-mass/" class="md-nav__link">
+      <a href="../sidebar-mass/" class="md-nav__link">
         
   
   
@@ -682,7 +626,7 @@
   
   
     <li class="md-nav__item">
-      <a href="ui/sidebar-block/" class="md-nav__link">
+      <a href="../sidebar-block/" class="md-nav__link">
         
   
   
@@ -710,7 +654,7 @@
   
   
     <li class="md-nav__item">
-      <a href="ui/sidebar-street/" class="md-nav__link">
+      <a href="../sidebar-street/" class="md-nav__link">
         
   
   
@@ -738,7 +682,7 @@
   
   
     <li class="md-nav__item">
-      <a href="ui/sidebar-architecture/" class="md-nav__link">
+      <a href="../sidebar-architecture/" class="md-nav__link">
         
   
   
@@ -766,7 +710,7 @@
   
   
     <li class="md-nav__item">
-      <a href="ui/sidebar-geometry-data/" class="md-nav__link">
+      <a href="../sidebar-geometry-data/" class="md-nav__link">
         
   
   
@@ -794,7 +738,7 @@
   
   
     <li class="md-nav__item">
-      <a href="ui/sidebar-custom-properties/" class="md-nav__link">
+      <a href="../sidebar-custom-properties/" class="md-nav__link">
         
   
   
@@ -822,7 +766,7 @@
   
   
     <li class="md-nav__item">
-      <a href="ui/sidebar-export/" class="md-nav__link">
+      <a href="../sidebar-export/" class="md-nav__link">
         
   
   
@@ -905,7 +849,7 @@
   
   
     <li class="md-nav__item">
-      <a href="ui/properties-project-data/" class="md-nav__link">
+      <a href="../properties-project-data/" class="md-nav__link">
         
   
   
@@ -933,7 +877,7 @@
   
   
     <li class="md-nav__item">
-      <a href="ui/properties-typology/" class="md-nav__link">
+      <a href="../properties-typology/" class="md-nav__link">
         
   
   
@@ -961,7 +905,7 @@
   
   
     <li class="md-nav__item">
-      <a href="ui/properties-overlays/" class="md-nav__link">
+      <a href="../properties-overlays/" class="md-nav__link">
         
   
   
@@ -1044,7 +988,7 @@
   
   
     <li class="md-nav__item">
-      <a href="ui/xy-constraint/" class="md-nav__link">
+      <a href="../xy-constraint/" class="md-nav__link">
         
   
   
@@ -1072,7 +1016,7 @@
   
   
     <li class="md-nav__item">
-      <a href="ui/transform-orientation/" class="md-nav__link">
+      <a href="../transform-orientation/" class="md-nav__link">
         
   
   
@@ -1100,7 +1044,7 @@
   
   
     <li class="md-nav__item">
-      <a href="ui/move-active-vertex/" class="md-nav__link">
+      <a href="../move-active-vertex/" class="md-nav__link">
         
   
   
@@ -1133,10 +1077,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="ui/node-editor/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Node Editor
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1152,6 +1123,98 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#mastro-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MaStro Panel
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MaStro Panel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rename-reroute" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rename Reroute
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sort-multi-input" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sort Multi-Input
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sticky-note" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sticky Note
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#note-sub-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Note Sub-panel
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#schedule-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schedule System
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1164,7 +1227,7 @@
   
   
     <li class="md-nav__item">
-      <a href="ui/view-layer-manager/" class="md-nav__link">
+      <a href="../view-layer-manager/" class="md-nav__link">
         
   
   
@@ -1192,7 +1255,7 @@
   
   
     <li class="md-nav__item">
-      <a href="ui/projection/" class="md-nav__link">
+      <a href="../projection/" class="md-nav__link">
         
   
   
@@ -1220,7 +1283,7 @@
   
   
     <li class="md-nav__item">
-      <a href="ui/import/" class="md-nav__link">
+      <a href="../import/" class="md-nav__link">
         
   
   
@@ -1248,7 +1311,7 @@
   
   
     <li class="md-nav__item">
-      <a href="ui/preferences/" class="md-nav__link">
+      <a href="../preferences/" class="md-nav__link">
         
   
   
@@ -1330,7 +1393,7 @@
   
   
     <li class="md-nav__item">
-      <a href="nodes/overview/" class="md-nav__link">
+      <a href="../../nodes/overview/" class="md-nav__link">
         
   
   
@@ -1358,7 +1421,7 @@
   
   
     <li class="md-nav__item">
-      <a href="nodes/architecture/" class="md-nav__link">
+      <a href="../../nodes/architecture/" class="md-nav__link">
         
   
   
@@ -1386,7 +1449,7 @@
   
   
     <li class="md-nav__item">
-      <a href="nodes/curve/" class="md-nav__link">
+      <a href="../../nodes/curve/" class="md-nav__link">
         
   
   
@@ -1414,7 +1477,7 @@
   
   
     <li class="md-nav__item">
-      <a href="nodes/indices/" class="md-nav__link">
+      <a href="../../nodes/indices/" class="md-nav__link">
         
   
   
@@ -1442,7 +1505,7 @@
   
   
     <li class="md-nav__item">
-      <a href="nodes/instances/" class="md-nav__link">
+      <a href="../../nodes/instances/" class="md-nav__link">
         
   
   
@@ -1470,7 +1533,7 @@
   
   
     <li class="md-nav__item">
-      <a href="nodes/materials/" class="md-nav__link">
+      <a href="../../nodes/materials/" class="md-nav__link">
         
   
   
@@ -1498,7 +1561,7 @@
   
   
     <li class="md-nav__item">
-      <a href="nodes/mesh/" class="md-nav__link">
+      <a href="../../nodes/mesh/" class="md-nav__link">
         
   
   
@@ -1526,7 +1589,7 @@
   
   
     <li class="md-nav__item">
-      <a href="nodes/street/" class="md-nav__link">
+      <a href="../../nodes/street/" class="md-nav__link">
         
   
   
@@ -1554,7 +1617,7 @@
   
   
     <li class="md-nav__item">
-      <a href="nodes/utilities/" class="md-nav__link">
+      <a href="../../nodes/utilities/" class="md-nav__link">
         
   
   
@@ -1636,7 +1699,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/operators/" class="md-nav__link">
+      <a href="../../reference/operators/" class="md-nav__link">
         
   
   
@@ -1664,7 +1727,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/custom-attributes/" class="md-nav__link">
+      <a href="../../reference/custom-attributes/" class="md-nav__link">
         
   
   
@@ -1699,7 +1762,7 @@
   
   
     <li class="md-nav__item">
-      <a href="acknowledgement/" class="md-nav__link">
+      <a href="../../acknowledgement/" class="md-nav__link">
         
   
   
@@ -1726,7 +1789,7 @@
   
   
     <li class="md-nav__item">
-      <a href="copyright/" class="md-nav__link">
+      <a href="../../copyright/" class="md-nav__link">
         
   
   
@@ -1753,7 +1816,7 @@
   
   
     <li class="md-nav__item">
-      <a href="about/" class="md-nav__link">
+      <a href="../../about/" class="md-nav__link">
         
   
   
@@ -1800,10 +1863,71 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#key-features" class="md-nav__link">
+  <a href="#mastro-panel" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Key Features
+        MaStro Panel
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MaStro Panel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rename-reroute" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rename Reroute
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sort-multi-input" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sort Multi-Input
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sticky-note" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sticky Note
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#note-sub-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Note Sub-panel
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#schedule-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schedule System
       
     </span>
   </a>
@@ -1827,30 +1951,44 @@
 
 
 
-<h1 id="introduction">Introduction</h1>
-<p>MaStro is a Blender extension designed for architects and anyone interested in rapidly creating fully parametric 3D architectural models.</p>
-<p>The core idea is that the user models only the essentials — essentially a schematic footprint — and assigns the parameters needed to define the volume, such as height, building type, and usage. From there, Geometry Nodes takes care of the rest. This approach can also be applied to tracing roads.</p>
-<h2 id="key-features">Key Features</h2>
+<h1 id="node-editor">Node Editor</h1>
+<p>MaStro adds a <strong>MaStro</strong> tab to the sidebar of the <strong>Node Editor</strong> when a Geometry Nodes or Shader Nodes tree is open. It provides utilities for managing nodes and a data-analysis scheduling system.</p>
+<hr />
+<h2 id="mastro-panel">MaStro Panel</h2>
+<p>The MaStro panel appears when a node is selected. The available controls depend on the type of active node.</p>
+<h3 id="rename-reroute">Rename Reroute</h3>
+<p>Available when the active node is a <strong>Reroute</strong> node.</p>
+<p><strong>Rename Reroute from Source Socket</strong><br />
+Automatically renames the reroute node to match the name of the socket it is connected to. Useful for keeping complex node trees readable without manually typing names.</p>
+<p>Keyboard shortcut: <strong>Shift+Ctrl+F2</strong>.</p>
+<h3 id="sort-multi-input">Sort Multi-Input</h3>
+<p>Available when the active node is a <strong>Join Geometry</strong> or <strong>Geometry to Instance</strong> node.</p>
+<p><strong>Sort Multi-Input</strong><br />
+Re-orders the inputs of the selected node. This is useful when the order of geometry inputs matters for subsequent operations and the automatic wiring order is not what you need.</p>
+<h3 id="sticky-note">Sticky Note</h3>
+<p>Available when the active node is a <strong>Frame</strong> node.</p>
+<p>If the frame already has a sticky note attached:<br />
+<strong>Edit the Sticky Note</strong> — opens an editor to modify the note text and appearance.</p>
+<p>If the frame does not have a sticky note:<br />
+<strong>Add a Sticky Note</strong> — converts the frame into a styled sticky note with editable text.</p>
+<p>Sticky notes are a lightweight annotation system for documenting node trees directly inside the node editor.</p>
+<hr />
+<h2 id="note-sub-panel">Note Sub-panel</h2>
+<p>The <strong>Note</strong> sub-panel appears below the MaStro panel when a Frame node is selected. It provides the same sticky note controls in a dedicated collapsible section.</p>
+<hr />
+<h2 id="schedule-system">Schedule System</h2>
+<p>MaStro includes a <strong>custom node tree</strong> type (the MaStro Schedule) for building data analysis and area schedules directly inside Blender's Node Editor. Open the Node Editor, switch the tree type to <strong>MaStro</strong>, and the schedule nodes become available.</p>
+<p>The schedule system provides nodes for:</p>
 <ul>
-<li>The extension operates on two levels:<ul>
-<li>A Python component that mainly manages the assignment of custom parameters to geometries.</li>
-<li>A set of Geometry Nodes dedicated to modeling.</li>
+<li><strong>Input nodes</strong> — read data from all MaStro objects in the scene, or from the current selection only.</li>
+<li><strong>Attribute nodes</strong> — extract specific attributes (area, use, storey level, perimeter, etc.) from the input objects.</li>
+<li><strong>Math nodes</strong> — perform arithmetic operations on the extracted data.</li>
+<li><strong>Table nodes</strong> — aggregate and format data into a table structure.</li>
+<li><strong>Viewer node</strong> — display the computed table directly in the node editor.</li>
 </ul>
-</li>
-<li>Custom nodes are designed to:<ul>
-<li>Quickly model main architectural elements such as walls, facades, and openings.</li>
-<li>Allow the development of additional nodes, recognizing that no extension can meet every user's needs.</li>
-</ul>
-</li>
-<li>This manual provides:<ul>
-<li>A detailed description of all available features.</li>
-<li>Practical examples to understand their full potential.</li>
-</ul>
-</li>
-</ul>
-<p>MaStro has been tested over the years on numerous architectural projects, ranging from single buildings with just a few floors to masterplans encompassing hundreds of buildings.. The name MaStro reflects the extension's versatility: it can be interpreted as <em>Masterplan and Roads</em>, <em>Mass and Streets</em>, or a combination of both.
-And, of course, <em>Mastro</em> in Italian can refer to a teacher, a master craftman or an expert.</p>
-<p>Enjoy!</p>
+<p>This system allows you to build live area schedules, floor-by-floor breakdowns, and custom aggregations without leaving Blender. The schedule updates automatically when the selection or the MaStro object parameters change.</p>
+<p>!!! note
+    Detailed documentation of each schedule node is provided in the <a href="../../nodes/utilities/">Nodes — Utilities</a> section.</p>
 
 
 
@@ -1879,15 +2017,31 @@ And, of course, <em>Mastro</em> in Italian can refer to a teacher, a master craf
       
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
+          
+          <a href="../move-active-vertex/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Move Active Vertex">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Move Active Vertex
+              </div>
+            </div>
+          </a>
+        
         
           
-          <a href="install/" class="md-footer__link md-footer__link--next" aria-label="Next: Install">
+          <a href="../view-layer-manager/" class="md-footer__link md-footer__link--next" aria-label="Next: View Layer Manager">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Install
+                View Layer Manager
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -1924,10 +2078,10 @@ And, of course, <em>Mastro</em> in Italian can refer to a teacher, a master craf
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.footer"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.footer"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>
