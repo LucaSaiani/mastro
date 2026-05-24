@@ -6,9 +6,10 @@ Flow:
   3. invoke_props_dialog: tab Objects | Collection
        Objects   → scrollable UIList of mesh+GP, checkbox per item
        Collection→ pick one collection, imports everything inside
-  4. Confirm → conflict dialog if needed → import + remap
+  4. Confirm → remap scene lists → link objects
 
 Resolution order: Uses → Typologies → Walls → Floors → Streets → Buildings → Blocks
+Matching: identical parameters → remap to existing; any difference → add as new entry.
 """
 
 import bpy
@@ -31,21 +32,6 @@ class MASTRO_PG_ImportCollection(PropertyGroup):
     pass   # name comes from PropertyGroup base
 
 
-class MASTRO_PG_ImportConflict(PropertyGroup):
-    list_type: StringProperty()
-    source_id: IntProperty()
-    label:     StringProperty()
-    choice: EnumProperty(
-        name="Action",
-        items=[
-            ('USE_EXISTING', "Use existing",
-             "Remap imported objects to the already-present entry"),
-            ('ADD_NEW',      "Add as new",
-             "Import this entry as a new item and keep using it"),
-        ],
-        default='USE_EXISTING',
-    )
-
 
 # ── Shared state ──────────────────────────────────────────────────────────────
 
@@ -55,9 +41,8 @@ _state: dict = {
     "obj_types":            {},   # {name: 'MESH'|'GP'}
     "all_collection_names": [],
     "collection_obj_map":   {},   # {coll_name: [obj_name, ...]}
-    "src_scene_name":       None,
+    "filepath":             "",
     "remaps":               {},
-    "raw_conflicts":        [],
     "select_op_ref":        None,
 }
 
@@ -208,8 +193,8 @@ class OBJECT_OT_Import_Mastro_Select(Operator):
         for name in _state["all_obj_names"]:
             item           = self.objects.add()
             item.name      = name
-            item.selected  = True
             item.is_mastro = name in mastro_names
+            item.selected  = True
             item.obj_type  = obj_types.get(name, 'MESH')
         self.collections.clear()
         for name in _state.get("all_collection_names", []):
@@ -293,42 +278,75 @@ class OBJECT_OT_Import_Mastro_Select(Operator):
     # ── Shared remap + hand-off ───────────────────────────────────────────────
 
     def _remap_and_finish(self, context, selected_names):
-        mastro_names  = _state.get("mastro_names", set())
-        src_scene     = bpy.data.scenes.get(_state.get("src_scene_name") or "")
-        mastro_objs   = [bpy.data.objects.get(n) for n in selected_names
-                         if n in mastro_names and bpy.data.objects.get(n)]
+        mastro_names = _state.get("mastro_names", set())
+        mastro_objs  = [bpy.data.objects.get(n) for n in selected_names
+                        if n in mastro_names and bpy.data.objects.get(n)]
 
-        scene         = context.scene
-        unique        = _collect_unique_entries(mastro_objs, src_scene)
-        raw_conflicts = []
+        # Load scene now (deferred from initial load) for remap data.
+        src_scene = None
+        fp = _state.get("filepath", "")
+        if fp:
+            try:
+                # Record existing objects before loading to clean up afterwards.
+                existing_obj_names = set(bpy.data.objects.keys())
+                with bpy.data.libraries.load(fp, link=False) as (src, dst):
+                    dst.scenes = src.scenes[:1]
+                src_scene = dst.scenes[0] if dst.scenes else None
+                # Remove any objects the scene load pulled in as copies.
+                for name in set(bpy.data.objects.keys()) - existing_obj_names:
+                    obj = bpy.data.objects.get(name)
+                    if obj:
+                        bpy.data.objects.remove(obj, do_unlink=True)
+            except Exception as e:
+                self.report({'WARNING'}, f"Could not load scene for remap: {e}")
+        else:
+            self.report({'WARNING'}, "Filepath missing — scene attributes will not be remapped.")
 
-        use_remap   = _build_remap(unique["use"],      "use",      scene, raw_conflicts)
+        if src_scene is None and mastro_objs:
+            self.report({'WARNING'}, "Source scene not found — scene list entries will not be imported.")
+
+        scene  = context.scene
+        unique = _collect_unique_entries(mastro_objs, src_scene)
+
+        use_remap   = _build_remap(unique["use"],      "use",      scene)
         for tid in unique["typology"]:
             unique["typology"][tid]["useList"] = _remap_use_list(
                 unique["typology"][tid]["useList"], use_remap)
-        typo_remap  = _build_remap(unique["typology"], "typology", scene, raw_conflicts,
-                                   use_remap=use_remap)
-        wall_remap  = _build_remap(unique["wall"],     "wall",     scene, raw_conflicts)
-        floor_remap = _build_remap(unique["floor"],    "floor",    scene, raw_conflicts)
-        str_remap   = _build_remap(unique["street"],   "street",   scene, raw_conflicts)
-        bld_remap   = _build_remap(unique["building"], "building", scene, raw_conflicts)
-        blk_remap   = _build_remap(unique["block"],    "block",    scene, raw_conflicts)
+        typo_remap  = _build_remap(unique["typology"], "typology", scene)
+        wall_remap  = _build_remap(unique["wall"],     "wall",     scene)
+        floor_remap = _build_remap(unique["floor"],    "floor",    scene)
+        str_remap   = _build_remap(unique["street"],   "street",   scene)
+        bld_remap   = _build_remap(unique["building"], "building", scene)
+        blk_remap   = _build_remap(unique["block"],    "block",    scene)
 
         if src_scene:
             bpy.data.scenes.remove(src_scene, do_unlink=True)
-        _state["src_scene_name"] = None
-        _state["all_obj_names"]  = selected_names
-        _state["remaps"] = {
+
+        remaps = {
             "use": use_remap, "typology": typo_remap, "wall": wall_remap,
             "floor": floor_remap, "street": str_remap,
             "building": bld_remap, "block": blk_remap,
         }
-        _state["raw_conflicts"] = raw_conflicts
 
-        if raw_conflicts:
-            bpy.ops.object.mastro_import_resolve('INVOKE_DEFAULT')
-        else:
-            bpy.ops.object.mastro_import_resolve('EXEC_DEFAULT')
+        imported = []
+        for name in selected_names:
+            obj = bpy.data.objects.get(name)
+            if obj is None:
+                continue
+            if name not in scene.collection.objects:
+                scene.collection.objects.link(obj)
+            imported.append(obj)
+
+        _apply_remap_to_objects(mastro_objs, remaps)
+
+        if imported:
+            bpy.ops.object.select_all(action='DESELECT')
+            for obj in imported:
+                obj.select_set(True)
+            context.view_layer.objects.active = imported[0]
+
+        _state.clear()
+        self.report({'INFO'}, f"Imported {len(imported)} object(s): {', '.join(o.name for o in imported)}.")
         return {'FINISHED'}
 
     def _discard_all(self):
@@ -336,13 +354,10 @@ class OBJECT_OT_Import_Mastro_Select(Operator):
             obj = bpy.data.objects.get(name)
             if obj:
                 bpy.data.objects.remove(obj, do_unlink=True)
-        sc = bpy.data.scenes.get(_state.get("src_scene_name") or "")
-        if sc:
-            bpy.data.scenes.remove(sc, do_unlink=True)
         _state.update({"all_obj_names": [], "mastro_names": set(),
                         "obj_types": {}, "all_collection_names": [],
-                        "collection_obj_map": {}, "src_scene_name": None,
-                        "remaps": {}, "raw_conflicts": []})
+                        "collection_obj_map": {}, "filepath": "",
+                        "remaps": {}})
 
 
 # ── Operator: file browser + modal loading phase ─────────────────────────────
@@ -371,8 +386,8 @@ class OBJECT_OT_Import_Mastro_Objects(Operator):
 
         _state.update({"all_obj_names": [], "mastro_names": set(),
                         "obj_types": {}, "all_collection_names": [],
-                        "collection_obj_map": {}, "src_scene_name": None,
-                        "remaps": {}, "raw_conflicts": [], "select_op_ref": None,
+                        "collection_obj_map": {}, "filepath": "",
+                        "remaps": {}, "select_op_ref": None,
                         "_filepath": fp})
         self._ticks = 0
         self._timer = context.window_manager.event_timer_add(0.05, window=context.window)
@@ -402,17 +417,14 @@ class OBJECT_OT_Import_Mastro_Objects(Operator):
     def _load_file(self, context, fp):
         try:
             with bpy.data.libraries.load(fp, link=False) as (src, dst):
-                src_coll_names  = list(src.collections)   # original names before rename
-                dst.scenes      = src.scenes[:1]
+                src_coll_names  = list(src.collections)
                 dst.objects     = list(src.objects)
                 dst.collections = list(src.collections)
         except Exception as e:
             self.report({'ERROR'}, f"Could not read file: {e}")
             return 'CANCELLED'
 
-        src_scene       = dst.scenes[0]      if dst.scenes      else None
-        all_objects     = [o for o in dst.objects     if o is not None]
-        all_collections = [c for c in dst.collections if c is not None]
+        all_objects = [o for o in dst.objects if o is not None]
 
         mesh_gp = [o for o in all_objects if _is_mesh_or_gp(o)]
         for o in all_objects:
@@ -420,15 +432,7 @@ class OBJECT_OT_Import_Mastro_Objects(Operator):
                 bpy.data.objects.remove(o, do_unlink=True)
 
         if not mesh_gp:
-            if src_scene:
-                bpy.data.scenes.remove(src_scene, do_unlink=True)
             self.report({'WARNING'}, "No mesh or grease pencil objects found.")
-            return 'CANCELLED'
-
-        if src_scene is None:
-            for o in mesh_gp:
-                bpy.data.objects.remove(o, do_unlink=True)
-            self.report({'ERROR'}, "Could not read scene data from file.")
             return 'CANCELLED'
 
         mesh_gp_names = {o.name for o in mesh_gp}
@@ -444,90 +448,13 @@ class OBJECT_OT_Import_Mastro_Objects(Operator):
             if names:
                 collection_obj_map[orig_name] = names
 
-        _state["src_scene_name"]       = src_scene.name
+        _state["filepath"]             = fp
         _state["all_obj_names"]        = sorted(mesh_gp_names)
         _state["mastro_names"]         = mastro_names
         _state["obj_types"]            = obj_types
         _state["all_collection_names"] = sorted(collection_obj_map.keys())
         _state["collection_obj_map"]   = collection_obj_map
         return 'FINISHED'
-
-
-# ── Operator: conflict resolution + final import ──────────────────────────────
-
-class OBJECT_OT_Import_Mastro_Resolve(Operator):
-    """Resolve attribute conflicts and finalise the Mastro import"""
-    bl_idname  = "object.mastro_import_resolve"
-    bl_label   = "Resolve Import Conflicts"
-    bl_options = {'INTERNAL', 'UNDO'}
-
-    conflicts: CollectionProperty(type=MASTRO_PG_ImportConflict)
-
-    def invoke(self, context, event):
-        self.conflicts.clear()
-        for rc in _state.get("raw_conflicts", []):
-            item           = self.conflicts.add()
-            item.list_type = rc["list_type"]
-            item.source_id = rc["source_id"]
-            item.label     = rc["label"]
-            item.choice    = 'USE_EXISTING'
-        return context.window_manager.invoke_props_dialog(self, width=520)
-
-    def draw(self, context):
-        layout = self.layout
-        layout.label(text="Conflicts — choose how to resolve each entry:")
-        layout.separator(factor=0.5)
-        col = layout.column(align=True)
-        for item in self.conflicts:
-            row = col.row(align=True)
-            row.label(text=item.label)
-            row.prop(item, "choice", text="")
-
-    def execute(self, context):
-        remaps        = _state.get("remaps", {})
-        raw_conflicts = _state.get("raw_conflicts", [])
-        obj_names     = _state.get("all_obj_names", [])
-
-        for item in self.conflicts:
-            if item.choice != 'ADD_NEW':
-                continue
-            rc = next((c for c in raw_conflicts
-                       if c["list_type"] == item.list_type
-                       and c["source_id"] == item.source_id), None)
-            if rc is None:
-                continue
-            collection = _get_scene_list(context.scene, item.list_type)
-            new_id     = _next_free_id(collection)
-            _add_entry(collection, item.list_type, rc["params"], new_id)
-            remaps[item.list_type][item.source_id] = new_id
-
-        scene    = context.scene
-        imported = []
-        for name in obj_names:
-            obj = bpy.data.objects.get(name)
-            if obj is None:
-                continue
-            if name not in scene.collection.objects:
-                scene.collection.objects.link(obj)
-            imported.append(obj)
-
-        if not imported:
-            _state.clear()
-            self.report({'WARNING'}, "No objects could be linked.")
-            return {'CANCELLED'}
-
-        mastro_names = _state.get("mastro_names", set())
-        mastro_objs  = [o for o in imported if o.name in mastro_names]
-        _apply_remap_to_objects(mastro_objs, remaps)
-
-        bpy.ops.object.select_all(action='DESELECT')
-        for obj in imported:
-            obj.select_set(True)
-        context.view_layer.objects.active = imported[0]
-
-        _state.clear()
-        self.report({'INFO'}, f"Imported {len(imported)} object(s).")
-        return {'FINISHED'}
 
 
 # ── Object type helpers ───────────────────────────────────────────────────────
@@ -557,7 +484,7 @@ def _attr_values(obj, attr_name, domain):
     attr = mesh.attributes[attr_name]
     if attr.domain != domain:
         return set()
-    return {d.value for d in attr.data} - {0}
+    return {d.value for d in attr.data}
 
 
 def _by_id(collection, eid):
@@ -567,6 +494,8 @@ def _by_id(collection, eid):
 def _collect_unique_entries(objects, src_scene):
     unique = {t: {} for t in
               ("use","typology","wall","floor","street","building","block")}
+    if not objects or src_scene is None:
+        return unique
     for obj in objects:
         mesh      = obj.data
         is_block  = bool(mesh.get("MaStro block"))
@@ -614,13 +543,13 @@ def _collect_unique_entries(objects, src_scene):
                         "streetEdgeColor": tuple(e.streetEdgeColor)}
 
         bid = obj.mastro_props.mastro_building_attribute
-        if bid and bid not in unique["building"]:
+        if bid is not None and bid not in unique["building"]:
             e = _by_id(src_scene.mastro_building_name_list, bid)
             if e:
                 unique["building"][bid] = {"name": e.name}
 
         blk = obj.mastro_props.mastro_block_attribute
-        if blk and blk not in unique["block"]:
+        if blk is not None and blk not in unique["block"]:
             e = _by_id(src_scene.mastro_block_name_list, blk)
             if e:
                 unique["block"][blk] = {"name": e.name}
@@ -655,6 +584,7 @@ def _params_match(a, b):
         elif va != vb:
             return False
     return True
+
 
 
 def _scene_params(entry, list_type):
@@ -720,7 +650,7 @@ def _remap_use_list(use_list_str, use_remap):
     return ";".join(str(use_remap.get(int(p), int(p))) for p in parts)
 
 
-def _build_remap(unique_entries, list_type, scene, conflicts_out, use_remap=None):
+def _build_remap(unique_entries, list_type, scene, use_remap=None):
     remap = {}; collection = _get_scene_list(scene, list_type)
     for src_id, params in unique_entries.items():
         cmp = dict(params)
@@ -728,18 +658,12 @@ def _build_remap(unique_entries, list_type, scene, conflicts_out, use_remap=None
             cmp["useList"] = _remap_use_list(params["useList"], use_remap)
         match_id = next((e.id for e in collection
                          if _params_match(cmp, _scene_params(e, list_type))), None)
-        if match_id is None:
+        if match_id is not None:
+            remap[src_id] = match_id
+        else:
             new_id = _next_free_id(collection)
             _add_entry(collection, list_type, cmp, new_id)
             remap[src_id] = new_id
-        else:
-            conflicts_out.append({
-                "list_type": list_type, "source_id": src_id,
-                "match_id": match_id, "params": cmp,
-                "label": (f"[{list_type}]  \"{params['name']}\""
-                          f"  (src {src_id} ↔ scene {match_id})"),
-            })
-            remap[src_id] = match_id
     return remap
 
 
