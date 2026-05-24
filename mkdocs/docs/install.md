@@ -6,7 +6,7 @@ MaStro requires **Blender 5.0 or later**. It is distributed as a Blender Extensi
 
 ## Dependencies
 
-MaStro uses **SciPy** for geometric computations in the 2D projection and shadow baking system. When the extension is enabled for the first time, Blender will automatically download and install SciPy into its bundled Python environment. An internet connection is required for this step.
+MaStro uses **SciPy** for geometric computations in the 2D projection and shadow baking system. SciPy is bundled directly in the extension package and installed automatically by Blender when the extension is enabled — no internet connection is required.
 
 No other external libraries are needed.
 
