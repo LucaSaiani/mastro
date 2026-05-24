@@ -8,11 +8,27 @@ on:
 jobs:
   zip:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - platform: linux-x64
+            wheel: scipy-1.16.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
+            platforms_toml: '"linux-x64"'
+          - platform: windows-x64
+            wheel: scipy-1.16.3-cp313-cp313-win_amd64.whl
+            platforms_toml: '"windows-x64"'
+          - platform: macos-arm64
+            wheel: scipy-1.16.3-cp313-cp313-macosx_14_0_arm64.whl
+            platforms_toml: '"macos-arm64"'
+          - platform: macos-x64
+            wheel: scipy-1.15.3-cp313-cp313-macosx_10_13_x86_64.whl
+            platforms_toml: '"macos-x64"'
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create folder with selected files
+      - name: Assemble addon folder
         run: |
           mkdir mastro
           cp -r Handlers mastro/
@@ -22,21 +38,47 @@ jobs:
           cp -r Operators mastro/
           cp -r UI mastro/
           cp -r Utils mastro/
-          cp -r *.py mastro/
+          cp __init__.py mastro/
           cp mastro.blend mastro/
           cp LICENSE.txt mastro/
-          cp blender_manifest.toml mastro/
 
-      - name: Create ZIP file
+          mkdir mastro/wheels
+          cp wheels/${{ matrix.wheel }} mastro/wheels/
+
+      - name: Write platform-specific manifest
         run: |
-          cd mastro
-          zip -r ../mastro.zip .
-          
-      - name: Create GitHub release
+          python3 - <<'EOF'
+          import re
+
+          with open("blender_manifest.toml") as f:
+              content = f.read()
+
+          # Uncomment and set platforms
+          content = re.sub(
+              r'^# platforms = .*$',
+              'platforms = ["${{ matrix.platform }}"]',
+              content, flags=re.MULTILINE
+          )
+
+          # Replace wheels block
+          content = re.sub(
+              r'wheels = \[.*?\]',
+              'wheels = [\n  "./wheels/${{ matrix.wheel }}",\n]',
+              content, flags=re.DOTALL
+          )
+
+          with open("mastro/blender_manifest.toml", "w") as f:
+              f.write(content)
+          EOF
+
+      - name: Create ZIP
+        run: zip -r mastro-${{ matrix.platform }}.zip mastro/
+
+      - name: Upload to GitHub release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: latest-mastro
-          name: MaStro ZIP
-          files: mastro.zip
+          name: MaStro
+          files: mastro-${{ matrix.platform }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
