@@ -7,7 +7,8 @@ from .OBJECT_OT_Add_Mastro_Street import OBJECT_OT_Add_Mastro_Street
 from .OBJECT_OT_Convert_to_Mastro import OBJECT_OT_Convert_to_Mastro_Mass, OBJECT_OT_Convert_to_Mastro_Street
 from .OBJECT_OT_Set_Street_Id import OBJECT_OT_Set_Street_Id
 from .OBJECT_OT_Update_Mastro_Mesh_Attributes import OBJECT_OT_Update_Mastro_Mesh_Attributes
-from .OBJECT_OT_Update_Street_Attributes import OBJECT_OT_Mastro_Update_All_Street_Attributes
+from .OBJECT_OT_Update_Street_Attributes import OBJECT_OT_Mastro_Update_Street_Attributes
+from .OBJECT_OT_Update_Mastro_Custom_Properties import OBJECT_OT_Update_Mastro_Custom_Properties, OBJECT_OT_Remove_Mastro_Custom_Property
 from .OBJECT_OT_Export_Data import OBJECT_OT_Mastro_Export_CSV, OBJECT_OT_Mastro_Print_Data
 
 from .TRANSFORM_OT_Set_Orientation import TRANSFORM_OT_Mastro_Set_Orientation
@@ -51,7 +52,8 @@ classes = (
     OBJECT_OT_Convert_to_Mastro_Street,
     OBJECT_OT_Set_Street_Id,
     OBJECT_OT_Update_Mastro_Mesh_Attributes,
-    OBJECT_OT_Mastro_Update_All_Street_Attributes,
+    OBJECT_OT_Mastro_Update_Street_Attributes,
+    OBJECT_OT_Update_Mastro_Custom_Properties,
     OBJECT_OT_Mastro_Export_CSV,
     OBJECT_OT_Mastro_Print_Data,
 
@@ -75,6 +77,7 @@ classes = (
     MASTRO_OT_CameraSetMoveDown,
     MASTRO_OT_CameraSetToggleCamera,
     MASTRO_OT_RenderShadowModal,
+    OBJECT_OT_Remove_Mastro_Custom_Property,
 
     MASTRO_PG_ImportObject,
     MASTRO_PG_ImportCollection,

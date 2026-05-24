@@ -14,7 +14,10 @@ Matching: identical parameters → remap to existing; any difference → add as 
 
 import bpy
 import os
+import re
 import fnmatch as _fnmatch
+
+_custom_key_re = re.compile(r'^mastro_custom_(\d+)$')
 from bpy.types import Operator, PropertyGroup, UIList, Menu
 from bpy.props import (StringProperty, CollectionProperty,
                        EnumProperty, IntProperty, BoolProperty)
@@ -316,8 +319,9 @@ class OBJECT_OT_Import_Mastro_Select(Operator):
         wall_remap  = _build_remap(unique["wall"],     "wall",     scene)
         floor_remap = _build_remap(unique["floor"],    "floor",    scene)
         str_remap   = _build_remap(unique["street"],   "street",   scene)
-        bld_remap   = _build_remap(unique["building"], "building", scene)
-        blk_remap   = _build_remap(unique["block"],    "block",    scene)
+        bld_remap    = _build_remap(unique["building"], "building", scene)
+        blk_remap    = _build_remap(unique["block"],    "block",    scene)
+        custom_remap = _build_remap(unique["custom"],   "custom",   scene)
 
         if src_scene:
             bpy.data.scenes.remove(src_scene, do_unlink=True)
@@ -325,7 +329,7 @@ class OBJECT_OT_Import_Mastro_Select(Operator):
         remaps = {
             "use": use_remap, "typology": typo_remap, "wall": wall_remap,
             "floor": floor_remap, "street": str_remap,
-            "building": bld_remap, "block": blk_remap,
+            "building": bld_remap, "block": blk_remap, "custom": custom_remap,
         }
 
         imported = []
@@ -493,7 +497,7 @@ def _by_id(collection, eid):
 
 def _collect_unique_entries(objects, src_scene):
     unique = {t: {} for t in
-              ("use","typology","wall","floor","street","building","block")}
+              ("use","typology","wall","floor","street","building","block","custom")}
     if not objects or src_scene is None:
         return unique
     for obj in objects:
@@ -554,6 +558,18 @@ def _collect_unique_entries(objects, src_scene):
             if e:
                 unique["block"][blk] = {"name": e.name}
 
+        for key in obj.keys():
+            m = _custom_key_re.match(key)
+            if not m:
+                continue
+            cid = int(m.group(1))
+            if cid in unique["custom"]:
+                continue
+            e = _by_id(src_scene.mastro_custom_property_name_list, cid)
+            if e:
+                unique["custom"][cid] = {
+                    "name": e.name, "property_type": e.property_type}
+
     for _tid, tp in unique["typology"].items():
         for uid_str in tp["useList"].split(";"):
             uid_str = uid_str.strip()
@@ -606,6 +622,8 @@ def _scene_params(entry, list_type):
                 "streetEdgeColor": tuple(entry.streetEdgeColor)}
     if list_type in ("building", "block"):
         return {"name": entry.name}
+    if list_type == "custom":
+        return {"name": entry.name, "property_type": entry.property_type}
     return {}
 
 
@@ -616,7 +634,8 @@ def _get_scene_list(scene, list_type):
             "floor": scene.mastro_floor_name_list,
             "street": scene.mastro_street_name_list,
             "building": scene.mastro_building_name_list,
-            "block": scene.mastro_block_name_list}[list_type]
+            "block":   scene.mastro_block_name_list,
+            "custom":  scene.mastro_custom_property_name_list}[list_type]
 
 
 def _next_free_id(collection):
@@ -643,6 +662,9 @@ def _add_entry(collection, list_type, params, new_id):
         item.streetWidth = params["streetWidth"]
         item.streetRadius = params["streetRadius"]
         item.streetEdgeColor = params["streetEdgeColor"]
+    elif list_type == "custom":
+        item.property_type = params["property_type"]
+        item.committed = True
 
 
 def _remap_use_list(use_list_str, use_remap):
@@ -707,3 +729,11 @@ def _apply_remap_to_objects(objects, remaps):
             new = remaps["block"].get(old)
             if new is not None:
                 obj.mastro_props.mastro_block_attribute = new
+        if "custom" in remaps:
+            for src_id, dst_id in remaps["custom"].items():
+                src_key = f"mastro_custom_{src_id}"
+                dst_key = f"mastro_custom_{dst_id}"
+                if src_key in obj:
+                    obj[dst_key] = obj[src_key]
+                    if src_key != dst_key:
+                        del obj[src_key]

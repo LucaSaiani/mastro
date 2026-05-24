@@ -44,4 +44,6 @@ class LAYER_MANAGER_OT_Move_Item(Operator):
         else:
             return {'CANCELLED'}
 
+        for area in context.screen.areas:
+            area.tag_redraw()
         return {'FINISHED'}

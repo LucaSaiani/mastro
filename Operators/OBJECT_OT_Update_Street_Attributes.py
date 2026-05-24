@@ -3,8 +3,8 @@ from bpy.types import Operator
 
 from ..Utils.read_street_attribute import read_street_attribute
 # Operator to update the attributes of all the MaStro streets in the scene        
-class OBJECT_OT_Mastro_Update_All_Street_Attributes(Operator):
-    bl_idname = "object.update_all_mastro_street_attributes"
+class OBJECT_OT_Mastro_Update_Street_Attributes(Operator):
+    bl_idname = "object.update_mastro_street_attributes"
     bl_label = "Update"
     bl_options = {'REGISTER', 'UNDO'}
     

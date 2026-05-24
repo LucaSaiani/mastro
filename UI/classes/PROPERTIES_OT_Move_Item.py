@@ -42,6 +42,8 @@ class PROPERTIES_OT_Move_Item(Operator):
 
             
             
+        for area in context.screen.areas:
+            area.tag_redraw()
         return {'FINISHED'}
 
 # Move the selected use up or down in the list
