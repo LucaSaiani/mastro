@@ -5,8 +5,19 @@ nav:
     - Install: install.md
   - Getting Started:
     - Core Concepts: getting-started/core-concepts.md
-    - Object Types: getting-started/object-types.md
-    - Typologies and Uses: getting-started/typologies-and-uses.md
+    - Object Types:
+      - Object Types: getting-started/object-types.md
+      - Mass: getting-started/object-type-mass.md
+      - Block: getting-started/object-type-block.md
+      - Street: getting-started/object-type-street.md
+      - Dimension: getting-started/object-type-dimension.md
+    - Typologies and Uses:
+      - Typologies and Uses: getting-started/typologies-and-uses.md
+      - Use: getting-started/typologies-use.md
+      - Typology: getting-started/typologies-typology.md
+      - Fixed vs Variable Storeys: getting-started/typologies-storeys.md
+      - Undercroft: getting-started/typologies-undercroft.md
+      - Top Floor Override: getting-started/typologies-top-floor.md
     - The Attribute System: getting-started/attribute-system.md
   - User Interface:
     - Viewport Sidebar:
@@ -20,8 +31,15 @@ nav:
       - Export: ui/sidebar-export.md
     - Properties Editor:
       - Project Data: ui/properties-project-data.md
-      - Typology: ui/properties-typology.md
       - Overlays: ui/properties-overlays.md
+      - Mass:
+        - Typology: ui/properties-typology.md
+        - Block: ui/properties-block.md
+        - Building: ui/properties-building.md
+      - Architecture: ui/properties-architecture.md
+      - Street: ui/properties-street.md
+      - Custom Properties: ui/properties-custom-properties.md
+      - Camera Sets: ui/properties-camera-sets.md
     - Tools:
       - XY Constraint: ui/xy-constraint.md
       - Transform Orientation: ui/transform-orientation.md
@@ -33,14 +51,140 @@ nav:
     - Preferences: ui/preferences.md
   - Nodes:
     - Overview: nodes/overview.md
-    - Architecture: nodes/architecture.md
-    - Curve: nodes/curve.md
-    - Indices: nodes/indices.md
-    - Instances: nodes/instances.md
-    - Materials: nodes/materials.md
-    - Mesh: nodes/mesh.md
-    - Street: nodes/street.md
-    - Utilities: nodes/utilities.md
+    - Architecture:
+      - Annotation:
+        - Attribute Visualiser: nodes/architecture/annotation/attribute-visualiser.md
+        - Brick Dimension: nodes/architecture/annotation/brick-dimension.md
+        - Dimension: nodes/architecture/annotation/dimension.md
+        - Read Slope: nodes/architecture/annotation/read-slope.md
+        - Reference Grid: nodes/architecture/annotation/reference-grid.md
+        - Ruler: nodes/architecture/annotation/ruler.md
+      - Elements:
+        - Adaptive Stair: nodes/architecture/elements/adaptive-stair.md
+        - Building Shadow: nodes/architecture/elements/building-shadow.md
+        - Catenary: nodes/architecture/elements/catenary.md
+        - Elements - Flag: nodes/architecture/elements/elements---flag.md
+        - Elements - Pergola: nodes/architecture/elements/elements---pergola.md
+        - Nave: nodes/architecture/elements/nave.md
+        - Pitch Roof: nodes/architecture/elements/pitch-roof.md
+        - Rails: nodes/architecture/elements/rails.md
+        - Stair: nodes/architecture/elements/stair.md
+        - Steel Profile: nodes/architecture/elements/steel-profile.md
+        - Vault: nodes/architecture/elements/vault.md
+        - Visibility Study: nodes/architecture/elements/visbility-study.md
+      - Facade:
+        - Arched Opening: nodes/architecture/facade/arched-opening.md
+        - Awning: nodes/architecture/facade/awning.md
+        - Facade Line Based: nodes/architecture/facade/facade-line-based.md
+        - Façade: nodes/architecture/facade/façade.md
+        - Façade Corner: nodes/architecture/facade/façade-corner.md
+        - Façade Pattern: nodes/architecture/facade/façade-pattern.md
+        - Folding Shutter: nodes/architecture/facade/folding-shutter.md
+        - Line Based Sum Height: nodes/architecture/facade/line-based-sum-height.md
+        - Opening: nodes/architecture/facade/opening.md
+        - Pivot Edge: nodes/architecture/facade/pivot-edge.md
+        - Triangle Opening: nodes/architecture/facade/triangle-opening.md
+        - Triangular Grid: nodes/architecture/facade/triangular-grid.md
+        - Window: nodes/architecture/facade/window.md
+      - Mass:
+        - Block: nodes/architecture/mass/block.md
+        - Convert Mass to Floor Lines: nodes/architecture/mass/convert-mass-to-floor-lines.md
+        - Floor Grid: nodes/architecture/mass/floor-grid.md
+        - Footprint: nodes/architecture/mass/footprint.md
+        - Generate Floors: nodes/architecture/mass/generate-floors.md
+        - Generate Topology: nodes/architecture/mass/generate-topology.md
+        - Line Based Building: nodes/architecture/mass/line-based-building.md
+        - Mass: nodes/architecture/mass/mass.md
+        - Mass Walls: nodes/architecture/mass/mass-walls.md
+        - Parapet: nodes/architecture/mass/parapet.md
+        - Perimeter: nodes/architecture/mass/perimeter.md
+        - Rooms: nodes/architecture/mass/rooms.md
+        - Separate Mass: nodes/architecture/mass/separate-mass.md
+    - Curve:
+      - Bevel 2D: nodes/curve/bevel-2d.md
+      - Bevel 3D: nodes/curve/bevel-3d.md
+      - Curve Noise: nodes/curve/curve-noise.md
+      - Fill Curve: nodes/curve/fill-curve.md
+      - Instances Along Curve: nodes/curve/instances-along-curve.md
+      - Loft Curves: nodes/curve/loft-curves.md
+      - Loft Profiles: nodes/curve/loft-profiles.md
+      - Mitered Mesh: nodes/curve/mitered-mesh.md
+      - Move Points along Curve: nodes/curve/move-points-along-curve.md
+      - Sine Wave: nodes/curve/sine-wave.md
+      - Stretch Edge: nodes/curve/stretch-edge.md
+    - Indices:
+      - Flip Indices: nodes/indices/flip-indices.md
+      - Highest/Lowest Boolean: nodes/indices/highestlowest-boolean.md
+      - Highest/Lowest Edge Index: nodes/indices/highestlowest-edge-index.md
+      - Instance Packer: nodes/indices/instance-packer.md
+      - Is Edge Cyclic: nodes/indices/is-edge-cyclic.md
+      - Is Point on Edge: nodes/indices/is-point-on-edge.md
+      - Offset Indices: nodes/indices/offset-indices.md
+      - Point Siblings: nodes/indices/point-siblings.md
+      - Random Points along Edge: nodes/indices/random-points-along-edge.md
+      - Set Edge ID: nodes/indices/set-edge-id.md
+      - Shuffle Indices: nodes/indices/shuffle-indices.md
+      - Sort Elements: nodes/indices/sort-elements.md
+    - Instances:
+      - Collection info +: nodes/instances/collection-info.md
+      - Distribute Instances: nodes/instances/distribute-instances.md
+      - Split to Instances: nodes/instances/split-to-instances.md
+    - Materials:
+      - Filter by Block Side: nodes/materials/filter-by-block-side.md
+      - Filter by Street Type: nodes/materials/filter-by-street-type.md
+      - Filter by Typology: nodes/materials/filter-by-typology.md
+      - Filter by Use: nodes/materials/filter-by-use.md
+      - Filter by Wall Type: nodes/materials/filter-by-wall-type.md
+      - Separate Geometry by Block Side: nodes/materials/separate-geometry-by-block-side.md
+      - Separate Geometry by Street Type: nodes/materials/separate-geometry-by-street-type.md
+      - Separate Geometry by Typology: nodes/materials/separate-geometry-by-typology.md
+      - Separate Geometry by Use: nodes/materials/separate-geometry-by-use.md
+      - Separate Geometry by Wall Type: nodes/materials/separate-geometry-by-wall-type.md
+    - Mesh:
+      - Contour Mesh: nodes/mesh/contour-mesh.md
+      - Custom Corners: nodes/mesh/custom-corners.md
+      - Delaunay: nodes/mesh/delaunay.md
+      - Dissolve Aligned: nodes/mesh/dissolve-aligned.md
+      - Edge Offset 2D: nodes/mesh/edge-offset-2d.md
+      - Edge Offset 3D: nodes/mesh/edge-offset-3d.md
+      - Extrude: nodes/mesh/extrude.md
+      - Face UV Map: nodes/mesh/face-uv-map.md
+      - Fix Normals: nodes/mesh/fix-normals.md
+      - Flat Projection: nodes/mesh/flat-projection.md
+      - Grease Pencil: nodes/mesh/grease-pencil.md
+      - Grease Pencil to Landscape: nodes/mesh/grease-pencil-to-landscape.md
+      - Grid: nodes/mesh/grid.md
+      - Grid Diagonals: nodes/mesh/grid-diagonals.md
+      - Hexagonal Grid: nodes/mesh/hexagonal-grid.md
+      - Inset Faces: nodes/mesh/inset-faces.md
+      - Mirror: nodes/mesh/mirror.md
+      - Plane UV Map: nodes/mesh/plane-uv-map.md
+      - Set Edge Position: nodes/mesh/set-edge-position.md
+      - Set Position: nodes/mesh/set-position.md
+      - Shear: nodes/mesh/shear.md
+      - Solidify: nodes/mesh/solidify.md
+      - Tartan: nodes/mesh/tartan.md
+      - UV Mapping: nodes/mesh/uv-mapping.md
+      - UV Visualiser: nodes/mesh/uv-visualiser.md
+      - Unify Normals: nodes/mesh/unify-normals.md
+    - Street:
+      - Offset Street Edges: nodes/street/offset-street-edges.md
+      - Street: nodes/street/street.md
+      - Street Elements: nodes/street/street-elements.md
+    - Utilities:
+      - Angle between Edges: nodes/utilities/angle-between-edges.md
+      - Camera Culling: nodes/utilities/camera-culling.md
+      - Edge Vectors: nodes/utilities/edge-vectors.md
+      - Ellipse: nodes/utilities/ellipse.md
+      - Intersection 2D: nodes/utilities/intersection-2d.md
+      - Intersection Between Line and Plane: nodes/utilities/intersection-between-line-and-plane.md
+      - Perpendicular Point on a Line: nodes/utilities/perpendicular-point-on-a-line.md
+      - Random Value: nodes/utilities/random-value.md
+      - Round Value: nodes/utilities/round-value.md
+      - Shortest Line Between Lines in 3D: nodes/utilities/shortest-line-between-lines-in-3d.md
+      - Tangent Tangent Center: nodes/utilities/tangent-tangent-center.md
+      - Vector: nodes/utilities/vector.md
+      - Vectors: nodes/utilities/vectors.md
   - Reference:
     - Operators: reference/operators.md
     - Attributes and Properties: reference/custom-attributes.md
@@ -67,6 +211,8 @@ theme:
         name: Switch to dark mode
   features:
     - navigation.footer
+    - toc.integrate
+    - navigation.prune
 
 extra_css:
   - stylesheets/extra.css
