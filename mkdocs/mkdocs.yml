@@ -15,7 +15,8 @@ nav:
       - Block: ui/sidebar-block.md
       - Street: ui/sidebar-street.md
       - Architecture: ui/sidebar-architecture.md
-      - Extras: ui/sidebar-extras.md
+      - Geometry Data: ui/sidebar-geometry-data.md
+      - Custom Properties: ui/sidebar-custom-properties.md
       - Export: ui/sidebar-export.md
     - Properties Editor:
       - Project Data: ui/properties-project-data.md
@@ -42,7 +43,7 @@ nav:
     - Utilities: nodes/utilities.md
   - Reference:
     - Operators: reference/operators.md
-    - Custom Attributes: reference/custom-attributes.md
+    - Attributes and Properties: reference/custom-attributes.md
   - Acknowledgement: acknowledgement.md
   - Copyright: copyright.md
   - About: about.md
