@@ -30,6 +30,16 @@ from .OBJECT_OT_camera_sets import (
     MASTRO_OT_CameraSetToggleCamera,
 )
 from ..Utils.projection.shadow_render import MASTRO_OT_RenderShadowModal
+from .OBJECT_OT_import_mastro_objects import (MASTRO_PG_ImportObject,
+                                               MASTRO_PG_ImportCollection,
+                                               MASTRO_PG_ImportConflict,
+                                               MASTRO_UL_ImportObjects,
+                                               MASTRO_UL_ImportCollections,
+                                               MASTRO_MT_ImportSpecials,
+                                               OBJECT_OT_Import_Mastro_Toggle_All,
+                                               OBJECT_OT_Import_Mastro_Select,
+                                               OBJECT_OT_Import_Mastro_Objects,
+                                               OBJECT_OT_Import_Mastro_Resolve)
 
 
 classes = (
@@ -67,4 +77,15 @@ classes = (
     MASTRO_OT_CameraSetMoveDown,
     MASTRO_OT_CameraSetToggleCamera,
     MASTRO_OT_RenderShadowModal,
+
+    MASTRO_PG_ImportObject,
+    MASTRO_PG_ImportCollection,
+    MASTRO_PG_ImportConflict,
+    MASTRO_UL_ImportObjects,
+    MASTRO_UL_ImportCollections,
+    MASTRO_MT_ImportSpecials,
+    OBJECT_OT_Import_Mastro_Toggle_All,
+    OBJECT_OT_Import_Mastro_Select,
+    OBJECT_OT_Import_Mastro_Objects,
+    OBJECT_OT_Import_Mastro_Resolve,
     )

@@ -223,7 +223,13 @@ def get_addon_classes(revert=False):
 
     return classes
 
-    
+
+def _mastro_import_menu(self, context):
+    self.layout.operator("object.mastro_import_objects",
+                         text="Mastro Objects (.blend)",
+                         icon='NONE')
+
+
 def register():
     ############################################################
     ### register icons ###
@@ -251,6 +257,7 @@ def register():
     
     ### register UI  buttons
     register_ui_buttons()
+    bpy.types.TOPBAR_MT_file_import.append(_mastro_import_menu)
         
     ### register shortcuts ###
     register_keymaps()
@@ -347,6 +354,7 @@ def unregister():
     unregister_keymaps()
     
     ### unregister UI  buttons
+    bpy.types.TOPBAR_MT_file_import.remove(_mastro_import_menu)
     unregister_ui_buttons()
    
     ### unregister nodes UI ###
