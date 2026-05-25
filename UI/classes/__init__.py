@@ -28,7 +28,7 @@ from .VIEW3D_PT_Mastro_Block import VIEW3D_PT_Mastro_Block
 from .VIEW3D_PT_Mastro_Extras import VIEW3D_PT_Mastro_Extras
 from .VIEW3D_PT_Mastro_Mass import VIEW3D_PT_Mastro_Mass
 from .VIEW3D_PT_Mastro_Street import VIEW3D_PT_Mastro_Street
-from .VIEW3D_PT_transform_orientations import VIEW3D_PT_transform_orientations
+from .VIEW3D_PT_Transform_Orientations import VIEW3D_PT_Transform_Orientations
 from .VIEW3D_PT_Mastro_Override import VIEW3D_PT_Mastro_Mass_Override, VIEW3D_PT_Mastro_Block_Override
 from .VIEW3D_PT_Mastro_Export import VIEW3D_PT_Mastro_Export
 from .NODE_EDITOR_PT_Mastro_Panel import NODE_EDITOR_PT_Mastro_Panel
@@ -77,7 +77,7 @@ classes = (
     VIEW3D_PT_Mastro_Extras,
     VIEW3D_PT_Mastro_Mass,
     VIEW3D_PT_Mastro_Street,
-    VIEW3D_PT_transform_orientations,
+    VIEW3D_PT_Transform_Orientations,
     VIEW3D_PT_Mastro_Mass_Override, 
     VIEW3D_PT_Mastro_Block_Override,
     VIEW3D_PT_Mastro_Export,
@@ -105,14 +105,15 @@ classes = (
 # - node_type: tuple of node categories ("gn", "shader") to update on add/move
 # - extra_action: "add use" triggers a linked use entry; None for no side-effect
 MASTRO_LISTS = [
-    # name,             color_attr,             filter_name       node type             extra_action
-    ("block",           None,                   "block",        ("shader",),            None),
-    ("building",        None,                   "building",     ("shader",),            None),
-    ("typology",        "typologyEdgeColor",    "typology",     ("gn","shader"),        "add use"),
-    ("wall",            "wallEdgeColor",        "wall type",    ("gn","shader"),        None),
-    ("floor",           None,                   None,           None,                   None),
-    ("street",          "streetEdgeColor",      "street type",  ("gn", "shader"),       None),
-    ("custom_property", None,                   None,           None,                   None),
+    # name,                     color_attr,         filter_name     node type           extra_action
+    ("block",                   None,               "block",        ("shader",),        None),
+    ("building",                None,               "building",     ("shader",),        None),
+    ("typology",                "typologyEdgeColor","typology",     ("gn","shader"),    "add use"),
+    ("wall",                    "wallEdgeColor",    "wall type",    ("gn","shader"),    None),
+    ("floor",                   None,               None,           None,               None),
+    ("street",                  "streetEdgeColor",  "street type",  ("gn", "shader"),   None),
+    ("custom_property",         None,               None,           None,               None),
+    ("custom_property_string",  None,               None,           None,               None),
 ]
 
 # ============================================================

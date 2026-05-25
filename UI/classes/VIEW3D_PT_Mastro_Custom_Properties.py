@@ -58,16 +58,10 @@ class VIEW3D_PT_Mastro_Custom_Properties(Panel):
             if key not in obj:
                 continue
 
-            row = layout.row()
-            row.label(text=attr.name)
-            if attr.property_type == 'INT':
-                row.prop(obj, f'["{key}"]', text="")
-            elif attr.property_type == 'FLOAT':
-                row.prop(obj, f'["{key}"]', text="")
-            elif attr.property_type == 'BOOL':
-                row.prop(obj, f'["{key}"]', text="")
-            elif attr.property_type == 'STRING':
-                row.prop(obj, f'["{key}"]', text="")
+            if attr.property_type == 'STRING':
+                layout.prop(scene, "mastro_custom_property_string_name", text=attr.name)
+            else:
+                layout.prop(obj, f'["{key}"]', text=attr.name)
             any_shown = True
 
         if not any_shown:

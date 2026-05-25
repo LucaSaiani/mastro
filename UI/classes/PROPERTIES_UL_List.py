@@ -20,6 +20,8 @@ class PROPERTIES_UL_List(UIList):
                 sub = split.split()
                 sub.label(text="Id: %d" % (item.id))
                 sub.prop(collection[index], self.color_attr, text="")
+            elif hasattr(item, "committed"):
+                split.label(text=f"mastro_custom_{item.id}")
             else:
                 split.label(text=f"Id: {item.id}")
             row = split.row(align=True)

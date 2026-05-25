@@ -20,6 +20,7 @@ from .property_classes import (mastro_CL_addon_properties,
                                mastro_CL_camera_set,
                                mastro_CL_projector_scene_props,
                                mastro_CL_custom_property_name_list,
+                               mastro_CL_custom_property_string_name_list,
 )
 
 classes = (
@@ -47,4 +48,5 @@ classes = (
     mastro_CL_camera_set,
     mastro_CL_projector_scene_props,
     mastro_CL_custom_property_name_list,
+    mastro_CL_custom_property_string_name_list,
 )

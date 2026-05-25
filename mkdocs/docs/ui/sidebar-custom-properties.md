@@ -6,4 +6,6 @@ Custom properties are defined in the Properties editor (see [Custom Properties](
 
 Each assigned custom property appears as a labelled field. The label is the property name as defined in the Project Data panel. The field type (integer, float, boolean, or text input) matches the property type. Changes made here affect only the active object.
 
+For **String** properties, the field is a dropdown listing all available string values. The options are always displayed in **alphabetical order**, regardless of the order they appear in the Project Data list. This makes it easier to find values quickly and ensures a consistent experience even after reordering the list.
+
 The panel is hidden when the object is not a MaStro object, when in Edit Mode, or when no custom properties have been assigned to the object.

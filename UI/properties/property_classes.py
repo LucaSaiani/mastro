@@ -239,6 +239,18 @@ class mastro_CL_custom_property_name_list(PropertyGroup):
 
     committed : BoolProperty(name="Committed", default=False)
     
+class mastro_CL_custom_property_string_name_list(PropertyGroup):
+    """Editable sub-list of strings shown in the custom attribute panel."""
+    id: IntProperty(
+           name="Id",
+           description="The custom string name id",
+           default = 0)
+    
+    name: StringProperty(
+           name="Name",
+           description="The custom string name",
+           default="")
+    
     
 # ------------------------------
 # Floor Properties
