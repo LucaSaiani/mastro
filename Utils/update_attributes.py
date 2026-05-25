@@ -307,7 +307,40 @@ def update_mastro_street_radius(self, context):
     bpy.ops.object.update_mastro_street_attributes(attribute_to_update=updates)
   
 
+# ------------------------------
+# Classes - Custom Properties
+# ------------------------------  
+def update_custom_property_string_name(self, context):
+    """Write the selected string's id to all STRING custom properties on the active object."""
+    try:
+        string_id = int(context.scene.mastro_custom_property_string_name)
+    except (ValueError, TypeError):
+        return
+    _write_string_id_to_object(context, string_id=string_id)
 
+
+def update_custom_property_string_list_index(self, context):
+    """Called when the user selects a different row in the string template_list."""
+    _write_string_id_to_object(context)
+
+
+def _write_string_id_to_object(context, string_id=None):
+    obj = context.object
+    if obj is None:
+        return
+    scene = context.scene
+    if string_id is None:
+        idx = scene.mastro_custom_property_string_name_list_index
+        string_list = scene.mastro_custom_property_string_name_list
+        if idx < 0 or idx >= len(string_list):
+            return
+        string_id = string_list[idx].id
+    for prop in scene.mastro_custom_property_name_list:
+        if prop.property_type != 'STRING':
+            continue
+        key = f"mastro_custom_{prop.id}"
+        if key in obj:
+            obj[key] = string_id
 
 # #Update the typology label in the UI and all the relative data in the selected faces
 # def update_attributes_mastro_mesh_typology(self, context):

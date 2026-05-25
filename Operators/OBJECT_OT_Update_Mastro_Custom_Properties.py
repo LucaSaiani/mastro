@@ -18,7 +18,9 @@ def add_custom_properties_to_object(obj, is_street=False):
         elif prop.property_type == 'BOOL':
             obj[key] = prop.default_bool
         elif prop.property_type == 'STRING':
-            obj[key] = prop.default_string
+            string_list = scene.mastro_custom_property_string_name_list
+            first = min(string_list, key=lambda e: e.name, default=None)
+            obj[key] = first.id if first else 0
 
 
 class OBJECT_OT_Update_Mastro_Custom_Properties(Operator):
@@ -66,7 +68,9 @@ class OBJECT_OT_Update_Mastro_Custom_Properties(Operator):
                     elif prop.property_type == 'BOOL':
                         obj[key] = obj.get(key, prop.default_bool)
                     elif prop.property_type == 'STRING':
-                        obj[key] = obj.get(key, prop.default_string)
+                        string_list = context.scene.mastro_custom_property_string_name_list
+                        first = min(string_list, key=lambda e: e.name, default=None)
+                        obj[key] = obj.get(key, first.id if first else 0)
 
         if not self.remove:
             for prop in props:
@@ -74,6 +78,27 @@ class OBJECT_OT_Update_Mastro_Custom_Properties(Operator):
 
         for area in bpy.context.screen.areas:
             area.tag_redraw()
+        return {'FINISHED'}
+
+
+class OBJECT_OT_Mastro_Activate_String_Property(Operator):
+    """Set the active STRING custom property key so the dropdown knows where to write"""
+    bl_idname  = "object.mastro_activate_string_property"
+    bl_label   = "Select"
+    bl_options = {'INTERNAL'}
+
+    property_key: bpy.props.StringProperty()
+
+    def execute(self, context):
+        context.scene.mastro_active_custom_string_property_key = self.property_key
+        # Sync the enum to the current value on the object
+        obj = context.object
+        if obj and self.property_key in obj:
+            string_list = context.scene.mastro_custom_property_string_name_list
+            current_id  = obj.get(self.property_key, 0)
+            entry = next((e for e in string_list if e.id == current_id), None)
+            if entry:
+                context.scene.mastro_custom_property_string_name = entry.name
         return {'FINISHED'}
 
 

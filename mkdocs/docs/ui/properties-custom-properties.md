@@ -29,3 +29,6 @@ Each entry in the list has:
 ---
 
 Per-object values are edited in the **Custom Properties** panel in the 3D viewport sidebar. See [Custom Properties](sidebar-custom-properties.md) for details.
+
+!!! note
+    For **String** properties, the dropdown in the 3D viewport sidebar lists the available values in **alphabetical order**, regardless of the order defined in this panel. This is intentional: alphabetical ordering makes it easier to locate a specific string when the list is long.
