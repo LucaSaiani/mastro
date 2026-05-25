@@ -1,5 +1,9 @@
 # Introduction
 
+<div style="text-align: center; max-width: 600px; margin: auto;">
+  ![MaStro Logo](assets/mastro_logo.png)
+</div>
+
 MaStro is a Blender extension designed for architects and anyone interested in rapidly creating fully parametric 3D architectural models.
 
 The core idea is that the user models only the essentials — a schematic footprint — and assigns the parameters needed to define the volume: height, building type, usage. From there, Geometry Nodes takes care of the rest. This approach applies equally to tracing roads.
