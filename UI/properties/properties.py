@@ -326,24 +326,6 @@ scene_props = [
     # ------------------------------
     ("mastro_custom_property_name_list", CollectionProperty(type=mastro_CL_custom_property_name_list)),
     ("mastro_custom_property_name_list_index", IntProperty(name="Custom Property Name", default=0)),
-    ("mastro_custom_property_string_name_list", CollectionProperty(type=mastro_CL_custom_property_string_name_list)),
-    ("mastro_custom_property_string_name_list_index", IntProperty(
-                                                    name="Custom String Name",
-                                                    default=0)),
-    ("mastro_custom_property_string_name", EnumProperty(
-        name="Custom String",
-        description="Select a string value for this property",
-        items=lambda self, context: (
-            sorted(
-                [(str(el.id), el.name, el.name, el.id)
-                 for el in context.scene.mastro_custom_property_string_name_list],
-                key=lambda t: t[1]
-            )
-            or [("0", "—", "No strings defined", 0)]
-        ),
-        get=get_custom_property_string_name,
-        set=set_custom_property_string_name,
-    )),
 ]
 
 # =============================================================================

@@ -2,7 +2,7 @@
 import bpy 
 from bpy.utils import register_class, unregister_class
 
-from .PROPERTIES_UL_List import PROPERTIES_UL_List, PROPERTIES_UL_Typology_Uses
+from .PROPERTIES_UL_List import PROPERTIES_UL_List, PROPERTIES_UL_Typology_Uses, PROPERTIES_UL_Custom_property_string
 from .PROPERTIES_OT_New_Item import PROPERTIES_OT_New_Item, PROPERTIES_OT_Typology_Uses_List_New_Item, PROPERTIES_OT_Use_List_New_Item
 from .PROPERTIES_OT_Move_Item import PROPERTIES_OT_Move_Item, PROPERTIES_OT_Typology_Uses_List_Move_Item
 from .PROPERTIES_OT_Remove_Item import PROPERTIES_OT_Remove_Item
@@ -56,6 +56,7 @@ classes = (
     PROPERTIES_OT_Typology_Uses_List_Delete_Item,
     PROPERTIES_UL_List,
     PROPERTIES_UL_Typology_Uses,
+    PROPERTIES_UL_Custom_property_string,
     PROPERTIES_OT_Typology_List_Duplicate_Item,
     # PROPERTIES_OT_Update_Use_List,
     VIEW3D_UL_Typology_Uses,
@@ -113,7 +114,6 @@ MASTRO_LISTS = [
     ("floor",                   None,               None,           None,               None),
     ("street",                  "streetEdgeColor",  "street type",  ("gn", "shader"),   None),
     ("custom_property",         None,               None,           None,               None),
-    ("custom_property_string",  None,               None,           None,               None),
 ]
 
 # ============================================================

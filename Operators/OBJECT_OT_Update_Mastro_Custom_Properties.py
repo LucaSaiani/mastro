@@ -1,5 +1,6 @@
 import bpy
 from bpy.types import Operator
+from ..Utils.string_property_enum import register_string_enum, unregister_string_enum
 
 
 def add_custom_properties_to_object(obj, is_street=False):
@@ -10,7 +11,7 @@ def add_custom_properties_to_object(obj, is_street=False):
         if not prop.committed:                        continue
         if is_mass   and not prop.assign_to_mass:    continue
         if is_street and not prop.assign_to_street:  continue
-        key = f"mastro_custom_{prop.id}"
+        key = f"_{prop.name}"  # _ prefix hides from Blender's native Custom Properties panel
         if prop.property_type == 'INT':
             obj[key] = prop.default_int
         elif prop.property_type == 'FLOAT':
@@ -18,8 +19,7 @@ def add_custom_properties_to_object(obj, is_street=False):
         elif prop.property_type == 'BOOL':
             obj[key] = prop.default_bool
         elif prop.property_type == 'STRING':
-            string_list = scene.mastro_custom_property_string_name_list
-            first = min(string_list, key=lambda e: e.name, default=None)
+            first = min(prop.string_options, key=lambda e: e.name, default=None)
             obj[key] = first.id if first else 0
 
 
@@ -52,7 +52,7 @@ class OBJECT_OT_Update_Mastro_Custom_Properties(Operator):
             if self.property_to_update == "street" and not is_street: continue
 
             for prop in props:
-                key = f"mastro_custom_{prop.id}"
+                key = f"_{prop.name}"
 
                 if self.remove:
                     if key in obj:
@@ -68,38 +68,21 @@ class OBJECT_OT_Update_Mastro_Custom_Properties(Operator):
                     elif prop.property_type == 'BOOL':
                         obj[key] = obj.get(key, prop.default_bool)
                     elif prop.property_type == 'STRING':
-                        string_list = context.scene.mastro_custom_property_string_name_list
-                        first = min(string_list, key=lambda e: e.name, default=None)
+                        first = min(prop.string_options, key=lambda e: e.name, default=None)
                         obj[key] = obj.get(key, first.id if first else 0)
 
         if not self.remove:
             for prop in props:
                 prop.committed = True
+                prop.previous_name = prop.name
+                if prop.property_type == 'STRING':
+                    register_string_enum(prop.id)
 
         for area in bpy.context.screen.areas:
             area.tag_redraw()
         return {'FINISHED'}
 
 
-class OBJECT_OT_Mastro_Activate_String_Property(Operator):
-    """Set the active STRING custom property key so the dropdown knows where to write"""
-    bl_idname  = "object.mastro_activate_string_property"
-    bl_label   = "Select"
-    bl_options = {'INTERNAL'}
-
-    property_key: bpy.props.StringProperty()
-
-    def execute(self, context):
-        context.scene.mastro_active_custom_string_property_key = self.property_key
-        # Sync the enum to the current value on the object
-        obj = context.object
-        if obj and self.property_key in obj:
-            string_list = context.scene.mastro_custom_property_string_name_list
-            current_id  = obj.get(self.property_key, 0)
-            entry = next((e for e in string_list if e.id == current_id), None)
-            if entry:
-                context.scene.mastro_custom_property_string_name = entry.name
-        return {'FINISHED'}
 
 
 class OBJECT_OT_Remove_Mastro_Custom_Property(Operator):
@@ -126,6 +109,9 @@ class OBJECT_OT_Remove_Mastro_Custom_Property(Operator):
         custom_list = context.scene.mastro_custom_property_name_list
         idx = next((i for i, p in enumerate(custom_list) if p.id == self.property_id), None)
         if idx is not None:
+            prop = custom_list[idx]
+            if prop.property_type == 'STRING':
+                unregister_string_enum(self.property_id)
             custom_list.remove(idx)
             context.scene.mastro_custom_property_name_list_index = max(0, idx - 1)
         for area in context.screen.areas:

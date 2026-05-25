@@ -32,3 +32,6 @@ Per-object values are edited in the **Custom Properties** panel in the 3D viewpo
 
 !!! note
     For **String** properties, the dropdown in the 3D viewport sidebar lists the available values in **alphabetical order**, regardless of the order defined in this panel. This is intentional: alphabetical ordering makes it easier to locate a specific string when the list is long.
+
+!!! note
+    Custom properties are stored internally with a leading underscore (e.g. `_My Property`). This hides them from Blender's native **Custom Properties** panel, preventing accidental renaming or deletion outside of MaStro. Always manage custom properties through the MaStro interface.

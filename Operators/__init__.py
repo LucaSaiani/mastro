@@ -8,7 +8,14 @@ from .OBJECT_OT_Convert_to_Mastro import OBJECT_OT_Convert_to_Mastro_Mass, OBJEC
 from .OBJECT_OT_Set_Street_Id import OBJECT_OT_Set_Street_Id
 from .OBJECT_OT_Update_Mastro_Mesh_Attributes import OBJECT_OT_Update_Mastro_Mesh_Attributes
 from .OBJECT_OT_Update_Street_Attributes import OBJECT_OT_Mastro_Update_Street_Attributes
-from .OBJECT_OT_Update_Mastro_Custom_Properties import OBJECT_OT_Update_Mastro_Custom_Properties, OBJECT_OT_Remove_Mastro_Custom_Property, OBJECT_OT_Mastro_Activate_String_Property
+from .OBJECT_OT_Update_Mastro_Custom_Properties import OBJECT_OT_Update_Mastro_Custom_Properties, OBJECT_OT_Remove_Mastro_Custom_Property
+from .OBJECT_OT_Mastro_String_Options import (
+    OBJECT_OT_Mastro_String_Option_New,
+    OBJECT_OT_Mastro_String_Option_Remove,
+    OBJECT_OT_Mastro_String_Option_Move,
+    OBJECT_OT_Mastro_Set_String_Property,
+    OBJECT_OT_Mastro_Set_String_Property_Menu,
+)
 from .OBJECT_OT_Export_Data import OBJECT_OT_Mastro_Export_CSV, OBJECT_OT_Mastro_Print_Data
 
 from .TRANSFORM_OT_Set_Orientation import TRANSFORM_OT_Mastro_Set_Orientation
@@ -78,7 +85,11 @@ classes = (
     MASTRO_OT_CameraSetToggleCamera,
     MASTRO_OT_RenderShadowModal,
     OBJECT_OT_Remove_Mastro_Custom_Property,
-    OBJECT_OT_Mastro_Activate_String_Property,
+    OBJECT_OT_Mastro_String_Option_New,
+    OBJECT_OT_Mastro_String_Option_Remove,
+    OBJECT_OT_Mastro_String_Option_Move,
+    OBJECT_OT_Mastro_Set_String_Property,
+    OBJECT_OT_Mastro_Set_String_Property_Menu,
 
     MASTRO_PG_ImportObject,
     MASTRO_PG_ImportCollection,

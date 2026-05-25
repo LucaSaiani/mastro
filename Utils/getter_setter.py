@@ -509,29 +509,4 @@ def set_attribute_mastro_object_building(self, value):
     set_attribute_mastro_object(value, "building")
 
 
-def get_custom_property_string_name(self):
-    obj = bpy.context.object
-    scene = bpy.context.scene
-    if obj is None:
-        return 0
-    for prop in scene.mastro_custom_property_name_list:
-        if prop.property_type != 'STRING':
-            continue
-        key = f"mastro_custom_{prop.id}"
-        if key in obj:
-            return obj[key]
-    return 0
-
-
-def set_custom_property_string_name(self, value):
-    obj = bpy.context.object
-    if obj is None:
-        return
-    scene = bpy.context.scene
-    for prop in scene.mastro_custom_property_name_list:
-        if prop.property_type != 'STRING':
-            continue
-        key = f"mastro_custom_{prop.id}"
-        if key in obj:
-            obj[key] = value
 

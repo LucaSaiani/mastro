@@ -29,7 +29,7 @@ class VIEW3D_PT_Mastro_Custom_Properties(Panel):
             p.committed and
             (is_mass   and p.assign_to_mass or
              is_street and p.assign_to_street) and
-            f"mastro_custom_{p.id}" in obj
+            f"_{p.name}" in obj
             for p in context.scene.mastro_custom_property_name_list
         )
 
@@ -54,12 +54,16 @@ class VIEW3D_PT_Mastro_Custom_Properties(Panel):
             if is_mass   and not attr.assign_to_mass:   continue
             if is_street and not attr.assign_to_street: continue
 
-            key = f"mastro_custom_{attr.id}"
+            key = f"_{attr.name}"
             if key not in obj:
                 continue
 
             if attr.property_type == 'STRING':
-                layout.prop(scene, "mastro_custom_property_string_name", text=attr.name)
+                enum_name = f"mastro_string_enum_{attr.id}"
+                if hasattr(scene, enum_name):
+                    layout.prop(scene, enum_name, text=attr.name)
+                else:
+                    layout.label(text=f"{attr.name}: not committed")
             else:
                 layout.prop(obj, f'["{key}"]', text=attr.name)
             any_shown = True
