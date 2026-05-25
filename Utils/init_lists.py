@@ -1,4 +1,5 @@
 import bpy
+from .string_property_enum import sync_string_enums
 
 def init_lists(scene=None):
     """Initialize all MaStro name lists with default values if empty."""
@@ -28,7 +29,6 @@ def init_lists(scene=None):
         ("mastro_street_name_list", {"name": "Street type"}),
         ("mastro_wall_name_list", {"name": "Wall type", "normal": 0}),
         ("mastro_floor_name_list", {"name": "Floor type"}),
-        ("mastro_custom_property_string_name_list", {"name": ""})
     ]
 
     # --- Apply initialization logic for all configured collections ---
@@ -43,5 +43,6 @@ def init_lists(scene=None):
     bpy.context.scene.mastro_wall_names
     bpy.context.scene.mastro_floor_names
     bpy.context.scene.mastro_street_names
+    sync_string_enums()
         
     

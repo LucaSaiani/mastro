@@ -16,6 +16,7 @@ import bpy
 import os
 import re
 import fnmatch as _fnmatch
+from ..Utils.string_property_enum import register_string_enum
 
 _custom_key_re = re.compile(r'^mastro_custom_(\d+)$')
 from bpy.types import Operator, PropertyGroup, UIList, Menu
@@ -321,7 +322,7 @@ class OBJECT_OT_Import_Mastro_Select(Operator):
         str_remap   = _build_remap(unique["street"],   "street",   scene)
         bld_remap    = _build_remap(unique["building"], "building", scene)
         blk_remap    = _build_remap(unique["block"],    "block",    scene)
-        custom_remap = _build_remap(unique["custom"],   "custom",   scene)
+        custom_remap, string_opt_remaps = _ensure_custom_props(unique["custom"], scene)
 
         if src_scene:
             bpy.data.scenes.remove(src_scene, do_unlink=True)
@@ -329,7 +330,8 @@ class OBJECT_OT_Import_Mastro_Select(Operator):
         remaps = {
             "use": use_remap, "typology": typo_remap, "wall": wall_remap,
             "floor": floor_remap, "street": str_remap,
-            "building": bld_remap, "block": blk_remap, "custom": custom_remap,
+            "building": bld_remap, "block": blk_remap,
+            "custom": custom_remap, "string_opts": string_opt_remaps,
         }
 
         imported = []
@@ -558,17 +560,15 @@ def _collect_unique_entries(objects, src_scene):
             if e:
                 unique["block"][blk] = {"name": e.name}
 
-        for key in obj.keys():
-            m = _custom_key_re.match(key)
-            if not m:
+        for prop in src_scene.mastro_custom_property_name_list:
+            if not prop.committed or f"_{prop.name}" not in obj:
                 continue
-            cid = int(m.group(1))
-            if cid in unique["custom"]:
-                continue
-            e = _by_id(src_scene.mastro_custom_property_name_list, cid)
-            if e:
-                unique["custom"][cid] = {
-                    "name": e.name, "property_type": e.property_type}
+            if prop.name not in unique["custom"]:
+                unique["custom"][prop.name] = {
+                    "name": prop.name,
+                    "property_type": prop.property_type,
+                    "string_options": [(o.id, o.name) for o in prop.string_options],
+                }
 
     for _tid, tp in unique["typology"].items():
         for uid_str in tp["useList"].split(";"):
@@ -665,6 +665,56 @@ def _add_entry(collection, list_type, params, new_id):
     elif list_type == "custom":
         item.property_type = params["property_type"]
         item.committed = True
+        item.previous_name = item.name
+
+
+def _next_free_string_opt_id(string_options):
+    used = {o.id for o in string_options}
+    i = 1
+    while i in used:
+        i += 1
+    return i
+
+
+def _ensure_custom_props(unique_custom, scene):
+    """Ensure all imported custom properties exist in dst scene.
+    Returns (set of names, {prop_name: {src_opt_id: dst_opt_id}})."""
+    collection = scene.mastro_custom_property_name_list
+    string_id_remaps = {}  # {prop_name: {src_id: dst_id}}
+
+    for prop_name, params in unique_custom.items():
+        existing = next((e for e in collection if e.name == prop_name), None)
+        if existing is None:
+            new_id = _next_free_id(collection)
+            item = collection.add()
+            item.id = new_id
+            item.name = params["name"]
+            item.previous_name = params["name"]
+            item.property_type = params["property_type"]
+            item.committed = True
+            remap = {}
+            for src_id, opt_name in params.get("string_options", []):
+                opt = item.string_options.add()
+                opt.id = _next_free_string_opt_id(item.string_options)
+                opt.name = opt_name
+                remap[src_id] = opt.id
+            if params["property_type"] == 'STRING':
+                register_string_enum(item.id)
+        else:
+            item = existing
+            remap = {}
+            for src_id, opt_name in params.get("string_options", []):
+                dst = next((o for o in item.string_options if o.name == opt_name), None)
+                if dst is None:
+                    opt = item.string_options.add()
+                    opt.id = _next_free_string_opt_id(item.string_options)
+                    opt.name = opt_name
+                    remap[src_id] = opt.id
+                else:
+                    remap[src_id] = dst.id
+        string_id_remaps[prop_name] = remap
+
+    return set(unique_custom.keys()), string_id_remaps
 
 
 def _remap_use_list(use_list_str, use_remap):
@@ -729,11 +779,12 @@ def _apply_remap_to_objects(objects, remaps):
             new = remaps["block"].get(old)
             if new is not None:
                 obj.mastro_props.mastro_block_attribute = new
-        if "custom" in remaps:
-            for src_id, dst_id in remaps["custom"].items():
-                src_key = f"mastro_custom_{src_id}"
-                dst_key = f"mastro_custom_{dst_id}"
-                if src_key in obj:
-                    obj[dst_key] = obj[src_key]
-                    if src_key != dst_key:
-                        del obj[src_key]
+        # remap string option ids on STRING custom properties
+        if "string_opts" in remaps:
+            for prop_name, opt_remap in remaps["string_opts"].items():
+                key = f"_{prop_name}"
+                if key in obj and opt_remap:
+                    old_val = obj[key]
+                    new_val = opt_remap.get(old_val)
+                    if new_val is not None:
+                        obj[key] = new_val

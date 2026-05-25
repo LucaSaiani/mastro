@@ -63,15 +63,16 @@ class PROPERTIES_PT_Mastro_Custom_Properties(Panel):
             row = layout.row()
             row.template_list(
                 "PROPERTIES_UL_Custom_property_string", "",
-                scene, "mastro_custom_property_string_name_list",
-                scene, "mastro_custom_property_string_name_list_index",
+                item, "string_options",
+                item, "string_options_index",
                 rows=3,
             )
             col = row.column(align=True)
-            col.operator("mastro_custom_property_string_name_list.new_item", icon='ADD', text="")
+            col.operator("mastro_string_options.new_item",    icon='ADD',        text="")
+            col.operator("mastro_string_options.remove_item", icon='REMOVE',     text="")
             col.separator()
-            col.operator("mastro_custom_property_string_name_list.move_item", icon='TRIA_UP',   text="").direction = 'UP'
-            col.operator("mastro_custom_property_string_name_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
+            col.operator("mastro_string_options.move_item",   icon='TRIA_UP',    text="").direction = 'UP'
+            col.operator("mastro_string_options.move_item",   icon='TRIA_DOWN',  text="").direction = 'DOWN'
 
         layout.prop(item, "description")
 

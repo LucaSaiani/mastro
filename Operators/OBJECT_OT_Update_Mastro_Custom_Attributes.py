@@ -10,7 +10,7 @@ def add_custom_properties_to_object(obj, is_street=False):
         if not attr.committed:                       continue
         if is_mass   and not attr.assign_to_mass:   continue
         if is_street and not attr.assign_to_street: continue
-        key = f"mastro_custom_{attr.id}"
+        key = f"_{attr.name}"
         if attr.property_type == 'INT':
             obj[key] = attr.default_int
         elif attr.property_type == 'FLOAT':
@@ -50,7 +50,7 @@ class OBJECT_OT_Update_Mastro_Custom_Attributes(Operator):
             if self.attribute_to_update == "street" and not is_street: continue
 
             for attr in attrs:
-                key = f"mastro_custom_{attr.id}"
+                key = f"_{attr.name}"
 
                 if self.remove:
                     if key in obj:
@@ -71,6 +71,7 @@ class OBJECT_OT_Update_Mastro_Custom_Attributes(Operator):
         if not self.remove:
             for attr in attrs:
                 attr.committed = True
+                attr.previous_name = attr.name
 
         return {'FINISHED'}
 

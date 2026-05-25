@@ -28,6 +28,8 @@ class PROPERTIES_OT_New_Item(Operator):
         # even when items are reordered or deleted (list index != id).
         ids = [el.id for el in collection if hasattr(el, 'id')]
         collection[last].id = max(ids) + 1 if ids else 1
+        if hasattr(collection[last], 'previous_name'):
+            collection[last].previous_name = collection[last].name
         
         # select the newly added element
         setattr(scene, self.index_name, last)

@@ -1,6 +1,24 @@
 import bpy
 from bpy.types import UIList
 
+
+class PROPERTIES_UL_Custom_property_string(UIList):
+    """UIList for string options inside a STRING custom property."""
+
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        if self.layout_type in {'DEFAULT', 'COMPACT'}:
+            layout.prop(item, "name", text="", emboss=False)
+        elif self.layout_type == 'GRID':
+            layout.alignment = 'CENTER'
+            layout.label(text="")
+
+    def filter_items(self, context, data, propname):
+        items = getattr(data, propname)
+        return [self.bitflag_filter_item] * len(items), []
+
+    def draw_filter(self, context, layout):
+        pass
+
 class PROPERTIES_UL_List(UIList):
     """Generic reusable UIList base class."""
     list_name: str = ""
@@ -21,7 +39,7 @@ class PROPERTIES_UL_List(UIList):
                 sub.label(text="Id: %d" % (item.id))
                 sub.prop(collection[index], self.color_attr, text="")
             elif hasattr(item, "committed"):
-                split.label(text=f"mastro_custom_{item.id}")
+                split.label(text="")
             else:
                 split.label(text=f"Id: {item.id}")
             row = split.row(align=True)
