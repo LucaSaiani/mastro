@@ -4,6 +4,7 @@ from .OBJECT_OT_Add_Mastro_Block import OBJECT_OT_Add_Mastro_Block
 from .OBJECT_OT_Add_Mastro_Dimension import OBJECT_OT_Add_Mastro_Dimension
 from .OBJECT_OT_Add_Mastro_Mass import OBJECT_OT_Add_Mastro_Mass
 from .OBJECT_OT_Add_Mastro_Street import OBJECT_OT_Add_Mastro_Street
+from .OBJECT_OT_Add_Mastro_Frame import OBJECT_OT_Add_Mastro_Frame
 from .OBJECT_OT_Convert_to_Mastro import OBJECT_OT_Convert_to_Mastro_Mass, OBJECT_OT_Convert_to_Mastro_Street
 from .OBJECT_OT_Set_Street_Id import OBJECT_OT_Set_Street_Id
 from .OBJECT_OT_Update_Mastro_Mesh_Attributes import OBJECT_OT_Update_Mastro_Mesh_Attributes
@@ -17,6 +18,7 @@ from .OBJECT_OT_Mastro_String_Options import (
     OBJECT_OT_Mastro_Set_String_Property_Menu,
 )
 from .OBJECT_OT_Export_Data import OBJECT_OT_Mastro_Export_CSV, OBJECT_OT_Mastro_Print_Data
+from .OBJECT_OT_Export_Mastro_Frame_PDF import OBJECT_OT_Export_Mastro_Frame_PDF
 
 from .TRANSFORM_OT_Set_Orientation import TRANSFORM_OT_Mastro_Set_Orientation
 from .TRANSFORM_OT_XY_Constraint import TRANSFORM_OT_Mastro_Rotate_XY_Constraint, TRANSFORM_OT_Mastro_Translate_XY_Constraint
@@ -55,6 +57,7 @@ classes = (
     OBJECT_OT_Add_Mastro_Dimension,
     OBJECT_OT_Add_Mastro_Mass,
     OBJECT_OT_Add_Mastro_Street,
+    OBJECT_OT_Add_Mastro_Frame,
     OBJECT_OT_Convert_to_Mastro_Mass,
     OBJECT_OT_Convert_to_Mastro_Street,
     OBJECT_OT_Set_Street_Id,
@@ -63,6 +66,7 @@ classes = (
     OBJECT_OT_Update_Mastro_Custom_Properties,
     OBJECT_OT_Mastro_Export_CSV,
     OBJECT_OT_Mastro_Print_Data,
+    OBJECT_OT_Export_Mastro_Frame_PDF,
 
     TRANSFORM_OT_Mastro_Set_Orientation,
     TRANSFORM_OT_Mastro_Translate_XY_Constraint,
