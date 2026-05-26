@@ -13,6 +13,7 @@ def add_mesh_menu(self, context):
     self.layout.operator("object.mastro_add_mastro_street", icon_value=myIcon)
     # myIcon = icons.icon_id("street")
     self.layout.operator("object.mastro_add_mastro_dimension", icon_value=myIcon)
+    self.layout.operator("object.mastro_add_mastro_frame", icon_value=myIcon)
   
   
 def register():
