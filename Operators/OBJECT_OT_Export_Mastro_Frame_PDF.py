@@ -398,6 +398,38 @@ def _export_frame_to_pdf(frame_obj, filepath, scene):
     return success, msg
 
 
+def _rebuild_xref(data):
+    """Rebuild xref table and startxref after binary patching changed object offsets."""
+    obj_offsets = {}
+    for m in _re.finditer(rb'\n(\d+)\s+0\s+obj\b', data):
+        obj_offsets[int(m.group(1))] = m.start() + 1
+    if not obj_offsets:
+        return data
+    trailer_m = _re.search(rb'trailer\s*(<<.*?>>)', data, _re.DOTALL)
+    if not trailer_m:
+        return data
+    trailer_dict = trailer_m.group(1)
+    xref_m = _re.search(rb'\nxref\b', data)
+    body = data[:xref_m.start() + 1] if xref_m else data
+    max_id = max(obj_offsets)
+    out = bytearray(body)
+    xref_offset = len(out)
+    out += b'xref\n'
+    out += f'0 {max_id + 1}\n'.encode()
+    out += b'0000000000 65535 f \n'
+    for i in range(1, max_id + 1):
+        if i in obj_offsets:
+            out += f'{obj_offsets[i]:010d} 00000 n \n'.encode()
+        else:
+            out += b'0000000000 65535 f \n'
+    out += b'trailer\n'
+    out += trailer_dict + b'\n'
+    out += b'startxref\n'
+    out += f'{xref_offset}\n'.encode()
+    out += b'%%EOF\n'
+    return bytes(out)
+
+
 def _fix_mediabox(filepath, width_pt, height_pt, frame_x_haru, frame_y_haru, scale_x, scale_y):
     """Rewrite MediaBox and wrap content streams with clip + scale transform."""
     tx = -frame_x_haru * scale_x
@@ -410,28 +442,30 @@ def _fix_mediabox(filepath, width_pt, height_pt, frame_x_haru, frame_y_haru, sca
     data = _re.sub(rb'/MediaBox\s*\[[^\]]+\]', b'/MediaBox ' + new_box, data)
     data = _re.sub(rb'/CropBox\s*\[[^\]]+\]',  b'/CropBox '  + new_box, data)
 
-    # Clip to page in device space, then apply scale + translate.
     prefix = (
         f'q\n'
         f'0 0 {width_pt:.3f} {height_pt:.3f} re W n\n'
         f'{scale_x:.6f} 0 0 {scale_y:.6f} {tx:.3f} {ty:.3f} cm\n'
     ).encode()
+    suffix = b'\nQ'
 
     parts = _re.split(rb'(stream\r?\n)(.*?)(\r?\nendstream)', data, flags=_re.DOTALL)
-    if len(parts) > 1:
-        out = bytearray(parts[0])
-        i = 1
-        while i < len(parts):
-            body     = parts[i + 1]
-            new_body = prefix + body + b'\nQ'
-            out += parts[i] + new_body + parts[i + 2]
-            if i + 3 < len(parts):
-                out += parts[i + 3]
-            i += 4
+    n_streams = (len(parts) - 1) // 4
+    if n_streams > 0:
+        out = bytearray()
+        for i in range(n_streams):
+            segment  = parts[i * 4]
+            old_body = parts[i * 4 + 2]
+            new_body = prefix + old_body + suffix
+            segment  = _re.sub(rb'/Length\s+\d+', f'/Length {len(new_body)}'.encode(), segment)
+            out += segment + parts[i * 4 + 1] + new_body + parts[i * 4 + 3]
+        out += parts[n_streams * 4]
         data = bytes(out)
 
+    data = _rebuild_xref(data)
+
     _log(f"[MaStro PDF] scale=({scale_x:.4f},{scale_y:.4f})  "
-          f"translate=({tx:.2f},{ty:.2f})  streams patched: {(len(parts)-1)//4}")
+          f"translate=({tx:.2f},{ty:.2f})  streams patched: {n_streams}")
 
     with open(filepath, 'wb') as f:
         f.write(data)
@@ -486,6 +520,10 @@ class OBJECT_OT_Export_Mastro_Frame_PDF(Operator, ExportHelper):
             obj.data.get("MaStro frame")
         )
 
+    def invoke(self, context, event):
+        self.filepath = bpy.path.ensure_ext(context.active_object.name, ".pdf")
+        return super().invoke(context, event)
+
     def draw(self, context):
         layout = self.layout
         all_frames = [o for o in bpy.data.objects
@@ -534,15 +572,34 @@ class OBJECT_OT_Export_Mastro_Frame_PDF(Operator, ExportHelper):
                 return {'CANCELLED'}
 
         else:
-            ok, msg = _export_frame_to_pdf(context.active_object, filepath, scene)
-            if not ok:
-                self.report({'ERROR' if msg else 'WARNING'},
-                            msg or "No grease pencil objects found inside the frame")
+            out_dir = os.path.dirname(filepath)
+            errors  = []
+            exported = []
+            for frame_obj in all_frames:
+                out_path = os.path.join(out_dir, bpy.path.ensure_ext(frame_obj.name, ".pdf"))
+                ok, msg = _export_frame_to_pdf(frame_obj, out_path, scene)
+                if ok:
+                    exported.append(out_path)
+                else:
+                    errors.append(f"'{frame_obj.name}': {msg}")
+
+            if not exported:
+                self.report({'ERROR'}, "No frames could be exported: " + "; ".join(errors))
                 return {'CANCELLED'}
+            if errors:
+                self.report({'WARNING'}, "Some frames skipped: " + "; ".join(errors))
+
+            filepath = exported[0]
+            if self.open_after:
+                for path in exported:
+                    try:
+                        _open_file(path)
+                    except Exception as e:
+                        self.report({'WARNING'}, f"Could not open PDF: {e}")
 
         self.report({'INFO'}, f"Exported PDF: {filepath}")
 
-        if self.open_after:
+        if self.open_after and self.bind_pages:
             try:
                 _open_file(filepath)
             except Exception as e:
