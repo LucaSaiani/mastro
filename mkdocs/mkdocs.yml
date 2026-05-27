@@ -40,6 +40,7 @@ nav:
       - Street: ui/properties-street.md
       - Custom Properties: ui/properties-custom-properties.md
       - Camera Sets: ui/properties-camera-sets.md
+      - PDF Sets: ui/properties-pdf-sets.md
     - Tools:
       - XY Constraint: ui/xy-constraint.md
       - Transform Orientation: ui/transform-orientation.md
