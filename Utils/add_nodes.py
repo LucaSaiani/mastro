@@ -146,6 +146,21 @@ def _is_asset_file():
     return current.startswith("mastro")
 
 
+# Sub-dependencies that must remain local after link+make_local so that
+# addon preferences can write to them at runtime.  Extend this list if you
+# add new runtime-driven groups or materials to mastro.blend.
+_FORCE_LOCAL_GROUPS = {
+    "Section RGB",
+    "Shadow RGB",
+}
+_FORCE_LOCAL_MATERIALS = {
+    "MaStro Mass",
+    "MaStro Mass Floor",
+    "MaStro Section Colour",
+    "MaStro Shadow Colour",
+}
+
+
 def add_nodes():
     """Main function to import nodes from mastro.blend.
 
@@ -188,34 +203,26 @@ def add_nodes():
             # (sub-deps remain linked and read-only, no need to touch them).
             clean_tree_recursive(ng, processed_trees)
 
+        # These node groups and materials must be local so that addon preferences
+        # (apply_section_color / apply_shadow_color) can write to them at runtime.
+        # add_nodes() runs before add_materials(), so no local copies exist yet
+        # and make_local() operates on the linked sub-dep in-place — all existing
+        # references inside the GN groups continue to point to the same data block,
+        # which is now writable.
+        for name in _FORCE_LOCAL_GROUPS:
+            ng = bpy.data.node_groups.get(name)
+            if ng is not None and ng.library is not None:
+                ng.make_local()
+                clear_asset_status(ng)
+        for name in _FORCE_LOCAL_MATERIALS:
+            mat = bpy.data.materials.get(name)
+            if mat is not None and mat.library is not None:
+                mat.make_local()
+                clear_asset_status(mat)
+
+        # Apply preference colours now that Section/Shadow RGB are local.
+        apply_section_color(get_prefs().section_color)
+        apply_shadow_color(get_prefs().shadow_color)
+
     except Exception as e:
         print(f"MaStro Error: {e}")
-
-
-
-
-# import bpy
-# import addon_utils
-# from pathlib import Path
-# # import mastro nodes in the file
-
-# def add_nodes():
-#     for mod in addon_utils.modules():
-#         if mod.bl_info['name'] == 'MaStro':
-#             my_addon_path = Path(mod.__file__).parent.resolve()
-#             break
-
-#     # my_addon_path = Path(bpy.utils.user_resource('EXTENSIONS'))
-#     blend_file_path = my_addon_path / "mastro.blend"
-#     # if not os.path.isdir(blend_file_path): blend_file_path = my_addon_path / "vscode_development/mastro/mastro.blend"
-#     inner_path = "NodeTree"
-    
-#     geoNodes_list = ("MaStro Mass", "MaStro Block", "MaStro Street", "MaStro Dimension")
-
-#     for group in geoNodes_list:
-#         if group not in bpy.data.node_groups:
-#             bpy.ops.wm.link(
-#                 filepath=str(blend_file_path / inner_path / group),
-#                 directory=str(blend_file_path / inner_path),
-#                 filename = group
-#                 )   
