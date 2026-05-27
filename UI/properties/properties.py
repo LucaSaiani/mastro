@@ -256,14 +256,14 @@ scene_props = [
     #     name="Previously selected edge Id", default=-1,
     #     description="Store the id of the previous selected edge"
     # )),
-    # ("mastro_previous_selection_vert_id", IntProperty(
-    #     name="Previously selected vert Id", default=-1,
-    #     description="Store the id of the previous selected vertex"
-    # )),
-    # ("mastro_previous_edge_number", IntProperty(
-    #     name="Previously number of edges", default=-1,
-    #     description="Store the number of edges of the previous selection"
-    # )),
+    ("mastro_previous_selection_vert_id", IntProperty(
+        name="Previously selected vert Id", default=-1,
+        description="Store the id of the previous selected vertex"
+    )),
+    ("mastro_previous_edge_number", IntProperty(
+        name="Previously number of edges", default=-1,
+        description="Store the number of edges of the previous selection"
+    )),
     
     # ------------------------------
     # Mastro Project Data (Collections & EnumProperties)
