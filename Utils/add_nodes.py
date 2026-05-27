@@ -66,6 +66,9 @@ def _deduplicate_node_group(canonical_name):
 def add_materials():
     """Append MaStro materials from mastro.blend in a single load call so shared
     node groups (e.g. Section RGB) are not duplicated."""
+    if _is_asset_file():
+        return
+
     mastro_path = None
     for mod in addon_utils.modules():
         if mod.bl_info.get('name') == 'MaStro':
@@ -136,9 +139,22 @@ def apply_shadow_color(color):
         mat.diffuse_color = (color[0], color[1], color[2], 1.0)
 
 
+def _is_asset_file():
+    """Return True if the current .blend file is the MaStro asset file itself.
+    In that case node import must be skipped to avoid circular self-linking."""
+    current = Path(bpy.data.filepath).stem.lower() if bpy.data.filepath else ""
+    return current.startswith("mastro")
+
+
 def add_nodes():
-    """Main function to append nodes and clean all dependencies."""
-    # Locate the MaStro addon path
+    """Main function to import nodes from mastro.blend.
+
+    Strategy: link all 4 top-level groups first, then make only those 4 local.
+    Their internal sub-group nodes keep pointing to the linked (read-only) copies
+    in mastro.blend — no manual reference-swapping needed, and no local duplicates."""
+    if _is_asset_file():
+        return
+
     mastro_path = None
     for mod in addon_utils.modules():
         if mod.bl_info.get('name') == 'MaStro':
@@ -149,22 +165,28 @@ def add_nodes():
         print("Error: 'MaStro' addon not found.")
         return
 
-    blend_file = str(mastro_path / "mastro.blend")
+    blend_file      = str(mastro_path / "mastro.blend")
     nodes_to_import = {"MaStro Mass", "MaStro Block", "MaStro Street", "MaStro Dimension"}
 
     try:
-        # Append node groups
-        with bpy.data.libraries.load(blend_file) as (data_from, data_to):
+        # Link the 4 top-level groups (sub-deps arrive as linked too).
+        with bpy.data.libraries.load(blend_file, link=True) as (data_from, data_to):
             data_to.node_groups = [
-                name for name in data_from.node_groups 
+                name for name in data_from.node_groups
                 if name in nodes_to_import and name not in bpy.data.node_groups
             ]
-        
-        # Start the recursive cleaning process
+
+        # Make only the 4 top-level groups local so the user can inspect them.
+        # Nested sub-groups stay linked — Blender's make_local() is not recursive.
         processed_trees = set()
-        for group in data_to.node_groups:
-            if group:
-                clean_tree_recursive(group, processed_trees)
+        for ng in data_to.node_groups:
+            if ng is None:
+                continue
+            ng.make_local()
+            clear_asset_status(ng)
+            # Clear asset status on the now-local group's direct children only
+            # (sub-deps remain linked and read-only, no need to touch them).
+            clean_tree_recursive(ng, processed_trees)
 
     except Exception as e:
         print(f"MaStro Error: {e}")
