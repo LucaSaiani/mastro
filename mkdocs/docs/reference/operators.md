@@ -17,6 +17,7 @@ All MaStro operators accessible from the UI. The `bl_idname` is the Python ident
 | Update | `object.update_mastro_mesh_attributes` | Recalculate and write all MaStro attributes on all objects in the scene |
 | Export Data as CSV | `object.mastro_export_csv` | Export granular floor data for all visible MaStro objects to a CSV file |
 | Print Data | `object.mastro_print_data` | Print aggregate or granular floor data to the console |
+| Export Frame PDF | `object.mastro_export_frame_pdf` | Export the active Frame object and its Grease Pencil content to a single-page PDF |
 | Set Street Id | `object.mastro_set_street_id` | Assign the street ID attribute to all edges of a Street object |
 | Update All Street Attributes | `object.mastro_update_all_street_attributes` | Recalculate street width and radius attributes on all Street objects |
 
@@ -50,6 +51,22 @@ All MaStro operators accessible from the UI. The `bl_idname` is the Python ident
 | Filter By (GN) | `node.mastro_gn_filter_by` | Update the MaStro GN Filter By node group |
 | Separate Geometry By (GN) | `node.mastro_gn_separate_geometry_by` | Update the MaStro GN Separate Geometry By node group |
 | Filter By (Shader) | `node.mastro_shader_filter_by` | Update the MaStro Shader Filter By node group |
+
+---
+
+---
+
+## PDF Set Operators
+
+| Label | bl_idname | Description |
+|---|---|---|
+| Add PDF Set | `mastro.pdf_set_add` | Add a new empty PDF set |
+| Remove PDF Set | `mastro.pdf_set_remove` | Remove the active PDF set |
+| Duplicate PDF Set | `mastro.pdf_set_duplicate` | Duplicate the active PDF set including its frame assignments |
+| Move PDF Set Up | `mastro.pdf_set_move_up` | Move the active PDF set up in the list |
+| Move PDF Set Down | `mastro.pdf_set_move_down` | Move the active PDF set down in the list |
+| Toggle Frame in PDF Set | `mastro.pdf_set_toggle_frame` | Add or remove a frame from the active PDF set |
+| Export PDF | `mastro.pdf_set_export` | Export the frames in the active PDF set to PDF (merged or individual) |
 
 ---
 

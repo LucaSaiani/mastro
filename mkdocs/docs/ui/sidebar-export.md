@@ -1,6 +1,6 @@
 # Export Panel
 
-The **Export** panel appears at the bottom of the MaStro sidebar tab in Object Mode. It provides tools for extracting quantitative data from all visible MaStro objects in the scene.
+The **Export** panel appears at the bottom of the MaStro sidebar tab in Object Mode. It provides tools for extracting quantitative data from all visible MaStro objects in the scene, and for exporting the active frame to PDF.
 
 ## Export Data as CSV
 
@@ -34,3 +34,15 @@ Both modes display totals for Perimeter, Wall Area, and GEA at the bottom of the
 
 !!! tip
     To see the printed output, open the **Blender System Console** (Window → Toggle System Console on Windows, or launch Blender from a terminal on macOS/Linux) before clicking Print Data.
+
+## Export Frame PDF
+
+Visible only when a **Frame** object is the active selection. Opens a file browser to choose a save path and exports the active frame — together with all Grease Pencil objects whose geometry intersects it — to a single-page PDF.
+
+The file browser sidebar exposes one option:
+
+| Option | Default | Description |
+|---|---|---|
+| Open after export | On | Open the exported PDF with the system default viewer immediately after saving |
+
+For exporting multiple frames at once, or binding several frames into a single PDF, use the [PDF Sets](properties-pdf-sets.md) panel in the Scene Properties.

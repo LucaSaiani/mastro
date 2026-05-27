@@ -12,3 +12,4 @@ Sub-panels, in order:
 | [Street](properties-street.md) | Street type list |
 | [Custom Properties](properties-custom-properties.md) | Per-object custom data fields |
 | [Camera Sets](properties-camera-sets.md) | Camera groupings for batch projection |
+| [PDF Sets](properties-pdf-sets.md) | Frame groupings for PDF export |
