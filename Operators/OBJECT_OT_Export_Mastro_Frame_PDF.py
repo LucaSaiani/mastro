@@ -95,8 +95,8 @@ def _export_frame_to_pdf(frame_obj, filepath, scene):
     scene.render.resolution_percentage = 100
     scene.render.pixel_aspect_x = 1.0
     scene.render.pixel_aspect_y = 1.0
-    scene.render.resolution_x = max(1, int(round(frame_w)))
-    scene.render.resolution_y = max(1, int(round(frame_h)))
+    scene.render.resolution_x = max(1, int(round(frame_w_mm)))
+    scene.render.resolution_y = max(1, int(round(frame_h_mm)))
 
     # Select only objects inside frame + anchor
     prev_selected = [o for o in bpy.data.objects if o.select_get()]
@@ -165,19 +165,25 @@ def _fix_mediabox(filepath, width_mm, height_mm,
     width_pt  = width_mm  * 72.0 / 25.4
     height_pt = height_mm * 72.0 / 25.4
 
-    if frame_w_world and frame_h_world:
-        frame_w_haru = frame_w_world * haru_k
-        frame_h_haru = frame_h_world * haru_k
-        scale_x = width_pt  / frame_w_haru
-        scale_y = height_pt / frame_h_haru
+    with open(filepath, 'rb') as f:
+        data = f.read()
+
+    # Read the actual MediaBox written by Haru to get the real coordinate space.
+    mb_match = _re.search(rb'/MediaBox\s*\[\s*([0-9.+-]+)\s+([0-9.+-]+)\s+([0-9.+-]+)\s+([0-9.+-]+)\s*\]', data)
+    if mb_match:
+        haru_w = float(mb_match.group(3)) - float(mb_match.group(1))
+        haru_h = float(mb_match.group(4)) - float(mb_match.group(2))
+        scale_x = width_pt  / haru_w if haru_w else 1.0
+        scale_y = height_pt / haru_h if haru_h else 1.0
         tx = -frame_x_haru * scale_x
         ty = -frame_y_haru * scale_y
+        print(f"[MaStro PDF] Haru MediaBox=({haru_w:.1f} x {haru_h:.1f} pt)  "
+              f"target=({width_pt:.1f} x {height_pt:.1f} pt)  "
+              f"scale=({scale_x:.4f},{scale_y:.4f})")
     else:
         scale_x = scale_y = 1.0
         tx = ty = 0.0
-
-    with open(filepath, 'rb') as f:
-        data = f.read()
+        print("[MaStro PDF] WARNING: could not read MediaBox from exported PDF")
 
     # Replace MediaBox and CropBox
     new_box = f'[0 0 {width_pt:.3f} {height_pt:.3f}]'.encode()
@@ -258,7 +264,7 @@ class OBJECT_OT_Export_Mastro_Frame_PDF(Operator, ExportHelper):
     open_after: BoolProperty(
         name="Open after export",
         description="Open the exported PDF with the system default viewer",
-        default=False,
+        default=True,
     )
 
     @classmethod
