@@ -109,9 +109,9 @@ def set_attribute_mastro_mesh_uses(self, value):
     if len(selected_objects) == 0:
         selected_objects.append(active_object)
 
-    typology_name = bpy.context.scene.mastro_typology_names
+    typology_id = int((bpy.context.scene.mastro_typology_names or "id_0").replace("id_", ""))
     for n in bpy.context.scene.mastro_typology_name_list:
-        if n.name == typology_name:
+        if n.id == typology_id:
             bpy.context.scene.mastro_attribute_mass_typology_id = n.id
             
             for obj in selected_objects:
@@ -356,19 +356,20 @@ def get_attribute_mastro_mesh(self, bm_layer):
         return 0
         
     mesh = obj.data
-    if mesh.is_editmode:
+    is_from_edit = mesh.is_editmode
+    if is_from_edit:
         bm = bmesh.from_edit_mesh(mesh)
     else:
         bm = bmesh.new()
         bm.from_mesh(mesh)
-            
+
     try:
         layer = None
         field = None
-        
+
         if bm_layer in attribute_map:
             field_name, type, mastro_type = attribute_map[bm_layer]
-            
+
             isType = False
             for mType in mastro_type:
                 if mType in obj.data:
@@ -376,9 +377,9 @@ def get_attribute_mastro_mesh(self, bm_layer):
                     break
             if not isType:
                 return 0
- 
+
             field = getattr(bm, field_name)
-            
+
             try:
                 if type == "FLOAT":
                     layer = field.layers.float[bm_layer]
@@ -388,7 +389,7 @@ def get_attribute_mastro_mesh(self, bm_layer):
                     layer = field.layers.bool[bm_layer]
             except:
                 return 0
-                
+
         # if the above is false, it means that the bm_layer can be either
         # an edge or a face layer, accordingly to the mastro type (block, or mass)
         else:
@@ -401,17 +402,18 @@ def get_attribute_mastro_mesh(self, bm_layer):
                     layer = field.layers.int[f"{bm_layer}_EDGE"]
             except:
                 return 0
-        
+
         if not layer or not field:
             return 0
-        
+
         for el in field:
             if el.select:
-                bm.free()
                 return(el[layer])
+    except Exception:
+        return 0
     finally:
-        bm.free()
-        
+        if not is_from_edit:
+            bm.free()
 
     return 0
 
