@@ -9,6 +9,8 @@ from bpy.props import StringProperty, BoolProperty
 from bpy_extras.io_utils import ExportHelper
 
 
+# ── Geometry helpers ──────────────────────────────────────────────────────────
+
 def _frame_bounds(obj):
     """Return (min_x, min_y, max_x, max_y) in world space from a frame mesh."""
     world = obj.matrix_world
@@ -19,23 +21,25 @@ def _frame_bounds(obj):
 
 
 def _gp_world_bounds(obj, scene):
-    """Return (min_x, min_y, max_x, max_y) from actual GP stroke points in world space.
+    """Return (min_x, min_y, max_x, max_y) from GP stroke points in world space.
+
     Uses the evaluated object so modifiers and transforms are applied.
-    Falls back to obj.bound_box if no strokes are found."""
+    Iterates all layers and finds the active frame at or before frame_current.
+    Falls back to obj.bound_box if no stroke points are found."""
     depsgraph = bpy.context.evaluated_depsgraph_get()
     eval_obj  = obj.evaluated_get(depsgraph)
     world     = eval_obj.matrix_world
     frame_num = scene.frame_current
     xs, ys = [], []
     for layer in eval_obj.data.layers:
-        # Find the frame at or before frame_current
+        # Walk layer frames to find the last one at or before the current frame.
         best = None
         for f in layer.frames:
             if f.frame_number == frame_num:
                 best = f
                 break
             if f.frame_number < frame_num:
-                best = f  # keep advancing — will end up being the last one before current
+                best = f
         if best is None:
             continue
         try:
@@ -48,13 +52,13 @@ def _gp_world_bounds(obj, scene):
             pass
     if xs:
         return min(xs), min(ys), max(xs), max(ys)
-    # fallback
+    # Fallback: use the evaluated bounding box.
     wc = [world @ mathutils.Vector(c) for c in eval_obj.bound_box]
     return min(c.x for c in wc), min(c.y for c in wc), max(c.x for c in wc), max(c.y for c in wc)
 
 
 def _objects_in_frame(min_x, min_y, max_x, max_y, scene):
-    """Return grease pencil objects whose stroke bounds overlap the frame XY bounds."""
+    """Return GP objects whose stroke bounds overlap the given XY frame bounds."""
     result = []
     for obj in bpy.data.objects:
         if obj.type != 'GREASEPENCIL':
@@ -65,48 +69,13 @@ def _objects_in_frame(min_x, min_y, max_x, max_y, scene):
     return result
 
 
-def _image_empties_in_frame(min_x, min_y, max_x, max_y, scene):
-    """Log Image Empty objects that overlap the frame XY bounds."""
-    import math
-    log = open("/tmp/mastro_image_debug.log", "w")
-    for obj in scene.objects:
-        if obj.type != 'EMPTY' or obj.empty_display_type != 'IMAGE':
-            continue
-        if obj.data is None:
-            continue
-        w = obj.matrix_world
-        pos = w.translation
-        # Image Empty size is controlled by empty_display_size (half-size in each axis)
-        # and actual pixel dims via obj.data.size
-        sx = w.to_scale().x * obj.empty_display_size
-        sy = w.to_scale().y * obj.empty_display_size
-        rot_z = math.degrees(w.to_euler().z)
-        px_w, px_h = obj.data.size
-        log.write(f"[Image Empty] {obj.name}\n")
-        log.write(f"  pos=({pos.x:.4f}, {pos.y:.4f}, {pos.z:.4f})\n")
-        log.write(f"  display_size={obj.empty_display_size:.4f}  scale=({w.to_scale().x:.4f}, {w.to_scale().y:.4f})\n")
-        log.write(f"  world_size=({sx:.4f}, {sy:.4f}) BU\n")
-        log.write(f"  rot_z={rot_z:.2f} deg\n")
-        log.write(f"  pixels=({px_w}, {px_h})\n")
-        log.write(f"  filepath={obj.data.filepath!r}\n")
-        in_frame = (pos.x + sx >= min_x and pos.x - sx <= max_x and
-                    pos.y + sy >= min_y and pos.y - sy <= max_y)
-        log.write(f"  in_frame={in_frame}\n\n")
-    log.close()
-
-
-def _read_mediabox(filepath):
-    """Return (w, h) in Haru points from the first MediaBox in the PDF."""
-    with open(filepath, 'rb') as f:
-        data = f.read()
-    m = _re.search(rb'/MediaBox\s*\[\s*([0-9.+-]+)\s+([0-9.+-]+)\s+([0-9.+-]+)\s+([0-9.+-]+)\s*\]', data)
-    if m:
-        return float(m.group(3)) - float(m.group(1)), float(m.group(4)) - float(m.group(2))
-    return None, None
-
+# ── Invisible GP anchor for coordinate calibration ────────────────────────────
 
 def _make_anchor(scene, corners):
-    """Create and link an invisible GP anchor object with one stroke through corners."""
+    """Create and link an invisible GP object with one stroke through corners.
+
+    The stroke has opacity=0 and radius=0 so it is exported but invisible.
+    It is used as a known-coordinate landmark to measure the Haru→PDF point mapping."""
     anchor_data = bpy.data.grease_pencils.new("_mastro_pdf_anchor")
     layer   = anchor_data.layers.new("anchor")
     frame_d = layer.frames.new(scene.frame_current)
@@ -123,6 +92,8 @@ def _make_anchor(scene, corners):
     return anchor_obj, anchor_data
 
 
+# ── GP export helpers ─────────────────────────────────────────────────────────
+
 def _find_view3d_context():
     """Return (area, region, space) for the first VIEW_3D area, or (None, None, None)."""
     for area in bpy.context.screen.areas:
@@ -136,7 +107,10 @@ def _find_view3d_context():
 
 
 def _gp_export_pdf(filepath, selected_object_type='SELECTED'):
-    """Call grease_pencil_export_pdf forcing camera view in the active VIEW_3D."""
+    """Call grease_pencil_export_pdf, forcing camera view in the active VIEW_3D.
+
+    The built-in exporter reads the camera projection; switching to CAMERA view
+    first ensures the ortho camera we set up in `_setup_scene` is actually used."""
     area, region, space = _find_view3d_context()
     if area is None:
         bpy.ops.wm.grease_pencil_export_pdf(filepath=filepath,
@@ -151,7 +125,7 @@ def _gp_export_pdf(filepath, selected_object_type='SELECTED'):
 
 
 def _setup_scene(scene, cam_obj, frame_w_mm, frame_h_mm):
-    """Override scene camera and render resolution; return previous values."""
+    """Override scene camera and render resolution; return previous values for restore."""
     prev = (scene.camera,
             scene.render.resolution_x, scene.render.resolution_y,
             scene.render.resolution_percentage,
@@ -160,6 +134,7 @@ def _setup_scene(scene, cam_obj, frame_w_mm, frame_h_mm):
     scene.render.resolution_percentage = 100
     scene.render.pixel_aspect_x = 1.0
     scene.render.pixel_aspect_y = 1.0
+    # Resolution in mm equals pixels when percentage=100 and aspect=1:1.
     scene.render.resolution_x = max(1, int(round(frame_w_mm)))
     scene.render.resolution_y = max(1, int(round(frame_h_mm)))
     return prev
@@ -172,9 +147,15 @@ def _restore_scene(scene, prev):
      scene.render.pixel_aspect_x, scene.render.pixel_aspect_y) = prev
 
 
+# ── PDF stream parsing ────────────────────────────────────────────────────────
+
 def _read_anchor_haru_bounds(filepath):
     """Parse the first content stream and return (min_x, min_y, max_x, max_y)
-    of m/l path commands — reliable only for pass 1 (anchor-only stream)."""
+    of m/l path commands.
+
+    In pass 1 only the anchor is exported, so these coordinates come entirely
+    from the anchor stroke — giving us the Haru point values that correspond to
+    the known world-space frame corners."""
     with open(filepath, 'rb') as f:
         data = f.read()
     parts = _re.split(rb'(stream\r?\n)(.*?)(\r?\nendstream)', data, flags=_re.DOTALL)
@@ -192,8 +173,10 @@ def _read_anchor_haru_bounds(filepath):
 
 def _read_max_haru_coords(filepath):
     """Return (max_x, max_y) of all m/l commands in the first content stream.
-    In pass 2 the anchor covers the full union bbox so its top-right corner
-    is always the stream maximum — GP strokes are strictly inside."""
+
+    In pass 2 the extended anchor covers the union bbox of frame + all GP objects,
+    so its top-right corner is the stream maximum.  GP strokes are strictly inside,
+    so the maximum always comes from the anchor."""
     with open(filepath, 'rb') as f:
         data = f.read()
     parts = _re.split(rb'(stream\r?\n)(.*?)(\r?\nendstream)', data, flags=_re.DOTALL)
@@ -207,9 +190,538 @@ def _read_max_haru_coords(filepath):
     return max(c[0] for c in coords), max(c[1] for c in coords)
 
 
+# ── PDF xref / MediaBox rewriting ─────────────────────────────────────────────
+
+def _rebuild_xref(data):
+    """Rebuild the xref table and startxref pointer after binary patching.
+
+    When we insert or modify PDF objects the byte offsets change, making the
+    original xref invalid.  We scan for all `N 0 obj` markers, record their
+    new offsets, then write a fresh xref + trailer at the end of the file."""
+    obj_offsets = {}
+    for m in _re.finditer(rb'\n(\d+)\s+0\s+obj\b', data):
+        obj_offsets[int(m.group(1))] = m.start() + 1
+    if not obj_offsets:
+        return data
+    trailer_m = _re.search(rb'trailer\s*(<<.*?>>)', data, _re.DOTALL)
+    if not trailer_m:
+        return data
+    trailer_dict = trailer_m.group(1)
+    xref_m = _re.search(rb'\nxref\b', data)
+    body = data[:xref_m.start() + 1] if xref_m else data
+    max_id = max(obj_offsets)
+    out = bytearray(body)
+    xref_offset = len(out)
+    out += b'xref\n'
+    out += f'0 {max_id + 1}\n'.encode()
+    out += b'0000000000 65535 f \n'
+    for i in range(1, max_id + 1):
+        if i in obj_offsets:
+            out += f'{obj_offsets[i]:010d} 00000 n \n'.encode()
+        else:
+            out += b'0000000000 65535 f \n'
+    out += b'trailer\n'
+    out += trailer_dict + b'\n'
+    out += b'startxref\n'
+    out += f'{xref_offset}\n'.encode()
+    out += b'%%EOF\n'
+    return bytes(out)
+
+
+def _fix_mediabox(filepath, width_pt, height_pt, frame_x_haru, frame_y_haru, scale_x, scale_y):
+    """Rewrite MediaBox to the frame size and wrap content streams with clip + scale.
+
+    Haru writes GP strokes in its own internal coordinate system, which may be
+    offset and scaled relative to the final PDF point grid.  This function:
+      1. Replaces MediaBox and CropBox with the exact frame dimensions.
+      2. Wraps every content stream in a `q … Q` save/restore block that:
+         - Clips to the page rectangle (prevents GP strokes from bleeding outside).
+         - Applies a cm transform to map Haru coordinates to PDF points."""
+    tx = -frame_x_haru * scale_x
+    ty = -frame_y_haru * scale_y
+
+    with open(filepath, 'rb') as f:
+        data = f.read()
+
+    new_box = f'[0 0 {width_pt:.3f} {height_pt:.3f}]'.encode()
+    data = _re.sub(rb'/MediaBox\s*\[[^\]]+\]', b'/MediaBox ' + new_box, data)
+    data = _re.sub(rb'/CropBox\s*\[[^\]]+\]',  b'/CropBox '  + new_box, data)
+
+    prefix = (
+        f'q\n'
+        f'0 0 {width_pt:.3f} {height_pt:.3f} re W n\n'  # clip rect
+        f'{scale_x:.6f} 0 0 {scale_y:.6f} {tx:.3f} {ty:.3f} cm\n'  # scale + translate
+    ).encode()
+    suffix = b'\nQ'
+
+    parts = _re.split(rb'(stream\r?\n)(.*?)(\r?\nendstream)', data, flags=_re.DOTALL)
+    n_streams = (len(parts) - 1) // 4
+    if n_streams > 0:
+        out = bytearray()
+        for i in range(n_streams):
+            segment  = parts[i * 4]
+            old_body = parts[i * 4 + 2]
+            new_body = prefix + old_body + suffix
+            segment  = _re.sub(rb'/Length\s+\d+', f'/Length {len(new_body)}'.encode(), segment)
+            out += segment + parts[i * 4 + 1] + new_body + parts[i * 4 + 3]
+        out += parts[n_streams * 4]
+        data = bytes(out)
+
+    data = _rebuild_xref(data)
+
+    with open(filepath, 'wb') as f:
+        f.write(data)
+
+
+# ── Image processing ──────────────────────────────────────────────────────────
+
+def _rotate_image_blender(img_path, rot_z, world_w, world_h, px_w, px_h, obj_name):
+    """Return a JPEG + alpha mask for an image rotated by rot_z (radians, CCW in world space).
+
+    Strategy:
+      1. Compute the axis-aligned bounding box of the rotated image.
+      2. Create a destination canvas of that bounding-box size, filled with white (alpha 0).
+      3. Use inverse pixel mapping (numpy) to rotate the source pixels into the canvas.
+         Pixels that fall outside the source image stay white and transparent.
+      4. Save the RGB channels as JPEG via Blender (which Y-flips on save).
+      5. Extract the alpha channel (top-down, matching Blender's JPEG flip) and
+         compress it with zlib to produce a PDF /SMask grayscale stream.
+
+    Notes on coordinate systems:
+      - Blender pixels:   Y=0 at bottom (bottom-up, "bu").
+      - Standard images:  Y=0 at top    (top-down,  "td").
+      - Blender rot_z is CCW in world space (Y-up), which is CW in image space (Y-down).
+        The inverse-mapping rotation therefore uses angle = -rot_z.
+      - Blender saves JPEG with a Y-flip (reads bottom-up, writes top-down on disk).
+        The alpha mask must therefore also be top-down so it stays aligned with the JPEG.
+
+    Returns (jpeg_bytes, mask_bytes, bb_px_w, bb_px_h, bb_world_w, bb_world_h),
+    or (None, None, 0, 0, 0, 0) on error."""
+    import math, tempfile
+    try:
+        import numpy as np
+    except ImportError:
+        return None, None, 0, 0, 0, 0
+
+    loaded  = False
+    tmp_img = None
+    try:
+        # Reuse image if already loaded in Blender.
+        src_img = next((i for i in bpy.data.images
+                        if bpy.path.abspath(i.filepath) == img_path), None)
+        if src_img is None:
+            src_img = bpy.data.images.load(img_path)
+            loaded = True
+        src_img.update()
+
+        # Read pixels and flip to top-down for rotation math.
+        src_bu = np.array(src_img.pixels[:], dtype=np.float32).reshape(px_h, px_w, 4)
+        src_td = src_bu[::-1]
+
+        # Axis-aligned bounding box of the rotated image.
+        c = abs(math.cos(rot_z));  s = abs(math.sin(rot_z))
+        bb_world_w = world_w * c + world_h * s
+        bb_world_h = world_w * s + world_h * c
+
+        # Maintain the same pixel density as the original (pixels per BU, based on height).
+        density = px_h / world_h
+        bb_px_w = max(1, int(round(bb_world_w * density)))
+        bb_px_h = max(1, int(round(bb_world_h * density)))
+
+        # Canvas: white RGB, alpha=0 (transparent outside the source image).
+        dst_td = np.zeros((bb_px_h, bb_px_w, 4), dtype=np.float32)
+        dst_td[:, :, :3] = 1.0
+
+        # Inverse mapping: for every destination pixel, find where it came from in the source.
+        cos_a = math.cos(-rot_z);  sin_a = math.sin(-rot_z)
+        cx_dst = bb_px_w / 2;  cy_dst = bb_px_h / 2
+        cx_src = px_w    / 2;  cy_src = px_h    / 2
+
+        y_d, x_d = np.mgrid[0:bb_px_h, 0:bb_px_w]
+        dx = x_d - cx_dst;  dy = y_d - cy_dst
+
+        # Rotate displacement back to source-image coordinates.
+        x_s = cx_src + dx * cos_a + dy * sin_a
+        y_s = cy_src - dx * sin_a + dy * cos_a
+
+        valid = (x_s >= 0) & (x_s < px_w) & (y_s >= 0) & (y_s < px_h)
+        xi = x_s.astype(int);  yi = y_s.astype(int)
+
+        dst_td[valid] = src_td[yi[valid], xi[valid]]
+        dst_td[valid, 3] = 1.0   # mark source pixels as fully opaque
+
+        # Flip back to bottom-up for Blender's pixel buffer.
+        dst_bu = dst_td[::-1]
+
+        # Save RGB channels as JPEG via Blender.
+        tmp_img = bpy.data.images.new("_mastro_rot_tmp", bb_px_w, bb_px_h, alpha=False)
+        tmp_img.pixels = dst_bu.flatten().tolist()
+        with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as f:
+            tmp_path = f.name
+        tmp_img.file_format  = 'JPEG'
+        tmp_img.filepath_raw = tmp_path
+        tmp_img.save()
+        bpy.data.images.remove(tmp_img);  tmp_img = None
+        with open(tmp_path, 'rb') as f:
+            jpeg_bytes = f.read()
+        os.unlink(tmp_path)
+
+        # Build PDF /SMask: grayscale uint8 (DeviceGray), zlib compressed.
+        # We use dst_td (top-down) because Blender Y-flips the JPEG on save,
+        # so both image and mask are in top-down order as stored on disk.
+        import zlib
+        alpha_f32 = dst_td[:, :, 3]
+        alpha_u8  = (alpha_f32 * 255).clip(0, 255).astype(np.uint8)
+        mask_bytes = zlib.compress(alpha_u8.tobytes(), level=6)
+
+        return jpeg_bytes, mask_bytes, bb_px_w, bb_px_h, bb_world_w, bb_world_h
+
+    except Exception:
+        return None, None, 0, 0, 0, 0
+    finally:
+        if tmp_img is not None:
+            bpy.data.images.remove(tmp_img)
+        if loaded and src_img is not None:
+            bpy.data.images.remove(src_img)
+
+
+def _crop_with_blender(img_path, crop_l, crop_u, crop_r, crop_b, obj_name):
+    """Load an image via bpy.data.images, crop to the given pixel box, save as JPEG.
+
+    Crop coordinates are top-down (crop_u = top row, crop_b = bottom row exclusive),
+    matching standard image conventions.  Blender's pixel buffer is bottom-up
+    (Y=0 at bottom), so we convert before reading rows.
+
+    Returns (jpeg_bytes, cropped_width, cropped_height) or (None, 0, 0) on error."""
+    import tempfile
+    crop_img = None
+    loaded   = False
+    src_img  = None
+    try:
+        src_img = next((i for i in bpy.data.images
+                        if bpy.path.abspath(i.filepath) == img_path), None)
+        if src_img is None:
+            src_img = bpy.data.images.load(img_path)
+            loaded = True
+
+        src_img.update()
+        px_w, px_h = src_img.size
+
+        # Convert top-down crop bounds to Blender's bottom-up row indices.
+        bl_y0 = px_h - crop_b   # first Blender row (= bottom of visible strip)
+        bl_y1 = px_h - crop_u   # last  Blender row (exclusive, = top of visible strip)
+        new_w = crop_r - crop_l
+        new_h = crop_b - crop_u
+
+        src = src_img.pixels[:]   # flat RGBA float tuple, bottom-up
+        dst = []
+        for bl_y in range(bl_y0, bl_y1):
+            row_start = (bl_y * px_w + crop_l) * 4
+            dst.extend(src[row_start: row_start + new_w * 4])
+
+        crop_img = bpy.data.images.new("_mastro_crop_tmp", new_w, new_h, alpha=False)
+        crop_img.pixels = dst
+
+        with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as f:
+            tmp_path = f.name
+        crop_img.file_format  = 'JPEG'
+        crop_img.filepath_raw = tmp_path
+        crop_img.save()
+
+        with open(tmp_path, 'rb') as f:
+            data = f.read()
+        os.unlink(tmp_path)
+        return data, new_w, new_h
+
+    except Exception:
+        return None, 0, 0
+    finally:
+        if crop_img is not None:
+            bpy.data.images.remove(crop_img)
+        if loaded and src_img is not None:
+            bpy.data.images.remove(src_img)
+
+
+# ── Image entry builder ───────────────────────────────────────────────────────
+
+def _build_image_entries(empties, min_x, min_y, frame_w, frame_h, width_pt, height_pt):
+    """Convert a list of Image Empty objects into PDF image placement records.
+
+    Each record is a dict with:
+      img_bytes  – JPEG bytes for the image XObject
+      mask_bytes – zlib-compressed grayscale alpha for /SMask (None if not needed)
+      px_w/px_h  – pixel dimensions of the image (after crop/rotation)
+      cx/cy      – bottom-left corner of the image in PDF points (origin = page bottom-left)
+      pw/ph      – width/height of the image rectangle in PDF points
+      rot_z      – rotation (always 0.0 here; rotation is baked into the image)
+
+    Coordinate notes:
+      - empty_display_size in Blender controls the HEIGHT of the image (not width).
+        Width = height / pixel_aspect_ratio.
+      - empty_image_offset (ox, oy): ox is in units of world_w, oy in units of world_h.
+        Default (-0.5, -0.5) centres the image on the object origin.
+      - For non-rotated images the visible portion is clipped to the frame rectangle
+        and cropped in pixel space (no PDF clip path needed).
+      - For rotated images we bake rotation + alpha mask in `_rotate_image_blender`
+        and place the bounding-box image directly (no crop; it is assumed to be
+        fully inside the frame)."""
+    import math
+    max_x = min_x + frame_w
+    max_y = min_y + frame_h
+    result = []
+    for obj in empties:
+        w_mat      = obj.matrix_world
+        rot_z      = w_mat.to_euler().z
+        px_w, px_h = obj.data.size
+        if px_w == 0 or px_h == 0:
+            continue
+
+        pos    = w_mat.translation
+        sx     = w_mat.to_scale().x
+        sy     = w_mat.to_scale().y
+        aspect = px_h / px_w   # height / width
+
+        # empty_display_size = HEIGHT of the displayed image.
+        world_h = obj.empty_display_size * abs(sy)
+        world_w = world_h / aspect
+
+        # empty_image_offset: moves the image so that offset=(−0.5,−0.5) centres it.
+        ox, oy   = tuple(getattr(obj, 'empty_image_offset', (0.0, 0.0)))
+        img_bl_x = pos.x + ox * world_w   # world X of the image bottom-left corner
+        img_bl_y = pos.y + oy * world_h   # world Y of the image bottom-left corner
+
+        img_path = bpy.path.abspath(obj.data.filepath)
+        if not os.path.isfile(img_path):
+            continue
+        ext = os.path.splitext(img_path)[1].lower()
+
+        # ── Rotated image ──────────────────────────────────────────────────
+        if rot_z != 0.0:
+            # Bake rotation into a bounding-box JPEG + alpha mask.
+            img_bytes, mask_bytes, px_w, px_h, bb_world_w, bb_world_h = \
+                _rotate_image_blender(img_path, rot_z, world_w, world_h, px_w, px_h, obj.name)
+            if img_bytes is None:
+                continue
+            # Centre of the original image in world space.
+            img_cx = img_bl_x + world_w / 2
+            img_cy = img_bl_y + world_h / 2
+            # Bottom-left of the bounding-box image (centred on the same point).
+            cx = (img_cx - bb_world_w / 2 - min_x) / frame_w * width_pt
+            cy = (img_cy - bb_world_h / 2 - min_y) / frame_h * height_pt
+            pw = bb_world_w / frame_w * width_pt
+            ph = bb_world_h / frame_h * height_pt
+            result.append({'img_bytes': img_bytes, 'mask_bytes': mask_bytes,
+                           'px_w': px_w, 'px_h': px_h,
+                           'cx': cx, 'cy': cy, 'pw': pw, 'ph': ph, 'rot_z': 0.0})
+            continue
+
+        # ── Non-rotated image: clip to frame, then crop pixels ─────────────
+        vis_x1 = max(img_bl_x, min_x);  vis_x2 = min(img_bl_x + world_w, max_x)
+        vis_y1 = max(img_bl_y, min_y);  vis_y2 = min(img_bl_y + world_h, max_y)
+        if vis_x2 <= vis_x1 or vis_y2 <= vis_y1:
+            continue   # completely outside the frame
+
+        # Fractional positions within the image that are visible.
+        fx1 = (vis_x1 - img_bl_x) / world_w;  fx2 = (vis_x2 - img_bl_x) / world_w
+        fy1 = (vis_y1 - img_bl_y) / world_h;  fy2 = (vis_y2 - img_bl_y) / world_h
+
+        # Convert to top-down pixel crop coordinates (Blender Y=0 is bottom).
+        crop_l = int(fx1 * px_w);  crop_r = int(fx2 * px_w)
+        crop_u = int((1.0 - fy2) * px_h);  crop_b = int((1.0 - fy1) * px_h)
+        crop_l = max(0, crop_l);  crop_r = min(px_w, crop_r)
+        crop_u = max(0, crop_u);  crop_b = min(px_h, crop_b)
+        if crop_r <= crop_l or crop_b <= crop_u:
+            continue
+
+        # PDF coordinates of the visible rectangle (bottom-left corner).
+        cx = (vis_x1 - min_x) / frame_w * width_pt
+        cy = (vis_y1 - min_y) / frame_h * height_pt
+        pw = (vis_x2 - vis_x1) / frame_w * width_pt
+        ph = (vis_y2 - vis_y1) / frame_h * height_pt
+
+        needs_crop = (crop_l > 0 or crop_u > 0 or crop_r < px_w or crop_b < px_h)
+
+        if needs_crop or ext not in ('.jpg', '.jpeg'):
+            img_bytes, px_w, px_h = _crop_with_blender(
+                img_path, crop_l, crop_u, crop_r, crop_b, obj.name)
+            if img_bytes is None:
+                continue
+        else:
+            with open(img_path, 'rb') as fi:
+                img_bytes = fi.read()
+
+        result.append({'img_bytes': img_bytes, 'mask_bytes': None,
+                       'px_w': px_w, 'px_h': px_h,
+                       'cx': cx, 'cy': cy, 'pw': pw, 'ph': ph, 'rot_z': 0.0})
+    return result
+
+
+# ── PDF image embedding ───────────────────────────────────────────────────────
+
+def _make_image_draw(entries, start_num, width_pt, height_pt):
+    """Build PDF object bytes and a draw stream for a list of image entries.
+
+    For each entry:
+      - If mask_bytes is present, prepend a /SMask XObject (DeviceGray, FlateDecode).
+      - Emit an Image XObject (DeviceRGB, DCTDecode) with optional /SMask reference.
+      - Append a `cm … Do` command to the draw stream that places the image at
+        the correct position and size in PDF points.
+
+    The PDF `cm` matrix maps the unit square [0,1]×[0,1] to the image rectangle.
+    For a non-rotated image of size (pw, ph) with bottom-left at (cx, cy):
+        [pw  0  0  ph  cx  cy]
+    (rot_z is always 0 here; rotation is already baked into the image pixels.)
+
+    Returns (new_obj_bytes, xobj_refs, draw_stream_bytes, next_num)
+    where next_num is the next available PDF object number after all objects created here."""
+    import math
+    new_obj_bytes = b''
+    xobj_refs     = []
+    # Open with a clip rect so the images respect the page boundary.
+    draw = (f'q\n0 0 {width_pt:.3f} {height_pt:.3f} re W n\n').encode()
+    next_num = start_num
+    for e in entries:
+        num  = next_num
+        name = f'Im{num}'
+        next_num += 1
+        xobj_refs.append(f'/{name} {num} 0 R'.encode())
+
+        # Optional alpha mask (needed when the image has transparent corners, e.g. rotated).
+        mask_bytes = e.get('mask_bytes')
+        smask_ref  = ''
+        if mask_bytes:
+            mnum = next_num;  next_num += 1
+            smask_ref = f' /SMask {mnum} 0 R'
+            mask_hdr = (
+                f'{mnum} 0 obj\n'
+                f'<< /Type /XObject /Subtype /Image'
+                f' /Width {e["px_w"]} /Height {e["px_h"]}'
+                f' /ColorSpace /DeviceGray /BitsPerComponent 8'
+                f' /Filter /FlateDecode /Length {len(mask_bytes)} >>\n'
+                f'stream\n'
+            ).encode()
+            new_obj_bytes += mask_hdr + mask_bytes + b'\nendstream\nendobj\n'
+
+        # RGB image XObject (JPEG / DCTDecode).
+        hdr = (
+            f'{num} 0 obj\n'
+            f'<< /Type /XObject /Subtype /Image'
+            f' /Width {e["px_w"]} /Height {e["px_h"]}'
+            f' /ColorSpace /DeviceRGB /BitsPerComponent 8'
+            f' /Filter /DCTDecode /Length {len(e["img_bytes"])}'
+            f'{smask_ref} >>\n'
+            f'stream\n'
+        ).encode()
+        new_obj_bytes += hdr + e['img_bytes'] + b'\nendstream\nendobj\n'
+
+        c  = math.cos(e['rot_z']); s  = math.sin(e['rot_z'])
+        pw = e['pw'];              ph = e['ph']
+        cx = e['cx'];              cy = e['cy']
+        a  =  c * pw; b_ =  s * pw
+        cc = -s * ph; d  =  c * ph
+        # (cx, cy) is the bottom-left corner of the image rectangle in PDF points.
+        # The cm matrix maps [0,1]² to the image, so the translation component
+        # is exactly the bottom-left corner.
+        ex = cx
+        ey = cy
+        draw += f'q\n{a:.3f} {b_:.3f} {cc:.3f} {d:.3f} {ex:.3f} {ey:.3f} cm\n/{name} Do\nQ\n'.encode()
+    draw += b'Q'
+    return new_obj_bytes, xobj_refs, draw, next_num
+
+
+def _embed_image_empties(filepath, image_empties_behind, image_empties_front,
+                         min_x, min_y, frame_w, frame_h, width_pt, height_pt):
+    """Embed Image Empty objects into an already-written PDF file.
+
+    Image Empties whose Z position is below all GP objects are drawn before
+    the GP content stream (behind); those at or above are drawn after (front).
+
+    The function:
+      1. Converts each Image Empty to a placement record (`_build_image_entries`).
+      2. Creates PDF Image XObjects + optional /SMask objects (`_make_image_draw`).
+      3. Inserts the new objects into the PDF byte stream before the xref table.
+      4. Adds /XObject resource references to the page dictionary.
+      5. Wraps the first content stream with behind-draw … GP-content … front-draw.
+      6. Rebuilds the xref table."""
+    entries_behind = _build_image_entries(
+        image_empties_behind, min_x, min_y, frame_w, frame_h, width_pt, height_pt)
+    entries_front  = _build_image_entries(
+        image_empties_front,  min_x, min_y, frame_w, frame_h, width_pt, height_pt)
+    if not entries_behind and not entries_front:
+        return
+
+    with open(filepath, 'rb') as f:
+        data = f.read()
+
+    obj_nums = [int(m.group(1)) for m in _re.finditer(rb'(\d+)\s+0\s+obj', data)]
+    if not obj_nums:
+        return
+    next_num = max(obj_nums) + 1
+
+    new_obj_bytes = b''
+    all_xobj_refs = []
+
+    # Build behind-images first so their object numbers are lower.
+    behind_objs, behind_refs, draw_behind, next_num = _make_image_draw(
+        entries_behind, next_num, width_pt, height_pt)
+    new_obj_bytes += behind_objs
+    all_xobj_refs += behind_refs
+
+    front_objs, front_refs, draw_front, _ = _make_image_draw(
+        entries_front, next_num, width_pt, height_pt)
+    new_obj_bytes += front_objs
+    all_xobj_refs += front_refs
+
+    # Add image XObject references to the page /Resources dictionary.
+    xobj_dict = b'<< ' + b' '.join(all_xobj_refs) + b' >>'
+    if b'/XObject' in data:
+        data = _re.sub(rb'/XObject\s*<<',
+                       b'/XObject << ' + b' '.join(all_xobj_refs) + b' ',
+                       data, count=1)
+    else:
+        data = _re.sub(rb'/Resources\s*<<',
+                       b'/Resources << /XObject ' + xobj_dict + b' ',
+                       data, count=1)
+
+    # Insert new XObject bytes just before the xref table.
+    xref_m = _re.search(rb'\nxref\b', data)
+    if not xref_m:
+        return
+    body_end = xref_m.start() + 1
+    data = data[:body_end] + new_obj_bytes + data[body_end:]
+
+    # Sandwich the GP content stream between the behind and front draw commands.
+    parts = _re.split(rb'(stream\r?\n)(.*?)(\r?\nendstream)', data, flags=_re.DOTALL)
+    if len(parts) >= 5:
+        seg      = parts[0]
+        s_open   = parts[1]
+        old_body = parts[2]
+        s_close  = parts[3]
+        new_body = draw_behind + b'\n' + old_body + b'\n' + draw_front
+        seg      = _re.sub(rb'/Length\s+\d+', f'/Length {len(new_body)}'.encode(), seg)
+        data     = seg + s_open + new_body + s_close + b''.join(parts[4:])
+
+    data = _rebuild_xref(data)
+    with open(filepath, 'wb') as f:
+        f.write(data)
+
+
+# ── Main export logic ─────────────────────────────────────────────────────────
 
 def _export_frame_to_pdf(frame_obj, filepath, scene):
-    """Export grease pencil contents of frame_obj to filepath. Returns (ok, msg)."""
+    """Export grease pencil objects inside frame_obj to a PDF at filepath.
+
+    Two-pass approach:
+      Pass 1 — Export only an invisible anchor stroke at the exact frame corners
+               to measure how Haru maps world-space coordinates to PDF points.
+      Pass 2 — Export all GP objects inside the frame, plus an extended anchor
+               that covers both the frame and all GP bounds.  Re-read the anchor's
+               maximum coordinates to derive the precise scale + translation needed
+               to fit the GP content into the frame page.
+
+    After GP export, Image Empties inside the frame are embedded as JPEG XObjects.
+
+    Returns (ok: bool, msg: str)."""
     min_x, min_y, max_x, max_y = _frame_bounds(frame_obj)
     frame_w = max_x - min_x
     frame_h = max_y - min_y
@@ -218,7 +730,6 @@ def _export_frame_to_pdf(frame_obj, filepath, scene):
     frame_w_mm = frame_w * scale_length * 1000
     frame_h_mm = frame_h * scale_length * 1000
 
-    _image_empties_in_frame(min_x, min_y, max_x, max_y, scene)
     image_empties = [o for o in scene.objects
                      if o.type == 'EMPTY' and o.empty_display_type == 'IMAGE'
                      and o.data is not None]
@@ -226,7 +737,7 @@ def _export_frame_to_pdf(frame_obj, filepath, scene):
     if not gp_objects:
         return False, f"No grease pencil objects found inside '{frame_obj.name}'"
 
-    # Orthographic camera centred on the frame
+    # Orthographic camera centred on the frame, pointing down –Z.
     cam_data = bpy.data.cameras.new("_mastro_pdf_cam")
     cam_data.type = 'ORTHO'
     cam_data.ortho_scale = frame_h
@@ -240,7 +751,10 @@ def _export_frame_to_pdf(frame_obj, filepath, scene):
     prev_scene    = _setup_scene(scene, cam_obj, frame_w_mm, frame_h_mm)
 
     try:
-        # ── Pass 1: anchor-only export to measure the exact Haru coordinate scale ──
+        # ── Pass 1: anchor-only export ────────────────────────────────────
+        # Export a single invisible stroke at the four frame corners.
+        # By parsing its Haru coordinates we learn the exact mapping:
+        #   world_coord * haru_k + haru_margin = haru_coord
         frame_corners = [(min_x, min_y, 0), (max_x, min_y, 0),
                          (max_x, max_y, 0), (min_x, max_y, 0)]
         anchor_obj1, anchor_data1 = _make_anchor(scene, frame_corners)
@@ -250,7 +764,7 @@ def _export_frame_to_pdf(frame_obj, filepath, scene):
         anchor_obj1.select_set(True)
         bpy.context.view_layer.objects.active = anchor_obj1
 
-        # Hide ALL GP objects so only the anchor is exported
+        # Hide all other GP objects so only the anchor is exported.
         hidden_pass1 = []
         for o in bpy.data.objects:
             if o.type == 'GREASEPENCIL' and o is not anchor_obj1:
@@ -281,12 +795,16 @@ def _export_frame_to_pdf(frame_obj, filepath, scene):
         haru_k_x = (ah_max_x - ah_min_x) / frame_w
         haru_k_y = (ah_max_y - ah_min_y) / frame_h
 
+        # Initial scale estimates (will be refined after pass 2).
         width_pt  = frame_w_mm * 72.0 / 25.4
         height_pt = frame_h_mm * 72.0 / 25.4
         scale_x = width_pt  / (ah_max_x - ah_min_x)
         scale_y = height_pt / (ah_max_y - ah_min_y)
 
-        # ── Pass 2: export frame content with extended anchor ──
+        # ── Pass 2: full GP export ────────────────────────────────────────
+        # The anchor in pass 2 covers the union of the frame and all GP strokes.
+        # This ensures Haru places all content inside one coordinate space; we
+        # then read the anchor's maximum to recover the precise scale.
         all_min_x, all_min_y = min_x, min_y
         all_max_x, all_max_y = max_x, max_y
         for obj in gp_objects:
@@ -327,9 +845,9 @@ def _export_frame_to_pdf(frame_obj, filepath, scene):
         bpy.data.objects.remove(anchor_obj2, do_unlink=True)
         bpy.data.grease_pencils.remove(anchor_data2)
 
+        # Refine calibration from the pass-2 anchor.
         p2_max_x, p2_max_y = _read_max_haru_coords(filepath)
         if p2_max_x is not None:
-            # Anchor top-right = stream max; anchor bottom-left derived from K (pass 1).
             ah2_min_x = p2_max_x - (all_max_x - all_min_x) * haru_k_x
             ah2_min_y = p2_max_y - (all_max_y - all_min_y) * haru_k_y
             frame_x_haru = ah2_min_x + (min_x - all_min_x) * haru_k_x
@@ -337,8 +855,10 @@ def _export_frame_to_pdf(frame_obj, filepath, scene):
             scale_x = width_pt  / (frame_w * haru_k_x)
             scale_y = height_pt / (frame_h * haru_k_y)
 
+        # Rewrite MediaBox and clip/scale the GP content stream.
         _fix_mediabox(filepath, width_pt, height_pt, frame_x_haru, frame_y_haru, scale_x, scale_y)
 
+        # Embed Image Empties: split by Z depth relative to GP content.
         gp_z_values = [o.matrix_world.translation.z for o in gp_objects]
         gp_z_min    = min(gp_z_values) if gp_z_values else 0.0
         imgs_behind = [o for o in image_empties if o.matrix_world.translation.z < gp_z_min]
@@ -363,311 +883,7 @@ def _export_frame_to_pdf(frame_obj, filepath, scene):
     return success, msg
 
 
-def _rebuild_xref(data):
-    """Rebuild xref table and startxref after binary patching changed object offsets."""
-    obj_offsets = {}
-    for m in _re.finditer(rb'\n(\d+)\s+0\s+obj\b', data):
-        obj_offsets[int(m.group(1))] = m.start() + 1
-    if not obj_offsets:
-        return data
-    trailer_m = _re.search(rb'trailer\s*(<<.*?>>)', data, _re.DOTALL)
-    if not trailer_m:
-        return data
-    trailer_dict = trailer_m.group(1)
-    xref_m = _re.search(rb'\nxref\b', data)
-    body = data[:xref_m.start() + 1] if xref_m else data
-    max_id = max(obj_offsets)
-    out = bytearray(body)
-    xref_offset = len(out)
-    out += b'xref\n'
-    out += f'0 {max_id + 1}\n'.encode()
-    out += b'0000000000 65535 f \n'
-    for i in range(1, max_id + 1):
-        if i in obj_offsets:
-            out += f'{obj_offsets[i]:010d} 00000 n \n'.encode()
-        else:
-            out += b'0000000000 65535 f \n'
-    out += b'trailer\n'
-    out += trailer_dict + b'\n'
-    out += b'startxref\n'
-    out += f'{xref_offset}\n'.encode()
-    out += b'%%EOF\n'
-    return bytes(out)
-
-
-def _fix_mediabox(filepath, width_pt, height_pt, frame_x_haru, frame_y_haru, scale_x, scale_y):
-    """Rewrite MediaBox and wrap content streams with clip + scale transform."""
-    tx = -frame_x_haru * scale_x
-    ty = -frame_y_haru * scale_y
-
-    with open(filepath, 'rb') as f:
-        data = f.read()
-
-    new_box = f'[0 0 {width_pt:.3f} {height_pt:.3f}]'.encode()
-    data = _re.sub(rb'/MediaBox\s*\[[^\]]+\]', b'/MediaBox ' + new_box, data)
-    data = _re.sub(rb'/CropBox\s*\[[^\]]+\]',  b'/CropBox '  + new_box, data)
-
-    prefix = (
-        f'q\n'
-        f'0 0 {width_pt:.3f} {height_pt:.3f} re W n\n'
-        f'{scale_x:.6f} 0 0 {scale_y:.6f} {tx:.3f} {ty:.3f} cm\n'
-    ).encode()
-    suffix = b'\nQ'
-
-    parts = _re.split(rb'(stream\r?\n)(.*?)(\r?\nendstream)', data, flags=_re.DOTALL)
-    n_streams = (len(parts) - 1) // 4
-    if n_streams > 0:
-        out = bytearray()
-        for i in range(n_streams):
-            segment  = parts[i * 4]
-            old_body = parts[i * 4 + 2]
-            new_body = prefix + old_body + suffix
-            segment  = _re.sub(rb'/Length\s+\d+', f'/Length {len(new_body)}'.encode(), segment)
-            out += segment + parts[i * 4 + 1] + new_body + parts[i * 4 + 3]
-        out += parts[n_streams * 4]
-        data = bytes(out)
-
-    data = _rebuild_xref(data)
-
-    with open(filepath, 'wb') as f:
-        f.write(data)
-
-
-
-def _crop_with_blender(img_path, crop_l, crop_u, crop_r, crop_b, rot_z, obj_name):
-    """Load an image via bpy.data.images, crop/rotate, save as JPEG, return (bytes, w, h)."""
-    import math, tempfile
-    tmp_img  = None
-    crop_img = None
-    loaded   = False
-    try:
-        # Reuse already-loaded image if possible.
-        src_img = next((i for i in bpy.data.images
-                        if bpy.path.abspath(i.filepath) == img_path), None)
-        if src_img is None:
-            src_img = bpy.data.images.load(img_path)
-            loaded = True
-
-        src_img.update()
-        px_w, px_h = src_img.size
-
-        # Blender pixels: RGBA float, Y=0 at BOTTOM.
-        # PIL crop coords (crop_l, crop_u, crop_r, crop_b) have Y=0 at TOP.
-        # Convert top-down row indices to Blender's bottom-up:
-        bl_y0 = px_h - crop_b   # first Blender row (bottom of visible strip)
-        bl_y1 = px_h - crop_u   # last  Blender row (exclusive)
-        new_w = crop_r - crop_l
-        new_h = crop_b - crop_u
-
-        src = src_img.pixels[:]   # flat RGBA float tuple
-        dst = []
-        for bl_y in range(bl_y0, bl_y1):
-            row_start = (bl_y * px_w + crop_l) * 4
-            dst.extend(src[row_start: row_start + new_w * 4])
-
-        crop_img = bpy.data.images.new("_mastro_crop_tmp", new_w, new_h, alpha=False)
-        crop_img.pixels = dst
-
-        if rot_z != 0.0:
-            # Rotation not yet implemented via Blender pixels; warn and skip.
-            with open("/tmp/mastro_image_debug.log", "a") as dbg:
-                dbg.write(f"  [warn] rotation not applied for {obj_name}\n")
-
-        with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as f:
-            tmp_path = f.name
-        crop_img.file_format   = 'JPEG'
-        crop_img.filepath_raw  = tmp_path
-        crop_img.save()
-
-        with open(tmp_path, 'rb') as f:
-            data = f.read()
-        os.unlink(tmp_path)
-        return data, new_w, new_h
-
-    except Exception as e:
-        with open("/tmp/mastro_image_debug.log", "a") as dbg:
-            dbg.write(f"  [crop error for {obj_name}]: {e}\n")
-        return None, 0, 0
-    finally:
-        if crop_img is not None:
-            bpy.data.images.remove(crop_img)
-        if loaded and src_img is not None:
-            bpy.data.images.remove(src_img)
-
-
-def _build_image_entries(empties, min_x, min_y, frame_w, frame_h, width_pt, height_pt):
-    import math, io
-    max_x = min_x + frame_w
-    max_y = min_y + frame_h
-    result = []
-    for obj in empties:
-        w_mat      = obj.matrix_world
-        rot_z      = w_mat.to_euler().z
-        px_w, px_h = obj.data.size
-        if px_w == 0 or px_h == 0:
-            continue
-
-        pos    = w_mat.translation
-        sx     = w_mat.to_scale().x
-        sy     = w_mat.to_scale().y
-        aspect = px_h / px_w
-        # In Blender, empty_display_size controls the HEIGHT of the image.
-        # Width = height / aspect.
-        world_h = obj.empty_display_size * abs(sy)
-        world_w = world_h / aspect
-
-        # empty_image_offset: (0,0) = bottom-left at origin (Blender default).
-        ox, oy = tuple(getattr(obj, 'empty_image_offset', (0.0, 0.0)))
-        img_bl_x = pos.x + ox * world_w
-        img_bl_y = pos.y + oy * world_h
-
-        # Intersection of image bounds with frame bounds.
-        vis_x1 = max(img_bl_x, min_x);  vis_x2 = min(img_bl_x + world_w, max_x)
-        vis_y1 = max(img_bl_y, min_y);  vis_y2 = min(img_bl_y + world_h, max_y)
-        if vis_x2 <= vis_x1 or vis_y2 <= vis_y1:
-            continue
-
-        # Fraction of the image that is visible.
-        fx1 = (vis_x1 - img_bl_x) / world_w;  fx2 = (vis_x2 - img_bl_x) / world_w
-        fy1 = (vis_y1 - img_bl_y) / world_h;  fy2 = (vis_y2 - img_bl_y) / world_h
-
-        # PIL pixel crop box.  PIL y=0 is the TOP of the image; Blender y=0 is the BOTTOM.
-        # World fy=0 (bottom) → PIL row px_h; world fy=1 (top) → PIL row 0.
-        crop_l = int(fx1 * px_w);  crop_r = int(fx2 * px_w)
-        crop_u = int((1.0 - fy2) * px_h);  crop_b = int((1.0 - fy1) * px_h)
-        # Clamp to valid pixel range.
-        crop_l = max(0, crop_l);  crop_r = min(px_w, crop_r)
-        crop_u = max(0, crop_u);  crop_b = min(px_h, crop_b)
-        if crop_r <= crop_l or crop_b <= crop_u:
-            continue
-
-        # PDF position and size of the visible (cropped) portion.
-        cx = (vis_x1 - min_x) / frame_w * width_pt
-        cy = (vis_y1 - min_y) / frame_h * height_pt
-        pw = (vis_x2 - vis_x1) / frame_w * width_pt
-        ph = (vis_y2 - vis_y1) / frame_h * height_pt
-
-        with open("/tmp/mastro_image_debug.log", "a") as dbg:
-            dbg.write(f"[embed] {obj.name}: offset=({ox:.3f},{oy:.3f}) "
-                      f"img_bl=({img_bl_x:.4f},{img_bl_y:.4f}) world=({world_w:.4f},{world_h:.4f})\n")
-            dbg.write(f"  visible world: ({vis_x1:.4f},{vis_y1:.4f})→({vis_x2:.4f},{vis_y2:.4f})\n")
-            dbg.write(f"  pixel crop: l={crop_l} u={crop_u} r={crop_r} b={crop_b} / {px_w}×{px_h}\n")
-            dbg.write(f"  pdf: cx={cx:.2f} cy={cy:.2f} pw={pw:.2f} ph={ph:.2f} "
-                      f"page=({width_pt:.2f},{height_pt:.2f})\n\n")
-
-        img_path = bpy.path.abspath(obj.data.filepath)
-        if not os.path.isfile(img_path):
-            continue
-
-        needs_crop = (crop_l > 0 or crop_u > 0 or crop_r < px_w or crop_b < px_h)
-        ext = os.path.splitext(img_path)[1].lower()
-
-        if needs_crop or rot_z != 0.0 or ext not in ('.jpg', '.jpeg'):
-            img_bytes, px_w, px_h = _crop_with_blender(
-                img_path, crop_l, crop_u, crop_r, crop_b,
-                rot_z, obj.name)
-            rot_z = 0.0
-            if img_bytes is None:
-                continue
-        else:
-            with open(img_path, 'rb') as fi:
-                img_bytes = fi.read()
-
-        result.append({'img_bytes': img_bytes, 'px_w': px_w, 'px_h': px_h,
-                       'cx': cx, 'cy': cy, 'pw': pw, 'ph': ph, 'rot_z': rot_z})
-    return result
-
-
-def _make_image_draw(entries, start_num, width_pt, height_pt):
-    import math
-    new_obj_bytes = b''
-    xobj_refs     = []
-    draw          = (f'q\n0 0 {width_pt:.3f} {height_pt:.3f} re W n\n').encode()
-    for i, e in enumerate(entries):
-        num  = start_num + i
-        name = f'Im{num}'
-        xobj_refs.append(f'/{name} {num} 0 R'.encode())
-        hdr = (
-            f'{num} 0 obj\n'
-            f'<< /Type /XObject /Subtype /Image'
-            f' /Width {e["px_w"]} /Height {e["px_h"]}'
-            f' /ColorSpace /DeviceRGB /BitsPerComponent 8'
-            f' /Filter /DCTDecode /Length {len(e["img_bytes"])} >>\n'
-            f'stream\n'
-        ).encode()
-        new_obj_bytes += hdr + e['img_bytes'] + b'\nendstream\nendobj\n'
-        c  = math.cos(e['rot_z']); s  = math.sin(e['rot_z'])
-        pw = e['pw'];              ph = e['ph']
-        cx = e['cx'];              cy = e['cy']
-        a  =  c * pw; b_ =  s * pw
-        cc = -s * ph; d  =  c * ph
-        # cx,cy is the image's bottom-left corner in PDF space.
-        # The cm matrix maps the unit square [0,1]x[0,1] to the image rectangle,
-        # so (ex, ey) is the PDF position of that bottom-left corner.
-        ex = cx
-        ey = cy
-        draw += f'q\n{a:.3f} {b_:.3f} {cc:.3f} {d:.3f} {ex:.3f} {ey:.3f} cm\n/{name} Do\nQ\n'.encode()
-    draw += b'Q'
-    return new_obj_bytes, xobj_refs, draw
-
-
-def _embed_image_empties(filepath, image_empties_behind, image_empties_front,
-                         min_x, min_y, frame_w, frame_h, width_pt, height_pt):
-    """Embed Image Empty objects into the PDF: behind group before GP stream, front group after."""
-    entries_behind = _build_image_entries(image_empties_behind, min_x, min_y, frame_w, frame_h, width_pt, height_pt)
-    entries_front  = _build_image_entries(image_empties_front,  min_x, min_y, frame_w, frame_h, width_pt, height_pt)
-    if not entries_behind and not entries_front:
-        return
-
-    with open(filepath, 'rb') as f:
-        data = f.read()
-
-    obj_nums = [int(m.group(1)) for m in _re.finditer(rb'(\d+)\s+0\s+obj', data)]
-    if not obj_nums:
-        return
-    next_num = max(obj_nums) + 1
-
-    new_obj_bytes = b''
-    all_xobj_refs = []
-
-    behind_objs, behind_refs, draw_behind = _make_image_draw(entries_behind, next_num, width_pt, height_pt)
-    new_obj_bytes += behind_objs
-    all_xobj_refs += behind_refs
-    next_num += len(entries_behind)
-
-    front_objs, front_refs, draw_front = _make_image_draw(entries_front, next_num, width_pt, height_pt)
-    new_obj_bytes += front_objs
-    all_xobj_refs += front_refs
-
-    # Update page /XObject resources
-    xobj_dict = b'<< ' + b' '.join(all_xobj_refs) + b' >>'
-    if b'/XObject' in data:
-        data = _re.sub(rb'/XObject\s*<<', b'/XObject << ' + b' '.join(all_xobj_refs) + b' ', data, count=1)
-    else:
-        data = _re.sub(rb'/Resources\s*<<', b'/Resources << /XObject ' + xobj_dict + b' ', data, count=1)
-
-    # Insert new XObject bytes before xref
-    xref_m = _re.search(rb'\nxref\b', data)
-    if not xref_m:
-        return
-    body_end = xref_m.start() + 1
-    data = data[:body_end] + new_obj_bytes + data[body_end:]
-
-    # Wrap first content stream: behind | GP | front
-    parts = _re.split(rb'(stream\r?\n)(.*?)(\r?\nendstream)', data, flags=_re.DOTALL)
-    if len(parts) >= 5:
-        seg      = parts[0]
-        s_open   = parts[1]
-        old_body = parts[2]
-        s_close  = parts[3]
-        new_body = draw_behind + b'\n' + old_body + b'\n' + draw_front
-        seg      = _re.sub(rb'/Length\s+\d+', f'/Length {len(new_body)}'.encode(), seg)
-        data     = seg + s_open + new_body + s_close + b''.join(parts[4:])
-
-    data = _rebuild_xref(data)
-    with open(filepath, 'wb') as f:
-        f.write(data)
-
+# ── Platform file opener ──────────────────────────────────────────────────────
 
 def _open_file(filepath):
     import sys
@@ -678,6 +894,8 @@ def _open_file(filepath):
     else:
         subprocess.Popen(['xdg-open', filepath])
 
+
+# ── Operator ──────────────────────────────────────────────────────────────────
 
 class OBJECT_OT_Export_Mastro_Frame_PDF(Operator, ExportHelper):
     """Export grease pencil objects inside the active MaStro frame to PDF"""
