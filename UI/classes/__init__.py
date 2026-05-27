@@ -43,6 +43,9 @@ from .PROPERTIES_PT_Mastro_2D_Projection_Shadow import PROPERTIES_PT_Mastro_2D_P
 from .PROPERTIES_PT_Mastro_Camera_Sets import PROPERTIES_PT_Mastro_Camera_Sets
 from .PROPERTIES_UL_Camera_Sets import PROPERTIES_UL_Camera_Sets
 from .PROPERTIES_UL_Set_Cameras import PROPERTIES_UL_Set_Cameras
+from .PROPERTIES_PT_Mastro_PDF_Sets import PROPERTIES_PT_Mastro_PDF_Sets
+from .PROPERTIES_UL_PDF_Sets import PROPERTIES_UL_PDF_Sets
+from .PROPERTIES_UL_PDF_Frames import PROPERTIES_UL_PDF_Frames
 from .PROPERTIES_PT_Mastro_Custom_Properties import PROPERTIES_PT_Mastro_Custom_Properties
 from .VIEW3D_PT_Mastro_Custom_Properties import VIEW3D_PT_Mastro_Custom_Properties
 
@@ -95,6 +98,9 @@ classes = (
     PROPERTIES_PT_Mastro_Camera_Sets,
     PROPERTIES_UL_Camera_Sets,
     PROPERTIES_UL_Set_Cameras,
+    PROPERTIES_PT_Mastro_PDF_Sets,
+    PROPERTIES_UL_PDF_Sets,
+    PROPERTIES_UL_PDF_Frames,
     PROPERTIES_PT_Mastro_Custom_Properties,
     VIEW3D_PT_Mastro_Custom_Properties,
     )

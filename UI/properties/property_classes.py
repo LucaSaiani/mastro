@@ -728,6 +728,28 @@ class mastro_CL_camera_set(PropertyGroup):
     cameras:    bpy.props.CollectionProperty(type=mastro_CL_camera_set_item)
 
 
+class mastro_CL_pdf_frame_item(PropertyGroup):
+    frame_name: StringProperty()
+
+
+class mastro_CL_pdf_set(PropertyGroup):
+    name:       StringProperty(name="Name", default="PDF Set")
+    bind_pages: BoolProperty(name="Bind Pages", default=False)
+    frames:     bpy.props.CollectionProperty(type=mastro_CL_pdf_frame_item)
+
+
+class mastro_CL_pdf_scene_props(PropertyGroup):
+    pdf_sets:                bpy.props.CollectionProperty(type=mastro_CL_pdf_set)
+    active_set_index:        IntProperty(default=0, min=0)
+    active_frame_index:      IntProperty(default=0, min=0)
+    all_frames:              bpy.props.CollectionProperty(type=mastro_CL_pdf_frame_item)
+    filter_set_members_only: BoolProperty(
+        name        = "Show assigned only",
+        default     = False,
+        description = "Show only frames assigned to this set",
+    )
+
+
 class mastro_CL_projector_scene_props(PropertyGroup):
     # ── Runtime state ─────────────────────────────────────────────────────────
     is_running:       BoolProperty(default=False)

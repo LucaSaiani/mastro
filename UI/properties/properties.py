@@ -31,6 +31,7 @@ from .property_classes import ( mastro_CL_addon_properties,
                                 mastro_CL_projector_properties,
                                 # mastro_CL_projector_batch_item,
                                 mastro_CL_projector_scene_props,
+                                mastro_CL_pdf_scene_props,
                                 mastro_CL_custom_property_name_list,
                                 mastro_CL_custom_property_string_name_list,
 )
@@ -341,6 +342,7 @@ scene_pointer_props = [
     ("mastro_layer_manager_props", PointerProperty(type=mastro_CL_layer_manager_props)),
     # ("mastro_key_dictionary", CollectionProperty(type=mastro_schedule.MaStro_string_item)),
     ("mastro_projector_props", PointerProperty(type=mastro_CL_projector_scene_props)),
+    ("mastro_pdf_props", PointerProperty(type=mastro_CL_pdf_scene_props)),
 ]
 
 camera_props = [

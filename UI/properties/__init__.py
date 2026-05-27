@@ -19,6 +19,9 @@ from .property_classes import (mastro_CL_addon_properties,
                                mastro_CL_camera_set_item,
                                mastro_CL_camera_set,
                                mastro_CL_projector_scene_props,
+                               mastro_CL_pdf_frame_item,
+                               mastro_CL_pdf_set,
+                               mastro_CL_pdf_scene_props,
                                mastro_CL_custom_property_name_list,
                                mastro_CL_custom_property_string_name_list,
 )
@@ -47,6 +50,9 @@ classes = (
     mastro_CL_camera_set_item,
     mastro_CL_camera_set,
     mastro_CL_projector_scene_props,
+    mastro_CL_pdf_frame_item,
+    mastro_CL_pdf_set,
+    mastro_CL_pdf_scene_props,
     # mastro_CL_custom_property_string_name_list must be registered before
     # mastro_CL_custom_property_name_list because the latter uses it as CollectionProperty type
     mastro_CL_custom_property_string_name_list,
