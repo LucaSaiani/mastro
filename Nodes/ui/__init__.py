@@ -1,25 +1,20 @@
 from .menus import (
-
     MASTRO_MT_add_gn_menu,
-    append_menus, 
+    MASTRO_MT_gn_filter_by,
+    MASTRO_MT_gn_separate_by,
+    MASTRO_MT_add_shader_menu,
+    MASTRO_MT_shader_filter_by,
+    append_menus,
     remove_menus,
-
-    )
-
-# from .panels import (
-
-#     NODEBOOSTER_PT_tool_search,
-#     NODEBOOSTER_PT_tool_color_palette,
-#     NODEBOOSTER_PT_tool_frame,
-#     NODEBOOSTER_PT_shortcuts_memo,
-#     NODEBOOSTER_PT_active_node,
-
-#     )
-
+)
 
 classes = (
+    MASTRO_MT_gn_filter_by,
+    MASTRO_MT_gn_separate_by,
     MASTRO_MT_add_gn_menu,
-    )
+    MASTRO_MT_shader_filter_by,
+    MASTRO_MT_add_shader_menu,
+)
 
 
 def register():
