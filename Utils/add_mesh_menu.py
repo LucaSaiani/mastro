@@ -14,7 +14,6 @@ def add_mesh_menu(self, context):
     # myIcon = icons.icon_id("street")
     self.layout.operator("object.mastro_add_mastro_dimension", icon_value=myIcon)
     self.layout.operator("object.mastro_add_mastro_frame", icon_value=myIcon)
-    self.layout.operator("object.mastro_add_drawing", icon='GREASEPENCIL')
   
   
 def register():
