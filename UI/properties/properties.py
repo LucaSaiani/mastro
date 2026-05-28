@@ -79,7 +79,11 @@ window_manager_props = [
     # ------------------------------
     # Auto-update toggle
     # ------------------------------
-    ("mastro_toggle_auto_update_mass_data", BoolProperty(name="Auto Update Mass Data", default=True)),
+    ("mastro_toggle_auto_update_mass_data", BoolProperty(
+        name="Auto Update Mass Data",
+        default=True,
+        update=update_all_mastro_meshes_useList,
+    )),
 ]
 
 # =============================================================================
