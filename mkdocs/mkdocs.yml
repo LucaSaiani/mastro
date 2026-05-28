@@ -11,6 +11,7 @@ nav:
       - Block: getting-started/object-type-block.md
       - Street: getting-started/object-type-street.md
       - Dimension: getting-started/object-type-dimension.md
+      - Drawing Mesh: getting-started/object-type-drawing.md
     - Typologies and Uses:
       - Typologies and Uses: getting-started/typologies-and-uses.md
       - Use: getting-started/typologies-use.md
@@ -38,6 +39,7 @@ nav:
         - Building: ui/properties-building.md
       - Architecture: ui/properties-architecture.md
       - Street: ui/properties-street.md
+      - Drawing: ui/drawing-layers.md
       - Custom Properties: ui/properties-custom-properties.md
       - Camera Sets: ui/properties-camera-sets.md
       - PDF Sets: ui/properties-pdf-sets.md

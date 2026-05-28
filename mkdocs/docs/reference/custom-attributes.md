@@ -113,3 +113,42 @@ Stored on edges of **Street** objects.
 | Attribute | Type | Description |
 |---|---|---|
 | `mastro_street_id` | INT | ID of the assigned street type |
+
+
+---
+
+## Drawing Attributes (Edge Domain)
+
+Stored on edges of **Drawing Mesh** objects. All attributes use the EDGE domain and are created automatically when a drawing object is added.
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `mastro_drawing_layer` | INT | 0 | ID of the layer this edge belongs to |
+| `mastro_drawing_thickness` | FLOAT | 0.2 | Stroke radius in metres (`pen.thickness / 2000`) |
+| `mastro_drawing_style_l1` | FLOAT | 1.0 | Dash length 1 |
+| `mastro_drawing_style_g1` | FLOAT | 0.0 | Gap after dash 1 |
+| `mastro_drawing_style_l2` | FLOAT | 0.0 | Dash length 2 |
+| `mastro_drawing_style_g2` | FLOAT | 0.0 | Gap after dash 2 |
+| `mastro_drawing_style_l3` | FLOAT | 0.0 | Dash length 3 |
+| `mastro_drawing_style_g3` | FLOAT | 0.0 | Gap after dash 3 |
+| `mastro_drawing_visibile` | BOOLEAN | True | Whether this edge produces output |
+| `mastro_drawing_black` | BOOLEAN | False | Marks the edge as a candidate for black-mode rendering |
+| `mastro_drawing_black_switch` | BOOLEAN | False | Set uniformly to True/False by the global Black Mode toggle |
+| `mastro_drawing_resample` | BOOLEAN | True | True when the line style is dashed (any of g1, l2, g2, l3, g3 ≠ 0) |
+
+**Mesh custom property (on the mesh data-block)**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `"MaStro drawing mesh"` | bool | Tags the object as a MaStro Drawing Mesh |
+
+---
+
+## Drawing GP Materials
+
+MaStro creates and manages Grease Pencil materials automatically. These should not be renamed or deleted manually.
+
+| Material | Description |
+|----------|-------------|
+| `Mastro_GP_{layer_id}` | Per-layer stroke material; colour matches the layer colour |
+| `Mastro_GP_Black` | Solid black material used when Black Mode is active |
