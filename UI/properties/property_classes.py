@@ -533,20 +533,11 @@ class mastro_CL_projector_properties(PropertyGroup):
     shadow_method: EnumProperty(
         name        = "Method",
         description = "Algorithm used to compute shadows",
-        default     = 'RENDER',
+        default     = 'TRACE',
         items       = [
-            ('RENDER',     "Render",     "Bake shadows by rendering with the Workbench engine"),
-            ('SILHOUETTE', "Silhouette", "Compute shadows geometrically by projecting sun-visible faces"),
             ('TRACE',      "Trace",      "Render with the Workbench engine then trace the shadow image with Blender's Grease Pencil tracer (Potrace)"),
+            ('SILHOUETTE', "Silhouette", "Compute shadows geometrically by projecting sun-visible faces"),
         ],
-    )
-
-    trace_threshold: FloatProperty(
-        name        = "Threshold",
-        description = "Binarisation threshold passed to the Grease Pencil tracer (0 = trace everything, 1 = trace nothing)",
-        default     = 0.5,
-        min         = 0.0,
-        max         = 1.0,
     )
 
     cutter_detection: EnumProperty(
@@ -579,26 +570,6 @@ class mastro_CL_projector_properties(PropertyGroup):
         default     = 10,
         min         = 1,
         max         = 100,
-    )
-    render_boundary_res: IntProperty(
-        name        = "Boundary Resolution",
-        description = (
-            "Target pixels on the short side when sampling the shadow boundary. "
-            "Higher = finer border detail, more vertices"
-        ),
-        default     = 400,
-        min         = 50,
-        max         = 2000,
-    )
-    render_interior_res: IntProperty(
-        name        = "Interior Resolution",
-        description = (
-            "Target pixels on the short side when sampling the shadow interior. "
-            "Lower = fewer interior triangles, faster"
-        ),
-        default     = 100,
-        min         = 20,
-        max         = 500,
     )
 
     def _light_poll(self, obj):

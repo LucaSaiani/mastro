@@ -59,14 +59,10 @@ class PROPERTIES_PT_Mastro_2D_Projection_Shadow(Panel):
         layout.separator()
 
         # ── Quality ───────────────────────────────────────────────────────────
-        if props.shadow_method in ('RENDER', 'TRACE'):
+        if props.shadow_method == 'TRACE':
             col = layout.column(heading="Quality")
             col.enabled = not any_running
             col.prop(props, "grid_subdivisions")
-            col.prop(props, "render_boundary_res")
-            col.prop(props, "render_interior_res")
-            if props.shadow_method == 'TRACE':
-                col.prop(props, "trace_threshold")
         else:
             col = layout.column(heading="Quality")
             col.enabled = not any_running
