@@ -1,8 +1,8 @@
-# Properties — Overlays
+# Viewport Overlays — MaStro
 
-The **Overlays** panel is a sub-panel of Project Data in the Properties editor. It controls the text and colour overlays drawn directly in the 3D viewport over MaStro objects.
+The **MaStro** section appears inside Blender's **Viewport Overlays** popover (the overlapping circles icon in the 3D viewport header). It controls the text and colour overlays drawn directly in the 3D viewport over MaStro objects.
 
-The panel header contains a **master toggle**. When disabled, all overlays are hidden. When enabled, the individual sections below become active.
+The section header contains a **master toggle**. When disabled, all MaStro overlays are hidden. Blender's global **Show Overlays** toggle also hides them. When enabled, the individual sections below become active.
 
 ---
 

@@ -6,7 +6,7 @@ Sub-panels, in order:
 
 | Panel | Description |
 |---|---|
-| [Overlays](properties-overlays.md) | Controls viewport overlays |
+| [Overlays](properties-overlays.md) | Controls viewport overlays (also accessible from Viewport Overlays popover → MaStro) |
 | [Mass](properties-mass.md) | Block, Building, and Typology lists |
 | [Architecture](properties-architecture.md) | Wall and Floor type lists |
 | [Street](properties-street.md) | Street type list |
