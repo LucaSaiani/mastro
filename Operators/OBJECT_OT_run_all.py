@@ -205,7 +205,6 @@ class OBJECT_OT_CancelAll(Operator):
     bl_options     = {"INTERNAL"}
 
     def execute(self, context):
-        _sil_state["running"]    = False
         _render_state["running"] = False
         _proj_state["running"]   = False
         props = context.scene.mastro_projector_props
