@@ -181,7 +181,8 @@ def add_nodes():
         return
 
     blend_file      = str(mastro_path / "mastro.blend")
-    nodes_to_import = {"MaStro Mass", "MaStro Block", "MaStro Street", "MaStro Dimension"}
+    nodes_to_import = {"MaStro Mass", "MaStro Block", "MaStro Street", "MaStro Dimension",
+                       ".MaStro Layer Setup"}
 
     try:
         # Link the 4 top-level groups (sub-deps arrive as linked too).
@@ -191,11 +192,13 @@ def add_nodes():
                 if name in nodes_to_import and name not in bpy.data.node_groups
             ]
 
-        # Make only the 4 top-level groups local so the user can inspect them.
-        # Nested sub-groups stay linked — Blender's make_local() is not recursive.
+        # Make only the 4 top-level GN groups local so the user can inspect them.
+        # Groups that must stay linked (e.g. shared sub-group assets) are excluded.
+        # Blender's make_local() is not recursive — nested sub-groups stay linked.
+        _KEEP_LINKED = {".MaStro Layer Setup"}
         processed_trees = set()
         for ng in data_to.node_groups:
-            if ng is None:
+            if ng is None or ng.name in _KEEP_LINKED:
                 continue
             ng.make_local()
             clear_asset_status(ng)
