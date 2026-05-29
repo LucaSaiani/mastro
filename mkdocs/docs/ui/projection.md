@@ -75,9 +75,7 @@ By default, shadows are computed from a **virtual light source** defined by azim
 
 | Setting | Description |
 |---|---|
-| **Grid Subdivisions** | Number of tiles along the camera's longest axis. Each tile is 256 px; more tiles means higher total bake resolution. |
-| **Boundary Resolution** | Target pixels on the short side when sampling the shadow boundary. Higher values produce finer border detail at the cost of more output vertices. |
-| **Interior Resolution** | Target pixels on the short side when sampling the shadow interior. Lower values produce fewer interior triangles and faster baking. |
+| **Grid Subdivisions** | Number of tiles along the camera's longest axis. Each tile is 256 px; more tiles means higher total bake resolution and finer shadow detail. |
 
 ---
 
@@ -85,7 +83,7 @@ By default, shadows are computed from a **virtual light source** defined by azim
 
 After calculation, all outputs are parented to an **empty** object named `<CameraName><suffix>` (suffix configured in Preferences, default `_projection`). The empty is placed in a dedicated **2D Projection and Shadows** collection.
 
-Each source object produces one output mesh named `<SourceName><suffix>`. Vertex groups on each mesh identify edge categories (visible, hidden, silhouette, section). The shadow output is a single filled mesh named `<CameraName>_shadow`.
+Each source object produces one output mesh named `<SourceName><suffix>`. Vertex groups on each mesh identify edge categories (visible, hidden, silhouette, section). The shadow output is a Grease Pencil object named `<CameraName>_shadow`.
 
 When **Place on Camera Plane** is enabled, the empty is positioned and scaled to match the camera frustum. The section outline mesh is offset slightly toward the camera (so it masks lines behind it) and the shadow mesh is offset slightly away (so it does not mask lines). Both offset values are configurable in Preferences.
 
