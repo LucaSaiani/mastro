@@ -16,7 +16,6 @@ from ..Utils.projection.shadow_helpers  import (get_light_source, sun_direction,
                                       collect_collection_objects)
 # from ..Utils.projection.ss_shadow_grid       import build_plane_axes, make_base_grid     # Adaptive Grid disabled
 # from ..Utils.projection.ss_shadow_timer      import _state as _shadow_state, _tick_grid  # Adaptive Grid disabled
-from ..Utils.projection.shadow_silhouette import _sil_state, _tick_sil_shadow
 from ..Utils.projection.shadow_render     import run_render_shadow, _state as _render_state
 from ..Utils.projection.proj_timer        import _proj_state, _tick_projection
 from ..Utils.projection.scene_graph_helpers import (_get_or_create_empty,
@@ -165,45 +164,14 @@ class OBJECT_OT_RunAll(Operator):
             extent  = get_scene_extent(world_verts, sun_dir)
             sun_vis = build_sun_visible_faces(eval_objs, sun_dir)
 
-            if proj_props.shadow_method == 'SILHOUETTE':
-                _sil_state.clear()
-                _sil_state.update({
-                    "running":        True,
-                    "phase":          "setup",
-                    "scene":          scene,
-                    "camera":         camera,
-                    "empty_name":     empty.name,
-                    "sun_dir":        sun_dir,
-                    "sun_vis":        sun_vis,
-                    "extent":         extent,
-                    "base_obj_names": [o.name for o in mesh_objs],
-                })
-                props.is_running = True
-                if proj_props.run_projection:
-                    excluded = _collect_excluded_names(scene, camera, proj_props, allowed_names=allowed_names)
-                    _proj_state.clear()
-                    _proj_state.update({
-                        "running":        True,
-                        "phase":          "setup",
-                        "scene":          scene,
-                        "camera":         camera,
-                        "empty":          empty,
-                        "excluded_names": excluded,
-                        "allowed_names":  allowed_names,
-                    })
-                    props.proj_is_running = True
-                bpy.app.timers.register(_tick_sil_shadow, first_interval=0.0, persistent=False)
-                # projection timer (if enabled) is started by _finalize_sil once done
-                return {"FINISHED"}
-            else:
-                try:
-                    run_render_shadow(context, sun, empty, camera, light_dir=sun_dir)
-                except Exception as exc:
-                    self.report({"ERROR"}, f"Render shadow failed: {exc}")
-                    return {"CANCELLED"}
-                if not props.proj_is_running:
-                    clear_stash(empty)
-                    unhide_empty_children(empty)
+            try:
+                run_render_shadow(context, sun, empty, camera, light_dir=sun_dir)
+            except Exception as exc:
+                self.report({"ERROR"}, f"Shadow failed: {exc}")
+                return {"CANCELLED"}
+            if not props.proj_is_running:
+                clear_stash(empty)
+                unhide_empty_children(empty)
 
         # ── 2D Projection ─────────────────────────────────────────────────────
         if proj_props.run_projection:

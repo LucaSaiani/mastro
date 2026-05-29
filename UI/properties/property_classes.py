@@ -530,37 +530,6 @@ class mastro_CL_projector_properties(PropertyGroup):
     )
     # ── Shadow / Light ────────────────────────────────────────────────────────
 
-    shadow_method: EnumProperty(
-        name        = "Method",
-        description = "Algorithm used to compute shadows",
-        default     = 'TRACE',
-        items       = [
-            ('TRACE',      "Trace",      "Render with the Workbench engine then trace the shadow image with Blender's Grease Pencil tracer (Potrace)"),
-            ('SILHOUETTE', "Silhouette", "Compute shadows geometrically by projecting sun-visible faces"),
-        ],
-    )
-
-    cutter_detection: EnumProperty(
-        name        = "Cutter Detection",
-        description = "Spatial acceleration used to find camera-facing occluders for each shadow polygon",
-        default     = 'AABB',
-        items       = [
-            ('AABB', "AABB",
-             "Bounding-box pre-filter: skip polygons whose UV bounding boxes do not "
-             "overlap the shadow polygon. Fast and simple — recommended for most scenes"),
-            ('BVH',  "BVH Tree",
-             "Build a BVH tree of all camera-facing polygons and query only the "
-             "candidates that overlap each shadow polygon. Best for scenes with "
-             "many polygons"),
-        ],
-    )
-
-    use_cast_shadow_cache: BoolProperty(
-        name        = "Cache Shadows",
-        description = "Re-use previously computed cast-shadow polygons when the light and geometry have not changed",
-        default     = True,
-    )
-
     grid_subdivisions: IntProperty(
         name        = "Grid Subdivisions",
         description = (
@@ -575,36 +544,11 @@ class mastro_CL_projector_properties(PropertyGroup):
     def _light_poll(self, obj):
         return obj.type == 'LIGHT' and obj.data.type in ('SUN', 'AREA')
 
-    def _drop_orphan_cache(self, old_key):
-        from ...Utils.projection.shadow_silhouette import _CACHE_PREFIX, _light_key_for
-        cache_name = _CACHE_PREFIX + old_key
-        if bpy.data.objects.get(cache_name) is None:
-            return
-        for cam_obj in bpy.data.objects:
-            if cam_obj.type != 'CAMERA':
-                continue
-            if cam_obj.data is self.id_data:
-                continue
-            if _light_key_for(cam_obj.data.mastro_projector_cl) == old_key:
-                return
-        bpy.data.meshes.remove(bpy.data.objects[cache_name].data, do_unlink=True)
-
     def _on_light_source_changed(self, context):
-        old_key = self.get("_prev_light_key", "")
-        if old_key:
-            self._drop_orphan_cache(old_key)
-        from ...Utils.projection.shadow_silhouette import _light_key_for
-        new_key = _light_key_for(self) or ""
-        self["_prev_light_key"] = new_key
+        pass
 
     def _on_virtual_light_changed(self, context):
-        from ...Utils.projection.shadow_silhouette import _light_key_for
-        new_key = _light_key_for(self) or ""
-        old_key = self.get("_prev_light_key", "")
-        if new_key == old_key:
-            return
-        if old_key:
-            self._drop_orphan_cache(old_key)
+        pass
         self["_prev_light_key"] = new_key
 
     virtual_azimuth: FloatProperty(
