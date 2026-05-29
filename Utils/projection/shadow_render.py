@@ -448,7 +448,183 @@ def _extract_contour_pts(shadow_mask, w, h, s):
     return all_ndc.astype(np.float64) if len(all_ndc) >= 3 else None
 
 
+def _finalize_trace(s):
+    """Finalise shadow using bpy.ops.grease_pencil.trace_image() (Potrace).
+
+    Pipeline
+    --------
+    1. Build a black-on-white RGBA image from the assembled render tiles.
+    2. Save it to a temp PNG (trace_image poll requires IMA_SRC_FILE).
+    3. Create a temporary Image Empty at the projector empty's world transform
+       so that Potrace strokes land in the same local space as the Render
+       method's mesh vertices.
+    4. Call bpy.ops.grease_pencil.trace_image() — the GP object copies the
+       Image Empty's loc/rot/scale and places strokes via pixel_to_object_transform.
+    5. Parent the GP to the projector empty (MPI = Identity, local = 0) — same
+       pattern as create_shadow_cam_mesh — so the shadow follows the empty.
+    6. Assign "MaStro Shadow Colour GP" material, replacing any auto-created ones.
+
+    Image Empty setup
+    -----------------
+    The empty is placed at the projector empty's loc/rot/scale.  This works for
+    both on_cam=True (near-plane space) and on_cam=False (flat XY space) because
+    in both cases the Render method also expresses vertex positions in the
+    projector empty's local coordinate system.
+
+    empty_image_offset = (-0.5, -0.5) centres the image at the empty origin:
+    Blender's Image Empty places the bottom-left corner at (ima_ofs.x, ima_ofs.y)
+    in local space and the image extends right (+X) and up (+Y).  The offset is
+    normalised so ±0.5 always centres regardless of drawsize.
+    """
+    import tempfile as _tempfile, os as _os
+    from mathutils import Matrix as _Matrix
+    from .shadow_helpers import (_SHADOW_TAG, link_to_projection_collection)
+
+    scene     = s['scene']
+    camera    = s['camera']
+    cam_cl    = s['cam_cl']
+    on_cam    = s['on_cam']
+    aspect    = s['aspect']
+    empty     = s['empty']
+    full_w    = s['full_w']
+    full_h    = s['full_h']
+
+    # Build shadow mask from the raw (un-flipped) render buffer.
+    # Image Empty displays row 0 at the top, matching screen convention.
+    px_on_trace = s['px_on']
+    alpha       = px_on_trace[:, :, 3]
+    brightness  = px_on_trace[:, :, :3].mean(axis=2)
+    shadow_mask = (alpha > 0.5) & (brightness < 0.95)
+    if not shadow_mask.any():
+        return
+
+    _set_header("Shadow [Trace] — Saving image…")
+
+    # Black shadow on white background — Potrace traces dark regions.
+    pixels = np.ones((full_h, full_w, 4), dtype=np.float32)
+    pixels[shadow_mask, 0] = 0.0
+    pixels[shadow_mask, 1] = 0.0
+    pixels[shadow_mask, 2] = 0.0
+
+    img_name = "_mastro_shadow_trace_tmp"
+    if img_name in bpy.data.images:
+        bpy.data.images.remove(bpy.data.images[img_name])
+    img = bpy.data.images.new(img_name, width=full_w, height=full_h, alpha=True)
+    img.use_fake_user = False
+    img.pixels.foreach_set(pixels.ravel())
+    img.update()
+
+    # trace_image poll requires IMA_SRC_FILE.
+    tmp_path = _os.path.join(_tempfile.gettempdir(), "mastro_shadow_trace.png")
+    img.filepath_raw = tmp_path
+    img.file_format  = 'PNG'
+    img.save()
+    img.source = 'FILE'
+
+    _set_header("Shadow [Trace] — Tracing…")
+
+    # Remove stale shadow object so the new one can take the name.
+    shadow_name = camera.name + "_shadow"
+    old = bpy.data.objects.get(shadow_name)
+    if old:
+        old_data = old.data
+        old_type = old.type
+        bpy.data.objects.remove(old, do_unlink=True)
+        if old_data and old_data.users == 0:
+            if old_type == 'MESH':
+                bpy.data.meshes.remove(old_data)
+            elif old_type == 'GREASEPENCIL':
+                bpy.data.grease_pencils.remove(old_data)
+
+    # Image Empty transform — mirrors the projector empty so strokes are in
+    # the same local coordinate space used by the Render method's mesh vertices.
+    # drawsize = 2*aspect covers the full camera frustum width in local units.
+    # ima_ofs = (-0.5, -0.5) centres the image at the empty origin (normalised
+    # offset: the Image Empty places its bottom-left at ima_ofs regardless of
+    # drawsize or object scale).
+    drawsize = 2.0 * aspect
+    ima_ofs  = (-0.5, -0.5)
+
+    gp_names_before = {o.name for o in bpy.context.scene.objects
+                       if o.type == 'GREASEPENCIL'}
+
+    if empty is not None:
+        e_loc   = empty.matrix_world.translation.copy()
+        e_rot   = empty.matrix_world.to_euler()
+        e_scale = empty.matrix_world.to_scale()
+    else:
+        e_loc   = (0.0, 0.0, 0.0)
+        e_rot   = (0.0, 0.0, 0.0)
+        e_scale = (1.0, 1.0, 1.0)
+
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.ops.object.add(type='EMPTY', location=e_loc, rotation=e_rot)
+    img_empty = bpy.context.active_object
+    img_empty.name               = "_mastro_shadow_trace_empty"
+    img_empty.empty_display_type = 'IMAGE'
+    img_empty.data               = img
+    img_empty.empty_display_size = drawsize
+    img_empty.empty_image_offset = ima_ofs
+    img_empty.scale              = e_scale
+
+    bpy.ops.grease_pencil.trace_image(
+        target    = 'NEW',
+        threshold = cam_cl.trace_threshold,
+        mode      = 'SINGLE',
+    )
+
+    gp_obj = next(
+        (o for o in bpy.context.scene.objects
+         if o.type == 'GREASEPENCIL' and o.name not in gp_names_before),
+        None,
+    )
+    if gp_obj is None:
+        try:
+            if img_empty.name in bpy.data.objects:
+                bpy.data.objects.remove(img_empty)
+        except ReferenceError:
+            pass
+        bpy.data.images.remove(img)
+        return
+
+    gp_obj.name          = shadow_name
+    gp_obj[_SHADOW_TAG]  = True
+    gp_obj.hide_viewport = False
+    link_to_projection_collection(gp_obj, scene)
+
+    if empty is not None:
+        gp_obj.parent                = empty
+        gp_obj.matrix_parent_inverse = _Matrix.Identity(4)
+        gp_obj.location              = (0.0, 0.0, 0.0)
+        gp_obj.rotation_euler        = (0.0, 0.0, 0.0)
+        gp_obj.scale                 = (1.0, 1.0, 1.0)
+
+    from .scene_graph_helpers import _get_or_create_gp_material
+    gp_mat = _get_or_create_gp_material("MaStro Shadow Colour GP", "MaStro Shadow Colour")
+    if gp_mat:
+        gp_obj.data.materials.clear()
+        gp_obj.data.materials.append(gp_mat)
+
+    prefs = get_prefs()
+    apply_depth_offset(gp_obj, camera, -prefs.shadow_offset)
+
+    try:
+        if img_empty.name in bpy.data.objects:
+            bpy.data.objects.remove(img_empty)
+    except ReferenceError:
+        pass
+    bpy.data.images.remove(img)
+    try:
+        _os.remove(tmp_path)
+    except OSError:
+        pass
+
+
 def _finalize(s):
+    if s['cam_cl'].shadow_method == 'TRACE':
+        _finalize_trace(s)
+        return
+
     scene     = s['scene']
     camera    = s['camera']
     cam_cl    = s['cam_cl']

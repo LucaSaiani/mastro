@@ -537,7 +537,16 @@ class mastro_CL_projector_properties(PropertyGroup):
         items       = [
             ('RENDER',     "Render",     "Bake shadows by rendering with the Workbench engine"),
             ('SILHOUETTE', "Silhouette", "Compute shadows geometrically by projecting sun-visible faces"),
+            ('TRACE',      "Trace",      "Render with the Workbench engine then trace the shadow image with Blender's Grease Pencil tracer (Potrace)"),
         ],
+    )
+
+    trace_threshold: FloatProperty(
+        name        = "Threshold",
+        description = "Binarisation threshold passed to the Grease Pencil tracer (0 = trace everything, 1 = trace nothing)",
+        default     = 0.5,
+        min         = 0.0,
+        max         = 1.0,
     )
 
     cutter_detection: EnumProperty(
