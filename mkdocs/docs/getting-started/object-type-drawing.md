@@ -24,6 +24,26 @@ See [Layers, Pens and Line Styles](../ui/drawing-layers.md) for the full panel r
 
 ---
 
+## Drawing scale
+
+Every drawing is associated with a **scale denominator** (e.g. `200` for 1:200). The scale multiplies all line thicknesses in the viewport so that lines appear at the correct visual weight for the intended print scale — a 0.25 mm line at 1:200 looks different from the same line at 1:50.
+
+The scale is stored **per camera**: each camera remembers its own scale and applies it automatically when that camera becomes the active view. When the viewport is not locked to any camera (free perspective or orthographic view), a separate **viewport scale** is used instead.
+
+### Where to set the scale
+
+| Location | What it controls |
+|---|---|
+| **Properties → Camera → Viewport Display → Scale 1:** | Scale for that specific camera |
+| **Viewport sidebar (N) → View → Scale 1:** | Active scale — shows camera scale in camera view, viewport scale otherwise |
+| **Status bar (bottom of Blender)** | Read-only display of the current active scale |
+
+### How it works
+
+The scale value is written to an internal node inside the **MaStro Drawing** Geometry Nodes group. Switching cameras updates this node automatically; no manual action is required.
+
+---
+
 ## Drawing workflow
 
 1. Use *Add → MaStro → Drawing (Mesh)* to add a new drawing object. A single edge is created at the 3D cursor position, already tagged with the active layer's attributes.
