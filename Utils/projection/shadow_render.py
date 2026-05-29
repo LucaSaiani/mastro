@@ -400,52 +400,8 @@ def _render_tile(s, i, j, context=None):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Finalize — build shadow mesh from rendered pixels
+# Finalize — dispatch to the active shadow method
 # ─────────────────────────────────────────────────────────────────────────────
-
-def _extract_contour_pts(shadow_mask, w, h, s):
-    from scipy.ndimage import binary_erosion
-
-    cam_cl  = s['cam_cl']
-    bnd_res = cam_cl.render_boundary_res
-    int_res = cam_cl.render_interior_res
-    short   = min(h, w)
-
-    fb       = max(1, short // bnd_res)
-    sb       = shadow_mask[::fb, ::fb]
-    sbh, sbw = sb.shape
-
-    he_r, he_c = np.where(sb[:-1, :] != sb[1:, :])
-    h_pts = np.column_stack([he_r + 0.5, he_c.astype(np.float64)])
-
-    ve_r, ve_c = np.where(sb[:, :-1] != sb[:, 1:])
-    v_pts = np.column_stack([ve_r.astype(np.float64), ve_c + 0.5])
-
-    if len(h_pts) == 0 and len(v_pts) == 0:
-        return None
-    bnd_rc  = np.vstack([p for p in [h_pts, v_pts] if len(p)])
-    bnd_ndc = np.column_stack([
-        2.0 * bnd_rc[:, 1] / sbw - 1.0,
-        2.0 * (1.0 - bnd_rc[:, 0] / sbh) - 1.0,
-    ])
-
-    fi       = max(1, short // int_res)
-    si       = shadow_mask[::fi, ::fi]
-    sih, siw = si.shape
-    i_rows, i_cols = np.where(binary_erosion(si, iterations=2))
-    _MAX_INT = 3000
-    if len(i_rows) > _MAX_INT:
-        step   = max(1, len(i_rows) // _MAX_INT)
-        i_rows = i_rows[::step]
-        i_cols = i_cols[::step]
-    int_ndc = np.column_stack([
-        2.0 * i_cols / siw - 1.0,
-        2.0 * (1.0 - i_rows / sih) - 1.0,
-    ]) if len(i_rows) else None
-
-    parts = [bnd_ndc] + ([int_ndc] if int_ndc is not None else [])
-    all_ndc = np.vstack(parts)
-    return all_ndc.astype(np.float64) if len(all_ndc) >= 3 else None
 
 
 def _finalize_trace(s):
@@ -569,7 +525,7 @@ def _finalize_trace(s):
 
     bpy.ops.grease_pencil.trace_image(
         target    = 'NEW',
-        threshold = cam_cl.trace_threshold,
+        threshold = 0.5,
         mode      = 'SINGLE',
     )
 
@@ -621,114 +577,4 @@ def _finalize_trace(s):
 
 
 def _finalize(s):
-    if s['cam_cl'].shadow_method == 'TRACE':
-        _finalize_trace(s)
-        return
-
-    scene     = s['scene']
-    camera    = s['camera']
-    cam_cl    = s['cam_cl']
-    cam_loc   = s['cam_loc']
-    cam_fwd   = s['cam_fwd']
-    cam_right = s['cam_right']
-    cam_up    = s['cam_up']
-    on_cam    = s['on_cam']
-    scale     = s['scale']
-    aspect    = s['aspect']
-    empty     = s['empty']
-    full_w    = s['full_w']
-    full_h    = s['full_h']
-
-    px_on = s['px_on'][::-1, :, :]
-
-    alpha       = px_on[:, :, 3]
-    brightness  = px_on[:, :, :3].mean(axis=2)
-
-    _THRESHOLD  = 0.95
-    shadow_mask = (alpha > 0.5) & (brightness < _THRESHOLD)
-
-    if not shadow_mask.any():
-        return
-
-    _set_header("Shadow [Render] — Triangulating…")
-
-    try:
-        from scipy.ndimage import gaussian_filter
-        from scipy.spatial import Delaunay
-    except ImportError as exc:
-        raise RuntimeError(f"scipy required: {exc}")
-
-    smooth      = gaussian_filter(shadow_mask.astype(np.float32), sigma=1.0)
-    shadow_mask = smooth > 0.5
-
-    w, h    = full_w, full_h
-    pts_ndc = _extract_contour_pts(shadow_mask, w, h, s)
-    if pts_ndc is None or len(pts_ndc) < 3:
-        return
-
-    if on_cam:
-        near   = camera.data.clip_start * 1.01
-        half_h = _cam_half_height(camera, near, aspect)
-        pc     = cam_loc + cam_fwd * near
-        plane_matrix = Matrix([
-            [cam_right.x * half_h * aspect, cam_up.x * half_h, cam_fwd.x, pc.x],
-            [cam_right.y * half_h * aspect, cam_up.y * half_h, cam_fwd.y, pc.y],
-            [cam_right.z * half_h * aspect, cam_up.z * half_h, cam_fwd.z, pc.z],
-            [0,                             0,                  0,          1  ],
-        ])
-        local_verts = [Vector((float(pts_ndc[k, 0]), float(pts_ndc[k, 1]), 0.0))
-                       for k in range(len(pts_ndc))]
-    else:
-        plane_matrix = None
-        local_verts  = [Vector((float(pts_ndc[k, 0]) * scale * aspect,
-                                float(pts_ndc[k, 1]) * scale, 0.0))
-                        for k in range(len(pts_ndc))]
-
-    final_faces = []
-    try:
-        tri  = Delaunay(pts_ndc)
-        for simplex in tri.simplices:
-            cx = pts_ndc[simplex, 0].mean()
-            cy = pts_ndc[simplex, 1].mean()
-            px_col = max(0, min(w - 1, int((cx + 1.0) / 2.0 * w)))
-            px_row = max(0, min(h - 1, int((1.0 - (cy + 1.0) / 2.0) * h)))
-            if shadow_mask[px_row, px_col]:
-                final_faces.append(list(map(int, simplex)))
-    except Exception as exc:
-        raise RuntimeError(f"Delaunay error: {exc}")
-
-    obj = create_shadow_cam_mesh(
-        local_verts, camera, scene, empty,
-        precomputed_faces=final_faces if final_faces else None,
-        plane_matrix=plane_matrix,
-    )
-
-    if obj and final_faces:
-        import bmesh as _bmesh
-        bm = _bmesh.new()
-        bm.from_mesh(obj.data)
-        _bmesh.ops.dissolve_limit(bm, angle_limit=math.radians(0.1),
-                                  verts=bm.verts[:], edges=bm.edges[:])
-        bm.to_mesh(obj.data)
-        bm.free()
-        obj.data.update()
-
-    if obj:
-        mat = bpy.data.materials.get("MaStro Shadow Colour")
-        if mat:
-            obj.data.materials.append(mat)
-        prefs = get_prefs()
-        if on_cam:
-            # The shadow object is created with plane_matrix as matrix_parent_inverse,
-            # so its local +Z = cam_fwd (away from camera).  Moving away = positive delta.
-            world_offset = prefs.section_offset + prefs.shadow_offset
-            obj.location.z += world_offset
-            if camera.data.type == 'PERSP':
-                d_new = near + world_offset
-                if near > 1e-6 and d_new > 1e-6:
-                    obj.scale = (d_new / near,) * 3
-        else:
-            apply_depth_offset(obj, camera, -prefs.shadow_offset)
-        obj.hide_viewport = False
-        if camera.data.mastro_projector_cl.convert_to_grease_pencil:
-            convert_objects_to_grease_pencil([obj])
+    _finalize_trace(s)
