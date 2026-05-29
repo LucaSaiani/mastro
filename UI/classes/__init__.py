@@ -13,7 +13,7 @@ from .VIEW3D_UL_Typology_Uses import VIEW3D_UL_Typology_Uses
 # from ..properties.property_classes import mastro_CL_obj_typology_uses_name_list
 from .PREFERENCES_Mastro_Preferences import PREFERENCES_Mastro_Preferences
 from .PROPERTIES_PT_Mastro_Project_Data import PROPERTIES_PT_Mastro_Project_Data
-from .PROPERTIES_PT_Mastro_Overlays import PROPERTIES_PT_Mastro_Overlay
+from .VIEW3D_PT_Mastro_Overlay import VIEW3D_PT_Mastro_Overlay
 from .PROPERTIES_PT_Mastro_Mass import PROPERTIES_PT_Mastro_Mass
 from .PROPERTIES_PT_Mastro_Block import PROPERTIES_PT_Mastro_Block
 from .PROPERTIES_PT_Mastro_Building import PROPERTIES_PT_Mastro_Building
@@ -66,7 +66,7 @@ classes = (
     # mastro_CL_obj_typology_uses_name_list,
     PREFERENCES_Mastro_Preferences,
     PROPERTIES_PT_Mastro_Project_Data,
-    PROPERTIES_PT_Mastro_Overlay,
+    VIEW3D_PT_Mastro_Overlay,
     PROPERTIES_PT_Mastro_Mass,
     PROPERTIES_PT_Mastro_Block,
     PROPERTIES_PT_Mastro_Building,

@@ -631,10 +631,14 @@ def draw_main_show_attributes_3D(context):
             show_block_overlay(obj)
     
 def draw_callback_px_show_attributes_2D(self, context):
+    if not context.space_data.overlay.show_overlays:
+        return
     draw_main_show_attributes_2D(context)
-    
+
 
 def draw_callback_px_show_attributes_3D(self, context):
+    if not context.space_data.overlay.show_overlays:
+        return
     draw_main_show_attributes_3D(context)
         
 
