@@ -70,6 +70,8 @@ class NODE_OT_Mastro_Sticky_Note(Operator):
                 note_text.use_fake_user = False
       
                 postIt.text = bpy.data.texts[note_text.name]
-                openTextEditor(note_text)
-            
+                node_tree.nodes.active = postIt
+
+        for area in bpy.context.screen.areas:
+            area.tag_redraw()
         return {'FINISHED'}
