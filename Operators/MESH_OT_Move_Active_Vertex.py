@@ -16,10 +16,11 @@ def safe_eval(expr):
     """
     Safely evaluate an arithmetic expression using AST.
     Supports +, -, *, / and numbers only.
+    Accepts both . and , as decimal separator.
     Ignores any other invalid input.
     """
     try:
-        node = ast.parse(expr, mode='eval').body
+        node = ast.parse(expr.replace(',', '.'), mode='eval').body
         return eval_node(node)
     except:
         return None
