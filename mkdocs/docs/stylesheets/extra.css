@@ -1,3 +1,5 @@
+
+
 /* Sticky footer navigation ------------------------------------------------- */
 
 .md-footer {
@@ -12,39 +14,68 @@
   padding-bottom: 8rem;
 }
 
-/* Dark mode colours -------------------------------------------------------- */
+/* Dark mode — Blender manual palette --------------------------------------- */
 
 [data-md-color-scheme="slate"] {
-  --md-primary-fg-color:        #1e1e2e;
-  --md-primary-fg-color--light: #2a2a3e;
-  --md-primary-fg-color--dark:  #12121e;
-  --md-primary-bg-color:        #cdd6f4;
+  /* Header / sidebar header */
+  --md-primary-fg-color:        #1a1c1e;
+  --md-primary-fg-color--light: #212426;
+  --md-primary-fg-color--dark:  #111315;
+  --md-primary-bg-color:        #cfd0d0;
 
-  --md-accent-fg-color:         #b4befe;
-  --md-accent-fg-color--transparent: #b4befe26;
+  /* Content background */
+  --md-default-bg-color:        #131416;
 
-  --md-default-bg-color:        #181825;
-  --md-default-fg-color:        #cdd6f4;
-  --md-default-fg-color--light: #a6adc8;
-  --md-default-fg-color--lighter: #6c7086;
+  /* Sidebar background (slightly lighter than content) */
+  --md-nav-item-color:          #cfd0d0;
 
-  --md-typeset-a-color:         #b4befe;
+  /* Text */
+  --md-default-fg-color:        #cfd0d0;
+  --md-default-fg-color--light: #9ca0a5;
+  --md-default-fg-color--lighter: #81868d;
 
-  --md-nav-item--section-color: #b4befe;
+  /* Links / accent — Blender blue */
+  --md-accent-fg-color:              #5ca5ff;
+  --md-accent-fg-color--transparent: #5ca5ff26;
+  --md-typeset-a-color:              #5ca5ff;
+
+  /* Code */
+  --md-code-bg-color:           #1a1c1e;
+  --md-code-fg-color:           #cfd0d0;
 }
 
-/* Light mode colours ------------------------------------------------------- */
+/* Sidebar slightly different background in dark mode */
+[data-md-color-scheme="slate"] .md-sidebar {
+  background-color: #1a1c1e;
+}
+
+/* Light mode — Blender manual palette -------------------------------------- */
 
 [data-md-color-scheme="default"] {
-  --md-primary-fg-color:        #5b5f97;
-  --md-primary-fg-color--light: #7b7fc4;
-  --md-primary-fg-color--dark:  #3d4080;
-  --md-primary-bg-color:        #ffffff;
+  /* Header */
+  --md-primary-fg-color:        #f8f9fb;
+  --md-primary-fg-color--light: #ffffff;
+  --md-primary-fg-color--dark:  #e8eaed;
+  --md-primary-bg-color:        #1a1a1a;
 
-  --md-accent-fg-color:         #7c3aed;
-  --md-accent-fg-color--transparent: #7c3aed26;
+  /* Text */
+  --md-default-fg-color:        #1a1a1a;
+  --md-default-fg-color--light: #5a5c63;
+  --md-default-fg-color--lighter: #6b6f76;
 
-  --md-typeset-a-color:         #7c3aed;
+  /* Links / accent — Blender blue */
+  --md-accent-fg-color:              #0a4bff;
+  --md-accent-fg-color--transparent: #0a4bff26;
+  --md-typeset-a-color:              #2757dd;
+
+  /* Code */
+  --md-code-bg-color:           #f8f9fb;
+}
+
+/* Sidebar background light mode */
+[data-md-color-scheme="default"] .md-sidebar {
+  background-color: #f8f9fb;
+  border-right: 1px solid #e0e2e6;
 }
 
 /* Node page icon top-right ------------------------------------------------- */
@@ -138,7 +169,117 @@
 
 /* Sidebar section headers bold + accent ------------------------------------ */
 
-.md-nav__item--section > .md-nav__link {
-  color: var(--md-nav-item--section-color, var(--md-accent-fg-color));
-  font-weight: 700;
+
+/* Chip ----------------------------------------------------------------------*/
+.breadcrumbs {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: #e0e0e0;
+}
+
+.breadcrumbs .step {
+  padding: 0 2px;
+}
+
+.breadcrumbs .sep {
+  margin: 0 6px;
+  color: rgba(255, 255, 255, 0.4); 
+  font-size: 0.75rem;
+}
+/* Chip ----------------------------------------------------------------------*/
+/* Blender-style admonitions ------------------------------------------------ */
+
+/* Shared base */
+.md-typeset .admonition,
+.md-typeset details {
+  border: none;
+  border-left: 4px solid;
+  border-radius: 2px;
+  box-shadow: none;
+  padding: 0;
+  margin: 1.2em 0;
+}
+
+.md-typeset .admonition-title,
+.md-typeset summary {
+  padding: 0.4em 0.8em;
+  font-size: 0.85em;
+  font-weight: 600;
+  margin: 0;
+  border-radius: 0;
+}
+
+.md-typeset .admonition > *:not(.admonition-title),
+.md-typeset details > *:not(summary) {
+  padding: 0.6em 0.8em;
+  margin: 0;
+}
+
+/* Note — blue */
+.md-typeset .admonition.note,
+.md-typeset details.note {
+  border-left-color: #3298d4;
+}
+.md-typeset .note > .admonition-title,
+.md-typeset .note > summary {
+  background-color: #1d4e6e;
+  color: #cfd0d0;
+}
+.md-typeset .note > .admonition-title::before,
+.md-typeset .note > summary::before {
+  background-color: #5ca5ff;
+}
+
+/* Tip — green */
+.md-typeset .admonition.tip,
+.md-typeset details.tip {
+  border-left-color: #4caf50;
+}
+.md-typeset .tip > .admonition-title,
+.md-typeset .tip > summary {
+  background-color: #1a3d22;
+  color: #cfd0d0;
+}
+.md-typeset .tip > .admonition-title::before,
+.md-typeset .tip > summary::before {
+  background-color: #4caf50;
+}
+
+/* Warning — amber */
+.md-typeset .admonition.warning,
+.md-typeset details.warning {
+  border-left-color: #e8a000;
+}
+.md-typeset .warning > .admonition-title,
+.md-typeset .warning > summary {
+  background-color: #3d2e00;
+  color: #cfd0d0;
+}
+
+/* Reference — grigio neutro (come Blender) */
+.md-typeset .admonition.seealso,
+.md-typeset details.seealso {
+  border-left-color: #555;
+}
+.md-typeset .seealso > .admonition-title,
+.md-typeset .seealso > summary {
+  background-color: #2a2a2a;
+  color: #9ca0a5;
+}
+
+/* Custom "reference" type */
+.md-typeset .admonition.reference,
+.md-typeset details.reference {
+  border-left-color: #555;
+}
+.md-typeset .reference > .admonition-title,
+.md-typeset .reference > summary {
+  background-color: #2a2a2a;
+  color: #9ca0a5;
 }

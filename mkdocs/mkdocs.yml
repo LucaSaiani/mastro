@@ -21,15 +21,7 @@ nav:
       - Top Floor Override: getting-started/typologies-top-floor.md
     - The Attribute System: getting-started/attribute-system.md
   - User Interface:
-    - Viewport Sidebar:
-      - MaStro Panel: ui/sidebar-main-panel.md
-      - Mass: ui/sidebar-mass.md
-      - Block: ui/sidebar-block.md
-      - Street: ui/sidebar-street.md
-      - Architecture: ui/sidebar-architecture.md
-      - Geometry Data: ui/sidebar-geometry-data.md
-      - Custom Properties: ui/sidebar-custom-properties.md
-      - Export: ui/sidebar-export.md
+    - User Interface: ui/user-interface.md
     - Properties Editor:
       - Project Data: ui/properties-project-data.md
       - Overlays: ui/properties-overlays.md
@@ -43,6 +35,16 @@ nav:
       - Custom Properties: ui/properties-custom-properties.md
       - Camera Sets: ui/properties-camera-sets.md
       - PDF Sets: ui/properties-pdf-sets.md
+    - Viewport Sidebar:
+      - MaStro Panel: ui/sidebar-main-panel.md
+      - Mass: ui/sidebar-mass.md
+      - Block: ui/sidebar-block.md
+      - Street: ui/sidebar-street.md
+      - Architecture: ui/sidebar-architecture.md
+      - Geometry Data: ui/sidebar-geometry-data.md
+      - Custom Properties: ui/sidebar-custom-properties.md
+      - Export: ui/sidebar-export.md
+    
     - Tools:
       - XY Constraint: ui/xy-constraint.md
       - Transform Orientation: ui/transform-orientation.md
@@ -214,8 +216,15 @@ theme:
         name: Switch to dark mode
   features:
     - navigation.footer
-    - toc.integrate
-    - navigation.prune
+    - navigation.expand        # expand all sections by default
+    - navigation.indexes       # section landing pages
+    - navigation.top           # back-to-top button
+    - toc.follow               # TOC highlights current heading on scroll
 
 extra_css:
   - stylesheets/extra.css
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
