@@ -1,8 +1,7 @@
 # Introduction
 
-<div style="text-align: center; max-width: 600px; margin: auto;">
-  ![MaStro Logo](assets/mastro_logo.png)
-</div>
+![MaStro Logo](assets/mastro_logo.png)
+
 
 MaStro is a Blender extension designed for architects and anyone interested in rapidly creating fully parametric 3D architectural models.
 
