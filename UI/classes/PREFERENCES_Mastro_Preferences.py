@@ -157,6 +157,12 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
         description="Shadow mesh is moved this distance away from the camera, so it does not mask projection lines"
     )
 
+    open_file_detection: bpy.props.BoolProperty(
+        name="Open File Detection",
+        default=True,
+        description="When opening a .blend file, warn if another user already has it open"
+    )
+
     show_overlay_settings: bpy.props.BoolProperty(
         name="Overlay Settings",
         default=False
@@ -301,6 +307,12 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
             row = col.row()
             row.label(text="Shadow Color:")
             row.prop(self, "shadow_color", text="")
+
+        # Section: Open File Detection
+        box = layout.box()
+        row = box.row()
+        row.label(text="Open File Detection:", icon='FILE_BLEND')
+        row.prop(self, "open_file_detection", text="Enabled")
 
 
 
