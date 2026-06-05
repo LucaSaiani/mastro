@@ -86,7 +86,14 @@
       "WebFetch(domain:projects.blender.org)",
       "Bash(find /home/luca/Software/ -name \"ss_shadow*\" 2>/dev/null *)",
       "Read(//home/luca/Software/**)",
-      "Bash(python3 -c ' *)"
+      "Bash(python3 -c ' *)",
+      "Bash(git -C /home/luca/Software/mastroDraw log --oneline -8)",
+      "Bash(/home/luca/Software/blender-git/build_linux/bin/blender --background --python-expr ' *)",
+      "Bash(ls /tmp/blender*.txt 2>/dev/null; ls ~/blender*.txt 2>/dev/null)",
+      "Read(//home/luca/**)",
+      "Bash(xxd /tmp/blender.crash.txt)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ],
     "additionalDirectories": [
       "/home/luca/Documents/Tesi_eng",
