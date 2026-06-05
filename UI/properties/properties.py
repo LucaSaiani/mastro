@@ -43,7 +43,7 @@ from .property_classes import ( mastro_CL_addon_properties,
 # from ... import mastro_geometryNodes
 # from ... import mastro_project_data
 # from ... import mastro_menu
-from ... import mastro_schedule
+# from ... import mastro_schedule
 # from ... import mastro_street
     
 # =============================================================================
