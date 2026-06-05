@@ -144,6 +144,34 @@ Stored on edges of **Drawing Mesh** objects. All attributes use the EDGE domain 
 
 ---
 
+## CAD Shape Attributes
+
+Added by the CAD tools (Circle, Rectangle, Fillet) when geometry is created inside a Drawing Mesh in Edit Mode. These attributes allow the edit handles to detect and reconstruct shapes for non-destructive editing (Alt+G).
+
+### Vertex Domain
+
+| Attribute | Type | Description |
+|---|---|---|
+| `mastro_cad_type` | STRING | Shape tag: `"Circle"`, `"Fillet"`, `"Rectangle"`, or `""` (untagged) |
+| `mastro_cad_status` | INT | 1 = valid shape, 0 = invalidated (geometry was modified outside the CAD tools) |
+| `mastro_cad_resolution` | INT | Circle/Fillet only: total segment count of the full circle this arc belongs to |
+
+### Edge Domain
+
+| Attribute | Type | Description |
+|---|---|---|
+| `mastro_cad_type_EDGE` | STRING | Same tag as the vertex, mirrored to edges for fast lookup |
+| `mastro_cad_status_EDGE` | INT | Same status as the vertex |
+| `mastro_cad_resolution_EDGE` | INT | Circle/Fillet only: total segment count, mirrored to edges |
+
+**Notes**
+
+- All four tag values (`"Circle"`, `"Fillet"`, `"Rectangle"`, `""`) are defined in `CIRCLE_TYPES = {"Circle", "Fillet"}` in `circle_utils.py`; rectangle detection uses `"Rectangle"`.
+- Setting `mastro_cad_status = 0` on any element of a shape de-activates the edit handle for that shape without removing the geometry.
+- When the CAD tools are used inside a Drawing Mesh, the drawing attributes (`mastro_drawing_*`) are also written automatically from the currently active drawing layer.
+
+---
+
 ## Drawing GP Materials
 
 MaStro creates and manages Grease Pencil materials automatically. These should not be renamed or deleted manually.
