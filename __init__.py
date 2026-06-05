@@ -278,7 +278,7 @@ def register():
     bpy.app.handlers.load_factory_startup_post.append(onFileDefault)
     
       
-    nodeitems_utils.register_node_categories('MASTRO_NODES', mastro_schedule.node_categories) 
+    # nodeitems_utils.register_node_categories('MASTRO_NODES', mastro_schedule.node_categories)
     
     # Add toggle to both tool header
     # bpy.types.VIEW3D_HT_tool_header.append(mastro_menu.constraint_xy_button)
@@ -341,7 +341,7 @@ def unregister():
     if _lm_original_viewlayer_draw is not None:
         bpy.types.VIEWLAYER_PT_context_layer.draw = _lm_original_viewlayer_draw
 
-    nodeitems_utils.unregister_node_categories('MASTRO_NODES')
+    # nodeitems_utils.unregister_node_categories('MASTRO_NODES')
 
      
     
