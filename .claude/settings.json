@@ -93,7 +93,9 @@
       "Read(//home/luca/**)",
       "Bash(xxd /tmp/blender.crash.txt)",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(./gradlew :app:assembleDebug*)",
+      "Bash(~/Android/Sdk/platform-tools/adb devices*)"
     ],
     "additionalDirectories": [
       "/home/luca/Documents/Tesi_eng",
