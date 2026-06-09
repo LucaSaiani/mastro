@@ -6,7 +6,7 @@ from .read_write_bmesh_use_attribute import write_bmesh_use_attribute
 from .write_bmesh_overlay_uses import overlay_bmesh_uses
 
 point_only_attributes = [("mastro_side_angle",      "FLOAT",    ("MaStro block",)),
-                        ("mastro_custom_vert",      "FLOAT",    ("MaStro mass", "MaStro block"))]
+                        ("mastro_custom_vertex",      "FLOAT",    ("MaStro mass", "MaStro block"))]
     
 edge_only_attributes = [("mastro_block_depth",      "FLOAT",    ("MaStro block",)),
                         ("mastro_inverted_normal",  "BOOL",     ("MaStro mass", "MaStro block")),
@@ -35,7 +35,7 @@ layer_map = {
     "mastro_block_depth": ("edges", "FLOAT", ("MaStro block",)),
     "mastro_side_angle": ("verts", "FLOAT", ("MaStro block",)),
     "mastro_floor_id": ("faces", "INT", ("MaStro mass",)),
-    "mastro_custom_vert": ("verts", "FLOAT", ("MaStro mass", "MaStro block")),
+    "mastro_custom_vertex": ("verts", "FLOAT", ("MaStro mass", "MaStro block")),
     "mastro_custom_edge": ("edges", "FLOAT", ("MaStro mass", "MaStro block")),
     "mastro_custom_face": ("faces", "FLOAT", ("MaStro mass", "MaStro block")),
 }   
@@ -441,7 +441,7 @@ def set_attribute_mastro_floor_id(self, value):
     
         
 def set_attribute_custom_vert(self, value):
-    set_attribute_mastro_generic(value, "mastro_custom_vert")
+    set_attribute_mastro_generic(value, "mastro_custom_vertex")
     
 def set_attribute_custom_edge(self, value):
     set_attribute_mastro_generic(value, "mastro_custom_edge")

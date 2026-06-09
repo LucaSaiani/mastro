@@ -20,7 +20,7 @@ street_attribute_set = [
             "attr_default" : 16
             },
             {
-            "attr" : "mastro_custom_vert",
+            "attr" : "mastro_custom_vertex",
             "attr_type" :  "FLOAT",
             "attr_domain" :  "POINT",
             "attr_default" : 0

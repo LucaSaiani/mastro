@@ -12,14 +12,14 @@ class OBJECT_OT_Set_Vertex_Extra(Operator):
         mesh = obj.data
         
         try:
-            mesh.attributes["mastro_custom_vert"]
+            mesh.attributes["mastro_custom_vertex"]
             attribute_vertex = context.scene.mastro_attribute_extra_vertex
 
             mode = obj.mode
             bpy.ops.object.mode_set(mode='OBJECT')
            
             selected_vertices = [v for v in bpy.context.active_object.data.vertices if v.select]
-            mesh_attributes = mesh.attributes["mastro_custom_vert"].data.items()
+            mesh_attributes = mesh.attributes["mastro_custom_vertex"].data.items()
             for vert in selected_vertices:
                 index = vert.index
                 for mesh_attribute in mesh_attributes:
