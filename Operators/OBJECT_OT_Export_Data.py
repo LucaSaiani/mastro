@@ -69,16 +69,20 @@ class OBJECT_OT_Mastro_Print_Data(Operator):
         
         for obj in objects:
             if obj.visible_get() and obj.type == "MESH" and "MaStro object" in obj.data:
+                mastro_type = None
                 if "MaStro mass" in obj.data:
                     mastro_type = "mass"
-                else:
+                elif "MaStro block" in obj.data:
                     mastro_type = "block"
-                roughData.append(get_mass_data(obj, mastro_type))
-
+                if mastro_type:
+                    roughData.append(get_mass_data(obj, mastro_type))
+                
                 # delete the copy of the mesh
                 # if "MaStro block" in obj.data:
                 #     bpy.data.meshes.remove(mesh)
        
+        if not roughData:
+            return{"CANCELLED"}
         
         data = roughData[:]
         
@@ -102,6 +106,7 @@ class OBJECT_OT_Mastro_Print_Data(Operator):
         total_perimeter = 0
         total_wall = 0
         total_gea = 0
+        
         
         for r, row in enumerate(dataDict):
             row_string = ""
@@ -429,6 +434,8 @@ def aggregateData(roughData):
         )
     )
     
+    if not roughData_sorted:
+        return {'CANCELLED'}
     data = [roughData_sorted[0]]
     
     for el in roughData_sorted[1:]:
