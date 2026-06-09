@@ -2,3 +2,13 @@ autoconstraints: SpaghetMeNot and autoConStraintsFree
 Erindale
 Ilir
 Nodebooster come esempio per i nodi
+
+mastroGIS - basemap viewer:
+  Ported and adapted from BlenderGIS by domlysz
+  https://github.com/domlysz/BlenderGIS
+  License: GPL v3
+
+mastroGIS - Google 3D Tiles import:
+  Ported and adapted from blosm by prokoudine / vvoovv
+  https://github.com/vvoovv/blosm
+  License: GPL v3

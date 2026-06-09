@@ -1,0 +1,54 @@
+# This is an Asset Catalog Definition file for Blender.
+#
+# Empty lines and lines starting with `#` will be ignored.
+# The first non-ignored line should be the version indicator.
+# Other lines are of the format "UUID:catalog/path/for/assets:simple catalog name"
+
+VERSION 1
+
+cf45073a-5179-4228-833e-2d33d9ba4e41:Cut Out:Cut Out
+1650e96f-4819-4b03-8c83-3b88ed343547:MaStro:MaStro
+396b7132-e59a-4ba2-b835-116259631193:MaStro Assets:MaStro Assets
+2f12e865-77a8-4db1-95ca-9c9a829b7337:MaStro Assets/Materials:MaStro Assets-Materials
+bfb096d2-85a8-4c51-bf27-c2db1e1af080:MaStro Assets/Materials/Shaders:MaStro Assets-Materials-Shaders
+ec6d5603-879d-4463-b670-9722aece8d75:MaStro Assets/Materials/Shaders/Glass:MaStro Assets-Materials-Shaders-Glass
+e5fbbed9-ba08-4585-8048-380d8bbd7408:MaStro Assets/Materials/Shaders/Marble:MaStro Assets-Materials-Shaders-Marble
+30900c2b-c008-42b4-bc19-25f812940d12:MaStro Assets/Materials/Shaders/Pattern:MaStro Assets-Materials-Shaders-Pattern
+6f4869fc-3e10-460b-b49c-c823774ef8ca:MaStro Assets/Materials/Shaders/Stone:MaStro Assets-Materials-Shaders-Stone
+e2db2261-03df-480f-9118-f020914b4d16:MaStro Assets/Materials/Shaders/Wall:MaStro Assets-Materials-Shaders-Wall
+3919b743-7354-45b5-9b06-5e47f0907f4a:MaStro Assets/Materials/Shaders/Wood:MaStro Assets-Materials-Shaders-Wood
+3a4bee09-1cc6-4020-8cb3-5c8fb03b2f65:MaStro Assets/Materials/Textures:MaStro Assets-Materials-Textures
+10bdfc99-2d07-4f27-8495-21572eceae5e:MaStro Assets/Materials/Textures/Marble:MaStro Assets-Materials-Textures-Marble
+5ad63230-b1a4-46f2-9701-39976f3603e5:MaStro Assets/Materials/Textures/Pattern:MaStro Assets-Materials-Textures-Pattern
+24ebfdbf-7c92-4ca6-afb3-30fc26cc3e3c:MaStro Assets/Materials/Textures/Stone:MaStro Assets-Materials-Textures-Stone
+617e75c0-5fa4-4f9e-ae98-ab194cc57437:MaStro Assets/Materials/Textures/Wall:MaStro Assets-Materials-Textures-Wall
+8144a86c-4790-46d9-9be9-900db45a2514:MaStro Assets/Materials/Textures/Wood:MaStro Assets-Materials-Textures-Wood
+5c7579a4-17be-48af-9637-15a272bc50da:MaStro Assets/Windows:MaStro Assets-Windows
+b4748e65-3d65-4b7f-8e7b-17a31fac4bd2:MaStro Assets/Windows/Casements:MaStro Assets-Windows-Casements
+8bd3a441-c4fa-45e1-98ec-e4d7eecadd12:MaStro Assets/Windows/Frames:MaStro Assets-Windows-Frames
+5efc4d40-0970-4de2-905c-5f2993455a78:MaStro Assets/Windows/Shutters:MaStro Assets-Windows-Shutters
+64ec2829-d12c-4519-90c0-78d49b88b7f1:MaStro Assets/Windows/Windows:MaStro Assets-Windows-Windows
+2b0d420b-411e-47ac-8156-edc43377d469:MaStro Assets/Windows/Windowsills:MaStro Assets-Windows-Windowsills
+d922c348-ab12-45a7-a416-5350c16b434f:MaStro/Architecture:MaStro-Architecture
+93576a95-8fea-44c1-abd2-d90998a5fad5:MaStro/Architecture/Annotation:MaStro-Architecture-Annotation
+ab8fb733-a64c-4350-816b-e148d68d34d4:MaStro/Architecture/Façade:MaStro-Architecture-Façade
+a3f2d709-4bae-4a9a-8533-6ffb0c083b23:MaStro/Architecture/Mass:MaStro-Architecture-Mass
+80b6c5d3-7466-4029-8dd5-71511ce9f0bf:MaStro/Architecture/Primitives:MaStro-Architecture-Primitives
+729d6dec-1b48-4880-8a4b-dab9444115b7:MaStro/Architecture/Stairs:MaStro-Architecture-Stairs
+ad620ac8-6a6e-41b1-a5d7-e94d9f67732f:MaStro/Curve:MaStro-Curve
+21927b53-55eb-4db2-b4c2-3b70562a9aee:MaStro/Curve/Operations:MaStro-Curve-Operations
+ba1a3696-9dc6-44d7-8384-5d5281480941:MaStro/Curve/Primitives:MaStro-Curve-Primitives
+06ff3190-9047-4b4d-99c9-193230edbbef:MaStro/Enviromental Studies:MaStro-Enviromental Studies
+048bb430-702f-4b63-9fd8-29c78e7bcf01:MaStro/Indices:MaStro-Indices
+5fdecf71-a6cc-472a-9298-6d4a67e0d834:MaStro/Instances:MaStro-Instances
+e6646823-b8da-4ae8-8a3e-df985ab2fa1c:MaStro/Landscape:MaStro-Landscape
+f849bd86-5298-407b-9e04-1e7681dd6062:MaStro/Materials:MaStro-Materials
+87599df8-9659-4869-9539-61b197945762:MaStro/Materials/Shaders:MaStro-Materials-Shaders
+fa7bef10-8469-46d3-a137-6a29858f7709:MaStro/Materials/Textures:MaStro-Materials-Textures
+7da0e70c-2d7b-4886-b24a-db30d2de829d:MaStro/Mesh:MaStro-Mesh
+a29dad23-c9ae-4be8-a71d-bf6ee8400214:MaStro/Mesh/Grid:MaStro-Mesh-Grid
+bd25134d-ca50-4c8f-98d2-ec2cd2e92a39:MaStro/Mesh/Mapping:MaStro-Mesh-Mapping
+97752dc3-68e0-44a8-942c-e3dc5876e47d:MaStro/Mesh/Operations:MaStro-Mesh-Operations
+646146b5-56bb-41fa-9499-64a573a508bb:MaStro/Street:MaStro-Street
+7e5e4352-7132-4faa-a136-1fb48d50ceb5:MaStro/Utilities:MaStro-Utilities
+04bce851-efab-4a82-a0e0-58c5d3f4bb17:MaStro/Vectors:MaStro-Vectors
