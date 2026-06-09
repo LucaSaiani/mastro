@@ -31,6 +31,7 @@ jobs:
           cp __init__.py mastro/
           cp mastro.blend mastro/
           cp LICENSE.txt mastro/
+          cp blender_assets.cats.txt mastro/
 
           mkdir mastro/wheels
           cp wheels/pypdf-6.12.2-py3-none-any.whl mastro/wheels/
