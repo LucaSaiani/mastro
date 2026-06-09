@@ -208,7 +208,7 @@ scene_props = [
         default=0, 
         step=100, 
         set = set_attribute_custom_vert,
-        get = lambda self: get_attribute_mastro_mesh(self, "mastro_custom_vert")
+        get = lambda self: get_attribute_mastro_mesh(self, "mastro_custom_vertex")
     )),
     ("mastro_attribute_custom_edge", FloatProperty(
         name="Custom edge value", 
