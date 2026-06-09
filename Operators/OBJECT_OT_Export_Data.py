@@ -1,11 +1,14 @@
 import bpy 
 import bmesh
+
 from bpy.types import Operator
 from bpy_extras.io_utils import ExportHelper
 from bpy.props import StringProperty
 
 import csv
 from decimal import Decimal, ROUND_HALF_DOWN
+
+import locale
 
 header_aggregateData = ["Block Name", 
                         "Building Name", 
@@ -58,7 +61,18 @@ class OBJECT_OT_Mastro_Print_Data(Operator):
         default = "aggregate"
     )
 
+    def format_locale(self, value):
+        return locale.format_string("%.2f", float(value), grouping=True)
+        
     def execute(self, context):
+        old_locale = locale.getlocale(locale.LC_NUMERIC)
+        locale.setlocale(locale.LC_NUMERIC, '')
+        try:
+            return self._execute(context)
+        finally:
+            locale.setlocale(locale.LC_NUMERIC, old_locale)
+
+    def _execute(self, context):
         objects = [obj for obj in bpy.context.scene.objects]
         data = []
         roughData = []
@@ -112,11 +126,10 @@ class OBJECT_OT_Mastro_Print_Data(Operator):
             row_string = ""
             for key in header:
                 el = row.get(key, "")
-                if isinstance(el, float): # if the entry is a float, it is rounded
-                     el = Decimal(el).quantize(Decimal('0.001'))
-                elif isinstance(el, Decimal):
-                    el = el.quantize(Decimal('0.001'))
-
+                if isinstance(el, (float, Decimal)):
+                    el_quantized = Decimal(el).quantize(Decimal('0.001'))
+                    el = self.format_locale(el_quantized)
+                    
                 row_string += f"{str(el):<{COL_WIDTH}}"
                      
                 # i = 1
@@ -144,10 +157,16 @@ class OBJECT_OT_Mastro_Print_Data(Operator):
         print_ui("")
         
         print_ui("\n")
-        print_ui("=== TOTALS ===")
-        print_ui(f"Perimeter:\t{Decimal(total_perimeter).quantize(Decimal('0.001'))}")
-        print_ui(f"Wall Area:\t{Decimal(total_wall).quantize(Decimal('0.001'))}")
-        print_ui(f"GEA:\t\t{Decimal(total_gea).quantize(Decimal('0.001'))}")
+        print_ui("TOTALS " + ("=" * (len(header_string)-7)))
+        totals = {"Perimeter": total_perimeter, "Wall Area": total_wall, "GEA": total_gea}
+        totals_string = ""
+        for key in header:
+            if key in totals:
+                el = self.format_locale(Decimal(totals[key]).quantize(Decimal('0.001')))
+            else:
+                el = ""
+            totals_string += f"{str(el):<{COL_WIDTH}}"
+        print_ui(totals_string)
         print_ui("")
         return {'FINISHED'}
     
