@@ -62,7 +62,6 @@ docs/_build/
 *.blend8
 *.blend9
 *.blend10
-blender_assets.cats.*
 *_ss.blend
 mastro_250429.blend
 .vscode/
