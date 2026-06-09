@@ -47,7 +47,7 @@ from .Nodes.ui import register as register_gn_ui, unregister as unregister_gn_ui
 from .Utils.sync_layer_slots import sync_layer_slots
 from .Utils.add_nodes import add_nodes, add_materials
 from .UI.utils.layer_manager_button import draw_layer_manager_header_button, draw_viewlayer_context_panel
-  
+from .UI.utils.console_header import draw_console_header_mastro_button
 ########################################
 # from . import Utils
 # from . import UI
@@ -316,13 +316,16 @@ def register():
         return None  # one-shot timer
     bpy.app.timers.register(_lm_initial_sync, first_interval=0.0)
    
-    
+    # append the print data button to the console header
+    bpy.types.CONSOLE_HT_header.append(draw_console_header_mastro_button)
     
 
 def unregister():
     bpy.app.handlers.load_post.remove(onFileLoaded)
     bpy.app.handlers.load_factory_startup_post.remove(onFileDefault)
 
+    
+    
     from .Handlers.utils.updates import updates as handlerUpdates
     bpy.app.handlers.depsgraph_update_post.remove(handlerUpdates)
 
@@ -354,6 +357,7 @@ def unregister():
     unregister_keymaps()
     
     ### unregister UI  buttons
+    bpy.types.CONSOLE_HT_header.remove(draw_console_header_mastro_button)
     bpy.types.TOPBAR_MT_file_import.remove(_mastro_import_menu)
     unregister_ui_buttons()
    
