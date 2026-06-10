@@ -4,6 +4,7 @@ from bpy.app.handlers import persistent
 from .utils.guard_light_sources import guard_light_sources
 from .utils.mastro_projector.sync_camera_sets import sync_default_camera_set
 from .utils.mastro_pdf.sync_pdf_frames import sync_pdf_frames
+from .mastro_cad.depsgraph_handlers_cad import _check_drawing_objects, _update_scale_header
 
 # Name of the last active node seen in the node editor — used to detect
 # selection changes without re-running the full sync every depsgraph tick.
@@ -53,6 +54,7 @@ def _on_depsgraph_update(scene, depsgraph):
     sync_default_camera_set(scene)
     sync_pdf_frames(scene)
     _sync_active_note(bpy.context)
+    _check_drawing_objects(bpy.context)
 
 
 @persistent

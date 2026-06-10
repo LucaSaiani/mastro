@@ -49,6 +49,22 @@ from .mastro_pdf.OBJECT_OT_pdf_sets import (
     MASTRO_OT_PdfSetExport,
 )
 from ..Utils.mastro_projector.shadow_render import MASTRO_OT_RenderShadowModal
+from .mastro_cad.MESH_OT_Offset import MESH_OT_MaStroCad_Offset
+from .mastro_cad.MESH_OT_Fillet import MESH_OT_MaStroCad_Fillet
+from .mastro_cad.MESH_OT_Trim import MESH_OT_MaStroCad_Trim
+from .mastro_cad.MESH_OT_DeleteSegment import MESH_OT_MaStroCad_DeleteSegment
+from .mastro_cad.MESH_OT_RectangleDiagonal import MESH_OT_MaStroCad_RectangleDiagonal
+from .mastro_cad.MESH_OT_RectangleBaseLine import MESH_OT_MaStroCad_RectangleBaseLine
+from .mastro_cad.MESH_OT_RectangleCenter import MESH_OT_MaStroCad_RectangleCenter
+from .mastro_cad.MESH_OT_RectangleCenterLine import MESH_OT_MaStroCad_RectangleCenterLine
+from .mastro_cad.MESH_OT_EditRectangle import MESH_OT_MaStroCad_EditRectangle
+from .mastro_cad.MESH_OT_Circle import MESH_OT_MaStroCad_Circle
+from .mastro_cad.MESH_OT_Circle3 import MESH_OT_MaStroCad_Circle3
+from .mastro_cad.MESH_OT_EditCircle import MESH_OT_MaStroCad_EditCircle
+from .mastro_cad.MESH_OT_EditCAD import MESH_OT_MaStroCad_EditCAD
+from .mastro_cad.MESH_MT_MaStroCad_Pie import MESH_MT_MaStroCad_Pie
+from .mastro_cad.OBJECT_OT_Add_MaStroCad_Drawing_Mesh import OBJECT_OT_MaStroCad_Add_Drawing_Mesh
+
 from .mastro_import_export.OBJECT_OT_import_mastro_objects import (MASTRO_PG_ImportObject,
                                                MASTRO_PG_ImportCollection,
                                                MASTRO_UL_ImportObjects,
@@ -118,4 +134,20 @@ classes = (
     OBJECT_OT_Import_Mastro_Toggle_All,
     OBJECT_OT_Import_Mastro_Select,
     OBJECT_OT_Import_Mastro_Objects,
+
+    MESH_MT_MaStroCad_Pie,
+    MESH_OT_MaStroCad_Offset,
+    MESH_OT_MaStroCad_Fillet,
+    MESH_OT_MaStroCad_Trim,
+    MESH_OT_MaStroCad_DeleteSegment,
+    MESH_OT_MaStroCad_RectangleDiagonal,
+    MESH_OT_MaStroCad_EditRectangle,
+    MESH_OT_MaStroCad_EditCircle,
+    MESH_OT_MaStroCad_EditCAD,
+    MESH_OT_MaStroCad_RectangleBaseLine,
+    MESH_OT_MaStroCad_RectangleCenter,
+    MESH_OT_MaStroCad_RectangleCenterLine,
+    MESH_OT_MaStroCad_Circle,
+    MESH_OT_MaStroCad_Circle3,
+    OBJECT_OT_MaStroCad_Add_Drawing_Mesh,
     )

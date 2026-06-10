@@ -29,6 +29,10 @@ from .property_classes_arch import (mastro_CL_addon_properties,
 from .property_classes_custom_properties import (mastro_CL_custom_property_name_list,
                                                   mastro_CL_custom_property_string_name_list,
 )
+from .property_classes_cad import (mastro_CL_cad_pen,
+                                   mastro_CL_cad_dash_pattern,
+                                   mastro_CL_cad_layer,
+)
 
 classes = (
     mastro_CL_addon_properties,
@@ -61,4 +65,7 @@ classes = (
     # mastro_CL_custom_property_name_list because the latter uses it as CollectionProperty type
     mastro_CL_custom_property_string_name_list,
     mastro_CL_custom_property_name_list,
+    mastro_CL_cad_pen,
+    mastro_CL_cad_dash_pattern,
+    mastro_CL_cad_layer,
 )

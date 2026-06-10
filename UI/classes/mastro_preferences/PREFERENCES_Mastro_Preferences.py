@@ -178,6 +178,11 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
         default=False
     )
 
+    show_pen_settings: bpy.props.BoolProperty(
+        name="Pens",
+        default=False
+    )
+
 
     def draw(self, context):
         layout = self.layout
@@ -307,6 +312,25 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
             row = col.row()
             row.label(text="Shadow Color:")
             row.prop(self, "shadow_color", text="")
+
+        # Section: Pens
+        box = layout.box()
+        box.prop(self,
+                 "show_pen_settings",
+                 text="Pens",
+                 icon='TRIA_DOWN' if self.show_pen_settings else 'TRIA_RIGHT',
+                 emboss=False)
+        if self.show_pen_settings:
+            scene = context.scene
+            if scene is None:
+                box.label(text="Open a scene to manage pens.")
+            else:
+                box.template_list(
+                    "PREFERENCES_UL_MaStroCad_All_Pens", "",
+                    scene, "mastro_cad_pens",
+                    scene, "mastro_cad_pen_index",
+                    rows=6,
+                )
 
         # Section: Open File Detection
         box = layout.box()
