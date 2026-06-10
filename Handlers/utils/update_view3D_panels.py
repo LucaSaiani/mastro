@@ -22,7 +22,13 @@ def update_view3D_panels(scene):
         return
 
     mesh = obj.data
-    bm = bmesh.from_edit_mesh(mesh)
+    
+    # to avoid issue when opening a file which was saved in edit mode
+    try:
+        bm = bmesh.from_edit_mesh(mesh)
+    except ValueError:
+        return
+        
 
     if ("MaStro mass" in obj.data or "MaStro block" in obj.data):
         numberOfStoreys = scene.mastro_attribute_mass_storeys
