@@ -65,6 +65,13 @@ from .mastro_cad.MESH_OT_EditCAD import MESH_OT_MaStroCad_EditCAD
 from .mastro_cad.MESH_MT_MaStroCad_Pie import MESH_MT_MaStroCad_Pie
 from .mastro_cad.OBJECT_OT_Add_MaStroCad_Drawing_Mesh import OBJECT_OT_MaStroCad_Add_Drawing_Mesh
 
+from .mastro_gis.VIEW3D_OT_MastroGIS_Basemap_Import import (
+    VIEW3D_OT_map_start,
+    VIEW3D_OT_map_viewer,
+    VIEW3D_OT_map_search,
+    VIEW3D_OT_MastroGIS_Basemap_Import,
+)
+
 from .mastro_import_export.OBJECT_OT_import_mastro_objects import (MASTRO_PG_ImportObject,
                                                MASTRO_PG_ImportCollection,
                                                MASTRO_UL_ImportObjects,
@@ -150,4 +157,9 @@ classes = (
     MESH_OT_MaStroCad_Circle,
     MESH_OT_MaStroCad_Circle3,
     OBJECT_OT_MaStroCad_Add_Drawing_Mesh,
+
+    VIEW3D_OT_map_start,
+    VIEW3D_OT_map_viewer,
+    VIEW3D_OT_map_search,
+    VIEW3D_OT_MastroGIS_Basemap_Import,
     )

@@ -1,8 +1,13 @@
+import json
+import os
+
 import bpy
 from bpy.types import AddonPreferences
 
 from .... import PREFS_KEY
 from ....Utils.add_nodes import apply_shadow_color
+from ....Utils.mastro_gis.prefs import PredefCRS, DEFAULT_CRS, APP_DATA
+from ....Utils.mastro_gis import settings as mastro_gis_settings
 
 """User preference panel"""
 class PREFERENCES_Mastro_Preferences(AddonPreferences):
@@ -183,6 +188,105 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
         default=False
     )
 
+    show_gis_settings: bpy.props.BoolProperty(
+        name="GIS",
+        default=False
+    )
+
+    # --- GIS: predefined CRS ---
+    def listPredefCRS(self, context):
+        return [tuple(elem) for elem in json.loads(self.predefCrsJson)]
+
+    predefCrsJson: bpy.props.StringProperty(default=json.dumps(DEFAULT_CRS))
+
+    predefCrs: bpy.props.EnumProperty(
+        name="Predefinate CRS",
+        description="Choose predefinite Coordinate Reference System",
+        items=listPredefCRS
+    )
+
+    # --- GIS: basemap cache folder ---
+    def getCacheFolder(self):
+        return bpy.path.abspath(self.get("cacheFolder", ''))
+
+    def setCacheFolder(self, value):
+        if os.access(value, os.X_OK | os.W_OK):
+            self["cacheFolder"] = value
+        else:
+            self["cacheFolder"] = "The selected folder has no write access"
+
+    def getCacheFolder5x(self, v, isSet):
+        return bpy.path.abspath(v)
+
+    def setCacheFolder5x(self, newVal, currentVal, isSet):
+        if os.access(newVal, os.X_OK | os.W_OK):
+            return newVal
+
+    if bpy.app.version[0] >= 5:
+        gis_cache_folder: bpy.props.StringProperty(
+            name="Cache folder",
+            default=APP_DATA,
+            description="Define a folder where to store Geopackage SQlite db",
+            subtype='DIR_PATH',
+            get_transform=getCacheFolder5x,
+            set_transform=setCacheFolder5x
+        )
+    else:
+        gis_cache_folder: bpy.props.StringProperty(
+            name="Cache folder",
+            default=APP_DATA,
+            description="Define a folder where to store Geopackage SQlite db",
+            subtype='DIR_PATH',
+            get=getCacheFolder,
+            set=setCacheFolder
+        )
+
+    # --- GIS: basemap viewer behaviour ---
+    gis_synch_origin: bpy.props.BoolProperty(
+        name="Synch. lat/long",
+        description='Keep geo origin synchronized with crs origin. Can be slow with remote reprojection services',
+        default=True)
+
+    gis_zoom_to_mouse: bpy.props.BoolProperty(
+        name="Zoom to mouse",
+        description='Zoom towards the mouse pointer position',
+        default=True)
+
+    gis_lock_origin: bpy.props.BoolProperty(
+        name="Lock origin",
+        description='Do not move scene origin when panning map',
+        default=False)
+
+    gis_lock_objects: bpy.props.BoolProperty(
+        name="Lock objects",
+        description='Retain objects geolocation when moving map origin',
+        default=True)
+
+    gis_resampling: bpy.props.EnumProperty(
+        name="Resampling method",
+        description="Choose GDAL's resampling method used for reprojection",
+        items=[('NN', 'Nearest Neighboor', ''), ('BL', 'Bilinear', ''), ('CB', 'Cubic', ''), ('CBS', 'Cubic Spline', ''), ('LCZ', 'Lanczos', '')]
+    )
+
+    gis_adjust_3dview: bpy.props.BoolProperty(
+        name="Adjust 3D view",
+        description="Update 3d view grid size and clip distances according to the new imported object's size",
+        default=True)
+
+    gis_force_textured_solid: bpy.props.BoolProperty(
+        name="Force textured solid shading",
+        description="Update shading mode to display raster's texture",
+        default=True)
+
+    def updateMapTilerApiKey(self, context):
+        mastro_gis_settings.maptiler_api_key = self.gis_maptiler_api_key
+
+    gis_maptiler_api_key: bpy.props.StringProperty(
+        name="",
+        description="API key for MapTiler Coordinates API (required for EPSG.io migration)",
+        update=updateMapTilerApiKey
+    )
+
 
     def draw(self, context):
         layout = self.layout
@@ -331,6 +435,42 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
                     scene, "mastro_cad_pen_index",
                     rows=6,
                 )
+
+        # Section: GIS
+        box = layout.box()
+        box.prop(self,
+                 "show_gis_settings",
+                 text="GIS",
+                 icon='TRIA_DOWN' if self.show_gis_settings else 'TRIA_RIGHT',
+                 emboss=False)
+        if self.show_gis_settings:
+            col = box.column(align=True)
+
+            row = col.row().split(factor=0.5)
+            row.prop(self, "predefCrs", text='')
+            row.operator("mastrogis.add_predef_crs", icon='ADD')
+            row.operator("mastrogis.edit_predef_crs", icon='PREFERENCES')
+            row.operator("mastrogis.rmv_predef_crs", icon='REMOVE')
+            row.operator("mastrogis.reset_predef_crs", icon='PLAY_REVERSE')
+
+            col.prop(self, "gis_cache_folder")
+
+            row = col.row()
+            row.prop(self, "gis_zoom_to_mouse")
+            row.prop(self, "gis_lock_objects")
+            row.prop(self, "gis_lock_origin")
+            row.prop(self, "gis_synch_origin")
+
+            row = col.row()
+            row.prop(self, "gis_resampling")
+
+            row = col.row()
+            row.prop(self, "gis_adjust_3dview")
+            row.prop(self, "gis_force_textured_solid")
+
+            row = col.row().split(factor=0.2)
+            row.label(text="MapTiler API Key")
+            row.prop(self, "gis_maptiler_api_key")
 
         # Section: Open File Detection
         box = layout.box()
