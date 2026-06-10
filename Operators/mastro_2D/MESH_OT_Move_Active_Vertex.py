@@ -165,7 +165,7 @@ class MESH_OT_Move_Active_Vertex(bpy.types.Operator):
             v_active.co = self.preview_co
             bmesh.update_edit_mesh(self.mesh, loop_triangles=False)
         else:
-            context.area.header_text_set(f"Distance: {round(old_distance),3}")
+            context.area.header_text_set(f"Distance: {round(old_distance,3)}")
         return {'RUNNING_MODAL'}
 
 def register():
