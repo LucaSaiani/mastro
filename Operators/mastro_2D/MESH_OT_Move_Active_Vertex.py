@@ -145,8 +145,7 @@ class MESH_OT_Move_Active_Vertex(bpy.types.Operator):
             if val is not None:
                 self.parsed = True
                 self.distance = val
-                    
-        if event.value == 'PRESS': print(event.type)
+
         # Update preview in real time
         # parsed = self.parse_input(self.input_str)
         
