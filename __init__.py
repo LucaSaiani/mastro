@@ -44,7 +44,7 @@ from .Utils.init_nodes import init_nodes
 from .Handlers.utils.check_new_scenes import known_scenes as knownScenes
 from .Keymaps.keymap import register as register_keymaps, unregister as unregister_keymaps
 from .Nodes.ui import register as register_gn_ui, unregister as unregister_gn_ui
-from .Utils.sync_layer_slots import sync_layer_slots
+from .Utils.mastro_layer.sync_layer_slots import sync_layer_slots
 from .Utils.add_nodes import add_nodes, add_materials
 from .UI.utils.layer_manager_button import draw_layer_manager_header_button, draw_viewlayer_context_panel
 from .UI.utils.console_header import draw_console_header_mastro_button

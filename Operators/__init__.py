@@ -1,36 +1,37 @@
-from .MESH_OT_Move_Active_Vertex import MESH_OT_Move_Active_Vertex
+from .mastro_2D.MESH_OT_Move_Active_Vertex import MESH_OT_Move_Active_Vertex
 
-from .OBJECT_OT_Add_Mastro_Block import OBJECT_OT_Add_Mastro_Block
-from .OBJECT_OT_Add_Mastro_Dimension import OBJECT_OT_Add_Mastro_Dimension
-from .OBJECT_OT_Add_Mastro_Mass import OBJECT_OT_Add_Mastro_Mass
-from .OBJECT_OT_Add_Mastro_Street import OBJECT_OT_Add_Mastro_Street
-from .OBJECT_OT_Add_Mastro_Frame import OBJECT_OT_Add_Mastro_Frame
-from .OBJECT_OT_Convert_to_Mastro import OBJECT_OT_Convert_to_Mastro_Mass, OBJECT_OT_Convert_to_Mastro_Street
-from .OBJECT_OT_Set_Street_Id import OBJECT_OT_Set_Street_Id
-from .OBJECT_OT_Update_Mastro_Mesh_Attributes import OBJECT_OT_Update_Mastro_Mesh_Attributes
-from .OBJECT_OT_Update_Street_Attributes import OBJECT_OT_Mastro_Update_Street_Attributes
-from .OBJECT_OT_Update_Mastro_Custom_Properties import OBJECT_OT_Update_Mastro_Custom_Properties, OBJECT_OT_Remove_Mastro_Custom_Property
-from .OBJECT_OT_Mastro_String_Options import (
+from .mastro_arch.OBJECT_OT_Add_Mastro_Block import OBJECT_OT_Add_Mastro_Block
+from .mastro_2D.OBJECT_OT_Add_Mastro_Dimension import OBJECT_OT_Add_Mastro_Dimension
+from .mastro_arch.OBJECT_OT_Add_Mastro_Mass import OBJECT_OT_Add_Mastro_Mass
+from .mastro_street.OBJECT_OT_Add_Mastro_Street import OBJECT_OT_Add_Mastro_Street
+from .mastro_pdf.OBJECT_OT_Add_Mastro_Frame import OBJECT_OT_Add_Mastro_Frame
+from .mastro_arch.OBJECT_OT_Convert_to_Mastro_Mass import OBJECT_OT_Convert_to_Mastro_Mass
+from .mastro_street.OBJECT_OT_Convert_to_Mastro_Street import OBJECT_OT_Convert_to_Mastro_Street
+from .mastro_street.OBJECT_OT_Set_Street_Id import OBJECT_OT_Set_Street_Id
+from .mastro_arch.OBJECT_OT_Update_Mastro_Mesh_Attributes import OBJECT_OT_Update_Mastro_Mesh_Attributes
+from .mastro_street.OBJECT_OT_Update_Street_Attributes import OBJECT_OT_Mastro_Update_Street_Attributes
+from .mastro_custom_properties.OBJECT_OT_Update_Mastro_Custom_Properties import OBJECT_OT_Update_Mastro_Custom_Properties, OBJECT_OT_Remove_Mastro_Custom_Property
+from .mastro_custom_properties.OBJECT_OT_Mastro_String_Options import (
     OBJECT_OT_Mastro_String_Option_New,
     OBJECT_OT_Mastro_String_Option_Remove,
     OBJECT_OT_Mastro_String_Option_Move,
     OBJECT_OT_Mastro_Set_String_Property,
     OBJECT_OT_Mastro_Set_String_Property_Menu,
 )
-from .OBJECT_OT_Export_Data import OBJECT_OT_Mastro_Export_CSV, OBJECT_OT_Mastro_Print_Data
-from .OBJECT_OT_Export_Mastro_Frame_PDF import OBJECT_OT_Export_Mastro_Frame_PDF
+from .mastro_import_export.OBJECT_OT_Export_Data import OBJECT_OT_Mastro_Export_CSV, OBJECT_OT_Mastro_Print_Data
+from .mastro_pdf.OBJECT_OT_Export_Mastro_Frame_PDF import OBJECT_OT_Export_Mastro_Frame_PDF
 
-from .TRANSFORM_OT_Set_Orientation import TRANSFORM_OT_Mastro_Set_Orientation
-from .TRANSFORM_OT_XY_Constraint import TRANSFORM_OT_Mastro_Rotate_XY_Constraint, TRANSFORM_OT_Mastro_Translate_XY_Constraint
+from .mastro_2D.TRANSFORM_OT_Set_Orientation import TRANSFORM_OT_Mastro_Set_Orientation
+from .mastro_constraints.TRANSFORM_OT_XY_Constraint import TRANSFORM_OT_Mastro_Rotate_XY_Constraint, TRANSFORM_OT_Mastro_Translate_XY_Constraint
 
-from .LAYER_MANAGER_OT_Set_Active import LAYER_MANAGER_OT_SetActive
-from .LAYER_MANAGER_OT_Add_Layer import LAYER_MANAGER_OT_AddLayer
-from .LAYER_MANAGER_OT_Add_Layer_Popup import LAYER_MANAGER_OT_AddLayer_Popup
+from .mastro_layer.LAYER_MANAGER_OT_Set_Active import LAYER_MANAGER_OT_SetActive
+from .mastro_layer.LAYER_MANAGER_OT_Add_Layer import LAYER_MANAGER_OT_AddLayer
+from .mastro_layer.LAYER_MANAGER_OT_Add_Layer_Popup import LAYER_MANAGER_OT_AddLayer_Popup
 
-from .OBJECT_OT_run_all import OBJECT_OT_RunAll, OBJECT_OT_CancelAll
-from .OBJECT_OT_run_batch import OBJECT_OT_RunBatch
-from .OBJECT_OT_bidimensional_Lines_Projection import OBJECT_OT_bidimensional_Lines_Projection
-from .OBJECT_OT_camera_sets import (
+from .mastro_projector.OBJECT_OT_run_all import OBJECT_OT_RunAll, OBJECT_OT_CancelAll
+from .mastro_projector.OBJECT_OT_run_batch import OBJECT_OT_RunBatch
+from .mastro_projector.OBJECT_OT_bidimensional_Lines_Projection import OBJECT_OT_bidimensional_Lines_Projection
+from .mastro_projector.OBJECT_OT_camera_sets import (
     MASTRO_OT_CameraSetAdd,
     MASTRO_OT_CameraSetRemove,
     MASTRO_OT_CameraSetDuplicate,
@@ -38,7 +39,7 @@ from .OBJECT_OT_camera_sets import (
     MASTRO_OT_CameraSetMoveDown,
     MASTRO_OT_CameraSetToggleCamera,
 )
-from .OBJECT_OT_pdf_sets import (
+from .mastro_pdf.OBJECT_OT_pdf_sets import (
     MASTRO_OT_PdfSetAdd,
     MASTRO_OT_PdfSetRemove,
     MASTRO_OT_PdfSetDuplicate,
@@ -47,8 +48,8 @@ from .OBJECT_OT_pdf_sets import (
     MASTRO_OT_PdfSetToggleFrame,
     MASTRO_OT_PdfSetExport,
 )
-from ..Utils.projection.shadow_render import MASTRO_OT_RenderShadowModal
-from .OBJECT_OT_import_mastro_objects import (MASTRO_PG_ImportObject,
+from ..Utils.mastro_projector.shadow_render import MASTRO_OT_RenderShadowModal
+from .mastro_import_export.OBJECT_OT_import_mastro_objects import (MASTRO_PG_ImportObject,
                                                MASTRO_PG_ImportCollection,
                                                MASTRO_UL_ImportObjects,
                                                MASTRO_UL_ImportCollections,
