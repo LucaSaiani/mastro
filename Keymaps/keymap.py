@@ -1,8 +1,8 @@
 import bpy
  
-from ..Operators.MESH_OT_Move_Active_Vertex import MESH_OT_Move_Active_Vertex
-from ..Operators.TRANSFORM_OT_Set_Orientation import TRANSFORM_OT_Mastro_Set_Orientation
-from ..Operators.TRANSFORM_OT_XY_Constraint import TRANSFORM_OT_Mastro_Translate_XY_Constraint, TRANSFORM_OT_Mastro_Rotate_XY_Constraint
+from ..Operators.mastro_2D.MESH_OT_Move_Active_Vertex import MESH_OT_Move_Active_Vertex
+from ..Operators.mastro_2D.TRANSFORM_OT_Set_Orientation import TRANSFORM_OT_Mastro_Set_Orientation
+from ..Operators.mastro_constraints.TRANSFORM_OT_XY_Constraint import TRANSFORM_OT_Mastro_Translate_XY_Constraint, TRANSFORM_OT_Mastro_Rotate_XY_Constraint
 
 from ..Nodes.operators.NODE_OT_Rename_Reroute import NODE_OT_Mastro_Rename_Reroute
 

@@ -1,7 +1,7 @@
 import bpy 
 
 from ..Utils.init_lists import init_lists
-from ..Utils.update_bmesh_attributes import update_bmesh_attributes
+from ..Utils.mastro_arch.update_bmesh_attributes import update_bmesh_attributes
 
 # ------------------------------
 # Mastro Project Data

@@ -1,7 +1,7 @@
 import bpy 
 from bpy.types import Operator
 
-from ...Utils.get_preferences  import get_prefs
+from ...Utils.mastro_preferences.get_preferences  import get_prefs
 
 # to open a new window, the preferences window 
 # is opened and then the area type is changed to text editor

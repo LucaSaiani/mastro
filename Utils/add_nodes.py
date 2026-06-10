@@ -1,7 +1,7 @@
 import bpy
 import addon_utils
 from pathlib import Path
-from .get_preferences import get_prefs
+from .mastro_preferences.get_preferences import get_prefs
 
 def clear_asset_status(data_block):
     """Clear the asset status of a data block. Appended node groups are marked as assets,

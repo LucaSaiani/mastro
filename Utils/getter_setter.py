@@ -1,9 +1,9 @@
 import bpy
 import bmesh
 
-from .read_write_bmesh_storey_attribute import write_bmesh_storey_attribute
-from .read_write_bmesh_use_attribute import write_bmesh_use_attribute
-from .write_bmesh_overlay_uses import overlay_bmesh_uses
+from .mastro_arch.read_write_bmesh_storey_attribute import write_bmesh_storey_attribute
+from .mastro_arch.read_write_bmesh_use_attribute import write_bmesh_use_attribute
+from .mastro_arch.write_bmesh_overlay_uses import overlay_bmesh_uses
 
 point_only_attributes = [("mastro_side_angle",      "FLOAT",    ("MaStro block",)),
                         ("mastro_custom_vertex",      "FLOAT",    ("MaStro mass", "MaStro block"))]

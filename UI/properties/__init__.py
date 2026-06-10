@@ -1,29 +1,33 @@
 
-from .property_classes import (mastro_CL_addon_properties,
-                               mastro_CL_constraint_XY_settings,
-                               mastro_CL_name_with_id,
-                               mastro_CL_street_name_list,
-                               mastro_CL_floor_name_list,
-                               mastro_CL_wall_name_list,
-                               mastro_CL_typology_uses_name_list,
-                               mastro_CL_use_name_list,
-                               mastro_CL_typology_name_list,
-                               mastro_CL_building_name_list,
-                               mastro_CL_block_name_list,
-                               mastro_CL_obj_typology_uses_name_list,
-                               mastro_CL_Sticky_Note,
-                               mastro_CL_layer_slot,
-                               mastro_CL_layer_manager_props,
-                               mastro_CL_projector_properties,
-                               mastro_CL_projector_batch_item,
-                               mastro_CL_camera_set_item,
-                               mastro_CL_camera_set,
-                               mastro_CL_projector_scene_props,
-                               mastro_CL_pdf_frame_item,
-                               mastro_CL_pdf_set,
-                               mastro_CL_pdf_scene_props,
-                               mastro_CL_custom_property_name_list,
-                               mastro_CL_custom_property_string_name_list,
+from .property_classes import mastro_CL_name_with_id
+from .property_classes_gn import mastro_CL_Sticky_Note
+from .property_classes_constraints import mastro_CL_constraint_XY_settings
+from .property_classes_projector import (mastro_CL_projector_properties,
+                                         mastro_CL_projector_batch_item,
+                                         mastro_CL_camera_set_item,
+                                         mastro_CL_camera_set,
+                                         mastro_CL_projector_scene_props,
+)
+from .property_classes_layer import (mastro_CL_layer_slot,
+                                     mastro_CL_layer_manager_props,
+)
+from .property_classes_street import mastro_CL_street_name_list
+from .property_classes_pdf import (mastro_CL_pdf_frame_item,
+                                   mastro_CL_pdf_set,
+                                   mastro_CL_pdf_scene_props,
+)
+from .property_classes_arch import (mastro_CL_addon_properties,
+                                    mastro_CL_floor_name_list,
+                                    mastro_CL_wall_name_list,
+                                    mastro_CL_typology_uses_name_list,
+                                    mastro_CL_use_name_list,
+                                    mastro_CL_typology_name_list,
+                                    mastro_CL_building_name_list,
+                                    mastro_CL_block_name_list,
+                                    mastro_CL_obj_typology_uses_name_list,
+)
+from .property_classes_custom_properties import (mastro_CL_custom_property_name_list,
+                                                  mastro_CL_custom_property_string_name_list,
 )
 
 classes = (
