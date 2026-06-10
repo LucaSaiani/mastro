@@ -48,6 +48,7 @@ from .mastro_pdf.PROPERTIES_UL_PDF_Sets import PROPERTIES_UL_PDF_Sets
 from .mastro_pdf.PROPERTIES_UL_PDF_Frames import PROPERTIES_UL_PDF_Frames
 from .mastro_custom_properties.PROPERTIES_PT_Mastro_Custom_Properties import PROPERTIES_PT_Mastro_Custom_Properties
 from .mastro_custom_properties.VIEW3D_PT_Mastro_Custom_Properties import VIEW3D_PT_Mastro_Custom_Properties
+from . import mastro_cad
 
 
 classes = (
@@ -103,6 +104,7 @@ classes = (
     PROPERTIES_UL_PDF_Frames,
     PROPERTIES_PT_Mastro_Custom_Properties,
     VIEW3D_PT_Mastro_Custom_Properties,
+    *mastro_cad.classes,
     )
 
 # Each row: (name, color_attr, filter_name, node_type, extra_action)
@@ -202,8 +204,12 @@ def register():
     for cls in _dynamic_classes:
         register_class(cls)
 
+    mastro_cad.register()
+
 def unregister():
     global _dynamic_classes
+    mastro_cad.unregister()
+
     if "_dynamic_classes" in globals() and _dynamic_classes:
         for cls in reversed(_dynamic_classes):
             unregister_class(cls)

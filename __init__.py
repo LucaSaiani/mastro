@@ -39,7 +39,7 @@ from .UI.utils.xy_constraint import register as register_ui_buttons, unregister 
 from .UI.classes import register as register_ui_dynamic_classes, unregister as unregister_ui_dynamic_classes
 from .Icons import register as register_icons, unregister as unregister_icons
 from .Utils import modules
-from .Utils.init_lists import init_lists
+from .Utils.init_lists import init_lists, init_drawing
 from .Utils.init_nodes import init_nodes
 from .Handlers.utils.check_new_scenes import known_scenes as knownScenes
 from .Keymaps.keymap import register as register_keymaps, unregister as unregister_keymaps
@@ -182,6 +182,7 @@ def _lm_on_load_post(filepath):
 def onFileLoaded(scene):
     init_lists()
     init_nodes()
+    init_drawing(bpy.context.scene)
     # bpy.context.scene.updating_mesh_attributes_is_active = False
     # bpy.context.scene.show_selection_overlay_is_active = False
     # bpy.context.scene.mastro_previous_selection_object_name = ""

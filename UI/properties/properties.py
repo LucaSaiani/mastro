@@ -17,6 +17,7 @@ from .properties_projector import camera_props_projector, scene_pointer_props_pr
 from .properties_constraints import scene_pointer_props_constraints
 from .properties_gn import node_frame_props_gn
 from .properties_extras import scene_props_extras
+from .properties_cad import scene_props_cad, camera_props_cad, window_manager_props_cad
 
                                 
 
@@ -66,6 +67,8 @@ window_manager_props = [
         default=True,
         update=update_all_mastro_meshes_useList,
     )),
+
+    *window_manager_props_cad,
 ]
 
 # =============================================================================
@@ -111,6 +114,8 @@ scene_props = [
     *scene_props_arch,
 
     *scene_props_custom_properties,
+
+    *scene_props_cad,
 ]
 
 # =============================================================================
@@ -130,6 +135,7 @@ scene_pointer_props = [
 
 camera_props = [
     *camera_props_projector,
+    *camera_props_cad,
 ]
 node_frame_props = [
     *node_frame_props_gn,
