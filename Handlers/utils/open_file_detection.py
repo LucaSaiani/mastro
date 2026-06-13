@@ -1,3 +1,4 @@
+import atexit
 import bpy
 import json
 import os
@@ -26,7 +27,9 @@ def _marker_path(blend_path):
     stem = os.path.basename(blend_path)
     if stem.endswith(".blend"):
         stem = stem[:-6]
-    return os.path.join(directory, f"~${stem}.in_use.blend")
+    # Not a ".blend" file, so it isn't picked up by file browsers/import
+    # dialogs or accidentally treated as project data.
+    return os.path.join(directory, f"~${stem}.in_use.lock")
 
 
 def _write_marker(blend_path):
@@ -100,14 +103,17 @@ def check_and_mark(blend_path):
         _write_marker(blend_path)
         return "ok"
 
-    if _marker_is_stale(data):
-        _write_marker(blend_path)
-        return "stale"
-
+    # Check ownership before staleness: our own marker may have gone stale
+    # (e.g. the refresh timer didn't run for a while), but that's not a
+    # "left open after a crash by someone else" situation.
     if (data.get("hostname") == socket.gethostname()
             and data.get("pid") == os.getpid()):
         _write_marker(blend_path)
         return "ok"
+
+    if _marker_is_stale(data):
+        _write_marker(blend_path)
+        return "stale"
 
     return data
 
@@ -162,6 +168,14 @@ def on_load_post(filepath):
     bpy.app.timers.register(_warn, first_interval=0.1)
 
 
+def _cleanup_marker_on_exit():
+    if not _detection_enabled():
+        return
+    blend_path = bpy.data.filepath
+    if blend_path and _is_our_marker(blend_path):
+        _remove_marker(blend_path)
+
+
 @persistent
 def on_load_pre(filepath):
     if not _detection_enabled():
@@ -176,8 +190,28 @@ def on_save_post(filepath):
     if not _detection_enabled():
         return
     blend_path = bpy.data.filepath
-    if blend_path:
-        _write_marker(blend_path)
+    if not blend_path:
+        return
+
+    data = _read_marker(blend_path)
+    if (data is not None
+            and not _marker_is_stale(data)
+            and not (data.get("hostname") == socket.gethostname() and data.get("pid") == os.getpid())):
+        user = data.get("user", "unknown")
+        hostname = data.get("hostname", "unknown")
+        message = (
+            f"{user} on {hostname} also has this file open. "
+            f"Saving has claimed the open-file marker; if they save too, "
+            f"one of you may overwrite the other's work."
+        )
+
+        def _warn():
+            bpy.ops.mastro.open_file_warning('INVOKE_DEFAULT',
+                                              message=message,
+                                              other_user=True)
+        bpy.app.timers.register(_warn, first_interval=0.1)
+
+    _write_marker(blend_path)
 
 
 # ── Dialog operator ───────────────────────────────────────────────────────────
@@ -235,9 +269,11 @@ def register():
     bpy.app.handlers.save_post.append(on_save_post)
     if not bpy.app.timers.is_registered(_refresh_marker):
         bpy.app.timers.register(_refresh_marker, first_interval=_REFRESH_INTERVAL_SECONDS, persistent=True)
+    atexit.register(_cleanup_marker_on_exit)
 
 
 def unregister():
+    atexit.unregister(_cleanup_marker_on_exit)
     if bpy.app.timers.is_registered(_refresh_marker):
         bpy.app.timers.unregister(_refresh_marker)
     if on_save_post in bpy.app.handlers.save_post:
