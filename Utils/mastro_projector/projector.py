@@ -85,6 +85,20 @@ class _Projector:
     def ndc_to_3d(ndc, scale, aspect):
         return Vector((ndc.x * scale * aspect, ndc.y * scale, 0.0))
 
+    @staticmethod
+    def ortho_world_scale(camera, aspect):
+        """World units per NDC unit, so projected orthographic geometry
+        keeps the real-world size of the scene. Perspective projections do
+        not preserve real-world size, so they keep NDC units (scale 1.0)."""
+        cam_data = camera.data
+        if cam_data.type != 'ORTHO':
+            return 1.0
+        half_h = cam_data.ortho_scale / 2
+        if cam_data.sensor_fit == 'VERTICAL' or \
+           (cam_data.sensor_fit == 'AUTO' and aspect < 1.0):
+            return half_h
+        return half_h / aspect
+
     # ── Visibility ────────────────────────────────────────────────────────────
 
     def sample_visible(self, scene, depsgraph, cam_location, pt_world, exclude_obj,
@@ -387,6 +401,7 @@ class _Projector:
         )
         vp_matrix    = proj_matrix @ view_matrix
         cam_location = camera.matrix_world.translation.copy()
+        scale        = self.ortho_world_scale(camera, aspect)
         # For orthographic cameras, visibility rays must be parallel to the
         # camera forward axis rather than converging toward cam_location.
         # This avoids direction errors for points far from the image centre.
@@ -423,7 +438,6 @@ class _Projector:
                 continue
 
             materials = mesh_data.materials
-            scale     = 1.0
 
             bm_visible           = bmesh.new()
             bm_silhouette        = bmesh.new() if props.compute_silhouette else None
