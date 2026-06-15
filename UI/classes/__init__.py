@@ -31,6 +31,10 @@ from .mastro_street.VIEW3D_PT_Mastro_Street import VIEW3D_PT_Mastro_Street
 from .mastro_2D.VIEW3D_PT_transform_orientations import VIEW3D_PT_transform_orientations
 from .mastro_arch.VIEW3D_PT_Mastro_Override import VIEW3D_PT_Mastro_Mass_Override, VIEW3D_PT_Mastro_Block_Override
 from .mastro_import_export.VIEW3D_PT_Mastro_Export import VIEW3D_PT_Mastro_Export
+from .mastro_import_export.PROPERTIES_UL_Print import (
+    MASTRO_UL_Print_Sets,
+    MASTRO_UL_Print_Set_Params,
+)
 from .mastro_gn.NODE_EDITOR_PT_Mastro_Panel import NODE_EDITOR_PT_Mastro_Panel
 from .mastro_gn.NODE_EDITOR_PT_Mastro_Node import NODE_EDITOR_PT_Mastro_Node
 from .mastro_layer.LAYER_MANAGER_PT_Popup import LAYER_MANAGER_PT_Popup
@@ -87,6 +91,8 @@ classes = (
     VIEW3D_PT_Mastro_Mass_Override, 
     VIEW3D_PT_Mastro_Block_Override,
     VIEW3D_PT_Mastro_Export,
+    MASTRO_UL_Print_Sets,
+    MASTRO_UL_Print_Set_Params,
     NODE_EDITOR_PT_Mastro_Panel,
     NODE_EDITOR_PT_Mastro_Node,
     LAYER_MANAGER_PT_Popup,

@@ -33,6 +33,10 @@ from .property_classes_cad import (mastro_CL_cad_pen,
                                    mastro_CL_cad_dash_pattern,
                                    mastro_CL_cad_layer,
 )
+from .property_classes_print import (mastro_CL_print_set_param,
+                                      mastro_CL_print_set,
+                                      mastro_CL_print_scene_props,
+)
 
 classes = (
     mastro_CL_addon_properties,
@@ -68,4 +72,9 @@ classes = (
     mastro_CL_cad_pen,
     mastro_CL_cad_dash_pattern,
     mastro_CL_cad_layer,
+    # mastro_CL_print_set_param must be registered before mastro_CL_print_set
+    # because the latter uses it as a CollectionProperty type
+    mastro_CL_print_set_param,
+    mastro_CL_print_set,
+    mastro_CL_print_scene_props,
 )

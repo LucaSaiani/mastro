@@ -21,7 +21,7 @@ class VIEW3D_PT_Mastro_Export(Panel):
     def draw(self, context):
         layout = self.layout
         layout.operator("object.mastro_export_csv")
-        layout.operator("object.mastro_print_data")
+        layout.operator("object.mastro_print_config")
 
         obj = context.active_object
         if (obj is not None and obj.type == 'MESH' and

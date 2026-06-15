@@ -18,7 +18,18 @@ from .mastro_custom_properties.OBJECT_OT_Mastro_String_Options import (
     OBJECT_OT_Mastro_Set_String_Property,
     OBJECT_OT_Mastro_Set_String_Property_Menu,
 )
-from .mastro_import_export.OBJECT_OT_Export_Data import OBJECT_OT_Mastro_Export_CSV, OBJECT_OT_Mastro_Print_Data
+from .mastro_import_export.OBJECT_OT_Export_CSV import OBJECT_OT_Mastro_Export_CSV
+from .mastro_import_export.OBJECT_OT_Print_Configured import OBJECT_OT_Mastro_Print_Configured
+from .mastro_import_export.OBJECT_OT_Print_Config import (
+    MASTRO_OT_PrintSetAdd,
+    MASTRO_OT_PrintSetRemove,
+    MASTRO_OT_PrintSetMoveUp,
+    MASTRO_OT_PrintSetMoveDown,
+    MASTRO_OT_PrintSetParamAdd,
+    MASTRO_OT_PrintSetParamRemove,
+    MASTRO_OT_PrintSetParamMove,
+    OBJECT_OT_Mastro_Print_Config,
+)
 from .mastro_pdf.OBJECT_OT_Export_Mastro_Frame_PDF import OBJECT_OT_Export_Mastro_Frame_PDF
 
 from .mastro_2D.TRANSFORM_OT_Set_Orientation import TRANSFORM_OT_Mastro_Set_Orientation
@@ -97,7 +108,15 @@ classes = (
     OBJECT_OT_Mastro_Update_Street_Attributes,
     OBJECT_OT_Update_Mastro_Custom_Properties,
     OBJECT_OT_Mastro_Export_CSV,
-    OBJECT_OT_Mastro_Print_Data,
+    OBJECT_OT_Mastro_Print_Configured,
+    MASTRO_OT_PrintSetAdd,
+    MASTRO_OT_PrintSetRemove,
+    MASTRO_OT_PrintSetMoveUp,
+    MASTRO_OT_PrintSetMoveDown,
+    MASTRO_OT_PrintSetParamAdd,
+    MASTRO_OT_PrintSetParamRemove,
+    MASTRO_OT_PrintSetParamMove,
+    OBJECT_OT_Mastro_Print_Config,
     OBJECT_OT_Export_Mastro_Frame_PDF,
 
     TRANSFORM_OT_Mastro_Set_Orientation,

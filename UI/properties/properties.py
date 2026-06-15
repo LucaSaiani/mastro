@@ -19,6 +19,7 @@ from .properties_gn import node_frame_props_gn
 from .properties_extras import scene_props_extras
 from .properties_cad import scene_props_cad, camera_props_cad, window_manager_props_cad
 from .properties_gis import scene_props_gis
+from .properties_print import scene_pointer_props_print
 
                                 
 
@@ -134,6 +135,7 @@ scene_pointer_props = [
     # ("mastro_key_dictionary", CollectionProperty(type=mastro_schedule.MaStro_string_item)),
     *scene_pointer_props_projector,
     *scene_pointer_props_pdf,
+    *scene_pointer_props_print,
 ]
 
 camera_props = [

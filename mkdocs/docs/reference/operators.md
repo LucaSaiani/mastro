@@ -16,7 +16,6 @@ All MaStro operators accessible from the UI. The `bl_idname` is the Python ident
 | Convert to MaStro Street | `object.mastro_convert_to_mastro_street` | Add Street attributes and node groups to selected meshes |
 | Update | `object.update_mastro_mesh_attributes` | Recalculate and write all MaStro attributes on all objects in the scene |
 | Export Data as CSV | `object.mastro_export_csv` | Export granular floor data for all visible MaStro objects to a CSV file |
-| Print Data | `object.mastro_print_data` | Print aggregate or granular floor data to the console |
 | Export Frame PDF | `object.mastro_export_frame_pdf` | Export the active Frame object and its Grease Pencil content to a single-page PDF |
 | Set Street Id | `object.mastro_set_street_id` | Assign the street ID attribute to all edges of a Street object |
 | Update All Street Attributes | `object.mastro_update_all_street_attributes` | Recalculate street width and radius attributes on all Street objects |
