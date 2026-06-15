@@ -19,7 +19,7 @@ def _merge_intersections_into_results(results, scene, depsgraph, projector,
     # test begins.
     SURFACE_MARGIN = props.ray_offset * 100
     cam_location   = scene.camera.matrix_world.translation.copy()
-    scale          = 1.0
+    scale          = projector.ortho_world_scale(scene.camera, aspect)
 
     camera_clipping = props.camera_clipping
     if camera_clipping:

@@ -249,16 +249,21 @@ class OBJECT_OT_bidimensional_Lines_Projection(Operator):
                     )
                 empty_scale = near * math.tan(fov_y / 2)
             else:
+                # The projector already emits orthographic geometry in
+                # world units (see Projector.ortho_world_scale), so the
+                # empty itself must not re-scale it. ortho_extent is only
+                # used below to keep the empty within the clipping volume.
                 half_h = cam_data.ortho_scale / 2
                 if cam_data.sensor_fit == 'VERTICAL' or \
                    (cam_data.sensor_fit == 'AUTO' and aspect_r < 1.0):
-                    empty_scale = half_h
+                    ortho_extent = half_h
                 else:
-                    empty_scale = half_h / aspect_r
+                    ortho_extent = half_h / aspect_r
                 # For orthographic cameras, push the empty far enough from
-                # clip_start so that the full extent of the scaled geometry
-                # stays within the clipping volume.
-                near = cam_data.clip_start + empty_scale * 0.1
+                # clip_start so that the full extent of the geometry stays
+                # within the clipping volume.
+                near = cam_data.clip_start + ortho_extent * 0.1
+                empty_scale = 1.0
 
             empty.location       = cam_mat.translation + forward * near
             empty.rotation_euler = camera.rotation_euler
