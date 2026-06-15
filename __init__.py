@@ -18,10 +18,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import nodeitems_utils
-
-
-
 # bpy must be imported here (not at the top) to ensure Blender's API is ready
 import bpy
 from bpy.utils import register_class, unregister_class
@@ -44,6 +40,7 @@ from .Utils.init_nodes import init_nodes
 from .Handlers.utils.check_new_scenes import known_scenes as knownScenes
 from .Keymaps.keymap import register as register_keymaps, unregister as unregister_keymaps
 from .Nodes.ui import register as register_gn_ui, unregister as unregister_gn_ui
+from .Nodes.schedule import register as register_schedule_nodes, unregister as unregister_schedule_nodes
 from .Utils.mastro_layer.sync_layer_slots import sync_layer_slots
 from .Utils.add_nodes import add_nodes, add_materials
 from .UI.utils.layer_manager_button import draw_layer_manager_header_button, draw_viewlayer_context_panel
@@ -107,74 +104,12 @@ def _lm_on_load_post(filepath):
 
 # classes = (
 #     # preferences.mastro_addon_preferences,
-    
+
 #     # mastro_geometryNodes.VIEW_PT_MaStro_Node_Panel,
 #     # mastro_geometryNodes.VIEW_PT_MaStro_GN_Panel,
 #     # mastro_geometryNodes.separate_geometry_by_factor_OT,
 #     # mastro_geometryNodes.NODE_OT_sticky_note,
 #     # mastro_geometryNodes.mastro_CL_Sticky_Note,
-        
-    
-
-#     mastro_schedule.MaStroTree,
-#     mastro_schedule.MaStro_string_item,
-#     mastro_schedule.MaStro_keyValueItem,
-#     mastro_schedule.MaStro_attribute_collectionItem,
-#     mastro_schedule.MaStro_attribute_propertyGroup,
-#     mastro_schedule.MaStro_stringCollection_Socket,
-#     # mastro_schedule.MaStroTreeNode,
-#     # mastro_schedule.MaStroInterfaceSocket,
-#     # mastro_schedule.MaStro_attributesCollectionAndFloat_Socket,
-#     mastro_schedule.MaStro_attributesCollection_Socket,
-#     mastro_schedule.MaStro_data_collectionItem,
-#     mastro_schedule.MaStro_data_propertyGroup,
-#     mastro_schedule.MaStro_dataCollection_Socket,
-#     # mastro_schedule.MaStro_dataOperation_Socket,
-#     # mastro_schedule.MaStro_attribute_addItemOperator,
-#     # mastro_schedule.MaStro_attribute_removeItemOperator,
-#     # mastro_schedule.MaStro_attribute_addKeyValueItemOperator,
-#     # mastro_schedule.MaStro_attribute_removeKeyValueItemOperator,
-#     # mastro_schedule.MaStro_attribute_deleteItemOperator,
-#     mastro_schedule.MaStroGroupInputNode,
-#     mastro_schedule.MaStroSelectedInputNode,
-#     mastro_schedule.MaStroCaptureAttributeNode,
-#     mastro_schedule.MaStroAllAttributesNode,
-#     mastro_schedule.MaStroAreaAttributeNode,
-#     mastro_schedule.MaStroUseAttributeNode,
-#     # mastro_schedule.Mastro_MathSubMenuEntries,
-#     mastro_schedule.MaStroIntegerNode,
-#     mastro_schedule.MaStroFloatNode,
-#     # mastro_schedule.MaStro_MathMenu,
-#     # mastro_schedule.MaStro_MathSubMenuFunctions,
-#     # mastro_schedule.MaStro_MathSubMenuComparisons,
-#     mastro_schedule.MaStro_MathNode,
-#     mastro_schedule.MaStro_key_name_list,
-#     mastro_schedule.NODE_UL_key_filter,
-#     mastro_schedule.NODE_UL_key_filter_NewItem,
-#     mastro_schedule.NODE_UL_key_filter_DeleteItem,
-#     mastro_schedule.NODE_UL_key_MoveItem,
-#     mastro_schedule.MaStroTableNode,
-#     # mastro_schedule.MaStroTableByNode,
-#     # mastro_schedule.MaStroGetUniqueNode,
-#     mastro_schedule.MaStroDataNode,
-#     mastro_schedule.MastroDataMathFunction,
-   
-    
-#     # mastro_schedule.MaStroAddColumn,
-    
-#     # mastro_schedule.MyCustomNode,
-#     # mastro_schedule.CustomNodeText,
-#     # mastro_schedule.CustomNodeFloat,
-#     # mastro_schedule.CustomNodeJoin,
-#     # mastro_schedule.CustomNodePrint,
-#     mastro_schedule.MaStroViewerNode,
-#     # mastro_schedule.MaStroAttributeToColumnNode,
-#     # mastro_schedule.MaStro_Schedule_Panel,
- 
-#     mastro_schedule.NODE_EDITOR_Mastro_Draw_Schedule,
-    
-    
-    
 # )
 
 #
@@ -215,9 +150,10 @@ def get_addon_classes(revert=False):
     from .Handlers.classes import classes as handler_classes
     from .Nodes.operators import classes as nodes_classes
     from .Nodes.ui import classes as ui_classes
+    from .Nodes.schedule import classes as schedule_classes
     from .Operators import classes as operator_classes
-    
-    classes = preference_classes + property_classes + handler_classes + nodes_classes + ui_classes + operator_classes
+
+    classes = preference_classes + property_classes + handler_classes + nodes_classes + ui_classes + schedule_classes + operator_classes
 
     if (revert):
         return reversed(classes)
@@ -255,7 +191,10 @@ def register():
     
     ### register nodes UI ###
     register_gn_ui()
-    
+
+    ### register schedule nodes ###
+    register_schedule_nodes()
+
     ### register UI  buttons
     register_ui_buttons()
     bpy.types.TOPBAR_MT_file_import.append(_mastro_import_menu)
@@ -279,8 +218,6 @@ def register():
     bpy.app.handlers.load_factory_startup_post.append(onFileDefault)
     
       
-    # nodeitems_utils.register_node_categories('MASTRO_NODES', mastro_schedule.node_categories)
-    
     # Add toggle to both tool header
     # bpy.types.VIEW3D_HT_tool_header.append(mastro_menu.constraint_xy_button)
     # Aggiungi la funzione al pannello nativo
@@ -345,8 +282,6 @@ def unregister():
     if _lm_original_viewlayer_draw is not None:
         bpy.types.VIEWLAYER_PT_context_layer.draw = _lm_original_viewlayer_draw
 
-    # nodeitems_utils.unregister_node_categories('MASTRO_NODES')
-
      
     
     
@@ -364,7 +299,10 @@ def unregister():
    
     ### unregister nodes UI ###
     unregister_gn_ui()
-    
+
+    ### unregister schedule nodes ###
+    unregister_schedule_nodes()
+
     ### unregister modules ###            
     for mod in reversed(modules):
         if hasattr(mod, "register"):
