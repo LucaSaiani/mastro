@@ -3,7 +3,7 @@
 # Empty lines and lines starting with `#` will be ignored.
 # The first non-ignored line should be the version indicator.
 # Other lines are of the format "UUID:catalog/path/for/assets:simple catalog name"
-#
+
 VERSION 1
 
 cf45073a-5179-4228-833e-2d33d9ba4e41:Cut Out:Cut Out
@@ -36,6 +36,7 @@ a3f2d709-4bae-4a9a-8533-6ffb0c083b23:MaStro/Architecture/Mass:MaStro-Architectur
 80b6c5d3-7466-4029-8dd5-71511ce9f0bf:MaStro/Architecture/Primitives:MaStro-Architecture-Primitives
 729d6dec-1b48-4880-8a4b-dab9444115b7:MaStro/Architecture/Stairs:MaStro-Architecture-Stairs
 ad620ac8-6a6e-41b1-a5d7-e94d9f67732f:MaStro/Curve:MaStro-Curve
+6dab27fa-c334-4e00-a78e-ae2f5f57a8a7:MaStro/Curve/Cuve Attributes:MaStro-Curve-Cuve Attributes
 21927b53-55eb-4db2-b4c2-3b70562a9aee:MaStro/Curve/Operations:MaStro-Curve-Operations
 ba1a3696-9dc6-44d7-8384-5d5281480941:MaStro/Curve/Primitives:MaStro-Curve-Primitives
 06ff3190-9047-4b4d-99c9-193230edbbef:MaStro/Enviroment Studies:MaStro-Enviroment Studies
