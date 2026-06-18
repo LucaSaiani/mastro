@@ -121,16 +121,26 @@ class MESH_OT_MaStroCad_Trim(CadMixin, bpy.types.Operator):
 
     # ── Preview ───────────────────────────────────────────────────────────────
 
-    def _update_preview(self, mouse_x, mouse_y, context=None):
+    def _update_preview(self, mouse_x, mouse_y, context):
         """Recompute the visual preview based on current mouse position.
 
-        Sets _mouse_side (+1 or -1) from the signed distance of the mouse to
-        the knife line, then classifies each candidate into keep/remove/extend.
+        Knife and candidate endpoints are reprojected to 2D screen space on
+        every call (not just when an option is toggled), so the preview
+        stays correct if the user orbits/zooms the viewport while the trim
+        modal is active. Sets _mouse_side (+1 or -1) from the signed distance
+        of the mouse to the knife line, then classifies each candidate into
+        keep/remove/extend.
         """
-        if self._knife_2d is None or self._candidates is None:
+        if self._knife_world is None or self._candidates is None:
             return
 
-        k0 = self._knife_2d[0];  k1 = self._knife_2d[1]
+        region = context.region
+        rv3d   = context.space_data.region_3d
+        k0 = location_3d_to_region_2d(region, rv3d, self._knife_world[0])
+        k1 = location_3d_to_region_2d(region, rv3d, self._knife_world[1])
+        if k0 is None or k1 is None:
+            return
+        self._knife_2d = (k0, k1)
 
         # signed_dist_2d > 0 means "left of k0→k1"; the mouse side is whichever
         # half-plane contains the mouse.
@@ -150,8 +160,10 @@ class MESH_OT_MaStroCad_Trim(CadMixin, bpy.types.Operator):
                 continue
 
             point = cand['point']
-            v0_2d = cand.get('v0_2d')
-            v1_2d = cand.get('v1_2d')
+            v0_2d = location_3d_to_region_2d(region, rv3d, v0)
+            v1_2d = location_3d_to_region_2d(region, rv3d, v1)
+            cand['v0_2d'] = v0_2d
+            cand['v1_2d'] = v1_2d
 
             if point is None or v0_2d is None or v1_2d is None:
                 keep_segs.extend([v0, v1])
@@ -325,12 +337,7 @@ class MESH_OT_MaStroCad_Trim(CadMixin, bpy.types.Operator):
             self._candidates_raw,
             self.infinite_knife, self.coplanar_only, context,
         )
-        region = context.region
-        rv3d   = context.space_data.region_3d
-        for cand in self._candidates:
-            cand['v0_2d'] = location_3d_to_region_2d(region, rv3d, cand['v0_world'])
-            cand['v1_2d'] = location_3d_to_region_2d(region, rv3d, cand['v1_world'])
-        self._update_preview(mouse_x, mouse_y)
+        self._update_preview(mouse_x, mouse_y, context)
 
     # ── Modal ─────────────────────────────────────────────────────────────────
 
@@ -362,7 +369,7 @@ class MESH_OT_MaStroCad_Trim(CadMixin, bpy.types.Operator):
             return {'RUNNING_MODAL'}
 
         if event.type in {'MOUSEMOVE', 'INBETWEEN_MOUSEMOVE'}:
-            self._update_preview(mouse_x, mouse_y)
+            self._update_preview(mouse_x, mouse_y, context)
             context.area.tag_redraw()
 
         elif event.type == 'LEFTMOUSE' and event.value == 'PRESS':
@@ -461,18 +468,16 @@ class MESH_OT_MaStroCad_Trim(CadMixin, bpy.types.Operator):
             self.report({'WARNING'}, "No candidate edges selected (besides the knife)")
             return {'CANCELLED'}
 
-        # Compute intersection data and enrich candidates with screen coords.
+        # Compute intersection data; screen coords are filled in by
+        # _update_preview on every call (see its docstring).
         self._candidates = compute_trim_candidates(
             knife_v0, knife_v1, self._candidates_raw,
             self.infinite_knife, self.coplanar_only, context,
         )
-        for cand in self._candidates:
-            cand['v0_2d'] = location_3d_to_region_2d(region, rv3d, cand['v0_world'])
-            cand['v1_2d'] = location_3d_to_region_2d(region, rv3d, cand['v1_world'])
 
         mx = event.mouse_region_x if event is not None else 0
         my = event.mouse_region_y if event is not None else 0
-        self._update_preview(mx, my)
+        self._update_preview(mx, my, context)
 
         global _trim_draw_handle
         h3d = bpy.types.SpaceView3D.draw_handler_add(

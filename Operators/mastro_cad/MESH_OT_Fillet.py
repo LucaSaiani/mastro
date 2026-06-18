@@ -218,6 +218,19 @@ def _fillet_result(e0_pts, e1_pts, plane_axes, mouse_world):
     }
 
 
+def _split_shared_vertex(bm0, shared, e1, t2_world, mw0_inv):
+    """When e0 and e1 already share a vertex, keep it as e0's endpoint
+    (caller has already moved it to t1_world) and create a new vertex for
+    e1 at t2_world, rewiring e1 onto it. Returns the new vertex."""
+    v1_keep = e1.verts[0] if e1.verts[1] == shared else e1.verts[1]
+    new_v = bm0.verts.new(mw0_inv @ t2_world)
+    copy_bm_vert_attrs(bm0, shared, new_v)
+    new_e1 = bm0.edges.new((new_v, v1_keep))
+    copy_bm_edge_attrs(bm0, e1, new_e1)
+    bm0.edges.remove(e1)
+    return new_v
+
+
 def _clamp_fillet_to_segments(arc_data, ix_2d, d0, d1, arm0_2d, arm1_2d, n0, n1):
     """If either tangent point is beyond its segment endpoint, recompute the
     circle constrained to the shorter arm length."""
@@ -314,6 +327,8 @@ class MESH_OT_MaStroCad_Fillet(bpy.types.Operator):
     _draw_handle   = None
     _preview_verts = []
     _mouse_world   = None
+    _mouse_world_edge_key = None  # (obj0, e0_idx, obj1, e1_idx) _mouse_world was computed for
+    _edge_key      = None  # edge_key of the pair currently being filleted (set in invoke)
     _size_input    = ""   # numeric input buffer for radius/length
     _e0_pts        = None
     _e1_pts        = None
@@ -362,6 +377,7 @@ class MESH_OT_MaStroCad_Fillet(bpy.types.Operator):
 
     def _update_preview(self, context, mouse_world):
         self._mouse_world = mouse_world
+        self._mouse_world_edge_key = self._edge_key
         from ...Utils.mastro_cad.cad.circle_utils import circle_ttp, circle_ttr, arc_points_3d
         if self._e0_pts is None:
             return
@@ -644,13 +660,7 @@ class MESH_OT_MaStroCad_Fillet(bpy.types.Operator):
             if same_obj and v0_move == v1_move:
                 shared = v0_move
                 shared.co = mw0_inv @ t1_world
-                v1_keep = e1.verts[0] if e1.verts[1] == shared else e1.verts[1]
-                new_v = bm0.verts.new(mw0_inv @ t2_world)
-                copy_bm_vert_attrs(bm0, shared, new_v)
-                new_e1 = bm0.edges.new((new_v, v1_keep))
-                copy_bm_edge_attrs(bm0, e1, new_e1)
-                bm0.edges.remove(e1)
-                v1_move = new_v
+                v1_move = _split_shared_vertex(bm0, shared, e1, t2_world, mw0_inv)
             else:
                 v0_move, e0 = _move_or_dup_vert(bm0, e0, v0_move, mw0_inv @ t1_world)
                 mw1_inv = mw1.inverted()
@@ -707,13 +717,7 @@ class MESH_OT_MaStroCad_Fillet(bpy.types.Operator):
             if same_obj and v0_move == v1_move:
                 shared = v0_move
                 shared.co = mw0_inv @ t1_world
-                v1_keep = e1.verts[0] if e1.verts[1] == shared else e1.verts[1]
-                new_v = bm0.verts.new(mw0_inv @ t2_world)
-                copy_bm_vert_attrs(bm0, shared, new_v)
-                new_e1 = bm0.edges.new((new_v, v1_keep))
-                copy_bm_edge_attrs(bm0, e1, new_e1)
-                bm0.edges.remove(e1)
-                arc_end_v = new_v
+                arc_end_v = _split_shared_vertex(bm0, shared, e1, t2_world, mw0_inv)
             else:
                 v0_move, e0 = _move_or_dup_vert(bm0, e0, v0_move, mw0_inv @ t1_world)
                 if circle_layers:
@@ -882,6 +886,7 @@ class MESH_OT_MaStroCad_Fillet(bpy.types.Operator):
 
         (obj0, bm0, e0), (obj1, bm1, e1) = edge_infos
         mw0, mw1 = obj0.matrix_world, obj1.matrix_world
+        self._edge_key = (obj0.name, e0.index, obj1.name, e1.index)
 
         # If the two edges share a vertex they already meet —
         # default to arc mode (8 segments).
@@ -947,9 +952,15 @@ class MESH_OT_MaStroCad_Fillet(bpy.types.Operator):
         self._e1_pts = (mw1 @ e1.verts[0].co, mw1 @ e1.verts[1].co)
 
         # Use centre of selection as mouse proxy so _fillet_result finds
-        # the correct sector when called from the redo panel.
-        if self._mouse_world is None:
+        # the correct sector when called from the redo panel. Recompute it
+        # if the selected edges changed since it was last set (e.g. the user
+        # picked a different pair of edges before re-running from the redo
+        # panel) — otherwise the stale sector can pick the wrong arms.
+        edge_key = (obj0.name, e0.index, obj1.name, e1.index)
+        self._edge_key = edge_key
+        if self._mouse_world is None or self._mouse_world_edge_key != edge_key:
             self._mouse_world = sum(all_pts, all_pts[0] * 0) / len(all_pts)
+            self._mouse_world_edge_key = edge_key
 
         # When called from redo panel, treat size > 0 as explicitly set.
         if self.size > 1e-8:
