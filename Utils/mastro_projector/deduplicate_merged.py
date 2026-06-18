@@ -24,7 +24,7 @@ def _deduplicate_merged_edges(merged):
     global_edge_seen = set()
     removed_total    = 0
 
-    for _src_name, (bm_merged, _cat_v) in merged.items():
+    for _src_name, (bm_merged, _cat_v, _cat_e) in merged.items():
         edges_to_remove = []
         for edge in bm_merged.edges:
             ca = (int(edge.verts[0].co.x * _COORD_QUANTIZE),

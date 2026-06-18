@@ -7,6 +7,7 @@ from .mastro_street.OBJECT_OT_Add_Mastro_Street import OBJECT_OT_Add_Mastro_Stre
 from .mastro_pdf.OBJECT_OT_Add_Mastro_Frame import OBJECT_OT_Add_Mastro_Frame
 from .mastro_arch.OBJECT_OT_Convert_to_Mastro_Mass import OBJECT_OT_Convert_to_Mastro_Mass
 from .mastro_street.OBJECT_OT_Convert_to_Mastro_Street import OBJECT_OT_Convert_to_Mastro_Street
+from .mastro_cad.OBJECT_OT_Convert_to_Mastro_Cad import OBJECT_OT_Convert_to_Mastro_Cad
 from .mastro_street.OBJECT_OT_Set_Street_Id import OBJECT_OT_Set_Street_Id
 from .mastro_arch.OBJECT_OT_Update_Mastro_Mesh_Attributes import OBJECT_OT_Update_Mastro_Mesh_Attributes
 from .mastro_street.OBJECT_OT_Update_Street_Attributes import OBJECT_OT_Mastro_Update_Street_Attributes
@@ -103,6 +104,7 @@ classes = (
     OBJECT_OT_Add_Mastro_Frame,
     OBJECT_OT_Convert_to_Mastro_Mass,
     OBJECT_OT_Convert_to_Mastro_Street,
+    OBJECT_OT_Convert_to_Mastro_Cad,
     OBJECT_OT_Set_Street_Id,
     OBJECT_OT_Update_Mastro_Mesh_Attributes,
     OBJECT_OT_Mastro_Update_Street_Attributes,

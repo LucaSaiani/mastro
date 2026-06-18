@@ -20,6 +20,8 @@ from ...Utils.mastro_projector.snap_orphans import _snap_orphans_in_bmeshes
 from ...Utils.mastro_projector.deduplicate_merged import _deduplicate_merged_edges
 from ...Utils.mastro_projector.write_merged import _write_merged_object
 from ...Utils.mastro_projector.section_outline import _compute_and_write_section_outline
+from ...Utils.mastro_cad.convert_to_drawing import convert_object_to_mastro_cad
+from ...Utils.mastro_projector.assign_cad_layers import assign_cad_layers_from_categories
 
 class OBJECT_OT_bidimensional_Lines_Projection(Operator):
     """Creates a 2D representation of the 3D scene as shown in the camera"""
@@ -62,7 +64,13 @@ class OBJECT_OT_bidimensional_Lines_Projection(Operator):
         for obj in to_delete:
             excluded_names.add(obj.name)
             if obj.type == 'MESH':
-                bpy.data.meshes.remove(obj.data, do_unlink=True)
+                # Remove the object itself, not just its mesh data — removing
+                # only the mesh (as a previous version of this code did)
+                # leaves a dangling, data-less MESH object in the scene.
+                old_mesh = obj.data
+                bpy.data.objects.remove(obj, do_unlink=True)
+                if old_mesh and old_mesh.users == 0:
+                    bpy.data.meshes.remove(old_mesh)
             else:
                 bpy.data.objects.remove(obj, do_unlink=True)
 
@@ -198,10 +206,10 @@ class OBJECT_OT_bidimensional_Lines_Projection(Operator):
         # ── STEP 5: merge per-category bmeshes into one bmesh per object ──────
         merged = {}
         for src_name, data in results.items():
-            bm_merged, category_verts = _merge_category_bmeshes(data)
+            bm_merged, category_verts, category_edges = _merge_category_bmeshes(data)
             if bm_merged is None:
                 continue
-            merged[src_name] = (bm_merged, category_verts)
+            merged[src_name] = (bm_merged, category_verts, category_edges)
 
         if not merged:
             wm.progress_end()
@@ -297,19 +305,22 @@ class OBJECT_OT_bidimensional_Lines_Projection(Operator):
 
         bpy.ops.object.select_all(action='DESELECT')
 
-        created_objects = []
-        for src_name, (bm_m, cat_v) in merged.items():
-            obj = _write_merged_object(
-                src_name, bm_m, cat_v, scene, props, parent=empty
+        created_objects        = []
+        created_category_edges = {}   # obj.name -> category_edge_indices
+        for src_name, (bm_m, cat_v, cat_e) in merged.items():
+            obj, category_edge_indices = _write_merged_object(
+                src_name, bm_m, cat_v, cat_e, scene, props, parent=empty
             )
             if obj is not None:
                 obj.select_set(True)
                 created_objects.append(obj)
+                created_category_edges[obj.name] = category_edge_indices
 
         # ── STEP 6b: write global section outline + fill ──────────────────────
         on_cam = camera.data.mastro_projector_cl.place_on_camera_plane
-        for section_obj in _compute_and_write_section_outline(
-                section_segs, scene, camera.name, parent=empty):
+        section_outline_objects = _compute_and_write_section_outline(
+            section_segs, scene, camera.name, parent=empty)
+        for section_obj in section_outline_objects:
             if not on_cam:
                 apply_depth_offset(section_obj, camera, get_prefs().section_offset)
             section_obj.select_set(True)
@@ -323,8 +334,24 @@ class OBJECT_OT_bidimensional_Lines_Projection(Operator):
 
         total_edges = sum(len(o.data.edges) for o in created_objects)
 
-        if props.convert_to_grease_pencil:
-            convert_objects_to_grease_pencil(created_objects)
+        # Make every projection output a MaStro CAD drawing, then override
+        # the per-edge layer using each edge's exact projection category
+        # (visible/silhouette -> Thin, hidden/hidden silhouette -> Dashed,
+        # section -> Thick), resolved by _write_merged_object. The vertex
+        # groups are left in place — harmless, possibly useful. The
+        # section-outline mask is always converted to Grease Pencil below
+        # instead, so it skips the (otherwise wasted) CAD setup.
+        for obj in created_objects:
+            if obj in section_outline_objects:
+                continue
+            convert_object_to_mastro_cad(context, obj)
+            category_edge_indices = created_category_edges.get(obj.name)
+            if category_edge_indices:
+                assign_cad_layers_from_categories(context, obj, category_edge_indices)
+
+        # The section-outline mask is always needed as Grease Pencil.
+        if section_outline_objects:
+            convert_objects_to_grease_pencil(section_outline_objects)
 
         empty.select_set(True)
         context.view_layer.objects.active = empty

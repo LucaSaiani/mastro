@@ -9,24 +9,47 @@ from ..mastro_preferences.get_preferences import get_prefs
 #  Write merged bmesh to scene as a single object with vertex groups
 # =============================================================================
 
-def _write_merged_object(src_name, bm_merged, category_verts, scene, props,
-                         parent=None):
+def _edge_key(a_xy, b_xy):
+    """Order-independent key for an edge from two quantized (x,y) tuples."""
+    return frozenset((a_xy, b_xy))
+
+
+def _write_merged_object(src_name, bm_merged, category_verts, category_edges,
+                         scene, props, parent=None):
     """
-    Convert bm_merged to a Blender mesh object with vertex groups.
+    Convert bm_merged to a Blender mesh object with vertex groups, and
+    return the set of final mesh edge indices belonging to each category.
     bm_merged is freed by this function.
-    Returns the created bpy.types.Object, or None if bm_merged has no edges.
+
+    Returns (obj, category_edge_indices), or (None, {}) if bm_merged has no
+    edges. category_edge_indices: dict { bm_key: set of mesh edge index }.
+
+    Edge category membership is resolved from category_edges (exact
+    per-edge (BMVert, BMVert) pairs), NOT by checking vertex-group
+    membership of both endpoints — vertices are shared across categories at
+    coincident positions, so "both endpoints are in group X" can wrongly
+    match an edge that does not actually belong to X.
     """
     if not bm_merged.edges:
         bm_merged.free()
-        return None
+        return None, {}
 
-    # Snapshot category vert XY positions before to_mesh invalidates BMVert refs.
+    def xy(co):
+        return (int(co.x * _COORD_QUANTIZE), int(co.y * _COORD_QUANTIZE))
+
+    # Snapshot category vert/edge XY positions before to_mesh invalidates BMVert refs.
     category_xy = {}
     for bm_key, _gn in _CATEGORY_MAP:
         vset = category_verts.get(bm_key)
         if vset:
-            category_xy[bm_key] = {
-                (int(v.co.x * _COORD_QUANTIZE), int(v.co.y * _COORD_QUANTIZE)) for v in vset
+            category_xy[bm_key] = {xy(v.co) for v in vset}
+
+    category_edge_xy = {}
+    for bm_key, _gn in _CATEGORY_MAP:
+        eset = category_edges.get(bm_key)
+        if eset:
+            category_edge_xy[bm_key] = {
+                _edge_key(xy(va.co), xy(vb.co)) for va, vb in eset
             }
 
     obj_name = src_name + get_prefs().projection_suffix
@@ -49,19 +72,33 @@ def _write_merged_object(src_name, bm_merged, category_verts, scene, props,
     if parent is not None:
         obj.parent = parent
         register_projection_output(parent, obj.name)
-    pos_to_idx = {
-        (int(v.co.x * _COORD_QUANTIZE), int(v.co.y * _COORD_QUANTIZE)): v.index
-        for v in mesh.vertices
-    }
+    pos_to_idx = {xy(v.co): v.index for v in mesh.vertices}
 
     for bm_key, group_name in _CATEGORY_MAP:
         xy_set = category_xy.get(bm_key)
         if not xy_set:
             continue
-        indices = [pos_to_idx[xy] for xy in xy_set if xy in pos_to_idx]
+        indices = [pos_to_idx[p] for p in xy_set if p in pos_to_idx]
         if not indices:
             continue
         vg = obj.vertex_groups.new(name=group_name)
         vg.add(indices, 1.0, 'REPLACE')
 
-    return obj
+    # Resolve each category's edges to final mesh edge indices, by matching
+    # the snapshotted endpoint-XY key against the final mesh's own edges.
+    # If cross-object dedup already removed an edge from bm_merged before
+    # this function ran, its category_edge_xy entry simply won't be found
+    # here and is silently dropped — correct, since that edge no longer
+    # exists in the final mesh.
+    edge_key_to_index = {
+        _edge_key(xy(mesh.vertices[e.vertices[0]].co),
+                  xy(mesh.vertices[e.vertices[1]].co)): e.index
+        for e in mesh.edges
+    }
+    category_edge_indices = {}
+    for bm_key, edge_xy_set in category_edge_xy.items():
+        indices = {edge_key_to_index[k] for k in edge_xy_set if k in edge_key_to_index}
+        if indices:
+            category_edge_indices[bm_key] = indices
+
+    return obj, category_edge_indices

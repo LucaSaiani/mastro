@@ -17,13 +17,23 @@ def _merge_category_bmeshes(data):
     populate their vertex groups correctly even when the edge already exists
     in bm_merged and the new() call raises ValueError.
 
+    category_edges records the (va, vb) BMVert pair for each category,
+    independently of vertex sharing — this is the only reliable way to know
+    which category a given EDGE belongs to. category_verts alone is not
+    enough: vertices are shared across categories at coincident positions,
+    so "both endpoints are in group X" can match an edge that does not
+    actually belong to X (e.g. a hidden edge whose endpoints happen to also
+    be visible-edge endpoints elsewhere).
+
     Returns:
         bm_merged      – new BMesh (or None if empty)
         category_verts – dict { bm_key: set of BMVert } in bm_merged
+        category_edges – dict { bm_key: set of (BMVert, BMVert) } in bm_merged
     """
     bm_merged      = bmesh.new()
     coord_to_vert  = {}
     category_verts = {key: set() for key, _ in _CATEGORY_MAP}
+    category_edges = {key: set() for key, _ in _CATEGORY_MAP}
 
     def get_or_add_merged(co):
         key = (int(co.x * _COORD_QUANTIZE), int(co.y * _COORD_QUANTIZE))
@@ -50,6 +60,7 @@ def _merge_category_bmeshes(data):
             # category vertex group empty.
             category_verts[bm_key].add(va)
             category_verts[bm_key].add(vb)
+            category_edges[bm_key].add((va, vb))
 
             try:
                 bm_merged.edges.new((va, vb))
@@ -64,6 +75,6 @@ def _merge_category_bmeshes(data):
 
     if not any_edge:
         bm_merged.free()
-        return None, {}
+        return None, {}, {}
 
-    return bm_merged, category_verts
+    return bm_merged, category_verts, category_edges

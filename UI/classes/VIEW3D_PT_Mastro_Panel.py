@@ -23,3 +23,4 @@ class VIEW3D_PT_Mastro_Panel(Panel):
         layout.operator("object.mastro_convert_to_mastro_mass")
         # layout.operator(OBJECT_OT_Add_Mastro_Street.bl_idname)
         layout.operator("object.mastro_convert_to_mastro_street")
+        layout.operator("object.mastro_convert_to_mastro_cad")

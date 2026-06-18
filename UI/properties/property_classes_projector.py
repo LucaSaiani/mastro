@@ -231,14 +231,6 @@ class mastro_CL_projector_properties(PropertyGroup):
         )
     )
 
-    # ── Output format ─────────────────────────────────────────────────────────
-
-    convert_to_grease_pencil: BoolProperty(
-        name        = "Convert to Grease Pencil",
-        default     = True,
-        description = "Convert all projection and shadow output meshes to Grease Pencil objects after generation",
-    )
-
 
 class mastro_CL_projector_batch_item(PropertyGroup):
     camera_name: StringProperty()

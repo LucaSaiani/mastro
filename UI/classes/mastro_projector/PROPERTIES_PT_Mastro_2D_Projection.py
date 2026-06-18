@@ -31,5 +31,4 @@ class PROPERTIES_PT_Mastro_2D_Projection(Panel):
         col.prop(props, "source_collection")
         col.prop(props, "camera_clipping")
         col.prop(props, "compute_intersections")
-        col.prop(props, "convert_to_grease_pencil")
         col.prop(props, "place_on_camera_plane")

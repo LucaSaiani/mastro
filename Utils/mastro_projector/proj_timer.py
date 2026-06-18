@@ -20,6 +20,8 @@ from .deduplicate_merged import _deduplicate_merged_edges
 from .write_merged import _write_merged_object
 from .section_outline import _compute_and_write_section_outline
 from .scene_graph_helpers import apply_depth_offset, convert_objects_to_grease_pencil
+from .assign_cad_layers import assign_cad_layers_from_categories
+from ..mastro_cad.convert_to_drawing import convert_object_to_mastro_cad
 
 _proj_state = {}
 
@@ -120,9 +122,9 @@ def _run_projection(s):
 
         merged = {}
         for src_name, data in results.items():
-            bm_m, cat_v = _merge_category_bmeshes(data)
+            bm_m, cat_v, cat_e = _merge_category_bmeshes(data)
             if bm_m is not None:
-                merged[src_name] = (bm_m, cat_v)
+                merged[src_name] = (bm_m, cat_v, cat_e)
 
         dedup = _deduplicate_merged_edges(merged)
 
@@ -130,16 +132,20 @@ def _run_projection(s):
         on_cam = camera.data.mastro_projector_cl.place_on_camera_plane
 
         bpy.ops.object.select_all(action="DESELECT")
-        created = []
-        for src_name, (bm_m, cat_v) in merged.items():
-            obj = _write_merged_object(src_name, bm_m, cat_v, scene, props, parent=empty)
+        created                 = []
+        created_category_edges  = {}   # obj.name -> category_edge_indices
+        for src_name, (bm_m, cat_v, cat_e) in merged.items():
+            obj, category_edge_indices = _write_merged_object(
+                src_name, bm_m, cat_v, cat_e, scene, props, parent=empty)
             if obj:
                 if on_cam:
                     apply_depth_offset(obj, camera, -prefs.section_offset)
                 obj.select_set(True)
                 created.append(obj)
-        for sec_obj in _compute_and_write_section_outline(
-                section_segs, scene, camera.name, parent=empty):
+                created_category_edges[obj.name] = category_edge_indices
+        section_outline_objects = _compute_and_write_section_outline(
+            section_segs, scene, camera.name, parent=empty)
+        for sec_obj in section_outline_objects:
             if not on_cam:
                 apply_depth_offset(sec_obj, camera, prefs.section_offset)
             sec_obj.select_set(True)
@@ -147,8 +153,23 @@ def _run_projection(s):
 
         n_edges = sum(len(o.data.edges) for o in created)
 
-        if props.convert_to_grease_pencil and created:
-            convert_objects_to_grease_pencil(created)
+        # Make every projection output a MaStro CAD drawing, then override
+        # the per-edge layer using each edge's exact projection category
+        # (visible/silhouette -> Thin, hidden/hidden silhouette -> Dashed,
+        # section -> Thick). The vertex groups are left in place. The
+        # section-outline mask is always converted to Grease Pencil below
+        # instead, so it skips the (otherwise wasted) CAD setup.
+        for obj in created:
+            if obj in section_outline_objects:
+                continue
+            convert_object_to_mastro_cad(bpy.context, obj)
+            category_edge_indices = created_category_edges.get(obj.name)
+            if category_edge_indices:
+                assign_cad_layers_from_categories(bpy.context, obj, category_edge_indices)
+
+        # The section-outline mask is always needed as Grease Pencil.
+        if section_outline_objects:
+            convert_objects_to_grease_pencil(section_outline_objects)
 
         _finalize_proj(s, len(created), n_edges, merged_verts, snapped, dedup,
                        time.perf_counter() - t_start)
