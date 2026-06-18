@@ -2,6 +2,7 @@ import bpy
 from .category_map import _CATEGORY_MAP
 from .scene_graph_helpers import (link_to_projection_collection,
                                    register_projection_output)
+from .tolerance_constants import _COORD_QUANTIZE
 from ..mastro_preferences.get_preferences import get_prefs
 
 # =============================================================================
@@ -25,7 +26,7 @@ def _write_merged_object(src_name, bm_merged, category_verts, scene, props,
         vset = category_verts.get(bm_key)
         if vset:
             category_xy[bm_key] = {
-                (int(v.co.x * 1e5), int(v.co.y * 1e5)) for v in vset
+                (int(v.co.x * _COORD_QUANTIZE), int(v.co.y * _COORD_QUANTIZE)) for v in vset
             }
 
     obj_name = src_name + get_prefs().projection_suffix
@@ -49,7 +50,7 @@ def _write_merged_object(src_name, bm_merged, category_verts, scene, props,
         obj.parent = parent
         register_projection_output(parent, obj.name)
     pos_to_idx = {
-        (int(v.co.x * 1e5), int(v.co.y * 1e5)): v.index
+        (int(v.co.x * _COORD_QUANTIZE), int(v.co.y * _COORD_QUANTIZE)): v.index
         for v in mesh.vertices
     }
 
