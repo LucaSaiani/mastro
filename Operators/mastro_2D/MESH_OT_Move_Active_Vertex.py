@@ -48,7 +48,14 @@ class MESH_OT_Move_Active_Vertex(bpy.types.Operator):
     bl_description = ("Move the active vertex along the line to the penultimate selected vertex using numeric input")
     bl_options = {'REGISTER', 'UNDO'}
 
-    
+    @classmethod
+    def poll(cls, context):
+        # Only meaningful in vertex select mode: select_history holds BMVert
+        # only there, so edge/face select mode would otherwise reach invoke()
+        # with non-vertex history entries and crash on .co access below.
+        return (context.mode == 'EDIT_MESH'
+                and context.tool_settings.mesh_select_mode[0])
+
     def invoke(self, context, event):
         obj = context.edit_object
         me = obj.data
@@ -62,12 +69,14 @@ class MESH_OT_Move_Active_Vertex(bpy.types.Operator):
 
         # Active vertex is the last selected
         active_vert = bm.select_history.active
-        if active_vert is None or not active_vert.select:
+        if (not isinstance(active_vert, bmesh.types.BMVert)
+                or not active_vert.select):
             self.report({'ERROR'}, "You must have an active vertex selected")
             return {'CANCELLED'}
 
         # Reference vertex is the penultimate selected
-        sel_history = [v for v in bm.select_history if v.select]
+        sel_history = [v for v in bm.select_history
+                       if isinstance(v, bmesh.types.BMVert) and v.select]
         if len(sel_history) < 2:
             self.report({'ERROR'}, "Selection history must have at least two vertices")
             return {'CANCELLED'}
