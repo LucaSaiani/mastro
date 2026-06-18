@@ -37,10 +37,12 @@ class OBJECT_OT_MaStroCad_Add_Drawing_Mesh(Operator, AddObjectHelper):
 
         add_drawing_attributes(obj)
 
-        # Assign the active layer and push its values onto the edge
+        # Assign the active layer and push its values onto the edge. Use the
+        # 3D View sidebar's active layer (window_manager), consistent with
+        # the extrusion handler — not the Scene Properties panel's index.
         scene_layers = context.scene.mastro_cad_layers
-        idx = context.scene.mastro_cad_layer_index
-        active_layer_id = scene_layers[idx].layer_id if scene_layers else 0
+        idx = context.window_manager.mastro_cad_viewport_layer_index
+        active_layer_id = scene_layers[idx].layer_id if scene_layers and 0 <= idx < len(scene_layers) else 0
         me.attributes["mastro_drawing_layer"].data[0].value = active_layer_id
         update_bmesh_drawing_attributes(context, {active_layer_id})
 

@@ -12,8 +12,11 @@ def _assign_layer_to_edge(scene, bm, edge):
     if edge[layer_attr] != 0:
         return  # already assigned — don't overwrite
 
+    # Use the 3D View sidebar's active layer (window_manager), not the Scene
+    # Properties panel's — they're independent active-layer selections, and
+    # the sidebar one is what's actually visible while drawing in the viewport.
     layers = scene.mastro_cad_layers
-    idx    = scene.mastro_cad_layer_index
+    idx    = bpy.context.window_manager.mastro_cad_viewport_layer_index
     if not (0 <= idx < len(layers)):
         return
     layer_id = layers[idx].layer_id

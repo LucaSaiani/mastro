@@ -21,37 +21,32 @@ def _draw_scale_view3d(self, context):
         col.prop(scene.camera.data, "mastro_cad_drawing_scale", text="Scale 1:")
     else:
         col.prop(scene, "mastro_cad_drawing_scale_viewport", text="Scale 1:")
-    if "mastro_cad_show_scale" in scene.bl_rna.properties:
-        col.prop(scene, "mastro_cad_show_scale", text="Show in Header")
 
 
-def _draw_header(self, context):
-    scene = context.scene
-    if scene is None:
-        return
-    if not scene.mastro_cad_show_scale:
-        return
-    space = context.space_data
-    if not space or space.type != 'VIEW_3D':
-        return
-    if not space.overlay.show_overlays:
-        return
-    in_cam = space.region_3d.view_perspective == 'CAMERA'
-    if in_cam and scene.camera and scene.camera.type == 'CAMERA':
-        scale = scene.camera.data.mastro_cad_drawing_scale
-    else:
-        scale = scene.mastro_cad_drawing_scale_viewport
-    self.layout.label(text=f"1:{scale}")
+def _find_view3d_space(context):
+    """Find a VIEW_3D space in the current screen.
+
+    context.space_data during a STATUSBAR_HT_header draw call is the status
+    bar's own space (type 'STATUSBAR'), not the 3D viewport — so it can't be
+    used to read view_perspective/overlay state here.
+    """
+    screen = context.screen
+    if screen is None:
+        return None
+    for area in screen.areas:
+        if area.type == 'VIEW_3D':
+            for space in area.spaces:
+                if space.type == 'VIEW_3D':
+                    return space
+    return None
 
 
 def _draw_statusbar(self, context):
     scene = context.scene
     if scene is None:
         return
-    if not getattr(scene, "mastro_cad_show_scale", False):
-        return
-    space = context.space_data
-    if not space or space.type != 'VIEW_3D':
+    space = _find_view3d_space(context)
+    if space is None:
         return
     in_cam = space.region_3d.view_perspective == 'CAMERA'
     if in_cam and scene.camera and scene.camera.type == 'CAMERA':

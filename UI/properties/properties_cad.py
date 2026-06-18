@@ -95,11 +95,6 @@ scene_props_cad = [
         min=1,
         update=_on_viewport_scale_changed,
     )),
-    ("mastro_cad_show_scale", BoolProperty(
-        name="Show Scale in Header",
-        description="Show the active drawing scale in the 3D viewport header",
-        default=True,
-    )),
 ]
 
 
