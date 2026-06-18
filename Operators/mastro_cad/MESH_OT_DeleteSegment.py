@@ -673,109 +673,6 @@ class MESH_OT_MaStroCad_DeleteSegment(CadMixin, bpy.types.Operator):
         _apply_delete_segment(context, edge_idx, obj, self._hover_cuts,
                                t_click, self.coplanar_only)
 
-    def _apply_polyline(self, context):
-        if not self._poly_pts_2d or len(self._poly_pts_2d) < 2:
-            return  # need at least two points to form a segment
-
-        region = context.region
-        rv3d   = context.space_data.region_3d
-        poly2d = self._poly_pts_2d
-
-        candidates = [o for o in context.scene.objects
-                      if o.visible_get() and o.type == 'MESH']
-
-        to_process = []   # (edge_idx, obj, t_indicator, v0_w, v1_w)
-
-        for obj in candidates:
-            mw = obj.matrix_world
-            is_edit = (obj.mode == 'EDIT')
-            if not is_edit:
-                continue   # only modify edit-mode mesh
-            bm = bmesh.from_edit_mesh(obj.data)
-
-            for e in bm.edges:
-                if e.hide:
-                    continue
-                v0_w = mw @ e.verts[0].co
-                v1_w = mw @ e.verts[1].co
-                p0_2d = location_3d_to_region_2d(region, rv3d, v0_w)
-                p1_2d = location_3d_to_region_2d(region, rv3d, v1_w)
-                if p0_2d is None or p1_2d is None:
-                    continue
-                hits = _polyline_crosses_edge_2d(poly2d, p0_2d, p1_2d)
-                if hits:
-                    # Collect ALL crossing t values so multi-crossing cases
-                    # (polyline crosses the same edge more than once) are handled.
-                    t_inds = [h[0] for h in hits]
-                    to_process.append((e.index, obj, t_inds, v0_w.copy(), v1_w.copy()))
-
-        for edge_idx, obj, t_inds, v0_w, v1_w in to_process:
-            others = _collect_other_edges(context, edge_idx, obj)
-            cuts   = compute_edge_cuts(v0_w, v1_w, others,
-                                        self.coplanar_only, context)
-            _apply_delete_segment(context, edge_idx, obj, cuts,
-                                   t_inds, self.coplanar_only)
-
-    def _apply_box(self, context):
-        if self._box_corner_2d is None:
-            return
-
-        region = context.region
-        rv3d   = context.space_data.region_3d
-        x0, y0 = self._box_corner_2d
-        x1, y1 = self._mouse_2d
-        box_poly2d = [(x0,y0),(x1,y0),(x1,y1),(x0,y1),(x0,y0)]
-
-        candidates = [o for o in context.scene.objects
-                      if o.visible_get() and o.type == 'MESH']
-
-        to_process = []
-
-        for obj in candidates:
-            mw = obj.matrix_world
-            is_edit = (obj.mode == 'EDIT')
-            if not is_edit:
-                continue
-            bm = bmesh.from_edit_mesh(obj.data)
-
-            for e in bm.edges:
-                if e.hide:
-                    continue
-                v0_w = mw @ e.verts[0].co
-                v1_w = mw @ e.verts[1].co
-                p0_2d = location_3d_to_region_2d(region, rv3d, v0_w)
-                p1_2d = location_3d_to_region_2d(region, rv3d, v1_w)
-                if p0_2d is None or p1_2d is None:
-                    continue
-
-                hits = _polyline_crosses_edge_2d(box_poly2d, p0_2d, p1_2d)
-                v0_in = _point_in_box_2d(p0_2d[0], p0_2d[1], x0, y0, x1, y1)
-
-                if not hits and not v0_in:
-                    continue  # fully outside
-
-                # Use midpoint of the inside portion as indicator.
-                cut_t = sorted(set(h[0] for h in hits))
-                boundaries_t = [0.0] + cut_t + [1.0]
-                td = v1_w - v0_w
-
-                for i in range(len(boundaries_t) - 1):
-                    mid_t = (boundaries_t[i] + boundaries_t[i+1]) * 0.5
-                    mid_w = v0_w + td * mid_t
-                    mid_2d = location_3d_to_region_2d(region, rv3d, mid_w)
-                    if mid_2d and _point_in_box_2d(
-                            mid_2d[0], mid_2d[1], x0, y0, x1, y1):
-                        to_process.append((e.index, obj, mid_t,
-                                           v0_w.copy(), v1_w.copy()))
-                        break  # one indicator per edge is enough
-
-        for edge_idx, obj, t_ind, v0_w, v1_w in to_process:
-            others = _collect_other_edges(context, edge_idx, obj)
-            cuts   = compute_edge_cuts(v0_w, v1_w, others,
-                                        self.coplanar_only, context)
-            _apply_delete_segment(context, edge_idx, obj, cuts,
-                                   t_ind, self.coplanar_only)
-
     # ── Header / footer ───────────────────────────────────────────────────────
 
     def _update_header(self, context, modifier=None):
@@ -862,7 +759,10 @@ class MESH_OT_MaStroCad_DeleteSegment(CadMixin, bpy.types.Operator):
                 if self._box_corner_2d is None:
                     self._box_corner_2d = (mx, my)
                 else:
-                    self._apply_box(context)
+                    # _pending_ops was already populated by _update_box_preview
+                    # on the last mouse move, using the same index-reuse-safe
+                    # edge_map path as POLYLINE confirm.
+                    self._apply_from_preview(context)
                     self._box_corner_2d = None
                     self._preview       = None
                     context.area.tag_redraw()
