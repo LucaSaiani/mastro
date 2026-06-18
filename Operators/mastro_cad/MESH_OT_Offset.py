@@ -54,6 +54,7 @@ class MESH_OT_MaStroCad_Offset(bpy.types.Operator):
     _cached_perp    = None
 
     _last_seg       = None   # (chain_idx, seg_idx) of last valid interior projection
+    _perp_preview   = None   # (mouse_3d, foot_point) — perpendicular guide line
     _snap           = None
     _snap_hit       = None
 
@@ -85,9 +86,18 @@ class MESH_OT_MaStroCad_Offset(bpy.types.Operator):
             gpu.state.line_width_set(1.5)
             batch.draw(shader)
 
-
         gpu.state.depth_test_set('LESS_EQUAL')
         gpu.state.blend_set('NONE')
+
+        # Perpendicular guide: mouse to the foot of the perpendicular on the
+        # segment the offset distance is actually being measured from (the
+        # active/tracked segment, not necessarily the globally nearest one).
+        try:
+            perp = self._perp_preview
+        except ReferenceError:
+            perp = None
+        if perp is not None:
+            draw_dotted_line(perp[0], perp[1], context)
 
     def _update_preview(self, context):
         if not self._cached_geo:
@@ -399,6 +409,11 @@ class MESH_OT_MaStroCad_Offset(bpy.types.Operator):
                         if g_closest is not None:
                             self._last_seg = (g_ci, g_si)
                     self.distance = dist
+                    # closest is the foot of the perpendicular on whichever
+                    # segment dist was actually measured from (the active
+                    # segment, possibly just switched above) — not
+                    # necessarily the globally nearest one.
+                    self._perp_preview = (mouse_3d, closest) if closest is not None else None
                 else:
                     raw_3d = region_2d_to_location_3d(
                         context.region, context.space_data.region_3d,
@@ -408,6 +423,11 @@ class MESH_OT_MaStroCad_Offset(bpy.types.Operator):
                     self._snap_hit = snapped
                     mouse_3d = snapped if snapped is not None else raw_3d
                     self.distance = (mouse_3d - self._center_world).dot(self._cached_perp)
+                    # Foot of the perpendicular from the mouse onto the
+                    # (single-segment) source line: remove the perpendicular
+                    # component from the mouse position.
+                    closest = mouse_3d - self.distance * self._cached_perp
+                    self._perp_preview = (mouse_3d, closest)
             self._update_preview(context)
             self._update_header(context, modifier)
             context.area.tag_redraw()
@@ -472,6 +492,7 @@ class MESH_OT_MaStroCad_Offset(bpy.types.Operator):
         self.distance       = 0.0
         self._snap_hit      = None
         self._last_seg      = None
+        self._perp_preview  = None
         self._snap          = SnapContext(context, select_modes=('VERT', 'EDGE'))
         self._build_caches(context, per_obj)
 
