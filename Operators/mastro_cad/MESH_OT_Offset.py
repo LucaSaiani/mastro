@@ -280,7 +280,11 @@ class MESH_OT_MaStroCad_Offset(bpy.types.Operator):
     # ── UI ────────────────────────────────────────────────────────────────────
 
     def _update_header(self, context, modifier=None):
-        dist_str = self._number_input if self._number_input else f"{self.distance:.4f}"
+        if self._number_input:
+            dist_str = self._number_input
+        else:
+            unit_system = context.scene.unit_settings.system
+            dist_str = bpy.utils.units.to_string(unit_system, 'LENGTH', self.distance)
         conn_str = "ON" if self.connect_ends else "OFF"
         context.area.header_text_set(f"Offset  |  Distance: {dist_str}  |  Connect ends: {conn_str}")
         CadMixin.set_status(context, modifier,

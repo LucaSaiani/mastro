@@ -776,7 +776,11 @@ class MESH_OT_MaStroCad_Fillet(bpy.types.Operator):
             context.area.header_text_set(f"Fillet  |  {mode}")
         else:
             label = "Length" if segs == 1 else "Radius"
-            val   = self._size_input if self._size_input else f"{self.size:.4f}"
+            if self._size_input:
+                val = self._size_input
+            else:
+                unit_system = context.scene.unit_settings.system
+                val = bpy.utils.units.to_string(unit_system, 'LENGTH', self.size)
             context.area.header_text_set(f"Fillet  |  {mode}  |  {label}: {val}")
 
         CadMixin.set_status(context,

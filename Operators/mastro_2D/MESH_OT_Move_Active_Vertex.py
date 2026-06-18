@@ -165,15 +165,22 @@ class MESH_OT_Move_Active_Vertex(bpy.types.Operator):
         #     bmesh.update_edit_mesh(self.mesh, loop_triangles=False)
 
 
-        # Display current input in header
-        # Update preview in real time
         if self.parsed:
-            context.area.header_text_set(f"Distance: {self.distance}")
             self.preview_co = v_other.co + self.original_direction * self.distance
             v_active.co = self.preview_co
             bmesh.update_edit_mesh(self.mesh, loop_triangles=False)
+
+        # Display current input in header: the raw typed text (formula
+        # included) while typing, formatted with the scene's unit system
+        # (e.g. "1.5 m") once it's empty/confirmed — same pattern as
+        # Fillet/Offset, so formulas like "5+3" stay visible until Enter.
+        if self._number_input:
+            dist_str = self._number_input
         else:
-            context.area.header_text_set(f"Distance: {round(old_distance,3)}")
+            unit_system = context.scene.unit_settings.system
+            value = self.distance if self.parsed else old_distance
+            dist_str = bpy.utils.units.to_string(unit_system, 'LENGTH', value)
+        context.area.header_text_set(f"Distance: {dist_str}")
         return {'RUNNING_MODAL'}
 
 def register():
