@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2025 Luca Saiani
+# Copyright (C) 2022-2026 Luca Saiani
 
 # luca.saiani@gmail.com
 
