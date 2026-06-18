@@ -282,9 +282,11 @@ def _clamp_fillet_to_segments(arc_data, ix_2d, d0, d1, arm0_2d, arm1_2d, n0, n1)
 class MESH_OT_MaStroCad_Fillet(bpy.types.Operator):
     """Fillet (or sharp-corner) two coplanar edges.
 
-    Finds the intersection of the two edge lines and moves the relevant
-    endpoints to meet at that point.  Mouse position selects the sector.
-    Radius = 0 (sharp corner); arc support will be added later.
+    Select either the two edges directly, or the two open-end vertices
+    (each the sole endpoint of one edge) to fillet from a profile's loose
+    ends. Finds the intersection of the two edge lines and moves the
+    relevant endpoints to meet at that point. Mouse position selects the
+    sector. Radius = 0 (sharp corner); arc support will be added later.
     """
     bl_idname  = "mastrocad.fillet"
     bl_label   = "Fillet"
@@ -585,26 +587,55 @@ class MESH_OT_MaStroCad_Fillet(bpy.types.Operator):
                 context.active_object is not None)
 
     def _get_two_edges(self, context):
-        """Return [(obj,bm,edge),(obj,bm,edge)] active-edge-first, or None."""
-        result = []
+        """Return [(obj,bm,edge),(obj,bm,edge)] active-edge-first, or None.
+
+        Two ways to pick the pair:
+          - exactly two selected edges, or
+          - exactly two selected vertices, each the free end of exactly
+            one edge (degree 1) — lets you fillet by picking the two open
+            endpoints of a profile instead of the edges themselves.
+        Edge selection takes priority; vertices are only considered when
+        no edge is selected, so a normal two-edge selection (which also
+        selects up to four vertices) is never ambiguous.
+        """
+        edge_result = []
+        vert_result = []
         for obj in context.objects_in_mode:
             if obj.type != 'MESH':
                 continue
             bm = bmesh.from_edit_mesh(obj.data)
             bm.edges.ensure_lookup_table()
+            bm.verts.ensure_lookup_table()
             for e in bm.edges:
                 if e.select:
-                    result.append((obj, bm, e))
-            if len(result) > 2:
+                    edge_result.append((obj, bm, e))
+            for v in bm.verts:
+                if v.select:
+                    vert_result.append((obj, bm, v))
+            if len(edge_result) > 2:
                 return None
-        if len(result) != 2:
+
+        if len(edge_result) == 2:
+            result = edge_result
+        elif not edge_result and len(vert_result) == 2:
+            result = []
+            for obj, bm, v in vert_result:
+                if len(v.link_edges) != 1:
+                    return None
+                result.append((obj, bm, v.link_edges[0]))
+        else:
             return None
-        # Put active edge first so it becomes src_edge in _apply_fillet.
+
+        # Put active edge/vertex first so it becomes src_edge in _apply_fillet.
         active_obj = context.active_object
         if active_obj and active_obj.type == 'MESH':
             bm_act = bmesh.from_edit_mesh(active_obj.data)
             ae = bm_act.select_history.active
             if isinstance(ae, bmesh.types.BMEdge) and result[1][2] is ae:
+                result = [result[1], result[0]]
+            elif (isinstance(ae, bmesh.types.BMVert)
+                  and ae in result[1][2].verts
+                  and ae not in result[0][2].verts):
                 result = [result[1], result[0]]
         return result
 
@@ -882,7 +913,7 @@ class MESH_OT_MaStroCad_Fillet(bpy.types.Operator):
         self._started_in_edit = context.mode == 'EDIT_MESH'
         edge_infos = self._get_two_edges(context)
         if edge_infos is None:
-            self.report({'WARNING'}, "Select exactly two edges")
+            self.report({'WARNING'}, "Select exactly two edges, or two open-end vertices")
             return {'CANCELLED'}
 
         self._size_input = ""
@@ -943,7 +974,7 @@ class MESH_OT_MaStroCad_Fillet(bpy.types.Operator):
         """Called by Shift+R or from the F9 redo panel with stored properties."""
         edge_infos = self._get_two_edges(context)
         if edge_infos is None:
-            self.report({'WARNING'}, "Select exactly two edges")
+            self.report({'WARNING'}, "Select exactly two edges, or two open-end vertices")
             return {'CANCELLED'}
         (obj0, bm0, e0), (obj1, bm1, e1) = edge_infos
         mw0, mw1 = obj0.matrix_world, obj1.matrix_world
