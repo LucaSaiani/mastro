@@ -33,7 +33,7 @@ from .mastro_import_export.OBJECT_OT_Print_Config import (
 from .mastro_pdf.OBJECT_OT_Export_Mastro_Frame_PDF import OBJECT_OT_Export_Mastro_Frame_PDF
 
 from .mastro_2D.TRANSFORM_OT_Set_Orientation import TRANSFORM_OT_Mastro_Set_Orientation
-from .mastro_constraints.TRANSFORM_OT_XY_Constraint import TRANSFORM_OT_Mastro_Rotate_XY_Constraint, TRANSFORM_OT_Mastro_Translate_XY_Constraint
+from .mastro_constraints.TRANSFORM_OT_XY_Constraint import TRANSFORM_OT_Mastro_Rotate_XY_Constraint, TRANSFORM_OT_Mastro_Translate_XY_Constraint, MESH_OT_Mastro_Extrude_XY_Constraint
 
 from .mastro_layer.LAYER_MANAGER_OT_Set_Active import LAYER_MANAGER_OT_SetActive
 from .mastro_layer.LAYER_MANAGER_OT_Add_Layer import LAYER_MANAGER_OT_AddLayer
@@ -122,6 +122,7 @@ classes = (
     TRANSFORM_OT_Mastro_Set_Orientation,
     TRANSFORM_OT_Mastro_Translate_XY_Constraint,
     TRANSFORM_OT_Mastro_Rotate_XY_Constraint,
+    MESH_OT_Mastro_Extrude_XY_Constraint,
 
     LAYER_MANAGER_OT_SetActive,
     LAYER_MANAGER_OT_AddLayer,
