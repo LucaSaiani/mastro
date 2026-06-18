@@ -12,6 +12,7 @@ from ...Utils.mastro_cad.cad.cad_utils import (
     apply_offset_to_geo,
     copy_bm_edge_attrs,
     nearest_src_edge,
+    format_length,
 )
 from ...Utils.mastro_cad.cad.gpu_utils import draw_dotted_line
 from ...Utils.mastro_cad.cad.snap_utils import SnapContext
@@ -280,11 +281,7 @@ class MESH_OT_MaStroCad_Offset(bpy.types.Operator):
     # ── UI ────────────────────────────────────────────────────────────────────
 
     def _update_header(self, context, modifier=None):
-        if self._number_input:
-            dist_str = self._number_input
-        else:
-            unit_system = context.scene.unit_settings.system
-            dist_str = bpy.utils.units.to_string(unit_system, 'LENGTH', self.distance)
+        dist_str = self._number_input if self._number_input else format_length(context, self.distance)
         conn_str = "ON" if self.connect_ends else "OFF"
         context.area.header_text_set(f"Offset  |  Distance: {dist_str}  |  Connect ends: {conn_str}")
         CadMixin.set_status(context, modifier,

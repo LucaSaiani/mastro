@@ -8,7 +8,8 @@ from gpu_extras.batch import batch_for_shader
 
 from ...Utils.mastro_cad.cad.cad_utils import (compute_plane, are_coplanar, to_2d,
                                     get_attr_layers, copy_drawing_attrs,
-                                    copy_bm_vert_attrs, copy_bm_edge_attrs)
+                                    copy_bm_vert_attrs, copy_bm_edge_attrs,
+                                    format_length)
 from ...Utils.mastro_cad.cad.snap_utils import SnapContext
 from .CAD_mixin import CadMixin, CAD_CHAR_MAP
 
@@ -807,11 +808,7 @@ class MESH_OT_MaStroCad_Fillet(bpy.types.Operator):
             context.area.header_text_set(f"Fillet  |  {mode}")
         else:
             label = "Length" if segs == 1 else "Radius"
-            if self._size_input:
-                val = self._size_input
-            else:
-                unit_system = context.scene.unit_settings.system
-                val = bpy.utils.units.to_string(unit_system, 'LENGTH', self.size)
+            val = self._size_input if self._size_input else format_length(context, self.size)
             context.area.header_text_set(f"Fillet  |  {mode}  |  {label}: {val}")
 
         CadMixin.set_status(context,

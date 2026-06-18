@@ -2,8 +2,57 @@
 
 import ast
 import operator as _op
+import bpy
 from mathutils import Vector
 from bpy_extras.view3d_utils import location_3d_to_region_2d
+
+
+# ── Length display formatting ─────────────────────────────────────────────────
+
+# Conversion factor to metres, and display suffix, for each fixed
+# scene.unit_settings.length_unit (everything except 'ADAPTIVE').
+_LENGTH_UNIT_TO_METERS = {
+    'KILOMETERS':  1000.0,
+    'METERS':      1.0,
+    'CENTIMETERS': 0.01,
+    'MILLIMETERS': 0.001,
+    'MICROMETERS': 1e-6,
+    'MILES':       1609.344,
+    'FEET':        0.3048,
+    'INCHES':      0.0254,
+    'THOU':        2.54e-5,
+}
+_LENGTH_UNIT_SUFFIX = {
+    'KILOMETERS': 'km', 'METERS': 'm', 'CENTIMETERS': 'cm',
+    'MILLIMETERS': 'mm', 'MICROMETERS': 'µm',
+    'MILES': 'mi', 'FEET': 'ft', 'INCHES': 'in', 'THOU': 'thou',
+}
+
+
+def format_length(context, value):
+    """Format a length (in Blender scene units) for display in headers.
+
+    Honors the scene's configured display unit (Scene Properties > Units)
+    instead of bpy.utils.units.to_string()'s automatic unit switching,
+    which jumps between e.g. cm/m as the value's magnitude changes and
+    reads as inconsistent in a live-updating header. Only when the scene
+    unit is explicitly set to "Adaptive" (or units are off) do we fall
+    back to that automatic behaviour.
+    """
+    unit_settings = context.scene.unit_settings
+    system = unit_settings.system
+    if system == 'NONE':
+        return f"{value:.4f}"
+
+    length_unit = unit_settings.length_unit
+    scale = _LENGTH_UNIT_TO_METERS.get(length_unit)
+    if scale is None:   # 'ADAPTIVE' or an unrecognised value
+        return bpy.utils.units.to_string(system, 'LENGTH', value)
+
+    meters = value * unit_settings.scale_length
+    displayed = meters / scale
+    suffix = _LENGTH_UNIT_SUFFIX.get(length_unit, '')
+    return f"{displayed:.4f} {suffix}"
 
 
 # ── Safe arithmetic expression evaluator ─────────────────────────────────────

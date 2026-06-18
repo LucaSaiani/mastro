@@ -5,6 +5,7 @@ import operator as op
 import math
 
 from ..mastro_cad.CAD_mixin import CadMixin, CAD_CHAR_MAP
+from ...Utils.mastro_cad.cad.cad_utils import format_length
 
 # Supported operators
 # operators = {
@@ -177,9 +178,8 @@ class MESH_OT_Move_Active_Vertex(bpy.types.Operator):
         if self._number_input:
             dist_str = self._number_input
         else:
-            unit_system = context.scene.unit_settings.system
             value = self.distance if self.parsed else old_distance
-            dist_str = bpy.utils.units.to_string(unit_system, 'LENGTH', value)
+            dist_str = format_length(context, value)
         context.area.header_text_set(f"Distance: {dist_str}")
         return {'RUNNING_MODAL'}
 
