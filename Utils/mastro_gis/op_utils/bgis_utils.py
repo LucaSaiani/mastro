@@ -40,17 +40,12 @@ def adjust3Dview(context, bbox, zoomToSelect=True):
 	for area in areas:
 		if area.type == 'VIEW_3D':
 			space = area.spaces.active
-			if dst < 100:
-				space.clip_start = 1
-			elif dst < 1000:
-				space.clip_start = 10
-			else:
-				space.clip_start = 100
-			#Adjust clip end distance if the new obj is largest than actual setting
-			if space.clip_end < dst:
-				if dst > 10000000:
-					dst = 10000000 #too large clip distance broke the 3d view
-				space.clip_end = dst
+			#Set clip end distance to match the new obj (not just increase it -
+			#a stale, much larger value from an earlier, wider-zoomed session
+			#would otherwise never shrink back down)
+			if dst > 10000000:
+				dst = 10000000 #too large clip distance broke the 3d view
+			space.clip_end = dst
 			if zoomToSelect:
 				overrideContext = context.copy()
 				overrideContext['area'] = area
@@ -68,8 +63,8 @@ def showTextures(context):
 	for area in context.screen.areas:
 		if area.type == 'VIEW_3D':
 			space = area.spaces.active
-			if space.shading.type == 'SOLID':
-				space.shading.color_type = 'TEXTURE'
+			if space.shading.type in ('SOLID', 'WIREFRAME'):
+				space.shading.type = 'MATERIAL'
 
 
 def addTexture(mat, img, uvLay, name='texture'):

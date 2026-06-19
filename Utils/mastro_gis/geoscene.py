@@ -69,6 +69,8 @@ class SK():
 	SCALE = "scale"
 	# Current zoom level in the Tile Matrix Set
 	ZOOM = "zoom"
+	# True if the origin was explicitly fixed to a project point (not 0,0)
+	FIXED_ORIGIN = "fixed_origin"
 
 
 
@@ -371,4 +373,24 @@ class GeoScene():
 	@property
 	def hasZoom(self):
 		return self.zoom is not None
+
+	@property
+	def fixedOrigin(self):
+		'''True if the scene origin was explicitly set to a known project
+		point (rather than the default 0,0 sentinel) - basemap import locks
+		panning/zooming from moving the origin and starts at max zoom when
+		this is set. See VIEW3D_OT_MastroGIS_Basemap_Import.'''
+		return self.scn.get(SK.FIXED_ORIGIN, False)
+	@fixedOrigin.setter
+	def fixedOrigin(self, v):
+		if SK.FIXED_ORIGIN not in self.scn:
+			self._rna_ui[SK.FIXED_ORIGIN] = {
+				"description": "Project origin is fixed (not the default 0,0)",
+				"default": False,
+			}
+		self.scn[SK.FIXED_ORIGIN] = v
+	@fixedOrigin.deleter
+	def fixedOrigin(self):
+		if SK.FIXED_ORIGIN in self.scn:
+			del self.scn[SK.FIXED_ORIGIN]
 

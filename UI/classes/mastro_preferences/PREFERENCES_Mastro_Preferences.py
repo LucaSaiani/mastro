@@ -252,11 +252,6 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
         description='Zoom towards the mouse pointer position',
         default=True)
 
-    gis_lock_origin: bpy.props.BoolProperty(
-        name="Lock origin",
-        description='Do not move scene origin when panning map',
-        default=False)
-
     gis_lock_objects: bpy.props.BoolProperty(
         name="Lock objects",
         description='Retain objects geolocation when moving map origin',
@@ -274,8 +269,8 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
         default=True)
 
     gis_force_textured_solid: bpy.props.BoolProperty(
-        name="Force textured solid shading",
-        description="Update shading mode to display raster's texture",
+        name="Force Viewport Shading: Material Preview",
+        description="Switch the viewport to Material Preview shading to display the imported texture/material",
         default=True)
 
     def updateMapTilerApiKey(self, context):
@@ -285,6 +280,26 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
         name="",
         description="API key for MapTiler Coordinates API (required for EPSG.io migration)",
         update=updateMapTilerApiKey
+    )
+
+    gis_google_api_key: bpy.props.StringProperty(
+        name="",
+        description="Google Maps Platform API key",
+        default="AIzaSyDeabiA2pp5FnWvGzNiH0t-9rlsJZEHhxE",
+    )
+
+    gis_google_3dtiles_lod: bpy.props.EnumProperty(
+        name="3D Tiles quality",
+        description="Level of detail for Google 3D Tiles import",
+        items=[
+            ("lod1", "Whole city",             "Very low detail, covers a large area"),
+            ("lod2", "Districts",              "Low detail"),
+            ("lod3", "Groups of buildings",    "Medium detail"),
+            ("lod4", "Separate buildings",     "Good detail"),
+            ("lod5", "Buildings with details", "High detail"),
+            ("lod6", "Maximum detail",         "Highest detail, heavy download"),
+        ],
+        default="lod3",
     )
 
 
@@ -458,7 +473,6 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
             row = col.row()
             row.prop(self, "gis_zoom_to_mouse")
             row.prop(self, "gis_lock_objects")
-            row.prop(self, "gis_lock_origin")
             row.prop(self, "gis_synch_origin")
 
             row = col.row()
@@ -471,6 +485,14 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
             row = col.row().split(factor=0.2)
             row.label(text="MapTiler API Key")
             row.prop(self, "gis_maptiler_api_key")
+
+            row = col.row().split(factor=0.2)
+            row.label(text="Google API Key")
+            row.prop(self, "gis_google_api_key")
+
+            row = col.row()
+            row.enabled = bool(self.gis_google_api_key)
+            row.prop(self, "gis_google_3dtiles_lod")
 
         # Section: Open File Detection
         box = layout.box()

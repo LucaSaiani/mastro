@@ -35,22 +35,15 @@ from gpu_extras.batch import batch_for_shader
 
 #mastro_gis core imports (ported from BlenderGIS)
 from ...Utils.mastro_gis import HAS_GDAL, HAS_PIL, HAS_IMGIO
-from ...Utils.mastro_gis.proj import reprojBbox, meters2dd
+from ...Utils.mastro_gis.proj import reprojBbox, reprojPt, meters2dd
 from ...Utils.mastro_gis.basemaps import GRIDS, SOURCES, MapService
 
-from ...Utils.mastro_gis import settings
-USER_AGENT = settings.user_agent
-
 from ...Utils.mastro_gis.geoscene import GeoScene, GIS_MAPS_NAME
-from ...Utils.mastro_gis.prefs import PredefCRS
 
 from ...Utils.mastro_gis.op_utils import getBBOX, mouseTo3d
 from ...Utils.mastro_gis.op_utils import placeObj, adjust3Dview, showTextures, rasterExtentToMesh, geoRastUVmap, addTexture
 
-try:
-    from ...Utils.mastro_gis.lib.nominatim import nominatimQuery
-except ImportError:
-    nominatimQuery = None
+from ...UI.properties.properties_gis import reset_origin_staging
 
 from ... import PREFS_KEY as PKG
 
@@ -145,15 +138,63 @@ class BaseMap(GeoScene):
 			self.srv.setDstGrid(grdkey)
 			self.tm = self.srv.dstTms
 
+		#Get layer def obj
+		self.layer = self.srv.layers[laykey]
+
 		#Init some geoscene props if needed
 		if not self.hasCRS:
 			self.crs = self.tm.CRS
-		if not self.hasOriginPrj:
-			self.setOriginPrj(0, 0, self.synchOrj)
+		# hasOriginPrj alone is not a reliable "already initialized" guard:
+		# the free-pan branch below stamps (0,0) as a sentinel on first use,
+		# which would otherwise permanently hide the fixed-origin option.
+		# fixedOrigin is the real "don't touch it again" guard - once set,
+		# it's never re-evaluated (this is what keeps it stable across
+		# subsequent imports).
+		just_fixed = False
+		if not self.fixedOrigin:
+			gis_props = self.scn
+			# If a previous fixed/free-pan origin already exists, fixing a new
+			# one must relocate the existing maps (and any other top-level
+			# objects) so they stay correctly positioned relative to it,
+			# instead of leaving them stranded at the old position.
+			had_origin = self.hasOriginPrj
+			old_crsx, old_crsy = (self.crsx, self.crsy) if had_origin else (0.0, 0.0)
+			if gis_props.mastro_gis_origin_input == 'LATLON' and (gis_props.mastro_gis_origin_lat_value != 0.0 or gis_props.mastro_gis_origin_lon_value != 0.0):
+				self.setOriginGeo(gis_props.mastro_gis_origin_lon_value, gis_props.mastro_gis_origin_lat_value)
+				self.fixedOrigin = True
+				just_fixed = True
+			elif gis_props.mastro_gis_origin_input == 'PROJECTED' and (gis_props.mastro_gis_origin_x_value != 0.0 or gis_props.mastro_gis_origin_y_value != 0.0):
+				# the user enters X/Y in whatever CRS they picked, not
+				# necessarily the map's own CRS - reproject to it first
+				input_crs = gis_props.mastro_gis_origin_crs
+				if input_crs and input_crs != self.crs:
+					x, y = reprojPt(input_crs, self.crs, gis_props.mastro_gis_origin_x_value, gis_props.mastro_gis_origin_y_value)
+				else:
+					x, y = gis_props.mastro_gis_origin_x_value, gis_props.mastro_gis_origin_y_value
+				self.setOriginPrj(x, y, self.synchOrj)
+				self.fixedOrigin = True
+				just_fixed = True
+			elif not self.hasOriginPrj:
+				self.setOriginPrj(0, 0, self.synchOrj)
+
+			if just_fixed and had_origin:
+				dx = self.crsx - old_crsx
+				dy = self.crsy - old_crsy
+				gis_maps = self.scn.objects.get(GIS_MAPS_NAME)
+				if gis_maps is not None and 'initial_crsx' in gis_maps:
+					gis_maps.location.x = -(self.crsx - gis_maps['initial_crsx']) / self.scale
+					gis_maps.location.y = -(self.crsy - gis_maps['initial_crsy']) / self.scale
+				self._moveObjLoc(dx, dy)
+
+			if just_fixed:
+				reset_origin_staging()
 		if not self.hasScale:
 			self.scale = 1
-		if not self.hasZoom:
-			self.zoom = 0
+		if just_fixed or not self.hasZoom:
+			if self.fixedOrigin:
+				self.zoom = min(self.layer.zmax, self.tm.nbLevels - 1)
+			else:
+				self.zoom = 0
 
 		self.lockedZoom = None
 
@@ -167,9 +208,6 @@ class BaseMap(GeoScene):
 			folder = bpy.app.tempdir
 		self.imgPath = folder + self.name + ".tif"
 
-		#Get layer def obj
-		self.layer = self.srv.layers[laykey]
-
 		#map keys
 		self.srckey = srckey
 		self.laykey = laykey
@@ -179,6 +217,10 @@ class BaseMap(GeoScene):
 		self.img = None       # bpy image datablock
 		self.bkg = None       # empty-image object in scene
 		self.viewDstZ = None  # view distance set after place(), used to restore zoom
+		self.needsPlace = False  # set by run() (background thread) for the
+		                          # modal's main-thread TIMER handler to pick
+		                          # up - place() touches bpy.data/GPU state
+		                          # and crashes if called off the main thread
 
 
 	def get(self):
@@ -195,14 +237,14 @@ class BaseMap(GeoScene):
 			self.thread.join()
 
 	def run(self):
-		"""thread method"""
+		"""thread method - network/CPU only, no bpy/GPU calls: place() must
+		run on the main thread (see the modal's TIMER handler)"""
 		self.mosaic = self.request()
 		if self.srv.running and self.mosaic is not None:
 			#save image
 			self.mosaic.save(self.imgPath)
 		if self.srv.running:
-			#Place background image
-			self.place()
+			self.needsPlace = True
 		self.srv.stop()
 
 	def moveOrigin(self, dx, dy, useScale=True, updObjLoc=True):
@@ -383,182 +425,53 @@ def drawZoomBox(self, context):
 		batch.draw(shader)
 
 
-###############
+HANDLE_RADIUS = 8  # px, hit-test and draw radius for selection rect corners
 
-class VIEW3D_OT_map_start(Operator):
+def drawSelectionRect(self, context):
+	"""Draw the 3D tiles area selection rectangle with 4 draggable corner handles."""
+	try:
+		_ = self.sel_rect
+	except ReferenceError:
+		return
+	x0, y0, x1, y1 = self.sel_rect
+	shader = gpu.shader.from_builtin('UNIFORM_COLOR')
 
-	bl_idname = "mastrogis.map_start"
-	bl_description = 'Toggle 2d map navigation'
-	bl_label = "Basemap"
-	bl_options = {'REGISTER'}
+	# rectangle outline
+	corners = [(x0, y0, 0), (x0, y1, 0), (x1, y1, 0), (x1, y0, 0)]
+	lines = [corners[0], corners[1], corners[1], corners[2],
+	         corners[2], corners[3], corners[3], corners[0]]
+	batch = batch_for_shader(shader, 'LINES', {"pos": lines})
+	shader.bind()
+	shader.uniform_float("color", (1.0, 0.6, 0.0, 1.0))
+	gpu.state.line_width_set(3.0)
+	batch.draw(shader)
+	gpu.state.line_width_set(1.0)
 
-	#special function to auto redraw an operator popup called through invoke_props_dialog
-	def check(self, context):
-		return True
-
-	def listSources(self, context):
-		srcItems = []
-		for srckey, src in SOURCES.items():
-			#put each item in a tuple (key, label, tooltip)
-			srcItems.append( (srckey, src['name'], src['description']) )
-		return srcItems
-
-	def listGrids(self, context):
-		grdItems = []
-		src = SOURCES[self.src]
-		for gridkey, grd in GRIDS.items():
-			#put each item in a tuple (key, label, tooltip)
-			if gridkey == src['grid']:
-				#insert at first position
-				grdItems.insert(0, (gridkey, grd['name']+' (source)', grd['description']) )
-			else:
-				grdItems.append( (gridkey, grd['name'], grd['description']) )
-		return grdItems
-
-	def listLayers(self, context):
-		layItems = []
-		src = SOURCES[self.src]
-		for laykey, lay in src['layers'].items():
-			#put each item in a tuple (key, label, tooltip)
-			layItems.append( (laykey, lay['name'], lay['description']) )
-		return layItems
+	# corner handles as filled squares
+	r = HANDLE_RADIUS
+	for cx, cy, _ in corners:
+		sq = [
+			(cx - r, cy - r, 0), (cx + r, cy - r, 0), (cx + r, cy + r, 0),
+			(cx - r, cy - r, 0), (cx + r, cy + r, 0), (cx - r, cy + r, 0),
+		]
+		batch = batch_for_shader(shader, 'TRIS', {"pos": sq})
+		shader.bind()
+		shader.uniform_float("color", (1.0, 0.6, 0.0, 1.0))
+		batch.draw(shader)
 
 
-	src: EnumProperty(
-				name = "Map",
-				description = "Choose map service source",
-				items = listSources
-				)
-
-	grd: EnumProperty(
-				name = "Grid",
-				description = "Choose cache tiles matrix",
-				items = listGrids
-				)
-
-	lay: EnumProperty(
-				name = "Layer",
-				description = "Choose layer",
-				items = listLayers
-				)
+def _sel_rect_corners(sel_rect):
+	"""Return the 4 corners of sel_rect as (x, y) tuples: BL, TL, TR, BR."""
+	x0, y0, x1, y1 = sel_rect
+	return [(x0, y0), (x0, y1), (x1, y1), (x1, y0)]
 
 
-	dialog: StringProperty(default='MAP') # 'MAP', 'SEARCH', 'OPTIONS'
-
-	query: StringProperty(name="Go to")
-
-	zoom: IntProperty(name='Zoom level', min=0, max=25)
-
-	recenter: BoolProperty(name='Center to existing objects')
-
-	def draw(self, context):
-		addonPrefs = context.preferences.addons[PKG].preferences
-		scn = context.scene
-		layout = self.layout
-
-		if self.dialog == 'SEARCH':
-				layout.prop(self, 'query')
-				layout.prop(self, 'zoom', slider=True)
-
-		elif self.dialog == 'OPTIONS':
-			#viewPrefs = context.preferences.view
-			#layout.prop(viewPrefs, "use_zoom_to_mouse")
-			layout.prop(addonPrefs, "gis_zoom_to_mouse")
-			layout.prop(addonPrefs, "gis_lock_objects")
-			layout.prop(addonPrefs, "gis_lock_origin")
-			layout.prop(addonPrefs, "gis_synch_origin")
-
-		elif self.dialog == 'MAP':
-			layout.prop(self, 'src', text='Source')
-			layout.prop(self, 'lay', text='Layer')
-			col = layout.column()
-			if not HAS_GDAL:
-				col.enabled = False
-				col.label(text='(No raster reprojection support)')
-			col.prop(self, 'grd', text='Tile matrix set')
-
-			#srcCRS = GRIDS[SOURCES[self.src]['grid']]['CRS']
-			grdCRS = GRIDS[self.grd]['CRS']
-			row = layout.row()
-			#row.alignment = 'RIGHT'
-			desc = PredefCRS.getName(grdCRS)
-			if desc is not None:
-				row.label(text='CRS: ' + desc)
-			else:
-				row.label(text='CRS: ' + grdCRS)
-
-			row = layout.row()
-			row.prop(self, 'recenter')
-
-			#row = layout.row()
-			#row.label(text='Map scale:')
-			#row.prop(scn, '["'+SK.SCALE+'"]', text='')
-
-
-	def invoke(self, context, event):
-
-		if not HAS_PIL and not HAS_GDAL and not HAS_IMGIO:
-			self.report({'ERROR'}, "No imaging library available. ImageIO module was not correctly installed.")
-			return {'CANCELLED'}
-
-		if not context.area.type == 'VIEW_3D':
-			self.report({'WARNING'}, "View3D not found, cannot run operator")
-			return {'CANCELLED'}
-
-		#Update zoom
-		geoscn = GeoScene(context.scene)
-		if geoscn.hasZoom:
-			self.zoom = geoscn.zoom
-
-		#Display dialog
-		return context.window_manager.invoke_props_dialog(self)
-
-	def execute(self, context):
-		scn = context.scene
-		geoscn = GeoScene(scn)
-		prefs = context.preferences.addons[PKG].preferences
-
-		#check cache folder
-		folder = prefs.gis_cache_folder
-		if folder == "" or not os.path.exists(folder):
-			self.report({'ERROR'}, "Please define a valid cache folder path in addon's preferences")
-			return {'CANCELLED'}
-		if not os.access(folder, os.X_OK | os.W_OK):
-			self.report({'ERROR'}, "The selected cache folder has no write access")
-			return {'CANCELLED'}
-
-		if self.dialog == 'MAP':
-			grdCRS = GRIDS[self.grd]['CRS']
-			if geoscn.isBroken:
-				self.report({'ERROR'}, "Scene georef is broken, please fix it beforehand")
-				return {'CANCELLED'}
-			#set scene crs as grid crs
-			#if not geoscn.hasCRS:
-				#geoscn.crs = grdCRS
-			#Check if raster reproj is needed
-			if geoscn.hasCRS and geoscn.crs != grdCRS and not HAS_GDAL:
-				self.report({'ERROR'}, "Please install gdal to enable raster reprojection support")
-				return {'CANCELLED'}
-
-		#Move scene origin to the researched place
-		if self.dialog == 'SEARCH':
-			r = bpy.ops.mastrogis.map_search('EXEC_DEFAULT', query=self.query)
-			if r == {'CANCELLED'}:
-				self.report({'INFO'}, "No location found")
-			else:
-				geoscn.zoom = self.zoom
-
-
-		#Start map viewer operator
-		self.dialog = 'MAP' #reinit dialog type
-		bpy.ops.mastrogis.map_viewer('INVOKE_DEFAULT', srckey=self.src, laykey=self.lay, grdkey=self.grd, recenter=self.recenter)
-
-		return {'FINISHED'}
-
-
-
-
-###############
+def _hit_handle(sel_rect, mx, my):
+	"""Return index 0-3 of the corner handle under the mouse, or None."""
+	for i, (cx, cy) in enumerate(_sel_rect_corners(sel_rect)):
+		if abs(mx - cx) <= HANDLE_RADIUS and abs(my - cy) <= HANDLE_RADIUS:
+			return i
+	return None
 
 
 class VIEW3D_OT_map_viewer(Operator):
@@ -581,12 +494,19 @@ class VIEW3D_OT_map_viewer(Operator):
 		return context.area.type == 'VIEW_3D'
 
 
+	def _origin_changed(self, context):
+		"""Tag the sidebar (N-panel) for redraw so the live origin labels in
+		VIEW3D_PT_MastroGIS_Basemap update while panning in free mode."""
+		for region in context.area.regions:
+			if region.type == 'UI':
+				region.tag_redraw()
+
 	def _cleanup(self, context):
 		"""Remove timer, draw handlers, and status text; must be called before returning from modal."""
 		if getattr(self, 'timer', None) is not None:
 			context.window_manager.event_timer_remove(self.timer)
 			self.timer = None
-		for attr in ('_drawTextHandler', '_drawZoomBoxHandler'):
+		for attr in ('_drawTextHandler', '_drawZoomBoxHandler', '_drawSelRectHandler'):
 			handler = getattr(self, attr, None)
 			if handler is not None:
 				try:
@@ -598,21 +518,16 @@ class VIEW3D_OT_map_viewer(Operator):
 		context.workspace.status_text_set(None)
 
 	def __del__(self):
-		for attr in ('_drawTextHandler', '_drawZoomBoxHandler'):
+		for attr in ('_drawTextHandler', '_drawZoomBoxHandler', '_drawSelRectHandler'):
 			handler = getattr(self, attr, None)
 			if handler is not None:
 				try:
 					bpy.types.SpaceView3D.draw_handler_remove(handler, 'WINDOW')
 				except Exception:
 					pass
-		if getattr(self, 'restart', False):
-			bpy.ops.mastrogis.map_start('INVOKE_DEFAULT', src=self.srckey, lay=self.laykey, grd=self.grdkey, dialog=self.dialog)
 
 
 	def invoke(self, context, event):
-
-		self.restart = False
-		self.dialog = 'MAP' # dialog name for MAP_START >> string in  ['MAP', 'SEARCH', 'OPTIONS']
 
 		self.moveFactor = 0.1
 
@@ -620,32 +535,20 @@ class VIEW3D_OT_map_viewer(Operator):
 		#Option to adjust or not objects location when panning
 		self.updObjLoc = self.prefs.gis_lock_objects #if georef is locked then we need to adjust object location after each pan
 
+		# in 3D Tiles mode the SAT layer is used as a visual reference
+		self.is_3dtiles = (self.laykey == "3D")
+		if self.is_3dtiles:
+			self.laykey = "SAT"
+
 		#Add draw callback to view space
 		args = (self, context)
 		self._drawTextHandler = bpy.types.SpaceView3D.draw_handler_add(drawInfosText, args, 'WINDOW', 'POST_PIXEL')
 		self._drawZoomBoxHandler = bpy.types.SpaceView3D.draw_handler_add(drawZoomBox, args, 'WINDOW', 'POST_PIXEL')
+		self._drawSelRectHandler = None
 
 		#Add modal handler and init a timer
 		context.window_manager.modal_handler_add(self)
 		self.timer = context.window_manager.event_timer_add(0.04, window=context.window)
-
-		#Switch to top view ortho (center to origin)
-		view3d = context.area.spaces.active
-		bpy.ops.view3d.view_axis(type='TOP')
-		view3d.region_3d.view_perspective = 'ORTHO'
-		context.scene.cursor.location = (0, 0, 0)
-		if not self.prefs.gis_lock_origin:
-			# center on existing GIS tiles if any, otherwise go to origin
-			existing = [o for o in context.scene.objects
-						if o.type == 'EMPTY' and o.empty_display_type == 'IMAGE']
-			if existing:
-				xs = [o.matrix_world.translation.x for o in existing]
-				ys = [o.matrix_world.translation.y for o in existing]
-				cx = (min(xs) + max(xs)) / 2
-				cy = (min(ys) + max(ys)) / 2
-				view3d.region_3d.view_location = (cx, cy, 0)
-			else:
-				view3d.region_3d.view_location = (0, 0, 0)
 
 		#Init some properties
 		# tag if map is currently drag
@@ -660,8 +563,31 @@ class VIEW3D_OT_map_viewer(Operator):
 		self.zb_xmin, self.zb_xmax = 0, 0
 		self.zb_ymin, self.zb_ymax = 0, 0
 
-		#Get map
+		#Get map - this is what actually fixes the project origin on first use
+		#(see BaseMap.__init__), so lockOrigin below must be computed after it
 		self.map = BaseMap(context, self.srckey, self.laykey, self.grdkey)
+
+		#Lock the origin once this scene has a fixed project origin (just set
+		#above, or from a previous import)
+		self.lockOrigin = self.map.fixedOrigin
+
+		#Switch to top view ortho (center to origin)
+		view3d = context.area.spaces.active
+		bpy.ops.view3d.view_axis(type='TOP')
+		view3d.region_3d.view_perspective = 'ORTHO'
+		context.scene.cursor.location = (0, 0, 0)
+		if not self.lockOrigin:
+			# center on existing GIS tiles if any, otherwise go to origin
+			existing = [o for o in context.scene.objects
+						if o.type == 'EMPTY' and o.empty_display_type == 'IMAGE']
+			if existing:
+				xs = [o.matrix_world.translation.x for o in existing]
+				ys = [o.matrix_world.translation.y for o in existing]
+				cx = (min(xs) + max(xs)) / 2
+				cy = (min(ys) + max(ys)) / 2
+				view3d.region_3d.view_location = (cx, cy, 0)
+			else:
+				view3d.region_3d.view_location = (0, 0, 0)
 
 		if self.recenter and len(context.scene.objects) > 0:
 			scnBbox = getBBOX.fromScn(context.scene).to2D()
@@ -673,13 +599,24 @@ class VIEW3D_OT_map_viewer(Operator):
 			resFactor = self.map.tm.getFromToResFac(self.map.zoom, z)
 			context.region_data.view_distance *= resFactor
 			x, y = scnBbox.center
-			if self.prefs.gis_lock_origin:
+			if self.lockOrigin:
 				context.region_data.view_location = (x, y, 0)
 			else:
 				self.map.moveOrigin(x, y)
+				self._origin_changed(context)
 			self.map.zoom = z
 
 		self.map.get()
+
+		if self.is_3dtiles:
+			# initialize selection rectangle centered in the viewport (1/3 of the area size)
+			w, h = context.area.width, context.area.height
+			margin_x, margin_y = w // 3, h // 3
+			self.sel_rect = [margin_x, margin_y, w - margin_x, h - margin_y]
+			self.drag_handle = None  # index 0-3 of the corner being dragged, or None
+			self._drawSelRectHandler = bpy.types.SpaceView3D.draw_handler_add(
+				drawSelectionRect, (self, context), 'WINDOW', 'POST_PIXEL'
+			)
 
 		_set_map_footer(context)
 
@@ -694,6 +631,11 @@ class VIEW3D_OT_map_viewer(Operator):
 		if event.type == 'TIMER':
 			#report thread progression
 			self.progress = self.map.srv.report
+			# place() touches bpy.data/GPU state - it must run here on the
+			# main thread, never directly inside run()'s background thread
+			if self.map.needsPlace:
+				self.map.needsPlace = False
+				self.map.place()
 			return {'PASS_THROUGH'}
 
 
@@ -736,13 +678,14 @@ class VIEW3D_OT_map_viewer(Operator):
 								viewLoc = context.region_data.view_location
 								moveFactor = (dst - dst2) / dst
 								deltaVect = (mouseLoc - viewLoc) * moveFactor
-								if self.prefs.gis_lock_origin:
+								if self.lockOrigin:
 									viewLoc += deltaVect
 								else:
 									dx, dy, dz = deltaVect
 									if not self.prefs.gis_lock_objects and self.map.bkg is not None:
 										self.map.bkg.location  -= deltaVect
 									self.map.moveOrigin(dx, dy, updObjLoc=self.updObjLoc)
+									self._origin_changed(context)
 						self.map.get()
 
 
@@ -787,13 +730,14 @@ class VIEW3D_OT_map_viewer(Operator):
 								viewLoc = context.region_data.view_location
 								moveFactor = (dst - dst2) / dst
 								deltaVect = (mouseLoc - viewLoc) * moveFactor
-								if self.prefs.gis_lock_origin:
+								if self.lockOrigin:
 									viewLoc += deltaVect
 								else:
 									dx, dy, dz = deltaVect
 									if not self.prefs.gis_lock_objects and self.map.bkg is not None:
 										self.map.bkg.location  -= deltaVect
 									self.map.moveOrigin(dx, dy, updObjLoc=self.updObjLoc)
+									self._origin_changed(context)
 						self.map.get()
 
 
@@ -804,6 +748,20 @@ class VIEW3D_OT_map_viewer(Operator):
 			loc = mouseTo3d(context, event.mouse_region_x, event.mouse_region_y)
 			self.posx, self.posy = self.map.view3dToProj(loc.x, loc.y)
 
+			if self.is_3dtiles and self.drag_handle is not None:
+				# drag the active corner; the opposite corner stays fixed
+				mx, my = event.mouse_region_x, event.mouse_region_y
+				x0, y0, x1, y1 = self.sel_rect
+				# corners order: BL=0, TL=1, TR=2, BR=3
+				if self.drag_handle == 0:
+					self.sel_rect = [mx, my, x1, y1]
+				elif self.drag_handle == 1:
+					self.sel_rect = [mx, y0, x1, my]
+				elif self.drag_handle == 2:
+					self.sel_rect = [x0, y0, mx, my]
+				elif self.drag_handle == 3:
+					self.sel_rect = [x0, my, mx, y1]
+
 			if self.zoomBoxMode:
 				self.zb_xmax, self.zb_ymax = event.mouse_region_x, event.mouse_region_y
 
@@ -812,7 +770,7 @@ class VIEW3D_OT_map_viewer(Operator):
 				loc1 = mouseTo3d(context, self.x1, self.y1)
 				loc2 = mouseTo3d(context, event.mouse_region_x, event.mouse_region_y)
 				dlt = loc1 - loc2
-				if event.ctrl or self.prefs.gis_lock_origin:
+				if event.ctrl or self.lockOrigin:
 					context.region_data.view_location = self.viewLoc1 + dlt
 				else:
 					#Move background image
@@ -825,10 +783,22 @@ class VIEW3D_OT_map_viewer(Operator):
 						for i, obj in enumerate(topParents):
 							if obj == self.map.bkg: #the background empty used as basemap
 								continue
+							if obj.name == GIS_MAPS_NAME: #positioned absolutely via initial_crsx/crsy
+								continue
 							loc1 = self.objsLoc1[i]
 							obj.location.x = loc1.x - dlt.x
 							obj.location.y = loc1.y - dlt.y
 
+
+		if event.type == 'LEFTMOUSE' and self.is_3dtiles:
+			if event.value == 'PRESS':
+				hit = _hit_handle(self.sel_rect, event.mouse_region_x, event.mouse_region_y)
+				if hit is not None:
+					self.drag_handle = hit
+					return {'RUNNING_MODAL'}
+			elif event.value == 'RELEASE':
+				self.drag_handle = None
+				return {'RUNNING_MODAL'}
 
 		if event.type in {'LEFTMOUSE', 'MIDDLEMOUSE'}:
 
@@ -839,7 +809,7 @@ class VIEW3D_OT_map_viewer(Operator):
 				if not event.ctrl:
 					#Stop thread now, because we don't know when the mouse click will be released
 					self.map.stop()
-					if not self.prefs.gis_lock_origin:
+					if not self.lockOrigin:
 						if self.map.bkg is not None:
 							self.offx1 = self.map.bkg.location[0]
 							self.offy1 = self.map.bkg.location[1]
@@ -851,12 +821,13 @@ class VIEW3D_OT_map_viewer(Operator):
 			if event.value == 'RELEASE' and not self.zoomBoxMode:
 				self.inMove = False
 				if not event.ctrl:
-					if not self.prefs.gis_lock_origin:
+					if not self.lockOrigin:
 						#Compute final shift
 						loc1 = mouseTo3d(context, self.x1, self.y1)
 						loc2 = mouseTo3d(context, event.mouse_region_x, event.mouse_region_y)
 						dlt = loc1 - loc2
 						self.map.moveOrigin(dlt.x, dlt.y, updObjLoc=False)
+						self._origin_changed(context)
 					self.map.get()
 
 
@@ -889,10 +860,11 @@ class VIEW3D_OT_map_viewer(Operator):
 				resFactor = self.map.tm.getFromToResFac(self.map.zoom, z)
 				#Preview
 				context.region_data.view_distance *= resFactor
-				if self.prefs.gis_lock_origin:
+				if self.lockOrigin:
 					context.region_data.view_location = loc
 				else:
 					self.map.moveOrigin(loc.x, loc.y, updObjLoc=self.updObjLoc)
+					self._origin_changed(context)
 				self.map.zoom = z
 				self.map.get()
 
@@ -913,50 +885,31 @@ class VIEW3D_OT_map_viewer(Operator):
 		if event.value == 'PRESS' and event.type in ['NUMPAD_2', 'NUMPAD_4', 'NUMPAD_6', 'NUMPAD_8']:
 			delta = self.map.bkg.scale.x * self.moveFactor
 			if event.type == 'NUMPAD_4':
-				if event.ctrl or self.prefs.gis_lock_origin:
+				if event.ctrl or self.lockOrigin:
 					context.region_data.view_location += Vector( (-delta, 0, 0) )
 				else:
 					self.map.moveOrigin(-delta, 0, updObjLoc=self.updObjLoc)
+					self._origin_changed(context)
 			if event.type == 'NUMPAD_6':
-				if event.ctrl or self.prefs.gis_lock_origin:
+				if event.ctrl or self.lockOrigin:
 					context.region_data.view_location += Vector( (delta, 0, 0) )
 				else:
 					self.map.moveOrigin(delta, 0, updObjLoc=self.updObjLoc)
+					self._origin_changed(context)
 			if event.type == 'NUMPAD_2':
-				if event.ctrl or self.prefs.gis_lock_origin:
+				if event.ctrl or self.lockOrigin:
 					context.region_data.view_location += Vector( (0, -delta, 0) )
 				else:
 					self.map.moveOrigin(0, -delta, updObjLoc=self.updObjLoc)
+					self._origin_changed(context)
 			if event.type == 'NUMPAD_8':
-				if event.ctrl or self.prefs.gis_lock_origin:
+				if event.ctrl or self.lockOrigin:
 					context.region_data.view_location += Vector( (0, delta, 0) )
 				else:
 					self.map.moveOrigin(0, delta, updObjLoc=self.updObjLoc)
+					self._origin_changed(context)
 			if not event.ctrl:
 				self.map.get()
-
-		#SWITCH LAYER
-		if event.type == 'SPACE':
-			self.map.stop()
-			self._cleanup(context)
-			self.restart = True
-			return {'FINISHED'}
-
-		#GO TO
-		if event.type == 'G':
-			self.map.stop()
-			self._cleanup(context)
-			self.restart = True
-			self.dialog = 'SEARCH'
-			return {'FINISHED'}
-
-		#OPTIONS
-		if event.type == 'O':
-			self.map.stop()
-			self._cleanup(context)
-			self.restart = True
-			self.dialog = 'OPTIONS'
-			return {'FINISHED'}
 
 		#Lock/unlock 3d view zoom distance
 		if event.type == 'L' and event.value == 'PRESS':
@@ -1020,6 +973,8 @@ class VIEW3D_OT_map_viewer(Operator):
 					_parent_tile(context.scene, self.map.bkg, self.map.srckey, self.map.laykey)
 					if self.map.bkg.data is not None:
 						self.map.bkg.data.pack()
+				if not self.map.fixedOrigin:
+					self.map.fixedOrigin = True
 				return {'FINISHED'}
 
 		#EXIT
@@ -1028,6 +983,45 @@ class VIEW3D_OT_map_viewer(Operator):
 				self.zoomBoxDrag = False
 				self.zoomBoxMode = False
 				context.window.cursor_set('DEFAULT')
+			elif self.is_3dtiles and event.type in {'RET', 'NUMPAD_ENTER', 'RIGHTMOUSE'}:
+				# confirm: convert screen rect to geo bbox and launch importer
+				self.map.stop()
+				self._cleanup(context)
+				# remove temporary reference basemap from scene
+				if self.map.bkg is not None:
+					bpy.data.objects.remove(self.map.bkg, do_unlink=True)
+				# the SAT reference layer was only a temporary guide - other
+				# previously placed basemap tiles must stay visible
+				for obj in context.scene.objects:
+					if obj.type == 'EMPTY' and obj.empty_display_type == 'IMAGE':
+						obj.hide_viewport = False
+				x0, y0, x1, y1 = self.sel_rect
+				corners_3d = [mouseTo3d(context, x, y) for x, y in
+				              [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]]
+				xs = [self.map.crsx + c.x * self.map.scale for c in corners_3d]
+				ys = [self.map.crsy + c.y * self.map.scale for c in corners_3d]
+				bbox = (min(xs), min(ys), max(xs), max(ys))
+				lod = self.prefs.gis_google_3dtiles_lod
+				bpy.ops.mastrogis.google_3dtiles_import(
+					'EXEC_DEFAULT',
+					bbox_xmin=bbox[0], bbox_ymin=bbox[1],
+					bbox_xmax=bbox[2], bbox_ymax=bbox[3],
+					lod=lod,
+					api_key=self.prefs.gis_google_api_key
+				)
+				if not self.map.fixedOrigin:
+					self.map.fixedOrigin = True
+				return {'FINISHED'}
+			elif self.is_3dtiles and event.type == 'ESC':
+				# cancel: remove temporary basemap
+				self.map.stop()
+				self._cleanup(context)
+				if self.map.bkg is not None:
+					bpy.data.objects.remove(self.map.bkg, do_unlink=True)
+				for obj in context.scene.objects:
+					if obj.type == 'EMPTY' and obj.empty_display_type == 'IMAGE':
+						obj.hide_viewport = False
+				return {'CANCELLED'}
 			else:
 				self.map.stop()
 				self._cleanup(context)
@@ -1038,6 +1032,12 @@ class VIEW3D_OT_map_viewer(Operator):
 					_parent_tile(context.scene, self.map.bkg, self.map.srckey, self.map.laykey)
 					if self.map.bkg.data is not None:
 						self.map.bkg.data.pack()
+				# Closing the viewer after a first successful download fixes the
+				# project origin where it currently stands (whether the user got
+				# there via manual coordinates or by panning) - every subsequent
+				# import is then placed relative to it instead of moving it.
+				if not self.map.fixedOrigin:
+					self.map.fixedOrigin = True
 				return {'CANCELLED'}
 
 
@@ -1047,42 +1047,6 @@ class VIEW3D_OT_map_viewer(Operator):
 
 
 ####################################
-
-class VIEW3D_OT_map_search(bpy.types.Operator):
-
-	bl_idname = "mastrogis.map_search"
-	bl_description = 'Search for a place and move scene origin to it'
-	bl_label = "Map search"
-	bl_options = {'INTERNAL'}
-
-	query: StringProperty(name="Go to")
-
-	def invoke(self, context, event):
-		geoscn = GeoScene(context.scene)
-		if geoscn.isBroken:
-			self.report({'ERROR'}, "Scene georef is broken")
-			return {'CANCELLED'}
-		return context.window_manager.invoke_props_dialog(self)
-
-	def execute(self, context):
-		geoscn = GeoScene(context.scene)
-		prefs = context.preferences.addons[PKG].preferences
-		try:
-			results = nominatimQuery(self.query, referer='bgis', user_agent=USER_AGENT)
-		except Exception as e:
-			log.error('Failed Nominatim query', exc_info=True)
-			return {'CANCELLED'}
-		if len(results) == 0:
-			return {'CANCELLED'}
-		else:
-			log.debug('Nominatim search results : {}'.format([r['display_name'] for r in results]))
-			result = results[0]
-			lat, lon = float(result['lat']), float(result['lon'])
-			if geoscn.isGeoref:
-				geoscn.updOriginGeo(lon, lat, updObjLoc=prefs.gis_lock_objects)
-			else:
-				geoscn.setOriginGeo(lon, lat)
-		return {'FINISHED'}
 
 
 
@@ -1104,9 +1068,126 @@ class VIEW3D_OT_MastroGIS_Basemap_Import(Operator):
         return {'FINISHED'}
 
 
+class VIEW3D_OT_MastroGIS_Unlock_Origin(Operator):
+    """Allow changing the fixed project origin; existing maps are relocated to the new origin once one is set"""
+    bl_idname  = "mastrogis.unlock_origin"
+    bl_label   = "Unlock Origin"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        GeoScene(context.scene).fixedOrigin = False
+        # Also clear the staged manual-input coordinates: if the origin was
+        # originally fixed by typing lat/lon/x/y, those values are still
+        # non-zero here, and BaseMap.__init__ would otherwise immediately
+        # re-fix the origin back to them on the very next "Download Basemap"
+        # click - before the user gets a chance to pan to a new location.
+        scn = context.scene
+        scn.mastro_gis_origin_lat_value = 0.0
+        scn.mastro_gis_origin_lon_value = 0.0
+        scn.mastro_gis_origin_x_value = 0.0
+        scn.mastro_gis_origin_y_value = 0.0
+        reset_origin_staging()
+        return {'FINISHED'}
+
+
+class VIEW3D_OT_MastroGIS_3DTiles_Import(Operator):
+    """Download Google 3D Tiles for the selected area and embed textures in the .blend file."""
+    bl_idname  = "mastrogis.google_3dtiles_import"
+    bl_label   = "Import Google 3D Tiles"
+    bl_options = {'REGISTER'}
+
+    bbox_xmin: bpy.props.FloatProperty()
+    bbox_ymin: bpy.props.FloatProperty()
+    bbox_xmax: bpy.props.FloatProperty()
+    bbox_ymax: bpy.props.FloatProperty()
+    lod:       bpy.props.StringProperty(default="lod3")
+    api_key:   bpy.props.StringProperty()
+
+    def execute(self, context):
+        self._tiles_done = 0
+        context.area.header_text_set("3D Tiles: downloading…")
+
+        # Both pivots must stay anchored to ONE fixed point for the scene's
+        # whole lifetime (GIS Maps' original anchor), never the
+        # current/panned-to origin. GIS Maps' own compensating shift assumes
+        # ALL of its children's "intrinsic" (pre-shift) position was
+        # computed relative to that SAME single anchor - if the translation
+        # pivot instead tracked the current pan position, two overlapping
+        # downloads taken after panning to different spots would place the
+        # SAME real-world building at two different Blender positions, even
+        # though each individual download is internally consistent.
+        # Rotation has its own, separate reason to need a fixed anchor:
+        # Earth's curvature makes "up" differ measurably between two points
+        # even a few tens of km apart.
+        geoscn = GeoScene(context.scene)
+        gis_maps = context.scene.objects.get(GIS_MAPS_NAME)
+        if gis_maps is not None and 'initial_crsx' in gis_maps and geoscn.hasValidCRS:
+            pivot = reprojPt(geoscn.crs, 4326, gis_maps['initial_crsx'], gis_maps['initial_crsy'])
+        else:
+            pivot = (geoscn.lon, geoscn.lat) if geoscn.hasOriginGeo else None
+        rotation_pivot = pivot
+
+        prefs_for_lod = context.preferences.addons[PKG].preferences
+        lod_items = prefs_for_lod.bl_rna.properties['gis_google_3dtiles_lod'].enum_items
+        lod_label = lod_items[self.lod].name if self.lod in lod_items else self.lod
+        tile_root_name = f"3D {lod_label}"
+
+        try:
+            from ...Utils.mastro_gis.threed_tiles import download_tiles
+            num_tiles, errors = download_tiles(
+                bbox=(self.bbox_xmin, self.bbox_ymin, self.bbox_xmax, self.bbox_ymax),
+                lod=self.lod,
+                api_key=self.api_key,
+                progress_cb=self._on_progress,
+                pivot=pivot,
+                rotation_pivot=rotation_pivot,
+                tile_root_name=tile_root_name,
+            )
+        except Exception as e:
+            context.area.header_text_set(None)
+            self.report({'ERROR'}, f"3D Tiles import failed: {e}")
+            return {'CANCELLED'}
+
+        context.area.header_text_set(None)
+
+        if errors:
+            self.report({'WARNING'}, f"3D Tiles: {num_tiles} tiles imported with errors: {'; '.join(errors)}")
+        else:
+            self.report({'INFO'}, f"3D Tiles: {num_tiles} tiles imported")
+
+        # embed all tile textures in the .blend file
+        for img in bpy.data.images:
+            if not img.packed_files and img.filepath:
+                try:
+                    img.pack()
+                except Exception:
+                    pass
+
+        prefs = context.preferences.addons[PKG].preferences
+        if prefs.gis_adjust_3dview:
+            # Use only the geometry just downloaded (this LOD's tile_root
+            # children), not the whole scene - the scene may still contain
+            # GIS Maps/empties from earlier, much wider-zoomed basemap
+            # sessions, which would otherwise inflate the bbox to a
+            # planet-sized clip distance.
+            tile_root = context.scene.objects.get(tile_root_name)
+            if tile_root is not None and tile_root.children:
+                bbox = getBBOX.fromObj(tile_root.children[0])
+                for child in tile_root.children[1:]:
+                    bbox += getBBOX.fromObj(child)
+                adjust3Dview(context, bbox)
+        if prefs.gis_force_textured_solid:
+            showTextures(context)
+
+        return {'FINISHED'}
+
+    def _on_progress(self, done, _total):
+        self._tiles_done = done
+
+
 classes = [
-    VIEW3D_OT_map_start,
     VIEW3D_OT_map_viewer,
-    VIEW3D_OT_map_search,
     VIEW3D_OT_MastroGIS_Basemap_Import,
+    VIEW3D_OT_MastroGIS_Unlock_Origin,
+    VIEW3D_OT_MastroGIS_3DTiles_Import,
 ]
