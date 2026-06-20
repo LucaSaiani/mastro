@@ -2,16 +2,16 @@ import bpy
 from bpy.types import Node
 
 from .tree import MaStroScheduleTreeNode
-from .execution import extract_mesh_rows
-
-
-def _mass_objects(objs):
-    return [obj for obj in objs
-            if obj.type == 'MESH' and obj.data is not None and "MaStro mass" in obj.data]
+from ...Utils.import_export.mastro_export_utils import (
+    get_mass_data_for_scope,
+    granularData,
+)
 
 
 class MaStroScheduleInputAllNode(MaStroScheduleTreeNode, Node):
-    """Build the schedule table from every MaStro mass object in the scene"""
+    """Build the schedule table from every MaStro mass object in the scene,
+    using the same granularData logic as the CSV export and print schedule
+    (multi-storey unwrapping, per-floor use and height)"""
     bl_idname = 'MaStroScheduleInputAll'
     bl_label = 'Input Mesh (All)'
 
@@ -19,11 +19,13 @@ class MaStroScheduleInputAllNode(MaStroScheduleTreeNode, Node):
         self.outputs.new('MaStroScheduleDataSocketType', "Data")
 
     def evaluate(self, inputs):
-        return [extract_mesh_rows(_mass_objects(bpy.context.scene.objects))]
+        rough = get_mass_data_for_scope(bpy.context, 'ALL')
+        return [granularData(rough) if rough else []]
 
 
 class MaStroScheduleInputSelectedNode(MaStroScheduleTreeNode, Node):
-    """Build the schedule table from the currently selected MaStro mass objects"""
+    """Build the schedule table from the currently selected MaStro mass objects,
+    using the same granularData logic as the CSV export and print schedule"""
     bl_idname = 'MaStroScheduleInputSelected'
     bl_label = 'Input Mesh (Selected)'
 
@@ -31,4 +33,5 @@ class MaStroScheduleInputSelectedNode(MaStroScheduleTreeNode, Node):
         self.outputs.new('MaStroScheduleDataSocketType', "Data")
 
     def evaluate(self, inputs):
-        return [extract_mesh_rows(_mass_objects(bpy.context.selected_objects))]
+        rough = get_mass_data_for_scope(bpy.context, 'SELECTED')
+        return [granularData(rough) if rough else []]

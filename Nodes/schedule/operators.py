@@ -7,7 +7,7 @@ class MASTRO_UL_schedule_keys(UIList):
     bl_idname = "MASTRO_UL_schedule_keys"
 
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
-        layout.prop(item, "name", text="", emboss=False, icon='COLUMN')
+        layout.prop(item, "name", text="", emboss=False, icon='SORTALPHA')
 
 
 class MASTRO_OT_Schedule_GroupBy_Key_Add(Operator):
@@ -20,7 +20,7 @@ class MASTRO_OT_Schedule_GroupBy_Key_Add(Operator):
     def execute(self, context):
         node = context.space_data.edit_tree.nodes[self.node_name]
         item = node.keys.add()
-        item.name = "Column"
+        item.name = node.column_to_add or "Column"
         node.active_key_index = len(node.keys) - 1
         node.id_data.execute()
         return {'FINISHED'}

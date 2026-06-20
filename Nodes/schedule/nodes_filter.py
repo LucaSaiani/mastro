@@ -1,8 +1,8 @@
 from bpy.types import Node
-from bpy.props import StringProperty
+from bpy.props import StringProperty, EnumProperty
 
 from .tree import MaStroScheduleTreeNode
-from .execution import update_node
+from .execution import update_node, get_available_columns_items
 
 
 class MaStroScheduleFilterNode(MaStroScheduleTreeNode, Node):
@@ -11,7 +11,11 @@ class MaStroScheduleFilterNode(MaStroScheduleTreeNode, Node):
     bl_idname = 'MaStroScheduleFilter'
     bl_label = 'Filter'
 
-    column: StringProperty(name="Column", update=update_node)
+    column: EnumProperty(
+        name="Column",
+        items=lambda self, context: get_available_columns_items(self),
+        update=update_node,
+    )
     value: StringProperty(name="Value", update=update_node)
 
     def init(self, context):

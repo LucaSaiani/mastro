@@ -22,8 +22,12 @@ from .nodes_groupby import MaStroScheduleGroupByNode
 from .nodes_aggregate import MaStroScheduleAggregateNode
 from .nodes_math import MaStroScheduleMathNode
 from .nodes_lookup import MaStroScheduleCategoryLookupNode, MaStroScheduleMatrixLookupNode
-from .nodes_table import MaStroScheduleTableDataNode
-from .nodes_viewer import MaStroScheduleViewerNode
+from .nodes_table import MaStroScheduleTableDataNode, MaStroScheduleFlattenNode
+from .nodes_viewer import (
+    MaStroScheduleViewerNode,
+    register_viewer_draw_handler,
+    unregister_viewer_draw_handler,
+)
 from .menus import schedule_node_categories
 
 
@@ -49,13 +53,16 @@ classes = (
     MaStroScheduleCategoryLookupNode,
     MaStroScheduleMatrixLookupNode,
     MaStroScheduleTableDataNode,
+    MaStroScheduleFlattenNode,
     MaStroScheduleViewerNode,
 )
 
 
 def register():
     nodeitems_utils.register_node_categories('MASTRO_SCHEDULE_NODES', schedule_node_categories)
+    register_viewer_draw_handler()
 
 
 def unregister():
+    unregister_viewer_draw_handler()
     nodeitems_utils.unregister_node_categories('MASTRO_SCHEDULE_NODES')

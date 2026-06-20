@@ -18,6 +18,45 @@ def get_node_table(tree_name, node_name):
     return _schedule_cache.get(tree_name, {}).get(node_name)
 
 
+def leaves(item):
+    """Recursively flatten a (possibly nested) Group By item down to its
+    leaf rows, descending through every level of "_members" """
+    if isinstance(item, dict) and "_members" in item:
+        result = []
+        for member in item["_members"]:
+            result.extend(leaves(member))
+        return result
+    return [item]
+
+
+# Blender requires a persistent reference to the strings returned by a
+# dynamic EnumProperty items callback, keyed by node name to avoid crashes
+# from garbage-collected enum items.
+_available_columns_cache = {}
+
+
+def get_available_columns_items(node):
+    """Build the EnumProperty items list of column names available on the
+    table feeding `node`'s first input, for column-picker dropdowns."""
+    names = []
+    socket = node.inputs[0]
+    if socket.is_linked:
+        link = socket.links[0]
+        from_node = link.from_node
+        table = get_node_table(node.id_data.name, from_node.name)
+        if table:
+            output_index = list(from_node.outputs).index(link.from_socket)
+            for item in table[output_index] or []:
+                for row in leaves(item):
+                    for key in row.keys():
+                        if not key.startswith("_") and key not in names:
+                            names.append(key)
+
+    items = [(name, name, "") for name in names] or [("", "(no columns)", "")]
+    _available_columns_cache[node.name] = items
+    return _available_columns_cache[node.name]
+
+
 def extract_mesh_rows(objs):
     """Build the schedule table rows (one per floor/level) for the given
     MaStro mass objects, decoding the per-face BMesh attribute layers

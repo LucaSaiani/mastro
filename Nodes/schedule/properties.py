@@ -1,5 +1,5 @@
 from bpy.types import PropertyGroup
-from bpy.props import StringProperty, CollectionProperty
+from bpy.props import StringProperty, CollectionProperty, BoolProperty, IntProperty
 
 
 class MaStro_schedule_key_item(PropertyGroup):
@@ -16,3 +16,5 @@ class MaStro_schedule_cell(PropertyGroup):
 class MaStro_schedule_row(PropertyGroup):
     """One row of a Viewer table"""
     cells: CollectionProperty(type=MaStro_schedule_cell)
+    is_subtotal: BoolProperty(name="Subtotal", default=False)
+    level: IntProperty(name="Level", default=0)

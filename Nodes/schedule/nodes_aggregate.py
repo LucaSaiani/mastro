@@ -2,16 +2,23 @@ from bpy.types import Node
 from bpy.props import StringProperty, EnumProperty
 
 from .tree import MaStroScheduleTreeNode
-from .execution import update_node
+from .execution import update_node, leaves, get_available_columns_items
 
 
 class MaStroScheduleAggregateNode(MaStroScheduleTreeNode, Node):
-    """Aggregate a value column over each group's members (equivalent to the
-    VBA SumByCriteria helper, generalized to Sum/Count/Average)"""
+    """Aggregate a value column over each group's members and annotate the
+    group with the result (equivalent to the VBA SumByCriteria helper,
+    generalized to Sum/Count/Average). Works at every nesting level produced
+    by chained Group By nodes: each group, at whatever depth, gets its own
+    subtotal for this column"""
     bl_idname = 'MaStroScheduleAggregate'
     bl_label = 'Aggregate'
 
-    column: StringProperty(name="Column", update=update_node)
+    column: EnumProperty(
+        name="Column",
+        items=lambda self, context: get_available_columns_items(self),
+        update=update_node,
+    )
     operation: EnumProperty(
         name="Operation",
         items=[
@@ -35,13 +42,18 @@ class MaStroScheduleAggregateNode(MaStroScheduleTreeNode, Node):
 
     def evaluate(self, inputs):
         rows = inputs[0] or []
+        return [self._annotate(rows)]
+
+    def _annotate(self, items):
         out_key = self.output_name or "Result"
 
         result = []
-        for row in rows:
-            new_row = {k: v for k, v in row.items() if k != "_members"}
-            members = row.get("_members", [row])
+        for item in items:
+            new_item = dict(item)
+            if "_members" in item:
+                new_item["_members"] = self._annotate(item["_members"])
 
+            members = leaves(item)
             if self.operation == 'COUNT':
                 aggregate = len(members)
             else:
@@ -56,7 +68,7 @@ class MaStroScheduleAggregateNode(MaStroScheduleTreeNode, Node):
                 else:
                     aggregate = sum(values)
 
-            new_row[out_key] = aggregate
-            result.append(new_row)
+            new_item[out_key] = aggregate
+            result.append(new_item)
 
-        return [result]
+        return result

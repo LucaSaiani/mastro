@@ -32,6 +32,7 @@ schedule_node_categories = [
     ]),
     MaStroScheduleNodeCategory('MASTRO_SCHEDULE_OUTPUT', "Output", items=[
         NodeItem("MaStroScheduleTableData"),
+        NodeItem("MaStroScheduleFlatten"),
         NodeItem("MaStroScheduleViewer"),
     ]),
 ]
