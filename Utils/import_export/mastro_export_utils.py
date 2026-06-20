@@ -73,6 +73,7 @@ def get_mass_data(obj, mastro_type):
 
     bm_typology = bm.faces.layers.int["mastro_typology_id"]
     bm_storeys = bm.faces.layers.int["mastro_number_of_storeys"]
+    bm_undercroft = bm.faces.layers.int["mastro_undercroft"]
     bm_use_list_A   = bm.faces.layers.int["mastro_list_use_id_A"]
     bm_use_list_B   = bm.faces.layers.int["mastro_list_use_id_B"]
     bm_storey_list_A = bm.faces.layers.int["mastro_list_storey_A"]
@@ -239,7 +240,8 @@ def get_mass_data(obj, mastro_type):
             "Perimeter": perimeter,
             "Wall Area": wall_area,
             "GEA": GEA,
-            "Edges": edges
+            "Edges": edges,
+            "Undercroft": face[bm_undercroft],
         }
         data.append(entry)
 
@@ -318,6 +320,9 @@ def granularData(roughData):
 
                 wallArea = perimeter * floorToFloorLevel
 
+                if floor <= el.get("Undercroft", 0):
+                    continue
+
                 expandedData.append({
                     "Object": el["Object"],
                     "Block Name": el["Block Name"],
@@ -337,6 +342,8 @@ def granularData(roughData):
 
     # add expanded data
     data.extend(expandedData)
+
+    data = [x for x in data if x.get("Undercroft", 0) < x["Number of Storeys"]]
 
     for x in data:
         if "Floor Number" not in x:

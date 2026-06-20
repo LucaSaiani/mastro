@@ -27,7 +27,9 @@ class MASTRO_UL_Print_Set_Params(UIList):
         row.prop(item, "group", text="Group")
         row.prop(item, "total", text="Total")
         row.prop(item, "calc", text="")
-        row.prop(item, "sort_order", text="")
+        icon = 'SORT_DESC' if item.sort_desc else 'SORT_ASC'
+        row.prop(item, "sort_desc", text="", icon=icon, toggle=True)
+        row.separator()
 
     def filter_items(self, context, data, propname):
         items = getattr(data, propname)

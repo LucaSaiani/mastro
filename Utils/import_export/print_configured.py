@@ -197,10 +197,13 @@ def _grouped_row_cells(columns, group_context, group_context_counts, rows, aggs)
 def _total_row_cells(columns, aggs):
     cells = []
     for position, col in enumerate(columns):
-        if position == 0:
+        if col.index in aggs:
+            formatted = _format_value_cell(col.param.calc, aggs.get(col.index))
+            # when position 0 is itself a value column there is no label column
+            # to print "GRAND TOTAL" in, so combine label and value in one cell
+            value = f"GRAND TOTAL: {formatted}" if position == 0 else formatted
+        elif position == 0:
             value = "GRAND TOTAL"
-        elif col.index in aggs:
-            value = _format_value_cell(col.param.calc, aggs.get(col.index))
         else:
             value = ""
         cells.append(value)
@@ -297,7 +300,7 @@ def build_print_table(context, set_name, set_params, scope):
             key = lambda row, dim=dim: _to_number(get_param_value(row, dim.field_name))
         else:
             key = lambda row, dim=dim: str(get_param_value(row, dim.field_name))
-        rows = sorted(rows, key=key, reverse=(dim.param.sort_order == 'DESC'))
+        rows = sorted(rows, key=key, reverse=dim.param.sort_desc)
 
     grand_sums = {
         col.index: sum(_to_number(get_param_value(row, col.field_name)) for row in rows)

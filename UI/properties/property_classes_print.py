@@ -52,14 +52,10 @@ class mastro_CL_print_set_param(PropertyGroup):
         description="Print a subtotal row for this column's groups",
         default=False,
     )
-    sort_order: EnumProperty(
-        name="Sort",
-        description="Sort order applied by this column",
-        items=(
-            ('ASC', "", "Sort this column's values in ascending order", 'SORT_ASC', 0),
-            ('DESC', "", "Sort this column's values in descending order", 'SORT_DESC', 1),
-        ),
-        default='ASC',
+    sort_desc: BoolProperty(
+        name="Sort Descending",
+        description="Sort order for this column (ascending / descending)",
+        default=False,
     )
 
 
