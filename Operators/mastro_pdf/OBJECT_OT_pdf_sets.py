@@ -20,7 +20,7 @@ def _open_file(path):
 
 def _all_frames(context):
     return [o for o in context.scene.objects
-            if o.type == 'MESH' and o.data.get("MaStro frame")]
+            if o.type == 'EMPTY' and o.get("MaStro frame")]
 
 
 class MASTRO_OT_PdfSetAdd(Operator):

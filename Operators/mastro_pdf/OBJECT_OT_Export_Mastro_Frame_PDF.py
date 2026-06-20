@@ -12,9 +12,20 @@ from bpy_extras.io_utils import ExportHelper
 # ── Geometry helpers ──────────────────────────────────────────────────────────
 
 def _frame_bounds(obj):
-    """Return (min_x, min_y, max_x, max_y) in world space from a frame mesh."""
+    """Return (min_x, min_y, max_x, max_y) in world space from a frame empty.
+
+    The frame is a Cube Empty centred on its origin, sized by empty_display_size
+    and scaled per-axis (Z scale is 0), so its local-space corners are at
+    (+/-half, +/-half, 0) where half = empty_display_size."""
     world = obj.matrix_world
-    coords = [world @ v.co for v in obj.data.vertices]
+    half = obj.empty_display_size
+    local_corners = [
+        mathutils.Vector((-half, -half, 0.0)),
+        mathutils.Vector((+half, -half, 0.0)),
+        mathutils.Vector((+half, +half, 0.0)),
+        mathutils.Vector((-half, +half, 0.0)),
+    ]
+    coords = [world @ c for c in local_corners]
     xs = [c.x for c in coords]
     ys = [c.y for c in coords]
     return min(xs), min(ys), max(xs), max(ys)
@@ -57,16 +68,60 @@ def _gp_world_bounds(obj, scene):
     return min(c.x for c in wc), min(c.y for c in wc), max(c.x for c in wc), max(c.y for c in wc)
 
 
+def _bake_drawing_to_gp(obj, depsgraph):
+    """Materialise a MaStro drawing's evaluated Grease Pencil geometry (produced
+    by its GN modifier's "Curves to Grease Pencil" output) into a real, standalone
+    GP object placed at the same world transform.
+
+    bpy.ops.object.convert(target='GREASEPENCIL') does not pick up GN-generated GP
+    geometry on a mesh object (it converts the base mesh topology instead and
+    yields an empty result), so we read the evaluated geometry set directly via
+    evaluated_geometry().grease_pencil and copy that datablock to a real one.
+
+    The original mesh object is left untouched. Returns the temporary GP object,
+    which the caller is responsible for removing after export, or None if the
+    modifier produced no Grease Pencil geometry."""
+    eval_obj = obj.evaluated_get(depsgraph)
+    # `geo` must stay a live local: if evaluated_geometry() is chained directly
+    # into `.grease_pencil` with no variable holding the GeometrySet, Python
+    # garbage-collects it immediately and gp_eval becomes a dangling RNA pointer.
+    geo = eval_obj.evaluated_geometry()
+    gp_eval = geo.grease_pencil
+    if gp_eval is None or len(gp_eval.layers) == 0:
+        return None
+
+    gp_data = gp_eval.copy()
+    gp_obj = bpy.data.objects.new(obj.name + "__gp_tmp", gp_data)
+    bpy.context.collection.objects.link(gp_obj)
+    gp_obj.matrix_world = obj.matrix_world.copy()
+
+    return gp_obj
+
+
 def _objects_in_frame(min_x, min_y, max_x, max_y, scene):
-    """Return GP objects whose stroke bounds overlap the given XY frame bounds."""
+    """Return GP objects whose stroke bounds overlap the given XY frame bounds.
+
+    MaStro drawing objects (mesh + GN modifier outputting Grease Pencil geometry)
+    are baked into temporary GP objects first; the originals stay untouched. The
+    second return value lists those temporaries so the caller can remove them."""
+    drawing_objs = [o for o in scene.objects
+                    if o.type == 'MESH' and o.data.get("MaStro drawing")]
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    depsgraph.update()
+    temp_objs = []
+    for d in drawing_objs:
+        baked = _bake_drawing_to_gp(d, depsgraph)
+        if baked is not None:
+            temp_objs.append(baked)
+
     result = []
-    for obj in bpy.data.objects:
+    for obj in list(bpy.data.objects):
         if obj.type != 'GREASEPENCIL':
             continue
         ox1, oy1, ox2, oy2 = _gp_world_bounds(obj, scene)
         if ox2 >= min_x and ox1 <= max_x and oy2 >= min_y and oy1 <= max_y:
             result.append(obj)
-    return result
+    return result, temp_objs
 
 
 # ── Invisible GP anchor for coordinate calibration ────────────────────────────
@@ -733,8 +788,13 @@ def _export_frame_to_pdf(frame_obj, filepath, scene):
     image_empties = [o for o in scene.objects
                      if o.type == 'EMPTY' and o.empty_display_type == 'IMAGE'
                      and o.data is not None]
-    gp_objects    = _objects_in_frame(min_x, min_y, max_x, max_y, scene)
+    gp_objects, temp_drawing_objs = _objects_in_frame(min_x, min_y, max_x, max_y, scene)
     if not gp_objects:
+        for o in temp_drawing_objs:
+            data = o.data
+            bpy.data.objects.remove(o, do_unlink=True)
+            if data.users == 0:
+                bpy.data.grease_pencils.remove(data)
         return False, f"No grease pencil objects found inside '{frame_obj.name}'"
 
     # Orthographic camera centred on the frame, pointing down –Z.
@@ -880,6 +940,12 @@ def _export_frame_to_pdf(frame_obj, filepath, scene):
     bpy.data.objects.remove(cam_obj,  do_unlink=True)
     bpy.data.cameras.remove(cam_data)
 
+    for o in temp_drawing_objs:
+        data = o.data
+        bpy.data.objects.remove(o, do_unlink=True)
+        if data.users == 0:
+            bpy.data.grease_pencils.remove(data)
+
     return success, msg
 
 
@@ -917,8 +983,8 @@ class OBJECT_OT_Export_Mastro_Frame_PDF(Operator, ExportHelper):
         obj = context.active_object
         return (
             obj is not None and
-            obj.type == 'MESH' and
-            obj.data.get("MaStro frame")
+            obj.type == 'EMPTY' and
+            obj.get("MaStro frame")
         )
 
     def invoke(self, context, event):

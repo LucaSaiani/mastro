@@ -1,9 +1,7 @@
 import bpy
-import bmesh
 from bpy.types import Operator
 from bpy.props import IntProperty, EnumProperty
-from bpy_extras.object_utils import AddObjectHelper
-from bpy_extras import object_utils
+from bpy_extras.object_utils import AddObjectHelper, object_data_add
 
 
 FORMAT_SIZES = {
@@ -84,49 +82,13 @@ class OBJECT_OT_Add_Mastro_Frame(Operator, AddObjectHelper):
             layout.prop(self, "height")
     
     def execute(self, context):
-        verts = [
-        (+0.0, +0.0,  +0.0),
-        (+1.0, +0.0,  +0.0),
-        (+1.0, +1.0,  +0.0),
-        (+0.0, +1.0,  +0.0),
-        ]
+        obj = object_data_add(context, None, operator=self, name="MaStro frame")
+        obj.empty_display_type = 'CUBE'
+        obj.empty_display_size = 0.5
+        obj.scale = (self.width / 1000, self.height / 1000, 0.0)
 
-        edges = [
-            (0,1),
-            (1,2),
-            (2,3),
-            (3,0),
-        ]
-        
-        for i, v in enumerate(verts):
-            verts[i] = v[0] * self.width/1000 , v[1] * self.height/1000 , v[2]
-
-        mesh = bpy.data.meshes.new("MaStro frame")
-
-        bm = bmesh.new()
-
-        for v_co in verts:
-            bm.verts.new(v_co)
-
-        bm.verts.ensure_lookup_table()
-        for e_idx in edges:
-            bm.edges.new([bm.verts[i] for i in e_idx])
-
-        bm.to_mesh(mesh)
-        mesh.update()
-
-        # add the mesh as an object into the scene with this utility module
-        
-        object_utils.object_data_add(context, mesh, operator=self)
-        
-        obj = bpy.context.active_object
-        bm.free()
-        
-        
-        obj.select_set(True)
-        mesh = obj.data 
-        mesh["MaStro object"] = True
-        mesh["MaStro frame"] = True
+        obj["MaStro object"] = True
+        obj["MaStro frame"] = True
 
         return {'FINISHED'}
     

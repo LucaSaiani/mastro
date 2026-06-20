@@ -24,8 +24,8 @@ class VIEW3D_PT_Mastro_Export(Panel):
         layout.operator("object.mastro_print_config")
 
         obj = context.active_object
-        if (obj is not None and obj.type == 'MESH' and
-                obj.data.get("MaStro frame")):
+        if (obj is not None and obj.type == 'EMPTY' and
+                obj.get("MaStro frame")):
             layout.separator()
             layout.operator("object.mastro_export_frame_pdf", icon='FILE')
 

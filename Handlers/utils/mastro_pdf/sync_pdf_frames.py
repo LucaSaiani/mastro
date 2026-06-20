@@ -5,7 +5,7 @@ def sync_pdf_frames(scene):
     pp = scene.mastro_pdf_props
     scene_frame_names = sorted(
         o.name for o in scene.objects
-        if o.type == 'MESH' and o.data.get("MaStro frame")
+        if o.type == 'EMPTY' and o.get("MaStro frame")
     )
     current = [item.frame_name for item in pp.all_frames]
     if current == scene_frame_names:
