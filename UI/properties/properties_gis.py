@@ -1,5 +1,6 @@
 from bpy.props import EnumProperty, FloatProperty, StringProperty
 
+from ... import PREFS_KEY
 from ...Utils.mastro_gis.basemaps import SOURCES
 from ...Utils.mastro_gis.geoscene import GeoScene
 from ...Utils.mastro_gis.prefs import PredefCRS
@@ -21,7 +22,12 @@ def _gis_layer_items(self, context):
     if src_key not in SOURCES:
         return [('NONE', 'None', '')]
     layers = SOURCES[src_key]['layers']
-    return [(key, lay['name'], lay['description']) for key, lay in layers.items()]
+    prefs = context.preferences.addons[PREFS_KEY].preferences
+    has_google_key = bool(prefs.gis_google_api_key)
+    return [
+        (key, lay['name'], lay['description']) for key, lay in layers.items()
+        if has_google_key or lay.get('service_type') != '3dtiles'
+    ]
 
 
 _gis_origin_lat_parse_ok = True

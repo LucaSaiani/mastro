@@ -23,11 +23,7 @@ class VIEW3D_PT_MastroGIS_Basemap(Panel):
         is_3dtiles = (scn.mastro_gis_basemap_source == "GOOGLE" and scn.mastro_gis_basemap_layer == "3D")
         if is_3dtiles:
             prefs = context.preferences.addons[PREFS_KEY].preferences
-            lod_row = layout.row()
-            lod_row.enabled = bool(prefs.gis_google_api_key)
-            lod_row.prop(prefs, "gis_google_3dtiles_lod", text="Quality")
-            if not prefs.gis_google_api_key:
-                layout.label(text="Set a Google API key in preferences", icon='ERROR')
+            layout.prop(prefs, "gis_google_3dtiles_lod", text="Quality")
 
         geoscn = GeoScene(scn)
         layout.separator()
