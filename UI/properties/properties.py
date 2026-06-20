@@ -20,6 +20,7 @@ from .properties_extras import scene_props_extras
 from .properties_cad import scene_props_cad, camera_props_cad, window_manager_props_cad
 from .properties_gis import scene_props_gis
 from .properties_print import scene_pointer_props_print
+from .property_classes_pdf_frame import mastro_CL_frame_settings
 
                                 
 
@@ -127,6 +128,7 @@ scene_props = [
 # =============================================================================
 object_props = [
     *object_props_arch,
+    ("mastro_frame_settings", PointerProperty(type=mastro_CL_frame_settings)),
 ]
 
 scene_pointer_props = [

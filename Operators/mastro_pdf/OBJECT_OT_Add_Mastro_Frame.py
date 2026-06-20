@@ -3,14 +3,7 @@ from bpy.types import Operator
 from bpy.props import IntProperty, EnumProperty
 from bpy_extras.object_utils import AddObjectHelper, object_data_add
 
-
-FORMAT_SIZES = {
-    'A0': (1189, 841),
-    'A1': (841, 594),
-    'A2': (594, 420),
-    'A3': (420, 297),
-    'A4': (297, 210),
-}
+from .frame_formats import FORMAT_SIZES
 
 
 def update_format(self, context):
@@ -89,6 +82,16 @@ class OBJECT_OT_Add_Mastro_Frame(Operator, AddObjectHelper):
 
         obj["MaStro object"] = True
         obj["MaStro frame"] = True
+
+        # Mirror the operator's values onto the Object Data panel's PropertyGroup.
+        # format/orientation go through the [] override to skip their own update
+        # callbacks (which would recompute width/height from FORMAT_SIZES and
+        # discard the values this operator already resolved for CUSTOM sizes).
+        settings = obj.mastro_frame_settings
+        settings["format"] = self.format
+        settings["orientation"] = self.orientation
+        settings.width = self.width
+        settings.height = self.height
 
         return {'FINISHED'}
     
