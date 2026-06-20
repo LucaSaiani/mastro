@@ -5,6 +5,10 @@ from .mastro_2D.OBJECT_OT_Add_Mastro_Dimension import OBJECT_OT_Add_Mastro_Dimen
 from .mastro_arch.OBJECT_OT_Add_Mastro_Mass import OBJECT_OT_Add_Mastro_Mass
 from .mastro_street.OBJECT_OT_Add_Mastro_Street import OBJECT_OT_Add_Mastro_Street
 from .mastro_pdf.OBJECT_OT_Add_Mastro_Frame import OBJECT_OT_Add_Mastro_Frame
+from .mastro_album.OBJECT_OT_Add_Mastro_Album import OBJECT_OT_Add_Mastro_Album
+from .mastro_album.OBJECT_OT_Mastro_Album_Select_Child import OBJECT_OT_Mastro_Album_Select_Child
+from .mastro_album.OBJECT_OT_Parent_to_Mastro_Album import OBJECT_OT_Parent_to_Mastro_Album
+from .mastro_album.OBJECT_OT_Unparent_from_Mastro_Album import OBJECT_OT_Unparent_from_Mastro_Album
 from .mastro_arch.OBJECT_OT_Convert_to_Mastro_Mass import OBJECT_OT_Convert_to_Mastro_Mass
 from .mastro_street.OBJECT_OT_Convert_to_Mastro_Street import OBJECT_OT_Convert_to_Mastro_Street
 from .mastro_cad.OBJECT_OT_Convert_to_Mastro_Cad import OBJECT_OT_Convert_to_Mastro_Cad
@@ -102,6 +106,10 @@ classes = (
     OBJECT_OT_Add_Mastro_Mass,
     OBJECT_OT_Add_Mastro_Street,
     OBJECT_OT_Add_Mastro_Frame,
+    OBJECT_OT_Add_Mastro_Album,
+    OBJECT_OT_Mastro_Album_Select_Child,
+    OBJECT_OT_Parent_to_Mastro_Album,
+    OBJECT_OT_Unparent_from_Mastro_Album,
     OBJECT_OT_Convert_to_Mastro_Mass,
     OBJECT_OT_Convert_to_Mastro_Street,
     OBJECT_OT_Convert_to_Mastro_Cad,

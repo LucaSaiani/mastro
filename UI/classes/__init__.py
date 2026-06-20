@@ -51,6 +51,7 @@ from .mastro_pdf.PROPERTIES_PT_Mastro_PDF_Sets import PROPERTIES_PT_Mastro_PDF_S
 from .mastro_pdf.PROPERTIES_UL_PDF_Sets import PROPERTIES_UL_PDF_Sets
 from .mastro_pdf.PROPERTIES_UL_PDF_Frames import PROPERTIES_UL_PDF_Frames
 from .mastro_pdf.PROPERTIES_PT_Mastro_Frame import PROPERTIES_PT_Mastro_Frame
+from .mastro_album.PROPERTIES_PT_Mastro_Album import PROPERTIES_PT_Mastro_Album
 from .mastro_custom_properties.PROPERTIES_PT_Mastro_Custom_Properties import PROPERTIES_PT_Mastro_Custom_Properties
 from .mastro_custom_properties.VIEW3D_PT_Mastro_Custom_Properties import VIEW3D_PT_Mastro_Custom_Properties
 from .mastro_gis.VIEW3D_PT_MastroGIS_Basemap import VIEW3D_PT_MastroGIS_Basemap
@@ -111,6 +112,7 @@ classes = (
     PROPERTIES_UL_PDF_Sets,
     PROPERTIES_UL_PDF_Frames,
     PROPERTIES_PT_Mastro_Frame,
+    PROPERTIES_PT_Mastro_Album,
     PROPERTIES_PT_Mastro_Custom_Properties,
     VIEW3D_PT_Mastro_Custom_Properties,
     VIEW3D_PT_MastroGIS_Basemap,

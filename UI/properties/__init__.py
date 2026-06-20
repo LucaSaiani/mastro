@@ -38,6 +38,7 @@ from .property_classes_print import (mastro_CL_print_set_param,
                                       mastro_CL_print_scene_props,
 )
 from .property_classes_pdf_frame import mastro_CL_frame_settings
+from .property_classes_album import mastro_CL_album_settings
 
 classes = (
     mastro_CL_addon_properties,
@@ -79,4 +80,5 @@ classes = (
     mastro_CL_print_set,
     mastro_CL_print_scene_props,
     mastro_CL_frame_settings,
+    mastro_CL_album_settings,
 )

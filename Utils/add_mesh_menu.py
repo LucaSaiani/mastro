@@ -14,6 +14,7 @@ def add_mesh_menu(self, context):
     # myIcon = icons.icon_id("street")
     self.layout.operator("object.mastro_add_mastro_dimension", icon_value=myIcon)
     self.layout.operator("object.mastro_add_mastro_frame", icon_value=myIcon)
+    self.layout.operator("object.mastro_add_mastro_album", icon='EMPTY_AXIS')
     self.layout.separator()
     self.layout.operator("mastrocad.add_drawing_mesh", icon='MESH_DATA')
   
