@@ -168,7 +168,15 @@ class BaseMap(GeoScene):
 				# necessarily the map's own CRS - reproject to it first
 				input_crs = gis_props.mastro_gis_origin_crs
 				if input_crs and input_crs != self.crs:
-					x, y = reprojPt(input_crs, self.crs, gis_props.mastro_gis_origin_x_value, gis_props.mastro_gis_origin_y_value)
+					try:
+						x, y = reprojPt(input_crs, self.crs, gis_props.mastro_gis_origin_x_value, gis_props.mastro_gis_origin_y_value)
+					except Exception as e:
+						raise Exception(
+							"Could not convert from {} to {}: {}. This CRS pair isn't covered by the "
+							"local builtin formula (WGS84<->WebMercator/UTM only); install GDAL or PyProj, "
+							"or set a MapTiler API key in Preferences > GIS to use the remote fallback."
+							.format(input_crs, self.crs, e)
+						) from e
 				else:
 					x, y = gis_props.mastro_gis_origin_x_value, gis_props.mastro_gis_origin_y_value
 				self.setOriginPrj(x, y, self.synchOrj)
@@ -1064,7 +1072,16 @@ class VIEW3D_OT_MastroGIS_Basemap_Import(Operator):
             self.report({'ERROR'}, "No source selected")
             return {'CANCELLED'}
         grd = SOURCES[src].get('grid', '')
-        bpy.ops.mastrogis.map_viewer('INVOKE_DEFAULT', srckey=src, laykey=lay, grdkey=grd, recenter=False)
+        try:
+            bpy.ops.mastrogis.map_viewer('INVOKE_DEFAULT', srckey=src, laykey=lay, grdkey=grd, recenter=False)
+        except RuntimeError as e:
+            # Most likely cause: the Projected origin's CRS isn't one of the
+            # cases the local builtin formula covers (WGS84<->WebMercator/
+            # UTM) and GDAL/PyProj aren't available either, so reprojection
+            # fell back to the remote MapTiler service, which needs an API
+            # key (Preferences > GIS > MapTiler API Key).
+            self.report({'ERROR'}, "Could not open the map viewer: {}".format(e))
+            return {'CANCELLED'}
         return {'FINISHED'}
 
 

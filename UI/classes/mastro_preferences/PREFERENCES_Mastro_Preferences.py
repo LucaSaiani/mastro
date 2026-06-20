@@ -279,7 +279,8 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
     gis_maptiler_api_key: bpy.props.StringProperty(
         name="",
         description="API key for MapTiler Coordinates API (required for EPSG.io migration)",
-        update=updateMapTilerApiKey
+        update=updateMapTilerApiKey,
+        default="ZzKFdpgCVbjFs6HyKe8Z",
     )
 
     gis_google_api_key: bpy.props.StringProperty(
