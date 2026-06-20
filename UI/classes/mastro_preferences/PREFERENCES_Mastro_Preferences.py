@@ -168,31 +168,6 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
         description="When opening a .blend file, warn if another user already has it open"
     )
 
-    show_overlay_settings: bpy.props.BoolProperty(
-        name="Overlay Settings",
-        default=False
-    )
-
-    show_note_settings: bpy.props.BoolProperty(
-        name="Note Settings",
-        default=False
-    )
-
-    show_projection_settings: bpy.props.BoolProperty(
-        name="Projection Settings",
-        default=False
-    )
-
-    show_pen_settings: bpy.props.BoolProperty(
-        name="Pens",
-        default=False
-    )
-
-    show_gis_settings: bpy.props.BoolProperty(
-        name="GIS",
-        default=False
-    )
-
     # --- GIS: predefined CRS ---
     def listPredefCRS(self, context):
         return [tuple(elem) for elem in json.loads(self.predefCrsJson)]
@@ -277,14 +252,14 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
         mastro_gis_settings.maptiler_api_key = self.gis_maptiler_api_key
 
     gis_maptiler_api_key: bpy.props.StringProperty(
-        name="",
+        name="Map Tiler API Key",
         description="API key for MapTiler Coordinates API (required for EPSG.io migration)",
         update=updateMapTilerApiKey,
         default="ZzKFdpgCVbjFs6HyKe8Z",
     )
 
     gis_google_api_key: bpy.props.StringProperty(
-        name="",
+        name="Google API Key",
         description="Google Maps Platform API key",
         default="AIzaSyDeabiA2pp5FnWvGzNiH0t-9rlsJZEHhxE",
     )
@@ -307,48 +282,136 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
     def draw(self, context):
         layout = self.layout
 
+        # Section: Projection
+        header, panel = layout.panel("mastro_prefs_projection_settings", default_closed=True)
+        header.label(text="2D Projection")
+        if panel:
+            col = panel.column(align=True)
+            split = col.split(factor=0.2)
+            split.label(text="Projection Suffix:")
+            split.prop(self, "projection_suffix", text="")
+            split = col.split(factor=0.2)
+            split.label(text="Section Offset:")
+            split.prop(self, "section_offset", text="")
+            split = col.split(factor=0.2)
+            split.label(text="Shadow Offset:")
+            split.prop(self, "shadow_offset", text="")
+            split = col.split(factor=0.2)
+            split.label(text="Section Color:")
+            split.prop(self, "section_color", text="")
+            split = col.split(factor=0.2)
+            split.label(text="Shadow Color:")
+            split.prop(self, "shadow_color", text="")
+
+        # Section: File
+        header, panel = layout.panel("mastro_prefs_file_settings", default_closed=True)
+        header.label(text="File")
+        if panel:
+            split = panel.split(factor=0.2)
+            split.label(text="Open File Detection:")
+            split.prop(self, "open_file_detection", text="Enabled")
+
+        # Section: GIS
+        header, panel = layout.panel("mastro_prefs_gis_settings", default_closed=True)
+        header.label(text="GIS")
+        if panel:
+            col = panel.column(align=True)
+            split = layout.split(factor=0.2)
+            split.label(text="CRS")
+            col = split.column()
+            col.prop(self, "predefCrs", text='')
+            row = col.row()
+            row.operator("mastrogis.add_predef_crs", icon='ADD')
+            row.operator("mastrogis.edit_predef_crs", icon='PREFERENCES')
+            row.operator("mastrogis.rmv_predef_crs", icon='REMOVE')
+            row.operator("mastrogis.reset_predef_crs", icon='PLAY_REVERSE')
+            col.prop(self, "gis_maptiler_api_key")
+
+
+            col.separator()
+            split = layout.split(factor=0.2)
+            split.label(text="Origin")
+            col = split.column()
+            col.prop(self, "gis_zoom_to_mouse")
+            col.prop(self, "gis_lock_objects")
+            col.prop(self, "gis_synch_origin")
+
+            row = col.row()
+            row.prop(self, "gis_resampling")
+
+
+
+
+            col.separator()
+            split = layout.split(factor=0.2)
+            split.label(text="3D Tiles")
+            col = split.column()
+            col.prop(self, "gis_google_api_key")
+            col.enabled = bool(self.gis_google_api_key)
+            col.prop(self, "gis_google_3dtiles_lod")
+
+            col.separator()
+            split = layout.split(factor=0.2)
+            split.label(text="Appeareance")
+            col = split.column()
+            col.prop(self, "gis_adjust_3dview")
+            col.prop(self, "gis_force_textured_solid")
+            col.prop(self, "gis_cache_folder")
+
+        # Section: Note
+        header, panel = layout.panel("mastro_prefs_note_settings", default_closed=True)
+        header.label(text="Node Note")
+        if panel:
+            col = panel.column(align=True)
+            row = col.row()
+            row.label(text="Font:")
+
+            split = col.split(factor=0.2)
+            split.label(text = "Size:")
+            split.prop(self, "noteSize", icon_only=True)
+
+            split = col.split(factor=0.2)
+            split.label(text = "Color:")
+            split.prop(self, "noteColor",icon_only=True)
+
         # Section: Overlay
-        box = layout.box()
-        box.prop(self, 
-                 "show_overlay_settings", 
-                 text="Overlays", 
-                 icon='TRIA_DOWN' if self.show_overlay_settings else 'TRIA_RIGHT', 
-                 emboss=False)
-        if self.show_overlay_settings:
-            col = box.column(align=True)
-            
+        header, panel = layout.panel("mastro_prefs_overlay_settings", default_closed=True)
+        header.label(text="Overlays")
+        if panel:
+            col = panel.column(align=True)
+
             # row = col.row()
             # row.label(text = "Toggle Selection Overlays in Edit Mode:")
             # row.prop(self, "toggleSelectionOverlay", icon_only=True)
-            
+
             # mass
             row = col.row()
             row.label(text="")
             row = col.row()
             row.label(text="Mass Overlay:")
-            
-            row = col.row()
-            row.label(text = "Edge thickness:")
-            row.prop(self, "massEdgeSize", icon_only=True)
-            
-            row = col.row()
-            row.label(text = "Edge color:")
-            row.prop(self, "massEdgeColor", icon_only=True)
-            
-            row = col.row()
-            row.label(text = "Face color:")
-            row.prop(self, "massFaceColor", icon_only=True)
-            
+
+            split = col.split(factor=0.2)
+            split.label(text = "Edge thickness:")
+            split.prop(self, "massEdgeSize", icon_only=True)
+
+            split = col.split(factor=0.2)
+            split.label(text = "Edge color:")
+            split.prop(self, "massEdgeColor", icon_only=True)
+
+            split = col.split(factor=0.2)
+            split.label(text = "Face color:")
+            split.prop(self, "massFaceColor", icon_only=True)
+
             # block
             row = col.row()
             row.label(text="")
             row = col.row()
             row.label(text="Block Overlay:")
-            
-            row = col.row()
-            row.label(text = "Edge thickness:")
-            row.prop(self, "blockEdgeSize", icon_only=True)
-            
+
+            split = col.split(factor=0.2)
+            split.label(text = "Edge thickness:")
+            split.prop(self, "blockEdgeSize", icon_only=True)
+
             # wall
             row = col.row()
             row.label(text="")
@@ -356,150 +419,52 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
             row = col.row()
             row.label(text="Wall Overlay:")
 
-            row = col.row()
-            row.label(text = "Thickness:")
-            row.prop(self, "wallEdgeSize", icon_only=True)
-            
+            split = col.split(factor=0.2)
+            split.label(text = "Thickness:")
+            split.prop(self, "wallEdgeSize", icon_only=True)
+
             # street
             row = col.row()
             row.label(text="")
             row = col.row()
             row.label(text="Street Overlay:")
 
-            row = col.row()
-            row.label(text = "Thickness:")
-            row.prop(self, "streetEdgeSize", icon_only=True)
+            split = col.split(factor=0.2)
+            split.label(text = "Thickness:")
+            split.prop(self, "streetEdgeSize", icon_only=True)
 
             # row = col.row()
             # row.label(text = "Dash length:")
             # row.prop(self, "streetEdgeDashSize", icon_only=True)
-                       
+
             # font
             row = col.row()
             row.label(text="")
             row = col.row()
             row.label(text="Font:")
 
-            row = col.row()
-            row.label(text = "Size:")
-            row.prop(self, "fontSize", icon_only=True)
+            split = col.split(factor=0.2)
+            split.label(text = "Size:")
+            split.prop(self, "fontSize", icon_only=True)
 
-            row = col.row()
-            row.label(text = "Color:")
-            row.prop(self, "fontColor", icon_only=True)
-            
-        # Section: Note
-        box = layout.box()
-        box.prop(self, 
-                 "show_note_settings", 
-                 text="Node Note", 
-                 icon='TRIA_DOWN' if self.show_note_settings else 'TRIA_RIGHT', 
-                 emboss=False)
-        if self.show_note_settings:
-            col = box.column(align=True)
-            row = col.row()
-            row.label(text="Font:")
-
-            row = col.row()
-            row.label(text = "Size:")
-            row.prop(self, "noteSize", icon_only=True)
-
-            row = col.row()
-            row.label(text = "Color:")
-            row.prop(self, "noteColor",icon_only=True)
-
-        # Section: Projection
-        box = layout.box()
-        box.prop(self,
-                 "show_projection_settings",
-                 text="2D Projection",
-                 icon='TRIA_DOWN' if self.show_projection_settings else 'TRIA_RIGHT',
-                 emboss=False)
-        if self.show_projection_settings:
-            col = box.column(align=True)
-            row = col.row()
-            row.label(text="Projection Suffix:")
-            row.prop(self, "projection_suffix", text="")
-            row = col.row()
-            row.label(text="Section Offset:")
-            row.prop(self, "section_offset", text="")
-            row = col.row()
-            row.label(text="Shadow Offset:")
-            row.prop(self, "shadow_offset", text="")
-            row = col.row()
-            row.label(text="Section Color:")
-            row.prop(self, "section_color", text="")
-            row = col.row()
-            row.label(text="Shadow Color:")
-            row.prop(self, "shadow_color", text="")
+            split = col.split(factor=0.2)
+            split.label(text = "Color:")
+            split.prop(self, "fontColor", icon_only=True)
 
         # Section: Pens
-        box = layout.box()
-        box.prop(self,
-                 "show_pen_settings",
-                 text="Pens",
-                 icon='TRIA_DOWN' if self.show_pen_settings else 'TRIA_RIGHT',
-                 emboss=False)
-        if self.show_pen_settings:
+        header, panel = layout.panel("mastro_prefs_pen_settings", default_closed=True)
+        header.label(text="Pens")
+        if panel:
             scene = context.scene
             if scene is None:
-                box.label(text="Open a scene to manage pens.")
+                panel.label(text="Open a scene to manage pens.")
             else:
-                box.template_list(
+                panel.template_list(
                     "PREFERENCES_UL_MaStroCad_All_Pens", "",
                     scene, "mastro_cad_pens",
                     scene, "mastro_cad_pen_index",
                     rows=6,
                 )
-
-        # Section: GIS
-        box = layout.box()
-        box.prop(self,
-                 "show_gis_settings",
-                 text="GIS",
-                 icon='TRIA_DOWN' if self.show_gis_settings else 'TRIA_RIGHT',
-                 emboss=False)
-        if self.show_gis_settings:
-            col = box.column(align=True)
-
-            row = col.row().split(factor=0.5)
-            row.prop(self, "predefCrs", text='')
-            row.operator("mastrogis.add_predef_crs", icon='ADD')
-            row.operator("mastrogis.edit_predef_crs", icon='PREFERENCES')
-            row.operator("mastrogis.rmv_predef_crs", icon='REMOVE')
-            row.operator("mastrogis.reset_predef_crs", icon='PLAY_REVERSE')
-
-            col.prop(self, "gis_cache_folder")
-
-            row = col.row()
-            row.prop(self, "gis_zoom_to_mouse")
-            row.prop(self, "gis_lock_objects")
-            row.prop(self, "gis_synch_origin")
-
-            row = col.row()
-            row.prop(self, "gis_resampling")
-
-            row = col.row()
-            row.prop(self, "gis_adjust_3dview")
-            row.prop(self, "gis_force_textured_solid")
-
-            row = col.row().split(factor=0.2)
-            row.label(text="MapTiler API Key")
-            row.prop(self, "gis_maptiler_api_key")
-
-            row = col.row().split(factor=0.2)
-            row.label(text="Google API Key")
-            row.prop(self, "gis_google_api_key")
-
-            row = col.row()
-            row.enabled = bool(self.gis_google_api_key)
-            row.prop(self, "gis_google_3dtiles_lod")
-
-        # Section: Open File Detection
-        box = layout.box()
-        row = box.row()
-        row.label(text="Open File Detection:", icon='FILE_BLEND')
-        row.prop(self, "open_file_detection", text="Enabled")
 
 
 
