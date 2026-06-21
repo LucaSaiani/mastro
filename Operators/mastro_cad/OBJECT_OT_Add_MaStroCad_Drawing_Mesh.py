@@ -1,5 +1,6 @@
 import bpy
 import bmesh
+from mathutils import Vector
 from bpy.types import Operator
 from bpy_extras.object_utils import AddObjectHelper
 from ...Utils.mastro_cad.add_attributes_drawing import add_drawing_attributes
@@ -17,15 +18,16 @@ class OBJECT_OT_MaStroCad_Add_Drawing_Mesh(Operator, AddObjectHelper):
     def execute(self, context):
         me = bpy.data.meshes.new("MaStro drawing")
 
+        cursor_co = context.scene.cursor.location
+
         bm = bmesh.new()
-        v0 = bm.verts.new((0.0, 0.0, 0.0))
-        v1 = bm.verts.new((0.0, 1.0, 0.0))
+        v0 = bm.verts.new(cursor_co)
+        v1 = bm.verts.new(cursor_co + Vector((0.0, 1.0, 0.0)))
         bm.edges.new((v0, v1))
         bm.to_mesh(me)
         bm.free()
 
         obj = bpy.data.objects.new("MaStro drawing", me)
-        obj.location = context.scene.cursor.location
         context.collection.objects.link(obj)
         bpy.ops.object.select_all(action='DESELECT')
         obj.select_set(True)
