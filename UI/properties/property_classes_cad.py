@@ -134,11 +134,6 @@ def _invalidate(self, context):
             area.tag_redraw()
 
 
-def _on_custom_pattern_toggled(self, context):
-    from ...Nodes.operators.NODE_OT_MaStro_Drawing_GN import set_custom_pattern_nodes
-    set_custom_pattern_nodes(context.scene, self.pattern_id, self.use_custom_pattern)
-
-
 class mastro_CL_cad_dash_pattern(PropertyGroup):
     """A line type: name and up to 6 alternating line/gap values in mm.
     Slots alternate l/g: [l1, g1, l2, g2, l3, g3]. Zero means slot unused."""
@@ -155,9 +150,9 @@ class mastro_CL_cad_dash_pattern(PropertyGroup):
 
     use_custom_pattern: BoolProperty(
         name="Custom Pattern",
-        description="Add a Combine Bundle node in the GN modifier to supply custom geometry for this line type",
+        description="Show the custom-pattern icon; connect geometry to this line type's L1/L2/L3 inputs in the node editor to supply it",
         default=False,
-        update=_on_custom_pattern_toggled,
+        update=_invalidate,
     )
 
     def to_sequence(self):
