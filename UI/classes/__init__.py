@@ -23,6 +23,7 @@ from .mastro_arch.PROPERTIES_PT_Mastro_Wall import PROPERTIES_PT_Mastro_Wall
 from .mastro_arch.PROPERTIES_PT_Mastro_Floor import PROPERTIES_PT_Mastro_Floor
 from .mastro_street.PROPERTIES_PT_Mastro_Street import PROPERTIES_PT_Mastro_Street
 from .VIEW3D_PT_Mastro_Panel import VIEW3D_PT_Mastro_Panel
+from .VIEW3D_PT_Mastro_Convert import VIEW3D_PT_Mastro_Convert
 from .mastro_arch.VIEW3D_PT_Mastro_Architecture import VIEW3D_PT_Mastro_Architecture
 from .mastro_arch.VIEW3D_PT_Mastro_Block import VIEW3D_PT_Mastro_Block
 from .mastro_extras.VIEW3D_PT_Mastro_Extras import VIEW3D_PT_Mastro_Extras
@@ -51,7 +52,10 @@ from .mastro_pdf.PROPERTIES_PT_Mastro_PDF_Sets import PROPERTIES_PT_Mastro_PDF_S
 from .mastro_pdf.PROPERTIES_UL_PDF_Sets import PROPERTIES_UL_PDF_Sets
 from .mastro_pdf.PROPERTIES_UL_PDF_Frames import PROPERTIES_UL_PDF_Frames
 from .mastro_pdf.PROPERTIES_PT_Mastro_Frame import PROPERTIES_PT_Mastro_Frame
+from .mastro_pdf.VIEW3D_PT_Mastro_Frame import VIEW3D_PT_Mastro_Frame
 from .mastro_album.PROPERTIES_PT_Mastro_Album import PROPERTIES_PT_Mastro_Album
+from .mastro_album.VIEW3D_PT_Mastro_Album import VIEW3D_PT_Mastro_Album
+from .mastro_album.PROPERTIES_UL_Album_Children import PROPERTIES_UL_Album_Children
 from .mastro_custom_properties.PROPERTIES_PT_Mastro_Custom_Properties import PROPERTIES_PT_Mastro_Custom_Properties
 from .mastro_custom_properties.VIEW3D_PT_Mastro_Custom_Properties import VIEW3D_PT_Mastro_Custom_Properties
 from .mastro_gis.VIEW3D_PT_MastroGIS_Basemap import VIEW3D_PT_MastroGIS_Basemap
@@ -84,6 +88,7 @@ classes = (
     PROPERTIES_PT_Mastro_Floor,
     PROPERTIES_PT_Mastro_Street,
     VIEW3D_PT_Mastro_Panel,
+    VIEW3D_PT_Mastro_Convert,
     VIEW3D_PT_Mastro_Architecture,
     VIEW3D_PT_Mastro_Block,
     VIEW3D_PT_Mastro_Extras,
@@ -112,7 +117,10 @@ classes = (
     PROPERTIES_UL_PDF_Sets,
     PROPERTIES_UL_PDF_Frames,
     PROPERTIES_PT_Mastro_Frame,
+    VIEW3D_PT_Mastro_Frame,
+    PROPERTIES_UL_Album_Children,
     PROPERTIES_PT_Mastro_Album,
+    VIEW3D_PT_Mastro_Album,
     PROPERTIES_PT_Mastro_Custom_Properties,
     VIEW3D_PT_Mastro_Custom_Properties,
     VIEW3D_PT_MastroGIS_Basemap,

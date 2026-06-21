@@ -6,7 +6,7 @@ from ...Utils.mastro_cad.convert_to_drawing import convert_object_to_mastro_cad
 
 class OBJECT_OT_Convert_to_Mastro_Cad(Operator):
     bl_idname = "object.mastro_convert_to_mastro_cad"
-    bl_label = "Convert to MaStro CAD"
+    bl_label = "Convert to MaStro Drawing"
     bl_description = "Convert the selected mesh to a MaStro CAD drawing with its attributes"
 
     @classmethod

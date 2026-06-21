@@ -2,13 +2,15 @@ import bpy
 from bpy.types import Panel
 
 
-class PROPERTIES_PT_Mastro_Album(Panel):
-    """Object Data panel for editing a MaStro album's drawing scale without
-    requiring the user to find/edit a custom property manually."""
-    bl_space_type  = "PROPERTIES"
-    bl_region_type = "WINDOW"
-    bl_context     = "data"
-    bl_label       = "MaStro Album"
+class VIEW3D_PT_Mastro_Album(Panel):
+    """Sidebar counterpart of PROPERTIES_PT_Mastro_Album, shown nested
+    under the main MaStro tab when the active object is a MaStro album."""
+    bl_space_type  = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_category    = "MaStro"
+    bl_label       = "Album"
+    bl_parent_id   = "VIEW3D_PT_Mastro_Panel"
+    bl_order       = 0
 
     @classmethod
     def poll(cls, context):

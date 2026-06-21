@@ -1,6 +1,7 @@
+import bpy
 from mathutils import Matrix
-from bpy.types import PropertyGroup
-from bpy.props import IntProperty
+from bpy.types import PropertyGroup, Object
+from bpy.props import IntProperty, CollectionProperty, PointerProperty
 
 
 def _on_album_scale_changed(self, context):
@@ -19,6 +20,24 @@ def _on_album_scale_changed(self, context):
         child.matrix_parent_inverse = Matrix.Identity(4)
 
 
+class mastro_CL_album_child_ref(PropertyGroup):
+    """A single row in mastro_CL_album_settings.children_display.
+
+    Rebuilt from obj.children on every panel draw — not a persisted
+    relationship, just a UIList-compatible view over the real parenting."""
+    object: PointerProperty(type=Object)
+
+
+def _on_album_children_display_index_changed(self, context):
+    """Select/activate the object picked in the children UIList."""
+    if 0 <= self.children_display_index < len(self.children_display):
+        obj = self.children_display[self.children_display_index].object
+        if obj is not None:
+            bpy.ops.object.select_all(action='DESELECT')
+            obj.select_set(True)
+            context.view_layer.objects.active = obj
+
+
 class mastro_CL_album_settings(PropertyGroup):
     """Lives on a MaStro album Empty as obj.mastro_album_settings.
 
@@ -32,3 +51,6 @@ class mastro_CL_album_settings(PropertyGroup):
         min=1,
         update=_on_album_scale_changed,
     )
+
+    children_display: CollectionProperty(type=mastro_CL_album_child_ref)
+    children_display_index: IntProperty(default=0, update=_on_album_children_display_index_changed)

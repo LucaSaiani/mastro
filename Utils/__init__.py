@@ -2,6 +2,8 @@ from . import monitor_view_rotation
 from . import add_mesh_menu
 from . import add_vertex_menu
 from . import add_parent_menu
+from . import mastro_album_active_sync
 from .mastro_gis import prefs as mastro_gis_prefs
 
-modules = [monitor_view_rotation, add_mesh_menu, add_vertex_menu, add_parent_menu, mastro_gis_prefs]
+modules = [monitor_view_rotation, add_mesh_menu, add_vertex_menu, add_parent_menu,
+           mastro_album_active_sync, mastro_gis_prefs]
