@@ -2,6 +2,7 @@ import bpy
 from bpy.types import Operator
 
 from .sync_children_display import sync_children_display
+from ...Utils.mastro_album.set_modifier_input import set_modifier_input
 
 
 class OBJECT_OT_Parent_to_Mastro_Album(Operator):
@@ -32,6 +33,12 @@ class OBJECT_OT_Parent_to_Mastro_Album(Operator):
             child.matrix_parent_inverse.identity()
             for collection in source.users_collection:
                 collection.objects.link(child)
+
+            for mod in source.modifiers:
+                if mod.type == 'NODES':
+                    new_mod = child.modifiers.new(mod.name, 'NODES')
+                    new_mod.node_group = mod.node_group
+                    set_modifier_input(new_mod, "Album Scale", album.mastro_album_settings.scale)
 
         sync_children_display(album)
         return {'FINISHED'}

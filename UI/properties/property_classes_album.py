@@ -3,21 +3,37 @@ from mathutils import Matrix
 from bpy.types import PropertyGroup, Object
 from bpy.props import IntProperty, CollectionProperty, PointerProperty
 
+from ...Utils.mastro_album.set_modifier_input import set_modifier_input
 
-def _on_album_scale_changed(self, context):
-    """Apply the scale denominator to the album empty's X/Y, then reset
+
+def _get_album_scale(self):
+    """Read back from obj.scale.x, so the displayed value stays correct
+    even if the album's scale was changed directly (e.g. dragging the
+    empty's scale in the N-panel) instead of through this property."""
+    obj = self.id_data
+    if obj is None or obj.scale.x == 0:
+        return 1
+    return max(1, round(1.0 / obj.scale.x))
+
+
+def _set_album_scale(self, value):
+    """Apply the scale denominator to the album empty's X/Y/Z, then reset
     matrix_parent_inverse on every child so the album's transform always
     applies, regardless of whether they were parented before or after this
     scale value was set. Applies to any child object (mesh, grease pencil,
     image empty, etc.), not just MaStro drawings."""
-    obj = context.object
+    obj = self.id_data
     if obj is None:
         return
-    factor = 1.0 / self.scale
+    factor = 1.0 / value
     obj.scale.x = factor
     obj.scale.y = factor
+    obj.scale.z = factor
     for child in obj.children:
         child.matrix_parent_inverse = Matrix.Identity(4)
+        for mod in child.modifiers:
+            if mod.type == 'NODES' and mod.node_group is not None:
+                set_modifier_input(mod, "Album Scale", value)
 
 
 class mastro_CL_album_child_ref(PropertyGroup):
@@ -49,7 +65,8 @@ class mastro_CL_album_settings(PropertyGroup):
         description="Scale denominator (e.g. 100 for 1:100) applied to children of this album",
         default=1,
         min=1,
-        update=_on_album_scale_changed,
+        get=_get_album_scale,
+        set=_set_album_scale,
     )
 
     children_display: CollectionProperty(type=mastro_CL_album_child_ref)
