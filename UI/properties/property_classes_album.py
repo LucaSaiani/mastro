@@ -3,8 +3,6 @@ from mathutils import Matrix
 from bpy.types import PropertyGroup, Object
 from bpy.props import IntProperty, CollectionProperty, PointerProperty
 
-from ...Utils.mastro_album.set_modifier_input import set_modifier_input
-
 
 def _get_album_scale(self):
     """Read back from obj.scale.x, so the displayed value stays correct
@@ -31,9 +29,6 @@ def _set_album_scale(self, value):
     obj.scale.z = factor
     for child in obj.children:
         child.matrix_parent_inverse = Matrix.Identity(4)
-        for mod in child.modifiers:
-            if mod.type == 'NODES' and mod.node_group is not None:
-                set_modifier_input(mod, "Album Scale", value)
 
 
 class mastro_CL_album_child_ref(PropertyGroup):

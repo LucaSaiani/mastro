@@ -38,7 +38,7 @@ Y_STEP  = -260
 
 
 def _add_chain_instance(nodes, links, chain_ng, geom_out, join_in, x, y,
-                        material=None, scale_out=None, album_scale_out=None, layer_id=None):
+                        material=None, scale_out=None, layer_id=None):
     n = nodes.new('GeometryNodeGroup')
     n.node_tree = chain_ng
     n.location  = (x, y)
@@ -50,8 +50,6 @@ def _add_chain_instance(nodes, links, chain_ng, geom_out, join_in, x, y,
         n.inputs['Material'].default_value = material
     if scale_out is not None and 'Scale' in n.inputs:
         links.new(scale_out, n.inputs['Scale'])
-    if album_scale_out is not None and 'Album Scale' in n.inputs:
-        links.new(album_scale_out, n.inputs['Album Scale'])
     return n
 
 
@@ -80,8 +78,6 @@ def build_drawing_gn(layers, scene=None):
         ng = bpy.data.node_groups.new(name=GN_GROUP_NAME, type='GeometryNodeTree')
 
     create_socket(ng, in_out='INPUT',  socket_type='NodeSocketGeometry', socket_name='Geometry')
-    album_scale_socket = create_socket(ng, in_out='INPUT',  socket_type='NodeSocketInt', socket_name='Album Scale')
-    album_scale_socket.default_value = 1
     create_socket(ng, in_out='OUTPUT', socket_type='NodeSocketGeometry', socket_name='Geometry')
 
 
@@ -146,7 +142,6 @@ def build_drawing_gn(layers, scene=None):
                             n_sep.outputs['Selection'],
                             n_join.inputs['Geometry'],
                             X_CHAIN, y, material=mat, scale_out=scale_out,
-                            album_scale_out=n_in.outputs['Album Scale'],
                             layer_id=layer_id)
 
         current_geom = n_sep.outputs['Inverted']
@@ -158,7 +153,6 @@ def build_drawing_gn(layers, scene=None):
                         current_geom,
                         n_join.inputs['Geometry'],
                         X_CHAIN, (n_layers - 1) * Y_STEP, material=last_mat, scale_out=scale_out,
-                        album_scale_out=n_in.outputs['Album Scale'],
                         layer_id=last_id)
 
     return ng
