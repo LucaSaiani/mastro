@@ -17,14 +17,17 @@ def _on_black_mode_toggled(self, context):
     set_black_switch(context, self.mastro_cad_drawing_black_mode)
 
 
-def _on_camera_scale_changed(self, context):
-    from ...Utils.mastro_cad.sync_drawing_scale import sync_drawing_scale
-    sync_drawing_scale(self.mastro_cad_drawing_scale)
-    scene = context.scene
-    if scene:
-        scene["mastro_cad_drawing_scale"] = self.mastro_cad_drawing_scale
-        from ...Handlers.depsgraph_handlers import _update_scale_header
-        _update_scale_header(scene)
+# Camera-scoped drawing scale ("Scale 1:" on the camera) is disabled — the
+# viewport-only scale (mastro_cad_drawing_scale_viewport) covers this now.
+# Kept commented instead of removed in case it's wanted back.
+# def _on_camera_scale_changed(self, context):
+#     from ...Utils.mastro_cad.sync_drawing_scale import sync_drawing_scale
+#     sync_drawing_scale(self.mastro_cad_drawing_scale)
+#     scene = context.scene
+#     if scene:
+#         scene["mastro_cad_drawing_scale"] = self.mastro_cad_drawing_scale
+#         from ...Handlers.depsgraph_handlers import _update_scale_header
+#         _update_scale_header(scene)
 
 
 def _on_scene_scale_changed(self, context):
@@ -34,16 +37,19 @@ def _on_scene_scale_changed(self, context):
     scene = context.scene
     if scene is None:
         return
-    space = getattr(context, 'space_data', None)
-    in_camera_view = (space and space.type == 'VIEW_3D' and
-                      space.region_3d.view_perspective == 'CAMERA')
-    if in_camera_view:
-        cam = scene.camera
-        if cam and cam.type == 'CAMERA' and cam.data.mastro_cad_drawing_scale != self.mastro_cad_drawing_scale:
-            cam.data["mastro_cad_drawing_scale"] = self.mastro_cad_drawing_scale
-    else:
-        if scene.mastro_cad_drawing_scale_viewport != self.mastro_cad_drawing_scale:
-            scene["mastro_cad_drawing_scale_viewport"] = self.mastro_cad_drawing_scale
+    # Camera-scoped drawing scale disabled (see _on_camera_scale_changed
+    # above) — always mirror into the viewport scale now, regardless of
+    # whether the active view happens to be a camera view.
+    # space = getattr(context, 'space_data', None)
+    # in_camera_view = (space and space.type == 'VIEW_3D' and
+    #                   space.region_3d.view_perspective == 'CAMERA')
+    # if in_camera_view:
+    #     cam = scene.camera
+    #     if cam and cam.type == 'CAMERA' and cam.data.mastro_cad_drawing_scale != self.mastro_cad_drawing_scale:
+    #         cam.data["mastro_cad_drawing_scale"] = self.mastro_cad_drawing_scale
+    # else:
+    if scene.mastro_cad_drawing_scale_viewport != self.mastro_cad_drawing_scale:
+        scene["mastro_cad_drawing_scale_viewport"] = self.mastro_cad_drawing_scale
 
 
 def _on_viewport_scale_changed(self, context):
@@ -101,14 +107,17 @@ scene_props_cad = [
 # =============================================================================
 # Camera Properties - CAD
 # =============================================================================
+# Camera-scoped "Scale 1:" disabled — see _on_camera_scale_changed above.
+# Kept as an empty list (rather than removed) so camera_props_cad's import
+# elsewhere doesn't need touching if this is ever turned back on.
 camera_props_cad = [
-    ("mastro_cad_drawing_scale", IntProperty(
-        name="Drawing Scale",
-        description="Scale denominator (e.g. 200 for 1:200). Multiplies all line thicknesses in the viewport",
-        default=100,
-        min=1,
-        update=_on_camera_scale_changed,
-    )),
+    # ("mastro_cad_drawing_scale", IntProperty(
+    #     name="Drawing Scale",
+    #     description="Scale denominator (e.g. 200 for 1:200). Multiplies all line thicknesses in the viewport",
+    #     default=100,
+    #     min=1,
+    #     update=_on_camera_scale_changed,
+    # )),
 ]
 
 

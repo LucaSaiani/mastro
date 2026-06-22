@@ -15,11 +15,13 @@ def sync_drawing_scale(scale):
             break
 
 
-def sync_drawing_scale_from_camera(scene):
-    """Mirror the active camera's mastro_cad_drawing_scale to scene.mastro_cad_drawing_scale."""
-    cam = scene.camera
-    if cam is None or cam.type != 'CAMERA':
-        return
-    scale = cam.data.get("mastro_cad_drawing_scale", 100)
-    if scene.mastro_cad_drawing_scale != scale:
-        scene.mastro_cad_drawing_scale = scale
+# Camera-scoped "Scale 1:" disabled — kept commented instead of removed
+# in case it's wanted back.
+# def sync_drawing_scale_from_camera(scene):
+#     """Mirror the active camera's mastro_cad_drawing_scale to scene.mastro_cad_drawing_scale."""
+#     cam = scene.camera
+#     if cam is None or cam.type != 'CAMERA':
+#         return
+#     scale = cam.data.get("mastro_cad_drawing_scale", 100)
+#     if scene.mastro_cad_drawing_scale != scale:
+#         scene.mastro_cad_drawing_scale = scale

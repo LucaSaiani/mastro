@@ -138,11 +138,12 @@ def _monitor_scale():
     _prev_camera_name = cam_name
     _prev_in_cam_view = in_cam_view
 
-    # Always sync from the current source so scale changes are picked up.
-    if in_cam_view and cam and cam.type == 'CAMERA':
-        new_scale = cam.data.mastro_cad_drawing_scale
-    else:
-        new_scale = scene.mastro_cad_drawing_scale_viewport
+    # Camera-scoped "Scale 1:" disabled — always sync from the viewport
+    # scale now, regardless of whether a viewport is in camera view.
+    # if in_cam_view and cam and cam.type == 'CAMERA':
+    #     new_scale = cam.data.mastro_cad_drawing_scale
+    # else:
+    new_scale = scene.mastro_cad_drawing_scale_viewport
 
     if scene.mastro_cad_drawing_scale != new_scale:
         scene.mastro_cad_drawing_scale = new_scale

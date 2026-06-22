@@ -2,25 +2,28 @@ import bpy
 from bpy.types import Panel
 
 
-
-def _draw_scale_data(self, context):
-    if context.camera is None:
-        return
-    self.layout.prop(context.camera, "mastro_cad_drawing_scale", text="Scale 1:")
+# Camera-scoped "Scale 1:" disabled — only the viewport scale is shown now.
+# Kept commented instead of removed in case it's wanted back.
+# def _draw_scale_data(self, context):
+#     if context.camera is None:
+#         return
+#     self.layout.prop(context.camera, "mastro_cad_drawing_scale", text="Scale 1:")
 
 
 def _draw_scale_view3d(self, context):
     scene = context.scene
     if scene is None:
         return
-    space = context.space_data
-    in_cam = (space and space.type == 'VIEW_3D' and
-              space.region_3d.view_perspective == 'CAMERA')
+    # Camera-scoped "Scale 1:" disabled — always show the viewport scale,
+    # regardless of whether the active view happens to be a camera view.
+    # space = context.space_data
+    # in_cam = (space and space.type == 'VIEW_3D' and
+    #           space.region_3d.view_perspective == 'CAMERA')
     col = self.layout.column(align=True)
-    if in_cam and scene.camera and scene.camera.type == 'CAMERA':
-        col.prop(scene.camera.data, "mastro_cad_drawing_scale", text="Scale 1:")
-    else:
-        col.prop(scene, "mastro_cad_drawing_scale_viewport", text="Scale 1:")
+    # if in_cam and scene.camera and scene.camera.type == 'CAMERA':
+    #     col.prop(scene.camera.data, "mastro_cad_drawing_scale", text="Scale 1:")
+    # else:
+    col.prop(scene, "mastro_cad_drawing_scale_viewport", text="Scale 1:")
 
 
 def _find_view3d_space(context):
@@ -48,16 +51,17 @@ def _draw_statusbar(self, context):
     space = _find_view3d_space(context)
     if space is None:
         return
-    in_cam = space.region_3d.view_perspective == 'CAMERA'
-    if in_cam and scene.camera and scene.camera.type == 'CAMERA':
-        scale = scene.camera.data.mastro_cad_drawing_scale
-    else:
-        scale = getattr(scene, "mastro_cad_drawing_scale_viewport", 100)
+    # Camera-scoped "Scale 1:" disabled — always show the viewport scale.
+    # in_cam = space.region_3d.view_perspective == 'CAMERA'
+    # if in_cam and scene.camera and scene.camera.type == 'CAMERA':
+    #     scale = scene.camera.data.mastro_cad_drawing_scale
+    # else:
+    scale = getattr(scene, "mastro_cad_drawing_scale_viewport", 100)
     self.layout.label(text=f"|  Scale 1:{scale}")
 
 
 def register():
-    bpy.types.DATA_PT_camera_display.append(_draw_scale_data)
+    # bpy.types.DATA_PT_camera_display.append(_draw_scale_data)
     bpy.types.VIEW3D_PT_view3d_properties.append(_draw_scale_view3d)
     bpy.types.STATUSBAR_HT_header.append(_draw_statusbar)
 
@@ -65,4 +69,4 @@ def register():
 def unregister():
     bpy.types.STATUSBAR_HT_header.remove(_draw_statusbar)
     bpy.types.VIEW3D_PT_view3d_properties.remove(_draw_scale_view3d)
-    bpy.types.DATA_PT_camera_display.remove(_draw_scale_data)
+    # bpy.types.DATA_PT_camera_display.remove(_draw_scale_data)
