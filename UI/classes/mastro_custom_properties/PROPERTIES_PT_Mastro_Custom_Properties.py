@@ -7,7 +7,7 @@ class PROPERTIES_PT_Mastro_Custom_Properties(Panel):
     bl_label = "Custom Properties"
     bl_parent_id = "PROPERTIES_PT_Mastro_Project_Data"
     bl_options = {'DEFAULT_CLOSED'}
-    bl_order = 4
+    bl_order = 3
 
     def draw(self, context):
         scene = context.scene

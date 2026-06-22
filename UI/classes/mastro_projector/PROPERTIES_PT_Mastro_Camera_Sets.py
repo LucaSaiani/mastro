@@ -6,10 +6,10 @@ class PROPERTIES_PT_Mastro_Camera_Sets(Panel):
     bl_space_type  = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context     = "scene"
-    bl_label       = "Camera Sets"
-    bl_parent_id   = "PROPERTIES_PT_Mastro_Project_Data"
+    bl_label       = "Cameras"
+    bl_parent_id   = "PROPERTIES_PT_Mastro_Sets"
     bl_options     = {"DEFAULT_CLOSED"}
-    bl_order       =  5
+    bl_order       =  1
 
     def draw(self, context):
         layout = self.layout

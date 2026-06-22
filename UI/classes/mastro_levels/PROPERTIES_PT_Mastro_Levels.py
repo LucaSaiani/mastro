@@ -4,7 +4,7 @@ from bpy.types import Panel
 class PROPERTIES_PT_Mastro_Levels(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
-    bl_label = "Levels"
+    bl_label = "Level List"
     bl_parent_id = "PROPERTIES_PT_Mastro_Level_Sets"
     bl_options = {'DEFAULT_CLOSED'}
     bl_order = 1

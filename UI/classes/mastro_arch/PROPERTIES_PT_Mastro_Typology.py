@@ -5,7 +5,7 @@ class PROPERTIES_PT_Mastro_Typology(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_label = "Typology"
-    bl_parent_id = "PROPERTIES_PT_Mastro_Mass"
+    bl_parent_id = "PROPERTIES_PT_Mastro_3D_Building"
     bl_options = {'DEFAULT_CLOSED'}
     bl_order = 0
     

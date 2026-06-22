@@ -4,10 +4,10 @@ from bpy.types import Panel
 class PROPERTIES_PT_Mastro_Level_Sets(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
-    bl_label = "Level Sets"
-    bl_parent_id = "PROPERTIES_PT_Mastro_Project_Data"
+    bl_label = "Levels"
+    bl_parent_id = "PROPERTIES_PT_Mastro_Sets"
     bl_options = {'DEFAULT_CLOSED'}
-    bl_order = 4
+    bl_order = 0
 
     def draw(self, context):
         scene = context.scene

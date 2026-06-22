@@ -62,7 +62,7 @@ class PROPERTIES_PT_MaStroCad_Drawing(Panel):
     bl_label       = "Drawing"
     bl_parent_id   = "PROPERTIES_PT_Mastro_Project_Data"
     bl_options     = {'DEFAULT_CLOSED'}
-    bl_order       = 10
+    bl_order       = 1
     bl_context     = "scene"
 
     def draw(self, context):

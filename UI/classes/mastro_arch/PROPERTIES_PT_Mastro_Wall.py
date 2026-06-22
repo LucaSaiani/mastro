@@ -5,9 +5,9 @@ class PROPERTIES_PT_Mastro_Wall(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_label = "Wall"
-    bl_parent_id = "PROPERTIES_PT_Mastro_Architecture"
+    bl_parent_id = "PROPERTIES_PT_Mastro_3D_Building"
     bl_options = {'DEFAULT_CLOSED'}
-    bl_order = 0    
+    bl_order = 3
     
     def draw(self, context):
         scene = context.scene

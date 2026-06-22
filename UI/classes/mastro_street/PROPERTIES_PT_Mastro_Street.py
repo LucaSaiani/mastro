@@ -9,7 +9,7 @@ class PROPERTIES_PT_Mastro_Street(Panel):
     bl_parent_id = "PROPERTIES_PT_Mastro_Project_Data"
     # bl_context = "scene"
     bl_options = {'DEFAULT_CLOSED'}
-    bl_order = 3
+    bl_order = 2
     
     def draw(self, context):
         scene = context.scene

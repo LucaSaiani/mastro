@@ -5,9 +5,9 @@ class PROPERTIES_PT_Mastro_Floor(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_label = "Floor"
-    bl_parent_id = "PROPERTIES_PT_Mastro_Architecture"
-    bl_options = {'DEFAULT_CLOSED'}      
-    bl_order = 1
+    bl_parent_id = "PROPERTIES_PT_Mastro_3D_Building"
+    bl_options = {'DEFAULT_CLOSED'}
+    bl_order = 4
     
     def draw(self, context):
         scene = context.scene

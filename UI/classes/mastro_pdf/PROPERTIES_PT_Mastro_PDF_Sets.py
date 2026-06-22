@@ -6,10 +6,10 @@ class PROPERTIES_PT_Mastro_PDF_Sets(Panel):
     bl_space_type  = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context     = "scene"
-    bl_label       = "PDF Sets"
-    bl_parent_id   = "PROPERTIES_PT_Mastro_Project_Data"
+    bl_label       = "PDF"
+    bl_parent_id   = "PROPERTIES_PT_Mastro_Sets"
     bl_options     = {"DEFAULT_CLOSED"}
-    bl_order       = 6
+    bl_order       = 2
 
     def draw(self, context):
         layout = self.layout

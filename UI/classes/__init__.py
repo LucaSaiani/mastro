@@ -13,12 +13,12 @@ from .mastro_arch.VIEW3D_UL_Typology_Uses import VIEW3D_UL_Typology_Uses
 # from ..properties.property_classes import mastro_CL_obj_typology_uses_name_list
 from .mastro_preferences.PREFERENCES_Mastro_Preferences import PREFERENCES_Mastro_Preferences
 from .PROPERTIES_PT_Mastro_Project_Data import PROPERTIES_PT_Mastro_Project_Data
+from .PROPERTIES_PT_Mastro_Sets import PROPERTIES_PT_Mastro_Sets
 from .VIEW3D_PT_Mastro_Overlay import VIEW3D_PT_Mastro_Overlay
-from .mastro_arch.PROPERTIES_PT_Mastro_Mass import PROPERTIES_PT_Mastro_Mass
+from .mastro_arch.PROPERTIES_PT_Mastro_3D_Building import PROPERTIES_PT_Mastro_3D_Building
 from .mastro_arch.PROPERTIES_PT_Mastro_Block import PROPERTIES_PT_Mastro_Block
 from .mastro_arch.PROPERTIES_PT_Mastro_Building import PROPERTIES_PT_Mastro_Building
 from .mastro_arch.PROPERTIES_PT_Mastro_Typology import PROPERTIES_PT_Mastro_Typology
-from .mastro_arch.PROPERTIES_PT_Mastro_Architecture import PROPERTIES_PT_Mastro_Architecture
 from .mastro_arch.PROPERTIES_PT_Mastro_Wall import PROPERTIES_PT_Mastro_Wall
 from .mastro_arch.PROPERTIES_PT_Mastro_Floor import PROPERTIES_PT_Mastro_Floor
 from .mastro_street.PROPERTIES_PT_Mastro_Street import PROPERTIES_PT_Mastro_Street
@@ -91,12 +91,12 @@ classes = (
     # mastro_CL_obj_typology_uses_name_list,
     PREFERENCES_Mastro_Preferences,
     PROPERTIES_PT_Mastro_Project_Data,
+    PROPERTIES_PT_Mastro_Sets,
     VIEW3D_PT_Mastro_Overlay,
-    PROPERTIES_PT_Mastro_Mass,
+    PROPERTIES_PT_Mastro_3D_Building,
+    PROPERTIES_PT_Mastro_Typology,
     PROPERTIES_PT_Mastro_Block,
     PROPERTIES_PT_Mastro_Building,
-    PROPERTIES_PT_Mastro_Typology,
-    PROPERTIES_PT_Mastro_Architecture,
     PROPERTIES_PT_Mastro_Wall,
     PROPERTIES_PT_Mastro_Floor,
     PROPERTIES_PT_Mastro_Street,
