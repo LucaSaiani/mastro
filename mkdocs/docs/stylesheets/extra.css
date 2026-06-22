@@ -8,6 +8,30 @@
   z-index: 10;
 }
 
+/* Confine the whole footer bar — background included, not just its
+   content — to the sidebar+content columns, leaving the TOC column's
+   width free on the right. Without this, the footer's own background
+   (painted by .md-footer itself, independent of its inner content's
+   width) still spans the full viewport and visually caps off the TOC
+   column partway down instead of letting it run the full height of the
+   page. .md-grid centers at max 61rem; the secondary (TOC) sidebar is
+   12.1rem, so the footer's own box is narrowed by that amount and
+   re-anchored to the same left edge as .md-grid instead of spanning
+   edge-to-edge. */
+@media screen and (min-width: 76.25em) {
+  .md-footer {
+    width: calc(61rem - 12.1rem);
+    margin-left: max(0px, calc(50vw - 30.5rem));
+  }
+
+  .md-footer__inner.md-grid,
+  .md-footer-meta__inner.md-grid {
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
 .md-main {
   padding-bottom: 8rem;
 }

@@ -52,6 +52,9 @@ coverage.xml
 # Sphinx documentation
 docs/_build/
 
+# MkDocs build output
+mkdocs/site/
+
 
 *.blend1
 *.blend2
