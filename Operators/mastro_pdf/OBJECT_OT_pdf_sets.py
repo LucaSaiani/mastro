@@ -3,7 +3,6 @@ import os
 import subprocess
 import sys
 from bpy.types import Operator
-from bpy.props import StringProperty
 
 from .OBJECT_OT_Export_Mastro_Frame_PDF import _export_frame_to_pdf
 from ...Utils.mastro_pdf.pdf_merge import merge as pdf_merge
@@ -98,27 +97,6 @@ class MASTRO_OT_PdfSetMoveDown(Operator):
             return {'CANCELLED'}
         pp.pdf_sets.move(idx, idx + 1)
         pp.active_set_index = idx + 1
-        return {'FINISHED'}
-
-
-class MASTRO_OT_PdfSetToggleFrame(Operator):
-    bl_idname  = "mastro.pdf_set_toggle_frame"
-    bl_label   = "Toggle Frame in PDF Set"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    frame_name: StringProperty()
-
-    def execute(self, context):
-        pp = context.scene.mastro_pdf_props
-        idx = pp.active_set_index
-        if idx < 0 or idx >= len(pp.pdf_sets):
-            return {'CANCELLED'}
-        s = pp.pdf_sets[idx]
-        for i, item in enumerate(s.frames):
-            if item.frame_name == self.frame_name:
-                s.frames.remove(i)
-                return {'FINISHED'}
-        s.frames.add().frame_name = self.frame_name
         return {'FINISHED'}
 
 

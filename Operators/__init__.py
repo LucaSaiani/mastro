@@ -53,7 +53,6 @@ from .mastro_projector.OBJECT_OT_camera_sets import (
     MASTRO_OT_CameraSetDuplicate,
     MASTRO_OT_CameraSetMoveUp,
     MASTRO_OT_CameraSetMoveDown,
-    MASTRO_OT_CameraSetToggleCamera,
 )
 from .mastro_pdf.OBJECT_OT_pdf_sets import (
     MASTRO_OT_PdfSetAdd,
@@ -61,7 +60,6 @@ from .mastro_pdf.OBJECT_OT_pdf_sets import (
     MASTRO_OT_PdfSetDuplicate,
     MASTRO_OT_PdfSetMoveUp,
     MASTRO_OT_PdfSetMoveDown,
-    MASTRO_OT_PdfSetToggleFrame,
     MASTRO_OT_PdfSetExport,
 )
 from ..Utils.mastro_projector.shadow_render import MASTRO_OT_RenderShadowModal
@@ -147,13 +145,11 @@ classes = (
     MASTRO_OT_CameraSetDuplicate,
     MASTRO_OT_CameraSetMoveUp,
     MASTRO_OT_CameraSetMoveDown,
-    MASTRO_OT_CameraSetToggleCamera,
     MASTRO_OT_PdfSetAdd,
     MASTRO_OT_PdfSetRemove,
     MASTRO_OT_PdfSetDuplicate,
     MASTRO_OT_PdfSetMoveUp,
     MASTRO_OT_PdfSetMoveDown,
-    MASTRO_OT_PdfSetToggleFrame,
     MASTRO_OT_PdfSetExport,
     MASTRO_OT_RenderShadowModal,
     OBJECT_OT_Remove_Mastro_Custom_Property,

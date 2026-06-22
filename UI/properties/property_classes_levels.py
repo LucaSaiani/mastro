@@ -1,8 +1,10 @@
+import bpy
 from bpy.types import PropertyGroup
 from bpy.props import (IntProperty,
                        FloatProperty,
                        StringProperty,
                        CollectionProperty,
+                       BoolProperty,
 )
 
 
@@ -37,6 +39,42 @@ class mastro_CL_level_set(PropertyGroup):
     levels: CollectionProperty(type=mastro_CL_level_set_item)
 
 
+def _get_active_level_set(context):
+    scene = context.scene
+    level_sets = scene.mastro_level_set_list
+    idx = scene.mastro_level_set_list_index
+    return level_sets[idx] if 0 <= idx < len(level_sets) else None
+
+
+def _get_in_active_set(self):
+    # Blender's BoolProperty get/set callbacks only receive self, never
+    # context, so the active scene must be read from bpy.context here.
+    context = bpy.context
+    active_set = _get_active_level_set(context)
+    if active_set is None:
+        return False
+    # The "All Levels" set (id 0) always contains every level.
+    if active_set.id == 0:
+        return True
+    return any(el.level_id == self.id for el in active_set.levels)
+
+
+def _set_in_active_set(self, value):
+    context = bpy.context
+    active_set = _get_active_level_set(context)
+    # Membership of the virtual "All Levels" set cannot be edited.
+    if active_set is None or active_set.id == 0:
+        return
+
+    for i, el in enumerate(active_set.levels):
+        if el.level_id == self.id:
+            if not value:
+                active_set.levels.remove(i)
+            return
+    if value:
+        active_set.levels.add().level_id = self.id
+
+
 class mastro_CL_level_list(PropertyGroup):
     """One project level, defined by its elevation.
 
@@ -64,4 +102,14 @@ class mastro_CL_level_list(PropertyGroup):
         precision=5,
         subtype="DISTANCE",
         update=update_level_list,
+    )
+    # Backed by the active level set's `levels` collection (see get/set
+    # above), not stored data. Exposing membership as a real toggle prop
+    # (rather than an operator button) lets Blender's native click-drag
+    # over multiple UIList rows assign/unassign several levels in one
+    # gesture, the same way drag-toggling works on modifier/layer icons.
+    in_active_set: BoolProperty(
+        name="In Active Set",
+        get=_get_in_active_set,
+        set=_set_in_active_set,
     )

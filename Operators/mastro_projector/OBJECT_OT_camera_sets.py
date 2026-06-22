@@ -1,6 +1,5 @@
 import bpy
 from bpy.types import Operator
-from bpy.props import StringProperty
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -92,29 +91,4 @@ class MASTRO_OT_CameraSetMoveDown(Operator):
             return {'CANCELLED'}
         ssp.camera_sets.move(idx, idx + 1)
         ssp.active_set_index = idx + 1
-        return {'FINISHED'}
-
-
-class MASTRO_OT_CameraSetToggleCamera(Operator):
-    """Add or remove a camera from the selected set"""
-    bl_idname  = "mastro.camera_set_toggle_camera"
-    bl_label   = "Toggle Camera in Set"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    camera_name: StringProperty()
-
-    def execute(self, context):
-        ssp = context.scene.mastro_projector_props
-        idx = ssp.active_set_index
-        if idx < 0 or idx >= len(ssp.camera_sets):
-            return {'CANCELLED'}
-        s = ssp.camera_sets[idx]
-        if s.is_default:
-            self.report({'WARNING'}, "Set 0 membership is managed automatically.")
-            return {'CANCELLED'}
-        for i, item in enumerate(s.cameras):
-            if item.camera_name == self.camera_name:
-                s.cameras.remove(i)
-                return {'FINISHED'}
-        s.cameras.add().camera_name = self.camera_name
         return {'FINISHED'}

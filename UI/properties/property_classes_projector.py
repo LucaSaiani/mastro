@@ -236,8 +236,48 @@ class mastro_CL_projector_batch_item(PropertyGroup):
     camera_name: StringProperty()
 
 
+def _get_camera_active_set(context):
+    ssp = context.scene.mastro_projector_props
+    idx = ssp.active_set_index
+    return ssp.camera_sets[idx] if 0 <= idx < len(ssp.camera_sets) else None
+
+
+def _get_in_active_camera_set(self):
+    # Blender's BoolProperty get/set callbacks only receive self, never
+    # context, so the active scene must be read from bpy.context here.
+    active_set = _get_camera_active_set(bpy.context)
+    if active_set is None or active_set.is_default:
+        return False
+    return any(it.camera_name == self.camera_name for it in active_set.cameras)
+
+
+def _set_in_active_camera_set(self, value):
+    active_set = _get_camera_active_set(bpy.context)
+    # Set 0 ("All Cameras") membership is managed automatically; see
+    # sync_default_camera_set.
+    if active_set is None or active_set.is_default:
+        return
+
+    for i, it in enumerate(active_set.cameras):
+        if it.camera_name == self.camera_name:
+            if not value:
+                active_set.cameras.remove(i)
+            return
+    if value:
+        active_set.cameras.add().camera_name = self.camera_name
+
+
 class mastro_CL_camera_set_item(PropertyGroup):
     camera_name: StringProperty()
+    # Backed by the active camera set's `cameras` collection (see get/set
+    # above). A real toggle prop (instead of an operator button) lets
+    # Blender's native click-drag over several UIList rows assign/unassign
+    # multiple cameras in one gesture.
+    in_active_set: BoolProperty(
+        name="In Active Set",
+        get=_get_in_active_camera_set,
+        set=_set_in_active_camera_set,
+    )
 
 
 class mastro_CL_camera_set(PropertyGroup):

@@ -33,13 +33,12 @@ class PROPERTIES_UL_Set_Cameras(UIList):
         sub.alignment = 'RIGHT'
 
         if active_set and not active_set.is_default:
-            in_set     = any(it.camera_name == cam_name for it in active_set.cameras)
-            check_icon = 'CHECKBOX_HLT' if in_set else 'CHECKBOX_DEHLT'
-            op = sub.operator(
-                "mastro.camera_set_toggle_camera",
-                text="", icon=check_icon, emboss=False,
-            )
-            op.camera_name = cam_name
+            # item.in_active_set is a real toggle prop (get/set backed by
+            # the active set's `cameras` collection), not an operator
+            # button, so Blender's native click-drag over several rows can
+            # assign/unassign multiple cameras in one gesture.
+            check_icon = 'CHECKBOX_HLT' if item.in_active_set else 'CHECKBOX_DEHLT'
+            sub.prop(item, "in_active_set", text="", icon=check_icon, emboss=False)
         else:
             s = sub.row(align=True)
             s.enabled = False

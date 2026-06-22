@@ -5,8 +5,10 @@ class PROPERTIES_OT_Level_Set_Duplicate_Item(Operator):
     """Duplicate the selected level set.
 
     Unlike remove/toggle, duplicating the "All Levels" set (id 0) is not
-    blocked: its (empty) `levels` collection is copied as-is, producing a
-    normal, editable set rather than another virtual "All Levels".
+    blocked. Since its membership is virtual (derived live from
+    mastro_level_list, not stored in `levels`), the duplicate is given an
+    explicit snapshot of all current level ids instead of an empty
+    `levels` collection, so it behaves as a normal, editable set.
     """
     bl_idname = "mastro_level_set_list.duplicate_item"
     bl_label = "Duplicate level set"
@@ -25,8 +27,14 @@ class PROPERTIES_OT_Level_Set_Duplicate_Item(Operator):
         ids = [el.id for el in collection]
         dst.id = max(ids) + 1 if ids else 1
         dst.name = src.name + " Copy"
-        for item in src.levels:
-            dst.levels.add().level_id = item.level_id
+        if src.id == 0:
+            # src.levels is empty (membership is virtual); snapshot the
+            # real level list instead so the duplicate isn't empty.
+            for level in scene.mastro_level_list:
+                dst.levels.add().level_id = level.id
+        else:
+            for item in src.levels:
+                dst.levels.add().level_id = item.level_id
 
         scene.mastro_level_set_list_index = len(collection) - 1
 

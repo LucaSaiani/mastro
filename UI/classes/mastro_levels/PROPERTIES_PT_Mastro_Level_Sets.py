@@ -32,19 +32,18 @@ class PROPERTIES_PT_Mastro_Level_Sets(Panel):
         col.operator("mastro_level_set_list.move_item", icon='TRIA_DOWN', text="").direction = 'DOWN'
 
         if scene.mastro_level_list:
-            layout.template_list("PROPERTIES_UL_Level_Set_Members", "level_set_members", scene,
-                                  "mastro_level_list", scene, "mastro_level_list_index", rows=4)
+            idx = scene.mastro_level_set_list_index
+            level_sets = scene.mastro_level_set_list
+            active_set = level_sets[idx] if 0 <= idx < len(level_sets) else None
+            is_all_levels = active_set.id == 0 if active_set else True
 
-        layout.separator()
-
-        # ── Levels ──────────────────────────────────────────────────────────
-        layout.label(text="Levels")
-        row = layout.row()
-        row.template_list("PROPERTIES_UL_Level", "level_list", scene,
-                           "mastro_level_list", scene, "mastro_level_list_index", rows=3)
-
-        col = row.column(align=True)
-        col.operator("mastro_level_list.new_item", icon='ADD', text="")
-        col.operator("mastro_level_list.remove_item", icon='REMOVE', text="")
-        col.separator()
-        col.menu("MASTRO_MT_Level_List_Specials", icon='DOWNARROW_HLT', text="")
+            row = layout.row()
+            row.template_list("PROPERTIES_UL_Level_Set_Members", "level_set_members", scene,
+                               "mastro_level_list", scene, "mastro_level_list_index", rows=4)
+            col = row.column(align=True)
+            # The "All Levels" set always contains everything, so the
+            # filter would be a no-op; keep it visible but disabled.
+            sub = col.column()
+            sub.enabled = not is_all_levels
+            sub.prop(scene, "mastro_level_set_filter_members_only", text="",
+                     icon='FILTER', toggle=True)

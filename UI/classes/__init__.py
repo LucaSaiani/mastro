@@ -31,10 +31,10 @@ from .mastro_levels.PROPERTIES_UL_Level_Set import PROPERTIES_UL_Level_Set
 from .mastro_levels.PROPERTIES_UL_Level_Set_Members import PROPERTIES_UL_Level_Set_Members
 from .mastro_levels.PROPERTIES_OT_Level_Set_New_Item import PROPERTIES_OT_Level_Set_New_Item
 from .mastro_levels.PROPERTIES_OT_Level_Set_Remove_Item import PROPERTIES_OT_Level_Set_Remove_Item
-from .mastro_levels.PROPERTIES_OT_Level_Set_Toggle_Level import PROPERTIES_OT_Level_Set_Toggle_Level
 from .mastro_levels.PROPERTIES_OT_Level_Set_Duplicate_Item import PROPERTIES_OT_Level_Set_Duplicate_Item
 from .mastro_levels.PROPERTIES_OT_Level_Set_Move_Item import PROPERTIES_OT_Level_Set_Move_Item
 from .mastro_levels.PROPERTIES_PT_Mastro_Level_Sets import PROPERTIES_PT_Mastro_Level_Sets
+from .mastro_levels.PROPERTIES_PT_Mastro_Levels import PROPERTIES_PT_Mastro_Levels
 from .VIEW3D_PT_Mastro_Panel import VIEW3D_PT_Mastro_Panel
 from .VIEW3D_PT_Mastro_Convert import VIEW3D_PT_Mastro_Convert
 from .mastro_arch.VIEW3D_PT_Mastro_Architecture import VIEW3D_PT_Mastro_Architecture
@@ -109,10 +109,10 @@ classes = (
     PROPERTIES_UL_Level_Set_Members,
     PROPERTIES_OT_Level_Set_New_Item,
     PROPERTIES_OT_Level_Set_Remove_Item,
-    PROPERTIES_OT_Level_Set_Toggle_Level,
     PROPERTIES_OT_Level_Set_Duplicate_Item,
     PROPERTIES_OT_Level_Set_Move_Item,
     PROPERTIES_PT_Mastro_Level_Sets,
+    PROPERTIES_PT_Mastro_Levels,
     VIEW3D_PT_Mastro_Panel,
     VIEW3D_PT_Mastro_Convert,
     VIEW3D_PT_Mastro_Architecture,

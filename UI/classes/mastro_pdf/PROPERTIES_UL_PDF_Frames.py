@@ -21,13 +21,12 @@ class PROPERTIES_UL_PDF_Frames(UIList):
         sub = row.row(align=True)
         sub.alignment = 'RIGHT'
         if active_set is not None:
-            in_set = any(it.frame_name == frame_name for it in active_set.frames)
-            check_icon = 'CHECKBOX_HLT' if in_set else 'CHECKBOX_DEHLT'
-            op = sub.operator(
-                "mastro.pdf_set_toggle_frame",
-                text="", icon=check_icon, emboss=False,
-            )
-            op.frame_name = frame_name
+            # item.in_active_set is a real toggle prop (get/set backed by
+            # the active set's `frames` collection), not an operator
+            # button, so Blender's native click-drag over several rows can
+            # assign/unassign multiple frames in one gesture.
+            check_icon = 'CHECKBOX_HLT' if item.in_active_set else 'CHECKBOX_DEHLT'
+            sub.prop(item, "in_active_set", text="", icon=check_icon, emboss=False)
 
     def draw_filter(self, context, layout):
         pp = context.scene.mastro_pdf_props
