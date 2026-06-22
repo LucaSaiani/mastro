@@ -32,6 +32,7 @@ class PROPERTIES_PT_Mastro_Camera_Sets(Panel):
             layout.label(text="Initializing…", icon='INFO')
             return
 
+        layout.label(text="Sets")
         row = layout.row()
         row.template_list(
             "PROPERTIES_UL_Camera_Sets", "",
@@ -60,6 +61,7 @@ class PROPERTIES_PT_Mastro_Camera_Sets(Panel):
 
         active_set = ssp.camera_sets[idx]
 
+        layout.label(text="Cameras")
         row = layout.row()
         row.enabled = not any_running
         row.template_list(

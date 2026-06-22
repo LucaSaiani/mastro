@@ -19,6 +19,7 @@ class PROPERTIES_PT_Mastro_PDF_Sets(Panel):
             layout.label(text="No frames in scene", icon='INFO')
             return
 
+        layout.label(text="Sets")
         row = layout.row()
         row.template_list(
             "PROPERTIES_UL_PDF_Sets", "",
@@ -39,6 +40,7 @@ class PROPERTIES_PT_Mastro_PDF_Sets(Panel):
         if not (0 <= idx < len(pp.pdf_sets)):
             return
 
+        layout.label(text="Frames")
         layout.template_list(
             "PROPERTIES_UL_PDF_Frames", "",
             pp, "all_frames",
