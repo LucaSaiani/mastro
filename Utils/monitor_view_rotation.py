@@ -73,7 +73,7 @@ def _on_view_changed(area, space, region_3d):
         # another ortho side) - restore whatever clip_start/clip_end/
         # view_location.z were before we started overriding them, rather
         # than leaving the override stuck in place.
-        restore_original_clip_state(space, region_3d)
+        restore_original_clip_state(scene, space, region_3d)
         area.tag_redraw()
         return
 

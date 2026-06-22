@@ -286,20 +286,42 @@ def get_view_side(region_3d):
 # .blend file or shared between scenes.
 _saved_clip_state = {}
 
+# Per-region "is this space's clip_start/clip_end currently a Clip Range
+# override" flag, persisted as a Scene id-property (unlike _saved_clip_state
+# above) so it survives an addon hot-reload during development. Without
+# this, reloading the addon while a viewport was already in Top/Bottom with
+# its clip_end already overridden would reset _saved_clip_state to empty,
+# and the next save would wrongly capture that already-overridden value as
+# if it were the user's real original.
+def _overridden_key(region_3d):
+    return f"mastro_clip_range_overridden_{region_3d.as_pointer()}"
 
-def _save_original_clip_state(space, region_3d):
+
+def _save_original_clip_state(scene, space, region_3d):
     key = region_3d.as_pointer()
-    if key not in _saved_clip_state:
+    if key in _saved_clip_state:
+        return
+    if scene.get(_overridden_key(region_3d)):
+        # Already overridden before this module was (re)loaded - the real
+        # original is unrecoverable, so fall back to Blender's own DNA
+        # default (source/blender/makesdna/DNA_view3d_types.h: "float
+        # clip_start = 0.01f, clip_end = 1000.0f;") instead of saving the
+        # already-clipped current value.
+        _saved_clip_state[key] = (0.01, 1000.0, region_3d.view_location.z)
+    else:
         _saved_clip_state[key] = (space.clip_start, space.clip_end, region_3d.view_location.z)
+    scene[_overridden_key(region_3d)] = True
 
 
-def restore_original_clip_state(space, region_3d):
+def restore_original_clip_state(scene, space, region_3d):
     """Restore clip_start/clip_end/view_location.z to what they were
     before apply_clip_to_space first overrode them for this region, then
     forget the saved state (so a later re-entry into Top/Bottom saves a
     fresh "original" rather than restoring a stale one)."""
     key = region_3d.as_pointer()
     saved = _saved_clip_state.pop(key, None)
+    if scene is not None:
+        scene.pop(_overridden_key(region_3d), None)
     if saved is None:
         return
     clip_start, clip_end, view_location_z = saved
@@ -369,7 +391,7 @@ def apply_clip_to_space(scene, space):
         return
     near, far = span
 
-    _save_original_clip_state(space, region_3d)
+    _save_original_clip_state(scene, space, region_3d)
 
     from ..mastro_preferences.get_preferences import get_prefs
     cutting_plane_height = get_prefs().clip_range_cutting_plane_height
