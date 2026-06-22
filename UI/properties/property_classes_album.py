@@ -1,7 +1,7 @@
 import bpy
 from mathutils import Matrix
 from bpy.types import PropertyGroup, Object
-from bpy.props import IntProperty, CollectionProperty, PointerProperty
+from bpy.props import IntProperty, FloatProperty, CollectionProperty, PointerProperty
 
 
 def _get_album_scale(self):
@@ -27,8 +27,19 @@ def _set_album_scale(self, value):
     obj.scale.x = factor
     obj.scale.y = factor
     obj.scale.z = factor
+    # Compensate the empty's display size so its icon stays a constant
+    # world-space size (icon_size) regardless of how much the album is scaled.
+    obj.empty_display_size = self.icon_size * value
     for child in obj.children:
         child.matrix_parent_inverse = Matrix.Identity(4)
+
+
+def _on_album_icon_size_changed(self, context):
+    """Re-apply the display size compensation when the base icon size changes."""
+    obj = self.id_data
+    if obj is None:
+        return
+    obj.empty_display_size = self.icon_size * self.scale
 
 
 class mastro_CL_album_child_ref(PropertyGroup):
@@ -62,6 +73,14 @@ class mastro_CL_album_settings(PropertyGroup):
         min=1,
         get=_get_album_scale,
         set=_set_album_scale,
+    )
+
+    icon_size: FloatProperty(
+        name="Icon Size",
+        description="World-space size of the album's empty icon, kept constant regardless of Scale 1:",
+        default=1.0,
+        min=0.01,
+        update=_on_album_icon_size_changed,
     )
 
     children_display: CollectionProperty(type=mastro_CL_album_child_ref)

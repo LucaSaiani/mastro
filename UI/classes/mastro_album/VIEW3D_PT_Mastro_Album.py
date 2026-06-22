@@ -26,11 +26,13 @@ class VIEW3D_PT_Mastro_Album(Panel):
         col = layout.column(align=True)
         col.prop(settings, "scale", text="Scale 1:")
 
-        layout.operator("object.mastro_parent_to_album")
-
-        layout.template_list(
+        row = layout.row()
+        row.template_list(
             "PROPERTIES_UL_Album_Children", "album_children_list",
             settings, "children_display",
             settings, "children_display_index",
             rows=5,
         )
+        row.operator("object.mastro_parent_to_album", text="", icon='ADD')
+
+        layout.prop(settings, "icon_size")

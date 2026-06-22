@@ -20,6 +20,9 @@ class OBJECT_OT_Mastro_Album_Remove_Child(Operator):
             return {'CANCELLED'}
 
         album = child.parent
+        # Clear children_display before removing the object — its
+        # PointerProperty holds a strong reference, so removing the
+        # object first leaves a zombie datablock do_unlink can't release.
         album.mastro_album_settings.children_display.clear()
         bpy.data.objects.remove(child, do_unlink=True)
         sync_children_display(album)

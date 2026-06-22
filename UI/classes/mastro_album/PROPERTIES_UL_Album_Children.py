@@ -11,7 +11,7 @@ class PROPERTIES_UL_Album_Children(UIList):
             row.operator(
                 "object.mastro_album_remove_child",
                 text="",
-                icon='X',
+                icon='TRASH',
                 emboss=False,
             ).object_name = item.object.name
         elif self.layout_type == 'GRID':
