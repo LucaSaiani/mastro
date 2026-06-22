@@ -13,7 +13,7 @@ The MaStro panel appears when a node is selected. The available controls depend 
 Available when the active node is a **Reroute** node.
 
 **Rename Reroute from Source Socket**  
-Automatically renames the reroute node to match the name of the socket it is connected to. Useful for keeping complex node trees readable without manually typing names.
+Automatically renames the reroute node to match the name of the socket it is connected to. Useful for keeping complex node trees readable without manually typing names. If renaming requires walking upstream through a chain of other unlabelled reroute nodes to reach the source socket, every unlabelled reroute crossed along the way is backfilled with the same name, not just the one originally selected.
 
 Keyboard shortcut: **Shift+Ctrl+F2**.
 

@@ -33,6 +33,7 @@ nav:
       - Street: ui/properties-street.md
       - Drawing: ui/drawing-layers.md
       - Custom Properties: ui/properties-custom-properties.md
+      - Levels: ui/properties-levels.md
       - Camera Sets: ui/properties-camera-sets.md
       - PDF Sets: ui/properties-pdf-sets.md
     - Viewport Sidebar:
@@ -43,12 +44,17 @@ nav:
       - Architecture: ui/sidebar-architecture.md
       - Geometry Data: ui/sidebar-geometry-data.md
       - Custom Properties: ui/sidebar-custom-properties.md
+      - Album: ui/mastro-album.md
+      - Frame: ui/mastro-frame.md
+      - GIS: ui/gis-basemap.md
       - Export: ui/sidebar-export.md
-    
+
     - Tools:
       - XY Constraint: ui/xy-constraint.md
       - Transform Orientation: ui/transform-orientation.md
       - Move Active Vertex: ui/move-active-vertex.md
+      - Clip Range: ui/clip-range.md
+      - CAD Tools: ui/cad-tools.md
     - Node Editor: ui/node-editor.md
     - View Layer Manager: ui/view-layer-manager.md
     - 2D Projection: ui/projection.md

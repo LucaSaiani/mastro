@@ -1,10 +1,10 @@
 # Properties — PDF Sets
 
-The **PDF Sets** sub-panel of Project Data (Scene Properties) organises Frame objects into named export sets. Each set can be exported to PDF in one click — either as a single merged file or as individual files per frame.
+The **PDF** sub-panel of [Sets](properties-project-data.md) organises Frame objects into named export sets. Each set can be exported to PDF in one click — either as a single merged file or as individual files per frame.
 
 ## Interface
 
-The panel contains two lists.
+The panel contains two labelled lists, matching the same pattern used by [Level Sets](properties-levels.md#level-sets) and [Camera Sets](properties-camera-sets.md).
 
 ### Sets list (top)
 
@@ -18,7 +18,7 @@ Use the buttons to the right of the list to **Add**, **Remove**, **Duplicate**, 
 
 ### Frames list (bottom)
 
-Shows all Frame objects present in the scene. Each row has a checkbox on the right: click it to add or remove that frame from the active set.
+Shows all Frame objects present in the scene. Each row has a checkbox on the right: click it to add or remove that frame from the active set. The checkbox is a real toggle (not a button), so clicking and dragging across several rows assigns or unassigns multiple frames in a single gesture.
 
 The list toolbar provides:
 

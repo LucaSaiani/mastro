@@ -28,19 +28,18 @@ See [Layers, Pens and Line Styles](../ui/drawing-layers.md) for the full panel r
 
 Every drawing is associated with a **scale denominator** (e.g. `200` for 1:200). The scale multiplies all line thicknesses in the viewport so that lines appear at the correct visual weight for the intended print scale — a 0.25 mm line at 1:200 looks different from the same line at 1:50.
 
-The scale is stored **per camera**: each camera remembers its own scale and applies it automatically when that camera becomes the active view. When the viewport is not locked to any camera (free perspective or orthographic view), a separate **viewport scale** is used instead.
+There is a single scene-wide **viewport scale**; per-camera scale is not used — switching the active camera does not change which scale applies. To give different drawings different scales, group them under separate [MaStro Albums](../ui/mastro-album.md), each carrying its own scale.
 
 ### Where to set the scale
 
 | Location | What it controls |
 |---|---|
-| **Properties → Camera → Viewport Display → Scale 1:** | Scale for that specific camera |
-| **Viewport sidebar (N) → View → Scale 1:** | Active scale — shows camera scale in camera view, viewport scale otherwise |
-| **Status bar (bottom of Blender)** | Read-only display of the current active scale |
+| **Viewport sidebar (N) → View → Scale 1:** | The scene's viewport scale |
+| **Status bar (bottom of Blender)** | Read-only display of the current viewport scale |
 
 ### How it works
 
-The scale value is written to an internal node inside the **MaStro Drawing** Geometry Nodes group. Switching cameras updates this node automatically; no manual action is required.
+The scale value is written to an internal node inside the **MaStro Drawing** Geometry Nodes group, and read by every drawing in the scene that is not parented to a [MaStro Album](../ui/mastro-album.md) (album children use their own album's scale instead).
 
 ---
 
@@ -53,3 +52,13 @@ The scale value is written to an internal node inside the **MaStro Drawing** Geo
 
 !!! note
     The active layer is tracked by the **MaStro Layers** panel in the Properties editor. Switch layers there before extruding to assign the correct attributes.
+
+### Drawing creation at the active level
+
+When the **Create at active level** preference (Preferences → Extensions → MaStro → [Levels](../ui/preferences.md#levels)) is enabled — the default — a new drawing is placed at the elevation of the active level of whichever Top/Bottom ortho viewport's [Clip Range](../ui/clip-range.md) is currently active, instead of at the 3D cursor's Z position. Disable the preference to always use the 3D cursor's Z position.
+
+### CAD modal tools
+
+Beyond extruding edges by hand, MaStro provides a full set of CAD-style tools — Rectangle, Circle, Offset, Trim/Extend, Fillet, Delete Segment — for constructing and editing drawing geometry precisely. See [CAD Tools](../ui/cad-tools.md) for the full reference.
+
+These tools display lengths in the **scene's configured display unit** (Scene Properties → Units), rather than switching unit automatically as the typed value's magnitude changes.

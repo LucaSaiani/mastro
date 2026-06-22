@@ -37,7 +37,7 @@ Both modes display totals for Perimeter, Wall Area, and GEA at the bottom of the
 
 ## Export Frame PDF
 
-Visible only when a **Frame** object is the active selection. Opens a file browser to choose a save path and exports the active frame — together with all Grease Pencil objects whose geometry intersects it — to a single-page PDF.
+Visible only when a [MaStro Frame](mastro-frame.md) object is the active selection. Opens a file browser to choose a save path and exports the active frame — together with all Grease Pencil objects whose geometry intersects it — to a single-page PDF.
 
 The file browser sidebar exposes one option:
 

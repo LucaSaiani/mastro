@@ -87,6 +87,18 @@ Each source object produces one output mesh named `<SourceName><suffix>`. Vertex
 
 When **Place on Camera Plane** is enabled, the empty is positioned and scaled to match the camera frustum. The section outline mesh is offset slightly toward the camera (so it masks lines behind it) and the shadow mesh is offset slightly away (so it does not mask lines). Both offset values are configurable in Preferences.
 
+### CAD layers on the output
+
+Each output mesh is automatically converted into a [MaStro CAD drawing](../getting-started/object-type-drawing.md), and every edge is pre-assigned to one of the default [CAD layers](drawing-layers.md) based on the exact projection category it came from, following standard architectural drawing convention (ISO 128):
+
+| Edge category | Layer |
+|---|---|
+| Visible / Silhouette | **Thin** — continuous thin line |
+| Hidden / Hidden silhouette | **Dashed** |
+| Section outline | **Thick** — continuous thick line |
+
+These are only the default assignments: once converted, the output behaves like any other drawing mesh, and the edges can be reassigned to different layers, or their layers' thickness, colour and dash pattern edited, like on any other MaStro CAD drawing.
+
 ---
 
 ## Calculate Panel
@@ -127,10 +139,13 @@ The upper list shows all camera sets. Use the buttons on the right to:
 
 The lower list shows all enabled cameras. For each row:
 
-- The **checkbox** at the right adds or removes the camera from the selected set. In Set 0 membership is automatic and the checkbox is read-only.
+- The **checkbox** at the right adds or removes the camera from the selected set. In Set 0 membership is automatic and the checkbox is disabled. The checkbox is a real toggle (not a button), so clicking and dragging across several rows assigns or unassigns multiple cameras in a single gesture.
 - The **camera icon** (render toggle) controls whether the camera is included when the **Bake** button is pressed.
 
-The list supports **filtering by name** and **sorting alphabetically**. When a non-default set is selected, the **filter** button restricts the list to cameras that belong to that set.
+The list supports **filtering by name** and **sorting alphabetically**. When a non-default set is selected, the **filter** button restricts the list to cameras that belong to that set; it is disabled while Set 0 is active, since Set 0 always contains every camera.
+
+!!! note
+    The panel shows two labelled lists, **Sets** and **Cameras**, matching the same pattern used by [Level Sets](properties-levels.md#level-sets) and [PDF Sets](properties-pdf-sets.md).
 
 ### Bake
 

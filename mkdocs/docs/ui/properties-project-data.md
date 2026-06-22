@@ -1,29 +1,21 @@
-# Properties — MaStro
+# Properties — Project Data
 
-With the **MaStro Panel** it is possibile to set up and edit all the properties related to the scene. These properties are organized in lists. To avoid conflict and data loss, it is not possible, with few exceptions, to delete the entries of the list. Since it is possible to sort the list, it is suggested to put at the end of the list the unwanted elements. Since it is possible to rename the elements, it is not a big deal to have some elements that are temporarely unused.
-
+The **MaStro** panel in the Properties editor is where all scene-wide MaStro data lives: lists of element types, drawing pens, and the various grouping "Sets" used for batch operations. To avoid conflicting or losing data, most of these lists do not allow deleting an entry's underlying id once created — instead, reorder unwanted entries to the end of the list, or rename them for later reuse.
 
 !!! note "Reference"
-    **Panel:** <span class="breadcrumbs"><span class="step">Properties editor</span><span class="sep">▸</span><span class="step">Scene Properties</span></span>
+    **Panel:** <span class="breadcrumbs"><span class="step">Properties editor</span><span class="sep">▸</span><span class="step">Scene Properties</span><span class="sep">▸</span><span class="step">MaStro</span></span>
 
-The properties are categorized in a series of sub-panels:
+The panel is organized into sub-panels:
 
-Sub-panels, in order:
-
-| Panel | Sub-Panel | Description |
-|---|---|---|
-<!-- | [Overlays](properties-overlays.md) | Controls viewport overlays (also accessible from Viewport Overlays popover → MaStro) |
-| [Mass](properties-mass.md) | Block, Building, and Typology lists |
-| [Architecture](properties-architecture.md) | Wall and Floor type lists |
+| Sub-panel | Description |
+|---|---|
+| [Building](properties-building.md) | Typology, Block and Building lists |
+| [Drawing](drawing-layers.md) | MaStro CAD layers, pens and line styles |
 | [Street](properties-street.md) | Street type list |
 | [Custom Properties](properties-custom-properties.md) | Per-object custom data fields |
-| [Camera Sets](properties-camera-sets.md) | Camera groupings for batch projection |
-| [PDF Sets](properties-pdf-sets.md) | Frame groupings for PDF export | -->
+| Sets | Container for the Levels, Cameras and PDF set panels below |
+| └ [Levels](properties-levels.md) | Level Sets — named groups of project levels, used by the viewport Clip Range |
+| └ [Cameras](properties-camera-sets.md) | Camera Sets — camera groupings for batch projection |
+| └ [PDF](properties-pdf-sets.md) | PDF Sets — frame groupings for PDF export |
 
-
-| Panel | Sub-Panel | Description |
-|---|---|---|
-| [Mass](properties-pdf-sets.md) | | Frame groupings for PDF export |
-| | [Typology] | Frame groupings for PDF export |
-| | [Block] | Frame groupings for PDF export |
-| | [Building] | Frame groupings for PDF export |
+The **Sets** sub-panel groups Levels, Cameras and PDF together because they all share the same interaction pattern: a list of named sets on top, and a members list below where checkboxes toggle membership for the active set. See [Levels](properties-levels.md) for the **Level List**, which lives alongside Level Sets but is not itself a set.
