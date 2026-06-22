@@ -2,7 +2,7 @@ from bpy.types import Operator
 from bpy.props import IntProperty
 
 from ....Utils.mastro_levels.clip_range import (
-    shift_clip_range, update_clip_from_selection, is_bottom_ortho,
+    shift_clip_range, update_clip_from_selection, is_top_bottom_ortho, get_view_side,
 )
 
 
@@ -16,8 +16,10 @@ class PROPERTIES_OT_Clip_Range_Shift(Operator):
 
     def execute(self, context):
         space = getattr(context, "space_data", None)
-        is_bottom = space is not None and space.type == 'VIEW_3D' and is_bottom_ortho(space.region_3d)
-        shift_clip_range(context.scene, self.direction, is_bottom)
+        if space is None or space.type != 'VIEW_3D' or not is_top_bottom_ortho(space.region_3d):
+            return {'CANCELLED'}
+        side = get_view_side(space.region_3d)
+        shift_clip_range(context.scene, side, self.direction)
         update_clip_from_selection(context)
         for area in context.screen.areas:
             area.tag_redraw()

@@ -3,13 +3,24 @@ from bpy.types import UIList
 
 from ....Utils.mastro_levels.clip_range import (
     get_active_clip_range_set, get_set_levels, is_clip_range_unlimited,
+    is_top_bottom_ortho, get_view_side,
 )
 
 
+def _side_from_context(context):
+    """"top" or "bottom" matching context.space_data's view, or None if
+    it's not a Top/Bottom ortho VIEW_3D (then there's nothing to show)."""
+    space = getattr(context, "space_data", None)
+    if space is None or space.type != 'VIEW_3D' or not is_top_bottom_ortho(space.region_3d):
+        return None
+    return get_view_side(space.region_3d)
+
+
 class PROPERTIES_UL_Clip_Range_Levels(UIList):
-    """Levels belonging to the set chosen for the viewport clip range
-    (scene.mastro_clip_range_set_id), each with a checkbox toggling whether
-    it's included in the contiguous clip range (see in_clip_range).
+    """Levels belonging to the set chosen for the viewport clip range on
+    the active viewport's side (scene.mastro_clip_range_set_id_top or
+    _bottom), each with a checkbox toggling whether it's included in the
+    contiguous clip range (see in_clip_range).
 
     The checkboxes are disabled while Unlimited is active, since the
     selection is then driven entirely by the active level and the list
@@ -20,13 +31,15 @@ class PROPERTIES_UL_Clip_Range_Levels(UIList):
 
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
+            side = _side_from_context(context)
+
             row = layout.row(align=True)
             row.label(text=f"{item.level:.3f}")
             row.label(text=item.name)
 
             sub = row.row(align=True)
             sub.alignment = 'RIGHT'
-            sub.enabled = not is_clip_range_unlimited(context.scene)
+            sub.enabled = side is not None and not is_clip_range_unlimited(context.scene, side)
             check_icon = 'HIDE_OFF' if item.in_clip_range else 'HIDE_ON'
             sub.prop(item, "in_clip_range", text="", icon=check_icon, emboss=False)
         elif self.layout_type == 'GRID':
@@ -39,7 +52,11 @@ class PROPERTIES_UL_Clip_Range_Levels(UIList):
     def filter_items(self, context, data, propname):
         items = getattr(data, propname)
         scene = context.scene
-        level_set = get_active_clip_range_set(scene)
+        side = _side_from_context(context)
+        if side is None:
+            return [0] * len(items), []
+
+        level_set = get_active_clip_range_set(scene, side)
         member_ids = {lvl.id for lvl in get_set_levels(scene, level_set)}
 
         flt_flags = [

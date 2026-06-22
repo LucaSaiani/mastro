@@ -75,10 +75,23 @@ def _set_in_active_set(self, value):
         active_set.levels.add().level_id = self.id
 
 
+def _get_active_clip_range_side(context):
+    """"top" or "bottom" matching the active viewport, or None if it isn't
+    a Top/Bottom ortho view (e.g. the UIList is being drawn somewhere
+    else, like a popup, where there's no clip range to show/edit)."""
+    from ...Utils.mastro_levels.clip_range import is_top_bottom_ortho, get_view_side
+    space = getattr(context, "space_data", None)
+    if space is None or space.type != 'VIEW_3D' or not is_top_bottom_ortho(space.region_3d):
+        return None
+    return get_view_side(space.region_3d)
+
+
 def _get_in_clip_range(self):
-    if self.id not in bpy.context.scene.get("mastro_clip_range_level_ids", []):
+    side = _get_active_clip_range_side(bpy.context)
+    if side is None:
         return False
-    return True
+    scene = bpy.context.scene
+    return self.id in scene.get(f"mastro_clip_range_level_ids_{side}", [])
 
 
 def _set_in_clip_range(self, value):
@@ -95,14 +108,12 @@ def _set_in_clip_range(self, value):
     resulting elevation range is then pushed to the active 3D viewport's
     clip start/end (see update_clip_from_selection).
     """
-    from ...Utils.mastro_levels.clip_range import (
-        apply_clip_range_toggle, update_clip_from_selection, is_bottom_ortho,
-    )
+    from ...Utils.mastro_levels.clip_range import apply_clip_range_toggle, update_clip_from_selection
     context = bpy.context
-    scene = context.scene
-    space = getattr(context, "space_data", None)
-    is_bottom = space is not None and space.type == 'VIEW_3D' and is_bottom_ortho(space.region_3d)
-    apply_clip_range_toggle(scene, self.id, value, is_bottom)
+    side = _get_active_clip_range_side(context)
+    if side is None:
+        return
+    apply_clip_range_toggle(context.scene, side, self.id, value)
     update_clip_from_selection(context)
 
 
@@ -144,9 +155,10 @@ class mastro_CL_level_list(PropertyGroup):
         get=_get_in_active_set,
         set=_set_in_active_set,
     )
-    # Backed by scene["mastro_clip_range_level_ids"], not stored as a real
-    # property, so it can be a plain id list shared across every level
-    # without a parallel BoolProperty per item to keep in sync.
+    # Backed by scene["mastro_clip_range_level_ids_top"/"_bottom"] (per the
+    # active viewport's side - see _get_active_clip_range_side), not stored
+    # as a real property, so it can be a plain id list shared across every
+    # level without a parallel BoolProperty per item to keep in sync.
     in_clip_range: BoolProperty(
         name="In Clip Range",
         get=_get_in_clip_range,
