@@ -75,6 +75,37 @@ def _set_in_active_set(self, value):
         active_set.levels.add().level_id = self.id
 
 
+def _get_in_clip_range(self):
+    if self.id not in bpy.context.scene.get("mastro_clip_range_level_ids", []):
+        return False
+    return True
+
+
+def _set_in_clip_range(self, value):
+    """Toggling a level's clip-range checkbox always leaves a single,
+    non-empty, contiguous range selected.
+
+    Levels are shown in mastro_level_list order (already sorted by
+    descending level), so "contiguous" means contiguous list indices, not
+    contiguous elevations. After applying the requested toggle, the
+    selection is collapsed to [min(selected_index), max(selected_index)] -
+    so clicking anywhere between the current extremes, or outside them,
+    grows or shrinks the range from the correct end, and clicking the only
+    remaining selected level is a no-op (can't empty the range). The
+    resulting elevation range is then pushed to the active 3D viewport's
+    clip start/end (see update_clip_from_selection).
+    """
+    from ...Utils.mastro_levels.clip_range import (
+        apply_clip_range_toggle, update_clip_from_selection, is_bottom_ortho,
+    )
+    context = bpy.context
+    scene = context.scene
+    space = getattr(context, "space_data", None)
+    is_bottom = space is not None and space.type == 'VIEW_3D' and is_bottom_ortho(space.region_3d)
+    apply_clip_range_toggle(scene, self.id, value, is_bottom)
+    update_clip_from_selection(context)
+
+
 class mastro_CL_level_list(PropertyGroup):
     """One project level, defined by its elevation.
 
@@ -112,4 +143,12 @@ class mastro_CL_level_list(PropertyGroup):
         name="In Active Set",
         get=_get_in_active_set,
         set=_set_in_active_set,
+    )
+    # Backed by scene["mastro_clip_range_level_ids"], not stored as a real
+    # property, so it can be a plain id list shared across every level
+    # without a parallel BoolProperty per item to keep in sync.
+    in_clip_range: BoolProperty(
+        name="In Clip Range",
+        get=_get_in_clip_range,
+        set=_set_in_clip_range,
     )

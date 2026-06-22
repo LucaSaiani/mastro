@@ -35,6 +35,10 @@ from .mastro_levels.PROPERTIES_OT_Level_Set_Duplicate_Item import PROPERTIES_OT_
 from .mastro_levels.PROPERTIES_OT_Level_Set_Move_Item import PROPERTIES_OT_Level_Set_Move_Item
 from .mastro_levels.PROPERTIES_PT_Mastro_Level_Sets import PROPERTIES_PT_Mastro_Level_Sets
 from .mastro_levels.PROPERTIES_PT_Mastro_Levels import PROPERTIES_PT_Mastro_Levels
+from .mastro_levels.PROPERTIES_UL_Clip_Range_Levels import PROPERTIES_UL_Clip_Range_Levels
+from .mastro_levels.PROPERTIES_OT_Clip_Range_Shift import PROPERTIES_OT_Clip_Range_Shift
+from .mastro_levels.PROPERTIES_OT_Clip_Range_Unlimited import PROPERTIES_OT_Clip_Range_Unlimited
+from .mastro_levels import VIEW3D_PT_Clip_Range as _mastro_clip_range_view3d
 from .VIEW3D_PT_Mastro_Panel import VIEW3D_PT_Mastro_Panel
 from .VIEW3D_PT_Mastro_Convert import VIEW3D_PT_Mastro_Convert
 from .mastro_arch.VIEW3D_PT_Mastro_Architecture import VIEW3D_PT_Mastro_Architecture
@@ -113,6 +117,9 @@ classes = (
     PROPERTIES_OT_Level_Set_Move_Item,
     PROPERTIES_PT_Mastro_Level_Sets,
     PROPERTIES_PT_Mastro_Levels,
+    PROPERTIES_UL_Clip_Range_Levels,
+    PROPERTIES_OT_Clip_Range_Shift,
+    PROPERTIES_OT_Clip_Range_Unlimited,
     VIEW3D_PT_Mastro_Panel,
     VIEW3D_PT_Mastro_Convert,
     VIEW3D_PT_Mastro_Architecture,
@@ -251,9 +258,11 @@ def register():
         register_class(cls)
 
     mastro_cad.register()
+    _mastro_clip_range_view3d.register()
 
 def unregister():
     global _dynamic_classes
+    _mastro_clip_range_view3d.unregister()
     mastro_cad.unregister()
 
     if "_dynamic_classes" in globals() and _dynamic_classes:
