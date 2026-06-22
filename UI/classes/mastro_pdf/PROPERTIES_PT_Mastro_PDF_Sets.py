@@ -25,7 +25,7 @@ class PROPERTIES_PT_Mastro_PDF_Sets(Panel):
             "PROPERTIES_UL_PDF_Sets", "",
             pp, "pdf_sets",
             pp, "active_set_index",
-            rows=4,
+            rows=5,
         )
         col = row.column(align=True)
         col.operator("mastro.pdf_set_add",       text="", icon='ADD')

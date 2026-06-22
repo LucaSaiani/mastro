@@ -34,6 +34,7 @@ def init_lists(scene=None):
         ("mastro_wall_name_list", {"name": "Wall type", "normal": 0}),
         ("mastro_floor_name_list", {"name": "Floor type"}),
         ("mastro_level_list", {"name": "AOD", "level": 0}),
+        ("mastro_level_set_list", {"name": "All Levels"}),
     ]
 
     # --- Apply initialization logic for all configured collections ---

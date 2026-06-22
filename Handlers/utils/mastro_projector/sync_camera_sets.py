@@ -1,10 +1,10 @@
 def sync_default_camera_set(scene):
-    """Keep Set 0 ('All') in sync with all enabled cameras."""
+    """Keep Set 0 ('All Cameras') in sync with all enabled cameras."""
     ssp = scene.mastro_projector_props
 
     if not ssp.camera_sets or not ssp.camera_sets[0].is_default:
         s = ssp.camera_sets.add()
-        s.name = "All"
+        s.name = "All Cameras"
         s.is_default = True
         ssp.camera_sets.move(len(ssp.camera_sets) - 1, 0)
 

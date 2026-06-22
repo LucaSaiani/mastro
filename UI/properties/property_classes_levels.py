@@ -2,6 +2,7 @@ from bpy.types import PropertyGroup
 from bpy.props import (IntProperty,
                        FloatProperty,
                        StringProperty,
+                       CollectionProperty,
 )
 
 
@@ -16,6 +17,24 @@ def update_level_list(self, context):
         return
     from ...Utils.mastro_levels.sort_level_list import sort_level_list
     sort_level_list(context.scene)
+
+
+class mastro_CL_level_set_item(PropertyGroup):
+    """Reference to a mastro_level_list entry, by id, that belongs to a set."""
+    level_id: IntProperty(name="Level Id", default=0)
+
+
+class mastro_CL_level_set(PropertyGroup):
+    """A named group of levels.
+
+    Set id 0 is the default "All Levels" set: its members are not stored
+    here but derived live from mastro_level_list (see
+    PROPERTIES_UL_Level_Set_Members), so it always reflects every level
+    that currently exists and cannot be edited or removed.
+    """
+    id: IntProperty(name="Id", default=0)
+    name: StringProperty(name="Name", default="Level Set")
+    levels: CollectionProperty(type=mastro_CL_level_set_item)
 
 
 class mastro_CL_level_list(PropertyGroup):
