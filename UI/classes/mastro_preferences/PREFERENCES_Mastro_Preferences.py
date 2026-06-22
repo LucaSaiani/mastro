@@ -182,6 +182,16 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
         ),
     )
 
+    create_drawing_at_active_level: bpy.props.BoolProperty(
+        name="Create Drawings at Active Level",
+        default=True,
+        description=(
+            "New MaStro drawing objects are placed at the elevation of the "
+            "active level in whichever Top/Bottom ortho viewport's Clip "
+            "Range is active, instead of at the 3D cursor's Z position"
+        ),
+    )
+
     # --- GIS: predefined CRS ---
     def listPredefCRS(self, context):
         return [tuple(elem) for elem in json.loads(self.predefCrsJson)]
@@ -296,14 +306,6 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
     def draw(self, context):
         layout = self.layout
 
-        # Section: Level Sets
-        header, panel = layout.panel("mastro_prefs_level_sets_settings", default_closed=True)
-        header.label(text="Level Sets")
-        if panel:
-            split = panel.split(factor=0.2)
-            split.label(text="Cutting Plane Height:")
-            split.prop(self, "clip_range_cutting_plane_height", text="")
-
         # Section: Projection
         header, panel = layout.panel("mastro_prefs_projection_settings", default_closed=True)
         header.label(text="2D Projection")
@@ -361,9 +363,6 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
             row = col.row()
             row.prop(self, "gis_resampling")
 
-
-
-
             col.separator()
             split = layout.split(factor=0.2)
             split.label(text="3D Tiles")
@@ -382,7 +381,7 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
 
         # Section: Note
         header, panel = layout.panel("mastro_prefs_note_settings", default_closed=True)
-        header.label(text="Node Note")
+        header.label(text="Geometry Nodes Note")
         if panel:
             col = panel.column(align=True)
             row = col.row()
@@ -395,6 +394,18 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
             split = col.split(factor=0.2)
             split.label(text = "Color:")
             split.prop(self, "noteColor",icon_only=True)
+
+        # Section: Level Sets
+        header, panel = layout.panel("mastro_prefs_level_sets_settings", default_closed=True)
+        header.label(text="Levels")
+        if panel:
+            split = panel.split(factor=0.2)
+            split.label(text="Cutting Plane Height:")
+            split.prop(self, "clip_range_cutting_plane_height", text="")
+
+            split = panel.split(factor=0.2)
+            split.label(text="Drawing Creation:")
+            split.prop(self, "create_drawing_at_active_level", text="Create at active level")
 
         # Section: Overlay
         header, panel = layout.panel("mastro_prefs_overlay_settings", default_closed=True)
