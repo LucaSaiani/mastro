@@ -1,5 +1,3 @@
-UNLIMITED_CLIP_DISTANCE = 1000.0  # 1 km, used for the "Unlimited" clip end/start
-
 _level_set_enum_cache = {}
 
 
@@ -88,10 +86,15 @@ def _set_clip_range_from_current(scene, side, ids_in_order, current_position, co
     scene[_key("level_ids", side)] = ids_in_order[lo:hi + 1]
     scene[_key("count", side)] = count
 
+    # Guards against re-entering shift_clip_range_to_position's update
+    # callback (on mastro_clip_range_list_index_<side>) when this write is
+    # itself what that callback is in the middle of applying.
+    scene[_key("updating_index", side)] = True
     for i, lvl in enumerate(scene.mastro_level_list):
         if lvl.id == ids_in_order[current_position]:
             setattr(scene, f"mastro_clip_range_list_index_{side}", i)
             break
+    scene[_key("updating_index", side)] = False
 
 
 def apply_clip_range_toggle(scene, side, level_id, value):
@@ -137,6 +140,29 @@ def apply_clip_range_toggle(scene, side, level_id, value):
     _set_clip_range_from_current(scene, side, ids_in_order, current_position, hi - lo + 1)
 
 
+def reset_clip_range_for_set_change(scene, side):
+    """Rebuild the clip range for `side` against its currently chosen level
+    set, instead of leaving stale level ids from a previously chosen set
+    in place - which, once compared against the new set's levels (see
+    filter_items/in_clip_range), would show an inconsistent selection
+    (e.g. the active row pointing at a level that "survived" only by id
+    coincidence, not because it's meaningfully selected for the new set).
+
+    Defaults to a single active level (the top of the list for "top", the
+    bottom for "bottom" - same convention as the very first time a side is
+    used, see sync_clip_range_on_view_change), or to Unlimited's "every
+    level" if Unlimited was already on for this side.
+    """
+    level_set = get_active_clip_range_set(scene, side)
+    ids_in_order = [lvl.id for lvl in get_set_levels(scene, level_set)]
+    if not ids_in_order:
+        return
+
+    default_position = len(ids_in_order) - 1 if side == "bottom" else 0
+    count = len(ids_in_order) if is_clip_range_unlimited(scene, side) else 1
+    _set_clip_range_from_current(scene, side, ids_in_order, default_position, count)
+
+
 def shift_clip_range(scene, side, steps):
     """Move the active level by `steps` list-positions, then rebuild the
     range as [active, active + count - 1] ("top") or [active - count + 1,
@@ -162,6 +188,44 @@ def shift_clip_range(scene, side, steps):
 
     new_position = current_position + steps
     _set_clip_range_from_current(scene, side, ids_in_order, new_position, count)
+
+
+def set_active_level_by_index(scene, side, level_list_index):
+    """Make the level at mastro_level_list[level_list_index] the active
+    one for `side`, keeping the same count - i.e. clicking a row in the
+    clip-range UIList behaves like shift_clip_range, just jumping straight
+    to the clicked position instead of moving by ±1 step. Works the same
+    whether Unlimited is on or off (count is whatever it currently is in
+    either case).
+
+    No-op (returns False) if called while _set_clip_range_from_current is
+    itself in the middle of writing mastro_clip_range_list_index_<side> -
+    see its "updating_index" guard - to avoid re-entering this from that
+    write's own update callback.
+    """
+    if scene.get(_key("updating_index", side)):
+        return False
+
+    if not (0 <= level_list_index < len(scene.mastro_level_list)):
+        return False
+    clicked_id = scene.mastro_level_list[level_list_index].id
+
+    level_set = get_active_clip_range_set(scene, side)
+    ids_in_order = [lvl.id for lvl in get_set_levels(scene, level_set)]
+    if clicked_id not in ids_in_order:
+        return False
+    new_position = ids_in_order.index(clicked_id)
+
+    current = scene.get(_key("level_ids", side), [])
+    positions = [ids_in_order.index(lid) for lid in current if lid in ids_in_order]
+    if positions:
+        lo, hi = min(positions), max(positions)
+        count = scene.get(_key("count", side), hi - lo + 1)
+    else:
+        count = 1
+
+    _set_clip_range_from_current(scene, side, ids_in_order, new_position, count)
+    return True
 
 
 def get_clip_range_elevations(scene, side):
@@ -213,44 +277,85 @@ def get_view_side(region_3d):
     return "bottom" if is_bottom_ortho(region_3d) else "top"
 
 
-def _camera_world_z(region_3d):
-    """World-space Z of the virtual ortho camera position.
-
-    clip_start/clip_end are distances measured from this point along the
-    view direction, not absolute world Z - and Blender requires
-    clip_start > 0, so an elevation of 0 or negative (e.g. a basement
-    level) cannot be written directly. view_matrix's inverse translation
-    is the camera's world-space position; for Top/Bottom views only its Z
-    component matters since the view direction is the world Z axis.
-    """
-    return region_3d.view_matrix.inverted().translation.z
+# Original clip_start/clip_end/view_location.z, saved per-region (keyed by
+# region_3d.as_pointer()) the first time apply_clip_to_space overrides them,
+# so leaving Top/Bottom can restore exactly what the user had before -
+# rather than leaving the override in place once the user rotates away.
+# Module-level cache, not Scene data: this is purely about this Blender
+# session's viewport state, not something that should be saved in the
+# .blend file or shared between scenes.
+_saved_clip_state = {}
 
 
-def _elevation_to_clip_distance(region_3d, elevation):
-    """Distance from the virtual ortho camera to a given world-Z
-    elevation, along the view direction (always positive for any
-    elevation the camera is actually looking towards)."""
-    camera_z = _camera_world_z(region_3d)
-    if is_bottom_ortho(region_3d):
-        return elevation - camera_z  # camera below, looking up +Z
-    return camera_z - elevation  # camera above, looking down -Z
+def _save_original_clip_state(space, region_3d):
+    key = region_3d.as_pointer()
+    if key not in _saved_clip_state:
+        _saved_clip_state[key] = (space.clip_start, space.clip_end, region_3d.view_location.z)
+
+
+def restore_original_clip_state(space, region_3d):
+    """Restore clip_start/clip_end/view_location.z to what they were
+    before apply_clip_to_space first overrode them for this region, then
+    forget the saved state (so a later re-entry into Top/Bottom saves a
+    fresh "original" rather than restoring a stale one)."""
+    key = region_3d.as_pointer()
+    saved = _saved_clip_state.pop(key, None)
+    if saved is None:
+        return
+    clip_start, clip_end, view_location_z = saved
+    space.clip_start = clip_start
+    space.clip_end = clip_end
+    region_3d.view_location.z = view_location_z
+
+
+def forget_clip_state(region_keys):
+    """Drop saved-original-clip entries for regions that no longer exist
+    (closed area/window) - without this, a region closed while its
+    Top/Bottom override was still active would leave a permanently
+    orphaned entry in _saved_clip_state."""
+    for key in list(_saved_clip_state):
+        if key not in region_keys:
+            del _saved_clip_state[key]
 
 
 def apply_clip_to_space(scene, space):
     """Push the current clip-range selection's elevation span to a given
-    VIEW_3D space's clip start/end, using whichever side (top/bottom)
-    matches that space's own view direction.
+    VIEW_3D space, using whichever side (top/bottom) matches that space's
+    own view direction.
 
-    clip_start/clip_end live on SpaceView3D (the "Clip Start"/"Clip End"
-    fields in the View panel), not on RegionView3D, and are distances from
-    the virtual ortho camera (see _elevation_to_clip_distance) rather than
-    absolute elevations - the near side of the range (the level closest to
-    the camera) is always clip_start, the far side clip_end.
+    IMPORTANT: in orthographic mode Blender's actual near/far clip planes
+    do NOT come from clip_start/clip_end the way they do in perspective.
+    Per BKE_camera_params_from_view3d (source/blender/blenkernel/intern/
+    camera.cc): for RV3D_ORTHO, clip_start is discarded entirely and the
+    effective near/far are computed as a *symmetric* range around the
+    view's eye point:
+        clip_end_eff   = clip_end * 0.5
+        clip_start_eff = -clip_end_eff
+    i.e. the visible Z-slab is always centered on the eye point, with
+    clip_end controlling its total thickness. There is no way to get an
+    asymmetric near/far pair without moving the eye point itself.
 
-    Takes space/scene directly rather than a context, so it can be
-    applied to any VIEW_3D space found while iterating every window/area
-    (see monitor_view_rotation.py), not just whichever one happens to be
-    context.space_data.
+    The eye point equals view_location exactly in orthographic mode
+    (verified empirically: eye.z - view_location.z == 0.0 for both Top
+    and Bottom ortho, regardless of view_distance - unlike perspective
+    mode, where the eye sits view_distance away from the pivot). So
+    moving the eye point along Z is simply writing region_3d.view_location.z
+    directly - which, for an orthographic Top/Bottom view, does NOT
+    change anything on screen in X/Y (the framing/pan/zoom is untouched):
+    it only changes which world-Z slab is inside the clip range.
+
+    To make [near, far] (world Z, near < far) the visible slab:
+        clip_end = far - near
+        view_location.z = (near + far) / 2
+
+    Before that, the end of the selection closest to the camera is pushed
+    out by the "Cutting Plane Height" preference (default 1.2m, the
+    standard architectural section height above a floor/below a ceiling):
+    the drawing sits AT the active level's elevation, so showing exactly
+    up to that elevation and no further would clip the drawing itself
+    away. This applies regardless of how many levels are selected - only
+    the camera-facing end moves; the far end stays exactly at its level's
+    elevation.
     """
     if space is None or space.type != 'VIEW_3D':
         return
@@ -262,13 +367,19 @@ def apply_clip_to_space(scene, space):
     span = get_clip_range_elevations(scene, side)
     if span is None:
         return
-    lo, hi = span
+    near, far = span
 
-    # Top: camera above, hi (closer to camera) is the near side. Bottom:
-    # camera below, lo is the near side - matches _elevation_to_clip_distance.
-    near, far = (lo, hi) if side == "bottom" else (hi, lo)
-    space.clip_start = max(1e-5, _elevation_to_clip_distance(region_3d, near))
-    space.clip_end = max(space.clip_start + 1e-5, _elevation_to_clip_distance(region_3d, far))
+    _save_original_clip_state(space, region_3d)
+
+    from ..mastro_preferences.get_preferences import get_prefs
+    cutting_plane_height = get_prefs().clip_range_cutting_plane_height
+    if side == "bottom":
+        near -= cutting_plane_height  # near (lowest elevation) faces the camera
+    else:
+        far += cutting_plane_height  # far (highest elevation) faces the camera
+
+    region_3d.view_location.z = (near + far) / 2.0
+    space.clip_end = max(1e-5, far - near)
 
 
 def update_clip_from_selection(context):
@@ -343,6 +454,14 @@ def sync_clip_range_on_view_change(scene, side):
     current = scene.get(_key("level_ids", side), [])
     positions = [ids_in_order.index(lid) for lid in current if lid in ids_in_order]
     if not positions:
+        # Nothing has ever been selected for this side yet (e.g. the very
+        # first time a Top or Bottom viewport is opened) - default to a
+        # single active level instead of leaving the range empty, which
+        # would skip writing view_location.z/clip_end entirely and leave
+        # the viewport showing no clip range at all (see get_view_side's
+        # active-level convention: lo for "top", hi for "bottom").
+        default_position = 0 if side != "bottom" else len(ids_in_order) - 1
+        _set_clip_range_from_current(scene, side, ids_in_order, default_position, 1)
         return
 
     index = getattr(scene, f"mastro_clip_range_list_index_{side}")

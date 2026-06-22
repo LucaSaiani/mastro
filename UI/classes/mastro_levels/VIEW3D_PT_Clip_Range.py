@@ -25,8 +25,7 @@ def _draw_clip_range(self, context):
 
     layout = self.layout
     layout.separator()
-    layout.label(text="Clip Range")
-    layout.prop(scene, f"mastro_clip_range_set_id_{side}", text="Set")
+    layout.prop(scene, f"mastro_clip_range_set_id_{side}", text="Clip Range")
 
     # "Unlimited" pushes the far clip plane out, which - given the
     # current/count model in clip_range.py - extends towards the bottom
@@ -37,7 +36,8 @@ def _draw_clip_range(self, context):
     unlimited = is_clip_range_unlimited(scene, side)
 
     if is_bottom:
-        layout.operator("mastro_clip_range.unlimited", icon='ARROW_LEFTRIGHT', depress=unlimited)
+        layout.operator("mastro_clip_range.unlimited", text="Bottom Unlimited",
+                         icon='TRIA_DOWN_BAR', depress=unlimited)
 
     row = layout.row()
     row.template_list("PROPERTIES_UL_Clip_Range_Levels", "clip_range_levels", scene,
@@ -50,7 +50,8 @@ def _draw_clip_range(self, context):
     col.operator("mastro_clip_range.shift", icon='TRIA_DOWN', text="").direction = 1
 
     if not is_bottom:
-        layout.operator("mastro_clip_range.unlimited", icon='ARROW_LEFTRIGHT', depress=unlimited)
+        layout.operator("mastro_clip_range.unlimited", text="Top Unlimited",
+                         icon='TRIA_UP_BAR', depress=unlimited)
 
 
 def register():

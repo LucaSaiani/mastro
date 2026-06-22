@@ -32,7 +32,12 @@ def monitor_view_rotation():
 
             last_view = _last_view_matrices.get(key)
             if last_view is not None and matrices_differ(current_view, last_view):
-                _on_view_changed(space, region_3d)
+                _on_view_changed(area, space, region_3d)
+                # _on_view_changed may itself write view_location.z (see
+                # apply_clip_to_space), which changes view_matrix again -
+                # re-read it so next tick doesn't see that as a further
+                # "the user moved the view" change and loop one extra tick.
+                current_view = region_3d.view_matrix.copy()
 
             _last_view_matrices[key] = current_view
 
@@ -42,12 +47,15 @@ def monitor_view_rotation():
         if key not in seen_keys:
             del _last_view_matrices[key]
 
+    from .mastro_levels.clip_range import forget_clip_state
+    forget_clip_state(seen_keys)
+
     return 0.1
 
 
-def _on_view_changed(space, region_3d):
+def _on_view_changed(area, space, region_3d):
     """Run side effects that need to react to one viewport's rotation/
-    movement (e.g. flipping between Top and Bottom ortho).
+    movement (e.g. flipping between Top and Bottom ortho, or leaving it).
 
     Safe to write to Scene here (unlike inside a Panel.draw()), since this
     runs from a timer callback with a normal, unrestricted context.
@@ -58,9 +66,15 @@ def _on_view_changed(space, region_3d):
 
     from .mastro_levels.clip_range import (
         sync_clip_range_on_view_change, apply_clip_to_space,
-        is_top_bottom_ortho, get_view_side,
+        is_top_bottom_ortho, get_view_side, restore_original_clip_state,
     )
     if not is_top_bottom_ortho(region_3d):
+        # Left Top/Bottom ortho (rotated away, or switched to perspective/
+        # another ortho side) - restore whatever clip_start/clip_end/
+        # view_location.z were before we started overriding them, rather
+        # than leaving the override stuck in place.
+        restore_original_clip_state(space, region_3d)
+        area.tag_redraw()
         return
 
     # Clip-range state is per-side now (top/bottom each independent - see
@@ -68,7 +82,10 @@ def _on_view_changed(space, region_3d):
     # a Top viewport elsewhere is unaffected by a Bottom viewport's change.
     side = get_view_side(region_3d)
     sync_clip_range_on_view_change(scene, side)
+    # apply_clip_to_space writes region_3d.view_location.z, which doesn't
+    # auto-redraw the viewport (unlike Scene/ID property changes).
     apply_clip_to_space(scene, space)
+    area.tag_redraw()
 
 def start_monitoring():
     if not bpy.app.timers.is_registered(monitor_view_rotation):

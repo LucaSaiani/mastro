@@ -168,6 +168,20 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
         description="When opening a .blend file, warn if another user already has it open"
     )
 
+    clip_range_cutting_plane_height: bpy.props.FloatProperty(
+        name="Cutting Plane Height",
+        default=1.2,
+        min=0.0,
+        precision=3,
+        unit='LENGTH',
+        description=(
+            "Standard architectural section height above the floor (Top view) "
+            "or below the ceiling (Bottom view): the Level Sets clip range "
+            "extends this far past the active level's own elevation, on the "
+            "side closest to the camera, instead of stopping exactly at it"
+        ),
+    )
+
     # --- GIS: predefined CRS ---
     def listPredefCRS(self, context):
         return [tuple(elem) for elem in json.loads(self.predefCrsJson)]
@@ -281,6 +295,14 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
 
     def draw(self, context):
         layout = self.layout
+
+        # Section: Level Sets
+        header, panel = layout.panel("mastro_prefs_level_sets_settings", default_closed=True)
+        header.label(text="Level Sets")
+        if panel:
+            split = panel.split(factor=0.2)
+            split.label(text="Cutting Plane Height:")
+            split.prop(self, "clip_range_cutting_plane_height", text="")
 
         # Section: Projection
         header, panel = layout.panel("mastro_prefs_projection_settings", default_closed=True)

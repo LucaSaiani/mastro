@@ -33,8 +33,19 @@ class PROPERTIES_UL_Clip_Range_Levels(UIList):
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
             side = _side_from_context(context)
 
+            # Explicit +/- sign and the scene's length unit (e.g. "m"),
+            # rather than a bare number, so it's clear at a glance whether
+            # a level is above or below AOD (elevation 0).
+            # precision=4 because bpy.utils.units.to_string rounds before
+            # trimming trailing zeros, so 3 ends up dropping the last
+            # displayed digit in some cases - 4 reliably keeps 3 decimals.
+            unit_system = context.scene.unit_settings.system
+            level_text = bpy.utils.units.to_string(unit_system, 'LENGTH', item.level, precision=4)
+            if item.level > 0:
+                level_text = "+" + level_text
+
             row = layout.row(align=True)
-            row.label(text=f"{item.level:.3f}")
+            row.label(text=level_text)
             row.label(text=item.name)
 
             sub = row.row(align=True)

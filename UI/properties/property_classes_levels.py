@@ -114,7 +114,12 @@ def _set_in_clip_range(self, value):
     if side is None:
         return
     apply_clip_range_toggle(context.scene, side, self.id, value)
+    # Writes region_3d.view_location.z (see apply_clip_to_space), which -
+    # unlike a Scene/ID property change - doesn't auto-redraw the viewport.
     update_clip_from_selection(context)
+    if context.screen is not None:
+        for area in context.screen.areas:
+            area.tag_redraw()
 
 
 class mastro_CL_level_list(PropertyGroup):
