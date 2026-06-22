@@ -33,6 +33,7 @@ def init_lists(scene=None):
         ("mastro_street_name_list", {"name": "Street type"}),
         ("mastro_wall_name_list", {"name": "Wall type", "normal": 0}),
         ("mastro_floor_name_list", {"name": "Floor type"}),
+        ("mastro_level_list", {"name": "AOD", "level": 0}),
     ]
 
     # --- Apply initialization logic for all configured collections ---

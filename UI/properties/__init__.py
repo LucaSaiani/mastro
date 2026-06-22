@@ -12,6 +12,7 @@ from .property_classes_layer import (mastro_CL_layer_slot,
                                      mastro_CL_layer_manager_props,
 )
 from .property_classes_street import mastro_CL_street_name_list
+from .property_classes_levels import mastro_CL_level_list
 from .property_classes_pdf import (mastro_CL_pdf_frame_item,
                                    mastro_CL_pdf_set,
                                    mastro_CL_pdf_scene_props,
@@ -45,6 +46,7 @@ classes = (
     mastro_CL_constraint_XY_settings,
     mastro_CL_name_with_id,
     mastro_CL_street_name_list,
+    mastro_CL_level_list,
     mastro_CL_floor_name_list,
     mastro_CL_wall_name_list,
     mastro_CL_typology_uses_name_list,

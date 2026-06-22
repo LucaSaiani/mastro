@@ -22,6 +22,12 @@ from .mastro_arch.PROPERTIES_PT_Mastro_Architecture import PROPERTIES_PT_Mastro_
 from .mastro_arch.PROPERTIES_PT_Mastro_Wall import PROPERTIES_PT_Mastro_Wall
 from .mastro_arch.PROPERTIES_PT_Mastro_Floor import PROPERTIES_PT_Mastro_Floor
 from .mastro_street.PROPERTIES_PT_Mastro_Street import PROPERTIES_PT_Mastro_Street
+from .mastro_levels.PROPERTIES_UL_Level import PROPERTIES_UL_Level
+from .mastro_levels.PROPERTIES_OT_Level_List_New_Item import PROPERTIES_OT_Level_List_New_Item
+from .mastro_levels.PROPERTIES_OT_Level_List_Remove_Item import PROPERTIES_OT_Level_List_Remove_Item
+from .mastro_levels.PROPERTIES_OT_Level_List_Batch_Add import PROPERTIES_OT_Level_List_Batch_Add
+from .mastro_levels.MASTRO_MT_Level_List_Specials import MASTRO_MT_Level_List_Specials
+from .mastro_levels.PROPERTIES_PT_Mastro_Levels import PROPERTIES_PT_Mastro_Levels
 from .VIEW3D_PT_Mastro_Panel import VIEW3D_PT_Mastro_Panel
 from .VIEW3D_PT_Mastro_Convert import VIEW3D_PT_Mastro_Convert
 from .mastro_arch.VIEW3D_PT_Mastro_Architecture import VIEW3D_PT_Mastro_Architecture
@@ -87,6 +93,12 @@ classes = (
     PROPERTIES_PT_Mastro_Wall,
     PROPERTIES_PT_Mastro_Floor,
     PROPERTIES_PT_Mastro_Street,
+    PROPERTIES_UL_Level,
+    PROPERTIES_OT_Level_List_New_Item,
+    PROPERTIES_OT_Level_List_Remove_Item,
+    PROPERTIES_OT_Level_List_Batch_Add,
+    MASTRO_MT_Level_List_Specials,
+    PROPERTIES_PT_Mastro_Levels,
     VIEW3D_PT_Mastro_Panel,
     VIEW3D_PT_Mastro_Convert,
     VIEW3D_PT_Mastro_Architecture,

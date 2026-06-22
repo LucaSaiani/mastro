@@ -10,6 +10,7 @@ from ...Utils.update_attributes import *
 
 from .properties_layer import scene_pointer_props_layer
 from .properties_street import scene_props_street
+from .properties_levels import scene_props_levels
 from .properties_pdf import scene_pointer_props_pdf
 from .properties_arch import scene_props_arch, object_props_arch
 from .properties_custom_properties import scene_props_custom_properties
@@ -82,6 +83,8 @@ scene_props = [
     *scene_props_extras,
 
     *scene_props_street,
+
+    *scene_props_levels,
 
     # ------------------------------
     # Geometry Nodes / Object Selection
