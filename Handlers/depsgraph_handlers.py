@@ -57,12 +57,49 @@ def _on_depsgraph_update(scene, depsgraph):
     _check_drawing_objects(bpy.context)
 
 
+def _apply_clip_range_to_open_viewports():
+    """Apply the clip range to every VIEW_3D already in Top/Bottom ortho
+    when the file is opened.
+
+    monitor_view_rotation's timer (Utils/monitor_view_rotation.py) only
+    reacts to a view CHANGE - if a viewport is already in Top/Bottom at
+    load time, there's no "change" for it to detect on the very first
+    tick (it has nothing yet to compare the current view matrix against),
+    so the clip range would otherwise never get applied, and the
+    original clip_start/clip_end/view_location.z would never get saved
+    for restoring later. This runs once at load instead, covering exactly
+    that gap.
+    """
+    from ..Utils.mastro_levels.clip_range import (
+        is_top_bottom_ortho, get_view_side, sync_clip_range_on_view_change,
+        apply_clip_to_space,
+    )
+    scene = bpy.context.scene
+    if scene is None:
+        return
+    for window in bpy.context.window_manager.windows:
+        for area in window.screen.areas:
+            if area.type != 'VIEW_3D':
+                continue
+            space = area.spaces.active
+            region_3d = space.region_3d
+            if is_top_bottom_ortho(region_3d):
+                # Same two calls _on_view_changed makes on a real view
+                # change (monitor_view_rotation.py): rebuild the range if
+                # this side has never been set up yet, then push it to
+                # clip_start/end - covering both "never initialized" and
+                # "already has a range from a previous session" cases.
+                sync_clip_range_on_view_change(scene, get_view_side(region_3d))
+                apply_clip_to_space(scene, space)
+
+
 @persistent
 def _on_load_post(filepath):
     scene = bpy.context.scene
     if scene:
         sync_default_camera_set(scene)
         sync_pdf_frames(scene)
+        _apply_clip_range_to_open_viewports()
 
 
 def register():
