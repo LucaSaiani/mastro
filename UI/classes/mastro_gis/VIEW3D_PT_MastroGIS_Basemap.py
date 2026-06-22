@@ -9,6 +9,7 @@ class VIEW3D_PT_MastroGIS_Basemap(Panel):
     bl_region_type = "UI"
     bl_category    = "MaStro"
     bl_label       = "GIS"
+    bl_options = {'DEFAULT_CLOSED'} 
 
     def draw(self, context):
         layout = self.layout

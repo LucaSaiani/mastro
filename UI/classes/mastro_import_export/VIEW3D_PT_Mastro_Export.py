@@ -8,6 +8,7 @@ class VIEW3D_PT_Mastro_Export(Panel):
     bl_category = "MaStro"
     bl_label = "Export"
     bl_order = 100
+    bl_options = {'DEFAULT_CLOSED'} 
     
     @classmethod
     def poll(cls, context):
