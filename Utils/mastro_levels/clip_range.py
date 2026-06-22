@@ -246,6 +246,55 @@ def update_clip_from_selection(context):
     space.clip_end = max(space.clip_start + 1e-5, _elevation_to_clip_distance(region_3d, far))
 
 
+def sync_clip_range_on_view_change(scene, region_3d):
+    """Rebuild the clip range when the view has just switched between Top
+    and Bottom ortho.
+
+    Only safe to call from a context where writing to Scene is allowed
+    (e.g. a timer callback) - NOT from a Panel.draw(), where Blender
+    raises AttributeError on any ID write. See monitor_view_rotation.py,
+    which calls this once per tick after detecting the view matrix changed.
+
+    The active level itself never changes when the view flips - it's read
+    straight from mastro_clip_range_list_index, the single source of
+    truth for "which level is active" - only the direction the count
+    extends in does (forward for Top, backward for Bottom; see
+    _set_clip_range_from_current). Re-applying the same active level and
+    count with the new is_bottom alone produces the right range.
+
+    No-op once mastro_clip_range_last_is_bottom already matches the
+    current view, so repeated calls while the view doesn't change are cheap.
+    """
+    is_bottom = is_bottom_ortho(region_3d)
+    if scene.get("mastro_clip_range_last_is_bottom") == is_bottom:
+        return
+    scene["mastro_clip_range_last_is_bottom"] = is_bottom
+
+    level_set = get_active_clip_range_set(scene)
+    levels = get_set_levels(scene, level_set)
+    ids_in_order = [lvl.id for lvl in levels]
+    if not ids_in_order:
+        return
+
+    current = scene.get("mastro_clip_range_level_ids", [])
+    positions = [ids_in_order.index(lid) for lid in current if lid in ids_in_order]
+    if not positions:
+        return
+
+    index = scene.mastro_clip_range_list_index
+    if not (0 <= index < len(scene.mastro_level_list)):
+        return
+    active_id = scene.mastro_level_list[index].id
+    if active_id not in ids_in_order:
+        return
+    current_position = ids_in_order.index(active_id)
+
+    lo, hi = min(positions), max(positions)
+    count = scene.get("mastro_clip_range_count", hi - lo + 1)
+
+    _set_clip_range_from_current(scene, ids_in_order, current_position, count, is_bottom)
+
+
 def is_clip_range_unlimited(scene):
     return bool(scene.get("mastro_clip_range_unlimited", False))
 

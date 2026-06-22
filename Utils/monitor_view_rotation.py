@@ -1,4 +1,4 @@
-import bpy 
+import bpy
 import math
 # import mathutils
 
@@ -19,14 +19,29 @@ def monitor_view_rotation():
         if area.type == 'VIEW_3D':
             region_3d = area.spaces.active.region_3d
             current_view = region_3d.view_matrix.copy()
-            
+
             if _last_view_matrix is not None and matrices_differ(current_view, _last_view_matrix):
-                pass
                 # print("✅ La vista 3D è stata ruotata o spostata!")
-            
+                _on_view_changed(region_3d)
+
             _last_view_matrix = current_view
             break
     return 0.1
+
+
+def _on_view_changed(region_3d):
+    """Run side effects that need to react to viewport rotation/movement.
+
+    Safe to write to Scene here (unlike inside a Panel.draw()), since this
+    runs from a timer callback with a normal, unrestricted context.
+    """
+    scene = bpy.context.scene
+    if scene is None:
+        return
+
+    from .mastro_levels.clip_range import sync_clip_range_on_view_change, update_clip_from_selection
+    sync_clip_range_on_view_change(scene, region_3d)
+    update_clip_from_selection(bpy.context)
 
 def start_monitoring():
     if not bpy.app.timers.is_registered(monitor_view_rotation):
