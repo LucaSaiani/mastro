@@ -1,113 +1,262 @@
+/* Sidebar expand/collapse icons: arrows instead of FontAwesome +/- -------- */
 
-
-/* Sticky footer navigation ------------------------------------------------- */
-
-.md-footer {
-  position: sticky;
-  bottom: 0;
-  z-index: 10;
+.wy-menu-vertical li button.toctree-expand:before {
+  font-family: inherit;
+  content: "▸";
 }
 
-/* Confine the whole footer bar — background included, not just its
-   content — to the sidebar+content columns, leaving the TOC column's
-   width free on the right. Without this, the footer's own background
-   (painted by .md-footer itself, independent of its inner content's
-   width) still spans the full viewport and visually caps off the TOC
-   column partway down instead of letting it run the full height of the
-   page. .md-grid centers at max 61rem; the secondary (TOC) sidebar is
-   12.1rem, so the footer's own box is narrowed by that amount and
-   re-anchored to the same left edge as .md-grid instead of spanning
-   edge-to-edge. */
-@media screen and (min-width: 76.25em) {
-  .md-footer {
-    width: calc(61rem - 12.1rem);
-    margin-left: max(0px, calc(50vw - 30.5rem));
-  }
+.wy-menu-vertical li.current > a button.toctree-expand:before,
+.wy-menu-vertical li.on > a button.toctree-expand:before {
+  font-family: inherit;
+  content: "▾";
+}
 
-  .md-footer__inner.md-grid,
-  .md-footer-meta__inner.md-grid {
+/* Center the content column instead of pinning it to the left -------------- */
+
+/* The theme's own .wy-nav-content has max-width:800px; margin:auto, then a
+   min-width:1100px media query overrides that to margin:0, pinning the
+   white "page" against the left edge of the remaining space (with a
+   faint grey background filling the rest, meant to look like a sheet of
+   paper on a desk). Both the cap and the pinning are dropped here: the
+   content simply fills whatever space is left of the sidebar, with a
+   fixed side padding instead of a width cap. */
+@media screen and (min-width: 1100px) {
+  .wy-nav-content {
     max-width: none;
-    margin-left: 0;
-    margin-right: 0;
+    margin: 0;
+    padding: 1.618em 3rem;
   }
 }
 
-.md-main {
-  padding-bottom: 8rem;
+/* Dark mode — Blender manual palette (readthedocs theme) ------------------- */
+
+body,
+.wy-body-for-nav {
+  background: #131416;
+  color: #cfd0d0;
 }
 
-/* Dark mode — Blender manual palette --------------------------------------- */
-
-[data-md-color-scheme="slate"] {
-  /* Header / sidebar header */
-  --md-primary-fg-color:        #1a1c1e;
-  --md-primary-fg-color--light: #212426;
-  --md-primary-fg-color--dark:  #111315;
-  --md-primary-bg-color:        #cfd0d0;
-
-  /* Content background */
-  --md-default-bg-color:        #131416;
-
-  /* Sidebar background (slightly lighter than content) */
-  --md-nav-item-color:          #cfd0d0;
-
-  /* Text */
-  --md-default-fg-color:        #cfd0d0;
-  --md-default-fg-color--light: #9ca0a5;
-  --md-default-fg-color--lighter: #81868d;
-
-  /* Links / accent — Blender blue */
-  --md-accent-fg-color:              #5ca5ff;
-  --md-accent-fg-color--transparent: #5ca5ff26;
-  --md-typeset-a-color:              #5ca5ff;
-
-  /* Code */
-  --md-code-bg-color:           #1a1c1e;
-  --md-code-fg-color:           #cfd0d0;
+.wy-nav-content-wrap {
+  background: #131416;
 }
 
-/* Sidebar slightly different background in dark mode */
-[data-md-color-scheme="slate"] .md-sidebar {
+.wy-nav-content {
+  background: #131416;
+  color: #cfd0d0;
+}
+
+.wy-nav-side {
+  background: #1a1c1e;
+  color: #9ca0a5;
+}
+
+.wy-side-nav-search {
+  background: #1a1c1e;
+}
+
+.wy-side-nav-search input[type="text"] {
+  background: #212426;
+  color: #cfd0d0;
+  border: none;
+  border-radius: 4px;
+  box-shadow: none;
+}
+
+.wy-side-nav-search input[type="text"]:focus {
+  box-shadow: none;
+  outline: none;
+}
+
+/* Section captions (e.g. "GETTING STARTED", "USER INTERFACE") are plain
+   text (p.caption), not links — the theme's own blue (#55a5d9) is meant
+   to stand out on the white sidebar, but here it makes them look like
+   clickable entries. They get the same neutral grey as the sidebar's
+   own default text colour instead, like the Blender manual's own
+   uppercase section labels. */
+.wy-menu-vertical p.caption {
+  color: #9ca0a5;
+}
+
+/* Sidebar entries — Blender manual convention: top-level and second-level
+   entries (the navigable sections, e.g. "Node Editor", "MaStro Panel")
+   are blue, whether or not they have a page of their own (the theme's
+   default gives those two cases different colours, which reads as some
+   entries being disabled on our dark background); third level and
+   deeper (the in-page TOC entries under an expanded section, e.g.
+   "Rename Reroute") stay a plain light grey instead, matching how deep
+   nesting is de-emphasized in the Blender manual's own sidebar. */
+.wy-menu-vertical a,
+.wy-menu-vertical li.current a,
+.wy-menu-vertical li.current > a,
+.wy-menu-vertical li.toctree-l2 a,
+.wy-menu-vertical li.toctree-l2.current > a {
+  color: #5ca5ff;
+}
+
+.wy-menu-vertical li.toctree-l3 a,
+.wy-menu-vertical li.toctree-l4 a,
+.wy-menu-vertical li.toctree-l5 a,
+.wy-menu-vertical li.toctree-l6 a {
+  color: #9ca0a5;
+}
+
+/* Drop the theme's light grey dividers (#c9c9c9) around expanded
+   sections — meant as a subtle border on the white sidebar, but they
+   render as bright lines cutting across our dark background. */
+.wy-menu-vertical li.current a,
+.wy-menu-vertical li.toctree-l1.current > a {
+  border: none;
+}
+
+.wy-menu-vertical a:hover,
+.wy-menu-vertical li.current a:hover {
+  background: #212426;
+  color: #cfd0d0;
+}
+
+.wy-menu-vertical li.current {
+  background: #1a1c1e;
+}
+
+.wy-menu-vertical li.current > a,
+.wy-menu-vertical li.toctree-l2.current > a {
+  background: #131416;
+  border: none;
+}
+
+/* The theme paints deeper nesting levels under the active page's
+   in-page TOC (toctree-l3 under a current toctree-l2, l4 under a current
+   l3, ...) with progressively lighter greys (#c9c9c9, #bdbdbd, ...) meant
+   to read as a subtle indent cue on the original white sidebar. On our
+   dark background those greys render as a glaring light rectangle, so
+   they're flattened to the same dark background as everything else. */
+.wy-menu-vertical li.toctree-l2.current > a,
+.wy-menu-vertical li.toctree-l2.current li.toctree-l3 > a,
+.wy-menu-vertical li.toctree-l3.current > a,
+.wy-menu-vertical li.toctree-l3.current li.toctree-l4 > a,
+.wy-menu-vertical li.toctree-l4.current > a,
+.wy-menu-vertical li.toctree-l4.current li.toctree-l5 > a {
+  background: #131416;
+}
+
+a,
+a:visited {
+  color: #5ca5ff;
+}
+
+/* Tables: plain Markdown tables here render as a bare <table> with no
+   .docutils/.wy-table-striped class (those only apply to Sphinx/RST
+   tables), so the theme supplies no zebra striping or header colour at
+   all for them — they inherit plain black-on-transparent browser
+   defaults, unreadable on our dark background. Header gets a slightly
+   lighter background with light text to stand out; body rows get a
+   manual zebra stripe via :nth-child since the theme's own striping
+   classes never get applied to these tables. */
+.rst-content table thead,
+.rst-content table thead th {
+  color: #cfd0d0;
   background-color: #1a1c1e;
+  border-bottom: 2px solid #2a2e31;
 }
 
-/* Light mode — Blender manual palette -------------------------------------- */
-
-[data-md-color-scheme="default"] {
-  /* Header */
-  --md-primary-fg-color:        #f8f9fb;
-  --md-primary-fg-color--light: #ffffff;
-  --md-primary-fg-color--dark:  #e8eaed;
-  --md-primary-bg-color:        #1a1a1a;
-
-  /* Text */
-  --md-default-fg-color:        #1a1a1a;
-  --md-default-fg-color--light: #5a5c63;
-  --md-default-fg-color--lighter: #6b6f76;
-
-  /* Links / accent — Blender blue */
-  --md-accent-fg-color:              #0a4bff;
-  --md-accent-fg-color--transparent: #0a4bff26;
-  --md-typeset-a-color:              #2757dd;
-
-  /* Code */
-  --md-code-bg-color:           #f8f9fb;
+.rst-content table td,
+.rst-content table th {
+  color: #cfd0d0 !important;
+  border-color: #2a2e31;
 }
 
-/* Sidebar background light mode */
-[data-md-color-scheme="default"] .md-sidebar {
-  background-color: #f8f9fb;
-  border-right: 1px solid #e0e2e6;
+/* Explicit background on every row, not just :nth-child(odd) — the
+   theme's own tr:nth-child(2n-1) td{background:#f3f6f6} rule (meant for
+   .docutils tables) was still winning on alternating rows for reasons
+   that didn't fully resolve under inspection, leaving every other row
+   pale. Setting both parities explicitly, with !important, removes the
+   ambiguity instead of trying to out-specify a selector that kept
+   reappearing. */
+.rst-content table tbody tr:nth-child(odd),
+.rst-content table tbody tr:nth-child(odd) td {
+  background-color: #1a1c1e !important;
 }
 
-/* Node page icon top-right ------------------------------------------------- */
+.rst-content table tbody tr:nth-child(even),
+.rst-content table tbody tr:nth-child(even) td {
+  background-color: #131416 !important;
+}
 
+.rst-content code,
+.rst-content tt,
+code {
+  background: #1a1c1e;
+  color: #cfd0d0;
+}
+
+/* Admonitions (Note/Tip/Warning/Reference): the theme's pastel body
+   backgrounds (#e7f2fa, #ffedcc, ...) paired with our light grey body
+   text are nearly unreadable. Bodies get a dark, colour-tinted background
+   close to each admonition's own accent colour, with light text; titles
+   keep the theme's own bright accent background (already readable with
+   white text). */
+.rst-content .note,
+.rst-content .seealso {
+  background: #16232e;
+  color: #cfd0d0;
+}
+
+.rst-content .tip,
+.rst-content .hint,
+.rst-content .important {
+  background: #102a22;
+  color: #cfd0d0;
+}
+
+.rst-content .warning,
+.rst-content .attention,
+.rst-content .caution,
+.rst-content .admonition-todo {
+  background: #2e2310;
+  color: #cfd0d0;
+}
+
+.rst-content .admonition-title,
+.wy-alert-title {
+  color: #131416;
+}
+
+/* Footer prev/next buttons: the theme's light "neutral" button (#f3f6f6
+   background, #404040 text, both !important) is barely visible against
+   our dark footer. Same treatment as the rest of the sidebar/content —
+   dark background, light text, blue on hover to match the link colour.
+   .btn-neutral:visited additionally forces #404040 !important on its
+   own — these are real <a href> links, so they're :visited as soon as
+   you've opened the page they point to — which without an explicit
+   override here wins over the plain .btn-neutral rule above and made
+   the buttons look unreadable until :hover took over. */
+.btn-neutral,
+.btn-neutral:visited {
+  background-color: #212426 !important;
+  color: #cfd0d0 !important;
+}
+
+.btn-neutral:hover {
+  background-color: #2a2e31 !important;
+  color: #5ca5ff !important;
+}
+
+/* Node page icon (drop-cap style, left) + thumbnail (right) --------------- */
+
+/* The icon floats left at the very start of .node-body, acting like a
+   drop cap next to the opening line of the description text, while the
+   thumbnail keeps floating right as before. */
 .node-icon {
-  float: right;
-  width: 48px;
-  height: 48px;
-  margin: 0 0 1rem 1.5rem;
+  float: left;
+  width: 4rem;
+  height: 4rem;
+  margin: 0 1rem 0.5rem 0;
   object-fit: contain;
+}
+
+.node-thumb {
+  float: right;
+  margin-right: 0;
 }
 
 /* Node page body with floated thumbnail ------------------------------------ */
@@ -116,9 +265,16 @@
   overflow: hidden;
 }
 
+/* Sized in rem (scales with the page's own font-size, same as .node-icon
+   above) with a percentage-based cap rather than a plain percentage —
+   a pure % of .node-body's width grows or shrinks independently of the
+   text around it as the viewport/zoom changes, which made the icon and
+   thumbnail visibly drift apart in size relative to each other and to
+   the text at different zoom levels. */
 .node-thumb {
   float: right;
-  width: 20%;
+  width: 18rem;
+  max-width: 35%;
   margin: 0 0 1.5rem 1.5rem;
 }
 
@@ -128,17 +284,28 @@
   margin: 0.25rem 0 1.5rem;
 }
 
+/* .node-sockets is a plain <dl>, so it inherits the theme's Sphinx-style
+   "API signature" look (light blue background, blue text, blue top
+   border) from a very long, highly specific selector chain
+   (html.writer-html5 .rst-content dl[class]:not(...):not(...)...>dt —
+   six :not() clauses, each counted as a class for specificity). No
+   plausible plain selector outweighs that, so !important is the
+   pragmatic fix here rather than trying to out-specify six :not()s. */
 .node-sockets dt {
-  font-weight: 700;
-  margin-top: 0.75rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  font-weight: 700 !important;
+  margin-top: 0.75rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  background: none !important;
+  color: #cfd0d0 !important;
+  border-top: none !important;
+  padding: 0 !important;
 }
 
 .node-sockets dd {
   margin: 0.15rem 0 0 1.5rem;
-  color: var(--md-default-fg-color--light);
+  color: #9ca0a5;
   font-size: 0.9em;
 }
 
@@ -156,7 +323,7 @@
   font-weight: 600;
   letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: var(--md-default-fg-color--light);
+  color: #9ca0a5;
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -167,7 +334,7 @@
   display: block;
   width: 3rem;
   height: 1px;
-  background: var(--md-default-fg-color--lighter);
+  background: #81868d;
 }
 
 /* Socket type colours (Blender palette) */
@@ -189,9 +356,6 @@
 .sock-matrix     { background: #6363c7; }
 .sock-unknown    { background: #555; }
 
-/* Sidebar section headers bold + accent ------------------------------------ */
-
-
 /* Chip ----------------------------------------------------------------------*/
 .breadcrumbs {
   display: inline-flex;
@@ -211,97 +375,6 @@
 
 .breadcrumbs .sep {
   margin: 0 6px;
-  color: rgba(255, 255, 255, 0.4); 
+  color: rgba(255, 255, 255, 0.4);
   font-size: 0.75rem;
-}
-/* Chip ----------------------------------------------------------------------*/
-/* Blender-style admonitions ------------------------------------------------ */
-
-/* Shared base */
-.md-typeset .admonition,
-.md-typeset details {
-  border: none;
-  border-left: 4px solid;
-  border-radius: 2px;
-  box-shadow: none;
-  padding: 0;
-  margin: 1.2em 0;
-}
-
-.md-typeset .admonition-title,
-.md-typeset summary {
-  padding: 0.4em 0.8em;
-  font-size: 0.85em;
-  font-weight: 600;
-  margin: 0;
-  border-radius: 0;
-}
-
-.md-typeset .admonition > *:not(.admonition-title),
-.md-typeset details > *:not(summary) {
-  padding: 0.6em 0.8em;
-  margin: 0;
-}
-
-/* Note — blue */
-.md-typeset .admonition.note,
-.md-typeset details.note {
-  border-left-color: #3298d4;
-}
-.md-typeset .note > .admonition-title,
-.md-typeset .note > summary {
-  background-color: #1d4e6e;
-  color: #cfd0d0;
-}
-.md-typeset .note > .admonition-title::before,
-.md-typeset .note > summary::before {
-  background-color: #5ca5ff;
-}
-
-/* Tip — green */
-.md-typeset .admonition.tip,
-.md-typeset details.tip {
-  border-left-color: #4caf50;
-}
-.md-typeset .tip > .admonition-title,
-.md-typeset .tip > summary {
-  background-color: #1a3d22;
-  color: #cfd0d0;
-}
-.md-typeset .tip > .admonition-title::before,
-.md-typeset .tip > summary::before {
-  background-color: #4caf50;
-}
-
-/* Warning — amber */
-.md-typeset .admonition.warning,
-.md-typeset details.warning {
-  border-left-color: #e8a000;
-}
-.md-typeset .warning > .admonition-title,
-.md-typeset .warning > summary {
-  background-color: #3d2e00;
-  color: #cfd0d0;
-}
-
-/* Reference — grigio neutro (come Blender) */
-.md-typeset .admonition.seealso,
-.md-typeset details.seealso {
-  border-left-color: #555;
-}
-.md-typeset .seealso > .admonition-title,
-.md-typeset .seealso > summary {
-  background-color: #2a2a2a;
-  color: #9ca0a5;
-}
-
-/* Custom "reference" type */
-.md-typeset .admonition.reference,
-.md-typeset details.reference {
-  border-left-color: #555;
-}
-.md-typeset .reference > .admonition-title,
-.md-typeset .reference > summary {
-  background-color: #2a2a2a;
-  color: #9ca0a5;
 }

@@ -204,28 +204,8 @@ nav:
   - About: about.md
 
 theme:
-  name: material
-  palette:
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
-      primary: custom
-      accent: custom
-      toggle:
-        icon: material/brightness-4
-        name: Switch to light mode
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      primary: custom
-      accent: custom
-      toggle:
-        icon: material/brightness-7
-        name: Switch to dark mode
-  features:
-    - navigation.footer
-    - navigation.expand        # expand all sections by default
-    - navigation.indexes       # section landing pages
-    - navigation.top           # back-to-top button
-    - toc.follow               # TOC highlights current heading on scroll
+  name: readthedocs
+  highlightjs: true
 
 extra_css:
   - stylesheets/extra.css
