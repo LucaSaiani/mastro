@@ -8,6 +8,7 @@ from .mastro_arch.OBJECT_OT_Mastro_Plan_Lock_To_Level import (
     OBJECT_OT_Mastro_Plan_Unlock_From_Level,
     OBJECT_OT_Mastro_Plan_Lock_To_Level,
 )
+from .mastro_arch.OBJECT_OT_Mastro_Plan_Duplicate_To_Levels import OBJECT_OT_Mastro_Plan_Duplicate_To_Levels
 from .mastro_street.OBJECT_OT_Add_Mastro_Street import OBJECT_OT_Add_Mastro_Street
 from .mastro_pdf.OBJECT_OT_Add_Mastro_Frame import OBJECT_OT_Add_Mastro_Frame
 from .mastro_album.OBJECT_OT_Add_Mastro_Album import OBJECT_OT_Add_Mastro_Album
@@ -110,6 +111,7 @@ classes = (
     OBJECT_OT_Add_Mastro_Plan,
     OBJECT_OT_Mastro_Plan_Unlock_From_Level,
     OBJECT_OT_Mastro_Plan_Lock_To_Level,
+    OBJECT_OT_Mastro_Plan_Duplicate_To_Levels,
     OBJECT_OT_Add_Mastro_Street,
     OBJECT_OT_Add_Mastro_Frame,
     OBJECT_OT_Add_Mastro_Album,

@@ -457,9 +457,9 @@ def toggle_unlimited_clip_range(scene, side):
     _set_clip_range_from_current(scene, side, ids_in_order, current_position, count)
 
 
-def active_clip_range_level_id(context):
-    """The level id currently active in the Clip Range of whichever
-    Top/Bottom ortho VIEW_3D is relevant.
+def active_clip_range_side_or_top(context):
+    """Which side ("top" or "bottom") should be treated as "the" active
+    Clip Range side right now.
 
     Tries context.space_data first (the viewport the operator was invoked
     from, e.g. via its header/sidebar), then falls back to scanning every
@@ -467,11 +467,10 @@ def active_clip_range_level_id(context):
     from a non-VIEW_3D editor (e.g. a menu in Properties).
 
     If no viewport is currently in Top/Bottom ortho (e.g. the user is in
-    perspective), falls back to the "top" side's active level - top/bottom
-    here name the viewing direction, not "highest/lowest level", and each
-    side's mastro_clip_range_list_index_<side> persists independently of
-    whatever the viewport is doing right now (see _key's docstring), so
-    "top" is as good a last-known-active level as any.
+    perspective), falls back to "top" - top/bottom here name the viewing
+    direction, not "highest/lowest level", and each side's clip-range state
+    persists independently of whatever the viewport is doing right now (see
+    _key's docstring), so "top" is as good a last-known-active side as any.
     """
     spaces_to_check = []
     space = getattr(context, "space_data", None)
@@ -485,13 +484,15 @@ def active_clip_range_level_id(context):
     for space in spaces_to_check:
         region_3d = space.region_3d
         if is_top_bottom_ortho(region_3d):
-            side = get_view_side(region_3d)
-            index = getattr(context.scene, f"mastro_clip_range_list_index_{side}")
-            level_list = context.scene.mastro_level_list
-            if 0 <= index < len(level_list):
-                return level_list[index].id
+            return get_view_side(region_3d)
 
-    index = getattr(context.scene, "mastro_clip_range_list_index_top")
+    return "top"
+
+
+def active_clip_range_level_id(context):
+    """The level id currently active in the Clip Range of active_clip_range_side_or_top."""
+    side = active_clip_range_side_or_top(context)
+    index = getattr(context.scene, f"mastro_clip_range_list_index_{side}")
     level_list = context.scene.mastro_level_list
     if 0 <= index < len(level_list):
         return level_list[index].id

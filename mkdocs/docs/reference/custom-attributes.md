@@ -11,13 +11,13 @@ For an explanation of the encoding scheme used for list attributes, see [The Att
 
 ## Custom Properties (Per-Object)
 
-Custom properties are defined in the **Custom Properties** sub-panel of the Project Data panel in the Properties editor. Each definition applies to all MaStro objects of the selected type (mass/block, street, or both).
+Custom properties are defined in the **Custom Properties** sub-panel of the Project Data panel in the Properties editor. Each definition applies to all MaStro objects of the selected type(s).
 
 ### Defining a Custom Property
 
 1. Click **+** to add a new entry to the list.
 2. Set **Name**, **Type** (Integer, Float, Boolean, or String), default value, and optional constraints (min, max, step, precision).
-3. Choose which object types receive the property via **Assign to Mass/Block** and **Assign to Street**.
+3. Choose which object types receive the property via the **Mass/Block**, **Street**, **Plan**, and **Drawing** toggles.
 4. Click the **Assign** icon (✓) in the list row to write the property to all existing matching objects. The entry is then locked — type and assignment cannot be changed.
 5. Click **Update** (↺) to propagate value changes to all objects after editing defaults.
 
@@ -103,6 +103,23 @@ Block objects store most attributes on **edges** with an `_EDGE` suffix. They mi
 | `mastro_inverted_normal_EDGE` | BOOLEAN | Whether the building extrudes in the opposite direction |
 | `mastro_side_angle` | FLOAT | Side rotation angle (stored per vertex) |
 | `mastro_custom_edge` | FLOAT | Free-form user value per edge (see [Geometry Data](../ui/sidebar-geometry-data.md)) |
+
+---
+
+## Plan Attributes
+
+Stored on a **Plan** object's edges and faces. Plan reuses the same wall/floor attribute schema as Mass (see [Properties — Architecture](../ui/properties-architecture.md) and the [Architecture sidebar panel](../ui/sidebar-architecture.md)), rather than its own naming scheme.
+
+| Attribute | Domain | Type | Description |
+|---|---|---|---|
+| `mastro_wall_id` | EDGE | INT | ID of the assigned wall type |
+| `mastro_inverted_normal` | EDGE | BOOLEAN | Whether the wall normal is flipped |
+| `mastro_floor_id` | FACE | INT | ID of the assigned floor type |
+| `mastro_custom_vert` | POINT | FLOAT | Free-form user value per vertex (see [Geometry Data](../ui/sidebar-geometry-data.md)) |
+| `mastro_custom_edge` | EDGE | FLOAT | Free-form user value per edge (see [Geometry Data](../ui/sidebar-geometry-data.md)) |
+| `mastro_custom_face` | FACE | FLOAT | Free-form user value per face (see [Geometry Data](../ui/sidebar-geometry-data.md)) |
+
+A Plan object also carries object-level properties — not mesh attributes — that drive its elevation and level lock; see [MaStro Plan](../ui/mastro-plan.md).
 
 ---
 

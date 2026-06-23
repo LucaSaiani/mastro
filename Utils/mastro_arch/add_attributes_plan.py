@@ -53,9 +53,12 @@ def add_plan_attributes(obj):
 
     obj.mastro_props['mastro_ffl'] = 0
     obj.mastro_props['mastro_floor_to_floor_height'] = 0
-    obj.mastro_props['mastro_bottom_level_id'] = 0
-    # Locked by default: the caller (OBJECT_OT_Add_Mastro_Plan) wires up the
-    # FFL/height drivers right after calling this, matching this default.
+    # -1 means "no level" (see OBJECT_OT_Mastro_Plan_Unlock_From_Level); the
+    # caller (OBJECT_OT_Add_Mastro_Plan) overwrites this with a real level
+    # id right after calling this, if one is available.
+    obj.mastro_props['mastro_bottom_level_id'] = -1
+    # Locked by default: the caller wires up the FFL/height drivers right
+    # after calling this, matching this default.
     obj.mastro_props['mastro_lock_to_level'] = True
 
     mesh = obj.data

@@ -1,8 +1,17 @@
 import bpy
 
+from ..mastro_preferences.get_preferences import get_prefs
+
 # Floor to floor height used when a plan's bottom level has no level above
 # it in mastro_level_list (it is the topmost level, or the only one).
 _DEFAULT_FLOOR_TO_FLOOR_HEIGHT = 3.0
+
+
+def plan_name_for_level(level_name, ffl):
+    """"<level name> - <FFL>" with an explicit sign and 3 decimals, e.g.
+    "Level - +4.562m" or "Level - -2.000m" - matches mastro_ffl's own
+    precision (see mastro_CL_addon_properties.mastro_ffl)."""
+    return f"{level_name} - {ffl:+.3f}m"
 
 
 def update_plan_attributes(context):
@@ -11,6 +20,8 @@ def update_plan_attributes(context):
     plan_drivers.link_all_plan_drivers) and its floor to floor height,
     derived from the level above its bottom level (by current list order -
     not by id, which is not derivable/stored, only used transiently here).
+    Also renames the plan to match its (possibly renamed) level, if
+    rename_plan_on_level_change is enabled in the addon preferences.
 
     Called whenever a level's elevation/name changes or the list gets
     re-sorted, since either can change which level ends up "above" a given
@@ -42,3 +53,8 @@ def update_plan_attributes(context):
         else:
             top_level = level_list[bottom_index - 1]
             obj.mastro_props.mastro_floor_to_floor_height = top_level.level - by_id[bottom_level_id]
+
+        if get_prefs().rename_plan_on_level_change:
+            level = next((lvl for lvl in level_list if lvl.id == bottom_level_id), None)
+            if level is not None:
+                obj.name = plan_name_for_level(level.name, obj.mastro_props.mastro_ffl)

@@ -1,6 +1,6 @@
 # Architecture Panel
 
-The **Architecture** panel appears in the MaStro sidebar tab when a **Mass** object is in Edit Mode. It exposes wall and floor type assignments at the element level.
+The **Architecture** panel appears in the MaStro sidebar tab when a **Mass** or [Plan](mastro-plan.md) object is in Edit Mode. It exposes wall and floor type assignments at the element level — the same attribute schema (`mastro_wall_id` on edges, `mastro_floor_id` on faces) is shared by both object types.
 
 ## Wall Type (Edge Select Mode)
 

@@ -192,6 +192,28 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
         ),
     )
 
+    rename_plan_on_relock: bpy.props.BoolProperty(
+        name="Rename Plan on Re-lock",
+        default=True,
+        description=(
+            "MaStro plan objects are renamed to \"<level name> - <FFL>\" "
+            "every time they are (re-)locked to a level - including locking "
+            "an existing plan to a different level - not just when first "
+            "created. Disable to keep the name a plan was given untouched"
+        ),
+    )
+
+    rename_plan_on_level_change: bpy.props.BoolProperty(
+        name="Rename Plan on Level Change",
+        default=True,
+        description=(
+            "MaStro plan objects locked to a level are renamed to "
+            "\"<level name> - <FFL>\" whenever that level's name or "
+            "elevation changes, keeping the name in sync with the level it "
+            "follows. Disable to keep the name a plan was given untouched"
+        ),
+    )
+
     # --- GIS: predefined CRS ---
     def listPredefCRS(self, context):
         return [tuple(elem) for elem in json.loads(self.predefCrsJson)]
@@ -406,6 +428,12 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
             split = panel.split(factor=0.2)
             split.label(text="Drawing Creation:")
             split.prop(self, "create_drawing_at_active_level", text="Create at active level")
+
+            split = panel.split(factor=0.2)
+            split.label(text="Plan Renaming:")
+            col = split.column(align=True)
+            col.prop(self, "rename_plan_on_relock", text="Rename on re-lock")
+            col.prop(self, "rename_plan_on_level_change", text="Rename on level change")
 
         # Section: Overlay
         header, panel = layout.panel("mastro_prefs_overlay_settings", default_closed=True)

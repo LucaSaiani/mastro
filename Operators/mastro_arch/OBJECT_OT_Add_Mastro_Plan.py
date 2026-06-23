@@ -6,10 +6,16 @@ from bpy_extras import object_utils
 from ..mastro_custom_properties.OBJECT_OT_Update_Mastro_Custom_Properties import add_custom_properties_to_object
 
 from ...Utils.mastro_arch.add_attributes_plan import add_plan_attributes
-from ...Utils.mastro_arch.update_plan_attributes import update_plan_attributes
+from ...Utils.mastro_arch.update_plan_attributes import update_plan_attributes, plan_name_for_level
 from ...Utils.mastro_arch.plan_drivers import link_all_plan_drivers
+from ...Utils.mastro_arch.duplicate_plan_to_levels import duplicate_plan_to_levels, levels_missing_a_plan
 from ...Utils.add_nodes import add_nodes, add_materials
-from ...Utils.mastro_levels.clip_range import active_clip_range_level_id
+from ...Utils.mastro_levels.clip_range import (
+    active_clip_range_level_id,
+    active_clip_range_side_or_top,
+    get_active_clip_range_set,
+    get_set_levels,
+)
 
 
 class OBJECT_OT_Add_Mastro_Plan(Operator, AddObjectHelper):
@@ -30,6 +36,15 @@ class OBJECT_OT_Add_Mastro_Plan(Operator, AddObjectHelper):
         description="MaStro plan depth",
         min=0,
         default=10,
+    )
+
+    duplicate_to_active_set: bpy.props.BoolProperty(
+        name="Duplicate to Active Level Set",
+        description="After creating this plan, also duplicate it (sharing "
+                    "the same mesh data, like repeated floors) to every "
+                    "other level in the active Clip Range's level set that "
+                    "doesn't already have a plan locked to it",
+        default=False,
     )
 
     def execute(self, context):
@@ -99,14 +114,33 @@ class OBJECT_OT_Add_Mastro_Plan(Operator, AddObjectHelper):
         # (unlike MaStro drawing, this ignores the create_drawing_at_active_level
         # preference - a plan never makes sense floating at the 3D cursor's Z).
         # X/Y stay wherever object_data_add put the object (the 3D cursor).
-        # Z, top_level_id and floor_to_floor_height are then derived by the
-        # same function used to keep plans in sync when levels change later.
+        # FFL and floor_to_floor_height are then derived by the same function
+        # used to keep plans in sync when levels change later.
         bottom_level_id = active_clip_range_level_id(context)
         if bottom_level_id is not None:
             obj.mastro_props.mastro_bottom_level_id = bottom_level_id
             update_plan_attributes(context)
 
+            # Always named on first creation, regardless of the "rename on
+            # re-lock" preference - that one only governs renaming an
+            # *existing* plan, not the initial name.
+            level = next((lvl for lvl in context.scene.mastro_level_list
+                          if lvl.id == bottom_level_id), None)
+            if level is not None:
+                obj.name = plan_name_for_level(level.name, obj.mastro_props.mastro_ffl)
+
         # Lock Z so the plan can't be accidentally moved off its level.
         obj.lock_location[2] = True
+
+        if self.duplicate_to_active_set and bottom_level_id is not None:
+            side = active_clip_range_side_or_top(context)
+            level_set = get_active_clip_range_set(context.scene, side)
+            levels = get_set_levels(context.scene, level_set)
+            # This plan already occupies bottom_level_id - duplicate only to
+            # whichever other levels in the set don't have a plan yet.
+            levels = [lvl for lvl in levels if lvl.id != bottom_level_id]
+            levels = levels_missing_a_plan(levels)
+            if levels:
+                duplicate_plan_to_levels(context, obj, levels, link_mesh=True)
 
         return {'FINISHED'}

@@ -52,8 +52,8 @@ class mastro_CL_addon_properties(PropertyGroup):
 
     mastro_bottom_level_id: IntProperty(
         name="Bottom Level Id",
-        default=0,
-        description="Id (mastro_level_list) of the active level the plan was created at, stored per-object so duplicates with linked mesh data can differ"
+        default=-1,
+        description="Id (mastro_level_list) of the level the plan is locked to, or -1 if it has no level (e.g. unlocked). Stored per-object so duplicates with linked mesh data can differ"
     )
 
     mastro_lock_to_level: BoolProperty(

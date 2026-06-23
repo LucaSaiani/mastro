@@ -1,6 +1,6 @@
 # Object Types
 
-MaStro works with five types of mesh objects, each identified by a custom property on the mesh data. The type determines which Geometry Nodes modifier is applied and which attributes and panels become available.
+MaStro works with six types of mesh objects, each identified by a custom property on the mesh data. The type determines which Geometry Nodes modifier is applied and which attributes and panels become available.
 
 | Type | Geometry | Description |
 |---|---|---|
@@ -9,5 +9,6 @@ MaStro works with five types of mesh objects, each identified by a custom proper
 | [Street](object-type-street.md) | Edges | Road networks |
 | [Dimension](object-type-dimension.md) | Single edge | Annotation anchor |
 | [Drawing Mesh](object-type-drawing.md) | Edges | 2D technical drawings |
+| [Plan](../ui/mastro-plan.md) | Single face | Floor plan, locked to a project level |
 
 If you already have a mesh you want to use as a MaStro object, use **Convert to MaStro Mass** or **Convert to MaStro Street** from the MaStro sidebar panel. The original geometry is preserved; only custom attributes and modifiers are added.

@@ -44,6 +44,7 @@ nav:
       - Architecture: ui/sidebar-architecture.md
       - Geometry Data: ui/sidebar-geometry-data.md
       - Custom Properties: ui/sidebar-custom-properties.md
+      - Plan: ui/mastro-plan.md
       - Album: ui/mastro-album.md
       - Frame: ui/mastro-frame.md
       - GIS: ui/gis-basemap.md
