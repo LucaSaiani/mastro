@@ -1,7 +1,7 @@
 import math
 
 from bpy.types import Node
-from bpy.props import StringProperty, EnumProperty, IntProperty
+from bpy.props import EnumProperty, IntProperty
 
 from .tree import MaStroScheduleTreeNode
 from .execution import update_node, get_available_columns_items
@@ -14,19 +14,22 @@ UNARY_OPERATIONS = {
 
 
 class MaStroScheduleMathNode(MaStroScheduleTreeNode, Node):
-    """Combine one or two columns of the same table (row or group) with a
-    mathematical operation, adding the result as a new column/field"""
+    """Combine a column from table A with a column from table B (or a
+    constant from a Value node) using a mathematical operation, producing a
+    table with one new column per row of A. If B has a single row, its value
+    is broadcast to every row of A; otherwise A and B must have the same
+    number of rows"""
     bl_idname = 'MaStroScheduleMath'
-    bl_label = 'Math'
+    bl_label = 'Math ?'
 
     column_a: EnumProperty(
         name="Column A",
-        items=lambda self, context: get_available_columns_items(self),
+        items=lambda self, context: get_available_columns_items(self, 0),
         update=update_node,
     )
     column_b: EnumProperty(
         name="Column B",
-        items=lambda self, context: get_available_columns_items(self),
+        items=lambda self, context: get_available_columns_items(self, 1),
         update=update_node,
     )
     round_digits: IntProperty(name="Digits", default=0, min=0, update=update_node)
@@ -56,10 +59,9 @@ class MaStroScheduleMathNode(MaStroScheduleTreeNode, Node):
         default='ADD',
         update=update_node,
     )
-    output_name: StringProperty(name="Output Name", default="Result", update=update_node)
-
     def init(self, context):
-        self.inputs.new('MaStroScheduleDataSocketType', "Data")
+        self.inputs.new('MaStroScheduleDataSocketType', "A")
+        self.inputs.new('MaStroScheduleDataSocketType', "B")
         self.outputs.new('MaStroScheduleDataSocketType', "Data")
 
     def draw_buttons(self, context, layout):
@@ -69,7 +71,6 @@ class MaStroScheduleMathNode(MaStroScheduleTreeNode, Node):
             layout.prop(self, "column_b", text="B")
         if self.operation == 'ROUND':
             layout.prop(self, "round_digits")
-        layout.prop(self, "output_name")
 
     def _compute(self, a, b):
         op = self.operation
@@ -114,15 +115,27 @@ class MaStroScheduleMathNode(MaStroScheduleTreeNode, Node):
         return 0.0
 
     def evaluate(self, inputs):
-        rows = inputs[0] or []
-        out_key = self.output_name or "Result"
+        rows_a = inputs[0] or []
+        rows_b = inputs[1] or []
+        out_key = "Result"
+        unary = self.operation in UNARY_OPERATIONS
+
+        if not unary and rows_b and len(rows_b) != len(rows_a) and len(rows_b) != 1:
+            raise ValueError(
+                f"Math node '{self.name}': table B has {len(rows_b)} rows, "
+                f"expected 1 (broadcast) or {len(rows_a)} (matching A)"
+            )
 
         result = []
-        for row in rows:
+        for i, row in enumerate(rows_a):
             new_row = dict(row)
             try:
                 a = float(row.get(self.column_a, 0))
-                b = 0.0 if self.operation in UNARY_OPERATIONS else float(row.get(self.column_b, 0))
+                if unary:
+                    b = 0.0
+                else:
+                    b_row = rows_b[0] if len(rows_b) == 1 else rows_b[i] if rows_b else {}
+                    b = float(b_row.get(self.column_b, 0))
                 value = self._compute(a, b)
             except (TypeError, ValueError):
                 value = 0.0

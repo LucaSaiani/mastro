@@ -30,16 +30,17 @@ def leaves(item):
 
 
 # Blender requires a persistent reference to the strings returned by a
-# dynamic EnumProperty items callback, keyed by node name to avoid crashes
-# from garbage-collected enum items.
+# dynamic EnumProperty items callback, keyed by (node name, input index) to
+# avoid crashes from garbage-collected enum items.
 _available_columns_cache = {}
 
 
-def get_available_columns_items(node):
+def get_available_columns_items(node, input_index=0):
     """Build the EnumProperty items list of column names available on the
-    table feeding `node`'s first input, for column-picker dropdowns."""
+    table feeding `node`'s input at `input_index`, for column-picker
+    dropdowns."""
     names = []
-    socket = node.inputs[0]
+    socket = node.inputs[input_index]
     if socket.is_linked:
         link = socket.links[0]
         from_node = link.from_node
@@ -52,9 +53,10 @@ def get_available_columns_items(node):
                         if not key.startswith("_") and key not in names:
                             names.append(key)
 
+    cache_key = (node.name, input_index)
     items = [(name, name, "") for name in names] or [("", "(no columns)", "")]
-    _available_columns_cache[node.name] = items
-    return _available_columns_cache[node.name]
+    _available_columns_cache[cache_key] = items
+    return _available_columns_cache[cache_key]
 
 
 def extract_mesh_rows(objs):

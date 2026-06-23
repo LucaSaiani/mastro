@@ -14,7 +14,7 @@ schedule_node_categories = [
         NodeItem("MaStroScheduleInputSelected"),
     ]),
     MaStroScheduleNodeCategory('MASTRO_SCHEDULE_ATTRIBUTE', "Attribute", items=[
-        NodeItem("MaStroScheduleGetCustomAttribute"),
+        NodeItem("MaStroScheduleGetAttribute"),
     ]),
     MaStroScheduleNodeCategory('MASTRO_SCHEDULE_FILTER', "Filter", items=[
         NodeItem("MaStroScheduleFilter"),
@@ -25,6 +25,9 @@ schedule_node_categories = [
     ]),
     MaStroScheduleNodeCategory('MASTRO_SCHEDULE_MATH', "Math", items=[
         NodeItem("MaStroScheduleMath"),
+        NodeItem("MaStroScheduleValue"),
+        NodeItem("MaStroScheduleString"),
+        NodeItem("MaStroScheduleHeader"),
     ]),
     MaStroScheduleNodeCategory('MASTRO_SCHEDULE_LOOKUP', "Lookup", items=[
         NodeItem("MaStroScheduleCategoryLookup"),

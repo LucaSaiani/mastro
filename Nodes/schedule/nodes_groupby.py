@@ -11,7 +11,7 @@ class MaStroScheduleGroupByNode(MaStroScheduleTreeNode, Node):
     unique combination of key values (equivalent to the VBA getUnique /
     getUniqueOfSelection helpers)"""
     bl_idname = 'MaStroScheduleGroupBy'
-    bl_label = 'Group By'
+    bl_label = 'Group By ?'
 
     keys: CollectionProperty(type=MaStro_schedule_key_item)
     active_key_index: IntProperty()

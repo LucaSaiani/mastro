@@ -12,7 +12,7 @@ from .properties import MaStro_schedule_key_item, MaStro_schedule_row
 CELL_WIDTH = 120
 CELL_HEIGHT = 24
 FONT_SIZE = 12
-NODE_GAP = 60
+NODE_GAP = 4
 
 _draw_handler = None
 
@@ -29,7 +29,7 @@ class MaStroScheduleViewerNode(MaStroScheduleTreeNode, Node):
     optionally as an overlay table drawn next to the node in the node
     editor"""
     bl_idname = 'MaStroScheduleViewer'
-    bl_label = 'Viewer'
+    bl_label = 'Viewer ?'
 
     columns: CollectionProperty(type=MaStro_schedule_key_item)
     rows: CollectionProperty(type=MaStro_schedule_row)
@@ -93,14 +93,22 @@ def _node_abs_location(node):
     return x, y
 
 
-def _draw_node_table(node, view2d):
+def _draw_node_table(node):
+    # Drawn in POST_VIEW: both the GPU batches and blf respect the node
+    # editor's current view2d transform automatically here, so coordinates
+    # are node-tree space (same units as node.location), scaled by ui_scale
+    # like the old prototype's dataForGraphic/draw_callback_schedule_overlay
+    # did - no manual view_to_region conversion (that caused a parallax-like
+    # drift when panning/zooming, confirmed by A/B testing against the old
+    # technique).
     columns = [c.name for c in node.columns]
     if not columns:
         return
 
     abs_x, abs_y = _node_abs_location(node)
-    origin_x = abs_x + node.width + NODE_GAP
-    origin_y = abs_y
+    ui_scale = bpy.context.preferences.system.ui_scale
+    origin_x = (abs_x + node.width + NODE_GAP) * ui_scale
+    origin_y = abs_y * ui_scale
 
     header_color = (0.45, 0.45, 0.45, 0.95)
     subtotal_color = (0.32, 0.32, 0.32, 0.9)
@@ -112,28 +120,23 @@ def _draw_node_table(node, view2d):
     gpu.state.blend_set('ALPHA')
 
     font_id = 0
-    # scale the font size with the current zoom level, based on the on-screen
-    # height of one cell, so text stays proportional to the table at any zoom
-    _, y0_px = view2d.view_to_region(0.0, 0.0, clip=False)
-    _, y1_px = view2d.view_to_region(0.0, CELL_HEIGHT, clip=False)
-    cell_height_px = abs(y1_px - y0_px)
-    font_size = max(1, round(cell_height_px * (FONT_SIZE / CELL_HEIGHT)))
+    # blf.size() is always literal screen pixels (BLF_size(fontid, size,
+    # dpi) - confirmed against Blender's source, no view-matrix scaling
+    # applied to it). Only blf.position() is transformed by the POST_VIEW
+    # matrix, same as the GPU batches below. So the glyph is rasterized at
+    # a fixed pixel size regardless of zoom; what changes with zoom is only
+    # where that fixed-size glyph ends up on screen relative to the
+    # (zoomable) cell grid - this is also exactly what the old prototype did
+    # with its always-12 fontSize.
+    font_size = FONT_SIZE
     blf.size(font_id, font_size)
 
     def cell_corners(row, col):
-        # convert node-tree-space corners to region pixels up front, so the
-        # GPU shapes and the blf text below are computed from the exact same
-        # screen-space points and stay perfectly in sync when panning/zooming
-        x0 = origin_x + col * CELL_WIDTH
-        x1 = x0 + CELL_WIDTH
-        y1 = origin_y - row * CELL_HEIGHT
-        y0 = y1 - CELL_HEIGHT
-        return (
-            view2d.view_to_region(x0, y0, clip=False),
-            view2d.view_to_region(x1, y0, clip=False),
-            view2d.view_to_region(x0, y1, clip=False),
-            view2d.view_to_region(x1, y1, clip=False),
-        )
+        x0 = origin_x + col * CELL_WIDTH * ui_scale
+        x1 = x0 + CELL_WIDTH * ui_scale
+        y1 = origin_y - row * CELL_HEIGHT * ui_scale
+        y0 = y1 - CELL_HEIGHT * ui_scale
+        return ((x0, y0), (x1, y0), (x0, y1), (x1, y1))
 
     def draw_cell(corners, color, text):
         p00, p10, p01, p11 = corners
@@ -176,16 +179,15 @@ def _draw_callback():
     if tree is None or tree.bl_idname != 'MaStroScheduleTreeType':
         return
 
-    view2d = context.region.view2d
     for node in tree.nodes:
         if node.bl_idname == 'MaStroScheduleViewer' and node.show_table:
-            _draw_node_table(node, view2d)
+            _draw_node_table(node)
 
 
 def register_viewer_draw_handler():
     global _draw_handler
     if _draw_handler is None:
-        _draw_handler = bpy.types.SpaceNodeEditor.draw_handler_add(_draw_callback, (), 'WINDOW', 'POST_PIXEL')
+        _draw_handler = bpy.types.SpaceNodeEditor.draw_handler_add(_draw_callback, (), 'WINDOW', 'POST_VIEW')
 
 
 def unregister_viewer_draw_handler():

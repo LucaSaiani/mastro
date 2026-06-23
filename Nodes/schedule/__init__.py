@@ -16,11 +16,14 @@ from .operators import (
     MASTRO_OT_Schedule_Category_Lookup_Remove,
 )
 from .nodes_input import MaStroScheduleInputAllNode, MaStroScheduleInputSelectedNode
-from .nodes_attribute import MaStroScheduleGetCustomAttributeNode
+from .nodes_attribute import MaStroScheduleGetAttributeNode
 from .nodes_filter import MaStroScheduleFilterNode
 from .nodes_groupby import MaStroScheduleGroupByNode
 from .nodes_aggregate import MaStroScheduleAggregateNode
 from .nodes_math import MaStroScheduleMathNode
+from .nodes_value import MaStroScheduleValueNode
+from .nodes_string import MaStroScheduleStringNode
+from .nodes_header import MaStroScheduleHeaderNode
 from .nodes_lookup import MaStroScheduleCategoryLookupNode, MaStroScheduleMatrixLookupNode
 from .nodes_table import MaStroScheduleTableDataNode, MaStroScheduleFlattenNode
 from .nodes_viewer import (
@@ -45,11 +48,14 @@ classes = (
     MASTRO_OT_Schedule_Category_Lookup_Remove,
     MaStroScheduleInputAllNode,
     MaStroScheduleInputSelectedNode,
-    MaStroScheduleGetCustomAttributeNode,
+    MaStroScheduleGetAttributeNode,
     MaStroScheduleFilterNode,
     MaStroScheduleGroupByNode,
     MaStroScheduleAggregateNode,
     MaStroScheduleMathNode,
+    MaStroScheduleValueNode,
+    MaStroScheduleStringNode,
+    MaStroScheduleHeaderNode,
     MaStroScheduleCategoryLookupNode,
     MaStroScheduleMatrixLookupNode,
     MaStroScheduleTableDataNode,
