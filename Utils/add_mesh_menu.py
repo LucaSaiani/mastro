@@ -9,15 +9,19 @@ def add_mesh_menu(self, context):
     self.layout.operator("object.mastro_add_mastro_block", icon_value=myIcon)
     myIcon = icons.icon_id("mass")
     self.layout.operator("object.mastro_add_mastro_mass", icon_value=myIcon)
+    myIcon = icons.icon_id("plan")
     self.layout.operator("object.mastro_add_mastro_plan", icon_value=myIcon)
     myIcon = icons.icon_id("street")
     self.layout.operator("object.mastro_add_mastro_street", icon_value=myIcon)
-    # myIcon = icons.icon_id("street")
+    myIcon = icons.icon_id("dimension")
     self.layout.operator("object.mastro_add_mastro_dimension", icon_value=myIcon)
+    myIcon = icons.icon_id("frame")
     self.layout.operator("object.mastro_add_mastro_frame", icon_value=myIcon)
-    self.layout.operator("object.mastro_add_mastro_album", icon='EMPTY_AXIS')
+    myIcon = icons.icon_id("album")
+    self.layout.operator("object.mastro_add_mastro_album", icon_value=myIcon)
     self.layout.separator()
-    self.layout.operator("mastrocad.add_drawing_mesh", icon='MESH_DATA')
+    myIcon = icons.icon_id("drawing")
+    self.layout.operator("mastrocad.add_drawing_mesh", icon_value=myIcon)
   
   
 def register():

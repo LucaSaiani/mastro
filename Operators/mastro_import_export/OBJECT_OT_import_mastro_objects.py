@@ -8,8 +8,11 @@ Flow:
        Collection→ pick one collection, imports everything inside
   4. Confirm → remap scene lists → link objects
 
-Resolution order: Uses → Typologies → Walls → Floors → Streets → Buildings → Blocks
-Matching: identical parameters → remap to existing; any difference → add as new entry.
+Resolution order: Uses → Typologies → Walls → Floors → Streets → Buildings →
+Blocks → Levels → Pens → Patterns → Layers
+Matching: identical parameters → remap to existing; any difference → add as
+new entry. Locked entries (standard pens/patterns, AOD level) are matched by
+id instead, since they're seeded identically in every scene.
 """
 
 import bpy
@@ -27,9 +30,10 @@ from bpy.props import (StringProperty, CollectionProperty,
 # ── PropertyGroups ────────────────────────────────────────────────────────────
 
 class MASTRO_PG_ImportObject(PropertyGroup):
-    selected:  BoolProperty(default=True)
-    is_mastro: BoolProperty(default=False)
-    obj_type:  StringProperty(default='MESH')   # 'MESH' | 'GP'
+    selected:    BoolProperty(default=True)
+    is_mastro:   BoolProperty(default=False)
+    mastro_type: StringProperty(default='')     # icon name, see Icons/; '' if not MaStro
+    obj_type:    StringProperty(default='MESH') # 'MESH' | 'GP'
 
 
 class MASTRO_PG_ImportCollection(PropertyGroup):
@@ -41,7 +45,7 @@ class MASTRO_PG_ImportCollection(PropertyGroup):
 
 _state: dict = {
     "all_obj_names":        [],
-    "mastro_names":         set(),
+    "mastro_types":         {},   # {name: icon-name str}, see Icons/
     "obj_types":            {},   # {name: 'MESH'|'GP'}
     "all_collection_names": [],
     "collection_obj_map":   {},   # {coll_name: [obj_name, ...]}
@@ -77,7 +81,11 @@ class MASTRO_UL_ImportObjects(UIList):
         layout.prop(item, "selected", text="", emboss=False,
                     icon='CHECKBOX_HLT' if item.selected else 'CHECKBOX_DEHLT')
         layout.label(text="", icon=type_icon)
-        layout.label(text="", icon='EVENT_M' if item.is_mastro else 'BLANK1')
+        if item.mastro_type:
+            from ...Icons import icon_id
+            layout.label(text="", icon_value=icon_id(item.mastro_type))
+        else:
+            layout.label(text="", icon='BLANK1')
         row = layout.row()
         row.alignment = 'LEFT'
         row.label(text=item.name)
@@ -192,14 +200,15 @@ class OBJECT_OT_Import_Mastro_Select(Operator):
     def invoke(self, context, event):
         _state["select_op_ref"] = self
         self.objects.clear()
-        mastro_names = _state.get("mastro_names", set())
+        mastro_types = _state.get("mastro_types", {})
         obj_types    = _state.get("obj_types", {})
         for name in _state["all_obj_names"]:
-            item           = self.objects.add()
-            item.name      = name
-            item.is_mastro = name in mastro_names
-            item.selected  = True
-            item.obj_type  = obj_types.get(name, 'MESH')
+            item             = self.objects.add()
+            item.name        = name
+            item.mastro_type = mastro_types.get(name, '')
+            item.is_mastro   = name in mastro_types
+            item.selected    = True
+            item.obj_type    = obj_types.get(name, 'MESH')
         self.collections.clear()
         for name in _state.get("all_collection_names", []):
             item      = self.collections.add()
@@ -282,9 +291,9 @@ class OBJECT_OT_Import_Mastro_Select(Operator):
     # ── Shared remap + hand-off ───────────────────────────────────────────────
 
     def _remap_and_finish(self, context, selected_names):
-        mastro_names = _state.get("mastro_names", set())
+        mastro_types = _state.get("mastro_types", {})
         mastro_objs  = [bpy.data.objects.get(n) for n in selected_names
-                        if n in mastro_names and bpy.data.objects.get(n)]
+                        if n in mastro_types and bpy.data.objects.get(n)]
 
         # Load scene now (deferred from initial load) for remap data.
         src_scene = None
@@ -324,14 +333,26 @@ class OBJECT_OT_Import_Mastro_Select(Operator):
         blk_remap    = _build_remap(unique["block"],    "block",    scene)
         custom_remap, string_opt_remaps = _ensure_custom_props(unique["custom"], scene)
 
+        level_remap   = _build_remap(unique["level"],   "level",   scene)
+        # Pens/patterns must be resolved before layers, same dependency
+        # order as use_remap before typo_remap above.
+        pen_remap     = _build_remap(unique["pen"],     "pen",     scene)
+        pattern_remap = _build_remap(unique["pattern"], "pattern", scene)
+        layer_remap   = _build_remap(unique["layer"],   "layer",   scene,
+                                      pen_remap=pen_remap, pattern_remap=pattern_remap)
+
         if src_scene:
             bpy.data.scenes.remove(src_scene, do_unlink=True)
 
+        # pen_remap/pattern_remap aren't needed below: they were only an
+        # intermediate step to build layer_remap, the same way use_remap
+        # is consumed into typo_remap and not applied to objects directly.
         remaps = {
             "use": use_remap, "typology": typo_remap, "wall": wall_remap,
             "floor": floor_remap, "street": str_remap,
             "building": bld_remap, "block": blk_remap,
             "custom": custom_remap, "string_opts": string_opt_remaps,
+            "level": level_remap, "layer": layer_remap,
         }
 
         imported = []
@@ -343,7 +364,7 @@ class OBJECT_OT_Import_Mastro_Select(Operator):
                 scene.collection.objects.link(obj)
             imported.append(obj)
 
-        _apply_remap_to_objects(mastro_objs, remaps)
+        _apply_remap_to_objects(context, mastro_objs, remaps)
 
         if imported:
             bpy.ops.object.select_all(action='DESELECT')
@@ -360,7 +381,7 @@ class OBJECT_OT_Import_Mastro_Select(Operator):
             obj = bpy.data.objects.get(name)
             if obj:
                 bpy.data.objects.remove(obj, do_unlink=True)
-        _state.update({"all_obj_names": [], "mastro_names": set(),
+        _state.update({"all_obj_names": [], "mastro_types": {},
                         "obj_types": {}, "all_collection_names": [],
                         "collection_obj_map": {}, "filepath": "",
                         "remaps": {}})
@@ -390,7 +411,7 @@ class OBJECT_OT_Import_Mastro_Objects(Operator):
             self.report({'ERROR'}, f"File not found: {fp}")
             return {'CANCELLED'}
 
-        _state.update({"all_obj_names": [], "mastro_names": set(),
+        _state.update({"all_obj_names": [], "mastro_types": {},
                         "obj_types": {}, "all_collection_names": [],
                         "collection_obj_map": {}, "filepath": "",
                         "remaps": {}, "select_op_ref": None,
@@ -442,7 +463,8 @@ class OBJECT_OT_Import_Mastro_Objects(Operator):
             return 'CANCELLED'
 
         mesh_gp_names = {o.name for o in mesh_gp}
-        mastro_names  = {o.name for o in mesh_gp if _is_mastro_object(o)}
+        mastro_types  = {o.name: _mastro_type_name(o) for o in mesh_gp
+                         if _mastro_type_name(o) is not None}
         obj_types     = {o.name: ('GP' if _is_gp_object(o) else 'MESH') for o in mesh_gp}
 
         collection_obj_map = {}
@@ -456,7 +478,7 @@ class OBJECT_OT_Import_Mastro_Objects(Operator):
 
         _state["filepath"]             = fp
         _state["all_obj_names"]        = sorted(mesh_gp_names)
-        _state["mastro_names"]         = mastro_names
+        _state["mastro_types"]         = mastro_types
         _state["obj_types"]            = obj_types
         _state["all_collection_names"] = sorted(collection_obj_map.keys())
         _state["collection_obj_map"]   = collection_obj_map
@@ -474,11 +496,31 @@ def _is_mesh_or_gp(obj):
 
 
 def _is_mastro_object(obj):
+    return _mastro_type_name(obj) is not None
+
+
+# Marker key on obj.data -> icon name in Icons/ (see Icons.icon_id). Every
+# importable MaStro type sets one of these alongside the generic "MaStro
+# object" marker, so the generic marker itself is never checked here.
+_MASTRO_TYPE_MARKERS = [
+    ("MaStro plan",    "plan"),
+    ("MaStro mass",    "mass"),
+    ("MaStro block",   "block"),
+    ("MaStro street",  "street"),
+    ("MaStro drawing", "drawing"),
+]
+
+
+def _mastro_type_name(obj):
+    """Return the icon name (see Icons/) for obj's MaStro type, or None if
+    obj isn't a recognised MaStro object."""
     if not _is_mesh_or_gp(obj):
-        return False
+        return None
     m = obj.data
-    return bool(m.get("MaStro object") or m.get("MaStro mass")
-                or m.get("MaStro block") or m.get("MaStro street"))
+    for marker, type_name in _MASTRO_TYPE_MARKERS:
+        if m.get(marker):
+            return type_name
+    return None
 
 
 # ── Domain utilities ──────────────────────────────────────────────────────────
@@ -499,13 +541,16 @@ def _by_id(collection, eid):
 
 def _collect_unique_entries(objects, src_scene):
     unique = {t: {} for t in
-              ("use","typology","wall","floor","street","building","block","custom")}
+              ("use","typology","wall","floor","street","building","block",
+               "custom","level","pen","pattern","layer")}
     if not objects or src_scene is None:
         return unique
     for obj in objects:
         mesh      = obj.data
         is_block  = bool(mesh.get("MaStro block"))
         is_street = bool(mesh.get("MaStro street"))
+        is_plan    = bool(mesh.get("MaStro plan"))
+        is_drawing = bool(mesh.get("MaStro drawing"))
 
         for attr in (["mastro_typology_id"] +
                      (["mastro_typology_id_EDGE"] if is_block else [])):
@@ -570,6 +615,28 @@ def _collect_unique_entries(objects, src_scene):
                     "string_options": [(o.id, o.name) for o in prop.string_options],
                 }
 
+        if is_plan:
+            # -1 is the "unlocked, no level" sentinel (see
+            # mastro_bottom_level_id) and must not be looked up/remapped.
+            lid = obj.mastro_props.mastro_bottom_level_id
+            if lid != -1 and lid not in unique["level"]:
+                e = _by_id(src_scene.mastro_level_list, lid)
+                if e:
+                    unique["level"][lid] = {"name": e.name, "level": e.level}
+
+        if is_drawing:
+            for lid in _attr_values(obj, "mastro_drawing_layer", "EDGE"):
+                if lid in unique["layer"]:
+                    continue
+                e = _by_id(src_scene.mastro_cad_layers, lid)
+                if e:
+                    unique["layer"][lid] = {
+                        "name": e.name, "pen_id": e.pen_id, "pattern_id": e.pattern_id,
+                        "color": tuple(e.color), "black": e.black, "visible": e.visible,
+                        "locked": e.locked}
+
+    # Typologies reference Use entries by id (useList); resolve those after
+    # the main pass so every typology referenced above has been collected.
     for _tid, tp in unique["typology"].items():
         for uid_str in tp["useList"].split(";"):
             uid_str = uid_str.strip()
@@ -583,7 +650,32 @@ def _collect_unique_entries(objects, src_scene):
                 unique["use"][uid] = {
                     "name": e.name, "floorToFloor": e.floorToFloor,
                     "storeys": e.storeys, "liquid": e.liquid}
+
+    # Same idea, one level down: Layers reference a Pen and a Pattern id.
+    for _lid, ly in unique["layer"].items():
+        pid = ly["pen_id"]
+        if pid not in unique["pen"]:
+            e = _by_id(src_scene.mastro_cad_pens, pid)
+            if e:
+                unique["pen"][pid] = {
+                    "thickness": e.thickness, "color": tuple(e.color), "locked": e.locked}
+        ptid = ly["pattern_id"]
+        if ptid not in unique["pattern"]:
+            e = _by_id(src_scene.mastro_cad_dash_patterns, ptid)
+            if e:
+                unique["pattern"][ptid] = {
+                    "name": e.name, "l1": e.l1, "g1": e.g1, "l2": e.l2,
+                    "g2": e.g2, "l3": e.l3, "g3": e.g3, "locked": e.locked}
     return unique
+
+
+# pen/pattern/layer store their id under a type-specific field name instead
+# of the generic "id" used by every other scene list.
+_ID_FIELD = {"pen": "pen_id", "pattern": "pattern_id", "layer": "layer_id"}
+
+
+def _id_field(list_type):
+    return _ID_FIELD.get(list_type, "id")
 
 
 def _params_match(a, b):
@@ -624,6 +716,16 @@ def _scene_params(entry, list_type):
         return {"name": entry.name}
     if list_type == "custom":
         return {"name": entry.name, "property_type": entry.property_type}
+    if list_type == "level":
+        return {"name": entry.name, "level": entry.level}
+    if list_type == "pen":
+        return {"thickness": entry.thickness, "color": tuple(entry.color)}
+    if list_type == "pattern":
+        return {"name": entry.name, "l1": entry.l1, "g1": entry.g1, "l2": entry.l2,
+                "g2": entry.g2, "l3": entry.l3, "g3": entry.g3}
+    if list_type == "layer":
+        return {"name": entry.name, "pen_id": entry.pen_id, "pattern_id": entry.pattern_id,
+                "color": tuple(entry.color), "black": entry.black, "visible": entry.visible}
     return {}
 
 
@@ -635,11 +737,18 @@ def _get_scene_list(scene, list_type):
             "street": scene.mastro_street_name_list,
             "building": scene.mastro_building_name_list,
             "block":   scene.mastro_block_name_list,
-            "custom":  scene.mastro_custom_property_name_list}[list_type]
+            "custom":  scene.mastro_custom_property_name_list,
+            "level":   scene.mastro_level_list,
+            "pen":     scene.mastro_cad_pens,
+            "pattern": scene.mastro_cad_dash_patterns,
+            "layer":   scene.mastro_cad_layers}[list_type]
 
 
-def _next_free_id(collection):
-    used = {e.id for e in collection}
+# list_type defaults to "custom" only because that maps to the generic "id"
+# field via _id_field(); any list using the generic id field works the same.
+def _next_free_id(collection, list_type="custom"):
+    id_field = _id_field(list_type)
+    used = {getattr(e, id_field) for e in collection}
     i = 1
     while i in used:
         i += 1
@@ -647,7 +756,10 @@ def _next_free_id(collection):
 
 
 def _add_entry(collection, list_type, params, new_id):
-    item = collection.add(); item.id = new_id; item.name = params["name"]
+    item = collection.add()
+    setattr(item, _id_field(list_type), new_id)
+    if list_type != "pen":  # pens have no "name" field
+        item.name = params["name"]
     if list_type == "use":
         item.floorToFloor = params["floorToFloor"]
         item.storeys = params["storeys"]; item.liquid = params["liquid"]
@@ -666,6 +778,18 @@ def _add_entry(collection, list_type, params, new_id):
         item.property_type = params["property_type"]
         item.committed = True
         item.previous_name = item.name
+    elif list_type == "level":
+        item.level = params["level"]
+    elif list_type == "pen":
+        item.thickness = params["thickness"]; item.color = params["color"]
+    elif list_type == "pattern":
+        item.l1 = params["l1"]; item.g1 = params["g1"]
+        item.l2 = params["l2"]; item.g2 = params["g2"]
+        item.l3 = params["l3"]; item.g3 = params["g3"]
+    elif list_type == "layer":
+        item.pen_id = params["pen_id"]; item.pattern_id = params["pattern_id"]
+        item.color = params["color"]; item.black = params["black"]
+        item.visible = params["visible"]
 
 
 def _next_free_string_opt_id(string_options):
@@ -722,24 +846,41 @@ def _remap_use_list(use_list_str, use_remap):
     return ";".join(str(use_remap.get(int(p), int(p))) for p in parts)
 
 
-def _build_remap(unique_entries, list_type, scene, use_remap=None):
+def _build_remap(unique_entries, list_type, scene, use_remap=None,
+                  pen_remap=None, pattern_remap=None):
     remap = {}; collection = _get_scene_list(scene, list_type)
+    id_field = _id_field(list_type)
     for src_id, params in unique_entries.items():
-        cmp = dict(params)
+        # Locked entries (standard pens/patterns/levels) are seeded with the
+        # same id in every scene by their respective ensure_*/init code, so
+        # they never need deduplication by parameters - just pass the id
+        # through unchanged.
+        if params.get("locked"):
+            remap[src_id] = src_id
+            continue
+        cmp = {k: v for k, v in params.items() if k != "locked"}
         if list_type == "typology" and use_remap:
             cmp["useList"] = _remap_use_list(params["useList"], use_remap)
-        match_id = next((e.id for e in collection
+        # Inject the already-resolved pen/pattern ids before comparing, same
+        # as typology does with useList above: a layer only matches an
+        # existing scene layer if it points at the *destination* pen/pattern.
+        if list_type == "layer":
+            if pen_remap:
+                cmp["pen_id"] = pen_remap.get(params["pen_id"], params["pen_id"])
+            if pattern_remap:
+                cmp["pattern_id"] = pattern_remap.get(params["pattern_id"], params["pattern_id"])
+        match_id = next((getattr(e, id_field) for e in collection
                          if _params_match(cmp, _scene_params(e, list_type))), None)
         if match_id is not None:
             remap[src_id] = match_id
         else:
-            new_id = _next_free_id(collection)
+            new_id = _next_free_id(collection, list_type)
             _add_entry(collection, list_type, cmp, new_id)
             remap[src_id] = new_id
     return remap
 
 
-def _apply_remap_to_objects(objects, remaps):
+def _apply_remap_to_objects(context, objects, remaps):
     def _remap_attr(obj, attr_name, domain, id_map):
         mesh = obj.data
         if attr_name not in mesh.attributes:
@@ -753,10 +894,13 @@ def _apply_remap_to_objects(objects, remaps):
                 item.value = v
         mesh.update()
 
+    any_plan_relocked = False
     for obj in objects:
         mesh      = obj.data
         is_block  = bool(mesh.get("MaStro block"))
         is_street = bool(mesh.get("MaStro street"))
+        is_plan    = bool(mesh.get("MaStro plan"))
+        is_drawing = bool(mesh.get("MaStro drawing"))
         if "typology" in remaps:
             _remap_attr(obj, "mastro_typology_id", "FACE", remaps["typology"])
             if is_block:
@@ -788,3 +932,30 @@ def _apply_remap_to_objects(objects, remaps):
                     new_val = opt_remap.get(old_val)
                     if new_val is not None:
                         obj[key] = new_val
+        if "level" in remaps and is_plan:
+            old = obj.mastro_props.mastro_bottom_level_id
+            if old != -1:  # -1 is "unlocked, no level" - nothing to remap
+                new = remaps["level"].get(old)
+                if new is not None:
+                    obj.mastro_props.mastro_bottom_level_id = new
+                if obj.mastro_props.mastro_lock_to_level:
+                    # obj.copy() in the library load above also copies the
+                    # plan's drivers, but their target.id still points at
+                    # whatever object they were on in the source file - so
+                    # without clearing+relinking, this plan would end up
+                    # driven by a foreign object instead of itself (same
+                    # fix as obj.copy() needs in duplicate_plan_to_levels).
+                    from ...Utils.mastro_arch.plan_drivers import link_all_plan_drivers
+                    obj.animation_data_clear()
+                    modifier = obj.modifiers.get("MaStro Plan")
+                    if modifier:
+                        link_all_plan_drivers(obj, modifier)
+                    any_plan_relocked = True
+        if "layer" in remaps and is_drawing:
+            _remap_attr(obj, "mastro_drawing_layer", "EDGE", remaps["layer"])
+
+    # Recompute FFL/floor-to-floor for every relocked plan against the
+    # destination scene's level list, once, instead of per object.
+    if any_plan_relocked:
+        from ...Utils.mastro_arch.update_plan_attributes import update_plan_attributes
+        update_plan_attributes(context)
