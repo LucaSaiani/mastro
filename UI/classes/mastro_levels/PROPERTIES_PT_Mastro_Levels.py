@@ -19,6 +19,5 @@ class PROPERTIES_PT_Mastro_Levels(Panel):
 
         col = row.column(align=True)
         col.operator("mastro_level_list.new_item", icon='ADD', text="")
-        col.operator("mastro_level_list.remove_item", icon='REMOVE', text="")
         col.separator()
         col.menu("MASTRO_MT_Level_List_Specials", icon='DOWNARROW_HLT', text="")

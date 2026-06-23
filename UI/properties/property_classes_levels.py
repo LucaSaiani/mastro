@@ -126,8 +126,9 @@ class mastro_CL_level_list(PropertyGroup):
     """One project level, defined by its elevation.
 
     id 0 is the default "AOD" (ground/datum) level created by init_lists and
-    can never be removed or edited; see PROPERTIES_OT_Level_List_Remove_Item
-    and PROPERTIES_UL_Level for where that is enforced.
+    can never be renamed; see PROPERTIES_UL_Level for where that is enforced.
+    Levels in general can never be removed (no remove operator exists, like
+    Block/Typology), to avoid breaking references to them elsewhere.
     """
     id: IntProperty(
         name="Id",

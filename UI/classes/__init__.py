@@ -24,7 +24,6 @@ from .mastro_arch.PROPERTIES_PT_Mastro_Floor import PROPERTIES_PT_Mastro_Floor
 from .mastro_street.PROPERTIES_PT_Mastro_Street import PROPERTIES_PT_Mastro_Street
 from .mastro_levels.PROPERTIES_UL_Level import PROPERTIES_UL_Level
 from .mastro_levels.PROPERTIES_OT_Level_List_New_Item import PROPERTIES_OT_Level_List_New_Item
-from .mastro_levels.PROPERTIES_OT_Level_List_Remove_Item import PROPERTIES_OT_Level_List_Remove_Item
 from .mastro_levels.PROPERTIES_OT_Level_List_Batch_Add import PROPERTIES_OT_Level_List_Batch_Add
 from .mastro_levels.MASTRO_MT_Level_List_Specials import MASTRO_MT_Level_List_Specials
 from .mastro_levels.PROPERTIES_UL_Level_Set import PROPERTIES_UL_Level_Set
@@ -106,7 +105,6 @@ classes = (
     PROPERTIES_PT_Mastro_Street,
     PROPERTIES_UL_Level,
     PROPERTIES_OT_Level_List_New_Item,
-    PROPERTIES_OT_Level_List_Remove_Item,
     PROPERTIES_OT_Level_List_Batch_Add,
     MASTRO_MT_Level_List_Specials,
     PROPERTIES_UL_Level_Set,
