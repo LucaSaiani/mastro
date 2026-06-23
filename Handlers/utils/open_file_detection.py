@@ -181,7 +181,7 @@ def on_load_post(filepath):
     if result == "stale":
         def _warn():
             bpy.ops.mastro.open_file_warning('INVOKE_DEFAULT',
-                                              message="This file may have been left open after a crash. The previous session marker has been cleared.",
+                                              message="This file's previous session was not closed cleanly (e.g. Blender quit, crashed, or was force-closed). The stale session marker has been cleared.",
                                               other_user=False)
         bpy.app.timers.register(_warn, first_interval=0.1)
         return
