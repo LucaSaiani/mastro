@@ -7,6 +7,15 @@ import math
 # independently instead of only whichever one happened to be first.
 _last_view_matrices = {}
 
+# Keyed the same way, tracks view_perspective ('ORTHO'/'PERSP'/'CAMERA')
+# alongside view_matrix. Toggling Ortho/Perspective (e.g. Numpad 5) does
+# NOT change view_matrix at all - Blender's view3d_view_persportho operator
+# only flips rv3d->persp, it doesn't go through ED_view3d_smooth_view - so
+# relying on matrices_differ alone misses that change entirely, leaving a
+# Top/Bottom ortho clip-range override stuck in place after switching to
+# Perspective without also rotating/panning the view.
+_last_view_perspectives = {}
+
 def matrices_differ(m1, m2, tol=1e-6):
     """Return True if any element of two 4x4 matrices differs beyond the given tolerance."""
     for i in range(4):
@@ -29,23 +38,32 @@ def monitor_view_rotation():
             key = region_3d.as_pointer()
             seen_keys.add(key)
             current_view = region_3d.view_matrix.copy()
+            current_persp = region_3d.view_perspective
 
             last_view = _last_view_matrices.get(key)
-            if last_view is not None and matrices_differ(current_view, last_view):
+            last_persp = _last_view_perspectives.get(key)
+            changed = (
+                last_view is not None
+                and (matrices_differ(current_view, last_view) or current_persp != last_persp)
+            )
+            if changed:
                 _on_view_changed(area, space, region_3d)
                 # _on_view_changed may itself write view_location.z (see
                 # apply_clip_to_space), which changes view_matrix again -
                 # re-read it so next tick doesn't see that as a further
                 # "the user moved the view" change and loop one extra tick.
                 current_view = region_3d.view_matrix.copy()
+                current_persp = region_3d.view_perspective
 
             _last_view_matrices[key] = current_view
+            _last_view_perspectives[key] = current_persp
 
     # Drop entries for viewports that no longer exist (closed area/window),
     # so this dict doesn't grow unbounded over a long session.
     for key in list(_last_view_matrices):
         if key not in seen_keys:
             del _last_view_matrices[key]
+            _last_view_perspectives.pop(key, None)
 
     from .mastro_levels.clip_range import forget_clip_state
     forget_clip_state(seen_keys)
@@ -89,7 +107,13 @@ def _on_view_changed(area, space, region_3d):
 
 def start_monitoring():
     if not bpy.app.timers.is_registered(monitor_view_rotation):
-        bpy.app.timers.register(monitor_view_rotation)
+        # persistent=True: without it, Blender silently unregisters this
+        # timer on every new file / file load (bpy.app.timers.register's
+        # default is persistent=False) - no error, no log, it just stops
+        # running, which made the Clip Range's view-change sync and
+        # restore-on-exit logic silently dead in any file opened/created
+        # after the addon's own register() call.
+        bpy.app.timers.register(monitor_view_rotation, persistent=True)
         print("MaStro: viewport monitoring started.")
 
 def stop_monitoring():
