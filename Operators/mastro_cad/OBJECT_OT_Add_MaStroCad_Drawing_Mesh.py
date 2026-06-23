@@ -8,36 +8,7 @@ from ...Utils.mastro_cad.update_bmesh_drawing_attributes import update_bmesh_dra
 from ...Utils.mastro_cad.drawing_materials import ensure_all_layer_materials
 from ...Nodes.operators.NODE_OT_MaStro_Drawing_GN import build_drawing_gn
 from ...Utils.mastro_preferences.get_preferences import get_prefs
-from ...Utils.mastro_levels.clip_range import is_top_bottom_ortho, get_view_side
-
-
-def _active_clip_range_level_id(context):
-    """The level id currently active in the Clip Range of whichever
-    Top/Bottom ortho VIEW_3D is relevant, or None if there isn't one.
-
-    Tries context.space_data first (the viewport the operator was invoked
-    from, e.g. via its header/sidebar), then falls back to scanning every
-    open VIEW_3D for one already in Top/Bottom ortho - covers invocation
-    from a non-VIEW_3D editor (e.g. a menu in Properties).
-    """
-    spaces_to_check = []
-    space = getattr(context, "space_data", None)
-    if space is not None and space.type == 'VIEW_3D':
-        spaces_to_check.append(space)
-    for window in context.window_manager.windows:
-        for area in window.screen.areas:
-            if area.type == 'VIEW_3D':
-                spaces_to_check.append(area.spaces.active)
-
-    for space in spaces_to_check:
-        region_3d = space.region_3d
-        if is_top_bottom_ortho(region_3d):
-            side = get_view_side(region_3d)
-            index = getattr(context.scene, f"mastro_clip_range_list_index_{side}")
-            level_list = context.scene.mastro_level_list
-            if 0 <= index < len(level_list):
-                return level_list[index].id
-    return None
+from ...Utils.mastro_levels.clip_range import active_clip_range_level_id
 
 
 class OBJECT_OT_MaStroCad_Add_Drawing_Mesh(Operator, AddObjectHelper):
@@ -89,7 +60,7 @@ class OBJECT_OT_MaStroCad_Add_Drawing_Mesh(Operator, AddObjectHelper):
         # active level elevation, leaving X/Y exactly where it was
         # generated (at the 3D cursor).
         if get_prefs().create_drawing_at_active_level:
-            level_id = _active_clip_range_level_id(context)
+            level_id = active_clip_range_level_id(context)
             if level_id is not None:
                 by_id = {lvl.id: lvl.level for lvl in context.scene.mastro_level_list}
                 obj.location.z = by_id[level_id]

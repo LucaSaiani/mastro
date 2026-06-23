@@ -44,6 +44,8 @@ from .mastro_arch.VIEW3D_PT_Mastro_Architecture import VIEW3D_PT_Mastro_Architec
 from .mastro_arch.VIEW3D_PT_Mastro_Block import VIEW3D_PT_Mastro_Block
 from .mastro_extras.VIEW3D_PT_Mastro_Extras import VIEW3D_PT_Mastro_Extras
 from .mastro_arch.VIEW3D_PT_Mastro_Mass import VIEW3D_PT_Mastro_Mass
+from .mastro_arch.VIEW3D_PT_Mastro_Plan import VIEW3D_PT_Mastro_Plan
+from .mastro_arch.MASTRO_MT_Plan_Lock_To_Level import MASTRO_MT_Plan_Lock_To_Level
 from .mastro_street.VIEW3D_PT_Mastro_Street import VIEW3D_PT_Mastro_Street
 from .mastro_2D.VIEW3D_PT_transform_orientations import VIEW3D_PT_transform_orientations
 from .mastro_arch.VIEW3D_PT_Mastro_Override import VIEW3D_PT_Mastro_Mass_Override, VIEW3D_PT_Mastro_Block_Override
@@ -124,6 +126,8 @@ classes = (
     VIEW3D_PT_Mastro_Block,
     VIEW3D_PT_Mastro_Extras,
     VIEW3D_PT_Mastro_Mass,
+    VIEW3D_PT_Mastro_Plan,
+    MASTRO_MT_Plan_Lock_To_Level,
     VIEW3D_PT_Mastro_Street,
     VIEW3D_PT_transform_orientations,
     VIEW3D_PT_Mastro_Mass_Override, 

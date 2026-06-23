@@ -9,6 +9,7 @@ def add_mesh_menu(self, context):
     self.layout.operator("object.mastro_add_mastro_block", icon_value=myIcon)
     myIcon = icons.icon_id("mass")
     self.layout.operator("object.mastro_add_mastro_mass", icon_value=myIcon)
+    self.layout.operator("object.mastro_add_mastro_plan", icon_value=myIcon)
     myIcon = icons.icon_id("street")
     self.layout.operator("object.mastro_add_mastro_street", icon_value=myIcon)
     # myIcon = icons.icon_id("street")

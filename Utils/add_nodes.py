@@ -182,7 +182,7 @@ def add_nodes():
 
     blend_file      = str(mastro_path / "mastro.blend")
     nodes_to_import = {"MaStro Mass", "MaStro Block", "MaStro Street", "MaStro Dimension",
-                       ".MaStro Layer Setup"}
+                       "MaStro Plan", ".MaStro Layer Setup"}
 
     try:
         # Link the 4 top-level groups (sub-deps arrive as linked too).

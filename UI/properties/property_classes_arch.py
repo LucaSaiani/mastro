@@ -8,6 +8,7 @@ from bpy.props import (IntProperty,
 )
 
 from ...Utils.update_attributes import *
+from ...Utils.mastro_arch.plan_drivers import update_plan_ffl, update_plan_floor_to_floor_height
 
 # ------------------------------
 # Addon Properties
@@ -26,6 +27,39 @@ class mastro_CL_addon_properties(PropertyGroup):
         default=1,
         min=1,
         description="Building name"
+    )
+
+    mastro_ffl: FloatProperty(
+        name="FFL",
+        default=0,
+        precision=3,
+        subtype="DISTANCE",
+        unit='LENGTH',
+        description="Finished floor level of the plan, stored per-object so duplicates with linked mesh data can differ",
+        update=update_plan_ffl
+    )
+
+    mastro_floor_to_floor_height: FloatProperty(
+        name="Height",
+        default=0,
+        min=0,
+        precision=3,
+        subtype="DISTANCE",
+        unit='LENGTH',
+        description="Floor to floor height of the plan, stored per-object so duplicates with linked mesh data can differ",
+        update=update_plan_floor_to_floor_height
+    )
+
+    mastro_bottom_level_id: IntProperty(
+        name="Bottom Level Id",
+        default=0,
+        description="Id (mastro_level_list) of the active level the plan was created at, stored per-object so duplicates with linked mesh data can differ"
+    )
+
+    mastro_lock_to_level: BoolProperty(
+        name="Lock to Level",
+        default=True,
+        description="Keep this plan's Z position and floor to floor height in sync with mastro_bottom_level_id whenever the level list changes. Disable to manage them manually"
     )
 
 # ------------------------------

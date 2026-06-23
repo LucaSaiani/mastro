@@ -1,6 +1,7 @@
 from bpy.types import Operator
 
 from ....Utils.mastro_levels.sort_level_list import sort_level_list
+from ....Utils.update_attributes import update_all_mastro_plans_level
 
 
 class PROPERTIES_OT_Level_List_New_Item(Operator):
@@ -26,6 +27,7 @@ class PROPERTIES_OT_Level_List_New_Item(Operator):
         del scene["mastro_level_list_batch_update"]
 
         sort_level_list(scene)
+        update_all_mastro_plans_level(context)
 
         for i, el in enumerate(collection):
             if el.id == item.id:

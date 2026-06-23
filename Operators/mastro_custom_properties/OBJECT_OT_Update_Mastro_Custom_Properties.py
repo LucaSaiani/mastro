@@ -3,14 +3,15 @@ from bpy.types import Operator
 from ...Utils.string_property_enum import register_string_enum, unregister_string_enum
 
 
-def add_custom_properties_to_object(obj, is_street=False):
+def add_custom_properties_to_object(obj, is_street=False, is_plan=False):
     """Add committed scene custom properties to a single newly created MaStro object."""
     scene = bpy.context.scene
-    is_mass = not is_street
+    is_mass = not is_street and not is_plan
     for prop in scene.mastro_custom_property_name_list:
         if not prop.committed:                        continue
         if is_mass   and not prop.assign_to_mass:    continue
         if is_street and not prop.assign_to_street:  continue
+        if is_plan   and not prop.assign_to_plan:    continue
         key = f"_{prop.name}"  # _ prefix hides from Blender's native Custom Properties panel
         if prop.property_type == 'INT':
             obj[key] = prop.default_int
@@ -46,10 +47,12 @@ class OBJECT_OT_Update_Mastro_Custom_Properties(Operator):
             if obj.type != 'MESH' or "MaStro object" not in obj.data:
                 continue
             is_street = bool(obj.data.get("MaStro street"))
-            is_mass   = not is_street
+            is_plan   = bool(obj.data.get("MaStro plan"))
+            is_mass   = not is_street and not is_plan
 
             if self.property_to_update == "mass"   and not is_mass:   continue
             if self.property_to_update == "street" and not is_street: continue
+            if self.property_to_update == "plan"   and not is_plan:   continue
 
             for prop in props:
                 key = f"_{prop.name}"
@@ -60,6 +63,7 @@ class OBJECT_OT_Update_Mastro_Custom_Properties(Operator):
                 else:
                     if is_mass   and not prop.assign_to_mass:   continue
                     if is_street and not prop.assign_to_street: continue
+                    if is_plan   and not prop.assign_to_plan:   continue
 
                     if prop.property_type == 'INT':
                         obj[key] = obj.get(key, prop.default_int)
@@ -92,7 +96,7 @@ class OBJECT_OT_Remove_Mastro_Custom_Property(Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     property_id: bpy.props.IntProperty()
-    object_type: bpy.props.StringProperty()  # 'mass', 'street', or 'all'
+    object_type: bpy.props.StringProperty()  # 'mass', 'street', 'plan', or 'all'
 
     def invoke(self, context, event):
         prop = next((p for p in context.scene.mastro_custom_property_name_list

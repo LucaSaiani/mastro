@@ -2,6 +2,7 @@ import bpy
 
 from ..Utils.init_lists import init_lists
 from ..Utils.mastro_arch.update_bmesh_attributes import update_bmesh_attributes
+from ..Utils.mastro_arch.update_plan_attributes import update_plan_attributes
 
 # ------------------------------
 # Mastro Project Data
@@ -256,6 +257,19 @@ def update_all_mastro_meshes_numberOfStoreys(self, context):
 def update_all_mastro_meshes_useList(self, context):
     if context.window_manager.mastro_toggle_auto_update_mass_data:
         update_bmesh_attributes(context, "all")
+
+
+# ------------------------------
+# Classes - Level
+# ------------------------------
+# called whenever a level's elevation/name changes (see update_level_list),
+# since either can change which level is "above" a given plan and what its
+# floor to floor height should be.
+# Always runs unconditionally (no toggle, unlike mass/block): plans are
+# object-level data, so even a few hundred of them update near-instantly,
+# unlike mass/block updates which walk every face/edge of a mesh.
+def update_all_mastro_plans_level(context):
+    update_plan_attributes(context)
         
         
 # update the node "filter by typology" if a new typology is added or

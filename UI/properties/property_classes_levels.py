@@ -9,16 +9,22 @@ from bpy.props import (IntProperty,
 
 
 def update_level_list(self, context):
-    """Keep the level list sorted by descending level, then by name.
+    """Keep the level list sorted by descending level, then by name, then
+    refresh every MaStro plan's level-derived data (FFL, floor to floor
+    height) - either field can change which level ends up "above" a given
+    plan and what its floor to floor height should be.
 
     Skipped while a batch operation (new_item, batch_add) is writing
     several fields/items in sequence; those operators call
-    sort_level_list() once themselves after all writes are done.
+    sort_level_list() (and the plan refresh) once themselves after all
+    writes are done.
     """
     if context.scene.get("mastro_level_list_batch_update"):
         return
     from ...Utils.mastro_levels.sort_level_list import sort_level_list
+    from ...Utils.update_attributes import update_all_mastro_plans_level
     sort_level_list(context.scene)
+    update_all_mastro_plans_level(context)
 
 
 class mastro_CL_level_set_item(PropertyGroup):

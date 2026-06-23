@@ -11,11 +11,15 @@ class VIEW3D_PT_Mastro_Architecture(Panel):
     
     @classmethod
     def poll(cls, context):
-        return (context.object is not None and 
-                context.object.type == "MESH" and 
+        # Plans share the same wall_id/floor_id edge/face attributes as
+        # masses, so this panel works unchanged for both - no separate
+        # "Architecture" panel needed for plan.
+        return (context.object is not None and
+                context.object.type == "MESH" and
                 context.object.mode == "EDIT" and
                 "MaStro object" in context.object.data and
-                "MaStro mass" in context.object.data)
+                ("MaStro mass" in context.object.data or
+                 "MaStro plan" in context.object.data))
     
     def draw(self, context):
         obj = context.active_object 

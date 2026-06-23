@@ -2,6 +2,7 @@ from bpy.types import Operator
 from bpy.props import FloatProperty, IntProperty, StringProperty, EnumProperty
 
 from ....Utils.mastro_levels.sort_level_list import sort_level_list
+from ....Utils.update_attributes import update_all_mastro_plans_level
 
 
 class PROPERTIES_OT_Level_List_Batch_Add(Operator):
@@ -83,6 +84,7 @@ class PROPERTIES_OT_Level_List_Batch_Add(Operator):
         del scene["mastro_level_list_batch_update"]
 
         sort_level_list(scene)
+        update_all_mastro_plans_level(context)
 
         for area in context.screen.areas:
             area.tag_redraw()

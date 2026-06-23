@@ -3,6 +3,11 @@ from .mastro_2D.MESH_OT_Move_Active_Vertex import MESH_OT_Move_Active_Vertex
 from .mastro_arch.OBJECT_OT_Add_Mastro_Block import OBJECT_OT_Add_Mastro_Block
 from .mastro_2D.OBJECT_OT_Add_Mastro_Dimension import OBJECT_OT_Add_Mastro_Dimension
 from .mastro_arch.OBJECT_OT_Add_Mastro_Mass import OBJECT_OT_Add_Mastro_Mass
+from .mastro_arch.OBJECT_OT_Add_Mastro_Plan import OBJECT_OT_Add_Mastro_Plan
+from .mastro_arch.OBJECT_OT_Mastro_Plan_Lock_To_Level import (
+    OBJECT_OT_Mastro_Plan_Unlock_From_Level,
+    OBJECT_OT_Mastro_Plan_Lock_To_Level,
+)
 from .mastro_street.OBJECT_OT_Add_Mastro_Street import OBJECT_OT_Add_Mastro_Street
 from .mastro_pdf.OBJECT_OT_Add_Mastro_Frame import OBJECT_OT_Add_Mastro_Frame
 from .mastro_album.OBJECT_OT_Add_Mastro_Album import OBJECT_OT_Add_Mastro_Album
@@ -102,6 +107,9 @@ classes = (
     OBJECT_OT_Add_Mastro_Block,
     OBJECT_OT_Add_Mastro_Dimension,
     OBJECT_OT_Add_Mastro_Mass,
+    OBJECT_OT_Add_Mastro_Plan,
+    OBJECT_OT_Mastro_Plan_Unlock_From_Level,
+    OBJECT_OT_Mastro_Plan_Lock_To_Level,
     OBJECT_OT_Add_Mastro_Street,
     OBJECT_OT_Add_Mastro_Frame,
     OBJECT_OT_Add_Mastro_Album,

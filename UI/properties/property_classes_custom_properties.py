@@ -66,6 +66,7 @@ class mastro_CL_custom_property_name_list(PropertyGroup):
 
     assign_to_mass   : BoolProperty(name="Assign to Mass/Block", default=True)
     assign_to_street : BoolProperty(name="Assign to Street",     default=True)
+    assign_to_plan   : BoolProperty(name="Assign to Plan",       default=True)
 
     committed: BoolProperty(name="Committed", default=False)
 

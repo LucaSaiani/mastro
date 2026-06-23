@@ -452,6 +452,57 @@ def toggle_unlimited_clip_range(scene, side):
     _set_clip_range_from_current(scene, side, ids_in_order, current_position, count)
 
 
+def active_clip_range_level_id(context):
+    """The level id currently active in the Clip Range of whichever
+    Top/Bottom ortho VIEW_3D is relevant.
+
+    Tries context.space_data first (the viewport the operator was invoked
+    from, e.g. via its header/sidebar), then falls back to scanning every
+    open VIEW_3D for one already in Top/Bottom ortho - covers invocation
+    from a non-VIEW_3D editor (e.g. a menu in Properties).
+
+    If no viewport is currently in Top/Bottom ortho (e.g. the user is in
+    perspective), falls back to the "top" side's active level - top/bottom
+    here name the viewing direction, not "highest/lowest level", and each
+    side's mastro_clip_range_list_index_<side> persists independently of
+    whatever the viewport is doing right now (see _key's docstring), so
+    "top" is as good a last-known-active level as any.
+    """
+    spaces_to_check = []
+    space = getattr(context, "space_data", None)
+    if space is not None and space.type == 'VIEW_3D':
+        spaces_to_check.append(space)
+    for window in context.window_manager.windows:
+        for area in window.screen.areas:
+            if area.type == 'VIEW_3D':
+                spaces_to_check.append(area.spaces.active)
+
+    for space in spaces_to_check:
+        region_3d = space.region_3d
+        if is_top_bottom_ortho(region_3d):
+            side = get_view_side(region_3d)
+            index = getattr(context.scene, f"mastro_clip_range_list_index_{side}")
+            level_list = context.scene.mastro_level_list
+            if 0 <= index < len(level_list):
+                return level_list[index].id
+
+    index = getattr(context.scene, "mastro_clip_range_list_index_top")
+    level_list = context.scene.mastro_level_list
+    if 0 <= index < len(level_list):
+        return level_list[index].id
+    return None
+
+
+def active_level_elevation(context):
+    """Elevation of the level currently active in the Clip Range (see
+    active_clip_range_level_id), or None if there isn't one."""
+    level_id = active_clip_range_level_id(context)
+    if level_id is None:
+        return None
+    by_id = {lvl.id: lvl.level for lvl in context.scene.mastro_level_list}
+    return by_id.get(level_id)
+
+
 def sync_clip_range_on_view_change(scene, side):
     """Rebuild the clip range for the given side.
 

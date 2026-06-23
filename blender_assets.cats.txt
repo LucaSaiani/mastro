@@ -33,6 +33,7 @@ d922c348-ab12-45a7-a416-5350c16b434f:MaStro/Architecture:MaStro-Architecture
 93576a95-8fea-44c1-abd2-d90998a5fad5:MaStro/Architecture/Annotation:MaStro-Architecture-Annotation
 ab8fb733-a64c-4350-816b-e148d68d34d4:MaStro/Architecture/Façade:MaStro-Architecture-Façade
 a3f2d709-4bae-4a9a-8533-6ffb0c083b23:MaStro/Architecture/Mass:MaStro-Architecture-Mass
+24e019b1-1bb1-41ec-a6f1-4fc105f2488d:MaStro/Architecture/Plan:MaStro-Architecture-Plan
 80b6c5d3-7466-4029-8dd5-71511ce9f0bf:MaStro/Architecture/Primitives:MaStro-Architecture-Primitives
 729d6dec-1b48-4880-8a4b-dab9444115b7:MaStro/Architecture/Stairs:MaStro-Architecture-Stairs
 ad620ac8-6a6e-41b1-a5d7-e94d9f67732f:MaStro/Curve:MaStro-Curve
