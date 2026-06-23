@@ -68,9 +68,45 @@ wheels = [
 
 # Optional: build settings.
 # https://docs.blender.org/manual/en/dev/advanced/extensions/command_line_arguments.html#command-line-args-extension-build
-# [build]
-# paths_exclude_pattern = [
-#   "__pycache__/",
-#   "/.git/",
-#   "/*.zip",
-# ]
+# Excludes everything not copied by .github/workflows/create_zip.yml, so a local
+# `extension build` produces an equivalent zip to the one published on release.
+# Note: unlike create_zip.yml (which omits the shapely wheels despite cad_utils.py
+# depending on shapely), this build correctly includes them.
+[build]
+paths_exclude_pattern = [
+  "__pycache__/",
+  "/.git/",
+  "/.github/",
+  "/.claude/",
+  "/.gitattributes",
+  "/.gitignore",
+  "/*.zip",
+  "/api_keys.py",
+  "/README.md",
+  "/acknowledgment.txt",
+  "/description.xml",
+  "/blenderData.csv",
+  "/blender_assets.cats.txt~",
+  "/export_nodes.py",
+  "/export_nodes.json",
+  "/generate_node_docs.py",
+  "/mastro_schedule.py",
+  "/mastro.blend1",
+  "/mastro.blend2",
+  "/mastro.blend3",
+  "/mastro.blend4",
+  "/mastro.blend5",
+  "/mastro.blend6",
+  "/mastro.blend7",
+  "/mastro.blend8",
+  "/mastro.blend9",
+  "/mastro.blend10",
+  "/mastroAssets.blend*",
+  "/mastroCutOuts.blend",
+  "/hiddenTestByClaude*",
+  "/~$*",
+  "/*~",
+  "/WIP blend files/",
+  "/Thumbnails/",
+  "/mkdocs/",
+]

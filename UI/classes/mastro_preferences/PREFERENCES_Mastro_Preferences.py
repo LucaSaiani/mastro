@@ -9,6 +9,15 @@ from ....Utils.add_nodes import apply_shadow_color
 from ....Utils.mastro_gis.prefs import PredefCRS, DEFAULT_CRS, APP_DATA
 from ....Utils.mastro_gis import settings as mastro_gis_settings
 
+try:
+    from .... import api_keys
+    _DEFAULT_MAPTILER_API_KEY = api_keys.MAPTILER_API_KEY
+    _DEFAULT_GOOGLE_API_KEY = api_keys.GOOGLE_API_KEY
+except ImportError:
+    # api_keys.py is excluded from the distributed extension zip
+    _DEFAULT_MAPTILER_API_KEY = ""
+    _DEFAULT_GOOGLE_API_KEY = ""
+
 """User preference panel"""
 class PREFERENCES_Mastro_Preferences(AddonPreferences):
     # this must match the add-on name, use '__package__'
@@ -301,13 +310,13 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
         name="Map Tiler API Key",
         description="API key for MapTiler Coordinates API (required for EPSG.io migration)",
         update=updateMapTilerApiKey,
-        default="ZzKFdpgCVbjFs6HyKe8Z",
+        default=_DEFAULT_MAPTILER_API_KEY,
     )
 
     gis_google_api_key: bpy.props.StringProperty(
         name="Google API Key",
         description="Google Maps Platform API key",
-        default="AIzaSyDeabiA2pp5FnWvGzNiH0t-9rlsJZEHhxE",
+        default=_DEFAULT_GOOGLE_API_KEY,
     )
 
     gis_google_3dtiles_lod: bpy.props.EnumProperty(
