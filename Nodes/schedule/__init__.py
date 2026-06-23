@@ -1,6 +1,6 @@
 import nodeitems_utils
 
-from .sockets import MaStroScheduleDataSocket
+from .sockets import MaStroScheduleDataSocket, MaStroScheduleAttributeRefSocket
 from .tree import MaStroScheduleTree
 from .properties import (
     MaStro_schedule_key_item,
@@ -14,9 +14,12 @@ from .operators import (
     MASTRO_UL_schedule_category_lookup,
     MASTRO_OT_Schedule_Category_Lookup_Add,
     MASTRO_OT_Schedule_Category_Lookup_Remove,
+    MASTRO_OT_Schedule_Force_Refresh,
 )
+from .panel import MASTRO_PT_Schedule_Tools
 from .nodes_input import MaStroScheduleInputAllNode, MaStroScheduleInputSelectedNode
-from .nodes_attribute import MaStroScheduleGetAttributeNode
+from .nodes_attribute import MaStroScheduleGetAttributeNamesNode
+from .nodes_evaluate import MaStroScheduleEvaluateAttributeNode
 from .nodes_filter import MaStroScheduleFilterNode
 from .nodes_groupby import MaStroScheduleGroupByNode
 from .nodes_aggregate import MaStroScheduleAggregateNode
@@ -39,6 +42,7 @@ classes = (
     MaStro_schedule_cell,
     MaStro_schedule_row,
     MaStroScheduleDataSocket,
+    MaStroScheduleAttributeRefSocket,
     MaStroScheduleTree,
     MASTRO_UL_schedule_keys,
     MASTRO_OT_Schedule_GroupBy_Key_Add,
@@ -46,9 +50,12 @@ classes = (
     MASTRO_UL_schedule_category_lookup,
     MASTRO_OT_Schedule_Category_Lookup_Add,
     MASTRO_OT_Schedule_Category_Lookup_Remove,
+    MASTRO_OT_Schedule_Force_Refresh,
+    MASTRO_PT_Schedule_Tools,
     MaStroScheduleInputAllNode,
     MaStroScheduleInputSelectedNode,
-    MaStroScheduleGetAttributeNode,
+    MaStroScheduleGetAttributeNamesNode,
+    MaStroScheduleEvaluateAttributeNode,
     MaStroScheduleFilterNode,
     MaStroScheduleGroupByNode,
     MaStroScheduleAggregateNode,

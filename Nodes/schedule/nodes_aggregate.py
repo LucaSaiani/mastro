@@ -14,7 +14,7 @@ class MaStroScheduleAggregateNode(MaStroScheduleTreeNode, Node):
     level produced by chained Group By nodes: each group, at whatever depth,
     gets its own subtotal for this column"""
     bl_idname = 'MaStroScheduleAggregate'
-    bl_label = 'Aggregate ?'
+    bl_label = 'Aggregate'
 
     column: EnumProperty(
         name="Column",

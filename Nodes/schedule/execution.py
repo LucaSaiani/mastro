@@ -1,10 +1,20 @@
 import bpy
 import bmesh
-import math
 
 # Cache of the last evaluated tables, keyed by tree name then node name.
 # Used by the Viewer node to read the table produced by its input node.
 _schedule_cache = {}
+
+
+def tag_redraw_node_editors():
+    """Force every visible Node Editor area to redraw, so a POST_VIEW
+    overlay (e.g. the Viewer's table) reflects a freshly re-evaluated tree
+    immediately, instead of waiting for the next incidental redraw (pan,
+    zoom, ...)."""
+    for window in bpy.context.window_manager.windows:
+        for area in window.screen.areas:
+            if area.type == 'NODE_EDITOR':
+                area.tag_redraw()
 
 
 def update_node(self, context):
@@ -12,10 +22,39 @@ def update_node(self, context):
     tree = self.id_data
     if hasattr(tree, "execute"):
         tree.execute()
+    tag_redraw_node_editors()
 
 
 def get_node_table(tree_name, node_name):
     return _schedule_cache.get(tree_name, {}).get(node_name)
+
+
+def linked_table(node, input_index=0):
+    """Resolve the table feeding `node`'s input at `input_index` from the
+    evaluation cache, but only if the link's socket types actually match -
+    same check as evaluate_tree/eval_node's execution gate, duplicated here
+    because UI callbacks (EnumProperty items, draw_buttons) read the cache
+    directly and run on their own schedule (e.g. mid-drag while a link is
+    being formed), not synchronized with when tree.update()/eval_node ran.
+    Each caller must validate locally instead of trusting a stale/instable
+    centralized pass - that's what the old prototype's per-node checkLink()
+    did before reading/writing anything, and what broke when validation was
+    only centralized in MaStroScheduleTree.update()."""
+    socket = node.inputs[input_index]
+    if not socket.is_linked or not socket.links:
+        return None
+    link = socket.links[0]
+    if link.from_socket.bl_idname != socket.bl_idname:
+        return None
+    from_node = link.from_node
+    table = get_node_table(node.id_data.name, from_node.name)
+    if not table:
+        return None
+    try:
+        output_index = list(from_node.outputs).index(link.from_socket)
+    except ValueError:
+        return None
+    return table[output_index]
 
 
 def leaves(item):
@@ -40,18 +79,13 @@ def get_available_columns_items(node, input_index=0):
     table feeding `node`'s input at `input_index`, for column-picker
     dropdowns."""
     names = []
-    socket = node.inputs[input_index]
-    if socket.is_linked:
-        link = socket.links[0]
-        from_node = link.from_node
-        table = get_node_table(node.id_data.name, from_node.name)
-        if table:
-            output_index = list(from_node.outputs).index(link.from_socket)
-            for item in table[output_index] or []:
-                for row in leaves(item):
-                    for key in row.keys():
-                        if not key.startswith("_") and key not in names:
-                            names.append(key)
+    table = linked_table(node, input_index)
+    if table:
+        for item in table:
+            for row in leaves(item):
+                for key in row.keys():
+                    if not key.startswith("_") and key not in names:
+                        names.append(key)
 
     cache_key = (node.name, input_index)
     items = [(name, name, "") for name in names] or [("", "(no columns)", "")]
@@ -95,36 +129,54 @@ def extract_mesh_rows(objs):
             typology_name = typology_names.get(f[bm_typology], "")
             area_total = round(f.calc_area(), 2)
 
+            # Parallel-digit-string encoding: each "_A"/"_B"/... layer holds
+            # one digit position per use/storey-group across the whole
+            # face, prefixed with "1" to avoid leading zeros being dropped.
+            # Stripping that "1" and zipping the strings char-by-char turns
+            # each position back into a "group" (e.g. one storey-group's
+            # use+storeys+height), simpler in plain Python than the
+            # log10/power-of-ten digit extraction used on the Geometry
+            # Nodes side, where strings aren't practical to slice.
+            storey_A_digits = str(f[bm_storey_A])[1:]
+            storey_B_digits = str(f[bm_storey_B])[1:]
+            use_A_digits = str(f[bm_use_A])[1:]
+            use_B_digits = str(f[bm_use_B])[1:]
+            height_A_digits = str(f[bm_height_A])[1:]
+            height_B_digits = str(f[bm_height_B])[1:]
+            height_C_digits = str(f[bm_height_C])[1:]
+            height_D_digits = str(f[bm_height_D])[1:]
+            height_E_digits = str(f[bm_height_E])[1:]
+
             storey_group = 0
-            index_list = 1
+            group_index = 0
             for level in range(storeys):
-                length = int(math.log10(f[bm_storey_A])) + 1 if f[bm_storey_A] else 1
-                pos = length - index_list - 1
+                storey_A = int(storey_A_digits[group_index])
+                storey_B = int(storey_B_digits[group_index])
 
-                storey_A = int((f[bm_storey_A] / 10 ** pos) % 10)
-                storey_B = int((f[bm_storey_B] / 10 ** pos) % 10)
-
-                use_A = int((f[bm_use_A] / 10 ** pos) % 10)
-                use_B = int((f[bm_use_B] / 10 ** pos) % 10)
+                use_A = int(use_A_digits[group_index])
+                use_B = int(use_B_digits[group_index])
                 use_name = use_names.get(use_A * 10 + use_B, "")
 
-                height_A = int((f[bm_height_A] / 10 ** pos) % 10)
-                height_B = int((f[bm_height_B] / 10 ** pos) % 10)
-                height_C = int((f[bm_height_C] / 10 ** pos) % 10)
-                height_D = int((f[bm_height_D] / 10 ** pos) % 10)
-                height_E = int((f[bm_height_E] / 10 ** pos) % 10)
+                height_A = int(height_A_digits[group_index])
+                height_B = int(height_B_digits[group_index])
+                height_C = int(height_C_digits[group_index])
+                height_D = int(height_D_digits[group_index])
+                height_E = int(height_E_digits[group_index])
                 height = height_A * 10 + height_B + height_C * 0.1 + height_D * 0.01 + height_E * 0.001
 
-                undercroft = int((f[bm_undercroft] / 10 ** pos) % 10)
-                area = 0 if undercroft == 1 else area_total
+                # mastro_undercroft stores a plain count of floors from the
+                # bottom that are undercroft (e.g. 3 means levels 0,1,2 are
+                # undercroft) - not a per-level digit like use/storey/height.
+                undercroft = level < f[bm_undercroft]
+                area = 0 if undercroft else area_total
 
                 storey_group_new = storey_A * 10 + storey_B + storey_group
                 if storey_group_new == level + 1:
                     storey_group = storey_group_new
-                    index_list += 1
+                    group_index += 1
 
                 rows.append({
-                    "Object": obj.name,
+                    "_Object": obj.name,
                     "Block": block_name,
                     "Building": building_name,
                     "Typology": typology_name,
@@ -133,8 +185,8 @@ def extract_mesh_rows(objs):
                     "Height": height,
                     "Undercroft": undercroft,
                     "Area": area,
-                    "Level": level,
-                    "Face": f.index,
+                    "_Level": level,
+                    "_Face": f.index,
                 })
 
         bm.free()
@@ -143,8 +195,19 @@ def extract_mesh_rows(objs):
 
 
 def evaluate_tree(tree):
-    """Topologically evaluate every node of the tree, caching each node's
-    output values (a list of tables, one per output socket)."""
+    """Topologically evaluate the tree, caching each visited node's output
+    values (a list of tables, one per output socket).
+
+    Only walks backwards from real sink nodes - those with no outputs of
+    their own at all (currently just the Viewer) - instead of evaluating
+    every node in the tree unconditionally. A node not yet wired up to any
+    Viewer (e.g. while building a chain, or one left dangling) is not
+    evaluated and its dropdowns stay empty until it's connected all the way
+    to a Viewer - this is a deliberate trade-off, not a bug: the
+    alternative (treating any node with an unlinked output as a "tip") was
+    tried and reverted because it still evaluates fully orphaned nodes that
+    were never connected to anything, which is the actual case this exists
+    to avoid (see the depsgraph-warning-spam case this was built for)."""
     cache = {}
 
     def eval_node(node):
@@ -156,6 +219,15 @@ def evaluate_tree(tree):
             value = None
             if socket.is_linked:
                 link = socket.links[0]
+                # A link between mismatched socket types is flagged (the
+                # node gets colored, see tree.py) but deliberately left in
+                # place so the user can see and fix it - it must not feed a
+                # value through though, the same way the old prototype's
+                # checkLink() gated execution and cleared the output instead
+                # of running on a mismatched input.
+                if link.from_socket.bl_idname != socket.bl_idname:
+                    input_values.append(None)
+                    continue
                 from_node = link.from_node
                 outputs = eval_node(from_node)
                 try:
@@ -170,7 +242,8 @@ def evaluate_tree(tree):
         return result
 
     for node in tree.nodes:
-        eval_node(node)
+        if not node.outputs:
+            eval_node(node)
 
     _schedule_cache[tree.name] = cache
     return cache

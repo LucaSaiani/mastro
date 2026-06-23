@@ -1,3 +1,5 @@
+import time
+
 import bpy
 from bpy.app.handlers import persistent
 
@@ -9,6 +11,41 @@ from .mastro_cad.depsgraph_handlers_cad import _check_drawing_objects, _update_s
 # Name of the last active node seen in the node editor — used to detect
 # selection changes without re-running the full sync every depsgraph tick.
 _prev_active_note_name = None
+
+# Timestamp of the last schedule auto-refresh, for throttling.
+_last_schedule_refresh = 0.0
+
+
+def _refresh_schedules():
+    """Re-evaluate every open MaStro Schedule node tree, but only recompute
+    the currently selected objects' mass data - everything else stays in
+    mastro_export_utils._mass_data_cache untouched. Throttled by
+    schedule_auto_refresh_interval so dragging a vertex doesn't re-run the
+    tree on every single depsgraph tick."""
+    global _last_schedule_refresh
+
+    from ..Utils.mastro_preferences.get_preferences import get_prefs
+    prefs = get_prefs()
+    if not prefs.schedule_auto_refresh:
+        return
+
+    now = time.monotonic()
+    if now - _last_schedule_refresh < prefs.schedule_auto_refresh_interval:
+        return
+    _last_schedule_refresh = now
+
+    from ..Utils.import_export.mastro_export_utils import clear_mass_data_cache
+    selected_names = [obj.name for obj in bpy.context.selected_objects]
+    if not selected_names:
+        return
+    clear_mass_data_cache(selected_names)
+
+    for tree in bpy.data.node_groups:
+        if tree.bl_idname == 'MaStroScheduleTreeType':
+            tree.execute()
+
+    from ..Nodes.schedule.execution import tag_redraw_node_editors
+    tag_redraw_node_editors()
 
 
 def _sync_active_note(context):
@@ -55,6 +92,7 @@ def _on_depsgraph_update(scene, depsgraph):
     sync_pdf_frames(scene)
     _sync_active_note(bpy.context)
     _check_drawing_objects(bpy.context)
+    _refresh_schedules()
 
 
 def _apply_clip_range_to_open_viewports():

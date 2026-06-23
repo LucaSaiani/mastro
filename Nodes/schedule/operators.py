@@ -1,6 +1,9 @@
 from bpy.types import Operator, UIList
 from bpy.props import StringProperty
 
+from .execution import tag_redraw_node_editors
+from ...Utils.import_export.mastro_export_utils import clear_mass_data_cache
+
 
 class MASTRO_UL_schedule_keys(UIList):
     """List of column names used as Group By keys"""
@@ -82,4 +85,21 @@ class MASTRO_OT_Schedule_Category_Lookup_Remove(Operator):
             node.items.remove(node.active_item_index)
             node.active_item_index = max(0, node.active_item_index - 1)
         node.id_data.execute()
+        return {'FINISHED'}
+
+
+class MASTRO_OT_Schedule_Force_Refresh(Operator):
+    """Re-evaluate the schedule tree. The tree only re-runs automatically
+    when the tree itself changes (a node/link added or a property edited);
+    it does not react to changes made outside the graph (e.g. editing a
+    mesh attribute or a custom property directly in the 3D viewport), so
+    this lets the user force a refresh on demand"""
+    bl_idname = "mastro_schedule.force_refresh"
+    bl_label = "Refresh"
+    bl_icon = 'FILE_REFRESH'
+
+    def execute(self, context):
+        clear_mass_data_cache()
+        context.space_data.edit_tree.execute()
+        tag_redraw_node_editors()
         return {'FINISHED'}

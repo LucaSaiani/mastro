@@ -7,7 +7,7 @@ class MaStroScheduleTableDataNode(MaStroScheduleTreeNode, Node):
     """Pass-through node marking the final table of a schedule, so it can be
     picked up by a Viewer (or further processed)"""
     bl_idname = 'MaStroScheduleTableData'
-    bl_label = 'Table Data ?'
+    bl_label = 'Table Data'
 
     def init(self, context):
         self.inputs.new('MaStroScheduleDataSocketType', "Data")
@@ -26,7 +26,7 @@ class MaStroScheduleFlattenNode(MaStroScheduleTreeNode, Node):
     and subtotal rows are tagged with "_subtotal" and "_level" for the
     Viewer to render"""
     bl_idname = 'MaStroScheduleFlatten'
-    bl_label = 'Flatten ?'
+    bl_label = 'Flatten'
 
     def init(self, context):
         self.inputs.new('MaStroScheduleDataSocketType', "Data")

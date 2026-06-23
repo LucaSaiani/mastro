@@ -402,12 +402,41 @@ def get_mass_objects_for_scope(context, scope):
     return objects
 
 
-def get_mass_data_for_scope(context, scope):
-    """Collect get_mass_data() rows for MaStro mass/block objects matching the given scope"""
+# Per-object cache of get_mass_data() rows, keyed by object name. Only used
+# when get_mass_data_for_scope() is called with use_cache=True (the schedule
+# node tree's auto-refresh path) - CSV export and the print schedule always
+# call with the default (no cache), so they keep computing everything fresh.
+# Cleared entirely by a manual schedule refresh; individual entries are
+# invalidated by the depsgraph auto-refresh handler for whichever objects
+# are currently selected, so editing one building's mesh doesn't force every
+# other object's schedule data to be recomputed too.
+_mass_data_cache = {}
+
+
+def clear_mass_data_cache(obj_names=None):
+    """Drop cached rows for the given object names, or the entire cache if
+    obj_names is None (used by a manual schedule refresh)."""
+    if obj_names is None:
+        _mass_data_cache.clear()
+    else:
+        for name in obj_names:
+            _mass_data_cache.pop(name, None)
+
+
+def get_mass_data_for_scope(context, scope, use_cache=False):
+    """Collect get_mass_data() rows for MaStro mass/block objects matching
+    the given scope. With use_cache=True, reuses _mass_data_cache for any
+    object already in it, computing (and caching) only the others."""
     roughData = []
     for obj in get_mass_objects_for_scope(context, scope):
+        if use_cache and obj.name in _mass_data_cache:
+            roughData.append(_mass_data_cache[obj.name])
+            continue
         mastro_type = "mass" if "MaStro mass" in obj.data else "block"
-        roughData.append(get_mass_data(obj, mastro_type))
+        rows = get_mass_data(obj, mastro_type)
+        if use_cache:
+            _mass_data_cache[obj.name] = rows
+        roughData.append(rows)
     return roughData
 
 

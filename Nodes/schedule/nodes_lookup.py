@@ -18,7 +18,7 @@ class MaStroScheduleCategoryLookupNode(MaStroScheduleTreeNode, Node):
     matched on a single column (equivalent to the VBA plotColor-style helpers:
     a fixed mapping from a category name to a value)"""
     bl_idname = 'MaStroScheduleCategoryLookup'
-    bl_label = 'Category Lookup ?'
+    bl_label = 'Category Lookup'
 
     key_column: StringProperty(name="Key Column", update=update_node)
 
@@ -55,7 +55,7 @@ class MaStroScheduleMatrixLookupNode(MaStroScheduleTreeNode, Node):
     matching on one or more key columns (equivalent to the VBA MultiLookup
     helper, e.g. MultiLookup(massFloors, [Phase, Use], [phase, use], Area))"""
     bl_idname = 'MaStroScheduleMatrixLookup'
-    bl_label = 'Matrix Lookup ?'
+    bl_label = 'Matrix Lookup'
 
     return_column: StringProperty(name="Return Column", update=update_node)
 

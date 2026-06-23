@@ -10,7 +10,7 @@ class MaStroScheduleHeaderNode(MaStroScheduleTreeNode, Node):
     typed here, or come from a Name input (e.g. a String node), so the same
     name can be reused and changed in one place across several Header nodes"""
     bl_idname = 'MaStroScheduleHeader'
-    bl_label = 'Header ?'
+    bl_label = 'Header'
 
     column: EnumProperty(
         name="Column",

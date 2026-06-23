@@ -7,21 +7,18 @@ from bpy.props import CollectionProperty, BoolProperty
 
 from .tree import MaStroScheduleTreeNode
 from .properties import MaStro_schedule_key_item, MaStro_schedule_row
+from .execution import tag_redraw_node_editors
+from ...Utils.mastro_preferences.get_preferences import get_prefs
 
 
 CELL_WIDTH = 120
-CELL_HEIGHT = 24
-FONT_SIZE = 12
 NODE_GAP = 4
 
 _draw_handler = None
 
 
-def _tag_redraw_node_editors(self, context):
-    for window in bpy.context.window_manager.windows:
-        for area in window.screen.areas:
-            if area.type == 'NODE_EDITOR':
-                area.tag_redraw()
+def _on_show_table_changed(self, context):
+    tag_redraw_node_editors()
 
 
 class MaStroScheduleViewerNode(MaStroScheduleTreeNode, Node):
@@ -29,11 +26,11 @@ class MaStroScheduleViewerNode(MaStroScheduleTreeNode, Node):
     optionally as an overlay table drawn next to the node in the node
     editor"""
     bl_idname = 'MaStroScheduleViewer'
-    bl_label = 'Viewer ?'
+    bl_label = 'Viewer'
 
     columns: CollectionProperty(type=MaStro_schedule_key_item)
     rows: CollectionProperty(type=MaStro_schedule_row)
-    show_table: BoolProperty(name="Show Table", default=False, update=_tag_redraw_node_editors)
+    show_table: BoolProperty(name="Show Table", default=True, update=_on_show_table_changed)
 
     def init(self, context):
         self.inputs.new('MaStroScheduleDataSocketType', "Data")
@@ -66,19 +63,7 @@ class MaStroScheduleViewerNode(MaStroScheduleTreeNode, Node):
         return []
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, "show_table")
-
-    def draw_buttons_ext(self, context, layout):
-        col = layout.column()
-
-        header = col.row()
-        for column in self.columns:
-            header.label(text=column.name)
-
-        for row in self.rows:
-            row_layout = col.row()
-            for cell in row.cells:
-                row_layout.label(text=cell.value)
+        layout.prop(self, "show_table", text="Show Table", icon='HIDE_OFF' if self.show_table else 'HIDE_ON')
 
 
 def _node_abs_location(node):
@@ -105,6 +90,10 @@ def _draw_node_table(node):
     if not columns:
         return
 
+    prefs = get_prefs()
+    cell_height = prefs.schedule_row_height
+    font_size = prefs.schedule_font_size
+
     abs_x, abs_y = _node_abs_location(node)
     ui_scale = bpy.context.preferences.system.ui_scale
     origin_x = (abs_x + node.width + NODE_GAP) * ui_scale
@@ -128,14 +117,13 @@ def _draw_node_table(node):
     # where that fixed-size glyph ends up on screen relative to the
     # (zoomable) cell grid - this is also exactly what the old prototype did
     # with its always-12 fontSize.
-    font_size = FONT_SIZE
     blf.size(font_id, font_size)
 
     def cell_corners(row, col):
         x0 = origin_x + col * CELL_WIDTH * ui_scale
         x1 = x0 + CELL_WIDTH * ui_scale
-        y1 = origin_y - row * CELL_HEIGHT * ui_scale
-        y0 = y1 - CELL_HEIGHT * ui_scale
+        y1 = origin_y - row * cell_height * ui_scale
+        y0 = y1 - cell_height * ui_scale
         return ((x0, y0), (x1, y0), (x0, y1), (x1, y1))
 
     def draw_cell(corners, color, text):

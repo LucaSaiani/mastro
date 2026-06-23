@@ -9,7 +9,7 @@ class MaStroScheduleStringNode(MaStroScheduleTreeNode, Node):
     """Emit a single constant string as a one-row table, so it can feed a
     Header node's Name input as a reusable, possibly shared, column name"""
     bl_idname = 'MaStroScheduleString'
-    bl_label = 'String ?'
+    bl_label = 'String'
 
     value: StringProperty(name="Value", update=update_node)
 

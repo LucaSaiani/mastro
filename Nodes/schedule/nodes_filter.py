@@ -9,7 +9,7 @@ class MaStroScheduleFilterNode(MaStroScheduleTreeNode, Node):
     """Keep only the rows where the given column equals the given value
     (equivalent to the VBA getUniqueOfSelection/SumByCriteria filter)"""
     bl_idname = 'MaStroScheduleFilter'
-    bl_label = 'Filter ?'
+    bl_label = 'Filter'
 
     column: EnumProperty(
         name="Column",

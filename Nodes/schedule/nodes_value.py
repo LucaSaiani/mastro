@@ -10,7 +10,7 @@ class MaStroScheduleValueNode(MaStroScheduleTreeNode, Node):
     Math node's A/B input as a scalar (broadcast over the other operand's
     rows) instead of requiring a column on the main table"""
     bl_idname = 'MaStroScheduleValue'
-    bl_label = 'Value ?'
+    bl_label = 'Value'
 
     value: FloatProperty(name="Value", update=update_node)
 

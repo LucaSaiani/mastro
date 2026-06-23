@@ -14,28 +14,23 @@ schedule_node_categories = [
         NodeItem("MaStroScheduleInputSelected"),
     ]),
     MaStroScheduleNodeCategory('MASTRO_SCHEDULE_ATTRIBUTE', "Attribute", items=[
-        NodeItem("MaStroScheduleGetAttribute"),
+        NodeItem("MaStroScheduleGetAttributeNames"),
+        NodeItem("MaStroScheduleEvaluateAttribute"),
     ]),
-    MaStroScheduleNodeCategory('MASTRO_SCHEDULE_FILTER', "Filter", items=[
+    MaStroScheduleNodeCategory('MASTRO_SCHEDULE_OUTPUT', "Output", items=[
+        NodeItem("MaStroScheduleViewer"),
+    ]),
+    MaStroScheduleNodeCategory('MASTRO_SCHEDULE_WIP', "WIP", items=[
         NodeItem("MaStroScheduleFilter"),
-    ]),
-    MaStroScheduleNodeCategory('MASTRO_SCHEDULE_GROUP', "Group", items=[
         NodeItem("MaStroScheduleGroupBy"),
         NodeItem("MaStroScheduleAggregate"),
-    ]),
-    MaStroScheduleNodeCategory('MASTRO_SCHEDULE_MATH', "Math", items=[
         NodeItem("MaStroScheduleMath"),
         NodeItem("MaStroScheduleValue"),
         NodeItem("MaStroScheduleString"),
         NodeItem("MaStroScheduleHeader"),
-    ]),
-    MaStroScheduleNodeCategory('MASTRO_SCHEDULE_LOOKUP', "Lookup", items=[
         NodeItem("MaStroScheduleCategoryLookup"),
         NodeItem("MaStroScheduleMatrixLookup"),
-    ]),
-    MaStroScheduleNodeCategory('MASTRO_SCHEDULE_OUTPUT', "Output", items=[
         NodeItem("MaStroScheduleTableData"),
         NodeItem("MaStroScheduleFlatten"),
-        NodeItem("MaStroScheduleViewer"),
     ]),
 ]

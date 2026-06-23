@@ -19,7 +19,7 @@ class MaStroScheduleInputAllNode(MaStroScheduleTreeNode, Node):
         self.outputs.new('MaStroScheduleDataSocketType', "Data")
 
     def evaluate(self, inputs):
-        rough = get_mass_data_for_scope(bpy.context, 'ALL')
+        rough = get_mass_data_for_scope(bpy.context, 'ALL', use_cache=True)
         return [granularData(rough) if rough else []]
 
 
@@ -33,5 +33,5 @@ class MaStroScheduleInputSelectedNode(MaStroScheduleTreeNode, Node):
         self.outputs.new('MaStroScheduleDataSocketType', "Data")
 
     def evaluate(self, inputs):
-        rough = get_mass_data_for_scope(bpy.context, 'SELECTED')
+        rough = get_mass_data_for_scope(bpy.context, 'SELECTED', use_cache=True)
         return [granularData(rough) if rough else []]
