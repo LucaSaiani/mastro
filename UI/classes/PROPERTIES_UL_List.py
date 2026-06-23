@@ -45,12 +45,18 @@ class PROPERTIES_UL_List(UIList):
             row = split.row(align=True)
             row.prop(collection[index], "name", text="", emboss=False)
             if hasattr(item, "committed"):
-                icon = 'FILE_REFRESH' if item.committed else 'ADD'
-                op = row.operator("object.update_mastro_custom_properties",
-                                  text="", icon=icon, emboss=False)
-                op.property_id = item.id
-                op.property_to_update = "all"
-                op.remove = False
+                if not item.committed:
+                    op = row.operator("object.update_mastro_custom_properties",
+                                      text="", icon='ADD', emboss=False)
+                    op.property_id = item.id
+                    op.property_to_update = "all"
+                    op.remove = False
+                elif item.dirty:
+                    op = row.operator("object.update_mastro_custom_properties",
+                                      text="", icon='FILE_REFRESH', emboss=False)
+                    op.property_id = item.id
+                    op.property_to_update = "all"
+                    op.remove = False
             
         elif self.layout_type in {'GRID'}:
             layout.alignment = 'CENTER'

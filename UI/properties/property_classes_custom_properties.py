@@ -7,7 +7,7 @@ from bpy.props import (IntProperty,
                        EnumProperty,
 )
 
-from ...Utils.update_attributes import *
+from ...Utils.update_attributes import mark_custom_property_dirty, rename_custom_property_key
 
 
 class mastro_CL_custom_property_string_name_list(PropertyGroup):
@@ -49,26 +49,28 @@ class mastro_CL_custom_property_name_list(PropertyGroup):
         ],
         default='INT')
 
-    default_int:    IntProperty(name="Default", default=0)
-    default_float:  FloatProperty(name="Default", default=0.0)
-    default_bool:   BoolProperty(name="Default", default=False)
+    default_int:    IntProperty(name="Default", default=0, update=mark_custom_property_dirty)
+    default_float:  FloatProperty(name="Default", default=0.0, update=mark_custom_property_dirty)
+    default_bool:   BoolProperty(name="Default", default=False, update=mark_custom_property_dirty)
 
-    min_int:   IntProperty(name="Min")
-    max_int:   IntProperty(name="Max", default=1)
-    min_float: FloatProperty(name="Min", default=0.0)
-    max_float: FloatProperty(name="Max", default=1.0)
+    min_int:   IntProperty(name="Min", update=mark_custom_property_dirty)
+    max_int:   IntProperty(name="Max", default=1, update=mark_custom_property_dirty)
+    min_float: FloatProperty(name="Min", default=0.0, update=mark_custom_property_dirty)
+    max_float: FloatProperty(name="Max", default=1.0, update=mark_custom_property_dirty)
 
-    step_int:       IntProperty(name="Step", default=1)
-    step_float:     FloatProperty(name="Step", default=0.1)
-    precision_float: IntProperty(name="Precision", default=3)
+    step_int:       IntProperty(name="Step", default=1, update=mark_custom_property_dirty)
+    step_float:     FloatProperty(name="Step", default=0.1, update=mark_custom_property_dirty)
+    precision_float: IntProperty(name="Precision", default=3, update=mark_custom_property_dirty)
 
     description: StringProperty(name="Description", default="")
 
-    assign_to_mass   : BoolProperty(name="Assign to Mass/Block", default=True)
-    assign_to_street : BoolProperty(name="Assign to Street",     default=True)
-    assign_to_plan   : BoolProperty(name="Assign to Plan",       default=True)
+    assign_to_mass    : BoolProperty(name="Assign to Mass/Block", default=True, update=mark_custom_property_dirty)
+    assign_to_street  : BoolProperty(name="Assign to Street",     default=True, update=mark_custom_property_dirty)
+    assign_to_plan    : BoolProperty(name="Assign to Plan",       default=True, update=mark_custom_property_dirty)
+    assign_to_drawing : BoolProperty(name="Assign to Drawing",    default=True, update=mark_custom_property_dirty)
 
     committed: BoolProperty(name="Committed", default=False)
+    dirty:     BoolProperty(name="Has unapplied changes", default=False)
 
     string_options      : CollectionProperty(type=mastro_CL_custom_property_string_name_list)
     string_options_index: IntProperty(name="String Option", default=0)

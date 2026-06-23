@@ -3,20 +3,31 @@ from bpy.types import Operator
 from ...Utils.string_property_enum import register_string_enum, unregister_string_enum
 
 
-def add_custom_properties_to_object(obj, is_street=False, is_plan=False):
+def add_custom_properties_to_object(obj, is_street=False, is_plan=False, is_drawing=False):
     """Add committed scene custom properties to a single newly created MaStro object."""
     scene = bpy.context.scene
-    is_mass = not is_street and not is_plan
+    is_mass = not is_street and not is_plan and not is_drawing
     for prop in scene.mastro_custom_property_name_list:
-        if not prop.committed:                        continue
-        if is_mass   and not prop.assign_to_mass:    continue
-        if is_street and not prop.assign_to_street:  continue
-        if is_plan   and not prop.assign_to_plan:    continue
+        if not prop.committed:                          continue
+        if is_mass    and not prop.assign_to_mass:    continue
+        if is_street  and not prop.assign_to_street:  continue
+        if is_plan    and not prop.assign_to_plan:    continue
+        if is_drawing and not prop.assign_to_drawing: continue
         key = f"_{prop.name}"  # _ prefix hides from Blender's native Custom Properties panel
         if prop.property_type == 'INT':
             obj[key] = prop.default_int
+            # soft_min/soft_max must be set too: they're what the UI slider
+            # actually uses, separate from the hard min/max clamp.
+            obj.id_properties_ui(key).update(
+                min=prop.min_int, max=prop.max_int,
+                soft_min=prop.min_int, soft_max=prop.max_int,
+                step=prop.step_int)
         elif prop.property_type == 'FLOAT':
             obj[key] = prop.default_float
+            obj.id_properties_ui(key).update(
+                min=prop.min_float, max=prop.max_float,
+                soft_min=prop.min_float, soft_max=prop.max_float,
+                step=prop.step_float, precision=prop.precision_float)
         elif prop.property_type == 'BOOL':
             obj[key] = prop.default_bool
         elif prop.property_type == 'STRING':
@@ -46,13 +57,15 @@ class OBJECT_OT_Update_Mastro_Custom_Properties(Operator):
         for obj in bpy.data.objects:
             if obj.type != 'MESH' or "MaStro object" not in obj.data:
                 continue
-            is_street = bool(obj.data.get("MaStro street"))
-            is_plan   = bool(obj.data.get("MaStro plan"))
-            is_mass   = not is_street and not is_plan
+            is_street  = bool(obj.data.get("MaStro street"))
+            is_plan    = bool(obj.data.get("MaStro plan"))
+            is_drawing = bool(obj.data.get("MaStro drawing"))
+            is_mass    = not is_street and not is_plan and not is_drawing
 
-            if self.property_to_update == "mass"   and not is_mass:   continue
-            if self.property_to_update == "street" and not is_street: continue
-            if self.property_to_update == "plan"   and not is_plan:   continue
+            if self.property_to_update == "mass"    and not is_mass:    continue
+            if self.property_to_update == "street"  and not is_street:  continue
+            if self.property_to_update == "plan"    and not is_plan:    continue
+            if self.property_to_update == "drawing" and not is_drawing: continue
 
             for prop in props:
                 key = f"_{prop.name}"
@@ -61,14 +74,23 @@ class OBJECT_OT_Update_Mastro_Custom_Properties(Operator):
                     if key in obj:
                         del obj[key]
                 else:
-                    if is_mass   and not prop.assign_to_mass:   continue
-                    if is_street and not prop.assign_to_street: continue
-                    if is_plan   and not prop.assign_to_plan:   continue
+                    if is_mass    and not prop.assign_to_mass:    continue
+                    if is_street  and not prop.assign_to_street:  continue
+                    if is_plan    and not prop.assign_to_plan:    continue
+                    if is_drawing and not prop.assign_to_drawing: continue
 
                     if prop.property_type == 'INT':
                         obj[key] = obj.get(key, prop.default_int)
+                        obj.id_properties_ui(key).update(
+                            min=prop.min_int, max=prop.max_int,
+                            soft_min=prop.min_int, soft_max=prop.max_int,
+                            step=prop.step_int)
                     elif prop.property_type == 'FLOAT':
                         obj[key] = obj.get(key, prop.default_float)
+                        obj.id_properties_ui(key).update(
+                            min=prop.min_float, max=prop.max_float,
+                            soft_min=prop.min_float, soft_max=prop.max_float,
+                            step=prop.step_float, precision=prop.precision_float)
                     elif prop.property_type == 'BOOL':
                         obj[key] = obj.get(key, prop.default_bool)
                     elif prop.property_type == 'STRING':
@@ -79,6 +101,7 @@ class OBJECT_OT_Update_Mastro_Custom_Properties(Operator):
             for prop in props:
                 prop.committed = True
                 prop.previous_name = prop.name
+                prop.dirty = False
                 if prop.property_type == 'STRING':
                     register_string_enum(prop.id)
 
@@ -96,7 +119,7 @@ class OBJECT_OT_Remove_Mastro_Custom_Property(Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     property_id: bpy.props.IntProperty()
-    object_type: bpy.props.StringProperty()  # 'mass', 'street', 'plan', or 'all'
+    object_type: bpy.props.StringProperty()  # 'mass', 'street', 'plan', 'drawing', or 'all'
 
     def invoke(self, context, event):
         prop = next((p for p in context.scene.mastro_custom_property_name_list

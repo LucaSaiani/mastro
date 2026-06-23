@@ -328,6 +328,15 @@ def update_mastro_street_radius(self, context):
 
 
 
+def mark_custom_property_dirty(self, context):
+    """Called when a value that the Update operator applies to objects changes
+    (default, min/max/step/precision, assign_to_*). Flags the item so the
+    refresh button only shows up once there is something to push to objects.
+    """
+    if self.committed:
+        self.dirty = True
+
+
 def rename_custom_property_key(self, context):
     """Called when item.name changes. Renames the key on all MaStro objects."""
     if not self.committed or not self.previous_name or self.previous_name == self.name:

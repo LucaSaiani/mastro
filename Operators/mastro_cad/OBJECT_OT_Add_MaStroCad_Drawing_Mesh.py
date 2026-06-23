@@ -4,6 +4,7 @@ from mathutils import Vector
 from bpy.types import Operator
 from bpy_extras.object_utils import AddObjectHelper
 from ...Utils.mastro_cad.add_attributes_drawing import add_drawing_attributes
+from ..mastro_custom_properties.OBJECT_OT_Update_Mastro_Custom_Properties import add_custom_properties_to_object
 from ...Utils.mastro_cad.update_bmesh_drawing_attributes import update_bmesh_drawing_attributes
 from ...Utils.mastro_cad.drawing_materials import ensure_all_layer_materials
 from ...Nodes.operators.NODE_OT_MaStro_Drawing_GN import build_drawing_gn
@@ -40,6 +41,7 @@ class OBJECT_OT_MaStroCad_Add_Drawing_Mesh(Operator, AddObjectHelper):
         me["MaStro drawing mesh"] = True
 
         add_drawing_attributes(obj)
+        add_custom_properties_to_object(obj, is_drawing=True)
 
         # Assign the active layer and push its values onto the edge. Use the
         # 3D View sidebar's active layer (window_manager), consistent with

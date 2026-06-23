@@ -11,6 +11,17 @@ class VIEW3D_PT_Mastro_Custom_Properties(Panel):
     bl_order       = 99
 
     @classmethod
+    def _assign_flag_for(cls, data):
+        """Return the assign_to_* attribute name matching the object's MaStro type."""
+        if data.get("MaStro street"):
+            return "assign_to_street"
+        if data.get("MaStro plan"):
+            return "assign_to_plan"
+        if data.get("MaStro drawing"):
+            return "assign_to_drawing"
+        return "assign_to_mass"
+
+    @classmethod
     def poll(cls, context):
         obj = context.object
         if obj is None or obj.type != 'MESH':
@@ -21,14 +32,14 @@ class VIEW3D_PT_Mastro_Custom_Properties(Panel):
         if not ("MaStro object" in data and
                 ("MaStro mass" in data or
                  "MaStro block" in data or
-                 "MaStro street" in data)):
+                 "MaStro street" in data or
+                 "MaStro plan" in data or
+                 "MaStro drawing" in data)):
             return False
-        is_street = bool(data.get("MaStro street"))
-        is_mass   = not is_street
+        assign_flag = cls._assign_flag_for(data)
         return any(
             p.committed and
-            (is_mass   and p.assign_to_mass or
-             is_street and p.assign_to_street) and
+            getattr(p, assign_flag) and
             f"_{p.name}" in obj
             for p in context.scene.mastro_custom_property_name_list
         )
@@ -46,13 +57,11 @@ class VIEW3D_PT_Mastro_Custom_Properties(Panel):
             layout.label(text="No custom properties defined.", icon='INFO')
             return
 
-        is_street = bool(obj.data.get("MaStro street"))
-        is_mass   = not is_street
+        assign_flag = self._assign_flag_for(obj.data)
 
         any_shown = False
         for attr in custom_list:
-            if is_mass   and not attr.assign_to_mass:   continue
-            if is_street and not attr.assign_to_street: continue
+            if not getattr(attr, assign_flag): continue
 
             key = f"_{attr.name}"
             if key not in obj:

@@ -78,6 +78,8 @@ class PROPERTIES_PT_Mastro_Custom_Properties(Panel):
 
         assign_col = layout.column(heading="Assign to")
         assign_col.enabled = not item.committed
-        assign_col.prop(item, "assign_to_mass",   text="Mass/Block")
-        assign_col.prop(item, "assign_to_street", text="Street")
+        assign_col.prop(item, "assign_to_mass",    text="Mass/Block")
+        assign_col.prop(item, "assign_to_street",  text="Street")
+        assign_col.prop(item, "assign_to_plan",    text="Plan")
+        assign_col.prop(item, "assign_to_drawing", text="Drawing")
 
