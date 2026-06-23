@@ -384,6 +384,11 @@ def apply_clip_to_space(scene, space):
     region_3d = space.region_3d
     if not is_top_bottom_ortho(region_3d):
         return
+    if len(scene.mastro_level_list) <= 1:
+        # Only the default AOD level exists - the project isn't using
+        # Levels at all, so don't impose a clip range on Top/Bottom views;
+        # Blender's native clip_start/clip_end behave as normal.
+        return
     side = get_view_side(region_3d)
 
     span = get_clip_range_elevations(scene, side)
@@ -518,6 +523,9 @@ def sync_clip_range_on_view_change(scene, side):
     (e.g. a timer callback) - NOT from a Panel.draw(), where Blender
     raises AttributeError on any ID write.
     """
+    if len(scene.mastro_level_list) <= 1:
+        # Only the default AOD level exists - see apply_clip_to_space.
+        return
     level_set = get_active_clip_range_set(scene, side)
     levels = get_set_levels(scene, level_set)
     ids_in_order = [lvl.id for lvl in levels]
