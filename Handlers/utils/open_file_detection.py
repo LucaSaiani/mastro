@@ -3,6 +3,7 @@ import bpy
 import json
 import os
 import socket
+import sys
 import datetime
 
 from bpy.app.handlers import persistent
@@ -58,13 +59,46 @@ def _read_marker(blend_path):
         return None
 
 
+def _pid_is_alive(pid):
+    if sys.platform == "win32":
+        # os.kill(pid, 0) doesn't reliably signal "no such process" on
+        # Windows; use OpenProcess instead.
+        import ctypes
+        PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+        handle = ctypes.windll.kernel32.OpenProcess(
+            PROCESS_QUERY_LIMITED_INFORMATION, False, pid)
+        if handle:
+            ctypes.windll.kernel32.CloseHandle(handle)
+            return True
+        return False
+    try:
+        os.kill(pid, 0)
+        return True
+    except ProcessLookupError:
+        return False
+    except OSError:
+        # Permission denied etc. still means the PID exists.
+        return True
+
+
 def _marker_is_stale(data):
     try:
         ts = datetime.datetime.fromisoformat(data["timestamp"])
         age = datetime.datetime.now() - ts
-        return age.total_seconds() > _STALE_TIMEOUT_MINUTES * 60
+        if age.total_seconds() > _STALE_TIMEOUT_MINUTES * 60:
+            return True
     except (KeyError, ValueError):
         return True
+
+    # Same machine but the process that wrote the marker is gone
+    # (e.g. Blender closed without running the atexit cleanup) ->
+    # the marker is left over, not an active session.
+    if data.get("hostname") == socket.gethostname():
+        pid = data.get("pid")
+        if not isinstance(pid, int) or not _pid_is_alive(pid):
+            return True
+
+    return False
 
 
 def _remove_marker(blend_path):
