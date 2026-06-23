@@ -223,6 +223,44 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
         ),
     )
 
+    schedule_font_size: bpy.props.IntProperty(
+        name="Font Size",
+        min=6,
+        max=64,
+        default=12,
+        description="Font size of the table overlay drawn next to a MaStro Schedule Viewer node"
+    )
+
+    schedule_row_height: bpy.props.IntProperty(
+        name="Row Height",
+        min=8,
+        max=128,
+        default=24,
+        description="Height of each row in the table overlay drawn next to a MaStro Schedule Viewer node"
+    )
+
+    schedule_auto_refresh: bpy.props.BoolProperty(
+        name="Auto-refresh Schedules",
+        default=False,
+        description=(
+            "Re-evaluate MaStro Schedule node trees automatically while editing "
+            "the currently selected object's mesh, instead of only on manual "
+            "Refresh. Only the selected object's cached data is recomputed - "
+            "on a masterplan with many buildings, the rest stay cached, but "
+            "leave this off if it still feels too heavy"
+        )
+    )
+
+    schedule_auto_refresh_interval: bpy.props.FloatProperty(
+        name="Auto-refresh Interval",
+        default=0.3,
+        min=0.05,
+        soft_max=2.0,
+        subtype='TIME_ABSOLUTE',
+        unit='TIME_ABSOLUTE',
+        description="Minimum time between automatic schedule re-evaluations"
+    )
+
     # --- GIS: predefined CRS ---
     def listPredefCRS(self, context):
         return [tuple(elem) for elem in json.loads(self.predefCrsJson)]
@@ -535,6 +573,27 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
                     scene, "mastro_cad_pen_index",
                     rows=6,
                 )
+
+        # Section: Schedule
+        header, panel = layout.panel("mastro_prefs_schedule_settings", default_closed=True)
+        header.label(text="Schedule")
+        if panel:
+            col = panel.column(align=True)
+            split = col.split(factor=0.2)
+            split.label(text="Font Size:")
+            split.prop(self, "schedule_font_size", text="")
+            split = col.split(factor=0.2)
+            split.label(text="Row Height:")
+            split.prop(self, "schedule_row_height", text="")
+
+            split = col.split(factor=0.2)
+            split.label(text="Auto-refresh:")
+            split.prop(self, "schedule_auto_refresh", text="")
+
+            row = col.split(factor=0.2)
+            row.enabled = self.schedule_auto_refresh
+            row.label(text="Interval:")
+            row.prop(self, "schedule_auto_refresh_interval", text="")
 
 
 
