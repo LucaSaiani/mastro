@@ -73,6 +73,17 @@ window_manager_props = [
         update=update_all_mastro_meshes_useList,
     )),
 
+    # ------------------------------
+    # Plan duplication
+    # ------------------------------
+    ("mastro_plan_duplicate_link_mesh", BoolProperty(
+        name="Link Mesh",
+        default=True,
+        description="Share the same mesh data across every duplicated plan, "
+                    "like repeated floors that should stay in sync, instead "
+                    "of giving each its own independent copy",
+    )),
+
     *window_manager_props_cad,
 ]
 

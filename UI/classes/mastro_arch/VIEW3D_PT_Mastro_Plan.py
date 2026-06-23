@@ -61,3 +61,15 @@ class VIEW3D_PT_Mastro_Plan(Panel):
             row.operator("object.mastro_plan_lock_to_level",
                           text="Lock to Active Level")
             row.menu("MASTRO_MT_Plan_Lock_To_Level", text="", icon='DOWNARROW_HLT')
+
+        col = layout.column(align=True)
+        # Disabled while unlocked: with no level to exclude/derive from,
+        # there is nothing for the operator to skip duplicating onto.
+        col.enabled = props.mastro_lock_to_level
+        # link_mesh has no UI by default (only the F9 redo panel after running
+        # the operator), so it's persisted on window_manager instead and fed
+        # into the operator call here - keeps the checkbox below always
+        # visible/editable before running, not just after.
+        col.operator("object.mastro_plan_duplicate_to_levels",
+                      text="Duplicate to Level Set").link_mesh = context.window_manager.mastro_plan_duplicate_link_mesh
+        col.prop(context.window_manager, "mastro_plan_duplicate_link_mesh")
