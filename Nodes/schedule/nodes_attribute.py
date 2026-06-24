@@ -116,31 +116,22 @@ def _pick_attribute_name_items(operator_self, context):
     return [(name, name, "") for name in names] or [("", "(no attributes)", "")]
 
 
+# Search popup for Get Attribute Names' Name field, instead of a permanent
+# dynamic EnumProperty on the node itself. The node's `name_value` is a
+# plain StringProperty - this operator computes the choices once when the
+# popup opens and writes the result there, rather than the node owning a
+# dynamic-items EnumProperty that Blender would keep re-validating on its
+# own schedule (redraws, undo, topology changes). That re-validation,
+# while walking this node's input link back to its source table, was
+# confirmed (headless Blender isolation) to recurse into a real
+# RecursionError - re-entering Blender's own node-update machinery before
+# the items callback returns. No node anywhere in Sverchok
+# (github.com/nortikin/sverchok, a long-established Blender node addon)
+# has a permanent dynamic-items EnumProperty either - it solves "pick from
+# a dynamic list" the same way, via a temporary EnumProperty on a
+# search-popup operator (e.g. nodes/exchange/FCStd_spreadsheet.py).
 class MASTRO_OT_Schedule_Pick_Attribute_Name(Operator):
-    """Pick the Name value for a Get Attribute Names node from a search
-    popup, instead of a permanent dynamic EnumProperty on the node itself.
-
-    A dynamic EnumProperty's `items` callback is invoked by Blender on its
-    own schedule (redraws, undo, node-tree topology changes...), not just
-    when the user opens the dropdown - and that callback here needs to
-    walk the input link back to a source node's cached table
-    (unique_objects -> linked_table). Confirmed by isolating this in
-    headless Blender: Blender re-invoking that callback while it's still
-    mid-way through settling a topology change (e.g. right after the user
-    draws the link feeding this node) re-enters Blender's own node-update
-    machinery before the callback returns, recursing into a real
-    RecursionError - this reproduced with zero calls into our own
-    `is_valid`/validation code, so the dynamic EnumProperty itself was the
-    only thing in common. Sverchok (a long-established Blender node addon,
-    github.com/nortikin/sverchok) has no node anywhere in its codebase
-    with this shape (a permanent dynamic EnumProperty whose items read
-    upstream link data) - it solves "pick a name from a dynamic list" with
-    exactly this pattern instead (see e.g. nodes/exchange/FCStd_spreadsheet.py):
-    a *temporary* EnumProperty that exists only on a search-popup operator,
-    invoked by an explicit user click, computed once when the popup opens,
-    writing the result into a plain, stable StringProperty on the node.
-    The node itself never owns a property Blender needs to keep
-    re-validating against changing data."""
+    """Pick the attribute Name to read"""
     bl_idname = "node.mastro_schedule_pick_attribute_name"
     bl_label = "Pick Attribute Name"
     bl_options = {'INTERNAL', 'REGISTER'}

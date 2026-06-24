@@ -227,7 +227,7 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
         name="Font Size",
         min=6,
         max=64,
-        default=12,
+        default=20,
         description="Font size of the table overlay drawn next to a MaStro Schedule Viewer node"
     )
 
@@ -235,8 +235,27 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
         name="Row Height",
         min=8,
         max=128,
-        default=24,
+        default=26,
         description="Height of each row in the table overlay drawn next to a MaStro Schedule Viewer node"
+    )
+
+    schedule_dynamic_column_width: bpy.props.BoolProperty(
+        name="Dynamic Column Width",
+        default=True,
+        description=(
+            "Size each column of the MaStro Schedule Viewer overlay to fit its "
+            "longest header/cell text, instead of a fixed width for every column"
+        )
+    )
+
+    schedule_visible_rows: bpy.props.IntProperty(
+        name="Visible Rows",
+        min=0,
+        default=0,
+        description=(
+            "Default number of rows shown in a new MaStro Schedule Viewer "
+            "node's table overlay. 0 shows every row"
+        )
     )
 
     schedule_auto_refresh: bpy.props.BoolProperty(
@@ -585,6 +604,12 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
             split = col.split(factor=0.2)
             split.label(text="Row Height:")
             split.prop(self, "schedule_row_height", text="")
+            split = col.split(factor=0.2)
+            split.label(text="Dynamic Column Width:")
+            split.prop(self, "schedule_dynamic_column_width", text="")
+            split = col.split(factor=0.2)
+            split.label(text="Visible Rows:")
+            split.prop(self, "schedule_visible_rows", text="")
 
             split = col.split(factor=0.2)
             split.label(text="Auto-refresh:")

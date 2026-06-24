@@ -92,25 +92,27 @@ def _digits(raw_value):
     return str(raw_value)[1:]
 
 
+# Outputs a Column: rows with only id keys (_Object, and one of _Face/
+# _Edge/_Vertex/_Level depending on Field) plus exactly one data key -
+# this node's own node.name, not the chosen attribute's name. node.name
+# is the Column's stable, Blender-guaranteed-unique identity, used to
+# join several Columns into a Table later without colliding even if two
+# Columns happen to have the same user-facing label (e.g. both "area").
+# `column_label` mirrors the chosen Name for now (read-only) - a future
+# dedicated rename node will let the user override it (e.g. "area" to
+# "volume" after a Math node multiplies it by height). Not called
+# `label` - bpy.types.Node already has a native `label` attribute (the
+# node's own custom display label, unrelated to this), and a same-named
+# Python @property doesn't reliably override it.
+#
+# For Field=Face, every face of a MaStro mass/block stands for
+# `mastro_number_of_storeys` stacked floors, so this always expands one
+# row per face into one row per (face, level); multi-component groups
+# (use/storey/height) are decoded per level the same way the legacy
+# Input Mesh node does. For Object/Edge/Vertex there is no such
+# expansion - one row per element.
 class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
-    """Read the actual values of the attribute named by the Name input (from
-    a Get Attribute Names node) for the objects in the Data input, as a
-    Column: rows with only id keys (_Object, and one of _Face/_Edge/
-    _Vertex/_Level depending on Field) plus exactly one data key - this
-    node's own node.name, not the chosen attribute's name. node.name is
-    the Column's stable, Blender-guaranteed-unique identity, used to join
-    several Columns into a Table later without colliding even if two
-    Columns happen to have the same user-facing label (e.g. both "area").
-    `label` mirrors the chosen Name for now (read-only) - a future
-    dedicated rename node will let the user override it (e.g. "area" to
-    "volume" after a Math node multiplies it by height).
-
-    For Field=Face, every face of a MaStro mass/block stands for
-    `mastro_number_of_storeys` stacked floors, so this always expands one
-    row per face into one row per (face, level); multi-component groups
-    (use/storey/height) are decoded per level the same way the legacy
-    Input Mesh node does. For Object/Edge/Vertex there is no such
-    expansion - one row per element"""
+    """Read the chosen attribute's values for the objects in Data, as a Column"""
     bl_idname = 'MaStroScheduleEvaluateAttribute'
     bl_label = 'Evaluate Attribute'
 
@@ -120,18 +122,15 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
         self.outputs.new('MaStroScheduleColumnSocketType', "Column")
 
     @property
-    def label(self):
+    def column_label(self):
         """User-facing name for this Column - for now just mirrors the
         chosen attribute Name, read straight from the upstream Get
         Attribute Names node (if linked) rather than cached on this
         node, so there's nothing here that can fall out of sync with the
         actual link. A future rename node overrides this independently
         of the data key (node.name)."""
-        socket = self.inputs["Name"]
-        if not socket.is_linked or not socket.links:
-            return ""
-        from_node = socket.links[0].from_node
-        return getattr(from_node, "name_value", "")
+        from .tree import upstream_attr
+        return upstream_attr(self.inputs["Name"], "name_value")
 
     def evaluate(self, inputs):
         objects_table = inputs[0] or []

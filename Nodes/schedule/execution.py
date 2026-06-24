@@ -1,6 +1,8 @@
 import bpy
 import bmesh
 
+from .tree import resolve_through_reroutes
+
 # Cache of the last evaluated tables, keyed by tree name then node name.
 # Used by the Viewer node to read the table produced by its input node.
 _schedule_cache = {}
@@ -44,14 +46,22 @@ def linked_table(node, input_index=0):
     if not socket.is_linked or not socket.links:
         return None
     link = socket.links[0]
-    if link.from_socket.bl_idname != socket.bl_idname:
+    # Same native-NodeReroute resolution as eval_node/mark_mismatched_links/
+    # is_node_valid (tree.py:resolve_through_reroutes) - without this, a
+    # Reroute (always created by Shift+RMB drag, with its own native socket
+    # type) between a source and this node made this function see a
+    # bl_idname mismatch and always return None, even though the real
+    # upstream socket type matched fine. Confirmed live: Get Attribute
+    # Names showed no attributes for any Field once a Reroute sat between
+    # it and its Data source.
+    from_node, from_socket = resolve_through_reroutes(link)
+    if from_node is None or from_socket.bl_idname != socket.bl_idname:
         return None
-    from_node = link.from_node
     table = get_node_table(node.id_data.name, from_node.name)
     if not table:
         return None
     try:
-        output_index = list(from_node.outputs).index(link.from_socket)
+        output_index = list(from_node.outputs).index(from_socket)
     except ValueError:
         return None
     return table[output_index]
@@ -219,6 +229,17 @@ def evaluate_tree(tree):
             value = None
             if socket.is_linked:
                 link = socket.links[0]
+                # Dragging a link with Shift+RMB always creates a native
+                # NodeReroute (confirmed live - no way to make Blender's
+                # drag-to-insert operator create our own reroute node
+                # instead), which has its own native socket type, not one
+                # of ours - resolve_through_reroutes walks straight
+                # through any such chain to the real producing node/
+                # socket, the same way tree.py's mark_mismatched_links/
+                # input_link_ok/is_node_valid do (see that function's
+                # docstring in tree.py for why, mirroring Sverchok's
+                # equivalent handling of the native NodeReroute).
+                from_node, from_socket = resolve_through_reroutes(link)
                 # A link between mismatched socket types is flagged (the
                 # node gets colored, see tree.py) but deliberately left in
                 # place so the user can see and fix it - it must not feed a
@@ -231,14 +252,14 @@ def evaluate_tree(tree):
                 # exempted here the same way tree.py's mark_mismatched_links/
                 # input_link_ok already are, or the Viewer would always get
                 # None instead of its actual input (confirmed live).
-                if (socket.bl_idname != 'MaStroScheduleAnySocketType'
-                        and link.from_socket.bl_idname != socket.bl_idname):
+                if from_node is None or (
+                        socket.bl_idname != 'MaStroScheduleAnySocketType'
+                        and from_socket.bl_idname != socket.bl_idname):
                     input_values.append(None)
                     continue
-                from_node = link.from_node
                 outputs = eval_node(from_node)
                 try:
-                    index = list(from_node.outputs).index(link.from_socket)
+                    index = list(from_node.outputs).index(from_socket)
                     value = outputs[index]
                 except (ValueError, IndexError):
                     value = None

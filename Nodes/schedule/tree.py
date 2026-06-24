@@ -55,6 +55,56 @@ def stop_polling():
         bpy.app.timers.unregister(_poll_pending_trees)
 
 
+def resolve_through_reroutes(link):
+    """Given a NodeLink, follow it back through any chain of native
+    Blender NodeReroute nodes to the real (from_node, from_socket) that
+    actually produces the value - or (None, None) if the chain dead-ends
+    without ever reaching a non-reroute node (a reroute with nothing
+    plugged into its own input).
+
+    Dragging a link in this tree's editor with Shift+RMB always creates
+    a native `NodeReroute` (confirmed live - Blender's drag-to-insert
+    operator hard-codes that type, there's no way to make it create our
+    own MaStroScheduleRerouteNode instead), which has its own native
+    socket type (not one of ours), so naively reading
+    `link.from_socket.bl_idname` on a link coming out of one would always
+    look like a mismatch. Mirrors Sverchok's approach (it doesn't have
+    its own reroute type either - it accepts the native NodeReroute as-is,
+    `core/update_system.py:_remove_reroutes()`, walking straight through
+    any reroute chain rather than evaluating/validating them as real
+    nodes) rather than trying to recolor/replace the native reroute,
+    which would mean writing node structure from inside NodeTree.update()
+    - the same place that, mishandled, caused this tree's RecursionError
+    (see update()'s docstring below)."""
+    from_socket = link.from_socket
+    from_node = link.from_node
+    while from_node.bl_idname == 'NodeReroute':
+        reroute_input = from_node.inputs[0]
+        if not reroute_input.is_linked or not reroute_input.links:
+            return None, None
+        inner_link = reroute_input.links[0]
+        from_socket = inner_link.from_socket
+        from_node = inner_link.from_node
+    return from_node, from_socket
+
+
+def upstream_attr(socket, attr_name, default=""):
+    """Read `attr_name` off the real node feeding `socket`, resolving
+    through any native NodeReroute chain first (see
+    resolve_through_reroutes) - the common case behind every
+    `column_label`/`name_value`-style lookup in this tree (Evaluate
+    Attribute, Math, ...): "what's the upstream node, ignoring any
+    Reroute in between, and what does it say". Returns `default` if the
+    socket isn't linked, the chain dead-ends, or the resolved node
+    doesn't have that attribute at all."""
+    if not socket.is_linked or not socket.links:
+        return default
+    from_node, _from_socket = resolve_through_reroutes(socket.links[0])
+    if from_node is None:
+        return default
+    return getattr(from_node, attr_name, default)
+
+
 def input_link_ok(socket):
     """A linked input is "ok" if its link's socket type matches (no
     mismatch) - an unlinked socket is judged separately by the caller,
@@ -65,7 +115,10 @@ def input_link_ok(socket):
         return True
     if socket.bl_idname == 'MaStroScheduleAnySocketType':
         return True
-    return socket.links[0].from_socket.bl_idname == socket.bl_idname
+    _from_node, from_socket = resolve_through_reroutes(socket.links[0])
+    if from_socket is None:
+        return False
+    return from_socket.bl_idname == socket.bl_idname
 
 
 def mark_mismatched_links(node):
@@ -98,7 +151,8 @@ def mark_mismatched_links(node):
         if socket.bl_idname == 'MaStroScheduleAnySocketType':
             continue
         link = socket.links[0]
-        ok = link.from_socket.bl_idname == socket.bl_idname
+        _from_node, from_socket = resolve_through_reroutes(link)
+        ok = from_socket is not None and from_socket.bl_idname == socket.bl_idname
         if link.is_valid != ok:
             link.is_valid = ok
 
@@ -140,7 +194,8 @@ def is_node_valid(node):
                         result = False
                         break
                     continue
-                if not visit(socket.links[0].from_node):
+                from_node, _from_socket = resolve_through_reroutes(socket.links[0])
+                if from_node is None or not visit(from_node):
                     result = False
                     break
         valid[n.name] = result

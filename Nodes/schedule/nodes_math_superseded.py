@@ -13,15 +13,14 @@ UNARY_OPERATIONS = {
 }
 
 
+# SUPERSEDED - not registered. Kept only as a reference for the feature
+# set still to be ported, incrementally, into the new minimal
+# MaStroScheduleMath (nodes_math.py): the other 16 operations beyond
+# Round/Floor/Ceil/Truncate, and A/B broadcasting between two tables. The
+# replacement uses Node.inputs[...].hide to actually hide socket B for
+# unary operations, instead of just leaving it wired but unused.
 class MaStroScheduleMathSupersededNode(MaStroScheduleTreeNode, Node):
-    """SUPERSEDED - not registered. Kept only as a reference for the
-    feature set still to be ported, incrementally, into the new minimal
-    MaStroScheduleMath (nodes_math.py): the other 16 operations beyond
-    Round/Floor/Ceil, and A/B broadcasting between two tables. The
-    replacement uses Node.inputs[...].hide to actually hide socket B for
-    unary operations, instead of just leaving it wired but unused.
-
-    Combine a column from table A with a column from table B (or a
+    """Combine a column from table A with a column from table B (or a
     constant from a Value node) using a mathematical operation, producing a
     table with one new column per row of A. If B has a single row, its value
     is broadcast to every row of A; otherwise A and B must have the same
