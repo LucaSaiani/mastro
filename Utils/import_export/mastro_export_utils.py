@@ -226,7 +226,7 @@ def get_mass_data(obj, mastro_type):
         level = level.quantize(Decimal('0.001'))
 
         entry = {
-            "Object": obj.name,
+            "_Object": obj.name,
             "Block Name": block_name,
             "Building Name": building_name,
             "Typology": typology_name,
@@ -324,7 +324,7 @@ def granularData(roughData):
                     continue
 
                 expandedData.append({
-                    "Object": el["Object"],
+                    "_Object": el["_Object"],
                     "Block Name": el["Block Name"],
                     "Building Name": el["Building Name"],
                     "Typology": el["Typology"],

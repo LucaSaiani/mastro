@@ -52,7 +52,7 @@ def scan_custom_param_names(context, scope):
 def get_param_value(row, name):
     if name in HARDCODED_PRINT_PARAMS:
         return row.get(name, "")
-    obj = bpy.data.objects.get(row.get("Object", ""))
+    obj = bpy.data.objects.get(row.get("_Object", ""))
     if obj is None:
         return ""
     return obj.get(name, "")
@@ -124,7 +124,7 @@ def _aggregate_values(rows, value_columns, grand_sums):
         elif calc == 'MAX':
             result[col.index] = max(numbers) if numbers else 0.0
         elif calc == 'COUNT':
-            result[col.index] = len({row.get("Object", "") for row in rows})
+            result[col.index] = len({row.get("_Object", "") for row in rows})
         elif calc == 'PERCENT':
             grand_sum = grand_sums.get(col.index, 0.0)
             result[col.index] = (sum(numbers) / grand_sum * 100.0) if grand_sum else 0.0
@@ -246,7 +246,7 @@ def _print_group(rows, dims, columns, value_columns, grand_sums, group_context=N
     for key, group_rows in groups:
         instance_count = None
         if dim.param.calc == 'COUNT':
-            instance_count = len({row.get("Object", "") for row in group_rows})
+            instance_count = len({row.get("_Object", "") for row in group_rows})
 
         if dim.param.group:
             new_context = dict(group_context)
