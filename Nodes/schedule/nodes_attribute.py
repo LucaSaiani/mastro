@@ -29,38 +29,66 @@ def unique_objects(node):
     return objs
 
 
-def available_attribute_names(node):
-    """List the logical attribute names available for the node's current
+def _object_attribute_names(obj, field):
+    """Logical attribute names present on a single object for the given
     Field: object custom properties for 'Object', or mesh attributes of
     the matching domain for Vertex/Edge/Face (domain suffix stripped, and
     multi-component groups like use/storey/height collapsed to one
-    name)."""
+    name). Order preserved, no duplicates."""
     names = []
-    field = node.field
-    for obj in unique_objects(node):
-        if field == 'OBJECT':
-            for name in OBJECT_MASTRO_PROPS:
-                if name not in names:
-                    names.append(name)
-            for key in obj.keys():
-                # "_RNA_UI" is Blender's own internal UI-metadata id-property,
-                # not a real custom property - everything else, including
-                # mastro's own underscore-prefixed custom properties (see
-                # property_classes_custom_properties.py), is real data.
-                if key != "_RNA_UI" and key not in names:
-                    names.append(key)
-        else:
-            for computed in COMPUTED_NAMES.get(field, ()):
-                if computed not in names:
-                    names.append(computed)
-            domain = FIELD_DOMAINS[field]
-            for attr in obj.data.attributes:
-                if attr.domain != domain:
-                    continue
-                logical = to_logical_name(attr.name, field)
-                if logical not in names:
-                    names.append(logical)
+    if field == 'OBJECT':
+        for name in OBJECT_MASTRO_PROPS:
+            if name not in names:
+                names.append(name)
+        for key in obj.keys():
+            # "_RNA_UI" is Blender's own internal UI-metadata id-property,
+            # not a real custom property - everything else, including
+            # mastro's own underscore-prefixed custom properties (see
+            # property_classes_custom_properties.py), is real data.
+            if key != "_RNA_UI" and key not in names:
+                names.append(key)
+    else:
+        for computed in COMPUTED_NAMES.get(field, ()):
+            if computed not in names:
+                names.append(computed)
+        domain = FIELD_DOMAINS[field]
+        from .nodes_evaluate import _resolve_attribute_mesh
+        mesh, is_temp_mesh = _resolve_attribute_mesh(obj)
+        for attr in mesh.attributes:
+            if attr.domain != domain:
+                continue
+            logical = to_logical_name(attr.name, field)
+            if logical not in names:
+                names.append(logical)
+        if is_temp_mesh:
+            bpy.data.meshes.remove(mesh)
     return names
+
+
+def available_attribute_names(node):
+    """List the logical attribute names common to EVERY object feeding
+    this node - the intersection, not the union. Input Mesh (All) is
+    meant to grow into mixing heterogeneous MaStro categories (Mass,
+    Block, Plan, Drawing, Street, generic Mesh), which don't all share
+    the same attributes; showing only names every selected object
+    actually has means the user is never offered a name that would
+    silently come back None for some objects (the None-row fallback in
+    nodes_evaluate.py stays in place as a safety net for cases that slip
+    through this anyway, e.g. an attribute removed after this list was
+    built)."""
+    objs = unique_objects(node)
+    if not objs:
+        return []
+    field = node.field
+    common = None
+    for obj in objs:
+        obj_names = set(_object_attribute_names(obj, field))
+        common = obj_names if common is None else (common & obj_names)
+        if not common:
+            return []
+    # Preserve the first object's order for a stable, predictable list.
+    first_names = _object_attribute_names(objs[0], field)
+    return [name for name in first_names if name in common]
 
 
 def _resolve_node(tree_name, node_name):

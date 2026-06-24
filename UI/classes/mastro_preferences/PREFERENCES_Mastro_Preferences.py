@@ -241,7 +241,7 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
 
     schedule_auto_refresh: bpy.props.BoolProperty(
         name="Auto-refresh Schedules",
-        default=False,
+        default=True,
         description=(
             "Re-evaluate MaStro Schedule node trees automatically while editing "
             "the currently selected object's mesh, instead of only on manual "

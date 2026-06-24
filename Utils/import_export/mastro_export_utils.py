@@ -63,13 +63,26 @@ def evaluate_mastro_obj(obj):
 def get_mass_data(obj, mastro_type):
     data = []
 
-    if mastro_type == "mass":
-        mesh = obj.data
-    else:
-        mesh = evaluate_mastro_obj(obj)
+    # bm.from_mesh(obj.data) reads a snapshot of the mesh datablock as it
+    # was when edit mode was last entered/exited - while obj is actively
+    # in edit mode, that snapshot is stale (doesn't reflect in-progress
+    # edits), which made the Schedule table disappear while editing a
+    # mass and only reappear back in object mode. bmesh.from_edit_mesh()
+    # instead gets Blender's own live edit-mode BMesh, reflecting changes
+    # as they happen - but it's Blender-owned, so it must NOT be
+    # bm.free()'d like a from_mesh() BMesh (see the is_edit_bmesh check at
+    # the end of this function).
+    is_edit_bmesh = mastro_type == "mass" and obj.mode == 'EDIT'
 
-    bm = bmesh.new()
-    bm.from_mesh(mesh)
+    if is_edit_bmesh:
+        bm = bmesh.from_edit_mesh(obj.data)
+    else:
+        if mastro_type == "mass":
+            mesh = obj.data
+        else:
+            mesh = evaluate_mastro_obj(obj)
+        bm = bmesh.new()
+        bm.from_mesh(mesh)
 
     bm_typology = bm.faces.layers.int["mastro_typology_id"]
     bm_storeys = bm.faces.layers.int["mastro_number_of_storeys"]
@@ -245,7 +258,8 @@ def get_mass_data(obj, mastro_type):
         }
         data.append(entry)
 
-    bm.free()
+    if not is_edit_bmesh:
+        bm.free()
 
     if mastro_type == "block":
         bpy.data.meshes.remove(mesh)

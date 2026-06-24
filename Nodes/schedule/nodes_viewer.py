@@ -38,17 +38,30 @@ class MaStroScheduleViewerNode(MaStroScheduleTreeNode, Node):
     def evaluate(self, inputs):
         rows = inputs[0] or []
 
-        column_names = []
+        # _Object and the element-index column (_Face/_Edge/_Vertex - a
+        # row only ever has one of these, never more than one, since
+        # they correspond to mutually exclusive Fields) are shown as
+        # "Object"/"Face"/"Edge"/"Vertex" debug columns - useful to see
+        # which object/element a row came from, especially once Input
+        # Mesh can mix heterogeneous categories (Mass/Plan/Drawing/
+        # Street/Mesh) in one table. _Level (the per-floor expansion row
+        # index, Face only) is shown the same way as "Level". Still
+        # excluded: _subtotal/_RNA_UI-style purely-internal bookkeeping
+        # keys that aren't meant to be read by the user at all.
+        debug_keys = ("_Object", "_Face", "_Edge", "_Vertex", "_Level")
+        debug_present = [key for key in debug_keys if any(key in row for row in rows)]
+
+        column_names = list(debug_present)
         for row in rows:
             for key in row.keys():
-                if key.startswith("_"):
+                if key.startswith("_") or key in column_names:
                     continue
-                if key not in column_names:
-                    column_names.append(key)
+                column_names.append(key)
 
         self.columns.clear()
         for name in column_names:
-            self.columns.add().name = name
+            label = name[1:] if name in debug_present else name
+            self.columns.add().name = label
 
         self.rows.clear()
         for row in rows:
@@ -57,7 +70,7 @@ class MaStroScheduleViewerNode(MaStroScheduleTreeNode, Node):
             row_item.level = int(row.get("_level", 0))
             for name in column_names:
                 cell = row_item.cells.add()
-                cell.name = name
+                cell.name = name[1:] if name in debug_present else name
                 cell.value = str(row.get(name, ""))
 
         return []

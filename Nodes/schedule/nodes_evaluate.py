@@ -11,6 +11,42 @@ OBJECT_MASTRO_PROPS_SOURCE = {
     "Building": "mastro_building_attribute",
 }
 
+
+def _resolve_attribute_mesh(obj):
+    """The mesh whose .attributes actually has the mastro_* layers for
+    this object - mirrors mastro_export_utils.py:get_mass_data's own
+    "mass" vs "block" distinction exactly, not just "has a Nodes
+    modifier or not":
+
+    - A MaStro "mass" must always read obj.data directly, regardless of
+      whether it has any Geometry Nodes modifiers of its own. The user's
+      explicit requirement: mass data has to come from the mass itself,
+      independent of GN, the same way the CSV export and on-screen print
+      already work - basing it on the GN-evaluated mesh would mean that
+      adding GN-driven detail to a mass (a purely visual/detail layer)
+      changes the numbers that feed the masterplan-level schedule, which
+      makes no sense at that level.
+    - A MaStro "block" always goes through evaluate_mastro_obj() (which
+      evaluates only the *first* Nodes modifier - the one that turns the
+      block into a mass-equivalent shape - temporarily disabling any
+      later ones), same as the CSV export.
+    - Anything else (a generic "Mesh" category object, Plan, Drawing,
+      Street) falls back to "has a Nodes modifier or not": there's no
+      mass/block-specific rule for these yet, so evaluating when a
+      modifier is present is the closest match to what the object
+      actually looks like.
+
+    Returns (mesh, is_temporary) - is_temporary meshes must be removed
+    with bpy.data.meshes.remove() by the caller once done."""
+    if "MaStro mass" in obj.data:
+        return obj.data, False
+    from ...Utils.import_export.mastro_export_utils import evaluate_mastro_obj
+    if "MaStro block" in obj.data:
+        return evaluate_mastro_obj(obj), True
+    if not any(mod.type == 'NODES' for mod in obj.modifiers):
+        return obj.data, False
+    return evaluate_mastro_obj(obj), True
+
 # bpy attribute data items expose the stored value under different property
 # names depending on the attribute's data type (int/float/bool vs vector vs
 # color vs string).
@@ -58,7 +94,17 @@ def _digits(raw_value):
 
 class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
     """Read the actual values of the attribute named by the Name input (from
-    a Get Attribute Names node) for the objects in the Data input.
+    a Get Attribute Names node) for the objects in the Data input, as a
+    Column: rows with only id keys (_Object, and one of _Face/_Edge/
+    _Vertex/_Level depending on Field) plus exactly one data key - this
+    node's own node.name, not the chosen attribute's name. node.name is
+    the Column's stable, Blender-guaranteed-unique identity, used to join
+    several Columns into a Table later without colliding even if two
+    Columns happen to have the same user-facing label (e.g. both "area").
+    `label` mirrors the chosen Name for now (read-only) - a future
+    dedicated rename node will let the user override it (e.g. "area" to
+    "volume" after a Math node multiplies it by height).
+
     For Field=Face, every face of a MaStro mass/block stands for
     `mastro_number_of_storeys` stacked floors, so this always expands one
     row per face into one row per (face, level); multi-component groups
@@ -71,7 +117,21 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
     def init(self, context):
         self.inputs.new('MaStroScheduleDataSocketType', "Data")
         self.inputs.new('MaStroScheduleAttributeRefSocketType', "Name")
-        self.outputs.new('MaStroScheduleDataSocketType', "Data")
+        self.outputs.new('MaStroScheduleColumnSocketType', "Column")
+
+    @property
+    def label(self):
+        """User-facing name for this Column - for now just mirrors the
+        chosen attribute Name, read straight from the upstream Get
+        Attribute Names node (if linked) rather than cached on this
+        node, so there's nothing here that can fall out of sync with the
+        actual link. A future rename node overrides this independently
+        of the data key (node.name)."""
+        socket = self.inputs["Name"]
+        if not socket.is_linked or not socket.links:
+            return ""
+        from_node = socket.links[0].from_node
+        return getattr(from_node, "name_value", "")
 
     def evaluate(self, inputs):
         objects_table = inputs[0] or []
@@ -85,9 +145,10 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
             return [[]]
 
         objs = unique_objects_from_table(objects_table)
+        key = self.name
 
         if field == 'OBJECT':
-            return [self._evaluate_object(objs, name)]
+            return [self._evaluate_object(objs, name, key)]
 
         domain = FIELD_DOMAINS[field]
         if name == "area":
@@ -98,59 +159,116 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
             raw_names = (domain_raw_name(name, field),)
 
         if field == 'FACE':
-            return [self._evaluate_face_expanded(objs, name, raw_names, domain)]
-        return [self._evaluate_simple(objs, name, raw_names, domain)]
+            return [self._evaluate_face_expanded(objs, name, raw_names, domain, key)]
+        return [self._evaluate_simple(objs, name, raw_names, domain, key)]
 
-    def _evaluate_object(self, objs, name):
+    def _evaluate_object(self, objs, name, key):
         result = []
         for obj in objs:
             if name in OBJECT_MASTRO_PROPS_SOURCE:
                 value = getattr(obj.mastro_props, OBJECT_MASTRO_PROPS_SOURCE[name], "")
             else:
                 value = obj.get(name, "")
-            result.append({"_Object": obj.name, name: value})
+            result.append({"_Object": obj.name, key: value})
         return result
 
-    def _evaluate_simple(self, objs, name, raw_names, domain):
+    def _evaluate_simple(self, objs, name, raw_names, domain, key):
         """One row per element (Edge/Vertex), no per-level expansion."""
         index_key = {'POINT': "_Vertex", 'EDGE': "_Edge", 'FACE': "_Face"}[domain]
         result = []
         for obj in objs:
-            attrs = [obj.data.attributes.get(raw) for raw in raw_names]
-            if any(a is None or a.domain != domain for a in attrs):
-                continue
-            count = len(attrs[0].data)
+            mesh, is_temp_mesh = _resolve_attribute_mesh(obj)
+            attrs = [mesh.attributes.get(raw) for raw in raw_names]
+            missing = any(a is None or a.domain != domain for a in attrs)
+            if missing:
+                count = {
+                    'POINT': len(mesh.vertices),
+                    'EDGE': len(mesh.edges),
+                    'FACE': len(mesh.polygons),
+                }[domain]
+            else:
+                count = len(attrs[0].data)
             for i in range(count):
-                values = [_read_attribute_value(a, i) for a in attrs]
-                value = values[0] if len(values) == 1 else tuple(values)
-                result.append({"_Object": obj.name, index_key: i, name: value})
+                if missing:
+                    # The attribute doesn't exist on this object's mesh
+                    # at all (e.g. one mass/block was created before
+                    # this attribute existed, or with a different set of
+                    # edge attributes than another) - every element this
+                    # object actually has still gets its own row, with
+                    # this column as None, instead of dropping the
+                    # object (losing its other columns/rows entirely) or
+                    # collapsing it to one row (which would misrepresent
+                    # a multi-edge object as having just one edge).
+                    value = None
+                else:
+                    values = [_read_attribute_value(a, i) for a in attrs]
+                    value = values[0] if len(values) == 1 else tuple(values)
+                result.append({"_Object": obj.name, index_key: i, key: value})
+            if is_temp_mesh:
+                bpy.data.meshes.remove(mesh)
         return result
 
-    def _evaluate_face_expanded(self, objs, name, raw_names, domain):
+    def _evaluate_face_plain_area(self, obj, mesh, is_temp_mesh, key):
+        """One row per face, real geometric BMFace.calc_area() - used for
+        "area" on objects with no mastro_number_of_storeys (e.g. a plain
+        Cube, or any non-mass/block "Mesh" category object). "area" on a
+        mass/block instead goes through _evaluate_face_expanded's
+        multi-storey unwrap - that's mastro's own made-up per-floor area
+        (one row per (face, level), all sharing the face's full
+        geometric area), a different, mass/block-specific concept from
+        "the real area of this face", which is what a generic mesh with
+        no storey concept actually has."""
+        bm = bmesh.new()
+        bm.from_mesh(mesh)
+        bm.faces.ensure_lookup_table()
+        result = [
+            {"_Object": obj.name, "_Face": face.index, key: face.calc_area()}
+            for face in bm.faces
+        ]
+        bm.free()
+        if is_temp_mesh:
+            bpy.data.meshes.remove(mesh)
+        return result
+
+    def _evaluate_face_expanded(self, objs, name, raw_names, domain, key):
         """One row per (face, level): every face of a mass/block stands for
         mastro_number_of_storeys stacked floors. Mirrors execution.py's
         extract_mesh_rows decoding loop, generalized to any attribute name."""
         result = []
         is_area = name == "area"
         for obj in objs:
-            attrs = obj.data.attributes
+            mesh, is_temp_mesh = _resolve_attribute_mesh(obj)
+            attrs = mesh.attributes
             if "mastro_number_of_storeys" not in attrs:
+                if is_area:
+                    result.extend(self._evaluate_face_plain_area(obj, mesh, is_temp_mesh, key))
+                elif is_temp_mesh:
+                    bpy.data.meshes.remove(mesh)
                 continue
             storeys_attr = attrs["mastro_number_of_storeys"]
 
             value_attrs = [attrs.get(raw) for raw in raw_names]
-            if any(a is None or a.domain != domain for a in value_attrs):
-                continue
+            # The attribute doesn't exist on this object's mesh at all
+            # (e.g. one mass/block was created before this attribute
+            # existed, or with a different set of attributes than
+            # another) - mastro_number_of_storeys (checked above) still
+            # tells us exactly how many (face, level) rows this object
+            # should have, so every one of them gets its own row with
+            # this column as None, instead of dropping the object
+            # (losing its other rows entirely) or collapsing it to one
+            # placeholder row (misrepresenting how many faces/levels it
+            # actually has).
+            missing = any(a is None or a.domain != domain for a in value_attrs)
 
             bm = None
-            if is_area:
+            if is_area and not missing:
                 # area is computed from the face's geometry (BMFace.calc_area()),
                 # not a stored mesh attribute - always the full geometric area,
                 # undercroft or not, so footprint-style sums at level 0 don't
                 # silently lose area. Subtracting undercroft area is the job of
                 # a separate node combining this with an "undercroft" Evaluate.
                 bm = bmesh.new()
-                bm.from_mesh(obj.data)
+                bm.from_mesh(mesh)
                 bm.faces.ensure_lookup_table()
 
             # storey_A/_B are always needed to know when a face's storey
@@ -163,17 +281,18 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
             for face_index in range(len(storeys_attr.data)):
                 storeys = storeys_attr.data[face_index].value
 
-                if is_area:
-                    plain_value = bm.faces[face_index].calc_area()
-                elif name == "undercroft":
-                    undercroft_count = value_attrs[0].data[face_index].value
-                elif is_digit_group:
-                    digit_strings = [_digits(attr.data[face_index].value) for attr in value_attrs]
-                else:
-                    # A plain (non digit-encoded) attribute like typology_id,
-                    # floor_id or overlay_top: one value per face, repeated
-                    # on every level row.
-                    plain_value = value_attrs[0].data[face_index].value
+                if not missing:
+                    if is_area:
+                        plain_value = bm.faces[face_index].calc_area()
+                    elif name == "undercroft":
+                        undercroft_count = value_attrs[0].data[face_index].value
+                    elif is_digit_group:
+                        digit_strings = [_digits(attr.data[face_index].value) for attr in value_attrs]
+                    else:
+                        # A plain (non digit-encoded) attribute like typology_id,
+                        # floor_id or overlay_top: one value per face, repeated
+                        # on every level row.
+                        plain_value = value_attrs[0].data[face_index].value
                 if storey_a is not None:
                     storey_a_digits = _digits(storey_a.data[face_index].value)
                     storey_b_digits = _digits(storey_b.data[face_index].value) if storey_b else None
@@ -190,7 +309,9 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
                     # function did) is an off-by-one: on a face's last level,
                     # group_index would already point past the end of the
                     # digit string, raising IndexError - confirmed live.
-                    if is_area:
+                    if missing:
+                        value = None
+                    elif is_area:
                         value = plain_value
                     elif name == "undercroft":
                         # mastro_undercroft stores a plain count of floors
@@ -213,7 +334,7 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
                         "_Object": obj.name,
                         "_Face": face_index,
                         "_Level": level,
-                        name: value,
+                        key: value,
                     })
 
                     if storey_a is not None:
@@ -226,6 +347,8 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
 
             if bm is not None:
                 bm.free()
+            if is_temp_mesh:
+                bpy.data.meshes.remove(mesh)
         return result
 
 

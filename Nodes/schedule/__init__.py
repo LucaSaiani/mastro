@@ -1,6 +1,6 @@
 import nodeitems_utils
 
-from .sockets import MaStroScheduleDataSocket, MaStroScheduleAttributeRefSocket
+from .sockets import MaStroScheduleDataSocket, MaStroScheduleAttributeRefSocket, MaStroScheduleColumnSocket
 from .tree import MaStroScheduleTree, start_polling, stop_polling
 from .properties import (
     MaStro_schedule_key_item,
@@ -43,6 +43,7 @@ classes = (
     MaStro_schedule_row,
     MaStroScheduleDataSocket,
     MaStroScheduleAttributeRefSocket,
+    MaStroScheduleColumnSocket,
     MaStroScheduleTree,
     MASTRO_UL_schedule_keys,
     MASTRO_OT_Schedule_GroupBy_Key_Add,

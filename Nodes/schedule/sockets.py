@@ -28,3 +28,29 @@ class MaStroScheduleAttributeRefSocket(NodeSocket):
     @classmethod
     def draw_color_simple(cls):
         return (1.0, 0.6, 0.2, 1.0)
+
+
+class MaStroScheduleColumnSocket(NodeSocket):
+    """Socket carrying a single Column: a list of row dicts each holding
+    only id keys (_Object, and one of _Face/_Edge/_Vertex/_Level
+    depending on Field) plus exactly one data key. That data key is the
+    producing node's own node.name - stable and guaranteed unique by
+    Blender, used as the Column's identity for joining several Columns
+    into a Table later on (matching rows by their shared id keys), never
+    by its user-facing label (read separately, e.g. from the Name chosen
+    on Get Attribute Names) - two Columns can have the same label
+    (e.g. both "area") without colliding, since they're still different
+    node.names.
+
+    Distinct color from Data (a multi-column Table) and Attribute (a
+    Field+Name reference, not row data at all) to keep the three from
+    being miswired into each other."""
+    bl_idname = 'MaStroScheduleColumnSocketType'
+    bl_label = "Column"
+
+    def draw(self, context, layout, node, text):
+        layout.label(text=text)
+
+    @classmethod
+    def draw_color_simple(cls):
+        return (0.6, 0.9, 0.3, 1.0)

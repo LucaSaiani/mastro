@@ -61,6 +61,6 @@ class MaStroScheduleMathNode(MaStroScheduleTreeNode, Node):
                 value = self._compute(float(row.get(self.column, 0)))
             except (TypeError, ValueError):
                 value = 0.0
-            new_row["Result"] = value
+            new_row[self.column] = value
             result.append(new_row)
         return [result]
