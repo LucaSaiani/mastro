@@ -33,10 +33,32 @@ class MaStroScheduleViewerNode(MaStroScheduleTreeNode, Node):
     show_table: BoolProperty(name="Show Table", default=True, update=_on_show_table_changed)
 
     def init(self, context):
-        self.inputs.new('MaStroScheduleDataSocketType', "Data")
+        self.inputs.new('MaStroScheduleAnySocketType', "Data")
 
     def evaluate(self, inputs):
+        # A single MaStroScheduleAnySocketType input, accepting Data,
+        # Column or Attribute alike (see that socket's docstring in
+        # sockets.py) - the Viewer has to work for whatever a node
+        # happens to output, not be limited to one specific shape.
+        # Column rows have a non-id data key that's the upstream node's
+        # own node.name, not a readable name - relabeled here using that
+        # node's `label` (mirrors Evaluate Attribute/Math's `label`
+        # property), the same way Data's columns are already named by
+        # their own dict keys.
+        socket = self.inputs[0]
         rows = inputs[0] or []
+        if (socket.is_linked and socket.links
+                and socket.links[0].from_socket.bl_idname == 'MaStroScheduleColumnSocketType'):
+            from_node = socket.links[0].from_node
+            label = getattr(from_node, "label", "") or from_node.name
+            data_key = from_node.name
+            relabeled = []
+            for row in rows:
+                new_row = {}
+                for key, value in row.items():
+                    new_row[label if key == data_key else key] = value
+                relabeled.append(new_row)
+            rows = relabeled
 
         # _Object and the element-index column (_Face/_Edge/_Vertex - a
         # row only ever has one of these, never more than one, since

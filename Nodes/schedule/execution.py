@@ -224,8 +224,15 @@ def evaluate_tree(tree):
                 # place so the user can see and fix it - it must not feed a
                 # value through though, the same way the old prototype's
                 # checkLink() gated execution and cleared the output instead
-                # of running on a mismatched input.
-                if link.from_socket.bl_idname != socket.bl_idname:
+                # of running on a mismatched input. MaStroScheduleAnySocketType
+                # (the Viewer's input) deliberately accepts any other MaStro
+                # Schedule socket type by design (see sockets.py) - its
+                # bl_idname never matches the from_socket's, so it must be
+                # exempted here the same way tree.py's mark_mismatched_links/
+                # input_link_ok already are, or the Viewer would always get
+                # None instead of its actual input (confirmed live).
+                if (socket.bl_idname != 'MaStroScheduleAnySocketType'
+                        and link.from_socket.bl_idname != socket.bl_idname):
                     input_values.append(None)
                     continue
                 from_node = link.from_node

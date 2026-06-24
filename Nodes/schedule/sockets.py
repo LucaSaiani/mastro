@@ -30,6 +30,28 @@ class MaStroScheduleAttributeRefSocket(NodeSocket):
         return (1.0, 0.6, 0.2, 1.0)
 
 
+class MaStroScheduleAnySocket(NodeSocket):
+    """Socket that accepts a link from any other MaStro Schedule socket
+    type (Data/Column/Attribute) without being flagged as a mismatch -
+    used only by the Viewer's input, so it works for debugging whatever
+    a node happens to output, instead of being limited to one specific
+    shape. tree.py's mark_mismatched_links() skips this socket's links
+    entirely (matching by from_socket.bl_idname would otherwise flag
+    every link into it). evaluate() on the receiving node inspects the
+    actual row shape at runtime (one data key vs several, or no rows at
+    all) to decide how to interpret it - this socket itself carries no
+    structural guarantee, unlike Data/Column."""
+    bl_idname = 'MaStroScheduleAnySocketType'
+    bl_label = "Any"
+
+    def draw(self, context, layout, node, text):
+        layout.label(text=text)
+
+    @classmethod
+    def draw_color_simple(cls):
+        return (0.8, 0.8, 0.8, 1.0)
+
+
 class MaStroScheduleColumnSocket(NodeSocket):
     """Socket carrying a single Column: a list of row dicts each holding
     only id keys (_Object, and one of _Face/_Edge/_Vertex/_Level

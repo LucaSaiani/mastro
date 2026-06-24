@@ -59,8 +59,11 @@ def input_link_ok(socket):
     """A linked input is "ok" if its link's socket type matches (no
     mismatch) - an unlinked socket is judged separately by the caller,
     since whether that's acceptable depends on whether the input is
-    optional."""
+    optional. MaStroScheduleAnySocketType (the Viewer's input) is always
+    "ok" regardless of what's linked - see mark_mismatched_links."""
     if not socket.is_linked or not socket.links:
+        return True
+    if socket.bl_idname == 'MaStroScheduleAnySocketType':
         return True
     return socket.links[0].from_socket.bl_idname == socket.bl_idname
 
@@ -87,6 +90,12 @@ def mark_mismatched_links(node):
     and draw_buttons both are not, for two unrelated reasons."""
     for socket in node.inputs:
         if not socket.is_linked or not socket.links:
+            continue
+        # MaStroScheduleAnySocketType (the Viewer's input) deliberately
+        # accepts any other MaStro Schedule socket type - it carries no
+        # structural guarantee by design, so a from_socket/to_socket
+        # bl_idname mismatch here is expected, not an error.
+        if socket.bl_idname == 'MaStroScheduleAnySocketType':
             continue
         link = socket.links[0]
         ok = link.from_socket.bl_idname == socket.bl_idname
