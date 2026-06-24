@@ -15,6 +15,20 @@ class MaStroScheduleGroupByNode(MaStroScheduleTreeNode, Node):
 
     keys: CollectionProperty(type=MaStro_schedule_key_item)
     active_key_index: IntProperty()
+    # TODO (still WIP, see menus.py): column_to_add is a permanent
+    # dynamic-items EnumProperty on the node itself - the same general
+    # shape that caused a real RecursionError on Get Attribute Names'
+    # `name` (there, items reading upstream link data + the property
+    # being read inside evaluate()). This one has no update= and isn't
+    # read inside evaluate() (only by operators.py's add-key operator on
+    # a user click), so it's lower-risk, but Blender can still re-invoke
+    # the items callback on its own schedule (redraws, undo, topology
+    # changes). When this node graduates out of WIP, consider migrating
+    # to the StringProperty + search-popup-operator pattern (see
+    # nodes_attribute.py: MASTRO_OT_Schedule_Pick_Attribute_Name,
+    # name_value) for consistency/safety - see project_schedule_nodes_roadmap
+    # memory, "Filter/GroupBy/Aggregate/Header/... are all still in the
+    # WIP Add-menu category".
     column_to_add: EnumProperty(name="Column", items=lambda self, context: get_available_columns_items(self))
 
     def init(self, context):

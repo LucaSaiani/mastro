@@ -1,7 +1,7 @@
 import nodeitems_utils
 
 from .sockets import MaStroScheduleDataSocket, MaStroScheduleAttributeRefSocket
-from .tree import MaStroScheduleTree
+from .tree import MaStroScheduleTree, start_polling, stop_polling
 from .properties import (
     MaStro_schedule_key_item,
     MaStro_schedule_cell,
@@ -18,7 +18,7 @@ from .operators import (
 )
 from .panel import MASTRO_PT_Schedule_Tools
 from .nodes_input import MaStroScheduleInputAllNode, MaStroScheduleInputSelectedNode
-from .nodes_attribute import MaStroScheduleGetAttributeNamesNode
+from .nodes_attribute import MaStroScheduleGetAttributeNamesNode, MASTRO_OT_Schedule_Pick_Attribute_Name
 from .nodes_evaluate import MaStroScheduleEvaluateAttributeNode
 from .nodes_filter import MaStroScheduleFilterNode
 from .nodes_groupby import MaStroScheduleGroupByNode
@@ -55,6 +55,7 @@ classes = (
     MaStroScheduleInputAllNode,
     MaStroScheduleInputSelectedNode,
     MaStroScheduleGetAttributeNamesNode,
+    MASTRO_OT_Schedule_Pick_Attribute_Name,
     MaStroScheduleEvaluateAttributeNode,
     MaStroScheduleFilterNode,
     MaStroScheduleGroupByNode,
@@ -74,8 +75,10 @@ classes = (
 def register():
     nodeitems_utils.register_node_categories('MASTRO_SCHEDULE_NODES', schedule_node_categories)
     register_viewer_draw_handler()
+    start_polling()
 
 
 def unregister():
+    stop_polling()
     unregister_viewer_draw_handler()
     nodeitems_utils.unregister_node_categories('MASTRO_SCHEDULE_NODES')

@@ -16,6 +16,15 @@ class MaStroScheduleAggregateNode(MaStroScheduleTreeNode, Node):
     bl_idname = 'MaStroScheduleAggregate'
     bl_label = 'Aggregate'
 
+    # TODO (still WIP, see menus.py): `column` has the same shape that
+    # caused a real RecursionError on Get Attribute Names - a permanent
+    # dynamic-items EnumProperty on the node itself, read inside
+    # evaluate(). When this node graduates out of WIP, migrate it to the
+    # StringProperty + search-popup-operator pattern (see
+    # nodes_attribute.py: MASTRO_OT_Schedule_Pick_Attribute_Name,
+    # name_value) instead of fixing it in place now - see
+    # project_schedule_nodes_roadmap memory, "Filter/GroupBy/Aggregate/
+    # Header/... are all still in the WIP Add-menu category".
     column: EnumProperty(
         name="Column",
         items=lambda self, context: get_available_columns_items(self),

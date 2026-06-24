@@ -1,6 +1,6 @@
 import bpy
-from bpy.types import Node
-from bpy.props import EnumProperty
+from bpy.types import Node, Operator
+from bpy.props import EnumProperty, StringProperty
 
 from .tree import MaStroScheduleTreeNode
 from .execution import update_node, linked_table
@@ -29,14 +29,16 @@ def unique_objects(node):
     return objs
 
 
-def get_attribute_name_items(node, context):
-    """List the logical attribute names available for the current Field:
-    object custom properties for 'Object', or mesh attributes of the
-    matching domain for Vertex/Edge/Face (domain suffix stripped, and
-    multi-component groups like use/storey/height collapsed to one name)."""
+def available_attribute_names(node):
+    """List the logical attribute names available for the node's current
+    Field: object custom properties for 'Object', or mesh attributes of
+    the matching domain for Vertex/Edge/Face (domain suffix stripped, and
+    multi-component groups like use/storey/height collapsed to one
+    name)."""
     names = []
+    field = node.field
     for obj in unique_objects(node):
-        if node.field == 'OBJECT':
+        if field == 'OBJECT':
             for name in OBJECT_MASTRO_PROPS:
                 if name not in names:
                     names.append(name)
@@ -48,30 +50,122 @@ def get_attribute_name_items(node, context):
                 if key != "_RNA_UI" and key not in names:
                     names.append(key)
         else:
-            for computed in COMPUTED_NAMES.get(node.field, ()):
+            for computed in COMPUTED_NAMES.get(field, ()):
                 if computed not in names:
                     names.append(computed)
-            domain = FIELD_DOMAINS[node.field]
+            domain = FIELD_DOMAINS[field]
             for attr in obj.data.attributes:
                 if attr.domain != domain:
                     continue
-                logical = to_logical_name(attr.name, node.field)
+                logical = to_logical_name(attr.name, field)
                 if logical not in names:
                     names.append(logical)
+    return names
 
-    items = [(name, name, "") for name in names] or [("", "(no attributes)", "")]
-    return items
+
+def _resolve_node(tree_name, node_name):
+    tree = bpy.data.node_groups.get(tree_name)
+    if tree is None:
+        return None
+    return tree.nodes.get(node_name)
+
+
+def _pick_attribute_name_items(operator_self, context):
+    """Module-level function, not a method on the operator class - an
+    instance method referenced from an `items=` annotation evaluated at
+    class-body time was confirmed (live, in the editor) to raise
+    `AttributeError: ... object has no attribute '_get_node'` when Blender
+    invokes the callback: by the time `option: EnumProperty(items=...)` is
+    evaluated as part of the class body, methods defined later in that same
+    body (`execute`, formerly `_get_node`) aren't bound/visible the way a
+    plain function reference is. Sverchok's equivalent callbacks
+    (`nodes/exchange/FCStd_spreadsheet.py`'s `LabelReader`) are also plain
+    functions for the same reason."""
+    node = _resolve_node(operator_self.tree_name, operator_self.node_name)
+    if node is None:
+        return [("", "(node not found)", "")]
+    names = available_attribute_names(node)
+    return [(name, name, "") for name in names] or [("", "(no attributes)", "")]
+
+
+class MASTRO_OT_Schedule_Pick_Attribute_Name(Operator):
+    """Pick the Name value for a Get Attribute Names node from a search
+    popup, instead of a permanent dynamic EnumProperty on the node itself.
+
+    A dynamic EnumProperty's `items` callback is invoked by Blender on its
+    own schedule (redraws, undo, node-tree topology changes...), not just
+    when the user opens the dropdown - and that callback here needs to
+    walk the input link back to a source node's cached table
+    (unique_objects -> linked_table). Confirmed by isolating this in
+    headless Blender: Blender re-invoking that callback while it's still
+    mid-way through settling a topology change (e.g. right after the user
+    draws the link feeding this node) re-enters Blender's own node-update
+    machinery before the callback returns, recursing into a real
+    RecursionError - this reproduced with zero calls into our own
+    `is_valid`/validation code, so the dynamic EnumProperty itself was the
+    only thing in common. Sverchok (a long-established Blender node addon,
+    github.com/nortikin/sverchok) has no node anywhere in its codebase
+    with this shape (a permanent dynamic EnumProperty whose items read
+    upstream link data) - it solves "pick a name from a dynamic list" with
+    exactly this pattern instead (see e.g. nodes/exchange/FCStd_spreadsheet.py):
+    a *temporary* EnumProperty that exists only on a search-popup operator,
+    invoked by an explicit user click, computed once when the popup opens,
+    writing the result into a plain, stable StringProperty on the node.
+    The node itself never owns a property Blender needs to keep
+    re-validating against changing data."""
+    bl_idname = "node.mastro_schedule_pick_attribute_name"
+    bl_label = "Pick Attribute Name"
+    bl_options = {'INTERNAL', 'REGISTER'}
+    bl_property = "option"
+
+    tree_name: StringProperty()
+    node_name: StringProperty()
+    option: EnumProperty(items=_pick_attribute_name_items)
+
+    def execute(self, context):
+        node = _resolve_node(self.tree_name, self.node_name)
+        if node is not None:
+            node.name_value = self.option
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        context.window_manager.invoke_search_popup(self)
+        return {'FINISHED'}
+
+
+def _on_field_changed(node, context):
+    """update= callback for Get Attribute Names' Field - a module-level
+    function, matching the rest of the codebase's convention for
+    update=/items= callbacks (e.g. nodes_viewer.py's
+    _on_show_table_changed), not a method on the node class.
+
+    A name_value picked for the previous Field (e.g. "area" under Face)
+    is silently wrong under a different Field - Evaluate Attribute
+    doesn't error on it, it just produces an empty/bogus value (e.g.
+    _evaluate_object falling through to obj.get("area", "") on a
+    Field=Object switch, which never has an "area" custom property).
+    Clearing it forces the user to pick a name that's actually valid for
+    the new Field, instead of leaving a stale one that looks set but
+    silently evaluates to nothing."""
+    node.name_value = ""
+    update_node(node, context)
 
 
 class MaStroScheduleGetAttributeNamesNode(MaStroScheduleTreeNode, Node):
     """List the attribute names available for the chosen Field (Object
     custom property, or Vertex/Edge/Face mesh attribute) on the objects
     feeding the Data input - names only, no values. Pick one with the Name
-    dropdown to feed it to an Evaluate Attribute node, which reads the
+    button to feed it to an Evaluate Attribute node, which reads the
     actual values"""
     bl_idname = 'MaStroScheduleGetAttributeNames'
     bl_label = 'Get Attribute Names'
 
+    # field's items are a fixed, static list - this one is safe as a
+    # normal EnumProperty (no items callback, nothing reads upstream link
+    # data to build it). name_value is a plain StringProperty written by
+    # MASTRO_OT_Schedule_Pick_Attribute_Name's search popup - see that
+    # operator's docstring for why Name is deliberately NOT a dynamic
+    # EnumProperty on the node itself.
     field: EnumProperty(
         name="Field",
         items=[
@@ -81,13 +175,9 @@ class MaStroScheduleGetAttributeNamesNode(MaStroScheduleTreeNode, Node):
             ('VERTEX', "Vertex", "Vertex-domain mesh attribute"),
         ],
         default='FACE',
-        update=update_node,
+        update=_on_field_changed,
     )
-    name: EnumProperty(
-        name="Name",
-        items=get_attribute_name_items,
-        update=update_node,
-    )
+    name_value: StringProperty(name="Name", update=update_node)
 
     def init(self, context):
         self.inputs.new('MaStroScheduleDataSocketType', "Data")
@@ -95,8 +185,16 @@ class MaStroScheduleGetAttributeNamesNode(MaStroScheduleTreeNode, Node):
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "field")
-        layout.prop(self, "name")
+        if self.is_valid:
+            op = layout.operator(
+                "node.mastro_schedule_pick_attribute_name",
+                text=self.name_value or "(pick a name)",
+            )
+            op.tree_name = self.id_data.name
+            op.node_name = self.name
+        else:
+            layout.label(text="Connect Data to a Viewer", icon='INFO')
 
     def evaluate(self, inputs):
-        name_ref = [{"Field": self.field, "Name": self.name}] if self.name else []
+        name_ref = [{"Field": self.field, "Name": self.name_value}] if self.name_value else []
         return [name_ref]

@@ -181,14 +181,15 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
                 storey_group = 0
                 group_index = 0
                 for level in range(storeys):
-                    if storey_a is not None:
-                        s_a = int(storey_a_digits[group_index])
-                        s_b = int(storey_b_digits[group_index]) if storey_b_digits else 0
-                        storey_group_new = s_a * 10 + s_b + storey_group
-                        if storey_group_new == level + 1:
-                            storey_group = storey_group_new
-                            group_index += 1
-
+                    # Read this level's value at the CURRENT group_index
+                    # before deciding whether group_index advances for the
+                    # *next* level - mirrors execution.py:extract_mesh_rows,
+                    # where storey_A/use_A/height_A are all read at the same
+                    # group_index, and group_index only advances after. Doing
+                    # the read after advancing (as an earlier version of this
+                    # function did) is an off-by-one: on a face's last level,
+                    # group_index would already point past the end of the
+                    # digit string, raising IndexError - confirmed live.
                     if is_area:
                         value = plain_value
                     elif name == "undercroft":
@@ -214,6 +215,14 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
                         "_Level": level,
                         name: value,
                     })
+
+                    if storey_a is not None:
+                        s_a = int(storey_a_digits[group_index])
+                        s_b = int(storey_b_digits[group_index]) if storey_b_digits else 0
+                        storey_group_new = s_a * 10 + s_b + storey_group
+                        if storey_group_new == level + 1:
+                            storey_group = storey_group_new
+                            group_index += 1
 
             if bm is not None:
                 bm.free()
