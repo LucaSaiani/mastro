@@ -193,7 +193,11 @@ class MaStroScheduleViewerNode(MaStroScheduleTreeNode, Node):
         return []
 
     def draw_buttons(self, context, layout):
-        row = layout.row(align=True)
+        # Not align=True - that joins the three controls edge-to-edge
+        # with no visible gap or individual border, confirmed cramped/
+        # hard to read live. A plain row() gives each its own border and
+        # Blender's normal widget spacing instead.
+        row = layout.row()
         row.prop(self, "show_table", text="", icon='HIDE_OFF' if self.show_table else 'HIDE_ON', emboss=False)
         row.prop(self, "visible_rows", text="")
         # FORWARD/BACK, not +/- or TRIA_LEFT/RIGHT - both of those read as
@@ -412,6 +416,47 @@ def _draw_callback():
     viewers.sort(key=lambda n: n.name == active_name)
     for node in viewers:
         _draw_node_table(node, is_active=(node.name == active_name))
+
+    _draw_evaluation_errors(tree)
+
+
+def _draw_evaluation_errors(tree):
+    """Draw each erroring node's exception message just above it - the
+    node is already colored red by tree.py:_mark_evaluation_errors, but
+    that alone doesn't say *why*. Read directly from
+    execution.py:_evaluation_errors (the same dict the poller reads to
+    decide which nodes to color) rather than caching anything here - this
+    runs on every redraw, always wants the latest state."""
+    from .execution import _evaluation_errors
+    errors = _evaluation_errors.get(tree.name, {})
+    if not errors:
+        return
+
+    prefs = get_prefs()
+    font_id = 0
+    blf.size(font_id, prefs.schedule_font_size)
+    ui_scale = bpy.context.preferences.system.ui_scale
+
+    for node in tree.nodes:
+        message = errors.get(node.name)
+        if message is None:
+            continue
+        abs_x, abs_y = _node_abs_location(node)
+        # node.location is the node's top-left corner in node-tree space
+        # (Y growing upward) - a small gap above that top edge is where
+        # the node's own header already is, so this sits just above the
+        # header, not overlapping it.
+        text_x = abs_x * ui_scale
+        text_y = (abs_y + 4) * ui_scale
+        blf.color(font_id, 1.0, 0.6, 0.6, 1.0)
+        blf.position(font_id, text_x, text_y, 0)
+        # blf draws actual text glyphs, not Blender's native icon set - U+26A0
+        # (WARNING SIGN) is just a Unicode character, drawn like any other,
+        # not the same thing as Blender's own warning icon. Relies on
+        # whatever font Blender's UI is using having that glyph - if it
+        # doesn't, this falls back to whatever blf's own missing-glyph
+        # placeholder is (a box, typically), not a crash.
+        blf.draw(font_id, "⚠ " + message)
 
 
 def register_viewer_draw_handler():

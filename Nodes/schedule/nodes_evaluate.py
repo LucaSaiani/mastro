@@ -118,8 +118,8 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
 
     def init(self, context):
         self.inputs.new('MaStroScheduleDataSocketType', "Data")
-        self.inputs.new('MaStroScheduleAttributeRefSocketType', "Name")
-        self.outputs.new('MaStroScheduleColumnSocketType', "Column")
+        self.inputs.new('MaStroScheduleAttributeRefSocketType', "Attribute Name")
+        self.outputs.new('MaStroScheduleColumnSocketType', "Number Column")
 
     @property
     def column_label(self):
@@ -129,8 +129,15 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
         node, so there's nothing here that can fall out of sync with the
         actual link. A future rename node overrides this independently
         of the data key (node.name)."""
+        # "Attribute Name" can be momentarily absent right after a
+        # copy/paste - Blender restores this node's properties before
+        # init() has necessarily finished rebuilding its sockets on the
+        # pasted copy (confirmed live, same shape as nodes_math.py's
+        # "A"/"B" case).
+        if "Attribute Name" not in self.inputs:
+            return ""
         from .tree import upstream_attr
-        return upstream_attr(self.inputs["Name"], "name_value")
+        return upstream_attr(self.inputs["Attribute Name"], "name_value")
 
     def evaluate(self, inputs):
         objects_table = inputs[0] or []

@@ -7,6 +7,14 @@ from .tree import resolve_through_reroutes
 # Used by the Viewer node to read the table produced by its input node.
 _schedule_cache = {}
 
+# Nodes whose evaluate() raised on the last run, keyed by tree name then
+# node name, holding the exception message - read by
+# tree.py:_poll_pending_trees to color the node red, the same way
+# mark_mismatched_links colors a mismatched link (see that function's
+# docstring for why this can only be written from the persistent-timer
+# poller, never from update() or draw_buttons).
+_evaluation_errors = {}
+
 
 def tag_redraw_node_editors():
     """Force every visible Node Editor area to redraw, so a POST_VIEW
@@ -265,7 +273,48 @@ def evaluate_tree(tree):
                     value = None
             input_values.append(value)
 
-        result = node.evaluate(input_values) if hasattr(node, "evaluate") else []
+        tree_errors = _evaluation_errors.setdefault(tree.name, {})
+        if node.mute:
+            # Muted: bypass evaluate() entirely and pass each input
+            # straight through to an output, instead of running the
+            # node's own logic on a "disabled" node - node.mute only
+            # changes how Blender draws the node, it does nothing to
+            # execution on its own (confirmed live: outputs kept
+            # reflecting evaluate()'s result even while muted, before
+            # this). Mirrors Sverchok's approach
+            # (core/update_system.py:_remove_muted_nodes, node_tree.py:
+            # Node.internal_links/sv_internal_links): which input maps to
+            # which output defaults to positional pairing (Blender's own
+            # Node.internal_links - first input to first output, etc.),
+            # overridable per node type via a `mastro_internal_links`
+            # property the same way Sverchok lets a node override
+            # sv_internal_links when the default pairing doesn't fit
+            # (e.g. Math: A should pass through, not B).
+            tree_errors.pop(node.name, None)
+            result = [None] * len(node.outputs)
+            pairs = (node.mastro_internal_links if hasattr(node, "mastro_internal_links")
+                     else [(link.from_socket, link.to_socket) for link in node.internal_links])
+            for in_socket, out_socket in pairs:
+                try:
+                    in_index = list(node.inputs).index(in_socket)
+                    out_index = list(node.outputs).index(out_socket)
+                except ValueError:
+                    continue
+                result[out_index] = input_values[in_index]
+            cache[node.name] = result
+            return result
+
+        try:
+            result = node.evaluate(input_values) if hasattr(node, "evaluate") else []
+            tree_errors.pop(node.name, None)
+        except Exception as exc:
+            # short_message (set by nodes that want a compact overlay
+            # text, e.g. nodes_math.py) is preferred over the exception's
+            # own message - the full text is often too long to read
+            # comfortably at node-editor zoom; falling back to str(exc)
+            # covers any node that doesn't bother setting one.
+            tree_errors[node.name] = getattr(exc, "short_message", None) or str(exc)
+            result = []
         cache[node.name] = result
         return result
 

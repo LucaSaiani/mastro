@@ -85,7 +85,7 @@ class MaStroScheduleInputAllNode(MaStroScheduleTreeNode, Node):
     """Build the schedule table from every matching object of the
     selected categories in the scene"""
     bl_idname = 'MaStroScheduleInputAll'
-    bl_label = 'Input Mesh (All)'
+    bl_label = 'Input All'
 
     categories: EnumProperty(
         name="Categories",
@@ -111,7 +111,7 @@ class MaStroScheduleInputSelectedNode(MaStroScheduleTreeNode, Node):
     """Build the schedule table from the currently selected matching
     objects of the selected categories"""
     bl_idname = 'MaStroScheduleInputSelected'
-    bl_label = 'Input Mesh (Selected)'
+    bl_label = 'Input Selected'
 
     categories: EnumProperty(
         name="Categories",

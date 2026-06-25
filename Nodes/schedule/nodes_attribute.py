@@ -200,7 +200,7 @@ class MaStroScheduleGetAttributeNamesNode(MaStroScheduleTreeNode, Node):
 
     def init(self, context):
         self.inputs.new('MaStroScheduleDataSocketType', "Data")
-        self.outputs.new('MaStroScheduleAttributeRefSocketType', "Name")
+        self.outputs.new('MaStroScheduleAttributeRefSocketType', "Attribute Name")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "field")

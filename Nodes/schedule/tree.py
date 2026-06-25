@@ -38,7 +38,32 @@ def _poll_pending_trees():
                 tree.execute()
             except Exception as exc:
                 print(f"MaStro Schedule: execution error: {exc}")
+            _mark_evaluation_errors(tree)
     return 0.1
+
+
+def _mark_evaluation_errors(tree):
+    """Color red any node whose evaluate() raised during the execute()
+    call just above (tracked in execution.py:_evaluation_errors, keyed by
+    tree/node name), and clear that color off every other node - the
+    same way mark_mismatched_links colors a single bad link instead of
+    leaving an exception to surface only as a console print or, worse,
+    only on a manual Refresh click (see MASTRO_OT_Schedule_Force_Refresh,
+    which has no try/except of its own and would otherwise show a
+    blocking Blender error popup there but nothing during auto-refresh -
+    this makes the two paths behave the same way). Same write-from-the-
+    poller constraint as mark_mismatched_links - see that function's
+    docstring."""
+    from .execution import _evaluation_errors
+    errors = _evaluation_errors.get(tree.name, {})
+    for node in tree.nodes:
+        if not isinstance(node, MaStroScheduleTreeNode):
+            continue
+        has_error = node.name in errors
+        if node.use_custom_color != has_error:
+            node.use_custom_color = has_error
+        if has_error:
+            node.color = (0.6, 0.1, 0.1)
 
 
 def start_polling():
@@ -207,7 +232,13 @@ def is_node_valid(node):
 class MaStroScheduleTree(NodeTree):
     """MaStro Schedule node tree: build quantity-takeoff tables from the MaStro model"""
     bl_idname = 'MaStroScheduleTreeType'
-    bl_label = "MaStro Schedule"
+    bl_label = "MaStro Schedule Editor"
+    # NodeTree.bl_icon only accepts Blender's native icon enum, not a
+    # custom icon loaded via bpy.utils.previews (confirmed against
+    # Blender's dev tracker, T85213) - a custom icon (Icons/schedule.svg,
+    # a copy of mass.svg meant to be edited separately) is usable
+    # elsewhere in this addon's UI (icon_value=icons.icon_id("schedule"),
+    # e.g. in a menu or panel) but not here.
     bl_icon = 'NODETREE'
 
     def execute(self):
