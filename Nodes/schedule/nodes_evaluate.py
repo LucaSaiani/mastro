@@ -98,12 +98,13 @@ def _digits(raw_value):
 # is the Column's stable, Blender-guaranteed-unique identity, used to
 # join several Columns into a Table later without colliding even if two
 # Columns happen to have the same user-facing label (e.g. both "area").
-# `column_label` mirrors the chosen Name for now (read-only) - a future
-# dedicated rename node will let the user override it (e.g. "area" to
-# "volume" after a Math node multiplies it by height). Not called
-# `label` - bpy.types.Node already has a native `label` attribute (the
-# node's own custom display label, unrelated to this), and a same-named
-# Python @property doesn't reliably override it.
+# `column_label` mirrors the chosen Name for now (read-only) - a
+# dedicated Rename Header node (nodes_header.py) renames a Column
+# independently of this, the same way a Math node transforms a Column's
+# value without taking over its identity. Not called `label` -
+# bpy.types.Node already has a native `label` attribute (the node's own
+# custom display label, unrelated to this), and a same-named Python
+# @property doesn't reliably override it.
 #
 # For Field=Face, every face of a MaStro mass/block stands for
 # `mastro_number_of_storeys` stacked floors, so this always expands one
@@ -127,8 +128,7 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
         chosen attribute Name, read straight from the upstream Get
         Attribute Names node (if linked) rather than cached on this
         node, so there's nothing here that can fall out of sync with the
-        actual link. A future rename node overrides this independently
-        of the data key (node.name)."""
+        actual link."""
         # "Attribute Name" can be momentarily absent right after a
         # copy/paste - Blender restores this node's properties before
         # init() has necessarily finished rebuilding its sockets on the

@@ -42,6 +42,9 @@ class NODE_MT_mastro_schedule_input_constants(bpy.types.Menu):
     def draw(self, context):
         _add_node(self.layout, "MaStroScheduleValue", "Value")
         _add_node(self.layout, "MaStroScheduleInteger", "Integer")
+        _add_node(self.layout, "MaStroScheduleString", "String")
+        _add_node(self.layout, "MaStroScheduleColour", "Colour")
+        _add_node(self.layout, "MaStroScheduleBoolean", "Boolean")
 
 
 class NODE_MT_mastro_schedule_input(bpy.types.Menu):
@@ -51,6 +54,34 @@ class NODE_MT_mastro_schedule_input(bpy.types.Menu):
     def draw(self, context):
         self.layout.menu(NODE_MT_mastro_schedule_input_scene.bl_idname)
         self.layout.menu(NODE_MT_mastro_schedule_input_constants.bl_idname)
+
+
+class NODE_MT_mastro_schedule_primitives_primitives(bpy.types.Menu):
+    bl_idname = "NODE_MT_mastro_schedule_primitives_primitives"
+    bl_label = "Primitives"
+
+    def draw(self, context):
+        _add_node(self.layout, "MaStroScheduleColumnPrimitive", "Column")
+        _add_node(self.layout, "MaStroScheduleTablePrimitive", "Table")
+
+
+class NODE_MT_mastro_schedule_primitives_operations(bpy.types.Menu):
+    bl_idname = "NODE_MT_mastro_schedule_primitives_operations"
+    bl_label = "Operations"
+
+    def draw(self, context):
+        _add_node(self.layout, "MaStroScheduleConvertColumnToTable", "Column to Table")
+        _add_node(self.layout, "MaStroScheduleHeader", "Rename Header")
+        _add_node(self.layout, "MaStroScheduleTableHeader", "Edit Header")
+
+
+class NODE_MT_mastro_schedule_primitives(bpy.types.Menu):
+    bl_idname = "NODE_MT_mastro_schedule_primitives"
+    bl_label = "Primitives"
+
+    def draw(self, context):
+        self.layout.menu(NODE_MT_mastro_schedule_primitives_primitives.bl_idname)
+        self.layout.menu(NODE_MT_mastro_schedule_primitives_operations.bl_idname)
 
 
 class NODE_MT_mastro_schedule_output(bpy.types.Menu):
@@ -94,8 +125,6 @@ class NODE_MT_mastro_schedule_wip(bpy.types.Menu):
         _add_node(self.layout, "MaStroScheduleFilter", "Filter")
         _add_node(self.layout, "MaStroScheduleGroupBy", "Group By")
         _add_node(self.layout, "MaStroScheduleAggregate", "Aggregate")
-        _add_node(self.layout, "MaStroScheduleString", "String")
-        _add_node(self.layout, "MaStroScheduleHeader", "Header")
         _add_node(self.layout, "MaStroScheduleCategoryLookup", "Category Lookup")
         _add_node(self.layout, "MaStroScheduleMatrixLookup", "Matrix Lookup")
         _add_node(self.layout, "MaStroScheduleTableData", "Table Data")
@@ -108,6 +137,9 @@ _menu_classes = (
     NODE_MT_mastro_schedule_input,
     NODE_MT_mastro_schedule_output,
     NODE_MT_mastro_schedule_attribute,
+    NODE_MT_mastro_schedule_primitives_primitives,
+    NODE_MT_mastro_schedule_primitives_operations,
+    NODE_MT_mastro_schedule_primitives,
     NODE_MT_mastro_schedule_utilities_maths,
     NODE_MT_mastro_schedule_utilities,
     NODE_MT_mastro_schedule_wip,
@@ -122,6 +154,8 @@ def _draw_add_menu(self, context):
     layout.menu(NODE_MT_mastro_schedule_output.bl_idname)
     layout.separator()
     layout.menu(NODE_MT_mastro_schedule_attribute.bl_idname)
+    layout.separator()
+    layout.menu(NODE_MT_mastro_schedule_primitives.bl_idname)
     layout.separator()
     layout.menu(NODE_MT_mastro_schedule_utilities.bl_idname)
     layout.separator()

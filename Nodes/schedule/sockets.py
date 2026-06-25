@@ -140,10 +140,169 @@ class MaStroScheduleColumnSocket(NodeSocket):
 
     def draw(self, context, layout, node, text):
         if not self.is_output and not self.is_linked and self.prop_name:
-            layout.prop(node, self.prop_name, text=text)
+            # placeholder is a text-field concept (greyed-out text
+            # filling an otherwise-empty textbox) - it has no effect on
+            # a numeric field (Columns/Rows use this same socket type
+            # with an IntProperty prop_name; a number field has no
+            # "empty" state for placeholder to fill, confirmed live: no
+            # label appeared at all). text=text (an external label to
+            # the field's left) is what Blender's own numeric fields use
+            # for this, so that's what a numeric prop_name gets;
+            # placeholder is only used when this socket's prop_name
+            # happens to be a StringProperty (Title/String fields - see
+            # nodes_column_primitive.py, nodes_header.py - where it
+            # matches Geometry Nodes' own "String" inside an empty
+            # textbox convention).
+            prop_def = node.bl_rna.properties.get(self.prop_name)
+            if prop_def is not None and prop_def.type == 'STRING':
+                layout.prop(node, self.prop_name, text="", placeholder=text)
+            else:
+                layout.prop(node, self.prop_name, text=text)
         else:
             layout.label(text=text)
 
     @classmethod
     def draw_color_simple(cls):
         return (161 / 255, 161 / 255, 161 / 255, 1.0)
+
+
+# A single constant string, as produced by the String node (see
+# nodes_string.py) - fed into e.g. a Rename Header node's String input
+# (renames a Number Column's header) or a Table primitive's/Edit
+# Header's Title input (nodes_table_primitive.py/
+# nodes_table_edit_header.py), kept as its own dedicated socket type
+# rather than reusing MaStroScheduleColumnSocket's generic prop_name
+# mechanism, so a string value reads unambiguously as text wherever
+# it's plugged in.
+class MaStroScheduleStringSocket(NodeSocket):
+    """Socket carrying a single text value"""
+    bl_idname = 'MaStroScheduleStringSocketType'
+    bl_label = "String"
+
+    # Same NodeSocket.prop_name mechanism as MaStroScheduleColumnSocket -
+    # see that class's docstring - draws an inline editable text field on
+    # the socket itself while unlinked.
+    prop_name: StringProperty(default="")
+
+    def draw(self, context, layout, node, text):
+        if not self.is_output and not self.is_linked and self.prop_name:
+            # text="" + placeholder=text - see
+            # MaStroScheduleColumnSocket.draw's comment for why, same
+            # reasoning here.
+            layout.prop(node, self.prop_name, text="", placeholder=text)
+        else:
+            layout.label(text=text)
+
+    @classmethod
+    def draw_color_simple(cls):
+        # The full rgb(112, 178, 255) reserved for this when
+        # MaStroScheduleAttributeRefSocket's color was chosen as a darker
+        # (0.7x) shade of the same hue specifically to leave this value
+        # free for String once it existed.
+        return (112 / 255, 178 / 255, 255 / 255, 1.0)
+
+
+# A single color, as produced by the Colour node (see nodes_rgb.py) -
+# fed into an Edit Header node's Background Color input. Mirrors
+# Sverchok's SvColorSocket (core/sockets.py): a FloatVectorProperty
+# (subtype='COLOR') as the inline-field backing value, same
+# NodeSocket.prop_name mechanism as every other socket in this file, just
+# holding a color instead of a single number/string.
+class MaStroScheduleColorSocket(NodeSocket):
+    """Socket carrying a single RGB color"""
+    bl_idname = 'MaStroScheduleColorSocketType'
+    bl_label = "Color"
+
+    prop_name: StringProperty(default="")
+
+    def draw(self, context, layout, node, text):
+        # No inline color-wheel field while unlinked, unlike every other
+        # socket type's prop_name mechanism in this file - confirmed
+        # live that layout.prop(..., expand=True) here draws three flat
+        # numeric sliders, not the color wheel a plain layout.prop(self,
+        # "value", text="") draws on a node's own draw_buttons (e.g.
+        # nodes_rgb.py's Colour node, which has no socket/expand
+        # involved at all) - the difference wasn't tracked down, and the
+        # user's call was to leave just the socket rather than ship a
+        # half-working widget. A constant color still works the same
+        # way every other constant does in this tree: wire in a Colour
+        # node.
+        layout.label(text=text)
+
+    @classmethod
+    def draw_color_simple(cls):
+        return (199 / 255, 199 / 255, 41 / 255, 1.0)
+
+
+# A single boolean, as used e.g. by Table's Join Header input (see
+# nodes_table_primitive.py) - a plain checkbox as the inline-field
+# backing value (NodeSocket.prop_name, same mechanism as every other
+# socket in this file), so a flag like Join Header can be driven from
+# upstream logic instead of always being a fixed choice on the node
+# itself.
+class MaStroScheduleBooleanSocket(NodeSocket):
+    """Socket carrying a single true/false value"""
+    bl_idname = 'MaStroScheduleBooleanSocketType'
+    bl_label = "Boolean"
+
+    prop_name: StringProperty(default="")
+
+    def draw(self, context, layout, node, text):
+        if not self.is_output and not self.is_linked and self.prop_name:
+            layout.prop(node, self.prop_name, text=text)
+        else:
+            layout.label(text=text)
+
+    @classmethod
+    def draw_color_simple(cls):
+        return (204 / 255, 166 / 255, 214 / 255, 1.0)
+
+
+# Table is the purely visual end of the pipeline, deliberately downstream
+# of every Column-level operation (Math, future Filter/GroupBy/etc.) - no
+# node ever computes anything from a Table's contents, it only displays
+# them. A Column's id keys (_Object, _Face/...) exist to let several
+# Columns line up into one Table row-for-row by identity; once converted
+# to a Table that identity is discarded on purpose (see
+# nodes_table_convert.py) - a Table's rows are just positions, free to be
+# rearranged (left/right/up/down) by whatever node combines several
+# Tables later, with nothing yet guaranteeing row i of one column is "the
+# same thing" as row i of another (the user's own call: "nessuna
+# garanzia... table è puramente grafico").
+#
+# Shape: {"columns": [...], "merges": [...]}.
+#
+# "columns" is a list of columns, each {"header": {"text": str, "bg":
+# color or None, "text_color": color or None, "text_align": "LEFT"/
+# "CENTER"/"RIGHT"}, "rows": [{"text": str, "bg": color or None}, ...]} -
+# a list (not a single column) from the start, so a future multi-Table
+# merge only ever appends more columns to this same list, no
+# socket/data shape change needed when that node exists. "bg"/
+# "text_color" default to None (meaning "use the Viewer's own row/
+# header color") until something (Edit Header/Table primitive, see
+# nodes_table_edit_header.py/nodes_table_primitive.py) sets them -
+# "text_color"/"text_align" exist only on a header dict today, since no
+# node edits row style yet; row dicts only ever have "bg".
+#
+# "merges" is a list of merged-cell regions, each {"start_row": int,
+# "start_col": int, "end_row": int, "end_col": int, "text": str, "bg":
+# color, "text_color": color, "text_align": ...} - row/column
+# coordinates (inclusive) plus the region's own content, drawn by the
+# Viewer LAST, on top of every column's own header/row cells (see
+# nodes_viewer.py:_draw_table_overlay) - e.g. Table's own Join Header
+# spans one merge across row 0, every column (see
+# nodes_table_primitive.py). The same shape a future Excel export would
+# feed straight into openpyxl/xlsxwriter's own merge_cells() - row/
+# column coordinates, not a special-cased "is this a title row" flag.
+class MaStroScheduleTableSocket(NodeSocket):
+    """Socket carrying a Table (purely visual - text and per-cell style,
+    no further computation happens on this data)"""
+    bl_idname = 'MaStroScheduleTableSocketType'
+    bl_label = "Table"
+
+    def draw(self, context, layout, node, text):
+        layout.label(text=text)
+
+    @classmethod
+    def draw_color_simple(cls):
+        return (1.0, 1.0, 1.0, 1.0)

@@ -82,10 +82,10 @@ def stop_polling():
 
 def resolve_through_reroutes(link):
     """Given a NodeLink, follow it back through any chain of native
-    Blender NodeReroute nodes to the real (from_node, from_socket) that
-    actually produces the value - or (None, None) if the chain dead-ends
-    without ever reaching a non-reroute node (a reroute with nothing
-    plugged into its own input).
+    Blender NodeReroute nodes AND muted nodes to the real (from_node,
+    from_socket) that actually produces the value - or (None, None) if
+    the chain dead-ends without ever reaching a real one (a reroute or
+    muted node with nothing plugged into the input it bypasses to).
 
     Dragging a link in this tree's editor with Shift+RMB always creates
     a native `NodeReroute` (confirmed live - Blender's drag-to-insert
@@ -100,14 +100,38 @@ def resolve_through_reroutes(link):
     nodes) rather than trying to recolor/replace the native reroute,
     which would mean writing node structure from inside NodeTree.update()
     - the same place that, mishandled, caused this tree's RecursionError
-    (see update()'s docstring below)."""
+    (see update()'s docstring below).
+
+    A muted node is walked through the same way, always via its FIRST
+    input regardless of socket type (the user's own call: "il mute, a
+    logica, vuol dire che connette il primo input con il primo output,
+    ignorando quello che sta in mezzo... va sempre sul primo input") -
+    this is the ONLY mute-bypass mechanism in this tree (an earlier
+    version also had eval_node apply a `mastro_internal_links`
+    same-bl_idname pairing per node, but that's now removed: every
+    consumer of resolve_through_reroutes - eval_node, mark_mismatched_links,
+    is_node_valid, upstream_attr - already resolves straight through a
+    muted node to the real upstream socket, so a node with no outputs of
+    its own being muted is the only case this doesn't cover, and that
+    case has no real use - a muted Viewer just draws nothing, which is
+    already correct). Resolving via first-input deliberately allows
+    surfacing a TYPE CHANGE across the muted node (e.g. Column to Table:
+    muting it lets something downstream see the original Column again,
+    not a default-shaped empty Table) - the existing bl_idname mismatch
+    check in eval_node/mark_mismatched_links then correctly flags that
+    as invalid if whatever's downstream actually required a Table."""
     from_socket = link.from_socket
     from_node = link.from_node
-    while from_node.bl_idname == 'NodeReroute':
-        reroute_input = from_node.inputs[0]
-        if not reroute_input.is_linked or not reroute_input.links:
+    while True:
+        if from_node.bl_idname == 'NodeReroute':
+            next_input = from_node.inputs[0]
+        elif getattr(from_node, "mute", False) and from_node.inputs:
+            next_input = from_node.inputs[0]
+        else:
+            break
+        if not next_input.is_linked or not next_input.links:
             return None, None
-        inner_link = reroute_input.links[0]
+        inner_link = next_input.links[0]
         from_socket = inner_link.from_socket
         from_node = inner_link.from_node
     return from_node, from_socket

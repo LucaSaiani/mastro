@@ -15,7 +15,9 @@ class MaStroScheduleIntegerNode(MaStroScheduleTreeNode, Node):
     value: IntProperty(name="Value", update=update_node)
 
     def init(self, context):
-        self.outputs.new('MaStroScheduleColumnSocketType', "Number Column")
+        # No instance name - see nodes_value.py's identical change for
+        # why (the socket TYPE is unaffected, only its visible label).
+        self.outputs.new('MaStroScheduleColumnSocketType', "")
 
     @property
     def column_label(self):

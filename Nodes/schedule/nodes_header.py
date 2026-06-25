@@ -1,55 +1,71 @@
 from bpy.types import Node
-from bpy.props import StringProperty, EnumProperty
+from bpy.props import StringProperty
 
 from .tree import MaStroScheduleTreeNode
-from .execution import update_node, get_available_columns_items
+from .execution import update_node
 
 
+# Renames a Number Column's header independently of the node that
+# produced it - the same separation of concerns as Math (transforms a
+# Column's value without taking over its identity): this transforms a
+# Column's label without touching its rows or data key. The new header
+# comes from a String input rather than a property on this node itself,
+# so the same name can be typed once (on a String node) and reused
+# across several Header nodes.
 class MaStroScheduleHeaderNode(MaStroScheduleTreeNode, Node):
-    """Rename a column of the incoming table. The new name can be a literal
-    typed here, or come from a Name input (e.g. a String node), so the same
-    name can be reused and changed in one place across several Header nodes"""
+    """Rename a column header, on a Number Column"""
     bl_idname = 'MaStroScheduleHeader'
-    bl_label = 'Header'
+    bl_label = 'Rename Header'
 
-    optional_inputs = frozenset({"Name"})
-
-    # TODO (still WIP, see menus.py): `column` has the same shape that
-    # caused a real RecursionError on Get Attribute Names - a permanent
-    # dynamic-items EnumProperty on the node itself, read inside
-    # evaluate(). When this node graduates out of WIP, migrate it to the
-    # StringProperty + search-popup-operator pattern (see
-    # nodes_attribute.py: MASTRO_OT_Schedule_Pick_Attribute_Name,
-    # name_value) instead of fixing it in place now - see
-    # project_schedule_nodes_roadmap memory, "Filter/GroupBy/Aggregate/
-    # Header/... are all still in the WIP Add-menu category".
-    column: EnumProperty(
-        name="Column",
-        items=lambda self, context: get_available_columns_items(self, 0),
-        update=update_node,
-    )
-    new_name: StringProperty(name="New Name", update=update_node)
+    # Cache of the String input's last resolved value, written by
+    # evaluate() below - a plain Python attribute wouldn't reliably
+    # persist on a bpy.types.Node instance, this needs to be a real
+    # property. No leading underscore - untested whether Blender's RNA
+    # system treats that specially, and no existing property in this
+    # codebase does it, so there's no established precedent to rely on.
+    cached_header_text: StringProperty(default="")
+    # Backing value for the String socket's inline text field
+    # (NodeSocket.prop_name, see sockets.py:MaStroScheduleStringSocket) -
+    # same mechanism as Math's value_a/value_b: editable directly on the
+    # socket while unlinked, read from the actual linked node's output
+    # instead once a String node is plugged in.
+    string_value: StringProperty(name="String", update=update_node)
 
     def init(self, context):
-        self.inputs.new('MaStroScheduleDataSocketType', "Data")
-        self.inputs.new('MaStroScheduleDataSocketType', "Name")
-        self.outputs.new('MaStroScheduleDataSocketType', "Data")
+        self.inputs.new('MaStroScheduleColumnSocketType', "Number Column")
+        self.inputs.new('MaStroScheduleStringSocketType', "String").prop_name = "string_value"
+        self.outputs.new('MaStroScheduleColumnSocketType', "Number Column")
 
-    def draw_buttons(self, context, layout):
-        layout.prop(self, "column")
-        if not self.inputs["Name"].is_linked:
-            layout.prop(self, "new_name", text="New Name")
+    @property
+    def column_label(self):
+        # No String value at all (unlinked AND the inline field left
+        # empty) means "don't rename" - the user's explicit call, to
+        # stop a Rename Header with nothing typed into String from
+        # turning the Column's existing label into an empty one. Falls
+        # through to the upstream Column's own label instead, the same
+        # way a muted node would (see tree.py:resolve_through_reroutes) -
+        # this node is meant to act as if it weren't there at all in
+        # that case.
+        if not self.cached_header_text:
+            from .tree import upstream_attr
+            return upstream_attr(self.inputs["Number Column"], "column_label")
+        return self.cached_header_text
 
     def evaluate(self, inputs):
-        rows = inputs[0] or []
-        name_rows = inputs[1] or []
-        new_name = name_rows[0].get("Value", "") if name_rows else self.new_name
-        new_name = new_name or self.column
-
-        result = []
-        for row in rows:
-            new_row = dict(row)
-            if self.column in new_row:
-                new_row[new_name] = new_row.pop(self.column)
-            result.append(new_row)
-        return [result]
+        # Stashed on self rather than recomputed in column_label - that
+        # property has no access to eval_node's resolved input_values,
+        # only to this node's own properties/links, and the String
+        # input's actual value (typed locally or fed from an upstream
+        # String node) is only available here.
+        #
+        # An unlinked socket always comes through as None (eval_node
+        # doesn't read prop_name on its own - confirmed in
+        # execution.py:eval_node, same as Math's value_a/value_b), so
+        # string_value (the inline field's own backing property) is read
+        # explicitly for that case rather than assuming inputs[1] holds
+        # it.
+        if self.inputs["String"].is_linked:
+            self.cached_header_text = inputs[1] or ""
+        else:
+            self.cached_header_text = self.string_value
+        return [inputs[0] or []]

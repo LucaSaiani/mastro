@@ -114,18 +114,6 @@ class MaStroScheduleMathNode(MaStroScheduleTreeNode, Node):
         if "B" in self.inputs:
             self.inputs["B"].hide = self.operation in UNARY_OPERATIONS
 
-    @property
-    def mastro_internal_links(self):
-        """When muted, pass A straight through to the output - not B,
-        which Blender's own default positional pairing (Node.internal_links:
-        first input to first output) would otherwise pick, since A is the
-        operand carrying the Column's actual identity (this node's
-        column_label mirrors A's, never B's - see this class's docstring).
-        Read by execution.py:eval_node's mute handling."""
-        if "A" not in self.inputs or not self.outputs:
-            return []
-        return [(self.inputs["A"], self.outputs[0])]
-
     def draw_label(self):
         # Mirrors Geometry Nodes/Sverchok's Math node: the node's own
         # display name follows the chosen operation, instead of staying

@@ -274,36 +274,6 @@ def evaluate_tree(tree):
             input_values.append(value)
 
         tree_errors = _evaluation_errors.setdefault(tree.name, {})
-        if node.mute:
-            # Muted: bypass evaluate() entirely and pass each input
-            # straight through to an output, instead of running the
-            # node's own logic on a "disabled" node - node.mute only
-            # changes how Blender draws the node, it does nothing to
-            # execution on its own (confirmed live: outputs kept
-            # reflecting evaluate()'s result even while muted, before
-            # this). Mirrors Sverchok's approach
-            # (core/update_system.py:_remove_muted_nodes, node_tree.py:
-            # Node.internal_links/sv_internal_links): which input maps to
-            # which output defaults to positional pairing (Blender's own
-            # Node.internal_links - first input to first output, etc.),
-            # overridable per node type via a `mastro_internal_links`
-            # property the same way Sverchok lets a node override
-            # sv_internal_links when the default pairing doesn't fit
-            # (e.g. Math: A should pass through, not B).
-            tree_errors.pop(node.name, None)
-            result = [None] * len(node.outputs)
-            pairs = (node.mastro_internal_links if hasattr(node, "mastro_internal_links")
-                     else [(link.from_socket, link.to_socket) for link in node.internal_links])
-            for in_socket, out_socket in pairs:
-                try:
-                    in_index = list(node.inputs).index(in_socket)
-                    out_index = list(node.outputs).index(out_socket)
-                except ValueError:
-                    continue
-                result[out_index] = input_values[in_index]
-            cache[node.name] = result
-            return result
-
         try:
             result = node.evaluate(input_values) if hasattr(node, "evaluate") else []
             tree_errors.pop(node.name, None)

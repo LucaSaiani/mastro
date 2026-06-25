@@ -3,12 +3,19 @@ from .sockets import (
     MaStroScheduleAttributeRefSocket,
     MaStroScheduleColumnSocket,
     MaStroScheduleAnySocket,
+    MaStroScheduleTableSocket,
+    MaStroScheduleStringSocket,
+    MaStroScheduleColorSocket,
+    MaStroScheduleBooleanSocket,
 )
 from .tree import MaStroScheduleTree, start_polling, stop_polling
 from .properties import (
     MaStro_schedule_key_item,
     MaStro_schedule_cell,
     MaStro_schedule_row,
+    MaStro_schedule_table_cell,
+    MaStro_schedule_table_column,
+    MaStro_schedule_table_merge,
 )
 from .operators import (
     MASTRO_UL_schedule_keys,
@@ -29,10 +36,16 @@ from .nodes_aggregate import MaStroScheduleAggregateNode
 from .nodes_math import MaStroScheduleMathNode
 from .nodes_value import MaStroScheduleValueNode
 from .nodes_integer import MaStroScheduleIntegerNode
+from .nodes_column_primitive import MaStroScheduleColumnPrimitiveNode
+from .nodes_table_primitive import MaStroScheduleTablePrimitiveNode
 from .nodes_string import MaStroScheduleStringNode
+from .nodes_rgb import MaStroScheduleColourNode
+from .nodes_boolean import MaStroScheduleBooleanNode
 from .nodes_header import MaStroScheduleHeaderNode
+from .nodes_table_edit_header import MaStroScheduleTableHeaderNode
 from .nodes_lookup import MaStroScheduleCategoryLookupNode, MaStroScheduleMatrixLookupNode
 from .nodes_table import MaStroScheduleTableDataNode, MaStroScheduleFlattenNode
+from .nodes_table_convert import MaStroScheduleConvertColumnToTableNode
 from .nodes_viewer import (
     MaStroScheduleViewerNode,
     register_viewer_draw_handler,
@@ -45,10 +58,17 @@ classes = (
     MaStro_schedule_key_item,
     MaStro_schedule_cell,
     MaStro_schedule_row,
+    MaStro_schedule_table_cell,
+    MaStro_schedule_table_column,
+    MaStro_schedule_table_merge,
     MaStroScheduleDataSocket,
     MaStroScheduleAttributeRefSocket,
     MaStroScheduleColumnSocket,
     MaStroScheduleAnySocket,
+    MaStroScheduleTableSocket,
+    MaStroScheduleStringSocket,
+    MaStroScheduleColorSocket,
+    MaStroScheduleBooleanSocket,
     MaStroScheduleTree,
     MASTRO_UL_schedule_keys,
     MASTRO_OT_Schedule_GroupBy_Key_Add,
@@ -69,12 +89,18 @@ classes = (
     MaStroScheduleMathNode,
     MaStroScheduleValueNode,
     MaStroScheduleIntegerNode,
+    MaStroScheduleColumnPrimitiveNode,
+    MaStroScheduleTablePrimitiveNode,
     MaStroScheduleStringNode,
+    MaStroScheduleColourNode,
+    MaStroScheduleBooleanNode,
     MaStroScheduleHeaderNode,
+    MaStroScheduleTableHeaderNode,
     MaStroScheduleCategoryLookupNode,
     MaStroScheduleMatrixLookupNode,
     MaStroScheduleTableDataNode,
     MaStroScheduleFlattenNode,
+    MaStroScheduleConvertColumnToTableNode,
     MaStroScheduleViewerNode,
 )
 

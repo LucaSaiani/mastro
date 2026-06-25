@@ -8,13 +8,34 @@ from bpy.types import Node
 from bpy.props import CollectionProperty, BoolProperty, IntProperty
 
 from .tree import MaStroScheduleTreeNode
-from .properties import MaStro_schedule_key_item, MaStro_schedule_row
+from .properties import (
+    MaStro_schedule_key_item, MaStro_schedule_row, MaStro_schedule_table_column, MaStro_schedule_table_merge,
+)
 from .execution import tag_redraw_node_editors
 from ...Utils.mastro_preferences.get_preferences import get_prefs
+from ... import Icons as icons
 
 
 CELL_WIDTH = 120
 NODE_GAP = 4
+# Row numbers in a Table overlay (_draw_table_overlay) never go past two
+# digits in practice (see that function's reasoning) - "0" sets a flat,
+# content-independent width for that left-hand band, shared with
+# _draw_node_table's identical margin so a Viewer's grid doesn't shift
+# sideways when replugged between a Column/Data input and a Table one.
+# Single digit rather than two - the user's call: a two-row-number-wide
+# margin read as too wide, even though an actual two-digit row number
+# will end up slightly overflowing this band's left edge as a result
+# (an accepted trade-off, same shape as row_label_width itself already
+# being a flat allowance rather than sized to the real row count).
+ROW_LABEL_TEXT = "0"
+
+
+def _row_label_width(font_id):
+    """blf.dimensions reads whatever size was last set on font_id via
+    blf.size() - callers must call that first, same as before any other
+    blf.dimensions call in this file."""
+    return blf.dimensions(font_id, ROW_LABEL_TEXT)[0] + 8
 
 
 def _header_text(name):
@@ -75,6 +96,23 @@ class MaStroScheduleViewerNode(MaStroScheduleTreeNode, Node):
 
     columns: CollectionProperty(type=MaStro_schedule_key_item)
     rows: CollectionProperty(type=MaStro_schedule_row)
+    # Populated instead of columns/rows when the linked input is a Table
+    # (MaStroScheduleTableSocketType) - a Table's shape (a list of
+    # independent columns, each with its own header/row cells and no
+    # shared row identity, see sockets.py) doesn't fit columns/rows'
+    # flat-dict-row model, so it gets its own storage and its own draw
+    # path (_draw_table_overlay) entirely, rather than forcing one shape
+    # into the other's schema.
+    table_columns: CollectionProperty(type=MaStro_schedule_table_column)
+    # Merged-cell regions of the same Table (see sockets.py:
+    # MaStroScheduleTableSocket's module-level comment) - drawn after
+    # every normal cell, on top, by _draw_table_overlay.
+    table_merges: CollectionProperty(type=MaStro_schedule_table_merge)
+    # Which of the two storages above is actually populated by the last
+    # evaluate() - read by the draw callback to pick which overlay
+    # function to call, since a Viewer can be replugged from a Column to
+    # a Table input (or vice versa) without re-running init().
+    showing_table: BoolProperty(default=False)
     show_table: BoolProperty(name="Show Table", default=True, update=_on_show_table_changed)
     # Number of leading id columns (Object, and one of Face/Edge/Vertex/
     # Level) among `columns`, computed in evaluate() - used by
@@ -109,29 +147,52 @@ class MaStroScheduleViewerNode(MaStroScheduleTreeNode, Node):
 
     def evaluate(self, inputs):
         # A single MaStroScheduleAnySocketType input, accepting Data,
-        # Column or Attribute alike (see that socket's docstring in
+        # Column, Attribute or Table alike (see that socket's docstring in
         # sockets.py) - the Viewer has to work for whatever a node
         # happens to output, not be limited to one specific shape.
+        from .tree import resolve_through_reroutes
+        socket = self.inputs[0]
+        from_node, from_socket = (None, None)
+        if socket.is_linked and socket.links:
+            from_node, from_socket = resolve_through_reroutes(socket.links[0])
+        if from_node is not None and from_socket.bl_idname == 'MaStroScheduleTableSocketType':
+            self._evaluate_table(inputs[0] or {"columns": [], "merges": []})
+            self.showing_table = True
+            return []
+        self.showing_table = False
+
         # Column rows have a non-id data key that's the upstream node's
         # own node.name, not a readable name - relabeled here using that
         # node's `column_label` (mirrors Evaluate Attribute/Math's
         # `column_label` property - not `label`, which collides with
         # bpy.types.Node's own native `label` attribute), the same way
         # Data's columns are already named by their own dict keys.
-        from .tree import resolve_through_reroutes
-        socket = self.inputs[0]
         rows = inputs[0] or []
-        from_node, from_socket = (None, None)
-        if socket.is_linked and socket.links:
-            from_node, from_socket = resolve_through_reroutes(socket.links[0])
         if from_node is not None and from_socket.bl_idname == 'MaStroScheduleColumnSocketType':
-            label = getattr(from_node, "column_label", "") or from_node.name
-            data_key = from_node.name
+            # No "or from_node.name" fallback - the user's explicit
+            # call: an intentionally empty label (e.g. Rename Header
+            # with nothing typed into String) should show as empty,
+            # never fall back to showing the node's own internal name
+            # ("Rename Header", "Rename Header.001", ...) instead.
+            label = getattr(from_node, "column_label", "")
             relabeled = []
             for row in rows:
                 new_row = {}
                 for key, value in row.items():
-                    new_row[label if key == data_key else key] = value
+                    # The data key is whichever key doesn't start with
+                    # "_" (same elimination rule as Math/Header's
+                    # _data_key) - NOT from_node.name: a pass-through
+                    # node like Header (which renames a Column's label
+                    # without touching its rows/data key at all) means
+                    # from_node is Header, but the actual key in the row
+                    # is still whatever upstream node originally
+                    # produced the Column (e.g. Evaluate Attribute) -
+                    # confirmed live: the Viewer kept showing that
+                    # original node's name as the header even when a
+                    # Header node further downstream had renamed the
+                    # Column, because this used to compare against
+                    # from_node.name instead.
+                    new_row[label if not key.startswith("_") else key] = value
                 relabeled.append(new_row)
             rows = relabeled
 
@@ -192,6 +253,52 @@ class MaStroScheduleViewerNode(MaStroScheduleTreeNode, Node):
 
         return []
 
+    def _evaluate_table(self, table):
+        """Populate table_columns/table_merges from a Table value (see
+        sockets.py:MaStroScheduleTableSocket for its shape) - the
+        separate storage/draw path for Table, kept apart from
+        columns/rows above which assume Column/Data's flat-dict-row
+        shape instead."""
+        self.table_columns.clear()
+        for column in table.get("columns", []):
+            col_item = self.table_columns.add()
+            header = column.get("header") or {}
+            col_item.header.text = str(header.get("text", ""))
+            header_bg = header.get("bg")
+            col_item.header.has_bg = header_bg is not None
+            if header_bg is not None:
+                col_item.header.bg = header_bg
+            header_text_color = header.get("text_color")
+            col_item.header.has_text_color = header_text_color is not None
+            if header_text_color is not None:
+                col_item.header.text_color = header_text_color
+            col_item.header.text_align = header.get("text_align", "LEFT")
+            for row in column.get("rows", []):
+                row_item = col_item.rows.add()
+                row_item.text = str(row.get("text", ""))
+                row_bg = row.get("bg")
+                row_item.has_bg = row_bg is not None
+                if row_bg is not None:
+                    row_item.bg = row_bg
+
+        self.table_merges.clear()
+        for merge in table.get("merges", []):
+            merge_item = self.table_merges.add()
+            merge_item.start_row = int(merge.get("start_row", 0))
+            merge_item.start_col = int(merge.get("start_col", 0))
+            merge_item.end_row = int(merge.get("end_row", 0))
+            merge_item.end_col = int(merge.get("end_col", 0))
+            merge_item.cell.text = str(merge.get("text", ""))
+            merge_bg = merge.get("bg")
+            merge_item.cell.has_bg = merge_bg is not None
+            if merge_bg is not None:
+                merge_item.cell.bg = merge_bg
+            merge_text_color = merge.get("text_color")
+            merge_item.cell.has_text_color = merge_text_color is not None
+            if merge_text_color is not None:
+                merge_item.cell.text_color = merge_text_color
+            merge_item.cell.text_align = merge.get("text_align", "LEFT")
+
     def draw_buttons(self, context, layout):
         # Not align=True - that joins the three controls edge-to-edge
         # with no visible gap or individual border, confirmed cramped/
@@ -200,12 +307,22 @@ class MaStroScheduleViewerNode(MaStroScheduleTreeNode, Node):
         row = layout.row()
         row.prop(self, "show_table", text="", icon='HIDE_OFF' if self.show_table else 'HIDE_ON', emboss=False)
         row.prop(self, "visible_rows", text="")
-        # FORWARD/BACK, not +/- or TRIA_LEFT/RIGHT - both of those read as
-        # "increment/decrement" right next to the visible_rows number
-        # field, confirmed confusing live. FORWARD/BACK reads as
-        # advance/retreat through the column layout instead, with no such
-        # clash.
-        row.prop(self, "show_id_columns", text="", icon='BACK' if self.show_id_columns else 'FORWARD', emboss=False)
+        # Id columns (Object/Face/Edge/Vertex/Level) are a Column/Data
+        # concept - a Table has already discarded that identity (see
+        # sockets.py:MaStroScheduleTableSocket), so there's nothing for
+        # this toggle to collapse when showing one. Hidden rather than
+        # just disabled - greyed out but still present would invite
+        # clicking it to see what it does, only to find out it does
+        # nothing for this input.
+        if not self.showing_table:
+            # Custom icons (Icons/node_viewer_expand.svg, Icons/
+            # node_viewer_collapse.svg - placeholders copied from xy_on/
+            # xy_off.svg, meant to be redrawn) - not +/- or
+            # TRIA_LEFT/RIGHT, both of which read as "increment/
+            # decrement" right next to the visible_rows number field,
+            # confirmed confusing live.
+            expand_icon = icons.icon_id("node_viewer_expand" if self.show_id_columns else "node_viewer_collapse")
+            row.prop(self, "show_id_columns", text="", icon_value=expand_icon, emboss=False)
 
 
 def _node_abs_location(node):
@@ -288,6 +405,14 @@ def _draw_node_table(node, is_active=True):
     # (zoomable) cell grid - this is also exactly what the old prototype did
     # with its always-12 fontSize.
     blf.size(font_id, font_size)
+
+    # A flat single-digit-wide margin on the left, matching the band
+    # _draw_table_overlay reserves there for its row numbers (see that
+    # function's comment) - so the grid's horizontal position stays the
+    # same whether the same Viewer is showing a Column/Data input or a
+    # Table one, instead of jumping sideways. This margin is otherwise
+    # unused here (no row numbers are drawn in this function).
+    origin_x += _row_label_width(font_id) * ui_scale
 
     # Column width: a fixed CELL_WIDTH for everyone, or - when the
     # "Dynamic Column Width" preference is on - each column sized to fit
@@ -385,6 +510,221 @@ def _draw_node_table(node, is_active=True):
         border_cell(corners)
 
 
+def _column_letter(index):
+    """0, 1, 2, ... -> "A", "B", ..., "Z", "AA", "AB", ... - the same
+    base-26 letter-only numbering spreadsheets use for column headers,
+    spelled out here since Python has no builtin for it."""
+    letters = ""
+    index += 1
+    while index > 0:
+        index, remainder = divmod(index - 1, 26)
+        letters = chr(ord('A') + remainder) + letters
+    return letters
+
+
+def _draw_table_overlay(node, is_active=True):
+    """Table's own draw path, separate from _draw_node_table above -
+    Table columns are independent (no shared row count/identity, see
+    sockets.py:MaStroScheduleTableSocket), so this lays each column out
+    by its own row count rather than one shared grid. A column letter
+    above each column and a row number to the left of each row are drawn
+    OUTSIDE the cell grid itself (the user's explicit requirement) -
+    spreadsheet-style reference labels, not part of the Table's own
+    data/header text."""
+    columns = list(node.table_columns)
+    merges = list(node.table_merges)
+    if not columns and not merges:
+        return
+
+    prefs = get_prefs()
+    cell_height = prefs.schedule_row_height
+    font_size = prefs.schedule_font_size
+
+    abs_x, abs_y = _node_abs_location(node)
+    ui_scale = bpy.context.preferences.system.ui_scale
+    origin_x = (abs_x + node.width + NODE_GAP) * ui_scale
+    # The header itself is flush with the node's own top edge (abs_y) -
+    # the column letters get their own band ABOVE that (added to it, not
+    # subtracted from it), so the header still lines up with the node
+    # like every other Viewer overlay, and the letters end up outside/
+    # above the node as required.
+    origin_y = abs_y * ui_scale
+
+    HEADER_COLOR = (0.18, 0.18, 0.18, 0.95)
+    ROW_COLOR = (0.12, 0.12, 0.12, 0.85)
+    line_color = (1.0, 1.0, 1.0, 0.4) if is_active else (0.3, 0.3, 0.3, 0.6)
+    text_color = (1.0, 1.0, 1.0, 1.0)
+    # Reference labels (column letters/row numbers) read as UI chrome, not
+    # data - dimmer than the actual cell text so the two are never
+    # confused for one another.
+    ref_label_color = (0.6, 0.6, 0.6, 1.0)
+
+    shader = gpu.shader.from_builtin('UNIFORM_COLOR')
+    gpu.state.blend_set('ALPHA')
+
+    font_id = 0
+    blf.size(font_id, font_size)
+
+    TEXT_PADDING = 8
+    col_widths = []
+    for column in columns:
+        # A column with 0 rows (the user's call: Rows can be 0 on the
+        # Table primitive, e.g. a title-only Table - a purely graphical
+        # section header in the final schedule's layout, with no
+        # per-column data of its own) still sizes against its own header
+        # text - column.rows is just empty, the max() below already
+        # handles that with no special-casing needed.
+        widest = blf.dimensions(font_id, _header_text(column.header.text))[0]
+        for row in column.rows:
+            widest = max(widest, blf.dimensions(font_id, row.text)[0])
+        col_widths.append(widest + TEXT_PADDING)
+
+    col_x_offsets = [0]
+    for width in col_widths:
+        col_x_offsets.append(col_x_offsets[-1] + width)
+
+    # Reference labels need their own room outside the grid - a fixed
+    # band above the header row for column letters, and a fixed band to
+    # the left of the grid for row numbers. Row number width is a flat
+    # single-digit allowance (the user's call - a two-digit-wide margin
+    # read as too wide), not sized to the actual row count - a Table
+    # running past 9 rows overflowing this band's left edge slightly is
+    # an accepted trade-off, not worth the grid's own width changing
+    # depending on how many rows happen to be in it.
+    row_label_width = _row_label_width(font_id)
+    col_label_height = cell_height
+
+    def cell_corners(row, col):
+        # row 0 (the header) is flush with the node's own top edge
+        # (origin_y) - the column letter goes in a band ABOVE that, not
+        # squeezed between origin_y and the header, so the header stays
+        # aligned with the node like every other Viewer overlay.
+        x0 = origin_x + row_label_width * ui_scale + col_x_offsets[col] * ui_scale
+        x1 = origin_x + row_label_width * ui_scale + col_x_offsets[col + 1] * ui_scale
+        y1 = origin_y - row * cell_height * ui_scale
+        y0 = y1 - cell_height * ui_scale
+        return ((x0, y0), (x1, y0), (x0, y1), (x1, y1))
+
+    # Same two-pass fill-then-border split as _draw_node_table - see that
+    # function's comment for why (a later cell's fill would otherwise
+    # paint over an earlier cell's already-drawn border).
+    def fill_cell(corners, color, text, this_text_color=None, align='LEFT'):
+        p00, p10, p01, p11 = corners
+        batch = batch_for_shader(shader, 'TRIS', {"pos": (p00, p10, p01, p11)}, indices=((0, 1, 2), (2, 1, 3)))
+        shader.uniform_float("color", color)
+        batch.draw(shader)
+        # align (Edit Header's/Table primitive's Alignment, see those
+        # files) picks where the text sits within the cell's own width -
+        # LEFT keeps the existing fixed 4px inset from the cell's left
+        # edge, CENTER/RIGHT measure the text and offset from the
+        # opposite edges instead, the same general approach
+        # draw_ref_label already uses for its own CENTER/RIGHT cases.
+        cell_width = p10[0] - p00[0]
+        if align == 'CENTER':
+            text_width = blf.dimensions(font_id, text)[0]
+            text_x = p00[0] + (cell_width - text_width) / 2
+        elif align == 'RIGHT':
+            text_width = blf.dimensions(font_id, text)[0]
+            text_x = p10[0] - text_width - 4
+        else:
+            text_x = p00[0] + 4
+        blf.position(font_id, text_x, p00[1] + (p01[1] - p00[1]) / 2 - font_size / 2, 0)
+        # blf.color() is stateful but freely settable per call (confirmed
+        # - this file already draws ref_label_color and text_color as
+        # two different colors within the same frame) - this_text_color
+        # (Edit Header's Text Color, see nodes_table_edit_header.py)
+        # overrides the flat default the same way a cell's own bg
+        # overrides HEADER_COLOR/ROW_COLOR above.
+        blf.color(font_id, *(this_text_color or text_color))
+        blf.draw(font_id, text)
+
+    def border_cell(corners):
+        p00, p10, p01, p11 = corners
+        batch = batch_for_shader(shader, 'LINES', {"pos": (p00, p10, p10, p11, p11, p01, p01, p00)})
+        shader.uniform_float("color", line_color)
+        gpu.state.line_width_set(1.0)
+        batch.draw(shader)
+
+    def draw_ref_label(x, y, width, height, text, align='CENTER'):
+        """A reference label in its own band - no fill/border, purely
+        text, since these aren't cells of the Table itself. Row numbers
+        are right-aligned (align='RIGHT') so the digits stay flush
+        against the grid regardless of how many digits a given number
+        has - row_label_width is already fixed to fit the widest number
+        needed (see above), so this never shifts the grid itself, only
+        where the text sits within that already-fixed band."""
+        text_width = blf.dimensions(font_id, text)[0]
+        if align == 'RIGHT':
+            text_x = x + width - text_width - TEXT_PADDING / 2
+        else:
+            text_x = x + (width - text_width) / 2
+        blf.position(font_id, text_x, y + (height - font_size) / 2, 0)
+        blf.color(font_id, *ref_label_color)
+        blf.draw(font_id, text)
+
+    all_corners = []
+    for col_idx, column in enumerate(columns):
+        corners = cell_corners(0, col_idx)
+        # has_bg/bg (Edit Header's/Table primitive's Background, see
+        # nodes_table_edit_header.py/nodes_table_primitive.py) overrides the flat HEADER_COLOR for
+        # this one column's header cell when set - alpha kept at
+        # HEADER_COLOR's own 0.95 rather than 1.0, so an overridden
+        # header still blends consistently with the rest of the overlay.
+        header_color = (*column.header.bg, HEADER_COLOR[3]) if column.header.has_bg else HEADER_COLOR
+        header_text_color = (*column.header.text_color, 1.0) if column.header.has_text_color else None
+        fill_cell(corners, header_color, _header_text(column.header.text), header_text_color, column.header.text_align)
+        all_corners.append(corners)
+        # Column letter, in its own band directly above the header cell -
+        # above origin_y, never below it, so the header itself stays
+        # flush with the node's top edge.
+        (x0, _y0), (x1, _y1b), _p01, (_x1b, y1) = corners
+        draw_ref_label(x0, y1, x1 - x0, col_label_height * ui_scale, _column_letter(col_idx))
+
+    visible_rows = node.visible_rows
+    for col_idx, column in enumerate(columns):
+        rows = column.rows if visible_rows == 0 else column.rows[:visible_rows]
+        for row_idx, row in enumerate(rows, start=1):
+            corners = cell_corners(row_idx, col_idx)
+            # has_bg/bg overrides the flat ROW_COLOR for this one cell
+            # when set - same reasoning as the header's own override
+            # above. No node sets this on a row yet (Edit Header only
+            # edits a column's header cell today), but the storage and
+            # this read are already in place for whenever one does.
+            row_color = (*row.bg, ROW_COLOR[3]) if row.has_bg else ROW_COLOR
+            fill_cell(corners, row_color, row.text)
+            all_corners.append(corners)
+            if col_idx == 0:
+                # Row number, in the band to the left of this row's
+                # first-column cell only - drawn once per row, not once
+                # per column, since it labels the row as a whole.
+                (x0, y0), _p10, _p01, (_x1, y1) = corners
+                draw_ref_label(origin_x, y0, row_label_width * ui_scale, y1 - y0, str(row_idx), align='RIGHT')
+
+    for corners in all_corners:
+        border_cell(corners)
+
+    # Merge regions drawn LAST, on top of every normal cell already
+    # drawn above (the user's explicit call - same fill/border pass
+    # shape as everything else, just deferred to the very end so a
+    # merge's one big rectangle paints over whatever grid lines/cell
+    # fills would otherwise show through underneath it).
+    merge_corners = []
+    for merge in merges:
+        start = cell_corners(merge.start_row, merge.start_col)
+        end = cell_corners(merge.end_row, merge.end_col)
+        # cell_corners returns (p00, p10, p01, p11) - bottom-left,
+        # bottom-right, top-left, top-right, in that order (see its own
+        # definition above) - the merged region spans from the start
+        # cell's top-left corner to the end cell's bottom-right one.
+        corners = (start[0], end[1], start[2], end[3])
+        merge_bg = (*merge.cell.bg, HEADER_COLOR[3]) if merge.cell.has_bg else HEADER_COLOR
+        merge_text_color = (*merge.cell.text_color, 1.0) if merge.cell.has_text_color else None
+        fill_cell(corners, merge_bg, _header_text(merge.cell.text), merge_text_color, merge.cell.text_align)
+        merge_corners.append(corners)
+    for corners in merge_corners:
+        border_cell(corners)
+
+
 def _draw_callback():
     context = bpy.context
     space = context.space_data
@@ -415,7 +755,11 @@ def _draw_callback():
     viewers = [n for n in tree.nodes if n.bl_idname == 'MaStroScheduleViewer' and n.show_table]
     viewers.sort(key=lambda n: n.name == active_name)
     for node in viewers:
-        _draw_node_table(node, is_active=(node.name == active_name))
+        is_active = node.name == active_name
+        if node.showing_table:
+            _draw_table_overlay(node, is_active=is_active)
+        else:
+            _draw_node_table(node, is_active=is_active)
 
     _draw_evaluation_errors(tree)
 
