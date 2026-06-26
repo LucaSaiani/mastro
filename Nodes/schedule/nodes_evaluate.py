@@ -66,7 +66,7 @@ VALUE_PROPERTY_BY_TYPE = {
 
 # the parallel-digit-string place value of each raw suffix within its group,
 # used to recombine the per-level digit into the final decoded value
-# (mirrors extract_mesh_rows: height = A*10 + B + C*0.1 + D*0.01 + E*0.001)
+# (height = A*10 + B + C*0.1 + D*0.01 + E*0.001)
 RAW_SUFFIX_WEIGHT = {
     "mastro_list_use_id_A": 10, "mastro_list_use_id_B": 1,
     "mastro_list_storey_A": 10, "mastro_list_storey_B": 1,
@@ -238,8 +238,9 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
 
     def _evaluate_face_expanded(self, objs, name, raw_names, domain, key):
         """One row per (face, level): every face of a mass/block stands for
-        mastro_number_of_storeys stacked floors. Mirrors execution.py's
-        extract_mesh_rows decoding loop, generalized to any attribute name."""
+        mastro_number_of_storeys stacked floors. Decodes the same parallel-
+        digit-string attribute layers for every attribute name, generalized
+        rather than duplicated per name."""
         result = []
         is_area = name == "area"
         for obj in objs:
@@ -288,7 +289,7 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
                 bm.faces.ensure_lookup_table()
 
             # storey_A/_B are always needed to know when a face's storey
-            # group advances by one level, same as extract_mesh_rows
+            # group advances by one level
             storey_a = attrs.get("mastro_list_storey_A")
             storey_b = attrs.get("mastro_list_storey_B")
 
@@ -337,13 +338,13 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
                 for level in range(storeys):
                     # Read this level's value at the CURRENT group_index
                     # before deciding whether group_index advances for the
-                    # *next* level - mirrors execution.py:extract_mesh_rows,
-                    # where storey_A/use_A/height_A are all read at the same
-                    # group_index, and group_index only advances after. Doing
-                    # the read after advancing (as an earlier version of this
-                    # function did) is an off-by-one: on a face's last level,
-                    # group_index would already point past the end of the
-                    # digit string, raising IndexError - confirmed live.
+                    # *next* level - storey_A/use_A/height_A are all read
+                    # at the same group_index, which only advances after.
+                    # Doing the read after advancing (as an earlier
+                    # version of this function did) is an off-by-one: on
+                    # a face's last level, group_index would already
+                    # point past the end of the digit string, raising
+                    # IndexError - confirmed live.
                     if missing:
                         value = None
                     elif is_area:

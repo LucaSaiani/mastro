@@ -1,5 +1,4 @@
 import bpy
-import bmesh
 
 from .tree import resolve_through_reroutes
 
@@ -109,107 +108,6 @@ def get_available_columns_items(node, input_index=0):
     items = [(name, name, "") for name in names] or [("", "(no columns)", "")]
     _available_columns_cache[cache_key] = items
     return _available_columns_cache[cache_key]
-
-
-def extract_mesh_rows(objs):
-    """Build the schedule table rows (one per floor/level) for the given
-    MaStro mass objects, decoding the per-face BMesh attribute layers
-    written by add_mass_attributes()."""
-    rows = []
-
-    use_names = {u.id: u.name for u in bpy.context.scene.mastro_use_name_list}
-    typology_names = {t.id: t.name for t in bpy.context.scene.mastro_typology_name_list}
-    block_names = {b.id: b.name for b in bpy.context.scene.mastro_block_name_list}
-    building_names = {b.id: b.name for b in bpy.context.scene.mastro_building_name_list}
-
-    for obj in objs:
-        block_name = block_names.get(obj.mastro_props.mastro_block_attribute, "")
-        building_name = building_names.get(obj.mastro_props.mastro_building_attribute, "")
-
-        bm = bmesh.new()
-        bm.from_mesh(obj.data)
-
-        bm_typology = bm.faces.layers.int["mastro_typology_id"]
-        bm_use_A = bm.faces.layers.int["mastro_list_use_id_A"]
-        bm_use_B = bm.faces.layers.int["mastro_list_use_id_B"]
-        bm_storeys = bm.faces.layers.int["mastro_number_of_storeys"]
-        bm_storey_A = bm.faces.layers.int["mastro_list_storey_A"]
-        bm_storey_B = bm.faces.layers.int["mastro_list_storey_B"]
-        bm_height_A = bm.faces.layers.int["mastro_list_height_A"]
-        bm_height_B = bm.faces.layers.int["mastro_list_height_B"]
-        bm_height_C = bm.faces.layers.int["mastro_list_height_C"]
-        bm_height_D = bm.faces.layers.int["mastro_list_height_D"]
-        bm_height_E = bm.faces.layers.int["mastro_list_height_E"]
-        bm_undercroft = bm.faces.layers.int["mastro_undercroft"]
-
-        for f in bm.faces:
-            storeys = f[bm_storeys]
-            typology_name = typology_names.get(f[bm_typology], "")
-            area_total = round(f.calc_area(), 2)
-
-            # Parallel-digit-string encoding: each "_A"/"_B"/... layer holds
-            # one digit position per use/storey-group across the whole
-            # face, prefixed with "1" to avoid leading zeros being dropped.
-            # Stripping that "1" and zipping the strings char-by-char turns
-            # each position back into a "group" (e.g. one storey-group's
-            # use+storeys+height), simpler in plain Python than the
-            # log10/power-of-ten digit extraction used on the Geometry
-            # Nodes side, where strings aren't practical to slice.
-            storey_A_digits = str(f[bm_storey_A])[1:]
-            storey_B_digits = str(f[bm_storey_B])[1:]
-            use_A_digits = str(f[bm_use_A])[1:]
-            use_B_digits = str(f[bm_use_B])[1:]
-            height_A_digits = str(f[bm_height_A])[1:]
-            height_B_digits = str(f[bm_height_B])[1:]
-            height_C_digits = str(f[bm_height_C])[1:]
-            height_D_digits = str(f[bm_height_D])[1:]
-            height_E_digits = str(f[bm_height_E])[1:]
-
-            storey_group = 0
-            group_index = 0
-            for level in range(storeys):
-                storey_A = int(storey_A_digits[group_index])
-                storey_B = int(storey_B_digits[group_index])
-
-                use_A = int(use_A_digits[group_index])
-                use_B = int(use_B_digits[group_index])
-                use_name = use_names.get(use_A * 10 + use_B, "")
-
-                height_A = int(height_A_digits[group_index])
-                height_B = int(height_B_digits[group_index])
-                height_C = int(height_C_digits[group_index])
-                height_D = int(height_D_digits[group_index])
-                height_E = int(height_E_digits[group_index])
-                height = height_A * 10 + height_B + height_C * 0.1 + height_D * 0.01 + height_E * 0.001
-
-                # mastro_undercroft stores a plain count of floors from the
-                # bottom that are undercroft (e.g. 3 means levels 0,1,2 are
-                # undercroft) - not a per-level digit like use/storey/height.
-                undercroft = level < f[bm_undercroft]
-                area = 0 if undercroft else area_total
-
-                storey_group_new = storey_A * 10 + storey_B + storey_group
-                if storey_group_new == level + 1:
-                    storey_group = storey_group_new
-                    group_index += 1
-
-                rows.append({
-                    "_Object": obj.name,
-                    "Block": block_name,
-                    "Building": building_name,
-                    "Typology": typology_name,
-                    "Use": use_name,
-                    "Storey": storey_group_new,
-                    "Height": height,
-                    "Undercroft": undercroft,
-                    "Area": area,
-                    "_Level": level,
-                    "_Face": f.index,
-                })
-
-        bm.free()
-
-    return rows
 
 
 def evaluate_tree(tree):
