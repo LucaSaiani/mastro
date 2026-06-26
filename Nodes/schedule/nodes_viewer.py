@@ -18,11 +18,18 @@ from ... import Icons as icons
 
 CELL_WIDTH = 120
 # Used by _draw_table_overlay (Table) only - _draw_node_table
-# (Column/List) uses COLUMN_NODE_GAP below instead, the user's own call:
-# the visible empty strip this left between the node and its own
-# overlay read as wrong specifically for Column/List, not for Table.
+# (Column/List) uses COLUMN_NODE_GAP below instead. The real cause of an
+# earlier, much bigger gap turned out to be a stray
+# `origin_x += _row_label_width(...)` left over in _draw_node_table - a
+# margin meant to align the Column grid with Table's own row-number
+# band, by design, but it was unconditionally added even though
+# _draw_node_table draws no row numbers at all, so it just pushed the
+# whole grid right with nothing to show for it. Removed; COLUMN_NODE_GAP
+# alone is the small, intentional breathing room left between the node
+# and its own overlay - same role NODE_GAP plays for Table, just kept
+# separate in case the two ever need to diverge again.
 NODE_GAP = 4
-COLUMN_NODE_GAP = 0
+COLUMN_NODE_GAP = 4
 # Row numbers in a Table overlay (_draw_table_overlay) never go past two
 # digits in practice (see that function's reasoning) - "0" sets a flat,
 # content-independent width for that left-hand band, shared with
@@ -61,7 +68,7 @@ def _header_text(name):
     return name[:1].upper() + name[1:]
 
 
-def _cell_text(value):
+def _cell_text(value, is_id_key=False):
     """Same str() every cell value already went through, except a float
     is formatted to 2 decimal places first - plain str(float) shows
     IEEE754's own binary-representation noise (e.g. 0.3 typed into a
@@ -71,7 +78,7 @@ def _cell_text(value):
     anything actually used in a calculation) - this only formats what's
     drawn here.
 
-    A zero value renders as an empty string instead, unless the
+    A zero DATA value renders as an empty string instead, unless the
     schedule_show_zero_values preference is on - the same convention
     Excel's own "Show a zero in cells that have zero value" checkbox
     follows (File > Options > Advanced > Display options for this
@@ -79,9 +86,16 @@ def _cell_text(value):
     (Evaluate Attribute deliberately zeroes it, see nodes_evaluate.py),
     where "0.00" reads as a real measured zero rather than "not
     applicable here" - blank reads as the latter, which is usually what's
-    meant. Only a literal 0/0.0 is affected - "" (already blank) and
-    non-numeric values pass through unchanged either way."""
-    if isinstance(value, (int, float)) and not isinstance(value, bool) and value == 0:
+    meant.
+
+    is_id_key=True (Object/Face/Level/...) skips this entirely - a Face
+    or Level index of 0 is a real, meaningful identity (the FIRST face,
+    the GROUND floor), never "nothing to show" the way a zeroed data
+    value is. Confirmed live as a real bug otherwise: Face 0/Level 0
+    rows went blank in that column, indistinguishable from an actually
+    missing id. Only a literal 0/0.0 is affected either way - ""
+    (already blank) and non-numeric values pass through unchanged."""
+    if not is_id_key and isinstance(value, (int, float)) and not isinstance(value, bool) and value == 0:
         if not get_prefs().schedule_show_zero_values:
             return ""
     if isinstance(value, float):
@@ -250,6 +264,59 @@ class MaStroScheduleViewerNode(MaStroScheduleTreeNode, Node):
             return []
         self.showing_list = False
 
+        # An Id Key (Get Id Keys' own output, see nodes_id_keys.py) is a
+        # single string (e.g. "_Object"), not a list of dict rows at all
+        # - confirmed live as a real crash otherwise ("'str' object has
+        # no attribute 'keys'") once the code below started assuming
+        # every input is iterable, dict-row-shaped data. Shown as one
+        # cell, its value put through _header_text the same way every
+        # other id-key display already is (Aggregate/Flatten Key/Group
+        # Into List/Accumulate's own pickers, the Viewer's own Object/
+        # Face/Level columns) - "_Object" reads as "Object_id" here too,
+        # not as the raw internal string.
+        if from_node is not None and from_socket.bl_idname == 'MaStroScheduleIdKeySocketType':
+            self.id_column_count = 0
+            self.columns.clear()
+            self.columns.add().name = "Id Key"
+            self.rows.clear()
+            row_item = self.rows.add()
+            cell = row_item.cells.add()
+            cell.name = "Id Key"
+            cell.value = _header_text(inputs[0] or "")
+            return []
+
+        # String/Color/Boolean (String/Colour/Boolean nodes' own
+        # outputs, see nodes_string.py/nodes_rgb.py/nodes_boolean.py) are
+        # each a single bare value (str/an (r,g,b) tuple/a bool), not a
+        # list of dict rows - same crash risk Id Key had above, just for
+        # three more socket types nobody happened to wire into a Viewer
+        # before audit_viewer_socket_coverage.py was built specifically
+        # to catch this whole class of bug rather than one node at a
+        # time (the user's own call: "gli esseri umani sono scemi e
+        # tendono a fare cose che il codice non prevede" - a rare,
+        # silly-looking connection like this is still a real one a user
+        # could make, and it must not crash). Each shown as one cell,
+        # _cell_text already does the right thing for a bare value with
+        # no id-key involved (is_id_key defaults to False).
+        if from_node is not None and (
+                from_socket.bl_idname == 'MaStroScheduleStringSocketType'
+                or from_socket.bl_idname == 'MaStroScheduleColorSocketType'
+                or from_socket.bl_idname == 'MaStroScheduleBooleanSocketType'):
+            label = {
+                'MaStroScheduleStringSocketType': "String",
+                'MaStroScheduleColorSocketType': "Color",
+                'MaStroScheduleBooleanSocketType': "Boolean",
+            }[from_socket.bl_idname]
+            self.id_column_count = 0
+            self.columns.clear()
+            self.columns.add().name = label
+            self.rows.clear()
+            row_item = self.rows.add()
+            cell = row_item.cells.add()
+            cell.name = label
+            cell.value = _cell_text(inputs[0])
+            return []
+
         # Column rows have a non-id data key that's the upstream node's
         # own node.name, not a readable name - relabeled here using that
         # node's `column_label` (mirrors Evaluate Attribute/Math's
@@ -338,7 +405,7 @@ class MaStroScheduleViewerNode(MaStroScheduleTreeNode, Node):
             for name in column_names:
                 cell = row_item.cells.add()
                 cell.name = name[1:] if name in underscore_id_keys else name
-                cell.value = _cell_text(row.get(name, ""))
+                cell.value = _cell_text(row.get(name, ""), is_id_key=name in underscore_id_keys)
 
         return []
 
@@ -554,14 +621,6 @@ def _draw_node_table(node, is_active=True):
     # (zoomable) cell grid - this is also exactly what the old prototype did
     # with its always-12 fontSize.
     blf.size(font_id, font_size)
-
-    # A flat single-digit-wide margin on the left, matching the band
-    # _draw_table_overlay reserves there for its row numbers (see that
-    # function's comment) - so the grid's horizontal position stays the
-    # same whether the same Viewer is showing a Column/Data input or a
-    # Table one, instead of jumping sideways. This margin is otherwise
-    # unused here (no row numbers are drawn in this function).
-    origin_x += _row_label_width(font_id) * ui_scale
 
     # Column width: a fixed CELL_WIDTH for everyone, or - when the
     # "Dynamic Column Width" preference is on - each column sized to fit

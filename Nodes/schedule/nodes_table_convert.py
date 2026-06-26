@@ -1,6 +1,7 @@
 from bpy.types import Node
 
 from .tree import MaStroScheduleTreeNode
+from .nodes_viewer import _cell_text
 
 
 def _data_key(row):
@@ -43,7 +44,16 @@ class MaStroScheduleConvertColumnToTableNode(MaStroScheduleTreeNode, Node):
         table_rows = []
         for row in rows:
             key = _data_key(row)
-            text = str(row.get(key, "")) if key is not None else ""
+            # _cell_text, not a plain str() - same "0.00 vs blank"
+            # convention as the Viewer's own Column rendering
+            # (nodes_viewer.py), confirmed live as a real inconsistency
+            # otherwise: a Column showing blank for a zeroed value (e.g.
+            # an undercroft floor's area) still showed "0.0" once
+            # converted to a Table through this node. is_id_key isn't
+            # passed - `key` here is already _data_key's result, never
+            # an id key (those were discarded above, see this class's
+            # own docstring).
+            text = _cell_text(row.get(key, "")) if key is not None else ""
             table_rows.append({"text": text, "bg": None})
 
         return [{
