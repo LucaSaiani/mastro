@@ -34,10 +34,31 @@ def _refresh_schedules():
         return
     _last_schedule_refresh = now
 
-    from ..Utils.import_export.mastro_export_utils import clear_mass_data_cache
-    selected_names = [obj.name for obj in bpy.context.selected_objects]
-    if not selected_names:
+    selected = bpy.context.selected_objects
+    if not selected:
         return
+    # mastro_number_of_storeys/mastro_undercroft are only ever set
+    # explicitly through the Mass panel's own fields (Utils/getter_setter.py),
+    # never recomputed live while editing the mesh itself - a topology
+    # change (extrude, duplicate, ...) creates new BMesh faces that don't
+    # yet carry these values (they default to 0) until the user
+    # re-applies the panel. Refreshing the Schedule while a selected
+    # object is mid-edit would read those still-zero faces and show the
+    # Viewer's area shrinking, then recovering once the user leaves Edit
+    # Mode - confirmed as the actual cause of a "the area disappears
+    # while editing" report, not a bug in the area calculation itself
+    # (Evaluate Attribute already reads the correct, live edit-mode BMesh
+    # via mastro_export_utils.get_mass_data's own EDIT-mode branch). The
+    # fix is to simply not refresh at all while editing - the last good
+    # Viewer result (from before Edit Mode was entered) stays in
+    # mastro_export_utils._mass_data_cache and on screen untouched,
+    # exactly the same way every OTHER non-selected object's cached data
+    # already does.
+    if any(obj.mode == 'EDIT' for obj in selected):
+        return
+
+    from ..Utils.import_export.mastro_export_utils import clear_mass_data_cache
+    selected_names = [obj.name for obj in selected]
     clear_mass_data_cache(selected_names)
 
     for tree in bpy.data.node_groups:
