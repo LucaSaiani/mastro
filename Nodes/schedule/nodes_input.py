@@ -107,27 +107,26 @@ class MaStroScheduleInputAllNode(MaStroScheduleTreeNode, Node):
         return [_evaluate_categories(self.categories, 'ALL')]
 
 
+# No Categories toggle, unlike Input All - the user's own call: "è
+# selected, quindi passeremo tutto quello che è selected" - filtering by
+# category here would be redundant with the user's own act of selecting
+# specific objects in the viewport. Every category is still resolved
+# internally (ALL_CATEGORY_IDS below), each selected object getting
+# whichever row schema actually matches what it is (mass_rows' rich
+# schema for Mass, the minimal {_Object: name} for Plan/Drawing/Street/
+# Mesh) - nothing is excluded, the choice this node no longer offers was
+# never about whether to include a selected object, only about its row
+# shape, which is determined automatically either way.
+ALL_CATEGORY_IDS = frozenset(identifier for identifier, _, _ in CATEGORY_ITEMS)
+
+
 class MaStroScheduleInputSelectedNode(MaStroScheduleTreeNode, Node):
-    """Build the schedule table from the currently selected matching
-    objects of the selected categories"""
+    """Build the schedule table from the currently selected objects"""
     bl_idname = 'MaStroScheduleInputSelected'
     bl_label = 'Input Selected'
-
-    categories: EnumProperty(
-        name="Categories",
-        items=CATEGORY_ITEMS,
-        options={'ENUM_FLAG'},
-        default={'MASS'},
-        update=update_node,
-    )
 
     def init(self, context):
         self.outputs.new('MaStroScheduleDataSocketType', "Data")
 
-    def draw_buttons(self, context, layout):
-        col = layout.column(align=True)
-        for identifier, label, _ in CATEGORY_ITEMS:
-            col.prop_enum(self, "categories", identifier, text=label)
-
     def evaluate(self, inputs):
-        return [_evaluate_categories(self.categories, 'SELECTED')]
+        return [_evaluate_categories(ALL_CATEGORY_IDS, 'SELECTED')]

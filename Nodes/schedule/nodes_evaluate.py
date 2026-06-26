@@ -319,6 +319,19 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
                     storey_a_digits = _digits(storey_a.data[face_index].value)
                     storey_b_digits = _digits(storey_b.data[face_index].value) if storey_b else None
 
+                # Decoding (group_index/storey_group below) must still
+                # walk level 0 (ground floor) upward - the digit strings
+                # (storey_a_digits/etc.) are encoded in that order, and
+                # group_index only knows how to advance forward. The
+                # rows THIS FACE contributes are collected here, then
+                # appended to `result` reversed (top floor first, ground
+                # floor last) - the user's own explicit call: a Table/
+                # Viewer reads top-to-bottom, and a real elevation has
+                # the ground floor at the bottom, the top floor at the
+                # top, with any basement level (a negative _Level, not
+                # produced yet but anticipated) ending up visually
+                # lowest of all once this convention is in place.
+                face_rows = []
                 storey_group = 0
                 group_index = 0
                 for level in range(storeys):
@@ -359,7 +372,7 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
                     else:
                         value = plain_value
 
-                    result.append({
+                    face_rows.append({
                         "_Object": obj.name,
                         "_Face": face_index,
                         "_Level": level,
@@ -373,6 +386,8 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
                         if storey_group_new == level + 1:
                             storey_group = storey_group_new
                             group_index += 1
+
+                result.extend(reversed(face_rows))
 
             if bm is not None:
                 bm.free()
