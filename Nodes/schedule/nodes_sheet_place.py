@@ -1,15 +1,46 @@
 from bpy.types import Node
-from bpy.props import EnumProperty, CollectionProperty, IntProperty
+from bpy.props import EnumProperty, CollectionProperty, IntProperty, StringProperty
 
-from .tree import MaStroScheduleTreeNode, resolve_origin_node
+from .tree import MaStroScheduleTreeNode, resolve_origin_node, resolve_named_origin
 from .execution import update_node, get_node_table
 from .properties import MaStro_schedule_join_table_item
 
 
-def _link_key(from_node, output_index):
+def _update_sheet_name(self, context):
+    # Mirrors the node's own displayed title to table_or_sheet_name
+    # whenever it's non-empty - Node.label (a real, native Blender
+    # property, confirmed in rna_nodetree.cc) is shown in the title
+    # bar INSTEAD of bl_label once set, exactly the bonus the user
+    # asked for: naming a Join Sheets' own combined result also
+    # renames the node itself in the editor, not just whatever reads
+    # table_or_sheet_name downstream (Export Excel's own _origin_label
+    # fallback, see that module's own comment for the other half of
+    # this).
+    self.label = self.table_or_sheet_name
+    update_node(self, context)
+    # Confirmed live as a real bug otherwise: update_node() runs
+    # tree.execute() directly (recomputing every evaluate(), including
+    # any downstream Join Sheets/Export Excel's own), but does NOT go
+    # through the polling timer - and _sync_table_items/
+    # _sync_sheet_items (the methods that actually copy this label
+    # into a downstream node's own table_items/sheet_items, see
+    # nodes_table_join.py's/nodes_excel_export.py's own docstrings)
+    # only ever run from that timer, never from evaluate(). Without
+    # this, a Join Sheets feeding another Join Sheets (or Export
+    # Excel) kept showing the OLD label until something else
+    # (re-wiring a link) happened to flag the tree for the timer by
+    # some other path. See tree.py's own _pending_execute_trees for
+    # what this set actually drives.
+    from .tree import _pending_execute_trees
+    _pending_execute_trees.add(self.id_data.name)
+
+
+def _link_key(from_node, output_index, link_position):
     """Same stable string identity as Join Tables' own _link_key
-    (nodes_table_join.py) - see that function's own docstring."""
-    return f"{from_node.name}::{output_index}"
+    (nodes_table_join.py) - see that function's own docstring,
+    including why link_position (this link's own index within
+    socket.links) is part of the key now too."""
+    return f"{from_node.name}::{output_index}::{link_position}"
 
 
 def _label_text(sheet):
@@ -26,6 +57,26 @@ def _label_text(sheet):
         return ""
     cells = columns[0].get("cells", [])
     return cells[0].get("text", "") if cells else ""
+
+
+def _origin_label(origin_node, sheet):
+    """origin_node's own table_or_sheet_name takes priority over
+    _label_text's first-cell-text fallback - same mechanism as Export
+    Excel's own _origin_label/Join Tables' own _origin_label
+    (nodes_excel_export.py/nodes_table_join.py). If origin_node itself
+    has no name, resolve_named_origin walks FURTHER upstream looking
+    for one (e.g. a Join Tables' own table_or_sheet_name, several
+    nodes back through Table to Sheet's own type change) - see that
+    function's own docstring in tree.py for why this is a separate
+    walk from resolve_origin_node's, only for the displayed name,
+    never for table_items' own link_key. _label_text's own fallback
+    still reads sheet - origin_node's own sheet (the thing
+    resolve_origin_node/_link_key are actually keyed by), not whatever
+    node resolve_named_origin happened to walk past."""
+    custom_name = getattr(origin_node, "table_or_sheet_name", "") or resolve_named_origin(origin_node)
+    if custom_name:
+        return custom_name
+    return _label_text(sheet)
 
 
 # Combines several Sheet blocks into one, side by side (more columns)
@@ -66,7 +117,7 @@ class MaStroScheduleSheetPlaceNode(MaStroScheduleTreeNode, Node):
     """Combine several Sheet blocks side by side or stacked, in an
     order set by this node's own list (not by link order)"""
     bl_idname = 'MaStroScheduleSheetPlace'
-    bl_label = 'Place in Sheet'
+    bl_label = 'Join Sheets'
 
     direction: EnumProperty(
         name="Direction",
@@ -79,11 +130,21 @@ class MaStroScheduleSheetPlaceNode(MaStroScheduleTreeNode, Node):
     )
     table_items: CollectionProperty(type=MaStro_schedule_join_table_item)
     active_table_index: IntProperty()
+    # Optional - left blank, this node's own label downstream
+    # (Export Excel's own sheet_items, see that node's own
+    # _sync_sheet_items) falls back to the first cell text found in
+    # whichever linked Sheet happens to be first, which reads as
+    # meaningless for a node whose whole job is combining several
+    # Sheets into one ("(empty)" in the user's own screenshot, the
+    # exact case this exists to fix) - set once, it names the combined
+    # result itself, not any one of the Sheets that went into it.
+    table_or_sheet_name: StringProperty(name="Sheet Name", update=_update_sheet_name)
 
     def init(self, context):
         # use_multi_input is a constructor-only argument - see Join
         # Tables' own init() for the confirmed RNA source detail.
         self.inputs.new('MaStroScheduleSheetSocketType', "Sheet", use_multi_input=True)
+        self.inputs.new('MaStroScheduleStringSocketType', "Sheet Name").prop_name = "table_or_sheet_name"
         self.outputs.new('MaStroScheduleSheetSocketType', "Sheet")
 
     def _sync_table_items(self):
@@ -95,7 +156,7 @@ class MaStroScheduleSheetPlaceNode(MaStroScheduleTreeNode, Node):
         socket = self.inputs["Sheet"]
         current_keys = []
         labels_by_key = {}
-        for link in socket.links:
+        for link_position, link in enumerate(socket.links):
             # Same "disappears entirely" treatment as Join Tables' own
             # _sync_table_items (nodes_table_join.py) - see that
             # method's own comment for why.
@@ -116,10 +177,10 @@ class MaStroScheduleSheetPlaceNode(MaStroScheduleTreeNode, Node):
                 output_index = list(origin_node.outputs).index(origin_socket)
             except ValueError:
                 continue
-            key = _link_key(origin_node, output_index)
+            key = _link_key(origin_node, output_index, link_position)
             current_keys.append(key)
             sheet = get_node_table(self.id_data.name, origin_node.name)
-            labels_by_key[key] = _label_text(sheet[output_index] if sheet else None)
+            labels_by_key[key] = _origin_label(origin_node, sheet[output_index] if sheet else None)
 
         existing_keys = [item.link_key for item in self.table_items]
         for index in reversed(range(len(self.table_items))):
@@ -207,7 +268,7 @@ class MaStroScheduleSheetPlaceNode(MaStroScheduleTreeNode, Node):
         # multi-input, execution.py:eval_node resolves it into a list).
         sheets_by_key = {}
         socket = self.inputs["Sheet"]
-        for link, value in zip(socket.links, inputs[0] or []):
+        for link_position, (link, value) in enumerate(zip(socket.links, inputs[0] or [])):
             # Same "disappears entirely" treatment as Join Tables' own
             # evaluate() (nodes_table_join.py) - see that method's own
             # comment for why.
@@ -223,7 +284,7 @@ class MaStroScheduleSheetPlaceNode(MaStroScheduleTreeNode, Node):
                 output_index = list(origin_node.outputs).index(origin_socket)
             except ValueError:
                 continue
-            sheets_by_key[_link_key(origin_node, output_index)] = value or {"columns": [], "merges": []}
+            sheets_by_key[_link_key(origin_node, output_index, link_position)] = value or {"columns": [], "merges": []}
 
         ordered_keys = [item.link_key for item in self.table_items if item.link_key in sheets_by_key]
         for key in sheets_by_key:

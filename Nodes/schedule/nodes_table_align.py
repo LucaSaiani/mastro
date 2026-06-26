@@ -36,7 +36,7 @@ class MaStroScheduleTableAlignNode(MaStroScheduleTreeNode, Node):
         self.outputs.new('MaStroScheduleTableSocketType', "Table")
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, "alignment", text="")
+        layout.row(align=True).prop(self, "alignment", expand=True, icon_only=True)
 
     def evaluate(self, inputs):
         table = inputs[0] or {"columns": [], "merges": []}

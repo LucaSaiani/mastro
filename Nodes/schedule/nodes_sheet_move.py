@@ -21,7 +21,7 @@ from .execution import update_node, is_socket_active
 # nodes) to avoid needing two chained nodes for a diagonal move.
 #
 # Inserted cells are always transparent (bg=None) - same convention as
-# Place in Sheet's own padding cells (nodes_sheet_place.py) in this
+# Join Sheets' own padding cells (nodes_sheet_place.py) in this
 # same Sheet world, and Join Tables' own padding cells
 # (nodes_table_join.py) in the separate Table world - the user's own
 # reversal of an earlier call ("aggiungi il background anche qui"): a
@@ -31,9 +31,9 @@ from .execution import update_node, is_socket_active
 # real content" impossible to tell at a glance. Use Sheet Background
 # (nodes_sheet_background.py) right after this node instead for the
 # same visual-guide effect, with every kind of Sheet padding cell
-# (Move Sheet's own, or Place in Sheet's) uniformly colorable in one
+# (Move Sheet's own, or Join Sheets') uniformly colorable in one
 # place: it colors every cell still at bg=None, exactly what this node
-# (and Place in Sheet) always leave behind.
+# (and Join Sheets) always leave behind.
 #
 # Existing merges are translated along with everything else (their
 # start_row/start_col/end_row/end_col coordinates shift by the same

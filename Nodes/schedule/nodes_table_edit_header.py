@@ -5,19 +5,20 @@ from .tree import MaStroScheduleTreeNode
 from .execution import update_node, is_socket_active
 
 
-# Plain text dropdown rather than three custom-icon buttons - the
-# user's own call, to sidestep the unconfirmed question of whether
-# layout.prop_enum() actually accepts icon_value for a custom preview
-# icon the same way layout.prop() does (likely yes, going by Blender's
-# own rna_ui_api.cc, but not verified live, and a plain dropdown carries
-# zero risk either way). The three custom icon SVGs this would have used
-# were removed (the user's call - no point keeping unused assets around)
-# rather than left on disk; revisit from scratch if this is ever worth
-# trying again.
+# Drawn as three expand=True icon buttons wherever this is used (see
+# each node's own draw_buttons - nodes_table_edit_header.py/
+# nodes_table_primitive.py/nodes_table_edit_cell.py/nodes_table_align.py),
+# not a plain text dropdown - native Blender icons (ALIGN_LEFT/
+# ALIGN_CENTER/ALIGN_RIGHT, confirmed real and present in Blender's
+# own UI_icons.hh, e.g. DEF_ICON(ALIGN_LEFT)), not the custom SVG
+# preview icons an earlier version of this comment worried weren't
+# confirmed to work via icon_value - that concern never applied here,
+# these are ordinary built-in enum icons, the same kind any
+# icon='SOME_NAME' kwarg elsewhere in this tree already uses.
 ALIGNMENT_ITEMS = [
-    ('LEFT', "Left", "Align text to the left"),
-    ('CENTER', "Center", "Center text"),
-    ('RIGHT', "Right", "Align text to the right"),
+    ('LEFT', "Left", "Align text to the left", 'ALIGN_LEFT', 0),
+    ('CENTER', "Center", "Center text", 'ALIGN_CENTER', 1),
+    ('RIGHT', "Right", "Align text to the right", 'ALIGN_RIGHT', 2),
 ]
 
 
@@ -147,7 +148,7 @@ class MaStroScheduleTableHeaderNode(MaStroScheduleTreeNode, Node):
         # Group's own interface panels are (see the user's own question
         # about this), so mimicking that look here with a plain label
         # read as out of place rather than as an actual native pattern.
-        layout.prop(self, "alignment", text="")
+        layout.row(align=True).prop(self, "alignment", expand=True, icon_only=True)
 
     @staticmethod
     def _resolve_scalar(socket, value_in, fallback, cast):

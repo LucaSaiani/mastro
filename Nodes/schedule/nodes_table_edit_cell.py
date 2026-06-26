@@ -58,7 +58,7 @@ class MaStroScheduleTableEditCellNode(MaStroScheduleTreeNode, Node):
         self.outputs.new('MaStroScheduleTableSocketType', "Table")
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, "alignment", text="")
+        layout.row(align=True).prop(self, "alignment", expand=True, icon_only=True)
 
     @staticmethod
     def _resolve_scalar(socket, value_in, fallback, cast):

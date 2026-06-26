@@ -163,12 +163,67 @@ class MaStroScheduleColumnSocket(NodeSocket):
 
     @classmethod
     def draw_color_simple(cls):
-        # Darkest gray of the Column -> Table -> Sheet progression (96,
-        # 161, 255 - see MaStroScheduleTableSocket/MaStroScheduleSheetSocket's
-        # own draw_color_simple) - Column is the loosest/least-finished
-        # data shape of the three, so it gets the darkest socket color,
-        # furthest from Sheet's white "fully finalized" end.
-        return (96 / 255, 96 / 255, 96 / 255, 1.0)
+        # Darkest of the Column -> Multi Column -> Table -> Sheet
+        # progression (91, then each step the midpoint of the
+        # remaining range to Sheet's own 255 - 132, 173, 255 - see
+        # MaStroScheduleMultiColumnSocket/MaStroScheduleTableSocket/
+        # MaStroScheduleSheetSocket's own draw_color_simple) - the
+        # user's own explicit values, Column back to its original 91
+        # (the 60->125->190->255 uniform ramp made the jump from
+        # Column to Table feel too large once Multi Column sat between
+        # them) - Column is the loosest/least-finished data shape of
+        # the four, so it gets the darkest socket color, furthest from
+        # Sheet's white "fully finalized" end.
+        return (91 / 255, 91 / 255, 91 / 255, 1.0)
+
+
+# A Multi Column carries the result of pivoting a Column (Pivot, see
+# nodes_pivot.py): rows that each have MORE THAN ONE data key, instead
+# of Column's own single data key per row. Shape: {"id_keys": [...],
+# "data_keys": [...], "rows": [{...}, ...]} - id_keys/data_keys are
+# explicit name lists, not inferred by Column's own "doesn't start
+# with _" convention, since a Multi Column's own data keys come from
+# whatever distinct values the pivoted Column Key happened to have
+# (e.g. "A", "B", "C") and could in principle start with "_" too - an
+# explicit list resolves that ambiguity once, rather than guessing per
+# row. Every row carries every key in id_keys + data_keys (filled with
+# 0/None where a particular id-key/data-key combination never actually
+# occurred in the source Column) - the user's own explicit call, so
+# every row has the exact same shape, no per-row variation to handle
+# downstream.
+#
+# Deliberately its OWN socket type, never just "a Column with more
+# than one data key" reusing MaStroScheduleColumnSocketType - every
+# existing Column-consuming node (Math, Aggregate, Get Attribute
+# Names, ...) is written assuming exactly one data key per row (found
+# by exclusion, via _data_key()), and would break or behave
+# nonsensically fed a row with several. Mirrors the lesson behind
+# Blender's own 5.0 socket shape redesign (confirmed via
+# code.blender.org/2025/08/new-socket-shapes - the old "diamond with a
+# dot" shape, meaning "could be either a single value or a field
+# depending what's plugged in", was removed in favor of always-fixed,
+# declared socket shapes): a socket whose shape/behavior changes
+# depending on how many data keys it happens to carry is exactly the
+# kind of ambiguity worth avoiding by giving it its own fixed type
+# instead.
+class MaStroScheduleMultiColumnSocket(NodeSocket):
+    """Socket carrying a Multi Column - rows with more than one data
+    key, as produced by Pivot"""
+    bl_idname = 'MaStroScheduleMultiColumnSocketType'
+    bl_label = "Multi Column"
+
+    def draw(self, context, layout, node, text):
+        layout.label(text=text)
+
+    @classmethod
+    def draw_color_simple(cls):
+        # Second of the Column -> Multi Column -> Table -> Sheet
+        # progression (91, 132, 173, 255 - see
+        # MaStroScheduleColumnSocket's own draw_color_simple for the
+        # full reasoning) - the midpoint between Column's own 91 and
+        # Table's own 173, Multi Column being conceptually halfway
+        # between "loose Column data" and "Table, ready for display".
+        return (132 / 255, 132 / 255, 132 / 255, 1.0)
 
 
 # A list of groups, as produced by Group Into List (see
@@ -361,11 +416,14 @@ class MaStroScheduleTableSocket(NodeSocket):
 
     @classmethod
     def draw_color_simple(cls):
-        # Middle gray of the Column -> Table -> Sheet progression (96,
-        # 161, 255 - see MaStroScheduleColumnSocket/MaStroScheduleSheetSocket's
-        # own draw_color_simple) - Table is the midpoint between loose
-        # Column data and a fully finalized, opaque Sheet block.
-        return (161 / 255, 161 / 255, 161 / 255, 1.0)
+        # Third of the Column -> Multi Column -> Table -> Sheet
+        # progression (91, 132, 173, 255 - see
+        # MaStroScheduleColumnSocket's own draw_color_simple for the
+        # full reasoning) - the midpoint between Column's own 91 and
+        # Sheet's own 255, Table sitting between Multi Column's
+        # still-structured-but-wider data and a fully finalized,
+        # opaque Sheet block.
+        return (173 / 255, 173 / 255, 173 / 255, 1.0)
 
 
 # A Sheet is a Table that's been finalized via Table to Sheet
@@ -380,10 +438,17 @@ class MaStroScheduleTableSocket(NodeSocket):
 # columns are (see the comment above MaStroScheduleTableSocket for that
 # shape). Each cell is still the same {"text": str, "bg": color or
 # None, "text_color": color or None, "text_align": ...} dict Table
-# already uses, just never split into a "header" slot anymore. "merges"
-# keeps the exact same shape as Table's own (row/column coordinates are
-# still meaningful - Sheet only erases the header/row DISTINCTION, not
-# row 0's special position as the visual top).
+# already uses, just never split into a "header" slot anymore, PLUS an
+# optional "border": {"style": str, "color": (r, g, b)} or None - set
+# by Sheet Grid (nodes_sheet_grid.py), meaningful only to Export Excel
+# (excel_export_shared.write_sheet draws it as a real openpyxl Border;
+# the Viewer never reads it at all, since it has no use for cell
+# borders of its own - kept in the shared cell shape anyway rather
+# than only living inside the export path, so Sheet Grid can sit
+# anywhere in a chain, not necessarily right before Export Excel).
+# "merges" keeps the exact same shape as Table's own (row/column
+# coordinates are still meaningful - Sheet only erases the header/row
+# DISTINCTION, not row 0's special position as the visual top).
 #
 # Carried by its OWN socket type so Cells/Header nodes (Edit Cell, Row
 # Colour, Edit Header, ...) can no longer connect to it - a type
@@ -396,7 +461,7 @@ class MaStroScheduleTableSocket(NodeSocket):
 # no good answer for "whose header wins" - confirmed as a genuine
 # surprise, not just a bug (nodes_table_join.py's own module comment
 # has the full story). A Sheet block solves that by being opaque:
-# Place in Sheet (nodes_sheet_place.py) keeps every joined block's own
+# Join Sheets (nodes_sheet_place.py) keeps every joined block's own
 # former header intact as an ordinary cell/row in the result, rather
 # than needing to merge/choose between them the way Join Tables'
 # columns (which already each carry their own header) do not have to.
@@ -412,7 +477,8 @@ class MaStroScheduleSheetSocket(NodeSocket):
 
     @classmethod
     def draw_color_simple(cls):
-        # Brightest of the Column -> Table -> Sheet progression (96,
-        # 161, 255 - see MaStroScheduleColumnSocket/MaStroScheduleTableSocket's
-        # own draw_color_simple) - white, the "fully finalized" end.
+        # Brightest of the Column -> Multi Column -> Table -> Sheet
+        # progression (91, 132, 173, 255 - see
+        # MaStroScheduleColumnSocket's own draw_color_simple for the
+        # full reasoning) - white, the "fully finalized" end.
         return (1.0, 1.0, 1.0, 1.0)

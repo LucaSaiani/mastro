@@ -1,20 +1,38 @@
 from bpy.types import Node
-from bpy.props import CollectionProperty, IntProperty
+from bpy.props import CollectionProperty, IntProperty, StringProperty
 
-from .tree import MaStroScheduleTreeNode, resolve_origin_node
-from .execution import get_node_table
+from .tree import MaStroScheduleTreeNode, resolve_origin_node, resolve_named_origin
+from .execution import update_node, get_node_table
 from .properties import MaStro_schedule_join_table_item
 
 
-def _link_key(from_node, output_index):
+def _update_table_name(self, context):
+    # Same Node.label rename, and same explicit
+    # _pending_execute_trees flag, as Join Sheets' own
+    # _update_sheet_name (nodes_sheet_place.py) - see that function's
+    # own docstring for why the flag is needed (update_node() alone
+    # never makes a downstream node's own _sync_table_items re-run).
+    self.label = self.table_or_sheet_name
+    update_node(self, context)
+    from .tree import _pending_execute_trees
+    _pending_execute_trees.add(self.id_data.name)
+
+
+def _link_key(from_node, output_index, link_position):
     """A stable string identity for one connection into Join Tables' own
     multi-input socket - NOT the NodeLink object itself (not a stable
-    Python identity across redraws/undo) and NOT just from_node.name
-    (the same node could have more than one output, or appear linked
-    more than once via different outputs) - from_node.name plus which
-    of its OWN outputs feeds this connection is the smallest thing that
-    actually disambiguates every real case."""
-    return f"{from_node.name}::{output_index}"
+    Python identity across redraws/undo) and NOT just
+    from_node.name::output_index (confirmed live as a real bug: the
+    SAME Table plugged in twice - or once directly, once through a
+    transparent operator like Edit Cell, both resolving to the same
+    origin - collapsed into a single table_items entry, since both
+    links resolved to an identical key). link_position (this link's
+    own index within socket.links, see _sync_table_items/evaluate's
+    own callers) disambiguates that case - stable as long as the user
+    doesn't rewire the links into a different order, which is the same
+    stability resolve_origin_node already only promises for everything
+    else (see that function's own docstring)."""
+    return f"{from_node.name}::{output_index}::{link_position}"
 
 
 def _header_text(table):
@@ -34,6 +52,36 @@ def _header_text(table):
     return columns[0].get("header", {}).get("text", "")
 
 
+def _origin_label(origin_node, table):
+    """origin_node's own table_or_sheet_name (this node's own optional name,
+    see MaStroScheduleTableJoinNode.table_or_sheet_name) takes priority over
+    _header_text's first-column-header fallback - same fix/reasoning
+    as Export Excel's own _origin_label (nodes_excel_export.py): a
+    Join Tables' combined result downstream showed up labeled after
+    one of its own column headers (e.g. "D"), meaningless for a node
+    whose whole job is combining several Tables, not being any one of
+    them.
+
+    If origin_node itself has no name, resolve_named_origin walks
+    FURTHER upstream looking for one - confirmed live as a real gap
+    otherwise: Join Tables -> Table to Sheet -> Join Sheets never saw
+    Join Tables' own table_or_sheet_name at all, since Table to Sheet (origin_node
+    here, a type-change boundary resolve_origin_node correctly stops
+    at for IDENTITY) has no name of its own to check. See
+    resolve_named_origin's own docstring in tree.py for why this is a
+    separate walk from resolve_origin_node's, only for the displayed
+    name, never for table_items' own link_key.
+
+    _header_text's own fallback still reads table - origin_node's own
+    table (the thing resolve_origin_node/_link_key are actually keyed
+    by), not whatever node resolve_named_origin happened to walk
+    past - the user's own explicit call to keep that part unchanged."""
+    custom_name = getattr(origin_node, "table_or_sheet_name", "") or resolve_named_origin(origin_node)
+    if custom_name:
+        return custom_name
+    return _header_text(table)
+
+
 # Concatenates several Tables side by side (more columns) - the user's
 # own explicit ask: "facciamo un nodo join tables? prende in input
 # multipli le tables, le unisce o orizzontalmente o verticalmente".
@@ -45,7 +93,7 @@ def _header_text(table):
 # bug to patch. The user's own conclusion: that case belongs to a
 # different concept ("Sheet" - a Table converted via Table to Sheet
 # into an opaque block of plain cells with no header concept at all,
-# combined - horizontally OR vertically - by Place in Sheet
+# combined - horizontally OR vertically - by Join Sheets
 # (nodes_sheet_place.py), which keeps every block's own former header
 # intact as an ordinary cell rather than needing to choose between
 # them) rather than forcing it into this node, which stays
@@ -91,6 +139,19 @@ class MaStroScheduleTableJoinNode(MaStroScheduleTreeNode, Node):
 
     table_items: CollectionProperty(type=MaStro_schedule_join_table_item)
     active_table_index: IntProperty()
+    # Optional - left blank, this node's own label downstream (any
+    # future Table-reading equivalent of Export Excel's own
+    # sheet_items, see nodes_excel_export.py's own _origin_label) falls
+    # back to the first column's own header text, which can read as
+    # meaningless for a node whose whole job is combining several
+    # Tables into one (confirmed live as a real case: a Table joined
+    # then converted to a Sheet showed up downstream labeled "D" - one
+    # of its own column headers, not a name for the combined result
+    # itself). Same shared property name as Join Sheets'/Table to
+    # Sheet's own table_or_sheet_name (see resolve_named_origin's own
+    # docstring in tree.py for why it's one shared name rather than a
+    # separate one per node type).
+    table_or_sheet_name: StringProperty(name="Table Name", update=_update_table_name)
 
     def init(self, context):
         # use_multi_input is a constructor-only argument (confirmed
@@ -98,6 +159,7 @@ class MaStroScheduleTableJoinNode(MaStroScheduleTreeNode, Node):
         # rna_nodetree.cc) - it can't be set on an existing socket
         # afterward, only at creation time here.
         self.inputs.new('MaStroScheduleTableSocketType', "Table", use_multi_input=True)
+        self.inputs.new('MaStroScheduleStringSocketType', "Table Name").prop_name = "table_or_sheet_name"
         self.outputs.new('MaStroScheduleTableSocketType', "Table")
 
     def _sync_table_items(self):
@@ -110,7 +172,7 @@ class MaStroScheduleTableJoinNode(MaStroScheduleTreeNode, Node):
         socket = self.inputs["Table"]
         current_keys = []
         labels_by_key = {}
-        for link in socket.links:
+        for link_position, link in enumerate(socket.links):
             # A muted link is treated as if it doesn't exist at all -
             # the user's own explicit call: the Table it feeds
             # disappears entirely from this list, not just from the
@@ -137,10 +199,10 @@ class MaStroScheduleTableJoinNode(MaStroScheduleTreeNode, Node):
                 output_index = list(origin_node.outputs).index(origin_socket)
             except ValueError:
                 continue
-            key = _link_key(origin_node, output_index)
+            key = _link_key(origin_node, output_index, link_position)
             current_keys.append(key)
             table = get_node_table(self.id_data.name, origin_node.name)
-            labels_by_key[key] = _header_text(table[output_index] if table else None)
+            labels_by_key[key] = _origin_label(origin_node, table[output_index] if table else None)
 
         existing_keys = [item.link_key for item in self.table_items]
         # Drop entries whose link no longer exists, back to front so
@@ -225,7 +287,7 @@ class MaStroScheduleTableJoinNode(MaStroScheduleTreeNode, Node):
         # reordering happens here, by link_key, not upstream).
         tables_by_key = {}
         socket = self.inputs["Table"]
-        for link, value in zip(socket.links, inputs[0] or []):
+        for link_position, (link, value) in enumerate(zip(socket.links, inputs[0] or [])):
             # Same "disappears entirely" treatment as _sync_table_items'
             # own is_muted check above - a muted link contributes
             # nothing to the join, not even an empty Table occupying a
@@ -246,7 +308,7 @@ class MaStroScheduleTableJoinNode(MaStroScheduleTreeNode, Node):
                 output_index = list(origin_node.outputs).index(origin_socket)
             except ValueError:
                 continue
-            tables_by_key[_link_key(origin_node, output_index)] = value or {"columns": [], "merges": []}
+            tables_by_key[_link_key(origin_node, output_index, link_position)] = value or {"columns": [], "merges": []}
 
         # table_items' own order (the user's own custom ordering, see
         # this class's module-level docstring) - a link_key with no

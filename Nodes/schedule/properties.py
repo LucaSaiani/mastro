@@ -79,6 +79,51 @@ class MaStro_schedule_join_table_item(PropertyGroup):
     label: StringProperty(name="Table")
 
 
+class MaStro_schedule_export_sheet_item(PropertyGroup):
+    """One entry in Export Excel's own ordering UIList
+    (nodes_excel_export.py) - one per Sheet currently linked into its
+    multi-input socket. Deliberately NOT MaStro_schedule_join_table_item
+    (the same-shaped PropertyGroup Join Tables/Join Sheets already
+    share) - the user's own explicit call: those two nodes have no use
+    for update_mode/start_cell, so giving them those fields anyway just
+    to reuse one PropertyGroup would leave dead properties sitting on
+    unrelated nodes. link_key/label work exactly like Join Tables' own
+    table_items (see that PropertyGroup's own docstring) - the rest are
+    this node's own per-Sheet export settings, editable directly in the
+    UIList (see MASTRO_UL_schedule_export_sheets.draw_item in
+    operators.py)."""
+    link_key: StringProperty()
+    # The actual Excel sheet name written by export_sheets()
+    # (nodes_excel_export.py) - no separate editable sheet_name field
+    # here anymore (the user's own explicit removal, once Table to
+    # Sheet/Join Tables/Join Sheets all gained their own
+    # table_or_sheet_name): renaming happens once, upstream, at
+    # whichever node produced/combined this Sheet, not a second time on
+    # this list too. Falls back to "Sheet {N}" (this entry's own
+    # 1-based position) if even that's blank.
+    label: StringProperty(name="Sheet")
+    # Off (the default): REPLACE - the existing sheet (if the workbook
+    # being written to already has one with this name) is wiped
+    # entirely before writing. On: UPDATE - only the rectangle at
+    # row>=start_cell's row AND column>=start_cell's column is cleared
+    # first - the user's own explicit design, to let an Excel sheet
+    # keep its own pre-existing content above/to the left of where
+    # this export writes (e.g. a title block or notes column the user
+    # added by hand in Excel itself, never touched by this node).
+    # Reworked from an EnumProperty into this single boolean - the
+    # user's own explicit call, so the UIList can simply disable
+    # start_cell (rather than hide/show it) when this is off, with one
+    # custom toggle icon instead of a dropdown (see this PropertyGroup's
+    # own update_icon class var note in operators.py's draw_item).
+    update_mode: BoolProperty(name="Update", default=False)
+    # An Excel-style cell reference (e.g. "B3") - only read (and only
+    # editable in the UIList) when update_mode is on. Validated/parsed
+    # by nodes_excel_export.py's own _parse_cell_ref, not here (a
+    # PropertyGroup string field has no
+    # validation hook of its own worth using for this).
+    start_cell: StringProperty(name="Start Cell", default="A1")
+
+
 class MaStro_schedule_table_merge(PropertyGroup):
     """One merged-cell region of a Viewer Table (see the module-level
     comment above sockets.py:MaStroScheduleTableSocket) - row/column

@@ -6,7 +6,7 @@ from .execution import update_node, is_socket_active
 
 
 # Colors every cell whose bg is still None - the padding/fit cells
-# inserted by Move Sheet or Place in Sheet (both of which deliberately
+# inserted by Move Sheet or Join Sheets (both of which deliberately
 # leave their own inserted Sheet cells transparent, bg=None - the
 # user's own explicit call: "se bg None poi lo possiamo facilmente
 # individuare e correggere con quel nodo che ho proposto"). Join Tables
@@ -24,7 +24,7 @@ from .execution import update_node, is_socket_active
 # generates one ever sets it), so there's nothing to color.
 class MaStroScheduleSheetBackgroundNode(MaStroScheduleTreeNode, Node):
     """Color every still-uncolored cell in a Sheet (the padding cells
-    Move Sheet/Place in Sheet/Join Tables leave transparent) - cells
+    Move Sheet/Join Sheets/Join Tables leave transparent) - cells
     that already have their own background are left untouched"""
     bl_idname = 'MaStroScheduleSheetBackground'
     bl_label = 'Sheet Background'

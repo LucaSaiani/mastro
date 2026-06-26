@@ -93,6 +93,17 @@ PROPERTY_UPDATE_EXEMPT = {
     ("nodes_lookup.py", "MaStroScheduleMatrixLookupNode", "active_key_index"),
     ("nodes_table_join.py", "MaStroScheduleTableJoinNode", "active_table_index"),
     ("nodes_sheet_place.py", "MaStroScheduleSheetPlaceNode", "active_table_index"),
+    ("nodes_excel_export.py", "MaStroScheduleExcelExportNode", "active_sheet_index"),
+    # filepath/auto_export (nodes_excel_export.py): this node has no
+    # real output (evaluate() always returns [], same as the Viewer) -
+    # nothing downstream ever depends on these, so there is nothing
+    # for update= to usefully re-run. filepath/auto_export only matter
+    # at export time (the Export button, or tree.py's own polling
+    # timer when auto_export is on), both of which read these
+    # properties directly rather than through the graph's own
+    # evaluate() pipeline.
+    ("nodes_excel_export.py", "MaStroScheduleExcelExportNode", "filepath"),
+    ("nodes_excel_export.py", "MaStroScheduleExcelExportNode", "auto_export"),
     # column_to_add (nodes_groupby.py): still-WIP dynamic-items
     # EnumProperty already flagged in its own TODO comment as a
     # RecursionError risk - left untouched until that node graduates

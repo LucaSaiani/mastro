@@ -218,25 +218,16 @@ class MaStroScheduleViewerNode(MaStroScheduleTreeNode, Node):
         if socket.is_linked and socket.links and not socket.links[0].is_muted:
             from_node, from_socket = resolve_through_reroutes(socket.links[0])
         # Sheet (nodes_table_sheet.py) shares this rendering path with
-        # Table, but NOT its data shape - Sheet's own columns are
-        # {"cells": [...]} (a flat list, no header/row split at all,
-        # see MaStroScheduleSheetSocket's own docstring in sockets.py),
-        # while _evaluate_table (shared by both) still expects Table's
-        # {"header": {...}, "rows": [...]} shape - cells[0] is converted
-        # back into a "header" dict here purely for rendering (still
-        # drawn at the visual top, same as before becoming a Sheet),
-        # NOT because Sheet itself has a header concept again.
+        # Table, but NOT its data shape - see sheet_to_table_shape's
+        # own docstring (sheet_shared.py) for the conversion, shared
+        # with excel_export_shared.write_sheet so there's only ONE
+        # interpretation of "how to read a Sheet" used everywhere,
+        # rather than this and the export path silently drifting apart
+        # from each other over time.
         if from_node is not None and from_socket.bl_idname == 'MaStroScheduleSheetSocketType':
+            from .sheet_shared import sheet_to_table_shape
             sheet = inputs[0] or {"columns": [], "merges": []}
-            table_shaped = {
-                "columns": [
-                    {"header": (column.get("cells") or [{"text": "", "bg": None}])[0],
-                     "rows": (column.get("cells") or [{}])[1:]}
-                    for column in sheet.get("columns", [])
-                ],
-                "merges": sheet.get("merges", []),
-            }
-            self._evaluate_table(table_shaped)
+            self._evaluate_table(sheet_to_table_shape(sheet))
             self.showing_table = True
             self.showing_list = False
             return []
@@ -283,6 +274,21 @@ class MaStroScheduleViewerNode(MaStroScheduleTreeNode, Node):
                 count_cell.value = str(len(group.get("rows", [])))
             return []
         self.showing_list = False
+
+        # A Multi Column (Pivot's own output, see nodes_pivot.py) wraps
+        # its actual rows in {"id_keys": [...], "data_keys": [...],
+        # "rows": [...]} - not itself a flat list of dict rows the way
+        # Column/Data's own inputs[0] already is, but each individual
+        # ROW inside it has that exact same {key: value, ...} shape
+        # (id_keys/data_keys are just the explicit list of which of
+        # those keys are which, see that socket's own docstring in
+        # sockets.py) - so unwrapping it down to its own "rows" list
+        # here, then falling straight through to the generic Column/
+        # Data display below, is all that's needed; no dedicated
+        # storage/draw path the way Table/List got.
+        if from_node is not None and from_socket.bl_idname == 'MaStroScheduleMultiColumnSocketType':
+            multi_column = inputs[0] or {"id_keys": [], "data_keys": [], "rows": []}
+            inputs = [multi_column.get("rows", [])]
 
         # An Id Key (Get Id Keys' own output, see nodes_id_keys.py) is a
         # single string (e.g. "_Object"), not a list of dict rows at all

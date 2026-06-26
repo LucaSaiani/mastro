@@ -97,6 +97,8 @@ class NODE_MT_mastro_schedule_primitives_operations_column(bpy.types.Menu):
     def draw(self, context):
         _add_node(self.layout, "MaStroScheduleAggregateColumn", "Aggregate")
         _add_node(self.layout, "MaStroScheduleConvertColumnToTable", "Column to Table")
+        _add_node(self.layout, "MaStroScheduleMultiColumnToTable", "Multi Column to Table")
+        _add_node(self.layout, "MaStroSchedulePivot", "Pivot")
 
 
 class NODE_MT_mastro_schedule_primitives_operations_header(bpy.types.Menu):
@@ -114,8 +116,9 @@ class NODE_MT_mastro_schedule_primitives_operations_sheet(bpy.types.Menu):
 
     def draw(self, context):
         _add_node(self.layout, "MaStroScheduleSheetMove", "Move Sheet")
-        _add_node(self.layout, "MaStroScheduleSheetPlace", "Place in Sheet")
+        _add_node(self.layout, "MaStroScheduleSheetPlace", "Join Sheets")
         _add_node(self.layout, "MaStroScheduleSheetBackground", "Sheet Background")
+        _add_node(self.layout, "MaStroScheduleSheetGrid", "Sheet Grid")
 
 
 class NODE_MT_mastro_schedule_primitives_operations_table(bpy.types.Menu):
@@ -153,6 +156,7 @@ class NODE_MT_mastro_schedule_output(bpy.types.Menu):
     bl_label = "Output"
 
     def draw(self, context):
+        _add_node(self.layout, "MaStroScheduleExcelExport", "Export to Excel")
         _add_node(self.layout, "MaStroScheduleViewer", "Viewer")
 
 

@@ -159,7 +159,7 @@ class MaStroScheduleTablePrimitiveNode(MaStroScheduleTreeNode, Node):
         # right below it) - Alignment/the colors always apply to the
         # header row, whether it's one merged cell (Join Header on) or
         # N separate per-column cells (off).
-        layout.prop(self, "alignment", text="")
+        layout.row(align=True).prop(self, "alignment", expand=True, icon_only=True)
 
     @staticmethod
     def _resolve_count(socket, rows_in, fallback):

@@ -34,13 +34,19 @@ def _poll_pending_trees():
     here for the same reason mark_mismatched_links already is. Place in
     Sheet (nodes_sheet_place.py) reuses the exact same table_items
     machinery for its own multi-input Sheet socket, so its sync is
-    polled here too. One side effect: _sync_table_items() reads each
+    polled here too; Export Excel (nodes_excel_export.py) has its own
+    sheet_items/_sync_sheet_items, same shape, same reason. One side
+    effect: both _sync_table_items()/_sync_sheet_items() read each
     linked Table/Sheet's own label text from the evaluation cache
     (get_node_table) BEFORE tree.execute() runs below, so the label
-    shown in either node's own list is always one poll (0.1s) stale
-    relative to whatever just changed - purely cosmetic (the join/place
-    itself always reads the freshly computed value, only the list's own
-    label lags), not worth reordering for."""
+    shown in any of these node's own list is always one poll (0.1s)
+    stale relative to whatever just changed - purely cosmetic (the
+    join/place/export itself always reads the freshly computed value,
+    only the list's own label lags), not worth reordering for.
+
+    Export Excel never writes from here - it only ever exports
+    manually, via its own button (see that node's own module comment
+    for why an auto-export-from-here option was tried and removed)."""
     if _pending_execute_trees:
         pending = list(_pending_execute_trees)
         _pending_execute_trees.clear()
@@ -53,6 +59,8 @@ def _poll_pending_trees():
                     mark_mismatched_links(node)
                 if node.bl_idname in ('MaStroScheduleTableJoin', 'MaStroScheduleSheetPlace'):
                     node._sync_table_items()
+                if node.bl_idname == 'MaStroScheduleExcelExport':
+                    node._sync_sheet_items()
             try:
                 tree.execute()
             except Exception as exc:
@@ -158,7 +166,7 @@ def resolve_through_reroutes(link):
 
 def resolve_origin_node(link):
     """Given a NodeLink feeding a Table/Sheet multi-input socket (Join
-    Tables/Place in Sheet, see nodes_table_join.py/nodes_sheet_place.py),
+    Tables/Join Sheets, see nodes_table_join.py/nodes_sheet_place.py),
     walk back through every "transparent" single-input Table/Sheet
     operator (Move Sheet, Edit Cell, Row Colour, Cell Align, ...) to the
     real origin node that actually CREATED this Table/Sheet (a
@@ -185,7 +193,7 @@ def resolve_origin_node(link):
     A node only counts as "transparent" here if it has EXACTLY one
     Table/Sheet input socket, of the SAME socket type as its (single)
     Table/Sheet output - any node that combines several Tables/Sheets
-    (multi-input, e.g. Join Tables/Place in Sheet) or changes the type
+    (multi-input, e.g. Join Tables/Join Sheets) or changes the type
     altogether (e.g. Table to Sheet: Table in, Sheet out) is treated as
     an origin in its own right, never walked through. mute is
     irrelevant here on purpose - unlike resolve_through_reroutes (which
@@ -195,9 +203,21 @@ def resolve_origin_node(link):
     from_node = link.from_node
     from_socket = link.from_socket
     while True:
+        # Confirmed live as a real bug otherwise: a multi-input socket
+        # (Join Tables/Join Sheets' own Table/Sheet input) still
+        # counts as exactly ONE declared input socket here, even with
+        # several real links feeding it - without explicitly excluding
+        # is_multi_input sockets, Join Sheets looked "transparent"
+        # by this same shape test, and got walked straight through to
+        # whichever ONE of its own several inputs happened to be
+        # link.from_socket's own upstream, silently dropping every
+        # other Sheet it was supposed to combine (Export Excel ended
+        # up exporting only one of the Sheets Join Sheets actually
+        # merged, ignoring its own join order entirely).
         table_sheet_inputs = [
             s for s in from_node.inputs
             if s.bl_idname in ('MaStroScheduleTableSocketType', 'MaStroScheduleSheetSocketType')
+            and not s.is_multi_input
         ]
         if len(table_sheet_inputs) != 1 or table_sheet_inputs[0].bl_idname != from_socket.bl_idname:
             break
@@ -208,6 +228,55 @@ def resolve_origin_node(link):
         from_socket = inner_link.from_socket
         from_node = inner_link.from_node
     return from_node, from_socket
+
+
+def resolve_named_origin(origin_node):
+    """Given the (origin_node, ...) resolve_origin_node already
+    returned, walks FURTHER upstream - through Table to Sheet's own
+    type change included, unlike resolve_origin_node itself - looking
+    for the first node carrying a non-empty table_or_sheet_name (Join
+    Tables/Join Sheets' own shared optional name property - ONE
+    attribute name for both, the user's own explicit simplification,
+    so this walk never needs to guess which of "table_name"/
+    "sheet_name" to check at each node it's currently looking at - it
+    could be either kind of node depending how many Table<->Sheet type
+    changes happen to sit in between). Returns that name, or "" if the
+    walk runs out (hits another multi-input node with no name of its
+    own, or a node with no further single Table/Sheet input to follow)
+    without ever finding one.
+
+    Exists because resolve_origin_node's own type-change boundary
+    (Table to Sheet: Table in, Sheet out) is the right place to stop
+    for IDENTITY (a Sheet's own identity is not the Table that made
+    it) but the wrong place to stop for a NAME someone set further
+    upstream - confirmed live as a real gap: Join Tables -> Table to
+    Sheet -> Join Sheets never saw Join Tables' own
+    table_or_sheet_name at all, since Table to Sheet (which has no
+    name of its own) was as far as the lookup went, leaving the user
+    staring at a meaningless fallback label ("D", one of the joined
+    Table's own column headers) with no way to tell what it actually
+    referred to. The user's own explicit call: keep walking past a
+    type change too, but ONLY for the name, not for table_items' own
+    link_key (which must stay exactly as stable as resolve_origin_node
+    already makes it - this function is purely an extra read on top,
+    never changes what counts as this entry's own identity)."""
+    node = origin_node
+    while node is not None:
+        name = getattr(node, "table_or_sheet_name", "")
+        if name:
+            return name
+        table_sheet_inputs = [
+            s for s in node.inputs
+            if s.bl_idname in ('MaStroScheduleTableSocketType', 'MaStroScheduleSheetSocketType')
+            and not s.is_multi_input
+        ]
+        if len(table_sheet_inputs) != 1:
+            return ""
+        next_input = table_sheet_inputs[0]
+        if not next_input.is_linked or not next_input.links:
+            return ""
+        node, _socket = resolve_through_reroutes(next_input.links[0])
+    return ""
 
 
 def upstream_attr(socket, attr_name, default=""):

@@ -1,6 +1,19 @@
 from bpy.types import Node
+from bpy.props import StringProperty
 
 from .tree import MaStroScheduleTreeNode
+from .execution import update_node
+
+
+def _update_table_or_sheet_name(self, context):
+    # Same Node.label rename, and same explicit
+    # _pending_execute_trees flag, as Join Tables/Join Sheets' own
+    # _update_table_name/_update_sheet_name (nodes_table_join.py/
+    # nodes_sheet_place.py) - see those functions' own docstrings.
+    self.label = self.table_or_sheet_name
+    update_node(self, context)
+    from .tree import _pending_execute_trees
+    _pending_execute_trees.add(self.id_data.name)
 
 
 # The boundary between Table (header/rows split, still editable by any
@@ -17,12 +30,12 @@ from .tree import MaStroScheduleTreeNode
 # coordinates as before). No position/offset inputs here, and no
 # multi-input either - this node converts exactly ONE Table at a time;
 # combining several already-converted Sheet blocks together
-# (horizontally or vertically) is Place in Sheet's own job
+# (horizontally or vertically) is Join Sheets' own job
 # (nodes_sheet_place.py), not this one's. Originally named "Place in
 # Sheet" itself, before that name and its single-Table shape were
-# reassigned to the new multi-input combining node instead - this one
-# kept the simpler single-conversion role and took the more literal
-# "Table to Sheet" name to match.
+# reassigned to the new multi-input combining node (now called Join
+# Sheets) instead - this one kept the simpler single-conversion role
+# and took the more literal "Table to Sheet" name to match.
 class MaStroScheduleTableSheetNode(MaStroScheduleTreeNode, Node):
     """Convert one Table into an opaque Sheet block - its header
     becomes an ordinary cell, and Cells/Header nodes can no longer
@@ -30,8 +43,20 @@ class MaStroScheduleTableSheetNode(MaStroScheduleTreeNode, Node):
     bl_idname = 'MaStroScheduleTableToSheet'
     bl_label = 'Table to Sheet'
 
+    # Optional - same shared name property as Join Tables/Join Sheets
+    # (table_or_sheet_name, see resolve_named_origin's own docstring in
+    # tree.py for why it's ONE shared attribute name rather than a
+    # separate one per node type) - the user's own follow-up: naming
+    # the Sheet right here, at the Table->Sheet boundary, means Export
+    # Excel's own sheet_items never need a name typed in a second time
+    # downstream - this node's own name (if set) is what
+    # resolve_named_origin finds first when walking upstream from
+    # wherever this Sheet eventually ends up.
+    table_or_sheet_name: StringProperty(name="Sheet Name", update=_update_table_or_sheet_name)
+
     def init(self, context):
         self.inputs.new('MaStroScheduleTableSocketType', "Table")
+        self.inputs.new('MaStroScheduleStringSocketType', "Sheet Name").prop_name = "table_or_sheet_name"
         self.outputs.new('MaStroScheduleSheetSocketType', "Sheet")
 
     def evaluate(self, inputs):

@@ -2,6 +2,7 @@ from .sockets import (
     MaStroScheduleDataSocket,
     MaStroScheduleAttributeRefSocket,
     MaStroScheduleColumnSocket,
+    MaStroScheduleMultiColumnSocket,
     MaStroScheduleAnySocket,
     MaStroScheduleTableSocket,
     MaStroScheduleSheetSocket,
@@ -20,6 +21,7 @@ from .properties import (
     MaStro_schedule_table_column,
     MaStro_schedule_table_merge,
     MaStro_schedule_join_table_item,
+    MaStro_schedule_export_sheet_item,
 )
 from .operators import (
     MASTRO_UL_schedule_keys,
@@ -30,6 +32,9 @@ from .operators import (
     MASTRO_OT_Schedule_Category_Lookup_Remove,
     MASTRO_UL_schedule_join_tables,
     MASTRO_OT_Schedule_Join_Tables_Move,
+    MASTRO_UL_schedule_export_sheets,
+    MASTRO_OT_Schedule_Export_Sheets_Move,
+    MASTRO_OT_Schedule_Excel_Export,
     MASTRO_OT_Schedule_Force_Refresh,
 )
 from .panel import MASTRO_PT_Schedule_Tools
@@ -58,6 +63,8 @@ from .nodes_table_sheet import MaStroScheduleTableSheetNode
 from .nodes_sheet_move import MaStroScheduleSheetMoveNode
 from .nodes_sheet_place import MaStroScheduleSheetPlaceNode
 from .nodes_sheet_background import MaStroScheduleSheetBackgroundNode
+from .nodes_sheet_grid import MaStroScheduleSheetGridNode
+from .nodes_excel_export import MaStroScheduleExcelExportNode
 from .nodes_table_hide_zero import MaStroScheduleTableHideZeroNode
 from .nodes_table_prefix_suffix import MaStroScheduleTablePrefixSuffixNode
 from .nodes_table_case import MaStroScheduleTableCaseNode
@@ -67,6 +74,8 @@ from .nodes_table_row_colour import MaStroScheduleTableRowColourNode
 from .nodes_table_row_pattern import MaStroScheduleTableRowPatternNode
 from .nodes_id_keys import MaStroScheduleGetIdKeysNode, MASTRO_OT_Schedule_Pick_Id_Key
 from .nodes_aggregate_column import MaStroScheduleAggregateColumnNode
+from .nodes_pivot import MaStroSchedulePivotNode
+from .nodes_multicolumn_convert import MaStroScheduleMultiColumnToTableNode
 from .nodes_flatten_key import MaStroScheduleFlattenKeyNode
 from .nodes_groupby_column import (
     MaStroScheduleGroupByColumnNode,
@@ -91,9 +100,11 @@ classes = (
     MaStro_schedule_table_column,
     MaStro_schedule_table_merge,
     MaStro_schedule_join_table_item,
+    MaStro_schedule_export_sheet_item,
     MaStroScheduleDataSocket,
     MaStroScheduleAttributeRefSocket,
     MaStroScheduleColumnSocket,
+    MaStroScheduleMultiColumnSocket,
     MaStroScheduleAnySocket,
     MaStroScheduleTableSocket,
     MaStroScheduleSheetSocket,
@@ -111,6 +122,9 @@ classes = (
     MASTRO_OT_Schedule_Category_Lookup_Remove,
     MASTRO_UL_schedule_join_tables,
     MASTRO_OT_Schedule_Join_Tables_Move,
+    MASTRO_UL_schedule_export_sheets,
+    MASTRO_OT_Schedule_Export_Sheets_Move,
+    MASTRO_OT_Schedule_Excel_Export,
     MASTRO_OT_Schedule_Force_Refresh,
     MASTRO_PT_Schedule_Tools,
     MaStroScheduleInputAllNode,
@@ -142,6 +156,8 @@ classes = (
     MaStroScheduleSheetMoveNode,
     MaStroScheduleSheetPlaceNode,
     MaStroScheduleSheetBackgroundNode,
+    MaStroScheduleSheetGridNode,
+    MaStroScheduleExcelExportNode,
     MaStroScheduleTableHideZeroNode,
     MaStroScheduleTablePrefixSuffixNode,
     MaStroScheduleTableCaseNode,
@@ -152,6 +168,8 @@ classes = (
     MaStroScheduleGetIdKeysNode,
     MASTRO_OT_Schedule_Pick_Id_Key,
     MaStroScheduleAggregateColumnNode,
+    MaStroSchedulePivotNode,
+    MaStroScheduleMultiColumnToTableNode,
     MaStroScheduleFlattenKeyNode,
     MaStroScheduleGroupByColumnNode,
     MaStroScheduleItemFromListNode,
