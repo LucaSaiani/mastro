@@ -15,9 +15,9 @@ class MaStroScheduleValueNode(MaStroScheduleTreeNode, Node):
     value: FloatProperty(name="Value", update=update_node)
 
     def init(self, context):
-        # No instance name ("Number Column" would read oddly on a node
-        # whose whole point is feeding a plain number into something
-        # like Table's Rows - the user's own call) - the socket TYPE is
+        # No instance name ("Column" would read oddly on a node whose
+        # whole point is feeding a plain number into something like
+        # Table's Rows - the user's own call) - the socket TYPE is
         # still MaStroScheduleColumnSocketType (stays compatible with
         # every input that expects one, e.g. Math's A/B, Table's
         # Rows/Columns), only the label next to the output dot is empty.

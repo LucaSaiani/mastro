@@ -121,13 +121,13 @@ class MaStroScheduleAnySocket(NodeSocket):
 class MaStroScheduleColumnSocket(NodeSocket):
     """Socket carrying a single Column (one attribute's worth of data)"""
     bl_idname = 'MaStroScheduleColumnSocketType'
-    # bl_label only - the displayed text, not the class/bl_idname (kept
-    # as "Column" everywhere in code/comments, this is purely the
-    # user-facing name). "Number Column" to leave room for a future
-    # "String Column" socket type without "Column" alone being ambiguous
-    # about what kind of data it carries - applies the same way whether
-    # the Column holds one row (e.g. the Value node's constant) or many.
-    bl_label = "Number Column"
+    # bl_label only - the displayed text, not the class/bl_idname.
+    # Used to be "Number Column", to leave room for a future "String
+    # Column" socket type - dropped (the user's own call): this same
+    # socket already carries text values fine too (e.g. a future "use"
+    # Column), so a separate String Column type was never actually
+    # needed, and "Number Column" was misleading about that.
+    bl_label = "Column"
 
     # Native Blender mechanism (NodeSocket.prop_name, not Sverchok-
     # specific - Blender's own socket types use the same thing): a node
@@ -166,9 +166,56 @@ class MaStroScheduleColumnSocket(NodeSocket):
         return (161 / 255, 161 / 255, 161 / 255, 1.0)
 
 
+# A list of groups, as produced by Group Into List (see
+# nodes_groupby_column.py) - each group is {"key": <id key's value for
+# this group>, "rows": [...]}, "rows" being a list of ordinary Column
+# rows (still carrying every id key except the chosen Id Key, untouched
+# - not yet aggregated). A darker shade (0.6x value) of
+# MaStroScheduleColumnSocket's own gray (161,161,161) - the user's own
+# call, distinct enough to read as "not a plain Column" while still
+# visually related, the same relationship MaStroScheduleAttributeRefSocket's
+# color already has to String's (0.7x value, same hue).
+class MaStroScheduleListSocket(NodeSocket):
+    """Socket carrying a list of groups, each holding its own list of
+    Column rows"""
+    bl_idname = 'MaStroScheduleListSocketType'
+    bl_label = "List"
+
+    def draw(self, context, layout, node, text):
+        layout.label(text=text)
+
+    @classmethod
+    def draw_color_simple(cls):
+        return (97 / 255, 97 / 255, 97 / 255, 1.0)
+
+
+# A reference to one id key (e.g. "_Object", "_Level") on a Column - as
+# produced by Get Id Keys (see nodes_id_keys.py) and consumed by
+# Aggregate/Flatten Key/Group Into List/Accumulate's own "Id Key" input,
+# instead of each of those nodes hardcoding its own search-popup-only
+# picker independently. Kept as its own dedicated socket type rather
+# than reusing String - the user's own call: a distinct color makes a
+# wrong/missing connection here easy to spot at a glance while
+# debugging, the same reasoning MaStroScheduleStringSocket itself was
+# kept separate from MaStroScheduleColumnSocket's generic prop_name
+# mechanism for.
+class MaStroScheduleIdKeySocket(NodeSocket):
+    """Socket carrying a reference to one id key on a Column (e.g.
+    "Object_id", "Level_id")"""
+    bl_idname = 'MaStroScheduleIdKeySocketType'
+    bl_label = "Id Key"
+
+    def draw(self, context, layout, node, text):
+        layout.label(text=text)
+
+    @classmethod
+    def draw_color_simple(cls):
+        return (214 / 255, 138 / 255, 89 / 255, 1.0)
+
+
 # A single constant string, as produced by the String node (see
 # nodes_string.py) - fed into e.g. a Rename Header node's String input
-# (renames a Number Column's header) or a Table primitive's/Edit
+# (renames a Column's header) or a Table primitive's/Edit
 # Header's Title input (nodes_table_primitive.py/
 # nodes_table_edit_header.py), kept as its own dedicated socket type
 # rather than reusing MaStroScheduleColumnSocket's generic prop_name

@@ -73,6 +73,7 @@ class NODE_MT_mastro_schedule_primitives_operations(bpy.types.Menu):
         _add_node(self.layout, "MaStroScheduleConvertColumnToTable", "Column to Table")
         _add_node(self.layout, "MaStroScheduleHeader", "Rename Header")
         _add_node(self.layout, "MaStroScheduleTableHeader", "Edit Header")
+        _add_node(self.layout, "MaStroScheduleAggregateColumn", "Aggregate")
 
 
 class NODE_MT_mastro_schedule_primitives(bpy.types.Menu):
@@ -99,6 +100,7 @@ class NODE_MT_mastro_schedule_attribute(bpy.types.Menu):
     def draw(self, context):
         _add_node(self.layout, "MaStroScheduleGetAttributeNames", "Get Attribute Names")
         _add_node(self.layout, "MaStroScheduleEvaluateAttribute", "Evaluate Attribute")
+        _add_node(self.layout, "MaStroScheduleGetIdKeys", "Get Id Keys")
 
 
 class NODE_MT_mastro_schedule_utilities_maths(bpy.types.Menu):
@@ -107,6 +109,17 @@ class NODE_MT_mastro_schedule_utilities_maths(bpy.types.Menu):
 
     def draw(self, context):
         _add_node(self.layout, "MaStroScheduleMath", "Math")
+        _add_node(self.layout, "MaStroScheduleAccumulate", "Accumulate")
+
+
+class NODE_MT_mastro_schedule_utilities_list(bpy.types.Menu):
+    bl_idname = "NODE_MT_mastro_schedule_utilities_list"
+    bl_label = "List"
+
+    def draw(self, context):
+        _add_node(self.layout, "MaStroScheduleGroupByColumn", "Group Into List")
+        _add_node(self.layout, "MaStroScheduleItemFromList", "Item from List")
+        _add_node(self.layout, "MaStroScheduleListLength", "List Length")
 
 
 class NODE_MT_mastro_schedule_utilities(bpy.types.Menu):
@@ -115,6 +128,7 @@ class NODE_MT_mastro_schedule_utilities(bpy.types.Menu):
 
     def draw(self, context):
         self.layout.menu(NODE_MT_mastro_schedule_utilities_maths.bl_idname)
+        self.layout.menu(NODE_MT_mastro_schedule_utilities_list.bl_idname)
 
 
 class NODE_MT_mastro_schedule_wip(bpy.types.Menu):
@@ -122,6 +136,7 @@ class NODE_MT_mastro_schedule_wip(bpy.types.Menu):
     bl_label = "WIP"
 
     def draw(self, context):
+        _add_node(self.layout, "MaStroScheduleFlattenKey", "Flatten Key")
         _add_node(self.layout, "MaStroScheduleFilter", "Filter")
         _add_node(self.layout, "MaStroScheduleGroupBy", "Group By")
         _add_node(self.layout, "MaStroScheduleAggregate", "Aggregate")
@@ -141,6 +156,7 @@ _menu_classes = (
     NODE_MT_mastro_schedule_primitives_operations,
     NODE_MT_mastro_schedule_primitives,
     NODE_MT_mastro_schedule_utilities_maths,
+    NODE_MT_mastro_schedule_utilities_list,
     NODE_MT_mastro_schedule_utilities,
     NODE_MT_mastro_schedule_wip,
 )

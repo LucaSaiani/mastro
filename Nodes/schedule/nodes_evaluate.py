@@ -120,7 +120,7 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
     def init(self, context):
         self.inputs.new('MaStroScheduleDataSocketType', "Data")
         self.inputs.new('MaStroScheduleAttributeRefSocketType', "Attribute Name")
-        self.outputs.new('MaStroScheduleColumnSocketType', "Number Column")
+        self.outputs.new('MaStroScheduleColumnSocketType', "Column")
 
     @property
     def column_label(self):

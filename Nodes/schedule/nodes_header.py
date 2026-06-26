@@ -5,15 +5,15 @@ from .tree import MaStroScheduleTreeNode
 from .execution import update_node
 
 
-# Renames a Number Column's header independently of the node that
-# produced it - the same separation of concerns as Math (transforms a
-# Column's value without taking over its identity): this transforms a
-# Column's label without touching its rows or data key. The new header
-# comes from a String input rather than a property on this node itself,
-# so the same name can be typed once (on a String node) and reused
-# across several Header nodes.
+# Renames a Column's header independently of the node that produced it -
+# the same separation of concerns as Math (transforms a Column's value
+# without taking over its identity): this transforms a Column's label
+# without touching its rows or data key. The new header comes from a
+# String input rather than a property on this node itself, so the same
+# name can be typed once (on a String node) and reused across several
+# Header nodes.
 class MaStroScheduleHeaderNode(MaStroScheduleTreeNode, Node):
-    """Rename a column header, on a Number Column"""
+    """Rename a column header, on a Column"""
     bl_idname = 'MaStroScheduleHeader'
     bl_label = 'Rename Header'
 
@@ -32,9 +32,9 @@ class MaStroScheduleHeaderNode(MaStroScheduleTreeNode, Node):
     string_value: StringProperty(name="String", update=update_node)
 
     def init(self, context):
-        self.inputs.new('MaStroScheduleColumnSocketType', "Number Column")
+        self.inputs.new('MaStroScheduleColumnSocketType', "Column")
         self.inputs.new('MaStroScheduleStringSocketType', "String").prop_name = "string_value"
-        self.outputs.new('MaStroScheduleColumnSocketType', "Number Column")
+        self.outputs.new('MaStroScheduleColumnSocketType', "Column")
 
     @property
     def column_label(self):
@@ -48,7 +48,7 @@ class MaStroScheduleHeaderNode(MaStroScheduleTreeNode, Node):
         # that case.
         if not self.cached_header_text:
             from .tree import upstream_attr
-            return upstream_attr(self.inputs["Number Column"], "column_label")
+            return upstream_attr(self.inputs["Column"], "column_label")
         return self.cached_header_text
 
     def evaluate(self, inputs):

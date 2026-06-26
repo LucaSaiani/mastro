@@ -40,7 +40,7 @@ class MaStroScheduleColumnPrimitiveNode(MaStroScheduleTreeNode, Node):
         # before the cosmetic one that just labels it).
         self.inputs.new('MaStroScheduleColumnSocketType', "Rows").prop_name = "row_count"
         self.inputs.new('MaStroScheduleStringSocketType', "Title").prop_name = "header"
-        self.outputs.new('MaStroScheduleColumnSocketType', "Number Column")
+        self.outputs.new('MaStroScheduleColumnSocketType', "Column")
 
     @property
     def column_label(self):

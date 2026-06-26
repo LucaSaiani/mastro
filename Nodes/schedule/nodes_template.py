@@ -72,7 +72,7 @@ class MaStroScheduleTemplateNode(MaStroScheduleTreeNode, Node):
     #     if "A" not in self.inputs:
     #         return ""  # or whatever this property's safe default is
 
-    # === column_label (only if this node outputs a Number Column) ===
+    # === column_label (only if this node outputs a Column) ===
     # Every Column-producing node exposes a `column_label` @property -
     # not a method named `label`, which collides with bpy.types.Node's
     # own native `label` attribute (a same-named Python @property
@@ -83,7 +83,7 @@ class MaStroScheduleTemplateNode(MaStroScheduleTreeNode, Node):
 
     def init(self, context):
         self.inputs.new('MaStroScheduleColumnSocketType', "A").prop_name = "value_a"
-        self.outputs.new('MaStroScheduleColumnSocketType', "Number Column")
+        self.outputs.new('MaStroScheduleColumnSocketType', "Column")
 
     def evaluate(self, inputs):
         a_linked = self.inputs["A"].is_linked

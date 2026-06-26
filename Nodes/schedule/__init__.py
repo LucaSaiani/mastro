@@ -7,6 +7,8 @@ from .sockets import (
     MaStroScheduleStringSocket,
     MaStroScheduleColorSocket,
     MaStroScheduleBooleanSocket,
+    MaStroScheduleListSocket,
+    MaStroScheduleIdKeySocket,
 )
 from .tree import MaStroScheduleTree, start_polling, stop_polling
 from .properties import (
@@ -46,12 +48,22 @@ from .nodes_table_edit_header import MaStroScheduleTableHeaderNode
 from .nodes_lookup import MaStroScheduleCategoryLookupNode, MaStroScheduleMatrixLookupNode
 from .nodes_table import MaStroScheduleTableDataNode, MaStroScheduleFlattenNode
 from .nodes_table_convert import MaStroScheduleConvertColumnToTableNode
+from .nodes_id_keys import MaStroScheduleGetIdKeysNode, MASTRO_OT_Schedule_Pick_Id_Key
+from .nodes_aggregate_column import MaStroScheduleAggregateColumnNode
+from .nodes_flatten_key import MaStroScheduleFlattenKeyNode
+from .nodes_groupby_column import (
+    MaStroScheduleGroupByColumnNode,
+    MaStroScheduleItemFromListNode,
+    MaStroScheduleListLengthNode,
+)
+from .nodes_accumulate import MaStroScheduleAccumulateNode
 from .nodes_viewer import (
     MaStroScheduleViewerNode,
     register_viewer_draw_handler,
     unregister_viewer_draw_handler,
 )
 from . import menus
+from . import nodes_math
 
 
 classes = (
@@ -69,6 +81,8 @@ classes = (
     MaStroScheduleStringSocket,
     MaStroScheduleColorSocket,
     MaStroScheduleBooleanSocket,
+    MaStroScheduleListSocket,
+    MaStroScheduleIdKeySocket,
     MaStroScheduleTree,
     MASTRO_UL_schedule_keys,
     MASTRO_OT_Schedule_GroupBy_Key_Add,
@@ -101,11 +115,20 @@ classes = (
     MaStroScheduleTableDataNode,
     MaStroScheduleFlattenNode,
     MaStroScheduleConvertColumnToTableNode,
+    MaStroScheduleGetIdKeysNode,
+    MASTRO_OT_Schedule_Pick_Id_Key,
+    MaStroScheduleAggregateColumnNode,
+    MaStroScheduleFlattenKeyNode,
+    MaStroScheduleGroupByColumnNode,
+    MaStroScheduleItemFromListNode,
+    MaStroScheduleListLengthNode,
+    MaStroScheduleAccumulateNode,
     MaStroScheduleViewerNode,
 )
 
 
 def register():
+    nodes_math.register()
     menus.register()
     register_viewer_draw_handler()
     start_polling()
@@ -115,3 +138,4 @@ def unregister():
     stop_polling()
     unregister_viewer_draw_handler()
     menus.unregister()
+    nodes_math.unregister()

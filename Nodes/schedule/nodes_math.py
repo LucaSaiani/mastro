@@ -1,7 +1,8 @@
 import math
 
-from bpy.types import Node
-from bpy.props import EnumProperty, IntProperty, FloatProperty
+import bpy
+from bpy.types import Node, Operator
+from bpy.props import EnumProperty, IntProperty, FloatProperty, StringProperty
 
 from .tree import MaStroScheduleTreeNode
 from .execution import update_node
@@ -42,10 +43,94 @@ OPERATION_ITEMS = [
 
 OPERATION_LABELS = {identifier: label for identifier, label, _ in OPERATION_ITEMS}
 
+# Grouped the same way the old, never-registered prototype menu did
+# (mastro_schedule.py's commented-out MaStro_MathMenu: "Functions"/
+# "Comparison"/"Rounding" columns) and the way Geometry Nodes/Sverchok's
+# own Math node group their own operation lists - PROTOTYPE, built so the
+# user can re-try this in the editor and recall what specifically didn't
+# work about it last time, not yet a settled design.
+OPERATION_CATEGORIES = [
+    ("Functions", ('ADD', 'SUBTRACT', 'MULTIPLY', 'DIVIDE', 'POWER', 'LOGARITHM',
+                   'SQRT', 'INVERSE_SQRT', 'ABSOLUTE', 'EXPONENT')),
+    ("Comparison", ('MINIMUM', 'MAXIMUM', 'LESS_THAN', 'GREATER_THAN', 'COMPARE')),
+    ("Rounding", ('ROUND', 'FLOOR', 'CEIL', 'TRUNCATE')),
+]
+
 
 def _on_operation_changed(self, context):
     self.update_sockets()
     update_node(self, context)
+
+
+class NODE_OT_mastro_schedule_math_set_operation(Operator):
+    """Set this Math node's operation"""
+    bl_idname = "node.mastro_schedule_math_set_operation"
+    bl_label = "Set Operation"
+    bl_options = {'INTERNAL'}
+
+    tree_name: StringProperty()
+    node_name: StringProperty()
+    operation: StringProperty()
+
+    def execute(self, context):
+        tree = bpy.data.node_groups.get(self.tree_name)
+        node = tree.nodes.get(self.node_name) if tree is not None else None
+        if node is not None:
+            node.operation = self.operation
+        return {'FINISHED'}
+
+
+def _draw_operation_category(layout, node, operation_ids):
+    """One column's worth of plain text buttons, each setting
+    `node.operation` through NODE_OT_mastro_schedule_math_set_operation -
+    layout.operator(), not prop_enum (which always draws its own radio
+    "bullet" next to every entry, confirmed disliked live: "odiavo i
+    pallini!") - mirrors menus.py's own _add_node/node.add_node, a plain
+    operator button with no such bullet, just text (and an icon if one
+    were set)."""
+    for identifier in operation_ids:
+        op = layout.operator(
+            "node.mastro_schedule_math_set_operation",
+            text=OPERATION_LABELS[identifier],
+            depress=node.operation == identifier,
+        )
+        op.tree_name = node.id_data.name
+        op.node_name = node.name
+        op.operation = identifier
+
+
+class NODE_MT_mastro_schedule_math_operation(bpy.types.Menu):
+    """Popup menu for Math's operation - PROTOTYPE, replacing the plain
+    layout.prop(self, "operation") dropdown with a nested, categorized
+    menu (Functions/Comparison/Rounding) the same way menus.py's Add menu
+    replaces nodeitems_utils' flat categories. context.node is read here
+    (this menu has no other way to know which Math node opened it) - same
+    assumption node_add_menu.py's own context.space_data makes about
+    which node tree is active."""
+    bl_idname = "NODE_MT_mastro_schedule_math_operation"
+    bl_label = "Operation"
+
+    def draw(self, context):
+        node = context.node
+        layout = self.layout
+        row = layout.row()
+        for category_label, operation_ids in OPERATION_CATEGORIES:
+            col = row.column()
+            col.label(text=category_label)
+            _draw_operation_category(col, node, operation_ids)
+
+
+_menu_classes = (NODE_OT_mastro_schedule_math_set_operation, NODE_MT_mastro_schedule_math_operation)
+
+
+def register():
+    for cls in _menu_classes:
+        bpy.utils.register_class(cls)
+
+
+def unregister():
+    for cls in reversed(_menu_classes):
+        bpy.utils.unregister_class(cls)
 
 
 # Single-Column math, ported from the old Table-based Math node
@@ -99,7 +184,7 @@ class MaStroScheduleMathNode(MaStroScheduleTreeNode, Node):
     def init(self, context):
         self.inputs.new('MaStroScheduleColumnSocketType', "A").prop_name = "value_a"
         self.inputs.new('MaStroScheduleColumnSocketType', "B").prop_name = "value_b"
-        self.outputs.new('MaStroScheduleColumnSocketType', "Number Column")
+        self.outputs.new('MaStroScheduleColumnSocketType', "Column")
         self.update_sockets()
 
     def update_sockets(self):
@@ -130,7 +215,12 @@ class MaStroScheduleMathNode(MaStroScheduleTreeNode, Node):
         return upstream_attr(self.inputs["A"], "column_label")
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, "operation", text="")
+        # PROTOTYPE - layout.menu() opening NODE_MT_mastro_schedule_math_operation
+        # (a categorized Functions/Comparison/Rounding popup) instead of
+        # the plain layout.prop(self, "operation") dropdown this used to
+        # be - try this and compare against the plain dropdown to recall
+        # what didn't work about the nested-menu version tried before.
+        layout.menu("NODE_MT_mastro_schedule_math_operation", text=OPERATION_LABELS[self.operation])
         if self.operation in DIGITS_OPERATIONS:
             layout.prop(self, "digits")
 

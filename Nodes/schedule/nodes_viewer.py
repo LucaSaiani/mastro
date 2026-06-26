@@ -17,7 +17,12 @@ from ... import Icons as icons
 
 
 CELL_WIDTH = 120
+# Used by _draw_table_overlay (Table) only - _draw_node_table
+# (Column/List) uses COLUMN_NODE_GAP below instead, the user's own call:
+# the visible empty strip this left between the node and its own
+# overlay read as wrong specifically for Column/List, not for Table.
 NODE_GAP = 4
+COLUMN_NODE_GAP = 0
 # Row numbers in a Table overlay (_draw_table_overlay) never go past two
 # digits in practice (see that function's reasoning) - "0" sets a flat,
 # content-independent width for that left-hand band, shared with
@@ -39,11 +44,35 @@ def _row_label_width(font_id):
 
 
 def _header_text(name):
-    """Capitalize a column header's first letter for display - the
-    underlying column name/key (e.g. "area", a Get Attribute Names
-    value) stays lowercase everywhere else (data, lookups, joins); this
-    only affects what's drawn."""
-    return name[:1].upper() + name[1:] if name else name
+    """Capitalize a column header's first letter for display, and -
+    for an id key (e.g. "_Object", "_Face") - strip the leading "_" and
+    append "_id" (so "_Object" reads "Object_id") - the user's own call:
+    leading-underscore "_Object" reads as an internal implementation
+    detail, "Object_id" reads as what it actually is, a stable row
+    identity rather than a regular data value. The underlying column
+    name/key stays exactly as-is everywhere else (data, lookups, joins)
+    - this only affects what's drawn here and in nodes_id_keys.py's own
+    Get Id Keys picker, which calls this same function for the same
+    reason."""
+    if not name:
+        return name
+    if name.startswith("_"):
+        return name[1:] + "_id"
+    return name[:1].upper() + name[1:]
+
+
+def _cell_text(value):
+    """Same str() every cell value already went through, except a float
+    is formatted to 2 decimal places first - plain str(float) shows
+    IEEE754's own binary-representation noise (e.g. 0.3 typed into a
+    Value node coming back as "0.299999999999999989..."), not a problem
+    with the user's own data, just how Python's float repr works. The
+    underlying value itself is untouched (no rounding happens to
+    anything actually used in a calculation) - this only formats what's
+    drawn here."""
+    if isinstance(value, float):
+        return f"{value:.2f}"
+    return str(value)
 
 
 def _srgb_color(*channels):
@@ -113,6 +142,14 @@ class MaStroScheduleViewerNode(MaStroScheduleTreeNode, Node):
     # function to call, since a Viewer can be replugged from a Column to
     # a Table input (or vice versa) without re-running init().
     showing_table: BoolProperty(default=False)
+    # Set when the linked input is a List (Group Into List's own output,
+    # see nodes_groupby_column.py) - both this and showing_table False
+    # means "showing a plain Column", the only case the Show Id Columns
+    # toggle below actually does anything for (see that property's own
+    # comment for why Table's collapsed/expanded id columns has no
+    # equivalent concept for a List either - "Key"/"Rows" are two fixed
+    # columns, not a variable-length run of id columns to collapse).
+    showing_list: BoolProperty(default=False)
     show_table: BoolProperty(name="Show Table", default=True, update=_on_show_table_changed)
     # Number of leading id columns (Object, and one of Face/Edge/Vertex/
     # Level) among `columns`, computed in evaluate() - used by
@@ -158,8 +195,46 @@ class MaStroScheduleViewerNode(MaStroScheduleTreeNode, Node):
         if from_node is not None and from_socket.bl_idname == 'MaStroScheduleTableSocketType':
             self._evaluate_table(inputs[0] or {"columns": [], "merges": []})
             self.showing_table = True
+            self.showing_list = False
             return []
         self.showing_table = False
+
+        # A List (Group Into List's own output, see nodes_groupby_column.py)
+        # has no flat-dict-row shape at all - each element is {"key": ...,
+        # "rows": [...]}, the rows themselves still full Column rows, not
+        # meant to be flattened/dumped raw into the grid below (confirmed
+        # live: doing nothing here showed Python repr() text for "Rows",
+        # unreadable). Reused as an ordinary 2-column table instead of a
+        # dedicated storage/draw path the way Table got (_evaluate_table/
+        # _draw_table_overlay) - the user's own call: just Key + a row
+        # COUNT is enough here, drilling into a group's actual rows is
+        # already Item from List's job, not the Viewer's.
+        if from_node is not None and from_socket.bl_idname == 'MaStroScheduleListSocketType':
+            groups = inputs[0] or []
+            self.showing_list = True
+            # "Key" colored the SAME as "Rows" (the data color), not the
+            # id color a Column's own id columns get - the user's own
+            # reversal of an earlier call: the id color visually implies
+            # "this is part of a collapsible run of id columns", but a
+            # List's expand/collapse toggle is deliberately hidden (see
+            # draw_buttons' has_extra_id_columns check) - showing the id
+            # color anyway would be a false promise of an interaction
+            # that doesn't exist here.
+            self.id_column_count = 0
+            self.columns.clear()
+            self.columns.add().name = "Key"
+            self.columns.add().name = "Rows"
+            self.rows.clear()
+            for group in groups:
+                row_item = self.rows.add()
+                key_cell = row_item.cells.add()
+                key_cell.name = "Key"
+                key_cell.value = str(group.get("key", ""))
+                count_cell = row_item.cells.add()
+                count_cell.name = "Rows"
+                count_cell.value = str(len(group.get("rows", [])))
+            return []
+        self.showing_list = False
 
         # Column rows have a non-id data key that's the upstream node's
         # own node.name, not a readable name - relabeled here using that
@@ -249,7 +324,7 @@ class MaStroScheduleViewerNode(MaStroScheduleTreeNode, Node):
             for name in column_names:
                 cell = row_item.cells.add()
                 cell.name = name[1:] if name in underscore_id_keys else name
-                cell.value = str(row.get(name, ""))
+                cell.value = _cell_text(row.get(name, ""))
 
         return []
 
@@ -307,14 +382,32 @@ class MaStroScheduleViewerNode(MaStroScheduleTreeNode, Node):
         row = layout.row()
         row.prop(self, "show_table", text="", icon='HIDE_OFF' if self.show_table else 'HIDE_ON', emboss=False)
         row.prop(self, "visible_rows", text="")
-        # Id columns (Object/Face/Edge/Vertex/Level) are a Column/Data
-        # concept - a Table has already discarded that identity (see
-        # sockets.py:MaStroScheduleTableSocket), so there's nothing for
-        # this toggle to collapse when showing one. Hidden rather than
-        # just disabled - greyed out but still present would invite
-        # clicking it to see what it does, only to find out it does
-        # nothing for this input.
-        if not self.showing_table:
+        # General rule: only worth showing when there's at least one id
+        # column AND at least one data column beyond those - otherwise
+        # collapsing/expanding has nothing meaningful left to change
+        # (covers Value/Integer/List Length/... automatically: a single
+        # one-row Column with no id keys at all has id_column_count==0,
+        # no per-node special-casing needed for any of them).
+        #
+        # showing_table/showing_list stay as their own explicit
+        # exceptions on top of that rule, not folded into it - Table has
+        # already discarded the id-key concept entirely (see sockets.py:
+        # MaStroScheduleTableSocket), and List's "Key"/"Rows" are two
+        # fixed columns, not a variable-length run of id columns, so
+        # collapsing "Key" alone would leave a Viewer showing only a
+        # column of row counts with no idea which group each one
+        # belongs to - both would otherwise satisfy the general rule
+        # above on a technicality. The user's own explicit call, to keep
+        # future new shapes from silently growing this exception list:
+        # a new socket type needs an actual reason like these two before
+        # earning a third one, not just "it happens to have id_column_count
+        # > 0 the same way Column does".
+        #
+        # Hidden rather than just disabled in every case - greyed out
+        # but still present would invite clicking it to see what it
+        # does, only to find out it does nothing for this input.
+        has_extra_id_columns = self.id_column_count > 0 and len(self.columns) > self.id_column_count
+        if has_extra_id_columns and not self.showing_table and not self.showing_list:
             # Custom icons (Icons/node_viewer_expand.svg, Icons/
             # node_viewer_collapse.svg - placeholders copied from xy_on/
             # xy_off.svg, meant to be redrawn) - not +/- or
@@ -348,9 +441,15 @@ def _draw_node_table(node, is_active=True):
     columns = [c.name for c in node.columns]
     # "Show Id Columns" off hides the id columns (Object/Face/Edge/
     # Vertex/Level) entirely - not just shrunk, not drawn at all - so
-    # only the actual data column(s) take up space in the overlay.
+    # only the actual data column(s) take up space in the overlay. Does
+    # NOT apply to a List's own "Key" column even while show_id_columns
+    # is at its normal default of False - the toggle controlling it is
+    # hidden for a List (draw_buttons' own has_extra_id_columns check),
+    # so there's no way for the user to ever turn it back on; confirmed
+    # live as a real bug otherwise, "Key" silently missing from every
+    # List Viewer with show_id_columns left at its default.
     id_column_count = node.id_column_count
-    if not node.show_id_columns:
+    if not node.show_id_columns and not node.showing_list:
         columns = columns[id_column_count:]
         id_column_count = 0
     if not columns:
@@ -362,7 +461,7 @@ def _draw_node_table(node, is_active=True):
 
     abs_x, abs_y = _node_abs_location(node)
     ui_scale = bpy.context.preferences.system.ui_scale
-    origin_x = (abs_x + node.width + NODE_GAP) * ui_scale
+    origin_x = (abs_x + node.width + COLUMN_NODE_GAP) * ui_scale
     origin_y = abs_y * ui_scale
 
     # Headers and rows are two independent color groups, each split

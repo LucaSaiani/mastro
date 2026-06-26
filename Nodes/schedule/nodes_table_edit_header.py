@@ -10,9 +10,10 @@ from .execution import update_node
 # layout.prop_enum() actually accepts icon_value for a custom preview
 # icon the same way layout.prop() does (likely yes, going by Blender's
 # own rna_ui_api.cc, but not verified live, and a plain dropdown carries
-# zero risk either way). The three custom icon SVGs (Icons/align_left.svg
-# etc.) are still on disk, ready to wire in later if this is ever worth
-# revisiting.
+# zero risk either way). The three custom icon SVGs this would have used
+# were removed (the user's call - no point keeping unused assets around)
+# rather than left on disk; revisit from scratch if this is ever worth
+# trying again.
 ALIGNMENT_ITEMS = [
     ('LEFT', "Left", "Align text to the left"),
     ('CENTER', "Center", "Center text"),
@@ -37,7 +38,7 @@ def _mark_touched(flag_name):
 # Edits one column's header in a Table (text, background, text colour
 # and alignment) - the Table equivalent of Rename Header
 # (nodes_header.py), kept as a separate node rather than one node that
-# branches on whatever's plugged into its first input (Number Column vs
+# branches on whatever's plugged into its first input (Column vs
 # Table): Column and Table have stayed two distinct concepts everywhere
 # else in this tree, and the code here is small enough that the
 # duplication is cheaper than a node whose shape changes depending on
