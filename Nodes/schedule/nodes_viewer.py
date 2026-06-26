@@ -69,7 +69,21 @@ def _cell_text(value):
     with the user's own data, just how Python's float repr works. The
     underlying value itself is untouched (no rounding happens to
     anything actually used in a calculation) - this only formats what's
-    drawn here."""
+    drawn here.
+
+    A zero value renders as an empty string instead, unless the
+    schedule_show_zero_values preference is on - the same convention
+    Excel's own "Show a zero in cells that have zero value" checkbox
+    follows (File > Options > Advanced > Display options for this
+    worksheet). Exists for cases like an undercroft floor's area
+    (Evaluate Attribute deliberately zeroes it, see nodes_evaluate.py),
+    where "0.00" reads as a real measured zero rather than "not
+    applicable here" - blank reads as the latter, which is usually what's
+    meant. Only a literal 0/0.0 is affected - "" (already blank) and
+    non-numeric values pass through unchanged either way."""
+    if isinstance(value, (int, float)) and not isinstance(value, bool) and value == 0:
+        if not get_prefs().schedule_show_zero_values:
+            return ""
     if isinstance(value, float):
         return f"{value:.2f}"
     return str(value)
