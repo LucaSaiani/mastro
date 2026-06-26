@@ -20,23 +20,29 @@ class MaStroScheduleTablePrefixSuffixNode(MaStroScheduleTreeNode, Node):
 
     prefix: StringProperty(name="Prefix", update=update_node)
     suffix: StringProperty(name="Suffix", update=update_node)
-    start_index: IntProperty(name="Start Index", default=0, min=0, update=update_node)
-    end_index: IntProperty(name="End Index", default=0, min=0, update=update_node)
+    start_index: IntProperty(
+        name="Start Column Index", default=0, min=0, update=update_node,
+        description="First column to apply this to - equal to End Column Index for just one column",
+    )
+    end_index: IntProperty(
+        name="End Column Index", default=0, min=0, update=update_node,
+        description="Last column to apply this to (inclusive) - equal to Start Column Index for just one column",
+    )
 
     def init(self, context):
         self.inputs.new('MaStroScheduleTableSocketType', "Table")
+        self.inputs.new('MaStroScheduleColumnSocketType', "Start Column Index").prop_name = "start_index"
+        self.inputs.new('MaStroScheduleColumnSocketType', "End Column Index").prop_name = "end_index"
         self.inputs.new('MaStroScheduleStringSocketType', "Prefix").prop_name = "prefix"
         self.inputs.new('MaStroScheduleStringSocketType', "Suffix").prop_name = "suffix"
-        self.inputs.new('MaStroScheduleColumnSocketType', "Start Index").prop_name = "start_index"
-        self.inputs.new('MaStroScheduleColumnSocketType', "End Index").prop_name = "end_index"
         self.outputs.new('MaStroScheduleTableSocketType', "Table")
 
     def evaluate(self, inputs):
         table = inputs[0] or {"columns": [], "merges": []}
-        prefix = inputs[1] if self.inputs["Prefix"].is_linked else self.prefix
-        suffix = inputs[2] if self.inputs["Suffix"].is_linked else self.suffix
-        start_index = resolve_index(self.inputs["Start Index"], inputs[3], self.start_index)
-        end_index = resolve_index(self.inputs["End Index"], inputs[4], self.end_index)
+        start_index = resolve_index(self.inputs["Start Column Index"], inputs[1], self.start_index)
+        end_index = resolve_index(self.inputs["End Column Index"], inputs[2], self.end_index)
+        prefix = inputs[3] if self.inputs["Prefix"].is_linked else self.prefix
+        suffix = inputs[4] if self.inputs["Suffix"].is_linked else self.suffix
         # Leaves an already-empty cell empty - the user's own explicit
         # call: a cell blanked by Hide Zero upstream (or genuinely empty
         # to begin with) should stay blank, not become "m²" with

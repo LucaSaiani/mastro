@@ -69,7 +69,7 @@ def _mark_touched(flag_name):
 # text colours - text_color and ref_label_color - already drawn in the
 # same frame), so it's wired through the same way background colour is.
 #
-# No revert/ignore button for Background/Text Colour - the user's own
+# No revert/ignore button for Background Colour/Text Colour - the user's own
 # call: deleting this node is already the way to undo an edit it made,
 # a dedicated per-property revert wasn't worth the extra UI.
 class MaStroScheduleTableHeaderNode(MaStroScheduleTreeNode, Node):
@@ -78,14 +78,14 @@ class MaStroScheduleTableHeaderNode(MaStroScheduleTreeNode, Node):
     bl_idname = 'MaStroScheduleTableHeader'
     bl_label = 'Edit Header'
 
-    # Backing values for Column Index/String/Background/Text Colour's
+    # Backing values for Column Index/String/Background Colour/Text Colour's
     # inline fields (NodeSocket.prop_name, same mechanism as Math's
     # value_a/value_b) - editable directly on the socket while unlinked,
     # read from the actual linked node's output instead once something
     # is plugged in.
     column_index: IntProperty(name="Column Index", default=0, min=0, update=update_node)
     string_value: StringProperty(name="String", update=update_node)
-    bg_value: FloatVectorProperty(name="Background", subtype='COLOR', size=3, min=0.0, max=1.0,
+    bg_value: FloatVectorProperty(name="Background Colour", subtype='COLOR', size=3, min=0.0, max=1.0,
                                    default=(0.18, 0.18, 0.18), update=_mark_touched("has_bg"))
     text_colour_value: FloatVectorProperty(
         name="Text Colour", subtype='COLOR', size=3, min=0.0, max=1.0, default=(1.0, 1.0, 1.0),
@@ -120,24 +120,26 @@ class MaStroScheduleTableHeaderNode(MaStroScheduleTreeNode, Node):
         self.inputs.new('MaStroScheduleTableSocketType', "Table")
         self.inputs.new('MaStroScheduleColumnSocketType', "Column Index").prop_name = "column_index"
         self.inputs.new('MaStroScheduleStringSocketType', "String").prop_name = "string_value"
-        self.inputs.new('MaStroScheduleColorSocketType', "Background").prop_name = "bg_value"
+        # Boolean socket, mirroring Table primitive's own Join Header
+        # input (nodes_table_primitive.py) - the user's own explicit
+        # ask: "table ha join con il socket, ma edit header no.
+        # possiamo aggiungerlo?" Placed right after String, matching
+        # Edit Cell's own input order (Table, Row/Column Index, String,
+        # Background Colour, Text Colour) as closely as Unjoin (which
+        # Edit Cell has no use for at all) allows.
+        self.inputs.new('MaStroScheduleBooleanSocketType', "Unjoin").prop_name = "unjoin"
+        self.inputs.new('MaStroScheduleColorSocketType', "Background Colour").prop_name = "bg_value"
         self.inputs.new('MaStroScheduleColorSocketType', "Text Colour").prop_name = "text_colour_value"
         self.outputs.new('MaStroScheduleTableSocketType', "Table")
 
     def draw_buttons(self, context, layout):
-        # Disabled (not hidden - keeps the row's height stable, and a
-        # disabled-but-visible control reads as "not applicable right
-        # now" rather than "doesn't exist") when the incoming Table has
-        # no merges to remove at all - linked_table reads the last
-        # evaluated value from the cache rather than this node's own
-        # input_values (draw_buttons has no access to those, only
-        # evaluate() does, and runs on its own schedule besides - see
-        # that function's own docstring in execution.py).
-        from .execution import linked_table
-        table = linked_table(self, 0) or {}
-        row = layout.row()
-        row.enabled = bool(table.get("merges"))
-        row.prop(self, "unjoin")
+        # Unjoin no longer drawn here - it's a socket now (see init()),
+        # already disabled the same way the disabling here used to be:
+        # if there's no merge at all, setting it True simply has no
+        # effect (covering_merge would be None regardless) - the user's
+        # own call, accepting the loss of the "greyed out when
+        # inapplicable" visual cue for a real socket instead.
+        #
         # Mirrors Table's own draw_buttons (nodes_table_primitive.py) -
         # a "Header" section label, then Alignment - so the two nodes
         # read consistently.
@@ -162,6 +164,22 @@ class MaStroScheduleTableHeaderNode(MaStroScheduleTreeNode, Node):
         return cast(rows_in[0].get(row_key, fallback)) if row_key else fallback
 
     @staticmethod
+    def _resolve_bool(socket, value_in, fallback):
+        # Same shape as Table primitive's own _resolve_bool
+        # (nodes_table_primitive.py) - kept separate rather than shared,
+        # since both classes already duplicate _resolve_scalar this way
+        # too.
+        if not socket.is_linked:
+            return fallback
+        if isinstance(value_in, bool):
+            return value_in
+        rows_in = value_in or []
+        if not rows_in:
+            return fallback
+        row_key = next((k for k in rows_in[0] if not k.startswith("_")), None)
+        return bool(rows_in[0].get(row_key, fallback)) if row_key else fallback
+
+    @staticmethod
     def _find_merge(table, index):
         """The merge region covering column `index`'s row-0 (header)
         cell, or None if it isn't covered by any."""
@@ -174,6 +192,7 @@ class MaStroScheduleTableHeaderNode(MaStroScheduleTreeNode, Node):
     def evaluate(self, inputs):
         table = inputs[0] or {"columns": [], "merges": []}
         index = self._resolve_scalar(self.inputs["Column Index"], inputs[1], self.column_index, int)
+        unjoin = self._resolve_bool(self.inputs["Unjoin"], inputs[2], self.unjoin)
         merges = table.get("merges", [])
 
         covering_merge = self._find_merge(table, index)
@@ -185,8 +204,8 @@ class MaStroScheduleTableHeaderNode(MaStroScheduleTreeNode, Node):
         # with Unjoin off, silently did nothing. The actual fix is to
         # edit the MERGE's own text/bg/text_color dict instead in that
         # case, not the column underneath it.
-        edit_merge = covering_merge if (covering_merge is not None and not self.unjoin) else None
-        if covering_merge is not None and self.unjoin:
+        edit_merge = covering_merge if (covering_merge is not None and not unjoin) else None
+        if covering_merge is not None and unjoin:
             # Remove the covering merge entirely - the columns it used
             # to span go back to having their own independent header
             # cells (whatever text/style they already had - this node
@@ -204,7 +223,7 @@ class MaStroScheduleTableHeaderNode(MaStroScheduleTreeNode, Node):
         # untouched case is special.
         string_socket = self.inputs["String"]
         if string_socket.is_linked:
-            new_text = inputs[2] or ""
+            new_text = inputs[3] or ""
             has_text = True
         else:
             new_text = self.string_value
@@ -215,16 +234,16 @@ class MaStroScheduleTableHeaderNode(MaStroScheduleTreeNode, Node):
         # bg_value/text_colour_value properties are already that shape,
         # no per-row dict/key extraction needed the way scalars above
         # require.
-        bg_socket = self.inputs["Background"]
+        bg_socket = self.inputs["Background Colour"]
         if bg_socket.is_linked:
-            new_bg = inputs[3]
+            new_bg = inputs[4]
             has_bg = True
         else:
             new_bg = tuple(self.bg_value)
             has_bg = self.has_bg
         text_colour_socket = self.inputs["Text Colour"]
         if text_colour_socket.is_linked:
-            new_text_colour = inputs[4]
+            new_text_colour = inputs[5]
             has_text_colour = True
         else:
             new_text_colour = tuple(self.text_colour_value)

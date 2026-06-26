@@ -52,6 +52,9 @@ from .nodes_table_hide_zero import MaStroScheduleTableHideZeroNode
 from .nodes_table_prefix_suffix import MaStroScheduleTablePrefixSuffixNode
 from .nodes_table_case import MaStroScheduleTableCaseNode
 from .nodes_table_align import MaStroScheduleTableAlignNode
+from .nodes_table_edit_cell import MaStroScheduleTableEditCellNode
+from .nodes_table_row_colour import MaStroScheduleTableRowColourNode
+from .nodes_table_row_pattern import MaStroScheduleTableRowPatternNode
 from .nodes_id_keys import MaStroScheduleGetIdKeysNode, MASTRO_OT_Schedule_Pick_Id_Key
 from .nodes_aggregate_column import MaStroScheduleAggregateColumnNode
 from .nodes_flatten_key import MaStroScheduleFlattenKeyNode
@@ -123,6 +126,9 @@ classes = (
     MaStroScheduleTablePrefixSuffixNode,
     MaStroScheduleTableCaseNode,
     MaStroScheduleTableAlignNode,
+    MaStroScheduleTableEditCellNode,
+    MaStroScheduleTableRowColourNode,
+    MaStroScheduleTableRowPatternNode,
     MaStroScheduleGetIdKeysNode,
     MASTRO_OT_Schedule_Pick_Id_Key,
     MaStroScheduleAggregateColumnNode,

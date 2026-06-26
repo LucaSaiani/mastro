@@ -26,13 +26,19 @@ class MaStroScheduleTableCaseNode(MaStroScheduleTreeNode, Node):
     bl_label = 'Cell Case'
 
     case: EnumProperty(name="Case", items=CASE_ITEMS, default='UPPER', update=update_node)
-    start_index: IntProperty(name="Start Index", default=0, min=0, update=update_node)
-    end_index: IntProperty(name="End Index", default=0, min=0, update=update_node)
+    start_index: IntProperty(
+        name="Start Column Index", default=0, min=0, update=update_node,
+        description="First column to apply this to - equal to End Column Index for just one column",
+    )
+    end_index: IntProperty(
+        name="End Column Index", default=0, min=0, update=update_node,
+        description="Last column to apply this to (inclusive) - equal to Start Column Index for just one column",
+    )
 
     def init(self, context):
         self.inputs.new('MaStroScheduleTableSocketType', "Table")
-        self.inputs.new('MaStroScheduleColumnSocketType', "Start Index").prop_name = "start_index"
-        self.inputs.new('MaStroScheduleColumnSocketType', "End Index").prop_name = "end_index"
+        self.inputs.new('MaStroScheduleColumnSocketType', "Start Column Index").prop_name = "start_index"
+        self.inputs.new('MaStroScheduleColumnSocketType', "End Column Index").prop_name = "end_index"
         self.outputs.new('MaStroScheduleTableSocketType', "Table")
 
     def draw_buttons(self, context, layout):
@@ -49,6 +55,6 @@ class MaStroScheduleTableCaseNode(MaStroScheduleTreeNode, Node):
 
     def evaluate(self, inputs):
         table = inputs[0] or {"columns": [], "merges": []}
-        start_index = resolve_index(self.inputs["Start Index"], inputs[1], self.start_index)
-        end_index = resolve_index(self.inputs["End Index"], inputs[2], self.end_index)
+        start_index = resolve_index(self.inputs["Start Column Index"], inputs[1], self.start_index)
+        end_index = resolve_index(self.inputs["End Column Index"], inputs[2], self.end_index)
         return [map_table_rows(table, start_index, end_index, self._transform)]

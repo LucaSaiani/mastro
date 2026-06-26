@@ -88,6 +88,11 @@ PROPERTY_UPDATE_EXEMPT = {
     ("nodes_table_edit_header.py", "MaStroScheduleTableHeaderNode", "has_bg"),
     ("nodes_table_edit_header.py", "MaStroScheduleTableHeaderNode", "has_text_colour"),
     ("nodes_table_edit_header.py", "MaStroScheduleTableHeaderNode", "has_alignment"),
+    # Same _mark_touched() pattern, same reasoning, on Edit Cell - a
+    # copy of Edit Header's own approach (see this node's own docstring).
+    ("nodes_table_edit_cell.py", "MaStroScheduleTableEditCellNode", "has_bg"),
+    ("nodes_table_edit_cell.py", "MaStroScheduleTableEditCellNode", "has_text_colour"),
+    ("nodes_table_edit_cell.py", "MaStroScheduleTableEditCellNode", "has_alignment"),
     # showing_table/showing_list/id_column_count (nodes_viewer.py):
     # internal cache flags written every evaluate() to record which
     # rendering path/column split is currently in effect - never

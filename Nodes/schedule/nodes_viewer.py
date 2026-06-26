@@ -427,6 +427,10 @@ class MaStroScheduleViewerNode(MaStroScheduleTreeNode, Node):
                 row_item.has_bg = row_bg is not None
                 if row_bg is not None:
                     row_item.bg = row_bg
+                row_text_color = row.get("text_color")
+                row_item.has_text_color = row_text_color is not None
+                if row_text_color is not None:
+                    row_item.text_color = row_text_color
                 row_item.text_align = row.get("text_align", "LEFT")
 
         self.table_merges.clear()
@@ -877,30 +881,43 @@ def _draw_table_overlay(node, is_active=True):
         # Column letter, in its own band directly above the header cell -
         # above origin_y, never below it, so the header itself stays
         # flush with the node's top edge.
-        (x0, _y0), (x1, _y1b), _p01, (_x1b, y1) = corners
+        (x0, y0), (x1, _y1b), _p01, (_x1b, y1) = corners
         draw_ref_label(x0, y1, x1 - x0, col_label_height * ui_scale, _column_letter(col_idx))
+        if col_idx == 0:
+            # Row number "1" for the header row - the user's own
+            # explicit call, mirroring Excel's own convention (A1 is
+            # the FIRST row, header included, not the first data row)
+            # ahead of a future Excel export: every data row's own
+            # number (drawn below) already starts at 2, not 1, to match.
+            draw_ref_label(origin_x, y0, row_label_width * ui_scale, y1 - y0, "1", align='RIGHT')
 
     visible_rows = node.visible_rows
     for col_idx, column in enumerate(columns):
         rows = column.rows if visible_rows == 0 else column.rows[:visible_rows]
         for row_idx, row in enumerate(rows, start=1):
             corners = cell_corners(row_idx, col_idx)
-            # has_bg/bg overrides the flat ROW_COLOR for this one cell
-            # when set - same reasoning as the header's own override
-            # above. No node sets bg on a row yet (Edit Header only
-            # edits a column's header cell today), but the storage and
-            # this read are already in place for whenever one does -
-            # text_align, unlike bg, IS set on rows now (Cell Align, see
-            # nodes_table_align.py).
+            # has_bg/bg, has_text_color/text_color and text_align all
+            # override the flat ROW_COLOR/default text color for this
+            # one cell when set - same reasoning as the header's own
+            # overrides above. bg/text_color are both set together by
+            # Edit Cell/Row Colour/Row Pattern, text_align by Cell Align
+            # (see nodes_table_edit_cell.py/nodes_table_row_colour.py/
+            # nodes_table_row_pattern.py/nodes_table_align.py).
             row_color = (*row.bg, ROW_COLOR[3]) if row.has_bg else ROW_COLOR
-            fill_cell(corners, row_color, row.text, align=row.text_align)
+            row_text_color = (*row.text_color, 1.0) if row.has_text_color else None
+            fill_cell(corners, row_color, row.text, row_text_color, row.text_align)
             all_corners.append(corners)
             if col_idx == 0:
                 # Row number, in the band to the left of this row's
                 # first-column cell only - drawn once per row, not once
                 # per column, since it labels the row as a whole.
+                # row_idx + 1, not row_idx - the header's own row is "1"
+                # (drawn above, in the header loop), so the first DATA
+                # row (row_idx == 1, geometrically) reads "2", matching
+                # Excel's own convention where A1 is the very first row
+                # including any header, not the first data row.
                 (x0, y0), _p10, _p01, (_x1, y1) = corners
-                draw_ref_label(origin_x, y0, row_label_width * ui_scale, y1 - y0, str(row_idx), align='RIGHT')
+                draw_ref_label(origin_x, y0, row_label_width * ui_scale, y1 - y0, str(row_idx + 1), align='RIGHT')
 
     for corners in all_corners:
         border_cell(corners)

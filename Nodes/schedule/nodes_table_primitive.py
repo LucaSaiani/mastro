@@ -79,7 +79,7 @@ def _per_column_labels(pattern, count):
 # nodes_column_primitive.py's Column plays, just for Table (see that
 # file's docstring). Columns/Rows come first (the fields that define
 # this Table's shape), then a separate Header section (Title, Alignment,
-# Text Colour, Background) - the cosmetic fields that label/style it.
+# Text Colour, Background Colour) - the cosmetic fields that label/style it.
 #
 # Rows has min=1, same as Column's primitive - a column's header is
 # itself row 0 of the grid (confirmed elsewhere - cell_corners(0,
@@ -92,7 +92,7 @@ def _per_column_labels(pattern, count):
 # header row is ONE merged cell spanning every column or N independent
 # per-column cells - Title is ALWAYS the single source for the text
 # either way (never something edited per column on this node), and
-# Alignment/Background/Text Colour ALWAYS apply too, regardless of Join
+# Alignment/Background Colour/Text Colour ALWAYS apply too, regardless of Join
 # Header - the user's explicit correction: an earlier version of this
 # only applied them while merged, which was wrong; they're meant to
 # style the header row whether it's one merged cell or N separate ones.
@@ -107,7 +107,7 @@ def _per_column_labels(pattern, count):
 #   _per_column_labels above) and expanded into one header label per
 #   column (test_{5} with 6 columns -> test_5, test_6, ..., test_10),
 #   each column keeping its own independent header cell, all sharing
-#   the same Alignment/Background/Text Colour.
+#   the same Alignment/Background Colour/Text Colour.
 class MaStroScheduleTablePrimitiveNode(MaStroScheduleTreeNode, Node):
     """Create an empty Table with the given number of columns and rows,
     with control over the header row's text, alignment and color"""
@@ -121,7 +121,7 @@ class MaStroScheduleTablePrimitiveNode(MaStroScheduleTreeNode, Node):
     column_count: IntProperty(name="Columns", default=3, min=1, update=update_node)
     row_count: IntProperty(name="Rows", default=2, min=1, update=update_node)
     title_value: StringProperty(name="Title", description=TITLE_TOOLTIP, update=update_node)
-    bg_value: FloatVectorProperty(name="Background", subtype='COLOR', size=3,
+    bg_value: FloatVectorProperty(name="Background Colour", subtype='COLOR', size=3,
                                    min=0.0, max=1.0, default=(0.18, 0.18, 0.18), update=update_node)
     text_colour_value: FloatVectorProperty(name="Text Colour", subtype='COLOR', size=3,
                                             min=0.0, max=1.0, default=(1.0, 1.0, 1.0), update=update_node)
@@ -143,12 +143,12 @@ class MaStroScheduleTablePrimitiveNode(MaStroScheduleTreeNode, Node):
         title_socket.prop_name = "title_value"
         title_socket.description = TITLE_TOOLTIP
         self.inputs.new('MaStroScheduleBooleanSocketType', "Join Header").prop_name = "join_header"
-        self.inputs.new('MaStroScheduleColorSocketType', "Background").prop_name = "bg_value"
+        self.inputs.new('MaStroScheduleColorSocketType', "Background Colour").prop_name = "bg_value"
         self.inputs.new('MaStroScheduleColorSocketType', "Text Colour").prop_name = "text_colour_value"
         self.outputs.new('MaStroScheduleTableSocketType', "Table")
 
     def draw_buttons(self, context, layout):
-        # Always shown, same as Background/Text Colour (the sockets
+        # Always shown, same as Background Colour/Text Colour (the sockets
         # right below it) - Alignment/the colors always apply to the
         # header row, whether it's one merged cell (Join Header on) or
         # N separate per-column cells (off).
@@ -196,7 +196,7 @@ class MaStroScheduleTablePrimitiveNode(MaStroScheduleTreeNode, Node):
         row_count = self._resolve_count(self.inputs["Rows"], inputs[1], self.row_count)
         title_text = self._resolve_text(self.inputs["Title"], inputs[2], self.title_value)
         join_header = self._resolve_bool(self.inputs["Join Header"], inputs[3], self.join_header)
-        bg = self._resolve_color(self.inputs["Background"], inputs[4], self.bg_value)
+        bg = self._resolve_color(self.inputs["Background Colour"], inputs[4], self.bg_value)
         text_colour = self._resolve_color(self.inputs["Text Colour"], inputs[5], self.text_colour_value)
 
         # No clamping on column_count/row_count - min=1 on the
@@ -210,7 +210,7 @@ class MaStroScheduleTablePrimitiveNode(MaStroScheduleTreeNode, Node):
         else:
             header_texts = _per_column_labels(title_text, column_count)
 
-        # Alignment/Background/Text Colour always apply to every
+        # Alignment/Background Colour/Text Colour always apply to every
         # column's own header cell - the user's explicit correction:
         # they're not gated on Join Header, they style the header row
         # either way (whether it ends up as one merged cell below, or

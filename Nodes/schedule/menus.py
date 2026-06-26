@@ -83,6 +83,9 @@ class NODE_MT_mastro_schedule_primitives_operations_cells(bpy.types.Menu):
         _add_node(self.layout, "MaStroScheduleTablePrefixSuffix", "Cell Prefix / Suffix")
         _add_node(self.layout, "MaStroScheduleTableCase", "Cell Case")
         _add_node(self.layout, "MaStroScheduleTableAlign", "Cell Align")
+        _add_node(self.layout, "MaStroScheduleTableEditCell", "Edit Cell")
+        _add_node(self.layout, "MaStroScheduleTableRowColour", "Row Colour")
+        _add_node(self.layout, "MaStroScheduleTableRowPattern", "Row Pattern")
 
 
 class NODE_MT_mastro_schedule_primitives_operations(bpy.types.Menu):

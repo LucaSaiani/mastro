@@ -322,16 +322,18 @@ class MaStroScheduleBooleanSocket(NodeSocket):
 # "columns" is a list of columns, each {"header": {"text": str, "bg":
 # color or None, "text_color": color or None, "text_align": "LEFT"/
 # "CENTER"/"RIGHT"}, "rows": [{"text": str, "bg": color or None,
-# "text_align": "LEFT"/"CENTER"/"RIGHT"}, ...]} - a list (not a single
-# column) from the start, so a future multi-Table merge only ever
-# appends more columns to this same list, no socket/data shape change
-# needed when that node exists. "bg"/"text_color" default to None
-# (meaning "use the Viewer's own row/header color") until something
-# (Edit Header/Table primitive, see nodes_table_edit_header.py/
-# nodes_table_primitive.py) sets them - "text_color" exists only on a
-# header dict today, since no node edits a row's text color yet; row
-# dicts have "bg"/"text_align" (the latter set by Cell Align, see
-# nodes_table_align.py), just not "text_color".
+# "text_color": color or None, "text_align": "LEFT"/"CENTER"/"RIGHT"},
+# ...]} - a list (not a single column) from the start, so a future
+# multi-Table merge only ever appends more columns to this same list,
+# no socket/data shape change needed when that node exists. "bg"/
+# "text_color" default to None (meaning "use the Viewer's own row/
+# header color") until something sets them - on a header, Edit Header/
+# Table primitive (nodes_table_edit_header.py/nodes_table_primitive.py);
+# on a row, Edit Cell/Row Colour/Row Pattern all set both "bg" and
+# "text_color" together (nodes_table_edit_cell.py/
+# nodes_table_row_colour.py/nodes_table_row_pattern.py), Cell Align
+# sets "text_align" (nodes_table_align.py) - header and row cells share
+# the exact same shape now, just written by different nodes.
 #
 # "merges" is a list of merged-cell regions, each {"start_row": int,
 # "start_col": int, "end_row": int, "end_col": int, "text": str, "bg":

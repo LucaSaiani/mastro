@@ -6,12 +6,16 @@ Table's column(s), the user's own explicit call over a single generic
 same "one node, one job" convention as Math/Aggregate/Flatten Key
 elsewhere in this tree.
 
-All four take the same Start Index/End Index range instead of a single
-Column Index - the user's own generalization: Start==End means exactly
-one column (the common case), Start<End applies the same operation to
-every column in that inclusive range in one node instead of needing one
-node per column. Align uses column_range directly (it sets text_align,
-not each row's own "text"); the other three go through map_table_rows.
+All four take the same Start Column Index/End Column Index range
+instead of a single Column Index - the user's own generalization:
+Start==End means exactly one column (the common case), Start<End
+applies the same operation to every column in that inclusive range in
+one node instead of needing one node per column. Labelled "Start/End
+COLUMN Index", not just "Start/End Index" - the user's own follow-up
+clarification, to make clear at a glance which axis this range covers
+(every one of these nodes works on columns, never rows). Align uses
+column_range directly (it sets text_align, not each row's own "text");
+the other three go through map_table_rows.
 """
 
 
