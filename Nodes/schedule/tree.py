@@ -23,7 +23,21 @@ def _poll_pending_trees():
     (the exact error this fixes). Sverchok's equivalent
     (`core/update_system.py`'s `e.socket.links[0].is_valid = False`) is
     likewise called from its task-runner timer (`core/tasks.py`), never
-    from a node's `draw_buttons` - same constraint, same fix shape."""
+    from a node's `draw_buttons` - same constraint, same fix shape.
+
+    Join Tables' own table_items sync (nodes_table_join.py) hit the
+    exact same error - confirmed live, table_items.add() from inside
+    draw_buttons raised "Writing to ID classes in this context is not
+    allowed" the moment a Table was actually linked in (a passive
+    redraw, e.g. the window's own idle-timer redraw, not a user action,
+    is what reaches draw_buttons in the disallowed context) - moved
+    here for the same reason mark_mismatched_links already is. One
+    side effect: _sync_table_items() reads each linked Table's header
+    text from the evaluation cache (get_node_table) BEFORE tree.execute()
+    runs below, so the label shown in Join Tables' own list is always
+    one poll (0.1s) stale relative to whatever just changed - purely
+    cosmetic (the join itself always reads the freshly computed Table,
+    only the list's own label lags), not worth reordering for."""
     if _pending_execute_trees:
         pending = list(_pending_execute_trees)
         _pending_execute_trees.clear()
@@ -34,6 +48,8 @@ def _poll_pending_trees():
             for node in tree.nodes:
                 if isinstance(node, MaStroScheduleTreeNode):
                     mark_mismatched_links(node)
+                if node.bl_idname == 'MaStroScheduleTableJoin':
+                    node._sync_table_items()
             try:
                 tree.execute()
             except Exception as exc:

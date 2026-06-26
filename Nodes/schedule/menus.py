@@ -94,6 +94,7 @@ class NODE_MT_mastro_schedule_primitives_operations(bpy.types.Menu):
 
     def draw(self, context):
         _add_node(self.layout, "MaStroScheduleConvertColumnToTable", "Column to Table")
+        _add_node(self.layout, "MaStroScheduleTableJoin", "Join Tables")
         _add_node(self.layout, "MaStroScheduleAggregateColumn", "Aggregate")
         self.layout.menu(NODE_MT_mastro_schedule_primitives_operations_header.bl_idname)
         self.layout.menu(NODE_MT_mastro_schedule_primitives_operations_cells.bl_idname)

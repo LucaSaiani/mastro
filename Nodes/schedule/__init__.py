@@ -18,6 +18,7 @@ from .properties import (
     MaStro_schedule_table_cell,
     MaStro_schedule_table_column,
     MaStro_schedule_table_merge,
+    MaStro_schedule_join_table_item,
 )
 from .operators import (
     MASTRO_UL_schedule_keys,
@@ -26,6 +27,8 @@ from .operators import (
     MASTRO_UL_schedule_category_lookup,
     MASTRO_OT_Schedule_Category_Lookup_Add,
     MASTRO_OT_Schedule_Category_Lookup_Remove,
+    MASTRO_UL_schedule_join_tables,
+    MASTRO_OT_Schedule_Join_Tables_Move,
     MASTRO_OT_Schedule_Force_Refresh,
 )
 from .panel import MASTRO_PT_Schedule_Tools
@@ -48,6 +51,7 @@ from .nodes_table_edit_header import MaStroScheduleTableHeaderNode
 from .nodes_lookup import MaStroScheduleCategoryLookupNode, MaStroScheduleMatrixLookupNode
 from .nodes_table import MaStroScheduleTableDataNode, MaStroScheduleFlattenNode
 from .nodes_table_convert import MaStroScheduleConvertColumnToTableNode
+from .nodes_table_join import MaStroScheduleTableJoinNode
 from .nodes_table_hide_zero import MaStroScheduleTableHideZeroNode
 from .nodes_table_prefix_suffix import MaStroScheduleTablePrefixSuffixNode
 from .nodes_table_case import MaStroScheduleTableCaseNode
@@ -80,6 +84,7 @@ classes = (
     MaStro_schedule_table_cell,
     MaStro_schedule_table_column,
     MaStro_schedule_table_merge,
+    MaStro_schedule_join_table_item,
     MaStroScheduleDataSocket,
     MaStroScheduleAttributeRefSocket,
     MaStroScheduleColumnSocket,
@@ -97,6 +102,8 @@ classes = (
     MASTRO_UL_schedule_category_lookup,
     MASTRO_OT_Schedule_Category_Lookup_Add,
     MASTRO_OT_Schedule_Category_Lookup_Remove,
+    MASTRO_UL_schedule_join_tables,
+    MASTRO_OT_Schedule_Join_Tables_Move,
     MASTRO_OT_Schedule_Force_Refresh,
     MASTRO_PT_Schedule_Tools,
     MaStroScheduleInputAllNode,
@@ -122,6 +129,7 @@ classes = (
     MaStroScheduleTableDataNode,
     MaStroScheduleFlattenNode,
     MaStroScheduleConvertColumnToTableNode,
+    MaStroScheduleTableJoinNode,
     MaStroScheduleTableHideZeroNode,
     MaStroScheduleTablePrefixSuffixNode,
     MaStroScheduleTableCaseNode,

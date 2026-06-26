@@ -130,45 +130,57 @@ def evaluate_tree(tree):
         if node.name in cache:
             return cache[node.name]
 
+        def resolve_link_value(socket, link):
+            # Dragging a link with Shift+RMB always creates a native
+            # NodeReroute (confirmed live - no way to make Blender's
+            # drag-to-insert operator create our own reroute node
+            # instead), which has its own native socket type, not one
+            # of ours - resolve_through_reroutes walks straight
+            # through any such chain to the real producing node/
+            # socket, the same way tree.py's mark_mismatched_links/
+            # input_link_ok/is_node_valid do (see that function's
+            # docstring in tree.py for why, mirroring Sverchok's
+            # equivalent handling of the native NodeReroute).
+            from_node, from_socket = resolve_through_reroutes(link)
+            # A link between mismatched socket types is flagged (the
+            # node gets colored, see tree.py) but deliberately left in
+            # place so the user can see and fix it - it must not feed a
+            # value through though, the same way the old prototype's
+            # checkLink() gated execution and cleared the output instead
+            # of running on a mismatched input. MaStroScheduleAnySocketType
+            # (the Viewer's input) deliberately accepts any other MaStro
+            # Schedule socket type by design (see sockets.py) - its
+            # bl_idname never matches the from_socket's, so it must be
+            # exempted here the same way tree.py's mark_mismatched_links/
+            # input_link_ok already are, or the Viewer would always get
+            # None instead of its actual input (confirmed live).
+            if from_node is None or (
+                    socket.bl_idname != 'MaStroScheduleAnySocketType'
+                    and from_socket.bl_idname != socket.bl_idname):
+                return None
+            outputs = eval_node(from_node)
+            try:
+                index = list(from_node.outputs).index(from_socket)
+                return outputs[index]
+            except (ValueError, IndexError):
+                return None
+
         input_values = []
         for socket in node.inputs:
+            # A multi-input socket (Join Tables' own Table input, see
+            # nodes_table_join.py) gets a LIST of values - one per link,
+            # in socket.links' own order - instead of the single value
+            # every other (non multi-input) socket gets. Every node
+            # written before this one has no multi-input sockets at
+            # all, so this branch never changes their behavior - only a
+            # node that actually sets use_multi_input=True on an input
+            # socket opts into receiving a list here.
+            if getattr(socket, "is_multi_input", False):
+                input_values.append([resolve_link_value(socket, link) for link in socket.links])
+                continue
             value = None
             if socket.is_linked:
-                link = socket.links[0]
-                # Dragging a link with Shift+RMB always creates a native
-                # NodeReroute (confirmed live - no way to make Blender's
-                # drag-to-insert operator create our own reroute node
-                # instead), which has its own native socket type, not one
-                # of ours - resolve_through_reroutes walks straight
-                # through any such chain to the real producing node/
-                # socket, the same way tree.py's mark_mismatched_links/
-                # input_link_ok/is_node_valid do (see that function's
-                # docstring in tree.py for why, mirroring Sverchok's
-                # equivalent handling of the native NodeReroute).
-                from_node, from_socket = resolve_through_reroutes(link)
-                # A link between mismatched socket types is flagged (the
-                # node gets colored, see tree.py) but deliberately left in
-                # place so the user can see and fix it - it must not feed a
-                # value through though, the same way the old prototype's
-                # checkLink() gated execution and cleared the output instead
-                # of running on a mismatched input. MaStroScheduleAnySocketType
-                # (the Viewer's input) deliberately accepts any other MaStro
-                # Schedule socket type by design (see sockets.py) - its
-                # bl_idname never matches the from_socket's, so it must be
-                # exempted here the same way tree.py's mark_mismatched_links/
-                # input_link_ok already are, or the Viewer would always get
-                # None instead of its actual input (confirmed live).
-                if from_node is None or (
-                        socket.bl_idname != 'MaStroScheduleAnySocketType'
-                        and from_socket.bl_idname != socket.bl_idname):
-                    input_values.append(None)
-                    continue
-                outputs = eval_node(from_node)
-                try:
-                    index = list(from_node.outputs).index(from_socket)
-                    value = outputs[index]
-                except (ValueError, IndexError):
-                    value = None
+                value = resolve_link_value(socket, socket.links[0])
             input_values.append(value)
 
         tree_errors = _evaluation_errors.setdefault(tree.name, {})

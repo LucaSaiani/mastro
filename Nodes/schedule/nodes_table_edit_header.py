@@ -140,12 +140,14 @@ class MaStroScheduleTableHeaderNode(MaStroScheduleTreeNode, Node):
         # own call, accepting the loss of the "greyed out when
         # inapplicable" visual cue for a real socket instead.
         #
-        # Mirrors Table's own draw_buttons (nodes_table_primitive.py) -
-        # a "Header" section label, then Alignment - so the two nodes
-        # read consistently.
-        header_box = layout.column(align=True)
-        header_box.label(text="Header")
-        header_box.prop(self, "alignment", text="")
+        # No "Header" section label above Alignment - the user's own
+        # call, confirmed never seeing a bare text label used as a
+        # section header this way in Geometry Nodes: a custom node's
+        # draw_buttons isn't the same kind of grouped-panel UI a Node
+        # Group's own interface panels are (see the user's own question
+        # about this), so mimicking that look here with a plain label
+        # read as out of place rather than as an actual native pattern.
+        layout.prop(self, "alignment", text="")
 
     @staticmethod
     def _resolve_scalar(socket, value_in, fallback, cast):

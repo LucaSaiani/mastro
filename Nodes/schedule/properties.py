@@ -59,6 +59,26 @@ class MaStro_schedule_table_column(PropertyGroup):
     rows: CollectionProperty(type=MaStro_schedule_table_cell)
 
 
+class MaStro_schedule_join_table_item(PropertyGroup):
+    """One entry in Join Tables' own ordering UIList
+    (nodes_table_join.py) - one per Table currently linked into its
+    multi-input socket. link_key identifies WHICH link this entry
+    tracks (not the link object itself - NodeLink isn't a stable
+    Python identity across redraws/undo the way this needs), so the
+    list can be re-synced against the socket's actual links (from
+    tree.py's own polling timer, see _sync_table_items's own docstring
+    for why not from draw_buttons) without losing the user's own
+    custom ordering when nothing about the links themselves changed.
+    label is purely cosmetic - the
+    first header text found in that Table, stored as an empty string
+    if it has none (the UIList itself, not this PropertyGroup, is what
+    shows "(empty)" for that case - see
+    MASTRO_UL_schedule_join_tables.draw_item in operators.py), shown
+    read-only in the list so the user can tell which entry is which."""
+    link_key: StringProperty()
+    label: StringProperty(name="Table")
+
+
 class MaStro_schedule_table_merge(PropertyGroup):
     """One merged-cell region of a Viewer Table (see the module-level
     comment above sockets.py:MaStroScheduleTableSocket) - row/column

@@ -47,18 +47,36 @@ COLUMN_LABEL_EXEMPT = {
     # A reference skeleton, never registered (see its own module
     # docstring) - not a real node, exists only to be copy-pasted from.
     ("nodes_template.py", "MaStroScheduleTemplateNode"),
+    # A reference-only example for a collapsible-box UI pattern, never
+    # registered (see its own module docstring) - not a Schedule node
+    # at all, has no init() and so no sockets whatsoever (it only
+    # exists to demonstrate draw_buttons' own panel-toggle trick).
+    ("reference_collapsible_box_pattern.py", "MyCustomNode"),
 }
 
 # (filename, class_name) pairs - only add with a comment justifying why
 # this specific node has no evaluate() (e.g. a pure menu/operator
 # helper that was mistakenly picked up as a Node subclass).
-EVALUATE_EXEMPT = set()
+EVALUATE_EXEMPT = {
+    # Same reference-only exemption as COLUMN_LABEL_EXEMPT above.
+    ("reference_collapsible_box_pattern.py", "MyCustomNode"),
+}
 
 # (filename, class_name, property_name) triples - only add with a
 # comment justifying why this specific property deliberately has no
 # update= (e.g. it's a read-only cache written from evaluate(), never
 # meant to be user-editable in the first place).
 PROPERTY_UPDATE_EXEMPT = {
+    # panel_1_open/panel_2_open/prop_a/prop_b/prop_c
+    # (reference_collapsible_box_pattern.py): a reference-only example,
+    # never registered (see its own module docstring) - update= doesn't
+    # matter for a node that's never actually instantiated in a real
+    # tree.
+    ("reference_collapsible_box_pattern.py", "MyCustomNode", "panel_1_open"),
+    ("reference_collapsible_box_pattern.py", "MyCustomNode", "panel_2_open"),
+    ("reference_collapsible_box_pattern.py", "MyCustomNode", "prop_a"),
+    ("reference_collapsible_box_pattern.py", "MyCustomNode", "prop_b"),
+    ("reference_collapsible_box_pattern.py", "MyCustomNode", "prop_c"),
     # cached_header_text (nodes_header.py/nodes_column_primitive.py):
     # written from evaluate()/draw_buttons reading the real input, never
     # directly edited by the user - update= would be a no-op (nothing
@@ -73,6 +91,7 @@ PROPERTY_UPDATE_EXEMPT = {
     ("nodes_groupby.py", "MaStroScheduleGroupByNode", "active_key_index"),
     ("nodes_lookup.py", "MaStroScheduleCategoryLookupNode", "active_item_index"),
     ("nodes_lookup.py", "MaStroScheduleMatrixLookupNode", "active_key_index"),
+    ("nodes_table_join.py", "MaStroScheduleTableJoinNode", "active_table_index"),
     # column_to_add (nodes_groupby.py): still-WIP dynamic-items
     # EnumProperty already flagged in its own TODO comment as a
     # RecursionError risk - left untouched until that node graduates
