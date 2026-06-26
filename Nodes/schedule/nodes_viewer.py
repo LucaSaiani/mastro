@@ -430,6 +430,30 @@ def _node_abs_location(node):
     return x, y
 
 
+def _is_showing_stale_data(node):
+    """True if any "_Object" referenced by this Viewer's own already-
+    evaluated rows is currently in Edit Mode - meaning the numbers on
+    screen are frozen from before editing started (see
+    Handlers/depsgraph_handlers.py:_refresh_schedules, which now skips
+    the Schedule's auto-refresh entirely while a selected object is mid-
+    edit, since mastro_number_of_storeys/mastro_undercroft aren't kept
+    up to date live during a topology edit). Read straight off
+    node.rows/node.table_columns (whichever this Viewer is currently
+    showing) rather than re-walking the node graph - the same object
+    names the grid itself already displays as its own "Object" id
+    column are exactly what needs checking here."""
+    # A Table has already discarded per-row object identity (see
+    # sockets.py:MaStroScheduleTableSocket) - node.rows is what a Column/
+    # Data-showing Viewer populates (see evaluate()), always empty for a
+    # Table-showing one, so this naturally never flags a Table stale.
+    object_names = set()
+    for row in node.rows:
+        for cell in row.cells:
+            if cell.name == "Object":
+                object_names.add(cell.value)
+    return any(bpy.data.objects.get(name) is not None and bpy.data.objects[name].mode == 'EDIT' for name in object_names)
+
+
 def _draw_node_table(node, is_active=True):
     # Drawn in POST_VIEW: both the GPU batches and blf respect the node
     # editor's current view2d transform automatically here, so coordinates
@@ -478,6 +502,18 @@ def _draw_node_table(node, is_active=True):
     # for these to move into Preferences in a follow-up once the look is
     # settled, so this intentionally doesn't wire them up yet.
     ACCENT_COLOR = (130 / 255, 53 / 255, 76 / 255)
+    # Desaturated to a flat gray of the same VALUE (not just dimmed -
+    # _hsv_variant below would still read as "the accent color, but
+    # darker") whenever this Viewer is showing data frozen from before
+    # Edit Mode started (see _is_showing_stale_data's own docstring) -
+    # the user's own ask: a clear visual cue that these numbers are not
+    # current, distinct from the already-existing active/non-active
+    # line_color distinction below (which is about which Viewer is
+    # selected, not about staleness).
+    is_stale = _is_showing_stale_data(node)
+    if is_stale:
+        accent_value = max(ACCENT_COLOR)
+        ACCENT_COLOR = (accent_value, accent_value, accent_value)
     ROW_BASE_COLOR = (0.18, 0.18, 0.18)
     id_header_color = _srgb_color(*_hsv_variant(ACCENT_COLOR, value_delta=0.2), 0.95)
     data_header_color = _srgb_color(*ACCENT_COLOR, 0.95)
@@ -489,7 +525,7 @@ def _draw_node_table(node, is_active=True):
     # table is the active one, since multiple Viewer overlays in the
     # same tree otherwise all look identical at a glance.
     line_color = (1.0, 1.0, 1.0, 0.4) if is_active else (0.3, 0.3, 0.3, 0.6)
-    text_color = (1.0, 1.0, 1.0, 1.0)
+    text_color = (0.7, 0.7, 0.7, 1.0) if is_stale else (1.0, 1.0, 1.0, 1.0)
 
     shader = gpu.shader.from_builtin('UNIFORM_COLOR')
     gpu.state.blend_set('ALPHA')
