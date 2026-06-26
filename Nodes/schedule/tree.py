@@ -31,13 +31,16 @@ def _poll_pending_trees():
     allowed" the moment a Table was actually linked in (a passive
     redraw, e.g. the window's own idle-timer redraw, not a user action,
     is what reaches draw_buttons in the disallowed context) - moved
-    here for the same reason mark_mismatched_links already is. One
-    side effect: _sync_table_items() reads each linked Table's header
-    text from the evaluation cache (get_node_table) BEFORE tree.execute()
-    runs below, so the label shown in Join Tables' own list is always
-    one poll (0.1s) stale relative to whatever just changed - purely
-    cosmetic (the join itself always reads the freshly computed Table,
-    only the list's own label lags), not worth reordering for."""
+    here for the same reason mark_mismatched_links already is. Place in
+    Sheet (nodes_sheet_place.py) reuses the exact same table_items
+    machinery for its own multi-input Sheet socket, so its sync is
+    polled here too. One side effect: _sync_table_items() reads each
+    linked Table/Sheet's own label text from the evaluation cache
+    (get_node_table) BEFORE tree.execute() runs below, so the label
+    shown in either node's own list is always one poll (0.1s) stale
+    relative to whatever just changed - purely cosmetic (the join/place
+    itself always reads the freshly computed value, only the list's own
+    label lags), not worth reordering for."""
     if _pending_execute_trees:
         pending = list(_pending_execute_trees)
         _pending_execute_trees.clear()
@@ -48,7 +51,7 @@ def _poll_pending_trees():
             for node in tree.nodes:
                 if isinstance(node, MaStroScheduleTreeNode):
                     mark_mismatched_links(node)
-                if node.bl_idname == 'MaStroScheduleTableJoin':
+                if node.bl_idname in ('MaStroScheduleTableJoin', 'MaStroScheduleSheetPlace'):
                     node._sync_table_items()
             try:
                 tree.execute()
@@ -153,6 +156,60 @@ def resolve_through_reroutes(link):
     return from_node, from_socket
 
 
+def resolve_origin_node(link):
+    """Given a NodeLink feeding a Table/Sheet multi-input socket (Join
+    Tables/Place in Sheet, see nodes_table_join.py/nodes_sheet_place.py),
+    walk back through every "transparent" single-input Table/Sheet
+    operator (Move Sheet, Edit Cell, Row Colour, Cell Align, ...) to the
+    real origin node that actually CREATED this Table/Sheet (a
+    primitive like Table Primitive/Sheet Primitive/Column to Table/
+    Table to Sheet, or another multi-input node like Join Tables/Place
+    in Sheet itself) - or (None, None) if the chain dead-ends.
+
+    Exists so the join/place order tracked by table_items'
+    own link_key (_link_key in nodes_table_join.py/nodes_sheet_place.py)
+    stays stable across the user editing an operator chain feeding into
+    the join (e.g. muting Move Sheet, or inserting/removing an Edit
+    Cell) - the user's own explicit framing: "quello per cui facciamo
+    join sono le tabelle e le sheet, eventualmente modificate da
+    operatori, ma sempre quelle sheet e tabelle sono... il nodo join per
+    stabilire l'id va fino alla prima table/sheet che incontra".
+    Confirmed live as a real bug before this existed: muting Move Sheet
+    (a node with one Sheet input and one Sheet output) made
+    resolve_through_reroutes correctly resolve straight past it to the
+    Sheet Primitive behind it - correct for VALUE resolution, but it
+    silently changed the (from_node, output_index) pair _link_key keys
+    table_items by, making the entry look like a brand new connection
+    each time, losing its position in the user's own custom order.
+
+    A node only counts as "transparent" here if it has EXACTLY one
+    Table/Sheet input socket, of the SAME socket type as its (single)
+    Table/Sheet output - any node that combines several Tables/Sheets
+    (multi-input, e.g. Join Tables/Place in Sheet) or changes the type
+    altogether (e.g. Table to Sheet: Table in, Sheet out) is treated as
+    an origin in its own right, never walked through. mute is
+    irrelevant here on purpose - unlike resolve_through_reroutes (which
+    exists specifically to resolve VALUES around a muted node), this
+    walks the same chain whether muted or not, since the user's own
+    framing is about identity, not value."""
+    from_node = link.from_node
+    from_socket = link.from_socket
+    while True:
+        table_sheet_inputs = [
+            s for s in from_node.inputs
+            if s.bl_idname in ('MaStroScheduleTableSocketType', 'MaStroScheduleSheetSocketType')
+        ]
+        if len(table_sheet_inputs) != 1 or table_sheet_inputs[0].bl_idname != from_socket.bl_idname:
+            break
+        next_input = table_sheet_inputs[0]
+        if not next_input.is_linked or not next_input.links:
+            return None, None
+        inner_link = next_input.links[0]
+        from_socket = inner_link.from_socket
+        from_node = inner_link.from_node
+    return from_node, from_socket
+
+
 def upstream_attr(socket, attr_name, default=""):
     """Read `attr_name` off the real node feeding `socket`, resolving
     through any native NodeReroute chain first (see
@@ -160,9 +217,12 @@ def upstream_attr(socket, attr_name, default=""):
     `column_label`/`name_value`-style lookup in this tree (Evaluate
     Attribute, Math, ...): "what's the upstream node, ignoring any
     Reroute in between, and what does it say". Returns `default` if the
-    socket isn't linked, the chain dead-ends, or the resolved node
-    doesn't have that attribute at all."""
-    if not socket.is_linked or not socket.links:
+    socket isn't linked, the link is muted (a muted link must behave
+    like the socket isn't linked at all - see execution.py:
+    is_socket_active's own docstring for the fuller story), the chain
+    dead-ends, or the resolved node doesn't have that attribute at
+    all."""
+    if not socket.is_linked or not socket.links or socket.links[0].is_muted:
         return default
     from_node, _from_socket = resolve_through_reroutes(socket.links[0])
     if from_node is None:

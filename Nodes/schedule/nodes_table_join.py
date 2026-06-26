@@ -1,7 +1,7 @@
 from bpy.types import Node
 from bpy.props import CollectionProperty, IntProperty
 
-from .tree import MaStroScheduleTreeNode, resolve_through_reroutes
+from .tree import MaStroScheduleTreeNode, resolve_origin_node
 from .execution import get_node_table
 from .properties import MaStro_schedule_join_table_item
 
@@ -43,10 +43,12 @@ def _header_text(table):
 # (the result has ONE header per column, never several) - confirmed
 # live as a real surprise ("vertical si mangia l'header"), not just a
 # bug to patch. The user's own conclusion: that case belongs to a
-# different, not-yet-built concept ("Sheet" - a Table finalized via a
-# future "Place in Sheet" node into an opaque block, joined/stacked by
-# a future "Join Sheets" that keeps every block's own header visible
-# as its own row) rather than forcing it into this node, which stays
+# different concept ("Sheet" - a Table converted via Table to Sheet
+# into an opaque block of plain cells with no header concept at all,
+# combined - horizontally OR vertically - by Place in Sheet
+# (nodes_sheet_place.py), which keeps every block's own former header
+# intact as an ordinary cell rather than needing to choose between
+# them) rather than forcing it into this node, which stays
 # horizontal-only, where there's no such ambiguity (every column
 # already carries its own header, nothing to choose between). A real
 # Blender multi-input socket (use_multi_input=True) - resolved by
@@ -109,16 +111,35 @@ class MaStroScheduleTableJoinNode(MaStroScheduleTreeNode, Node):
         current_keys = []
         labels_by_key = {}
         for link in socket.links:
-            from_node, from_socket = resolve_through_reroutes(link)
-            if from_node is None:
+            # A muted link is treated as if it doesn't exist at all -
+            # the user's own explicit call: the Table it feeds
+            # disappears entirely from this list, not just from the
+            # join result (same "unplugged in spirit" treatment as the
+            # mismatch/reroute-failure cases right below).
+            if link.is_muted:
+                continue
+            # Both the KEY identifying this entry AND the label shown
+            # for it come from resolve_origin_node (walks back through
+            # any transparent single-input Table operator - Move Sheet,
+            # Edit Cell, ... - to the real origin) - the user's own
+            # explicit call ("per me la label è quella del nodo
+            # [origine]"): the label names the same node the key
+            # tracks, not whatever value happens to be flowing through
+            # right now (which can differ from the origin's own value
+            # when an operator in between is muted) - identity and its
+            # displayed name are the same thing, on purpose. See
+            # resolve_origin_node's own docstring for the full story/bug
+            # this fixes.
+            origin_node, origin_socket = resolve_origin_node(link)
+            if origin_node is None:
                 continue
             try:
-                output_index = list(from_node.outputs).index(from_socket)
+                output_index = list(origin_node.outputs).index(origin_socket)
             except ValueError:
                 continue
-            key = _link_key(from_node, output_index)
+            key = _link_key(origin_node, output_index)
             current_keys.append(key)
-            table = get_node_table(self.id_data.name, from_node.name)
+            table = get_node_table(self.id_data.name, origin_node.name)
             labels_by_key[key] = _header_text(table[output_index] if table else None)
 
         existing_keys = [item.link_key for item in self.table_items]
@@ -205,21 +226,34 @@ class MaStroScheduleTableJoinNode(MaStroScheduleTreeNode, Node):
         tables_by_key = {}
         socket = self.inputs["Table"]
         for link, value in zip(socket.links, inputs[0] or []):
-            from_node, from_socket = resolve_through_reroutes(link)
-            if from_node is None:
+            # Same "disappears entirely" treatment as _sync_table_items'
+            # own is_muted check above - a muted link contributes
+            # nothing to the join, not even an empty Table occupying a
+            # slot.
+            if link.is_muted:
+                continue
+            # Same identity resolution as _sync_table_items' own key
+            # (resolve_origin_node, not resolve_through_reroutes) - see
+            # that method's own comment, and resolve_origin_node's own
+            # docstring, for why: this key must match exactly what
+            # table_items itself tracks, or the join order built from
+            # table_items below would never line up with this dict's
+            # own keys.
+            origin_node, origin_socket = resolve_origin_node(link)
+            if origin_node is None:
                 continue
             try:
-                output_index = list(from_node.outputs).index(from_socket)
+                output_index = list(origin_node.outputs).index(origin_socket)
             except ValueError:
                 continue
-            tables_by_key[_link_key(from_node, output_index)] = value or {"columns": [], "merges": []}
+            tables_by_key[_link_key(origin_node, output_index)] = value or {"columns": [], "merges": []}
 
         # table_items' own order (the user's own custom ordering, see
         # this class's module-level docstring) - a link_key with no
-        # entry yet (this evaluate() ran before draw_buttons' own sync,
-        # e.g. right after a new link is made) falls back to whatever
-        # order socket.links itself has, appended after every already-
-        # ordered Table.
+        # entry yet (this evaluate() ran before the polling timer's own
+        # next _sync_table_items pass, e.g. right after a new link is
+        # made) falls back to whatever order socket.links itself has,
+        # appended after every already-ordered Table.
         ordered_keys = [item.link_key for item in self.table_items if item.link_key in tables_by_key]
         for key in tables_by_key:
             if key not in ordered_keys:

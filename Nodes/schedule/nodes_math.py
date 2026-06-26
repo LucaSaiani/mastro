@@ -5,7 +5,7 @@ from bpy.types import Node, Operator
 from bpy.props import EnumProperty, IntProperty, FloatProperty, StringProperty
 
 from .tree import MaStroScheduleTreeNode
-from .execution import update_node
+from .execution import update_node, is_socket_active
 
 
 # operations that only use Column A - the B input socket is hidden for
@@ -301,8 +301,8 @@ class MaStroScheduleMathNode(MaStroScheduleTreeNode, Node):
         # comment) means there's nothing to evaluate against - fall back
         # to the typed-in constant rather than indexing a socket that
         # isn't there.
-        a_linked = "A" in self.inputs and self.inputs["A"].is_linked
-        b_linked = "B" in self.inputs and self.inputs["B"].is_linked
+        a_linked = "A" in self.inputs and is_socket_active(self.inputs["A"])
+        b_linked = "B" in self.inputs and is_socket_active(self.inputs["B"])
         rows_a = inputs[0] if a_linked else [{self.name: self.value_a}]
         rows_a = rows_a or []
         rows_b = inputs[1] if b_linked else [{self.name: self.value_b}]

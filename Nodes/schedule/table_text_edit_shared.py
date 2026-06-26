@@ -19,12 +19,18 @@ the other three go through map_table_rows.
 """
 
 
+from .execution import is_socket_active
+
+
 def resolve_index(socket, value_in, fallback):
     """Same "unlinked socket always comes through as None" handling as
     Rename Header/Math/Edit Header's own Column Index - fall back to the
     inline field's own backing property explicitly when unlinked, rather
-    than assuming the input holds it."""
-    if not socket.is_linked:
+    than assuming the input holds it. is_socket_active, not bare
+    socket.is_linked - see that function's own docstring in
+    execution.py for why (a muted link must fall back the same way an
+    actually-unlinked socket does)."""
+    if not is_socket_active(socket):
         return fallback
     if isinstance(value_in, str):
         return int(value_in) if value_in else fallback

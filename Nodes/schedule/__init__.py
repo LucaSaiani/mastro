@@ -4,6 +4,7 @@ from .sockets import (
     MaStroScheduleColumnSocket,
     MaStroScheduleAnySocket,
     MaStroScheduleTableSocket,
+    MaStroScheduleSheetSocket,
     MaStroScheduleStringSocket,
     MaStroScheduleColorSocket,
     MaStroScheduleBooleanSocket,
@@ -43,6 +44,7 @@ from .nodes_value import MaStroScheduleValueNode
 from .nodes_integer import MaStroScheduleIntegerNode
 from .nodes_column_primitive import MaStroScheduleColumnPrimitiveNode
 from .nodes_table_primitive import MaStroScheduleTablePrimitiveNode
+from .nodes_sheet_primitive import MaStroScheduleSheetPrimitiveNode
 from .nodes_string import MaStroScheduleStringNode
 from .nodes_rgb import MaStroScheduleColourNode
 from .nodes_boolean import MaStroScheduleBooleanNode
@@ -52,6 +54,10 @@ from .nodes_lookup import MaStroScheduleCategoryLookupNode, MaStroScheduleMatrix
 from .nodes_table import MaStroScheduleTableDataNode, MaStroScheduleFlattenNode
 from .nodes_table_convert import MaStroScheduleConvertColumnToTableNode
 from .nodes_table_join import MaStroScheduleTableJoinNode
+from .nodes_table_sheet import MaStroScheduleTableSheetNode
+from .nodes_sheet_move import MaStroScheduleSheetMoveNode
+from .nodes_sheet_place import MaStroScheduleSheetPlaceNode
+from .nodes_sheet_background import MaStroScheduleSheetBackgroundNode
 from .nodes_table_hide_zero import MaStroScheduleTableHideZeroNode
 from .nodes_table_prefix_suffix import MaStroScheduleTablePrefixSuffixNode
 from .nodes_table_case import MaStroScheduleTableCaseNode
@@ -90,6 +96,7 @@ classes = (
     MaStroScheduleColumnSocket,
     MaStroScheduleAnySocket,
     MaStroScheduleTableSocket,
+    MaStroScheduleSheetSocket,
     MaStroScheduleStringSocket,
     MaStroScheduleColorSocket,
     MaStroScheduleBooleanSocket,
@@ -119,6 +126,7 @@ classes = (
     MaStroScheduleIntegerNode,
     MaStroScheduleColumnPrimitiveNode,
     MaStroScheduleTablePrimitiveNode,
+    MaStroScheduleSheetPrimitiveNode,
     MaStroScheduleStringNode,
     MaStroScheduleColourNode,
     MaStroScheduleBooleanNode,
@@ -130,6 +138,10 @@ classes = (
     MaStroScheduleFlattenNode,
     MaStroScheduleConvertColumnToTableNode,
     MaStroScheduleTableJoinNode,
+    MaStroScheduleTableSheetNode,
+    MaStroScheduleSheetMoveNode,
+    MaStroScheduleSheetPlaceNode,
+    MaStroScheduleSheetBackgroundNode,
     MaStroScheduleTableHideZeroNode,
     MaStroScheduleTablePrefixSuffixNode,
     MaStroScheduleTableCaseNode,

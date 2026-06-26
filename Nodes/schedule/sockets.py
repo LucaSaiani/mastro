@@ -163,7 +163,12 @@ class MaStroScheduleColumnSocket(NodeSocket):
 
     @classmethod
     def draw_color_simple(cls):
-        return (161 / 255, 161 / 255, 161 / 255, 1.0)
+        # Darkest gray of the Column -> Table -> Sheet progression (96,
+        # 161, 255 - see MaStroScheduleTableSocket/MaStroScheduleSheetSocket's
+        # own draw_color_simple) - Column is the loosest/least-finished
+        # data shape of the three, so it gets the darkest socket color,
+        # furthest from Sheet's white "fully finalized" end.
+        return (96 / 255, 96 / 255, 96 / 255, 1.0)
 
 
 # A list of groups, as produced by Group Into List (see
@@ -356,4 +361,58 @@ class MaStroScheduleTableSocket(NodeSocket):
 
     @classmethod
     def draw_color_simple(cls):
+        # Middle gray of the Column -> Table -> Sheet progression (96,
+        # 161, 255 - see MaStroScheduleColumnSocket/MaStroScheduleSheetSocket's
+        # own draw_color_simple) - Table is the midpoint between loose
+        # Column data and a fully finalized, opaque Sheet block.
+        return (161 / 255, 161 / 255, 161 / 255, 1.0)
+
+
+# A Sheet is a Table that's been finalized via Table to Sheet
+# (nodes_table_sheet.py) into an opaque block - but, unlike Table, it
+# has NO header concept at all: every position is just a cell, the
+# user's own explicit correction ("per sheet tutto è cell, non ci sono
+# headers"). Shape: {"columns": [...], "merges": [...]} - "columns" is
+# a list of columns, each {"cells": [cell, cell, ...]}, a flat
+# positional list (cells[0] is whatever Table's own header used to be,
+# now just an ordinary cell, indistinguishable from cells[1], cells[2],
+# ...) - NOT {"header": {...}, "rows": [...]} the way Table's own
+# columns are (see the comment above MaStroScheduleTableSocket for that
+# shape). Each cell is still the same {"text": str, "bg": color or
+# None, "text_color": color or None, "text_align": ...} dict Table
+# already uses, just never split into a "header" slot anymore. "merges"
+# keeps the exact same shape as Table's own (row/column coordinates are
+# still meaningful - Sheet only erases the header/row DISTINCTION, not
+# row 0's special position as the visual top).
+#
+# Carried by its OWN socket type so Cells/Header nodes (Edit Cell, Row
+# Colour, Edit Header, ...) can no longer connect to it - a type
+# mismatch the same way connecting a Column into a Boolean input is;
+# those nodes are all written against Table's header/rows split, which
+# Sheet no longer has. Exists because joining/stacking whole Tables
+# (the original Join Tables, before it was simplified to
+# horizontal-only) ran into a real design gap live: every Table after
+# the first lost its own header the moment several were stacked, with
+# no good answer for "whose header wins" - confirmed as a genuine
+# surprise, not just a bug (nodes_table_join.py's own module comment
+# has the full story). A Sheet block solves that by being opaque:
+# Place in Sheet (nodes_sheet_place.py) keeps every joined block's own
+# former header intact as an ordinary cell/row in the result, rather
+# than needing to merge/choose between them the way Join Tables'
+# columns (which already each carry their own header) do not have to.
+class MaStroScheduleSheetSocket(NodeSocket):
+    """Socket carrying a Sheet - a Table finalized into an opaque
+    block of plain cells (no header/row distinction), no longer
+    editable by Cells/Header nodes"""
+    bl_idname = 'MaStroScheduleSheetSocketType'
+    bl_label = "Sheet"
+
+    def draw(self, context, layout, node, text):
+        layout.label(text=text)
+
+    @classmethod
+    def draw_color_simple(cls):
+        # Brightest of the Column -> Table -> Sheet progression (96,
+        # 161, 255 - see MaStroScheduleColumnSocket/MaStroScheduleTableSocket's
+        # own draw_color_simple) - white, the "fully finalized" end.
         return (1.0, 1.0, 1.0, 1.0)

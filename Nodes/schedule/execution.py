@@ -38,6 +38,27 @@ def get_node_table(tree_name, node_name):
     return _schedule_cache.get(tree_name, {}).get(node_name)
 
 
+def is_socket_active(socket):
+    """True if `socket` is linked AND that link isn't muted - the
+    single check every node's evaluate()/draw_buttons should use
+    instead of bare `socket.is_linked` whenever deciding "should I use
+    the linked value, or my own inline fallback?". socket.is_linked
+    alone stays True for a muted link (confirmed live - Blender's own
+    NodeLink.is_muted is a separate flag, "linked" and "active" are not
+    the same thing) - every node written before this helper existed
+    checked is_linked directly, which made muting a link a no-op
+    everywhere (the dashed-line cable changed color but fed the same
+    value through regardless, same gap Sverchok's own
+    update_system.py already filters with `if not li.is_muted` before
+    building its own dependency graph at all). Mirrors eval_node's own
+    resolve_link_value, which already returns None for a muted link's
+    value - this is the matching check for the "is there even a value
+    worth reading" half of the same decision, read directly off the
+    socket rather than the resolved value (some draw_buttons callbacks
+    need to know this before evaluate() has even run)."""
+    return socket.is_linked and bool(socket.links) and not socket.links[0].is_muted
+
+
 def linked_table(node, input_index=0):
     """Resolve the table feeding `node`'s input at `input_index` from the
     evaluation cache, but only if the link's socket types actually match -
@@ -53,6 +74,15 @@ def linked_table(node, input_index=0):
     if not socket.is_linked or not socket.links:
         return None
     link = socket.links[0]
+    # A muted link (the dashed-line "disconnect without unplugging"
+    # toggle, native Blender NodeLink.is_muted) must behave like the
+    # socket isn't linked at all - confirmed live as a real gap before
+    # this check existed: muting a link visually grayed the cable but
+    # had zero effect on evaluation, the exact same way Sverchok's own
+    # update_system.py filters `if not li.is_muted` before building its
+    # dependency graph at all (rather than gating individual reads).
+    if link.is_muted:
+        return None
     # Same native-NodeReroute resolution as eval_node/mark_mismatched_links/
     # is_node_valid (tree.py:resolve_through_reroutes) - without this, a
     # Reroute (always created by Shift+RMB drag, with its own native socket
@@ -131,6 +161,15 @@ def evaluate_tree(tree):
             return cache[node.name]
 
         def resolve_link_value(socket, link):
+            # A muted link must behave like the socket isn't linked at
+            # all - same fix/reasoning as linked_table's own is_muted
+            # check above (the dashed-line "disconnect without
+            # unplugging" toggle had zero effect on evaluation before
+            # this existed, confirmed live) - checked before even
+            # resolving reroutes, since a muted link feeds nothing
+            # through regardless of what's on the other end of it.
+            if link.is_muted:
+                return None
             # Dragging a link with Shift+RMB always creates a native
             # NodeReroute (confirmed live - no way to make Blender's
             # drag-to-insert operator create our own reroute node

@@ -2,7 +2,7 @@ from bpy.types import Node
 from bpy.props import StringProperty
 
 from .tree import MaStroScheduleTreeNode
-from .execution import update_node
+from .execution import update_node, is_socket_active
 
 
 # Renames a Column's header independently of the node that produced it -
@@ -64,7 +64,7 @@ class MaStroScheduleHeaderNode(MaStroScheduleTreeNode, Node):
         # string_value (the inline field's own backing property) is read
         # explicitly for that case rather than assuming inputs[1] holds
         # it.
-        if self.inputs["String"].is_linked:
+        if is_socket_active(self.inputs["String"]):
             self.cached_header_text = inputs[1] or ""
         else:
             self.cached_header_text = self.string_value

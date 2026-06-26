@@ -6,7 +6,7 @@ from bpy.props import IntProperty, StringProperty, FloatVectorProperty, EnumProp
 from .nodes_table_edit_header import ALIGNMENT_ITEMS
 
 from .tree import MaStroScheduleTreeNode
-from .execution import update_node
+from .execution import update_node, is_socket_active
 
 
 # Set on BOTH the property's own description= AND the Title socket's
@@ -45,18 +45,25 @@ def _column_letter(index):
 # Title - never edited per column individually). "test_{f}"/"test_{F}"
 # means an alphabetic sequence starting at f/F instead, case-matched to
 # the token. Anything not matching this pattern (including an empty
-# Title) falls back to the same "A0"/"B0"/... default every column
-# already starts with.
+# Title) leaves every column's header blank - this used to fall back to
+# an automatic "A0"/"B0"/... label, removed (the user's own correction):
+# it was both semantically wrong (numbering should start at 1, not 0,
+# if numbering at all) and entirely redundant - the exact same sequence
+# is already obtainable on purpose by typing "{A}0" into Title, so a
+# silent default doing the same thing behind an EMPTY Title just hid
+# what "no Title" actually means (nothing typed = no header text, not
+# "some flavor of auto-numbering").
 _PATTERN_RE = re.compile(r"^(.*)\{([0-9]+|[a-zA-Z])\}(.*)$")
 
 
 def _per_column_labels(pattern, count):
     """Generate `count` per-column header labels from a "{...}" pattern
-    (see _PATTERN_RE above) - or the existing "A0"/"B0"/... default for
-    every column if `pattern` doesn't match that shape at all."""
+    (see _PATTERN_RE above) - or a blank header for every column if
+    `pattern` doesn't match that shape at all (including an empty
+    Title)."""
     match = _PATTERN_RE.match(pattern) if pattern else None
     if not match:
-        return [f"{_column_letter(i)}0" for i in range(count)]
+        return ["" for _ in range(count)]
 
     prefix, token, suffix = match.groups()
     if token.isdigit():
@@ -156,7 +163,7 @@ class MaStroScheduleTablePrimitiveNode(MaStroScheduleTreeNode, Node):
 
     @staticmethod
     def _resolve_count(socket, rows_in, fallback):
-        if not socket.is_linked:
+        if not is_socket_active(socket):
             return fallback
         rows_in = rows_in or []
         if not rows_in:
@@ -166,19 +173,19 @@ class MaStroScheduleTablePrimitiveNode(MaStroScheduleTreeNode, Node):
 
     @staticmethod
     def _resolve_text(socket, value_in, fallback):
-        if not socket.is_linked:
+        if not is_socket_active(socket):
             return fallback
         return value_in if isinstance(value_in, str) else fallback
 
     @staticmethod
     def _resolve_color(socket, value_in, fallback):
-        if not socket.is_linked:
+        if not is_socket_active(socket):
             return tuple(fallback)
         return tuple(value_in) if value_in else tuple(fallback)
 
     @staticmethod
     def _resolve_bool(socket, value_in, fallback):
-        if not socket.is_linked:
+        if not is_socket_active(socket):
             return fallback
         if isinstance(value_in, bool):
             return value_in
@@ -206,7 +213,15 @@ class MaStroScheduleTablePrimitiveNode(MaStroScheduleTreeNode, Node):
         # already returns nothing for a value <= 0, no special-casing
         # needed.
         if join_header:
-            header_texts = [f"{_column_letter(i)}0" for i in range(column_count)]
+            # Always covered by the merge built below (which draws
+            # Title's own text on top, see sockets.py:
+            # MaStroScheduleTableSocket's docstring - merges are drawn
+            # LAST, over every column's own header cell) - blank rather
+            # than some auto-numbered placeholder for the same reason
+            # _per_column_labels' own fallback was removed: data that's
+            # never actually seen shouldn't carry a misleading value
+            # either, even if invisible today.
+            header_texts = ["" for _ in range(column_count)]
         else:
             header_texts = _per_column_labels(title_text, column_count)
 

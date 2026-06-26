@@ -209,8 +209,37 @@ class MaStroScheduleViewerNode(MaStroScheduleTreeNode, Node):
         from .tree import resolve_through_reroutes
         socket = self.inputs[0]
         from_node, from_socket = (None, None)
-        if socket.is_linked and socket.links:
+        # A muted link must behave like nothing is plugged in at all
+        # (see execution.py:is_socket_active's own docstring for why
+        # bare is_linked isn't enough) - every branch below already
+        # checks `from_node is not None`, so leaving it None here makes
+        # every one of them correctly fall through to the same empty/
+        # generic display an actually-unplugged Viewer already shows.
+        if socket.is_linked and socket.links and not socket.links[0].is_muted:
             from_node, from_socket = resolve_through_reroutes(socket.links[0])
+        # Sheet (nodes_table_sheet.py) shares this rendering path with
+        # Table, but NOT its data shape - Sheet's own columns are
+        # {"cells": [...]} (a flat list, no header/row split at all,
+        # see MaStroScheduleSheetSocket's own docstring in sockets.py),
+        # while _evaluate_table (shared by both) still expects Table's
+        # {"header": {...}, "rows": [...]} shape - cells[0] is converted
+        # back into a "header" dict here purely for rendering (still
+        # drawn at the visual top, same as before becoming a Sheet),
+        # NOT because Sheet itself has a header concept again.
+        if from_node is not None and from_socket.bl_idname == 'MaStroScheduleSheetSocketType':
+            sheet = inputs[0] or {"columns": [], "merges": []}
+            table_shaped = {
+                "columns": [
+                    {"header": (column.get("cells") or [{"text": "", "bg": None}])[0],
+                     "rows": (column.get("cells") or [{}])[1:]}
+                    for column in sheet.get("columns", [])
+                ],
+                "merges": sheet.get("merges", []),
+            }
+            self._evaluate_table(table_shaped)
+            self.showing_table = True
+            self.showing_list = False
+            return []
         if from_node is not None and from_socket.bl_idname == 'MaStroScheduleTableSocketType':
             self._evaluate_table(inputs[0] or {"columns": [], "merges": []})
             self.showing_table = True

@@ -2,7 +2,7 @@ from bpy.types import Node
 from bpy.props import IntProperty, StringProperty, FloatVectorProperty, EnumProperty, BoolProperty
 
 from .tree import MaStroScheduleTreeNode
-from .execution import update_node
+from .execution import update_node, is_socket_active
 
 
 # Plain text dropdown rather than three custom-icon buttons - the
@@ -155,7 +155,7 @@ class MaStroScheduleTableHeaderNode(MaStroScheduleTreeNode, Node):
         # as Rename Header/Math - fall back to the inline field's own
         # backing property explicitly when unlinked, rather than
         # assuming the input holds it.
-        if not socket.is_linked:
+        if not is_socket_active(socket):
             return fallback
         if isinstance(value_in, str):
             return cast(value_in) if value_in else fallback
@@ -171,7 +171,7 @@ class MaStroScheduleTableHeaderNode(MaStroScheduleTreeNode, Node):
         # (nodes_table_primitive.py) - kept separate rather than shared,
         # since both classes already duplicate _resolve_scalar this way
         # too.
-        if not socket.is_linked:
+        if not is_socket_active(socket):
             return fallback
         if isinstance(value_in, bool):
             return value_in
@@ -224,7 +224,7 @@ class MaStroScheduleTableHeaderNode(MaStroScheduleTreeNode, Node):
         # an explicit input and does overwrite - only the truly
         # untouched case is special.
         string_socket = self.inputs["String"]
-        if string_socket.is_linked:
+        if is_socket_active(string_socket):
             new_text = inputs[3] or ""
             has_text = True
         else:
@@ -237,14 +237,14 @@ class MaStroScheduleTableHeaderNode(MaStroScheduleTreeNode, Node):
         # no per-row dict/key extraction needed the way scalars above
         # require.
         bg_socket = self.inputs["Background Colour"]
-        if bg_socket.is_linked:
+        if is_socket_active(bg_socket):
             new_bg = inputs[4]
             has_bg = True
         else:
             new_bg = tuple(self.bg_value)
             has_bg = self.has_bg
         text_colour_socket = self.inputs["Text Colour"]
-        if text_colour_socket.is_linked:
+        if is_socket_active(text_colour_socket):
             new_text_colour = inputs[5]
             has_text_colour = True
         else:

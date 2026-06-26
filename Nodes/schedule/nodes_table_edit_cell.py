@@ -2,7 +2,7 @@ from bpy.types import Node
 from bpy.props import IntProperty, StringProperty, FloatVectorProperty, EnumProperty, BoolProperty
 
 from .tree import MaStroScheduleTreeNode
-from .execution import update_node
+from .execution import update_node, is_socket_active
 from .nodes_table_edit_header import ALIGNMENT_ITEMS, _mark_touched
 
 
@@ -62,7 +62,7 @@ class MaStroScheduleTableEditCellNode(MaStroScheduleTreeNode, Node):
 
     @staticmethod
     def _resolve_scalar(socket, value_in, fallback, cast):
-        if not socket.is_linked:
+        if not is_socket_active(socket):
             return fallback
         if isinstance(value_in, str):
             return cast(value_in) if value_in else fallback
@@ -85,7 +85,7 @@ class MaStroScheduleTableEditCellNode(MaStroScheduleTreeNode, Node):
         col_index = self._resolve_scalar(self.inputs["Column Index"], inputs[2], self.column_index, int)
 
         string_socket = self.inputs["String"]
-        if string_socket.is_linked:
+        if is_socket_active(string_socket):
             new_text = inputs[3] or ""
             has_text = True
         else:
@@ -93,14 +93,14 @@ class MaStroScheduleTableEditCellNode(MaStroScheduleTreeNode, Node):
             has_text = bool(new_text)
 
         bg_socket = self.inputs["Background Colour"]
-        if bg_socket.is_linked:
+        if is_socket_active(bg_socket):
             new_bg = inputs[4]
             has_bg = True
         else:
             new_bg = tuple(self.bg_value)
             has_bg = self.has_bg
         text_colour_socket = self.inputs["Text Colour"]
-        if text_colour_socket.is_linked:
+        if is_socket_active(text_colour_socket):
             new_text_colour = inputs[5]
             has_text_colour = True
         else:

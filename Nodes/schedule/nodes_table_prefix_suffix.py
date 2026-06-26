@@ -2,7 +2,7 @@ from bpy.types import Node
 from bpy.props import IntProperty, StringProperty
 
 from .tree import MaStroScheduleTreeNode
-from .execution import update_node
+from .execution import update_node, is_socket_active
 from .table_text_edit_shared import resolve_index, map_table_rows
 
 
@@ -41,8 +41,8 @@ class MaStroScheduleTablePrefixSuffixNode(MaStroScheduleTreeNode, Node):
         table = inputs[0] or {"columns": [], "merges": []}
         start_index = resolve_index(self.inputs["Start Column Index"], inputs[1], self.start_index)
         end_index = resolve_index(self.inputs["End Column Index"], inputs[2], self.end_index)
-        prefix = inputs[3] if self.inputs["Prefix"].is_linked else self.prefix
-        suffix = inputs[4] if self.inputs["Suffix"].is_linked else self.suffix
+        prefix = inputs[3] if is_socket_active(self.inputs["Prefix"]) else self.prefix
+        suffix = inputs[4] if is_socket_active(self.inputs["Suffix"]) else self.suffix
         # Leaves an already-empty cell empty - the user's own explicit
         # call: a cell blanked by Hide Zero upstream (or genuinely empty
         # to begin with) should stay blank, not become "m²" with

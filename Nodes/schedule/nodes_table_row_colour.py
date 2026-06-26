@@ -2,7 +2,7 @@ from bpy.types import Node
 from bpy.props import IntProperty, FloatVectorProperty
 
 from .tree import MaStroScheduleTreeNode
-from .execution import update_node
+from .execution import update_node, is_socket_active
 from .table_text_edit_shared import resolve_index
 
 
@@ -55,8 +55,8 @@ class MaStroScheduleTableRowColourNode(MaStroScheduleTreeNode, Node):
         # must never be reachable from this node regardless of where
         # Row Index's value came from.
         row_index = max(2, row_index)
-        bg_colour = inputs[2] if self.inputs["Background Colour"].is_linked else tuple(self.bg_colour)
-        text_colour = inputs[3] if self.inputs["Text Colour"].is_linked else tuple(self.text_colour)
+        bg_colour = inputs[2] if is_socket_active(self.inputs["Background Colour"]) else tuple(self.bg_colour)
+        text_colour = inputs[3] if is_socket_active(self.inputs["Text Colour"]) else tuple(self.text_colour)
 
         # row_index - 2, not - 1: see this class's own module-level
         # comment - row_index 2 is the first entry of "rows" (list

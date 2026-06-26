@@ -2,7 +2,7 @@ from bpy.types import Node
 from bpy.props import IntProperty, StringProperty
 
 from .tree import MaStroScheduleTreeNode
-from .execution import update_node
+from .execution import update_node, is_socket_active
 
 
 # A Column with no upstream at all - rows of empty values, ready to be
@@ -52,7 +52,7 @@ class MaStroScheduleColumnPrimitiveNode(MaStroScheduleTreeNode, Node):
         # property explicitly when unlinked, rather than assuming
         # inputs[...] holds it. Rows is inputs[0], Title is inputs[1] -
         # matches init()'s socket order above.
-        if self.inputs["Rows"].is_linked:
+        if is_socket_active(self.inputs["Rows"]):
             rows_in = inputs[0] or []
             row_count = 0
             if rows_in:
@@ -61,7 +61,7 @@ class MaStroScheduleColumnPrimitiveNode(MaStroScheduleTreeNode, Node):
         else:
             row_count = self.row_count
 
-        if self.inputs["Title"].is_linked:
+        if is_socket_active(self.inputs["Title"]):
             self.cached_header_text = inputs[1] or ""
         else:
             self.cached_header_text = self.header

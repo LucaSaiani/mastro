@@ -2,7 +2,7 @@ from bpy.types import Node
 from bpy.props import IntProperty, FloatVectorProperty
 
 from .tree import MaStroScheduleTreeNode
-from .execution import update_node
+from .execution import update_node, is_socket_active
 from .table_text_edit_shared import resolve_index, column_range
 
 
@@ -66,10 +66,10 @@ class MaStroScheduleTableRowPatternNode(MaStroScheduleTreeNode, Node):
         table = inputs[0] or {"columns": [], "merges": []}
         start_index = resolve_index(self.inputs["Start Column Index"], inputs[1], self.start_index)
         end_index = resolve_index(self.inputs["End Column Index"], inputs[2], self.end_index)
-        bg_colour_a = inputs[3] if self.inputs["Background Colour A"].is_linked else tuple(self.bg_colour_a)
-        text_colour_a = inputs[4] if self.inputs["Text Colour A"].is_linked else tuple(self.text_colour_a)
-        bg_colour_b = inputs[5] if self.inputs["Background Colour B"].is_linked else tuple(self.bg_colour_b)
-        text_colour_b = inputs[6] if self.inputs["Text Colour B"].is_linked else tuple(self.text_colour_b)
+        bg_colour_a = inputs[3] if is_socket_active(self.inputs["Background Colour A"]) else tuple(self.bg_colour_a)
+        text_colour_a = inputs[4] if is_socket_active(self.inputs["Text Colour A"]) else tuple(self.text_colour_a)
+        bg_colour_b = inputs[5] if is_socket_active(self.inputs["Background Colour B"]) else tuple(self.bg_colour_b)
+        text_colour_b = inputs[6] if is_socket_active(self.inputs["Text Colour B"]) else tuple(self.text_colour_b)
 
         bounds = column_range(table, start_index, end_index)
         if bounds is None:

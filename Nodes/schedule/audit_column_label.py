@@ -92,6 +92,7 @@ PROPERTY_UPDATE_EXEMPT = {
     ("nodes_lookup.py", "MaStroScheduleCategoryLookupNode", "active_item_index"),
     ("nodes_lookup.py", "MaStroScheduleMatrixLookupNode", "active_key_index"),
     ("nodes_table_join.py", "MaStroScheduleTableJoinNode", "active_table_index"),
+    ("nodes_sheet_place.py", "MaStroScheduleSheetPlaceNode", "active_table_index"),
     # column_to_add (nodes_groupby.py): still-WIP dynamic-items
     # EnumProperty already flagged in its own TODO comment as a
     # RecursionError risk - left untouched until that node graduates

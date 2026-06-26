@@ -20,7 +20,7 @@ from bpy.types import Node
 from bpy.props import FloatProperty
 
 from .tree import MaStroScheduleTreeNode
-from .execution import update_node
+from .execution import update_node, is_socket_active
 
 
 class MaStroScheduleTemplateNode(MaStroScheduleTreeNode, Node):
@@ -59,9 +59,12 @@ class MaStroScheduleTemplateNode(MaStroScheduleTreeNode, Node):
     #        self.inputs.new('MaStroScheduleColumnSocketType', "A").prop_name = "value_a"
     # 3. In evaluate(), eval_node does NOT read prop_name automatically -
     #    an unlinked socket's input value always comes through as None,
-    #    so check self.inputs["A"].is_linked explicitly and fall back to
-    #    self.value_a yourself (see nodes_math.py's evaluate() or
-    #    nodes_header.py's for two real examples of this exact check).
+    #    so check is_socket_active(self.inputs["A"]) explicitly (NOT
+    #    bare .is_linked - that stays True for a muted link too, see
+    #    execution.py's own is_socket_active docstring for why) and
+    #    fall back to self.value_a yourself (see nodes_math.py's
+    #    evaluate() or nodes_header.py's for two real examples of this
+    #    exact check).
 
     # === "SOCKET MOMENTARILY ABSENT" GUARD (only needed if you read
     # self.inputs["SomeName"] from inside a property like column_label,
@@ -86,6 +89,6 @@ class MaStroScheduleTemplateNode(MaStroScheduleTreeNode, Node):
         self.outputs.new('MaStroScheduleColumnSocketType', "Column")
 
     def evaluate(self, inputs):
-        a_linked = self.inputs["A"].is_linked
+        a_linked = is_socket_active(self.inputs["A"])
         rows_a = inputs[0] if a_linked else [{self.name: self.value_a}]
         return [rows_a or []]

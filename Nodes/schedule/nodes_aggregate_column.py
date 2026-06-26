@@ -21,9 +21,6 @@ def _data_key(row):
     return None
 
 
-# PROTOTYPE - see the conversation that introduced this node for the
-# design discussion.
-#
 # Aggregates a Column down to one row per distinct value of the chosen
 # `group_key` id key, DROPPING every other id key entirely - "total per
 # Object" means group_key=_Object, and the result no longer carries

@@ -2,7 +2,7 @@ from bpy.types import Node
 from bpy.props import IntProperty
 
 from .tree import MaStroScheduleTreeNode
-from .execution import update_node
+from .execution import update_node, is_socket_active
 
 
 # PROTOTYPE - see the conversation that introduced this node for the
@@ -129,7 +129,7 @@ class MaStroScheduleItemFromListNode(MaStroScheduleTreeNode, Node):
         # Same "unlinked socket always comes through as None" handling
         # as Rename Header/Math - fall back to the inline field's own
         # backing property explicitly when unlinked.
-        if not self.inputs["Index"].is_linked:
+        if not is_socket_active(self.inputs["Index"]):
             return self.index
         if isinstance(value_in, (int, float)):
             return int(value_in)
