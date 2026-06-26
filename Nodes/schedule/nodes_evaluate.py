@@ -267,12 +267,22 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
             missing = any(a is None or a.domain != domain for a in value_attrs)
 
             bm = None
+            # mastro_undercroft is read independently of raw_names (which
+            # for "area" holds nothing - area is a BMFace.calc_area() call,
+            # not a stored attribute) - the user's own explicit call:
+            # "mastro area" should already mean "area minus the undercroft
+            # floors", not the raw full geometric area every level
+            # (undercroft or not) used to get. Read once per face below,
+            # regardless of `name`, since every attribute - not just area -
+            # benefits from knowing which of its levels are undercroft (a
+            # future name could need the same zeroing this gives "area").
+            undercroft_attr = attrs.get("mastro_undercroft")
             if is_area and not missing:
-                # area is computed from the face's geometry (BMFace.calc_area()),
-                # not a stored mesh attribute - always the full geometric area,
-                # undercroft or not, so footprint-style sums at level 0 don't
-                # silently lose area. Subtracting undercroft area is the job of
-                # a separate node combining this with an "undercroft" Evaluate.
+                # area is computed from the face's geometry
+                # (BMFace.calc_area()), not a stored mesh attribute - the
+                # FULL geometric area is still what's computed per face
+                # (area_undercroft_count, read below, decides per LEVEL
+                # whether to zero it out, not the geometry itself).
                 bm = bmesh.new()
                 bm.from_mesh(mesh)
                 bm.faces.ensure_lookup_table()
@@ -299,6 +309,12 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
                         # floor_id or overlay_top: one value per face, repeated
                         # on every level row.
                         plain_value = value_attrs[0].data[face_index].value
+                # Read independently of the name=="undercroft" branch
+                # above (which only fires when undercroft IS the
+                # requested attribute) - "area" needs this value too, to
+                # zero out undercroft levels, without the caller having
+                # to separately request "undercroft" itself.
+                area_undercroft_count = undercroft_attr.data[face_index].value if undercroft_attr else 0
                 if storey_a is not None:
                     storey_a_digits = _digits(storey_a.data[face_index].value)
                     storey_b_digits = _digits(storey_b.data[face_index].value) if storey_b else None
@@ -318,7 +334,14 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
                     if missing:
                         value = None
                     elif is_area:
-                        value = plain_value
+                        # "mastro area" deliberately excludes undercroft
+                        # floors by default - the user's own explicit
+                        # call: undercroft levels never contribute to an
+                        # area total unless the caller goes out of their
+                        # way to ask for the raw geometric area instead
+                        # (no such opt-in exists yet - add one if a real
+                        # case for the full area ever comes up).
+                        value = 0.0 if level < area_undercroft_count else plain_value
                     elif name == "undercroft":
                         # mastro_undercroft stores a plain count of floors
                         # from the bottom that are undercroft (e.g. 3 means
