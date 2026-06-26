@@ -43,6 +43,9 @@ class MaStro_schedule_table_cell(PropertyGroup):
     # already this Viewer's existing default behavior (the fixed 4px
     # inset from the cell's left edge every cell used before alignment
     # existed at all), so there's no separate "unset" state to track.
+    # Set on a header cell by Edit Header/Table primitive; on a row cell
+    # by Cell Align (nodes_table_align.py) - both write the same field
+    # on this shared PropertyGroup.
     text_align: StringProperty(name="Text Align", default="LEFT")
 
 

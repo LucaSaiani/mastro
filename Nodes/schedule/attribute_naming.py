@@ -37,11 +37,23 @@ ATTRIBUTE_GROUPS = {
 # mesh.attributes
 RAW_TO_GROUP = {raw: logical for logical, raws in ATTRIBUTE_GROUPS.items() for raw in raws}
 
-# Names that aren't backed by a stored mesh.attribute at all - computed from
-# the geometry instead (e.g. "area" comes from BMFace.calc_area(), not a
-# layer). Only meaningful for Field=FACE. Always available, regardless of
-# what mesh.attributes the object happens to have.
-COMPUTED_NAMES = {'FACE': ("area",)}
+# Names that aren't backed by a single stored mesh.attribute at all -
+# "area" comes from BMFace.calc_area(), not a layer; "floor" is the
+# CURRENT level index itself (0, 1, 2, ... - the same number each row
+# already carries as the _Level id key), exposed here as a real DATA
+# value usable in Math/Aggregate/etc. instead - the user's own ask:
+# "non abbiamo modo di visualizzare / ottenere il numero dei livelli...
+# voglio piano 0, 1, 2, 3...", clarified after an earlier attempt
+# returned the face's total floor COUNT instead, which already exists
+# as mastro_number_of_storeys and wasn't what was wanted. Named "floor",
+# not "level"/"storey" - those already mean something else here:
+# _Level is the per-row id key (shown as "Level_id", never a value);
+# "storey" is the ATTRIBUTE_GROUPS logical name for the per-level
+# storey-group digit (mastro_list_storey_A/B) - "floor" reads distinctly
+# from both at a glance. Only meaningful for Field=FACE. Always
+# available, regardless of what mesh.attributes the object happens to
+# have.
+COMPUTED_NAMES = {'FACE': ("area", "floor")}
 
 
 def domain_raw_name(name, field):

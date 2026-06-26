@@ -157,7 +157,7 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
             return [self._evaluate_object(objs, name, key)]
 
         domain = FIELD_DOMAINS[field]
-        if name == "area":
+        if name in ("area", "floor"):
             raw_names = ()
         elif name in ATTRIBUTE_GROUPS:
             raw_names = ATTRIBUTE_GROUPS[name]
@@ -243,10 +243,17 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
         rather than duplicated per name."""
         result = []
         is_area = name == "area"
+        is_floor = name == "floor"
         for obj in objs:
             mesh, is_temp_mesh = _resolve_attribute_mesh(obj)
             attrs = mesh.attributes
             if "mastro_number_of_storeys" not in attrs:
+                # "floor" has no meaningful fallback the way "area" does
+                # (_evaluate_face_plain_area) - a plain geometric face
+                # has no floor count at all without this attribute, so
+                # there's simply nothing to report for it, same as every
+                # other attribute already does when this layer is
+                # missing (the function returns early below it too).
                 if is_area:
                     result.extend(self._evaluate_face_plain_area(obj, mesh, is_temp_mesh, key))
                 elif is_temp_mesh:
@@ -301,6 +308,13 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
                 if not missing:
                     if is_area:
                         plain_value = bm.faces[face_index].calc_area()
+                    elif is_floor:
+                        # Nothing to read here at all - "floor"'s value
+                        # is `level` itself, set directly in the
+                        # per-level loop below (value_attrs is empty for
+                        # it too, see raw_names=() for "floor" in
+                        # evaluate(), same as "area").
+                        pass
                     elif name == "undercroft":
                         undercroft_count = value_attrs[0].data[face_index].value
                     elif is_digit_group:
@@ -356,6 +370,19 @@ class MaStroScheduleEvaluateAttributeNode(MaStroScheduleTreeNode, Node):
                         # (no such opt-in exists yet - add one if a real
                         # case for the full area ever comes up).
                         value = 0.0 if level < area_undercroft_count else plain_value
+                    elif is_floor:
+                        # `level` itself - the SAME 0,1,2,... each row
+                        # already carries as _Level (the id key, shown
+                        # as "Level_id"), here exposed as a real DATA
+                        # value instead - the user's own clarification:
+                        # "voglio piano 0, 1, 2, 3..." per row, not the
+                        # face's total floor count (mastro_number_of_storeys
+                        # already exists for that, no Column needed) -
+                        # this is for feeding the current floor index
+                        # into Math/Aggregate/etc. as an actual value,
+                        # something _Level alone (an id key, never a
+                        # value) can't do.
+                        value = level
                     elif name == "undercroft":
                         # mastro_undercroft stores a plain count of floors
                         # from the bottom that are undercroft (e.g. 3 means

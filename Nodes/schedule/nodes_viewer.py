@@ -68,7 +68,7 @@ def _header_text(name):
     return name[:1].upper() + name[1:]
 
 
-def _cell_text(value, is_id_key=False):
+def _cell_text(value):
     """Same str() every cell value already went through, except a float
     is formatted to 2 decimal places first - plain str(float) shows
     IEEE754's own binary-representation noise (e.g. 0.3 typed into a
@@ -78,26 +78,17 @@ def _cell_text(value, is_id_key=False):
     anything actually used in a calculation) - this only formats what's
     drawn here.
 
-    A zero DATA value renders as an empty string instead, unless the
-    schedule_show_zero_values preference is on - the same convention
-    Excel's own "Show a zero in cells that have zero value" checkbox
-    follows (File > Options > Advanced > Display options for this
-    worksheet). Exists for cases like an undercroft floor's area
-    (Evaluate Attribute deliberately zeroes it, see nodes_evaluate.py),
-    where "0.00" reads as a real measured zero rather than "not
-    applicable here" - blank reads as the latter, which is usually what's
-    meant.
-
-    is_id_key=True (Object/Face/Level/...) skips this entirely - a Face
-    or Level index of 0 is a real, meaningful identity (the FIRST face,
-    the GROUND floor), never "nothing to show" the way a zeroed data
-    value is. Confirmed live as a real bug otherwise: Face 0/Level 0
-    rows went blank in that column, indistinguishable from an actually
-    missing id. Only a literal 0/0.0 is affected either way - ""
-    (already blank) and non-numeric values pass through unchanged."""
-    if not is_id_key and isinstance(value, (int, float)) and not isinstance(value, bool) and value == 0:
-        if not get_prefs().schedule_show_zero_values:
-            return ""
+    Always shows a literal zero as "0.00"/"0" - the user's own reversal
+    of an earlier global "hide zero values" preference: that approach
+    (one tree-wide setting, with an is_id_key escape hatch for Object/
+    Face/Level) kept needing more escape hatches every time a new
+    legitimate-zero case showed up (e.g. Evaluate Attribute's own
+    "floor", level 0 being the ground floor). Hiding a zero for a
+    specific column is now Hide Zero's job instead
+    (nodes_table_hide_zero.py) - a real node the user places explicitly
+    where it's wanted (e.g. right after Column to Table, for an
+    undercroft floor's area), working on Table text directly rather
+    than a tree-wide setting with exceptions."""
     if isinstance(value, float):
         return f"{value:.2f}"
     return str(value)
@@ -405,7 +396,7 @@ class MaStroScheduleViewerNode(MaStroScheduleTreeNode, Node):
             for name in column_names:
                 cell = row_item.cells.add()
                 cell.name = name[1:] if name in underscore_id_keys else name
-                cell.value = _cell_text(row.get(name, ""), is_id_key=name in underscore_id_keys)
+                cell.value = _cell_text(row.get(name, ""))
 
         return []
 
@@ -436,6 +427,7 @@ class MaStroScheduleViewerNode(MaStroScheduleTreeNode, Node):
                 row_item.has_bg = row_bg is not None
                 if row_bg is not None:
                     row_item.bg = row_bg
+                row_item.text_align = row.get("text_align", "LEFT")
 
         self.table_merges.clear()
         for merge in table.get("merges", []):
@@ -895,11 +887,13 @@ def _draw_table_overlay(node, is_active=True):
             corners = cell_corners(row_idx, col_idx)
             # has_bg/bg overrides the flat ROW_COLOR for this one cell
             # when set - same reasoning as the header's own override
-            # above. No node sets this on a row yet (Edit Header only
+            # above. No node sets bg on a row yet (Edit Header only
             # edits a column's header cell today), but the storage and
-            # this read are already in place for whenever one does.
+            # this read are already in place for whenever one does -
+            # text_align, unlike bg, IS set on rows now (Cell Align, see
+            # nodes_table_align.py).
             row_color = (*row.bg, ROW_COLOR[3]) if row.has_bg else ROW_COLOR
-            fill_cell(corners, row_color, row.text)
+            fill_cell(corners, row_color, row.text, align=row.text_align)
             all_corners.append(corners)
             if col_idx == 0:
                 # Row number, in the band to the left of this row's

@@ -44,15 +44,13 @@ class MaStroScheduleConvertColumnToTableNode(MaStroScheduleTreeNode, Node):
         table_rows = []
         for row in rows:
             key = _data_key(row)
-            # _cell_text, not a plain str() - same "0.00 vs blank"
+            # _cell_text, not a plain str() - same float-formatting
             # convention as the Viewer's own Column rendering
-            # (nodes_viewer.py), confirmed live as a real inconsistency
-            # otherwise: a Column showing blank for a zeroed value (e.g.
-            # an undercroft floor's area) still showed "0.0" once
-            # converted to a Table through this node. is_id_key isn't
-            # passed - `key` here is already _data_key's result, never
-            # an id key (those were discarded above, see this class's
-            # own docstring).
+            # (nodes_viewer.py): 2 decimal places, avoiding IEEE754's
+            # own binary-representation noise. Hiding a zero for a
+            # specific column, if wanted, is Hide Zero's job
+            # (nodes_table_hide_zero.py), applied after this node, not
+            # this one's concern.
             text = _cell_text(row.get(key, "")) if key is not None else ""
             table_rows.append({"text": text, "bg": None})
 

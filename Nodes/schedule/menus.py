@@ -65,15 +65,35 @@ class NODE_MT_mastro_schedule_primitives_primitives(bpy.types.Menu):
         _add_node(self.layout, "MaStroScheduleTablePrimitive", "Table")
 
 
+class NODE_MT_mastro_schedule_primitives_operations_header(bpy.types.Menu):
+    bl_idname = "NODE_MT_mastro_schedule_primitives_operations_header"
+    bl_label = "Header"
+
+    def draw(self, context):
+        _add_node(self.layout, "MaStroScheduleHeader", "Rename Header")
+        _add_node(self.layout, "MaStroScheduleTableHeader", "Edit Header")
+
+
+class NODE_MT_mastro_schedule_primitives_operations_cells(bpy.types.Menu):
+    bl_idname = "NODE_MT_mastro_schedule_primitives_operations_cells"
+    bl_label = "Cells"
+
+    def draw(self, context):
+        _add_node(self.layout, "MaStroScheduleTableHideZero", "Hide Zero")
+        _add_node(self.layout, "MaStroScheduleTablePrefixSuffix", "Cell Prefix / Suffix")
+        _add_node(self.layout, "MaStroScheduleTableCase", "Cell Case")
+        _add_node(self.layout, "MaStroScheduleTableAlign", "Cell Align")
+
+
 class NODE_MT_mastro_schedule_primitives_operations(bpy.types.Menu):
     bl_idname = "NODE_MT_mastro_schedule_primitives_operations"
     bl_label = "Operations"
 
     def draw(self, context):
         _add_node(self.layout, "MaStroScheduleConvertColumnToTable", "Column to Table")
-        _add_node(self.layout, "MaStroScheduleHeader", "Rename Header")
-        _add_node(self.layout, "MaStroScheduleTableHeader", "Edit Header")
         _add_node(self.layout, "MaStroScheduleAggregateColumn", "Aggregate")
+        self.layout.menu(NODE_MT_mastro_schedule_primitives_operations_header.bl_idname)
+        self.layout.menu(NODE_MT_mastro_schedule_primitives_operations_cells.bl_idname)
 
 
 class NODE_MT_mastro_schedule_primitives(bpy.types.Menu):
@@ -153,6 +173,8 @@ _menu_classes = (
     NODE_MT_mastro_schedule_output,
     NODE_MT_mastro_schedule_attribute,
     NODE_MT_mastro_schedule_primitives_primitives,
+    NODE_MT_mastro_schedule_primitives_operations_header,
+    NODE_MT_mastro_schedule_primitives_operations_cells,
     NODE_MT_mastro_schedule_primitives_operations,
     NODE_MT_mastro_schedule_primitives,
     NODE_MT_mastro_schedule_utilities_maths,

@@ -248,23 +248,6 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
         )
     )
 
-    # Same name/polarity as Excel's own "Show a zero in cells that have
-    # zero value" (File > Options > Advanced > Display options for this
-    # worksheet) - the user's own call: an existing, recognizable
-    # convention, not a new one invented here. Excel's own default is
-    # True (zeros shown); this one defaults to False (zeros hidden) -
-    # the user's own call, since the case this exists for (e.g. an
-    # undercroft floor's area, deliberately zeroed by Evaluate
-    # Attribute) reads more naturally as "nothing here" than "0.00".
-    schedule_show_zero_values: bpy.props.BoolProperty(
-        name="Show Zero Values",
-        default=False,
-        description=(
-            "Show a zero in cells that have zero value in the MaStro Schedule "
-            "Viewer overlay, instead of leaving the cell blank"
-        )
-    )
-
     schedule_visible_rows: bpy.props.IntProperty(
         name="Visible Rows",
         min=0,
@@ -624,9 +607,6 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
             split = col.split(factor=0.2)
             split.label(text="Dynamic Column Width:")
             split.prop(self, "schedule_dynamic_column_width", text="")
-            split = col.split(factor=0.2)
-            split.label(text="Show Zero Values:")
-            split.prop(self, "schedule_show_zero_values", text="")
             split = col.split(factor=0.2)
             split.label(text="Visible Rows:")
             split.prop(self, "schedule_visible_rows", text="")
