@@ -46,6 +46,22 @@ def register():
     km = kc.keymaps.new(name='Node Editor', space_type='NODE_EDITOR')
     addon_keymaps.extend([
         (km, km.keymap_items.new(NODE_OT_Mastro_Rename_Reroute.bl_idname, 'F2', 'PRESS', shift=True, ctrl=True)),
+        # MaStro Schedule Group node: same Ctrl+G/Tab muscle memory as
+        # Blender's own native Group nodes (Geometry/Shader/Compositor/
+        # Texture), even though the native node.group_make/group_edit
+        # operators can never run on our own custom tree type (a
+        # hardcoded whitelist in Blender's own C++ source,
+        # node_group.cc:node_group_operator_active_poll - confirmed
+        # neither overlaps with these: that poll() returns False for
+        # MaStroScheduleTreeType, so it never fires here, the same way
+        # Sverchok's own equivalent keymaps - ui/nodeview_keymaps.py -
+        # coexist with Blender's native ones without conflict).
+        (km, km.keymap_items.new('mastro_schedule.add_group_from_selected', 'G', 'PRESS', ctrl=True)),
+        (km, km.keymap_items.new('mastro_schedule.enter_exit_group', 'TAB', 'PRESS')),
+        # Same Ctrl+Alt+G as Blender's own native node.group_ungroup -
+        # mastro_schedule.ungroup's own poll() restricts it to our
+        # Group node, same coexistence story as the other two above.
+        (km, km.keymap_items.new('mastro_schedule.ungroup', 'G', 'PRESS', ctrl=True, alt=True)),
     ])
         
 def unregister():

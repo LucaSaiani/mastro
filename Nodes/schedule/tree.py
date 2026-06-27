@@ -462,7 +462,15 @@ class MaStroScheduleTreeNode:
 
     @classmethod
     def poll(cls, ntree):
-        return ntree.bl_idname == 'MaStroScheduleTreeType'
+        # Also allowed inside MaStroScheduleGroupTreeType - confirmed
+        # live as a real bug otherwise ("Cannot add node X into node
+        # tree MaStro Schedule Group"): bpy.ops.node.clipboard_paste()
+        # (used by "Group Selected", nodes_group.py) checks every
+        # copied node's own poll against the DESTINATION tree before
+        # pasting it in, and a Group's own body is a
+        # MaStroScheduleGroupTree, not the main MaStroScheduleTree -
+        # every ordinary node needs to be usable in both.
+        return ntree.bl_idname in ('MaStroScheduleTreeType', 'MaStroScheduleGroupTreeType')
 
     @property
     def is_valid(self):

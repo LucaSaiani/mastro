@@ -194,12 +194,6 @@ class NODE_MT_mastro_schedule_utilities(bpy.types.Menu):
     def draw(self, context):
         self.layout.menu(NODE_MT_mastro_schedule_utilities_list.bl_idname)
         self.layout.menu(NODE_MT_mastro_schedule_utilities_maths.bl_idname)
-        # An empty Group node (no node_tree of its own yet) - useful on
-        # its own once a node_tree is assigned manually, but "Group
-        # Selected" right below is the normal way to get one with a
-        # body already filled in.
-        _add_node(self.layout, "MaStroScheduleGroupNodeType", "Group")
-        self.layout.operator("mastro_schedule.add_group_from_selected", text="Group Selected")
 
 
 class NODE_MT_mastro_schedule_wip(bpy.types.Menu):
@@ -209,7 +203,6 @@ class NODE_MT_mastro_schedule_wip(bpy.types.Menu):
     def draw(self, context):
         _add_node(self.layout, "MaStroScheduleFlattenKey", "Flatten Key")
         _add_node(self.layout, "MaStroScheduleFilter", "Filter")
-        _add_node(self.layout, "MaStroScheduleGroupBy", "Group By")
         _add_node(self.layout, "MaStroScheduleAggregate", "Aggregate")
         _add_node(self.layout, "MaStroScheduleCategoryLookup", "Category Lookup")
         _add_node(self.layout, "MaStroScheduleMatrixLookup", "Matrix Lookup")
