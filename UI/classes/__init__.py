@@ -77,6 +77,8 @@ from .mastro_album.PROPERTIES_UL_Album_Children import PROPERTIES_UL_Album_Child
 from .mastro_custom_properties.PROPERTIES_PT_Mastro_Custom_Properties import PROPERTIES_PT_Mastro_Custom_Properties
 from .mastro_custom_properties.VIEW3D_PT_Mastro_Custom_Properties import VIEW3D_PT_Mastro_Custom_Properties
 from .mastro_gis.VIEW3D_PT_MastroGIS_Basemap import VIEW3D_PT_MastroGIS_Basemap
+from .mastro_linked_collections.LINKED_COLLECTIONS_UL_List import LINKED_COLLECTIONS_UL_List
+from .mastro_linked_collections.PROPERTIES_PT_Mastro_Linked_Collections import PROPERTIES_PT_Mastro_Linked_Collections
 from . import mastro_cad
 
 
@@ -159,6 +161,8 @@ classes = (
     PROPERTIES_PT_Mastro_Custom_Properties,
     VIEW3D_PT_Mastro_Custom_Properties,
     VIEW3D_PT_MastroGIS_Basemap,
+    LINKED_COLLECTIONS_UL_List,
+    PROPERTIES_PT_Mastro_Linked_Collections,
     *mastro_cad.classes,
     )
 
