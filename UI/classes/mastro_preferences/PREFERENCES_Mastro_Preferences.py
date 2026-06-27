@@ -280,6 +280,39 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
         description="Minimum time between automatic schedule re-evaluations"
     )
 
+    def update_linked_collections_check_for_updates(self, context):
+        from ....Utils.mastro_linked_collections.check_for_updates import (
+            start_polling,
+            stop_polling,
+        )
+        if self.linked_collections_check_for_updates:
+            start_polling()
+        else:
+            stop_polling()
+
+    linked_collections_check_for_updates: bpy.props.BoolProperty(
+        name="Check for Updates",
+        default=False,
+        description=(
+            "Periodically check the modification time of every linked "
+            "collection's source file, and flag entries whose file changed "
+            "since it was linked or last reloaded. Off by default since it "
+            "polls the filesystem - leave disabled if source files live on "
+            "a slow network drive"
+        ),
+        update=update_linked_collections_check_for_updates,
+    )
+
+    linked_collections_check_interval: bpy.props.FloatProperty(
+        name="Check Interval",
+        default=10.0,
+        min=1.0,
+        soft_max=120.0,
+        subtype='TIME_ABSOLUTE',
+        unit='TIME_ABSOLUTE',
+        description="How often to check linked collection source files for changes",
+    )
+
     # --- GIS: predefined CRS ---
     def listPredefCRS(self, context):
         return [tuple(elem) for elem in json.loads(self.predefCrsJson)]
@@ -619,6 +652,20 @@ class PREFERENCES_Mastro_Preferences(AddonPreferences):
             row.enabled = self.schedule_auto_refresh
             row.label(text="Interval:")
             row.prop(self, "schedule_auto_refresh_interval", text="")
+
+        # Section: Linked Collections
+        header, panel = layout.panel("mastro_prefs_linked_collections_settings", default_closed=True)
+        header.label(text="Linked Collections")
+        if panel:
+            col = panel.column(align=True)
+            split = col.split(factor=0.2)
+            split.label(text="Check for Updates:")
+            split.prop(self, "linked_collections_check_for_updates", text="")
+
+            row = col.split(factor=0.2)
+            row.enabled = self.linked_collections_check_for_updates
+            row.label(text="Interval:")
+            row.prop(self, "linked_collections_check_interval", text="")
 
 
 

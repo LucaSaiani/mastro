@@ -50,6 +50,14 @@ from .mastro_layer.LAYER_MANAGER_OT_Set_Active import LAYER_MANAGER_OT_SetActive
 from .mastro_layer.LAYER_MANAGER_OT_Add_Layer import LAYER_MANAGER_OT_AddLayer
 from .mastro_layer.LAYER_MANAGER_OT_Add_Layer_Popup import LAYER_MANAGER_OT_AddLayer_Popup
 
+from .mastro_linked_collections.OBJECT_OT_Linked_Collection_Link import (
+    OBJECT_OT_Linked_Collection_Link,
+    OBJECT_OT_Linked_Collection_Choose_Collection,
+)
+from .mastro_linked_collections.OBJECT_OT_Linked_Collection_Unload import OBJECT_OT_Linked_Collection_Unload
+from .mastro_linked_collections.OBJECT_OT_Linked_Collection_Reload import OBJECT_OT_Linked_Collection_Reload
+from .mastro_linked_collections.OBJECT_OT_Linked_Collection_Remove import OBJECT_OT_Linked_Collection_Remove
+
 from .mastro_projector.OBJECT_OT_run_all import OBJECT_OT_RunAll, OBJECT_OT_CancelAll
 from .mastro_projector.OBJECT_OT_run_batch import OBJECT_OT_RunBatch
 from .mastro_projector.OBJECT_OT_bidimensional_Lines_Projection import OBJECT_OT_bidimensional_Lines_Projection
@@ -198,4 +206,10 @@ classes = (
     VIEW3D_OT_MastroGIS_Basemap_Import,
     VIEW3D_OT_MastroGIS_Unlock_Origin,
     VIEW3D_OT_MastroGIS_3DTiles_Import,
+
+    OBJECT_OT_Linked_Collection_Link,
+    OBJECT_OT_Linked_Collection_Choose_Collection,
+    OBJECT_OT_Linked_Collection_Unload,
+    OBJECT_OT_Linked_Collection_Reload,
+    OBJECT_OT_Linked_Collection_Remove,
     )

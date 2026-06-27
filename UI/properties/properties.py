@@ -21,6 +21,7 @@ from .properties_extras import scene_props_extras
 from .properties_cad import scene_props_cad, camera_props_cad, window_manager_props_cad
 from .properties_gis import scene_props_gis
 from .properties_print import scene_pointer_props_print
+from .properties_linked_collections import scene_pointer_props_linked_collections
 from .property_classes_pdf_frame import mastro_CL_frame_settings
 from .property_classes_album import mastro_CL_album_settings
 
@@ -154,6 +155,7 @@ scene_pointer_props = [
     *scene_pointer_props_projector,
     *scene_pointer_props_pdf,
     *scene_pointer_props_print,
+    *scene_pointer_props_linked_collections,
 ]
 
 camera_props = [

@@ -256,9 +256,26 @@ def register():
    
     # append the print data button to the console header
     bpy.types.CONSOLE_HT_header.append(draw_console_header_mastro_button)
-    
+
+    # --- Linked Collections: resume the background update-check timer if
+    # it was left enabled in the preferences from a previous session ---
+    def _lc_initial_check_bootstrap():
+        from .Utils.mastro_preferences.get_preferences import get_prefs
+        from .Utils.mastro_linked_collections.check_for_updates import start_polling
+        try:
+            prefs = get_prefs()
+        except KeyError:
+            return None
+        if prefs.linked_collections_check_for_updates:
+            start_polling()
+        return None  # one-shot timer
+    bpy.app.timers.register(_lc_initial_check_bootstrap, first_interval=0.0)
+
 
 def unregister():
+    from .Utils.mastro_linked_collections.check_for_updates import stop_polling
+    stop_polling()
+
     bpy.app.handlers.load_post.remove(onFileLoaded)
     bpy.app.handlers.load_factory_startup_post.remove(onFileDefault)
 

@@ -40,6 +40,9 @@ from .property_classes_print import (mastro_CL_print_set_param,
 )
 from .property_classes_pdf_frame import mastro_CL_frame_settings
 from .property_classes_album import mastro_CL_album_child_ref, mastro_CL_album_settings
+from .property_classes_linked_collections import (mastro_CL_linked_collection_entry,
+                                                   mastro_CL_linked_collections_props,
+)
 
 classes = (
     mastro_CL_addon_properties,
@@ -88,4 +91,8 @@ classes = (
     mastro_CL_frame_settings,
     mastro_CL_album_child_ref,
     mastro_CL_album_settings,
+    # mastro_CL_linked_collection_entry must be registered before
+    # mastro_CL_linked_collections_props because the latter uses it as a CollectionProperty type
+    mastro_CL_linked_collection_entry,
+    mastro_CL_linked_collections_props,
 )
