@@ -88,6 +88,7 @@ from .nodes_viewer import (
     register_viewer_draw_handler,
     unregister_viewer_draw_handler,
 )
+from . import nodes_group
 from . import menus
 from . import nodes_math
 
@@ -180,6 +181,7 @@ classes = (
 
 
 def register():
+    nodes_group.register()
     nodes_math.register()
     menus.register()
     register_viewer_draw_handler()
@@ -191,3 +193,4 @@ def unregister():
     unregister_viewer_draw_handler()
     menus.unregister()
     nodes_math.unregister()
+    nodes_group.unregister()

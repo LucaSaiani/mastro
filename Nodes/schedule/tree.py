@@ -410,6 +410,19 @@ class MaStroScheduleTree(NodeTree):
     # e.g. in a menu or panel) but not here.
     bl_icon = 'NODETREE'
 
+    @classmethod
+    def valid_socket_type(cls, socket_type):
+        # Required (Blender 3.2+) before Make Group/Group Input/Group
+        # Output are enabled for this tree type at all - without this
+        # classmethod Blender doesn't know which sockets those nodes
+        # are allowed to expose, and disables the whole Group feature
+        # for the tree (confirmed against Sverchok's own
+        # core/node_group.py:valid_socket_type, the pattern this
+        # mirrors). See sockets.py:socket_type_names for how the
+        # allowed set is built.
+        from .sockets import socket_type_names
+        return socket_type in socket_type_names()
+
     def execute(self):
         from .execution import evaluate_tree
         evaluate_tree(self)

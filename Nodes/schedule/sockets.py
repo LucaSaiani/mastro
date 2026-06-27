@@ -1,5 +1,26 @@
+import inspect
+import sys
+
 from bpy.types import NodeSocket
 from bpy.props import StringProperty
+
+
+def socket_type_names():
+    """Every MaStro Schedule socket bl_idname, auto-collected by
+    introspecting this module - same pattern as Sverchok's own
+    socket_type_names (core/sockets.py), used by
+    MaStroScheduleTree.valid_socket_type (tree.py) to tell Blender
+    which sockets Group Input/Output are allowed to expose, the
+    requirement Blender (3.2+) imposes before it enables Make Group/
+    Group Input/Output for a custom NodeTree at all (confirmed against
+    Sverchok's own core/node_group.py - without this classmethod,
+    Blender doesn't know what sockets to give those nodes and disables
+    the whole Group feature for the tree type)."""
+    names = set()
+    for _name, member in inspect.getmembers(sys.modules[__name__]):
+        if inspect.isclass(member) and member.__module__ == __name__ and NodeSocket in member.__bases__:
+            names.add(member.bl_idname)
+    return names
 
 
 class MaStroScheduleDataSocket(NodeSocket):
