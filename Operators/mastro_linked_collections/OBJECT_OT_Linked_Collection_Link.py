@@ -29,6 +29,8 @@ def _create_linked_collection_instance(context, filepath, collection_name):
     entry.instance_location = instance.location
     entry.instance_rotation_euler = instance.rotation_euler
     entry.instance_scale = instance.scale
+    entry.source_mtime = str(os.path.getmtime(filepath))
+    entry.source_changed = False
 
     props.active_index = len(props.entries) - 1
 

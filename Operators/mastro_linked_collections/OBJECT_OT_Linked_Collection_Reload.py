@@ -1,3 +1,5 @@
+import os
+
 import bpy
 from bpy.types import Operator
 
@@ -46,5 +48,7 @@ class OBJECT_OT_Linked_Collection_Reload(Operator):
 
         entry.instance_object_name = instance.name
         entry.status = 'LOADED'
+        entry.source_mtime = str(os.path.getmtime(entry.filepath))
+        entry.source_changed = False
 
         return {'FINISHED'}
