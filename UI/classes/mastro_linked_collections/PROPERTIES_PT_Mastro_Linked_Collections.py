@@ -27,11 +27,21 @@ class PROPERTIES_PT_Mastro_Linked_Collections(Panel):
 
         if 0 <= props.active_index < len(props.entries):
             entry = props.entries[props.active_index]
-            row = layout.row()
-            if entry.status == 'LOADED':
-                row.operator("mastro_linked_collections.unload", text="Unload", icon='HIDE_ON')
+
+            if entry.status == 'BROKEN':
+                box = layout.box()
+                box.alert = True
+                box.label(
+                    text=f"'{entry.collection_name}' not found in the source file",
+                    icon='ERROR',
+                )
+                box.operator("mastro_linked_collections.reload", text="Retry Reload", icon='FILE_REFRESH')
             else:
-                row.operator("mastro_linked_collections.reload", text="Reload", icon='HIDE_OFF')
+                row = layout.row()
+                if entry.status == 'LOADED':
+                    row.operator("mastro_linked_collections.unload", text="Unload", icon='HIDE_ON')
+                else:
+                    row.operator("mastro_linked_collections.reload", text="Reload", icon='HIDE_OFF')
 
             box = layout.box()
             box.label(text=entry.filepath, icon='FILE_BLEND')
