@@ -17,3 +17,5 @@ class LINKED_COLLECTIONS_UL_List(UIList):
         row = layout.row(align=True)
         row.label(text="", icon=_STATUS_ICON.get(item.status, 'QUESTION'))
         row.label(text=item.collection_name)
+        if item.status == 'LOADED' and item.source_changed:
+            row.label(text="", icon='FILE_REFRESH')

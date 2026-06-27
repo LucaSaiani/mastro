@@ -37,6 +37,14 @@ class PROPERTIES_PT_Mastro_Linked_Collections(Panel):
                 )
                 box.operator("mastro_linked_collections.reload", text="Retry Reload", icon='FILE_REFRESH')
             else:
+                if entry.status == 'LOADED' and entry.source_changed:
+                    warn_box = layout.box()
+                    warn_box.alert = True
+                    warn_box.label(
+                        text="Source file changed since this was linked/reloaded",
+                        icon='FILE_REFRESH',
+                    )
+
                 row = layout.row()
                 if entry.status == 'LOADED':
                     row.operator("mastro_linked_collections.unload", text="Unload", icon='HIDE_ON')
