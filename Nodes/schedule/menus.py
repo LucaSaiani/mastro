@@ -97,8 +97,6 @@ class NODE_MT_mastro_schedule_primitives_operations_column(bpy.types.Menu):
     def draw(self, context):
         _add_node(self.layout, "MaStroScheduleAggregateColumn", "Aggregate")
         _add_node(self.layout, "MaStroScheduleConvertColumnToTable", "Column to Table")
-        _add_node(self.layout, "MaStroScheduleMultiColumnToTable", "Multi Column to Table")
-        _add_node(self.layout, "MaStroSchedulePivot", "Pivot")
 
 
 class NODE_MT_mastro_schedule_primitives_operations_header(bpy.types.Menu):
@@ -209,6 +207,8 @@ class NODE_MT_mastro_schedule_wip(bpy.types.Menu):
         _add_node(self.layout, "MaStroScheduleAggregate", "Aggregate")
         _add_node(self.layout, "MaStroScheduleCategoryLookup", "Category Lookup")
         _add_node(self.layout, "MaStroScheduleMatrixLookup", "Matrix Lookup")
+        _add_node(self.layout, "MaStroScheduleMultiColumnToTable", "Multi Column to Table")
+        _add_node(self.layout, "MaStroSchedulePivot", "Pivot")
         _add_node(self.layout, "MaStroScheduleTableData", "Table Data")
         _add_node(self.layout, "MaStroScheduleFlatten", "Flatten")
 
