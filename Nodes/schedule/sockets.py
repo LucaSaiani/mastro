@@ -267,7 +267,7 @@ class MaStroScheduleListSocket(NodeSocket):
 
     @classmethod
     def draw_color_simple(cls):
-        return (97 / 255, 97 / 255, 97 / 255, 1.0)
+        return (125 / 255, 153 / 255, 153 / 255, 1.0)
 
 
 # A reference to one id key (e.g. "_Object", "_Level") on a Column - as

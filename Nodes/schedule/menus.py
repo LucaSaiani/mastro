@@ -173,6 +173,7 @@ class NODE_MT_mastro_schedule_utilities_list(bpy.types.Menu):
     bl_label = "List"
 
     def draw(self, context):
+        _add_node(self.layout, "MaStroScheduleForEach", "For Each List")
         _add_node(self.layout, "MaStroScheduleGroupByColumn", "Group Into List")
         _add_node(self.layout, "MaStroScheduleItemFromList", "Item from List")
         _add_node(self.layout, "MaStroScheduleListLength", "List Length")
@@ -203,7 +204,6 @@ class NODE_MT_mastro_schedule_wip(bpy.types.Menu):
     def draw(self, context):
         _add_node(self.layout, "MaStroScheduleFlattenKey", "Flatten Key")
         _add_node(self.layout, "MaStroScheduleFilter", "Filter")
-        _add_node(self.layout, "MaStroScheduleAggregate", "Aggregate")
         _add_node(self.layout, "MaStroScheduleCategoryLookup", "Category Lookup")
         _add_node(self.layout, "MaStroScheduleMatrixLookup", "Matrix Lookup")
         _add_node(self.layout, "MaStroScheduleMultiColumnToTable", "Multi Column to Table")

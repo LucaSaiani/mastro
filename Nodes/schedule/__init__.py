@@ -43,7 +43,6 @@ from .nodes_attribute import MaStroScheduleGetAttributeNamesNode, MASTRO_OT_Sche
 from .nodes_evaluate import MaStroScheduleEvaluateAttributeNode
 from .nodes_filter import MaStroScheduleFilterNode
 from .nodes_groupby import MaStroScheduleGroupByNode
-from .nodes_aggregate import MaStroScheduleAggregateNode
 from .nodes_math import MaStroScheduleMathNode
 from .nodes_value import MaStroScheduleValueNode
 from .nodes_integer import MaStroScheduleIntegerNode
@@ -89,6 +88,7 @@ from .nodes_viewer import (
     unregister_viewer_draw_handler,
 )
 from . import nodes_group
+from .nodes_foreach import MaStroScheduleForEachNode
 from . import menus
 from . import nodes_math
 
@@ -135,7 +135,6 @@ classes = (
     MaStroScheduleEvaluateAttributeNode,
     MaStroScheduleFilterNode,
     MaStroScheduleGroupByNode,
-    MaStroScheduleAggregateNode,
     MaStroScheduleMathNode,
     MaStroScheduleValueNode,
     MaStroScheduleIntegerNode,
@@ -176,6 +175,7 @@ classes = (
     MaStroScheduleItemFromListNode,
     MaStroScheduleListLengthNode,
     MaStroScheduleAccumulateNode,
+    MaStroScheduleForEachNode,
     MaStroScheduleViewerNode,
 )
 

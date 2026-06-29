@@ -44,12 +44,14 @@ def _data_key(row):
 # way to set it, never both a socket and a node-local picker at the
 # same time.
 #
-# Deliberately NOT the abandoned WIP Group By/Aggregate
-# (nodes_groupby.py/nodes_aggregate.py, both still WIP and built against
-# the old Data model before this Column model existed) - the user's own
-# call: "ignora quello che c'è in wip... spesso non è generalizzabile",
-# that earlier attempt mirrored one Excel-macro example without ever
-# discussing the general problem this one is built from.
+# Deliberately NOT the abandoned WIP Group By (nodes_groupby.py, still
+# WIP and built against the old Data model before this Column model
+# existed) - the user's own call: "ignora quello che c'è in wip...
+# spesso non è generalizzabile", that earlier attempt mirrored one
+# Excel-macro example without ever discussing the general problem this
+# one is built from. The equally superseded Aggregate
+# (nodes_aggregate.py) was removed outright once confirmed redundant
+# with this node.
 class MaStroScheduleAggregateColumnNode(MaStroScheduleTreeNode, Node):
     """Aggregate a Column down to one row per distinct value of the
     chosen id key, dropping every other id key - e.g. Id Key=Object_id

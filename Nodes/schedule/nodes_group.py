@@ -67,12 +67,29 @@ class MaStroScheduleGroupTree(NodeTree):
         # tree - a Group node referencing this tree can itself live
         # inside ANOTHER Group's own body (nested groups), not only in
         # the outermost MaStroScheduleTree.
+        from .tree import _pending_execute_trees
         for tree in bpy.data.node_groups:
             if tree.bl_idname not in ('MaStroScheduleTreeType', 'MaStroScheduleGroupTreeType'):
                 continue
             for node in tree.nodes:
                 if node.bl_idname == MaStroScheduleGroupNode.bl_idname and node.node_tree == self:
                     _sync_group_node_sockets(node)
+                # For Each's own body_tree is an ordinary PointerProperty,
+                # not a real node_tree (see nodes_foreach.py's own module
+                # comment for why) - it has no sockets to keep in sync
+                # the way a plain Group does (its external sockets are
+                # fixed, never mirror the body's own interface), but
+                # editing its body still needs SOMETHING to flag the
+                # tree containing this For Each node for re-evaluation -
+                # confirmed live as a real bug otherwise: building the
+                # body's own logic (e.g. wiring up Aggregate) never
+                # triggered a re-run of the main tree at all, so the
+                # Viewer kept showing whatever this node's own evaluate()
+                # had last produced before the body existed (its default
+                # passthrough wiring, see _build_body) - looked exactly
+                # like the body's own logic was simply being ignored.
+                elif node.bl_idname == 'MaStroScheduleForEach' and node.body_tree == self:
+                    _pending_execute_trees.add(tree.name)
 
 
 # A real Blender NodeCustomGroup (the native base class for group
@@ -216,12 +233,18 @@ def _sync_group_node_sockets(group_node):
 
 class MASTRO_OT_Schedule_Enter_Exit_Group(Operator):
     """Tab's own target inside a MaStro Schedule editor: enters the
-    active node's own Group body if it has one, otherwise steps back
-    out one level if currently inside a Group - mirrors Sverchok's own
+    active node's own body if it has one, otherwise steps back out one
+    level if currently inside a Group/For Each - mirrors Sverchok's own
     EnterExitGroupNodes (ui/nodeview_keymaps.py), bound to Tab the same
     way there (no bl_label/description needed beyond what the keymap
     entry itself implies - this is never meant to be found in a menu,
-    only pressed)."""
+    only pressed).
+
+    Recognizes BOTH MaStroScheduleGroupNode (its body lives in the
+    native node_tree property) and MaStroScheduleForEachNode (its body
+    lives in body_tree, an ordinary PointerProperty instead - see
+    nodes_foreach.py's own module comment for why For Each isn't a
+    NodeCustomGroup at all, hence no native node_tree of its own)."""
     bl_idname = "mastro_schedule.enter_exit_group"
     bl_label = "Enter/Exit Group"
 
@@ -234,8 +257,14 @@ class MASTRO_OT_Schedule_Enter_Exit_Group(Operator):
 
     def execute(self, context):
         node = context.active_node
-        if node is not None and node.bl_idname == MaStroScheduleGroupNode.bl_idname and node.node_tree is not None:
-            context.space_data.path.append(node.node_tree, node=node)
+        body_tree = None
+        if node is not None:
+            if node.bl_idname == MaStroScheduleGroupNode.bl_idname:
+                body_tree = node.node_tree
+            elif node.bl_idname == 'MaStroScheduleForEach':
+                body_tree = node.body_tree
+        if body_tree is not None:
+            context.space_data.path.append(body_tree, node=node)
         elif len(context.space_data.path) > 1:
             context.space_data.path.pop()
         return {'FINISHED'}
@@ -543,6 +572,8 @@ class MASTRO_OT_Schedule_Ungroup(Operator):
         return {'FINISHED'}
 
 
+# MaStroScheduleGroupTree is NOT here - already registered at module
+# level above (see that registration's own comment for why).
 classes = (
     MaStroScheduleGroupTree,
     MaStroScheduleGroupNode,

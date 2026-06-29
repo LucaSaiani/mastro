@@ -94,6 +94,26 @@ def _cell_text(value):
     return str(value)
 
 
+def _single_group_value(group):
+    """For a List group ({"key": ..., "rows": [...]}, see Group Into
+    List/For Each List's own docstrings), the single data value worth
+    showing directly in the List Viewer's own "Value" column instead of
+    a row count - only when "rows" really does boil down to exactly
+    that: one row, with exactly one non-id key (an id key starts with
+    "_", same convention _data_key/_id_keys already use elsewhere, e.g.
+    nodes_aggregate_column.py). Returns None otherwise (several rows
+    left un-aggregated, zero data keys, or more than one - any of which
+    means there's no single unambiguous value to show, falling back to
+    the plain row count is more honest than guessing which one)."""
+    rows = group.get("rows") or []
+    if len(rows) != 1:
+        return None
+    data_keys = [k for k in rows[0].keys() if not k.startswith("_")]
+    if len(data_keys) != 1:
+        return None
+    return rows[0][data_keys[0]]
+
+
 def _srgb_color(*channels):
     """No-op: kept as the single place every color in this file passes
     through before reaching the shader. An earlier version of this
@@ -262,16 +282,35 @@ class MaStroScheduleViewerNode(MaStroScheduleTreeNode, Node):
             self.id_column_count = 0
             self.columns.clear()
             self.columns.add().name = "Key"
-            self.columns.add().name = "Rows"
+            # "Value" (the aggregated result) when every group's own rows
+            # boil down to a single value worth showing directly, "Rows"
+            # (a plain count) otherwise - confirmed live as a real
+            # usability gap with the count-only version: a For Each
+            # List's own output (nodes_foreach.py) is exactly this same
+            # List shape, but each group's "rows" there holds the loop
+            # body's own RESULT, not a list of original rows left to
+            # drill into - showing a count of 1 for every group (the
+            # common case once something like Aggregate ran inside the
+            # loop) reads as meaningless/broken, even though the
+            # underlying value was correct all along. _single_group_value
+            # below decides per-call whether this List as a whole
+            # qualifies (every group must agree, so the column header
+            # itself doesn't lie about what a given row actually shows).
+            show_values = groups and all(_single_group_value(g) is not None for g in groups)
+            self.columns.add().name = "Value" if show_values else "Rows"
             self.rows.clear()
             for group in groups:
                 row_item = self.rows.add()
                 key_cell = row_item.cells.add()
                 key_cell.name = "Key"
                 key_cell.value = str(group.get("key", ""))
-                count_cell = row_item.cells.add()
-                count_cell.name = "Rows"
-                count_cell.value = str(len(group.get("rows", [])))
+                value_cell = row_item.cells.add()
+                if show_values:
+                    value_cell.name = "Value"
+                    value_cell.value = _cell_text(_single_group_value(group))
+                else:
+                    value_cell.name = "Rows"
+                    value_cell.value = str(len(group.get("rows", [])))
             return []
         self.showing_list = False
 
