@@ -76,8 +76,8 @@ class NODE_MT_mastro_schedule_primitives_primitives(bpy.types.Menu):
         _add_node(self.layout, "MaStroScheduleTablePrimitive", "Table")
 
 
-class NODE_MT_mastro_schedule_primitives_operations_cells(bpy.types.Menu):
-    bl_idname = "NODE_MT_mastro_schedule_primitives_operations_cells"
+class NODE_MT_mastro_schedule_primitives_operations_table_cells(bpy.types.Menu):
+    bl_idname = "NODE_MT_mastro_schedule_primitives_operations_table_cells"
     bl_label = "Cells"
 
     def draw(self, context):
@@ -90,6 +90,15 @@ class NODE_MT_mastro_schedule_primitives_operations_cells(bpy.types.Menu):
         _add_node(self.layout, "MaStroScheduleTableRowPattern", "Row Pattern")
 
 
+class NODE_MT_mastro_schedule_primitives_operations_table_header(bpy.types.Menu):
+    bl_idname = "NODE_MT_mastro_schedule_primitives_operations_table_header"
+    bl_label = "Header"
+
+    def draw(self, context):
+        _add_node(self.layout, "MaStroScheduleTableHeader", "Edit Header")
+        _add_node(self.layout, "MaStroScheduleHeader", "Rename Header")
+
+
 class NODE_MT_mastro_schedule_primitives_operations_column(bpy.types.Menu):
     bl_idname = "NODE_MT_mastro_schedule_primitives_operations_column"
     bl_label = "Column"
@@ -97,15 +106,7 @@ class NODE_MT_mastro_schedule_primitives_operations_column(bpy.types.Menu):
     def draw(self, context):
         _add_node(self.layout, "MaStroScheduleAggregateColumn", "Aggregate")
         _add_node(self.layout, "MaStroScheduleConvertColumnToTable", "Column to Table")
-
-
-class NODE_MT_mastro_schedule_primitives_operations_header(bpy.types.Menu):
-    bl_idname = "NODE_MT_mastro_schedule_primitives_operations_header"
-    bl_label = "Header"
-
-    def draw(self, context):
-        _add_node(self.layout, "MaStroScheduleTableHeader", "Edit Header")
-        _add_node(self.layout, "MaStroScheduleHeader", "Rename Header")
+        _add_node(self.layout, "MaStroScheduleGroupByColumn", "Group Column by Key")
 
 
 class NODE_MT_mastro_schedule_primitives_operations_sheet(bpy.types.Menu):
@@ -124,6 +125,8 @@ class NODE_MT_mastro_schedule_primitives_operations_table(bpy.types.Menu):
     bl_label = "Table"
 
     def draw(self, context):
+        self.layout.menu(NODE_MT_mastro_schedule_primitives_operations_table_cells.bl_idname)
+        self.layout.menu(NODE_MT_mastro_schedule_primitives_operations_table_header.bl_idname)
         _add_node(self.layout, "MaStroScheduleTableJoin", "Join Tables")
         _add_node(self.layout, "MaStroScheduleTableToSheet", "Table to Sheet")
 
@@ -133,9 +136,7 @@ class NODE_MT_mastro_schedule_primitives_operations(bpy.types.Menu):
     bl_label = "Operations"
 
     def draw(self, context):
-        self.layout.menu(NODE_MT_mastro_schedule_primitives_operations_cells.bl_idname)
         self.layout.menu(NODE_MT_mastro_schedule_primitives_operations_column.bl_idname)
-        self.layout.menu(NODE_MT_mastro_schedule_primitives_operations_header.bl_idname)
         self.layout.menu(NODE_MT_mastro_schedule_primitives_operations_sheet.bl_idname)
         self.layout.menu(NODE_MT_mastro_schedule_primitives_operations_table.bl_idname)
 
@@ -174,9 +175,9 @@ class NODE_MT_mastro_schedule_utilities_list(bpy.types.Menu):
 
     def draw(self, context):
         _add_node(self.layout, "MaStroScheduleForEach", "For Each List")
-        _add_node(self.layout, "MaStroScheduleGroupByColumn", "Group Into List")
         _add_node(self.layout, "MaStroScheduleItemFromList", "Item from List")
         _add_node(self.layout, "MaStroScheduleListLength", "List Length")
+        _add_node(self.layout, "MaStroScheduleMergeList", "Merge List")
 
 
 class NODE_MT_mastro_schedule_utilities_maths(bpy.types.Menu):
@@ -219,9 +220,9 @@ _menu_classes = (
     NODE_MT_mastro_schedule_output,
     NODE_MT_mastro_schedule_attribute,
     NODE_MT_mastro_schedule_primitives_primitives,
-    NODE_MT_mastro_schedule_primitives_operations_cells,
+    NODE_MT_mastro_schedule_primitives_operations_table_cells,
+    NODE_MT_mastro_schedule_primitives_operations_table_header,
     NODE_MT_mastro_schedule_primitives_operations_column,
-    NODE_MT_mastro_schedule_primitives_operations_header,
     NODE_MT_mastro_schedule_primitives_operations_sheet,
     NODE_MT_mastro_schedule_primitives_operations_table,
     NODE_MT_mastro_schedule_primitives_operations,

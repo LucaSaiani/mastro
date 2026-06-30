@@ -2,7 +2,7 @@ import bpy
 from bpy.types import Node, Operator
 from bpy.props import EnumProperty, StringProperty
 
-from .tree import MaStroScheduleTreeNode
+from .tree import MaStroScheduleTreeNode, downstream_main_inputs
 from .execution import update_node, linked_table
 from .attribute_naming import FIELD_DOMAINS, to_logical_name, COMPUTED_NAMES
 
@@ -11,11 +11,11 @@ from .attribute_naming import FIELD_DOMAINS, to_logical_name, COMPUTED_NAMES
 OBJECT_MASTRO_PROPS = ("Block", "Building")
 
 
-def unique_objects(node):
+def unique_objects(node, input_index=0):
     """Resolve the distinct MaStro objects referenced by the table feeding
-    this node's Data input (typically Input Mesh All/Selected)."""
+    `node`'s input at `input_index` (typically Input Mesh All/Selected)."""
     objs = []
-    table = linked_table(node, 0)
+    table = linked_table(node, input_index)
     if table:
         seen = set()
         for row in table:
@@ -65,29 +65,57 @@ def _object_attribute_names(obj, field):
     return names
 
 
-def available_attribute_names(node):
+def available_attribute_names(get_attribute_names_node):
     """List the logical attribute names common to EVERY object feeding
-    this node - the intersection, not the union. Input Mesh (All) is
-    meant to grow into mixing heterogeneous MaStro categories (Mass,
-    Block, Plan, Drawing, Street, generic Mesh), which don't all share
-    the same attributes; showing only names every selected object
-    actually has means the user is never offered a name that would
-    silently come back None for some objects (the None-row fallback in
-    nodes_evaluate.py stays in place as a safety net for cases that slip
-    through this anyway, e.g. an attribute removed after this list was
-    built)."""
-    objs = unique_objects(node)
-    if not objs:
+    EVERY real consumer of this Get Attribute Names node's own output
+    (typically Evaluate Attribute) - found by walking FORWARD
+    (downstream_main_inputs, tree.py) to each consumer and reading
+    THEIR OWN Data input, not a Data input this node carries itself
+    (removed - same reasoning as Get Id Keys' own redesign,
+    nodes_id_keys.py: a second, independently-wired Data input here
+    was a real, silent mismatch risk - nothing stopped wiring it to a
+    DIFFERENT upstream Data than the one actually feeding the real
+    consumer).
+
+    Still the intersection, not the union, across every object AND
+    every consumer found - Input Mesh (All) is meant to grow into
+    mixing heterogeneous MaStro categories (Mass, Block, Plan, Drawing,
+    Street, generic Mesh), which don't all share the same attributes;
+    showing only names every object actually has means the user is
+    never offered a name that would silently come back None for some
+    objects (the None-row fallback in nodes_evaluate.py stays in place
+    as a safety net for cases that slip through this anyway, e.g. an
+    attribute removed after this list was built).
+
+    Same KNOWN LIMITATION as Get Id Keys' own available_id_keys
+    (nodes_id_keys.py): only reads one level upstream of each consumer -
+    if a consumer's own Data input is itself fed by another node that
+    needs something from this node to produce anything, that chain
+    isn't resolved here."""
+    pairs = downstream_main_inputs(get_attribute_names_node.outputs["Attribute Name"], 'MaStroScheduleAttributeRefSocketType')
+    if not pairs:
         return []
-    field = node.field
+    field = get_attribute_names_node.field
     common = None
-    for obj in objs:
-        obj_names = set(_object_attribute_names(obj, field))
-        common = obj_names if common is None else (common & obj_names)
-        if not common:
+    first_names = None
+    for consumer, socket in pairs:
+        try:
+            input_index = list(consumer.inputs).index(socket)
+        except ValueError:
+            continue
+        objs = unique_objects(consumer, input_index)
+        if not objs:
             return []
-    # Preserve the first object's order for a stable, predictable list.
-    first_names = _object_attribute_names(objs[0], field)
+        for obj in objs:
+            obj_names = set(_object_attribute_names(obj, field))
+            common = obj_names if common is None else (common & obj_names)
+            if not common:
+                return []
+            if first_names is None:
+                first_names = _object_attribute_names(obj, field)
+    if not common or first_names is None:
+        return []
+    # Preserve the first object's own order for a stable, predictable list.
     return [name for name in first_names if name in common]
 
 
@@ -199,20 +227,28 @@ class MaStroScheduleGetAttributeNamesNode(MaStroScheduleTreeNode, Node):
     name_value: StringProperty(name="Name", update=update_node)
 
     def init(self, context):
-        self.inputs.new('MaStroScheduleDataSocketType', "Data")
+        # No Data input of its own (removed - see
+        # available_attribute_names' own docstring for why a second,
+        # independently-wired input was a real, silent mismatch risk) -
+        # this node's own picker now reads Data straight off whatever
+        # real node(s) consume its Attribute Name output instead (e.g.
+        # Evaluate Attribute's own Data input).
         self.outputs.new('MaStroScheduleAttributeRefSocketType', "Attribute Name")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "field")
-        if self.is_valid:
-            op = layout.operator(
-                "node.mastro_schedule_pick_attribute_name",
-                text=self.name_value or "(pick a name)",
-            )
-            op.tree_name = self.id_data.name
-            op.node_name = self.name
-        else:
-            layout.label(text="Connect Data to a Viewer", icon='INFO')
+        # Always shown, no "connect something first" placeholder text -
+        # mirrors Get Id Keys' own draw_buttons (nodes_id_keys.py),
+        # which never had one either; the popup itself already says
+        # "(no attributes)" when available_attribute_names finds
+        # nothing (_pick_attribute_name_items' own fallback below) -
+        # no need to say the same thing twice in two different ways.
+        op = layout.operator(
+            "node.mastro_schedule_pick_attribute_name",
+            text=self.name_value or "(pick a name)",
+        )
+        op.tree_name = self.id_data.name
+        op.node_name = self.name
 
     def evaluate(self, inputs):
         name_ref = [{"Field": self.field, "Name": self.name_value}] if self.name_value else []

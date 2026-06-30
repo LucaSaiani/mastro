@@ -1,8 +1,8 @@
 from bpy.types import Node, Operator
 from bpy.props import EnumProperty, StringProperty
 
-from .tree import MaStroScheduleTreeNode
-from .execution import update_node, linked_table
+from .tree import MaStroScheduleTreeNode, downstream_main_inputs
+from .execution import update_node
 from .nodes_viewer import _header_text
 
 
@@ -26,21 +26,84 @@ def _resolve_node(tree_name, node_name):
     return tree.nodes.get(node_name)
 
 
-def available_id_keys(node, input_index=0):
-    """The distinct id keys available on the Column feeding `node`'s
-    input at `input_index`, in first-appearance order - shared by Get Id
-    Keys' own picker and every other node that used to hardcode this
-    same lookup against its own input (Aggregate/Flatten Key/Group Into
-    List/Accumulate, before this node existed to make the list dynamic
-    instead - the user's own call: "non dovrebbe essere hardcoded e
-    dovrebbe essere ottenuto in modo analogo a get attribute name")."""
-    table = linked_table(node, input_index) or []
+def _id_keys_for_socket(node, socket):
+    """The distinct id keys available on whatever feeds `socket`, in
+    first-appearance order. Walks EVERY one of socket's own links, not
+    just the first - confirmed live as a real gap with an earlier
+    version of this function (delegating straight to execution.py's
+    own linked_table, which only ever reads link[0]): a multi-input
+    socket (e.g. Merge List's own "List", nodes_merge_list.py) only had
+    its FIRST connected List's own keys considered, silently missing
+    whatever the others carried."""
+    from .tree import resolve_through_reroutes
+    from .execution import get_node_table
+
     keys = []
-    for row in table:
-        for key in _id_keys(row):
-            if key not in keys:
-                keys.append(key)
+    if not socket.is_linked:
+        return keys
+    for link in socket.links:
+        if link.is_muted:
+            continue
+        from_node, from_socket = resolve_through_reroutes(link)
+        if from_node is None or from_socket.bl_idname != socket.bl_idname:
+            continue
+        table = get_node_table(node.id_data.name, from_node.name)
+        if not table:
+            continue
+        try:
+            output_index = list(from_node.outputs).index(from_socket)
+        except ValueError:
+            continue
+        rows = table[output_index] or []
+        for row in rows:
+            for key in _id_keys(row):
+                if key not in keys:
+                    keys.append(key)
     return keys
+
+
+def available_id_keys(get_id_keys_node):
+    """The id keys available to pick from this Get Id Keys node's own
+    output, found by walking FORWARD to whatever real node(s) consume
+    it (downstream_main_inputs, tree.py) and reading each one's own
+    main data input - NOT a Column this node carries itself (removed -
+    see this module's own docstring for why a second, independently-
+    wired input was a real, silent mismatch risk). If more than one
+    consumer is wired (the same Get Id Keys feeding e.g. both Group
+    Into List AND Merge List's own Match Key), only keys common to
+    EVERY consumer's own data are offered - a key that isn't actually
+    present everywhere this picker's result will be used isn't a safe
+    choice.
+
+    KNOWN LIMITATION (not solved here): only reads ONE level upstream
+    of each consumer - if a consumer's own main input is itself fed by
+    another node that ALSO needs an Id Key to produce anything (e.g.
+    Merge List fed by a Group Into List that hasn't been given its own
+    key yet), that upstream node's own output is empty until ITS key is
+    picked, so this sees no rows and offers no keys at all - confirmed
+    live as a real circular-dependency gap. Worked around for now by
+    keeping the single-level case (the common one - a consumer wired
+    directly to a Column/List that already has real data, e.g. Group
+    Into List or Aggregate on a Column straight from Evaluate
+    Attribute) fully working, while a chain through more than one
+    key-dependent node isn't - see issue tracker for the open
+    follow-up."""
+    pairs = downstream_main_inputs(get_id_keys_node.outputs["Id Key"], 'MaStroScheduleIdKeySocketType')
+    if not pairs:
+        return []
+    common = None
+    for consumer, socket in pairs:
+        keys = set(_id_keys_for_socket(consumer, socket))
+        common = keys if common is None else (common & keys)
+    if not common:
+        return []
+    # Order: first-appearance order from the FIRST consumer found,
+    # filtered down to the common set - arbitrary but stable/
+    # deterministic (pairs' own order is socket.links' own order,
+    # unaffected by set intersection's lack of inherent ordering).
+    first_consumer, first_socket = pairs[0]
+    ordered = _id_keys_for_socket(first_consumer, first_socket)
+    return [k for k in ordered if k in common]
 
 
 def _pick_id_key_items(operator_self, context):
@@ -49,7 +112,7 @@ def _pick_id_key_items(operator_self, context):
     node = _resolve_node(operator_self.tree_name, operator_self.node_name)
     if node is None:
         return [("", "(node not found)", "")]
-    keys = available_id_keys(node, 0)
+    keys = available_id_keys(node)
     return [(key, _header_text(key), "") for key in keys] or [("", "(no id keys)", "")]
 
 
@@ -86,10 +149,24 @@ class MASTRO_OT_Schedule_Pick_Id_Key(Operator):
 # internally, hardcoded against their own first input, with one shared
 # node whose output can be wired to several of them at once (the user's
 # own explicit ask).
+#
+# No Column input of its own (removed - see available_id_keys' own
+# docstring for why) - confirmed live as a real, silent bug otherwise:
+# nothing stopped wiring this node's own Column input to a DIFFERENT
+# upstream Column than the one actually feeding whatever consumes this
+# node's own Id Key output (e.g. two separate Evaluate Attribute
+# branches, Area and Use, each with its own Column - picking the wrong
+# one here showed a plausible-looking key list whenever both branches
+# happened to share the same id keys, with no indication anything was
+# wrong). This node instead looks FORWARD to its own consumer(s) and
+# reads each one's own main input directly - there's only one Column/
+# List relationship to keep in sync now, the one already wired into
+# the real consuming node.
 class MaStroScheduleGetIdKeysNode(MaStroScheduleTreeNode, Node):
-    """List the id keys available on the Column feeding this node's
-    Column input - pick one with the button to feed it to Aggregate/
-    Flatten Key/Group Into List/Accumulate's own Id Key input"""
+    """List the id keys available on whatever this node's own Id Key
+    output is wired into - pick one with the button to feed it to
+    Aggregate/Flatten Key/Group Into List/Merge List/Accumulate's own
+    Id Key input"""
     bl_idname = 'MaStroScheduleGetIdKeys'
     bl_label = 'Get Id Keys'
 
@@ -100,7 +177,6 @@ class MaStroScheduleGetIdKeysNode(MaStroScheduleTreeNode, Node):
     key_value: StringProperty(name="Key", update=update_node)
 
     def init(self, context):
-        self.inputs.new('MaStroScheduleColumnSocketType', "Column")
         self.outputs.new('MaStroScheduleIdKeySocketType', "Id Key")
 
     def draw_buttons(self, context, layout):

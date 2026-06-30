@@ -299,6 +299,43 @@ def upstream_attr(socket, attr_name, default=""):
     return getattr(from_node, attr_name, default)
 
 
+def downstream_main_inputs(output_socket, exclude_bl_idname):
+    """Every (consumer_node, consumer_input_socket) pair downstream of
+    `output_socket`, one per link, where consumer_input_socket is that
+    consumer's own FIRST input socket whose type is not
+    exclude_bl_idname - the consumer's own "main data input" (e.g.
+    Group Into List's "Column", Merge List's "List"), as opposed to the
+    very socket `output_socket` itself feeds into (e.g. "Id Key"/
+    "Match Key"), which is excluded by type so this never just returns
+    the same link it started from.
+
+    Built for Get Id Keys/Get Attribute Names' own picker (see
+    nodes_id_keys.py/nodes_attribute.py): rather than reading a
+    dedicated Column/Data input THOSE nodes carry themselves (a second,
+    independent link the user has to keep in sync with whatever they
+    actually intend to feed downstream - confirmed live as a real,
+    silent-failure-prone gap: nothing stops wiring that input to the
+    WRONG upstream Column, one that happens to share the same id keys
+    by coincidence but isn't actually the data being grouped/matched),
+    this walks FORWARD from the picker's own output to whichever real
+    node(s) consume it, and reads each one's own main input instead -
+    there's only one Column/List relationship to keep track of, the
+    one already wired into the actual consuming node, not a second one
+    duplicated onto the picker."""
+    if not output_socket.is_output:
+        return []
+    pairs = []
+    for link in output_socket.links:
+        if link.is_muted:
+            continue
+        consumer = link.to_node
+        for input_socket in consumer.inputs:
+            if input_socket.bl_idname != exclude_bl_idname:
+                pairs.append((consumer, input_socket))
+                break
+    return pairs
+
+
 def input_link_ok(socket):
     """A linked input is "ok" if its link's socket type matches (no
     mismatch) - an unlinked socket is judged separately by the caller,

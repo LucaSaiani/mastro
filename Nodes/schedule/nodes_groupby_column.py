@@ -38,7 +38,7 @@ class MaStroScheduleGroupByColumnNode(MaStroScheduleTreeNode, Node):
     with Item from List to keep working on it (e.g. group it again by a
     different key)"""
     bl_idname = 'MaStroScheduleGroupByColumn'
-    bl_label = 'Group Into List'
+    bl_label = 'Group Column by Key'
 
     def init(self, context):
         self.inputs.new('MaStroScheduleColumnSocketType', "Column")
