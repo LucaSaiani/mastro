@@ -5,6 +5,24 @@ from bpy_extras.object_utils import AddObjectHelper, object_data_add
 
 from .frame_formats import FORMAT_SIZES
 
+FRAME_IMAGE_NAME = "MaStro frame paper"
+
+
+def _get_frame_image():
+    """Return the shared white "paper" image used by all frame empties,
+    generating it once if it doesn't exist yet in this .blend file.
+
+    A single 2x2 white image is reused by every frame instead of creating
+    one per object: actual paper proportions come from obj.scale, not from
+    the image's own pixel aspect, so there is nothing format-specific to
+    bake into the image itself."""
+    img = bpy.data.images.get(FRAME_IMAGE_NAME)
+    if img is None:
+        img = bpy.data.images.new(FRAME_IMAGE_NAME, width=2, height=2, alpha=False)
+        img.pixels = [1.0, 1.0, 1.0, 1.0] * 4
+        img.pack()
+    return img
+
 
 def update_format(self, context):
     if self.format in FORMAT_SIZES:
@@ -76,7 +94,9 @@ class OBJECT_OT_Add_Mastro_Frame(Operator, AddObjectHelper):
     
     def execute(self, context):
         obj = object_data_add(context, None, operator=self, name="MaStro frame")
-        obj.empty_display_type = 'CUBE'
+        obj.empty_display_type = 'IMAGE'
+        obj.data = _get_frame_image()
+        obj.empty_image_depth = 'BACK'
         obj.empty_display_size = 0.5
         obj.scale = (self.width / 1000, self.height / 1000, 0.0)
 

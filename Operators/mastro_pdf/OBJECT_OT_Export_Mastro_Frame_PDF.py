@@ -14,9 +14,12 @@ from bpy_extras.io_utils import ExportHelper
 def _frame_bounds(obj):
     """Return (min_x, min_y, max_x, max_y) in world space from a frame empty.
 
-    The frame is a Cube Empty centred on its origin, sized by empty_display_size
-    and scaled per-axis (Z scale is 0), so its local-space corners are at
-    (+/-half, +/-half, 0) where half = empty_display_size."""
+    The frame is an Image Empty (square placeholder image, empty_image_offset
+    centred at (-0.5, -0.5)) scaled per-axis (Z scale is 0). With a square
+    image, Blender draws the rectangle with a local-space half-extent of
+    empty_display_size on each axis (no extra 0.5 factor — verified against
+    Blender's own matrix_world output), independently scaled by
+    obj.scale.x/y — same geometry as the previous Cube Empty frame."""
     world = obj.matrix_world
     half = obj.empty_display_size
     local_corners = [
@@ -785,9 +788,12 @@ def _export_frame_to_pdf(frame_obj, filepath, scene):
     frame_w_mm = frame_w * scale_length * 1000
     frame_h_mm = frame_h * scale_length * 1000
 
+    # MaStro frames are themselves Image Empties (white "paper" placeholder,
+    # see OBJECT_OT_Add_Mastro_Frame._get_frame_image) — exclude them here so
+    # the frame doesn't get embedded into its own PDF as a background image.
     image_empties = [o for o in scene.objects
                      if o.type == 'EMPTY' and o.empty_display_type == 'IMAGE'
-                     and o.data is not None]
+                     and o.data is not None and not o.get("MaStro frame")]
     gp_objects, temp_drawing_objs = _objects_in_frame(min_x, min_y, max_x, max_y, scene)
     if not gp_objects:
         for o in temp_drawing_objs:
