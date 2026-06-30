@@ -251,7 +251,16 @@ def _pick_attribute_name_items(operator_self, context):
     if node is None:
         return [("", "(node not found)", "")]
     pairs = available_attribute_names(node)
-    return [(value, label, "") for value, label in pairs] or [("", "(no attributes)", "")]
+    # Capitalized for DISPLAY only (Get Id Keys' own picker already
+    # does the same via nodes_viewer.py's own _header_text) - value
+    # itself (what actually gets stored in name_value, matched against
+    # row keys elsewhere - see nodes_aggregate_column.py's own
+    # _resolve_data_key) stays exactly as-is, never capitalized, so
+    # this is purely cosmetic. The user's own explicit ask, after
+    # noticing Id Key entries (already capitalized) and Attribute
+    # entries (shown raw) looked inconsistent side by side.
+    from .nodes_viewer import _header_text
+    return [(value, _header_text(label), "") for value, label in pairs] or [("", "(no attributes)", "")]
 
 
 # Search popup for Named Attribute's Name field, instead of a permanent
@@ -353,9 +362,14 @@ class MaStroScheduleGetAttributeNamesNode(MaStroScheduleTreeNode, Node):
         # "(no attributes)" when available_attribute_names finds
         # nothing (_pick_attribute_name_items' own fallback below) -
         # no need to say the same thing twice in two different ways.
+        # Capitalized for display, same as Id Keys' own draw_buttons
+        # (nodes_id_keys.py) - self.name_value itself stays exactly
+        # as picked, only the button's own text is run through
+        # _header_text.
+        from .nodes_viewer import _header_text
         op = layout.operator(
             "node.mastro_schedule_pick_attribute_name",
-            text=self.name_value or "(pick a name)",
+            text=_header_text(self.name_value) if self.name_value else "(pick a name)",
         )
         op.tree_name = self.id_data.name
         op.node_name = self.name

@@ -46,7 +46,18 @@ def _poll_pending_trees():
 
     Export Excel never writes from here - it only ever exports
     manually, via its own button (see that node's own module comment
-    for why an auto-export-from-here option was tried and removed)."""
+    for why an auto-export-from-here option was tried and removed).
+
+    Aggregate (nodes_aggregate_column.py) has its own group_by_items,
+    same shape/reason as table_items - merges its two multi-input
+    sockets' own links (Id Key to Group, Attribute to Group) into one
+    user-reorderable group-by order, see that node's own
+    _sync_group_by_items docstring.
+
+    Every one of these *_items syncs only ever runs for trees flagged
+    pending here - see _flag_all_trees_pending below for why a freshly
+    OPENED file (links already saved, no live update() this session)
+    needs its own separate trigger for that first sync."""
     if _pending_execute_trees:
         pending = list(_pending_execute_trees)
         _pending_execute_trees.clear()
@@ -61,6 +72,8 @@ def _poll_pending_trees():
                     node._sync_table_items()
                 if node.bl_idname == 'MaStroScheduleExcelExport':
                     node._sync_sheet_items()
+                if node.bl_idname == 'MaStroScheduleAggregateColumn':
+                    node._sync_group_by_items()
             try:
                 tree.execute()
             except Exception as exc:
@@ -93,6 +106,26 @@ def _mark_evaluation_errors(tree):
             node.color = (0.6, 0.1, 0.1)
 
 
+def _flag_all_trees_pending(_dummy=None):
+    """bpy.app.handlers.load_post callback: flags every already-saved
+    MaStro Schedule tree as pending the moment a .blend finishes
+    loading - confirmed live as a real, separate gap otherwise: a
+    tree's own group_by_items/table_items/sheet_items (Aggregate/Join
+    Tables/Place in Sheet/Export Excel's own UIList-backing
+    CollectionProperty, synced from _poll_pending_trees below) is only
+    ever rebuilt when MaStroScheduleTree.update() itself fires - which
+    only happens from a TOPOLOGY CHANGE (a link/node added or removed)
+    DURING the current session, never just from opening a file that
+    already has those links saved in it. A file opened with Aggregate's
+    own Id Key to Group/Attribute to Group already wired showed a
+    completely empty UIList until some unrelated edit happened to flag
+    the tree - this handler makes that first poll after load do the
+    same sync immediately, with no edit required."""
+    for tree in bpy.data.node_groups:
+        if tree.bl_idname in ('MaStroScheduleTreeType', 'MaStroScheduleGroupTreeType'):
+            _pending_execute_trees.add(tree.name)
+
+
 def start_polling():
     if not bpy.app.timers.is_registered(_poll_pending_trees):
         # persistent=True: without it Blender silently unregisters this
@@ -100,11 +133,15 @@ def start_polling():
         # for the same gotcha), which would make the tree stop
         # auto-refreshing in any file opened after the addon's register().
         bpy.app.timers.register(_poll_pending_trees, persistent=True)
+    if _flag_all_trees_pending not in bpy.app.handlers.load_post:
+        bpy.app.handlers.load_post.append(_flag_all_trees_pending)
 
 
 def stop_polling():
     if bpy.app.timers.is_registered(_poll_pending_trees):
         bpy.app.timers.unregister(_poll_pending_trees)
+    if _flag_all_trees_pending in bpy.app.handlers.load_post:
+        bpy.app.handlers.load_post.remove(_flag_all_trees_pending)
 
 
 def resolve_through_reroutes(link):

@@ -22,6 +22,7 @@ from .properties import (
     MaStro_schedule_table_merge,
     MaStro_schedule_join_table_item,
     MaStro_schedule_export_sheet_item,
+    MaStro_schedule_group_by_item,
 )
 from .operators import (
     MASTRO_UL_schedule_keys,
@@ -36,6 +37,8 @@ from .operators import (
     MASTRO_OT_Schedule_Export_Sheets_Move,
     MASTRO_OT_Schedule_Excel_Export,
     MASTRO_OT_Schedule_Force_Refresh,
+    MASTRO_UL_schedule_group_by,
+    MASTRO_OT_Schedule_Group_By_Move,
 )
 from .panel import MASTRO_PT_Schedule_Tools
 from .nodes_input import MaStroScheduleInputAllNode, MaStroScheduleInputSelectedNode
@@ -103,6 +106,7 @@ classes = (
     MaStro_schedule_table_merge,
     MaStro_schedule_join_table_item,
     MaStro_schedule_export_sheet_item,
+    MaStro_schedule_group_by_item,
     MaStroScheduleDataSocket,
     MaStroScheduleAttributeRefSocket,
     MaStroScheduleColumnSocket,
@@ -128,6 +132,8 @@ classes = (
     MASTRO_OT_Schedule_Export_Sheets_Move,
     MASTRO_OT_Schedule_Excel_Export,
     MASTRO_OT_Schedule_Force_Refresh,
+    MASTRO_UL_schedule_group_by,
+    MASTRO_OT_Schedule_Group_By_Move,
     MASTRO_PT_Schedule_Tools,
     MaStroScheduleInputAllNode,
     MaStroScheduleInputSelectedNode,

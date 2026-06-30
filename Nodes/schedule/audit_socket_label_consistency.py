@@ -52,8 +52,22 @@ LABEL_EXEMPT = {
     ("nodes_accumulate.py", "MaStroScheduleAccumulateNode", "Total"),
     ("nodes_column_primitive.py", "MaStroScheduleColumnPrimitiveNode", "Rows"),
     ("nodes_column_primitive.py", "MaStroScheduleColumnPrimitiveNode", "Title"),
-    ("nodes_foreach.py", "MaStroScheduleForEachNode", "Accumulator"),
     ("nodes_groupby_column.py", "MaStroScheduleItemFromListNode", "Index"),
+    # Aggregate's own Attribute to Group/Attribute Name
+    # (nodes_aggregate_column.py): two DIFFERENT
+    # MaStroScheduleAttributeRefSocketType inputs on the same node -
+    # one says WHAT to group by (alongside Id Key to Group, freely
+    # interleaved via group_by_items), the other says WHICH attribute's
+    # values to aggregate (Sum/Average/...) - "Attribute Name" twice on
+    # the same node would be genuinely ambiguous, same reasoning as
+    # Pivot's own Row Key/Column Key above. "X to Group" on both this
+    # one and Id Key to Group below - the user's own explicit naming
+    # fix, replacing "Id Key"/"Group By Attribute" (which didn't read
+    # as the same kind of thing at a glance) with names that share the
+    # same "to Group" suffix, making their shared purpose (feeding
+    # group_by_items together) obvious from the socket list alone.
+    ("nodes_aggregate_column.py", "MaStroScheduleAggregateColumnNode", "Attribute to Group"),
+    ("nodes_aggregate_column.py", "MaStroScheduleAggregateColumnNode", "Id Key to Group"),
     ("nodes_lookup.py", "MaStroScheduleMatrixLookupNode", "Reference"),
     ("nodes_math.py", "MaStroScheduleMathNode", "A"),
     ("nodes_math.py", "MaStroScheduleMathNode", "B"),

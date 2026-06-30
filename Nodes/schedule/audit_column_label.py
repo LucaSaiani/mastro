@@ -94,6 +94,7 @@ PROPERTY_UPDATE_EXEMPT = {
     ("nodes_table_join.py", "MaStroScheduleTableJoinNode", "active_table_index"),
     ("nodes_sheet_place.py", "MaStroScheduleSheetPlaceNode", "active_table_index"),
     ("nodes_excel_export.py", "MaStroScheduleExcelExportNode", "active_sheet_index"),
+    ("nodes_aggregate_column.py", "MaStroScheduleAggregateColumnNode", "active_group_by_index"),
     # filepath/auto_export (nodes_excel_export.py): this node has no
     # real output (evaluate() always returns [], same as the Viewer) -
     # nothing downstream ever depends on these, so there is nothing

@@ -79,6 +79,31 @@ class MaStro_schedule_join_table_item(PropertyGroup):
     label: StringProperty(name="Table")
 
 
+class MaStro_schedule_group_by_item(PropertyGroup):
+    """One entry in Aggregate's own group-by ordering UIList
+    (nodes_aggregate_column.py) - one per Id Key OR Attribute Name
+    currently linked into its two separate multi-input sockets (kept
+    as two real sockets, not one generic Any socket, for simpler
+    validation - the user's own explicit call), merged into ONE
+    ordered list here so Id Keys and Attributes can be freely
+    interleaved (e.g. group by Floor then Use, or Use then Floor -
+    the user's own explicit ask: which order they're wired/listed in
+    changes the grouping's own nesting order, like a multi-column
+    Excel pivot).
+
+    kind ('KEY' or 'ATTRIBUTE') says which of the two sockets this
+    entry came from, since link_key alone (see
+    MaStro_schedule_join_table_item's own docstring for why link
+    identity needs a stable string, not the NodeLink object itself)
+    isn't enough to tell them apart once merged into one list - the
+    two sockets' own links are independently numbered, so a KEY entry
+    and an ATTRIBUTE entry can share the same link_position by
+    coincidence."""
+    kind: StringProperty()
+    link_key: StringProperty()
+    label: StringProperty(name="Group By")
+
+
 class MaStro_schedule_export_sheet_item(PropertyGroup):
     """One entry in Export Excel's own ordering UIList
     (nodes_excel_export.py) - one per Sheet currently linked into its

@@ -119,6 +119,46 @@ class MASTRO_OT_Schedule_Join_Tables_Move(Operator):
         return {'FINISHED'}
 
 
+class MASTRO_UL_schedule_group_by(UIList):
+    """List of linked Id Keys/Attribute Names for Aggregate
+    (nodes_aggregate_column.py), showing each one's own readable label -
+    read-only, the list only exists here to let the user REORDER/
+    interleave them (the actual grouping order comes from this list's
+    own order, not from link/connection order or from which of the two
+    sockets an entry came from - the user's own explicit call, same
+    "order set by this node's own list" pattern Join Tables' own
+    table_items already follows). No Id Key/Attribute prefix or icon
+    distinguishing the two kinds - the user's own explicit call: each
+    label is already unique/unambiguous on its own (an Id Key's own
+    label, e.g. "Object_id", never collides with an Attribute's own
+    chosen name, e.g. "use"), so the distinction reads as visual noise
+    rather than useful information; item.kind itself is unchanged,
+    still read internally by evaluate()'s own KEY/ATTRIBUTE branch."""
+    bl_idname = "MASTRO_UL_schedule_group_by"
+
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        layout.label(text=item.label or "(empty)")
+
+
+class MASTRO_OT_Schedule_Group_By_Move(Operator):
+    """Move the active entry up or down in Aggregate's own group-by order"""
+    bl_idname = "mastro_schedule.group_by_move"
+    bl_label = "Move Group By Entry"
+
+    node_name: StringProperty()
+    direction: EnumProperty(items=[('UP', "Up", ""), ('DOWN', "Down", "")])
+
+    def execute(self, context):
+        node = context.space_data.edit_tree.nodes[self.node_name]
+        index = node.active_group_by_index
+        new_index = index + (-1 if self.direction == 'UP' else 1)
+        if 0 <= new_index < len(node.group_by_items):
+            node.group_by_items.move(index, new_index)
+            node.active_group_by_index = new_index
+            node.id_data.execute()
+        return {'FINISHED'}
+
+
 class MASTRO_UL_schedule_export_sheets(UIList):
     """List of linked Sheets for Export Excel (nodes_excel_export.py) -
     unlike Join Tables/Join Sheets' own read-only list, every row here
