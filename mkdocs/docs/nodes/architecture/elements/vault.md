@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/vault/node.png" class="node-icon" alt="Vault icon">
-
 # Vault
 
 <div class="node-body">
-<img src="../../../nodes/images/vault/node.png" class="node-thumb" alt="Vault preview">
+<img src="../../../../nodes/images/vault/node.png" class="node-icon" alt="Vault icon">
+<img src="../../../../nodes/images/vault/node.png" class="node-thumb" alt="Vault preview">
 
 *Description to be written.*
 

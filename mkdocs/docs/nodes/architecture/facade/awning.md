@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/awning/node.png" class="node-icon" alt="Awning icon">
-
 # Awning
 
 <div class="node-body">
-<img src="../../../nodes/images/awning/node.png" class="node-thumb" alt="Awning preview">
+<img src="../../../../nodes/images/awning/node.png" class="node-icon" alt="Awning icon">
+<img src="../../../../nodes/images/awning/node.png" class="node-thumb" alt="Awning preview">
 
 *Description to be written.*
 

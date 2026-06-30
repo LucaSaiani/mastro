@@ -1,9 +1,8 @@
-<img src="../../nodes/images/is-point-on-edge/node.png" class="node-icon" alt="Is Point on Edge icon">
-
 # Is Point on Edge
 
 <div class="node-body">
-<img src="../../nodes/images/is-point-on-edge/node.png" class="node-thumb" alt="Is Point on Edge preview">
+<img src="../../../nodes/images/is-point-on-edge/node.png" class="node-icon" alt="Is Point on Edge icon">
+<img src="../../../nodes/images/is-point-on-edge/node.png" class="node-thumb" alt="Is Point on Edge preview">
 
 *Description to be written.*
 

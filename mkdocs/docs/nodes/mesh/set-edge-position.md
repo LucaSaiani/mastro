@@ -1,9 +1,8 @@
-<img src="../../nodes/images/set-edge-position/node.png" class="node-icon" alt="Set Edge Position icon">
-
 # Set Edge Position
 
 <div class="node-body">
-<img src="../../nodes/images/set-edge-position/node.png" class="node-thumb" alt="Set Edge Position preview">
+<img src="../../../nodes/images/set-edge-position/node.png" class="node-icon" alt="Set Edge Position icon">
+<img src="../../../nodes/images/set-edge-position/node.png" class="node-thumb" alt="Set Edge Position preview">
 
 *Description to be written.*
 

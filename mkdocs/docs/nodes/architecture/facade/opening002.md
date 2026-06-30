@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/opening002/node.png" class="node-icon" alt="Opening.002 icon">
-
 # Opening.002
 
 <div class="node-body">
-<img src="../../../nodes/images/opening002/node.png" class="node-thumb" alt="Opening.002 preview">
+<img src="../../../../nodes/images/opening002/node.png" class="node-icon" alt="Opening.002 icon">
+<img src="../../../../nodes/images/opening002/node.png" class="node-thumb" alt="Opening.002 preview">
 
 *Description to be written.*
 

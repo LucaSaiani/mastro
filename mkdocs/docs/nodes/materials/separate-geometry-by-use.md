@@ -1,9 +1,8 @@
-<img src="../../nodes/images/separate-geometry-by-use/node.png" class="node-icon" alt="Separate Geometry by Use icon">
-
 # Separate Geometry by Use
 
 <div class="node-body">
-<img src="../../nodes/images/separate-geometry-by-use/node.png" class="node-thumb" alt="Separate Geometry by Use preview">
+<img src="../../../nodes/images/separate-geometry-by-use/node.png" class="node-icon" alt="Separate Geometry by Use icon">
+<img src="../../../nodes/images/separate-geometry-by-use/node.png" class="node-thumb" alt="Separate Geometry by Use preview">
 
 *Description to be written.*
 

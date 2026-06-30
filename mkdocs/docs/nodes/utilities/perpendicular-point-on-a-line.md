@@ -1,9 +1,8 @@
-<img src="../../nodes/images/perpendicular-point-on-a-line/node.png" class="node-icon" alt="Perpendicular Point on a Line icon">
-
 # Perpendicular Point on a Line
 
 <div class="node-body">
-<img src="../../nodes/images/perpendicular-point-on-a-line/node.png" class="node-thumb" alt="Perpendicular Point on a Line preview">
+<img src="../../../nodes/images/perpendicular-point-on-a-line/node.png" class="node-icon" alt="Perpendicular Point on a Line icon">
+<img src="../../../nodes/images/perpendicular-point-on-a-line/node.png" class="node-thumb" alt="Perpendicular Point on a Line preview">
 
 *Description to be written.*
 

@@ -1,9 +1,8 @@
-<img src="../../nodes/images/grease-pencil-to-landscape/node.png" class="node-icon" alt="Grease Pencil to Landscape icon">
-
 # Grease Pencil to Landscape
 
 <div class="node-body">
-<img src="../../nodes/images/grease-pencil-to-landscape/node.png" class="node-thumb" alt="Grease Pencil to Landscape preview">
+<img src="../../../nodes/images/grease-pencil-to-landscape/node.png" class="node-icon" alt="Grease Pencil to Landscape icon">
+<img src="../../../nodes/images/grease-pencil-to-landscape/node.png" class="node-thumb" alt="Grease Pencil to Landscape preview">
 
 *Description to be written.*
 

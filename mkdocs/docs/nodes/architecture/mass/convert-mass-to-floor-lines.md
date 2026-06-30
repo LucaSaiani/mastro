@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/convert-mass-to-floor-lines/node.png" class="node-icon" alt="Convert Mass to Floor Lines icon">
-
 # Convert Mass to Floor Lines
 
 <div class="node-body">
-<img src="../../../nodes/images/convert-mass-to-floor-lines/node.png" class="node-thumb" alt="Convert Mass to Floor Lines preview">
+<img src="../../../../nodes/images/convert-mass-to-floor-lines/node.png" class="node-icon" alt="Convert Mass to Floor Lines icon">
+<img src="../../../../nodes/images/convert-mass-to-floor-lines/node.png" class="node-thumb" alt="Convert Mass to Floor Lines preview">
 
 *Description to be written.*
 

@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/generate-topology/node.png" class="node-icon" alt="Generate Topology icon">
-
 # Generate Topology
 
 <div class="node-body">
-<img src="../../../nodes/images/generate-topology/node.png" class="node-thumb" alt="Generate Topology preview">
+<img src="../../../../nodes/images/generate-topology/node.png" class="node-icon" alt="Generate Topology icon">
+<img src="../../../../nodes/images/generate-topology/node.png" class="node-thumb" alt="Generate Topology preview">
 
 *Description to be written.*
 

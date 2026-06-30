@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/nave/node.png" class="node-icon" alt="Nave icon">
-
 # Nave
 
 <div class="node-body">
-<img src="../../../nodes/images/nave/node.png" class="node-thumb" alt="Nave preview">
+<img src="../../../../nodes/images/nave/node.png" class="node-icon" alt="Nave icon">
+<img src="../../../../nodes/images/nave/node.png" class="node-thumb" alt="Nave preview">
 
 *Description to be written.*
 

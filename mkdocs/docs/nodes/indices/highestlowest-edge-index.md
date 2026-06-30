@@ -1,9 +1,8 @@
-<img src="../../nodes/images/highestlowest-edge-index/node.png" class="node-icon" alt="Highest/Lowest Edge Index icon">
-
 # Highest/Lowest Edge Index
 
 <div class="node-body">
-<img src="../../nodes/images/highestlowest-edge-index/node.png" class="node-thumb" alt="Highest/Lowest Edge Index preview">
+<img src="../../../nodes/images/highestlowest-edge-index/node.png" class="node-icon" alt="Highest/Lowest Edge Index icon">
+<img src="../../../nodes/images/highestlowest-edge-index/node.png" class="node-thumb" alt="Highest/Lowest Edge Index preview">
 
 *Description to be written.*
 

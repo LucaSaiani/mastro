@@ -1,9 +1,8 @@
-<img src="../../nodes/images/sort-elements/node.png" class="node-icon" alt="Sort Elements icon">
-
 # Sort Elements
 
 <div class="node-body">
-<img src="../../nodes/images/sort-elements/node.png" class="node-thumb" alt="Sort Elements preview">
+<img src="../../../nodes/images/sort-elements/node.png" class="node-icon" alt="Sort Elements icon">
+<img src="../../../nodes/images/sort-elements/node.png" class="node-thumb" alt="Sort Elements preview">
 
 *Description to be written.*
 

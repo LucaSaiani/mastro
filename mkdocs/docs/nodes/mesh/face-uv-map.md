@@ -1,9 +1,8 @@
-<img src="../../nodes/images/face-uv-map/node.png" class="node-icon" alt="Face UV Map icon">
-
 # Face UV Map
 
 <div class="node-body">
-<img src="../../nodes/images/face-uv-map/node.png" class="node-thumb" alt="Face UV Map preview">
+<img src="../../../nodes/images/face-uv-map/node.png" class="node-icon" alt="Face UV Map icon">
+<img src="../../../nodes/images/face-uv-map/node.png" class="node-thumb" alt="Face UV Map preview">
 
 *Description to be written.*
 

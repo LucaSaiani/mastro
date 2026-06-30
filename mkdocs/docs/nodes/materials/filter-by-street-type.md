@@ -1,9 +1,8 @@
-<img src="../../nodes/images/filter-by-street-type/node.png" class="node-icon" alt="Filter by Street Type icon">
-
 # Filter by Street Type
 
 <div class="node-body">
-<img src="../../nodes/images/filter-by-street-type/node.png" class="node-thumb" alt="Filter by Street Type preview">
+<img src="../../../nodes/images/filter-by-street-type/node.png" class="node-icon" alt="Filter by Street Type icon">
+<img src="../../../nodes/images/filter-by-street-type/node.png" class="node-thumb" alt="Filter by Street Type preview">
 
 *Description to be written.*
 

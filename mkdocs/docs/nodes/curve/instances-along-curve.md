@@ -1,9 +1,8 @@
-<img src="../../nodes/images/instances-along-curve/node.png" class="node-icon" alt="Instances Along Curve icon">
-
 # Instances Along Curve
 
 <div class="node-body">
-<img src="../../nodes/images/instances-along-curve/node.png" class="node-thumb" alt="Instances Along Curve preview">
+<img src="../../../nodes/images/instances-along-curve/node.png" class="node-icon" alt="Instances Along Curve icon">
+<img src="../../../nodes/images/instances-along-curve/node.png" class="node-thumb" alt="Instances Along Curve preview">
 
 *Description to be written.*
 

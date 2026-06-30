@@ -1,9 +1,8 @@
-<img src="../../nodes/images/filter-by-use/node.png" class="node-icon" alt="Filter by Use icon">
-
 # Filter by Use
 
 <div class="node-body">
-<img src="../../nodes/images/filter-by-use/node.png" class="node-thumb" alt="Filter by Use preview">
+<img src="../../../nodes/images/filter-by-use/node.png" class="node-icon" alt="Filter by Use icon">
+<img src="../../../nodes/images/filter-by-use/node.png" class="node-thumb" alt="Filter by Use preview">
 
 *Description to be written.*
 

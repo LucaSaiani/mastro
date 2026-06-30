@@ -1,9 +1,8 @@
-<img src="../../nodes/images/instance-packer/node.png" class="node-icon" alt="Instance Packer icon">
-
 # Instance Packer
 
 <div class="node-body">
-<img src="../../nodes/images/instance-packer/node.png" class="node-thumb" alt="Instance Packer preview">
+<img src="../../../nodes/images/instance-packer/node.png" class="node-icon" alt="Instance Packer icon">
+<img src="../../../nodes/images/instance-packer/node.png" class="node-thumb" alt="Instance Packer preview">
 
 *Description to be written.*
 

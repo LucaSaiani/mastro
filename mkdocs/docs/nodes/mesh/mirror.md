@@ -1,9 +1,8 @@
-<img src="../../nodes/images/mirror/node.png" class="node-icon" alt="Mirror icon">
-
 # Mirror
 
 <div class="node-body">
-<img src="../../nodes/images/mirror/node.png" class="node-thumb" alt="Mirror preview">
+<img src="../../../nodes/images/mirror/node.png" class="node-icon" alt="Mirror icon">
+<img src="../../../nodes/images/mirror/node.png" class="node-thumb" alt="Mirror preview">
 
 *Description to be written.*
 

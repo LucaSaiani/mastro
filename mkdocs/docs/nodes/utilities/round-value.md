@@ -1,9 +1,8 @@
-<img src="../../nodes/images/round-value/node.png" class="node-icon" alt="Round Value icon">
-
 # Round Value
 
 <div class="node-body">
-<img src="../../nodes/images/round-value/node.png" class="node-thumb" alt="Round Value preview">
+<img src="../../../nodes/images/round-value/node.png" class="node-icon" alt="Round Value icon">
+<img src="../../../nodes/images/round-value/node.png" class="node-thumb" alt="Round Value preview">
 
 *Description to be written.*
 

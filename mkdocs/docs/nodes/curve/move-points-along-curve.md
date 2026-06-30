@@ -1,9 +1,8 @@
-<img src="../../nodes/images/move-points-along-curve/node.png" class="node-icon" alt="Move Points along Curve icon">
-
 # Move Points along Curve
 
 <div class="node-body">
-<img src="../../nodes/images/move-points-along-curve/node.png" class="node-thumb" alt="Move Points along Curve preview">
+<img src="../../../nodes/images/move-points-along-curve/node.png" class="node-icon" alt="Move Points along Curve icon">
+<img src="../../../nodes/images/move-points-along-curve/node.png" class="node-thumb" alt="Move Points along Curve preview">
 
 *Description to be written.*
 

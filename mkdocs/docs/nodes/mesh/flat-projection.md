@@ -1,9 +1,8 @@
-<img src="../../nodes/images/flat-projection/node.png" class="node-icon" alt="Flat Projection icon">
-
 # Flat Projection
 
 <div class="node-body">
-<img src="../../nodes/images/flat-projection/node.png" class="node-thumb" alt="Flat Projection preview">
+<img src="../../../nodes/images/flat-projection/node.png" class="node-icon" alt="Flat Projection icon">
+<img src="../../../nodes/images/flat-projection/node.png" class="node-thumb" alt="Flat Projection preview">
 
 *Description to be written.*
 

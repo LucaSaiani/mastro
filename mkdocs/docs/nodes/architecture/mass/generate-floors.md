@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/generate-floors/node.png" class="node-icon" alt="Generate Floors icon">
-
 # Generate Floors
 
 <div class="node-body">
-<img src="../../../nodes/images/generate-floors/node.png" class="node-thumb" alt="Generate Floors preview">
+<img src="../../../../nodes/images/generate-floors/node.png" class="node-icon" alt="Generate Floors icon">
+<img src="../../../../nodes/images/generate-floors/node.png" class="node-thumb" alt="Generate Floors preview">
 
 *Description to be written.*
 

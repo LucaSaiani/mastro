@@ -1,9 +1,8 @@
-<img src="../../nodes/images/tangent-tangent-center/node.png" class="node-icon" alt="Tangent Tangent Center icon">
-
 # Tangent Tangent Center
 
 <div class="node-body">
-<img src="../../nodes/images/tangent-tangent-center/node.png" class="node-thumb" alt="Tangent Tangent Center preview">
+<img src="../../../nodes/images/tangent-tangent-center/node.png" class="node-icon" alt="Tangent Tangent Center icon">
+<img src="../../../nodes/images/tangent-tangent-center/node.png" class="node-thumb" alt="Tangent Tangent Center preview">
 
 *Description to be written.*
 

@@ -1,9 +1,8 @@
-<img src="../../nodes/images/angle-between-edges/node.png" class="node-icon" alt="Angle between Edges icon">
-
 # Angle between Edges
 
 <div class="node-body">
-<img src="../../nodes/images/angle-between-edges/node.png" class="node-thumb" alt="Angle between Edges preview">
+<img src="../../../nodes/images/angle-between-edges/node.png" class="node-icon" alt="Angle between Edges icon">
+<img src="../../../nodes/images/angle-between-edges/node.png" class="node-thumb" alt="Angle between Edges preview">
 
 *Description to be written.*
 

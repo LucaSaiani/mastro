@@ -1,9 +1,8 @@
-<img src="../../nodes/images/set-edge-id/node.png" class="node-icon" alt="Set Edge ID icon">
-
 # Set Edge ID
 
 <div class="node-body">
-<img src="../../nodes/images/set-edge-id/node.png" class="node-thumb" alt="Set Edge ID preview">
+<img src="../../../nodes/images/set-edge-id/node.png" class="node-icon" alt="Set Edge ID icon">
+<img src="../../../nodes/images/set-edge-id/node.png" class="node-thumb" alt="Set Edge ID preview">
 
 *Description to be written.*
 

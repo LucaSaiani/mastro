@@ -1,9 +1,8 @@
-<img src="../../nodes/images/filter-by-typology/node.png" class="node-icon" alt="Filter by Typology icon">
-
 # Filter by Typology
 
 <div class="node-body">
-<img src="../../nodes/images/filter-by-typology/node.png" class="node-thumb" alt="Filter by Typology preview">
+<img src="../../../nodes/images/filter-by-typology/node.png" class="node-icon" alt="Filter by Typology icon">
+<img src="../../../nodes/images/filter-by-typology/node.png" class="node-thumb" alt="Filter by Typology preview">
 
 *Description to be written.*
 

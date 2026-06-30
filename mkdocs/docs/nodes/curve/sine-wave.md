@@ -1,9 +1,8 @@
-<img src="../../nodes/images/sine-wave/node.png" class="node-icon" alt="Sine Wave icon">
-
 # Sine Wave
 
 <div class="node-body">
-<img src="../../nodes/images/sine-wave/node.png" class="node-thumb" alt="Sine Wave preview">
+<img src="../../../nodes/images/sine-wave/node.png" class="node-icon" alt="Sine Wave icon">
+<img src="../../../nodes/images/sine-wave/node.png" class="node-thumb" alt="Sine Wave preview">
 
 *Description to be written.*
 

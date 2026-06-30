@@ -1,9 +1,8 @@
-<img src="../../nodes/images/separate-geometry-by-wall-type/node.png" class="node-icon" alt="Separate Geometry by Wall Type icon">
-
 # Separate Geometry by Wall Type
 
 <div class="node-body">
-<img src="../../nodes/images/separate-geometry-by-wall-type/node.png" class="node-thumb" alt="Separate Geometry by Wall Type preview">
+<img src="../../../nodes/images/separate-geometry-by-wall-type/node.png" class="node-icon" alt="Separate Geometry by Wall Type icon">
+<img src="../../../nodes/images/separate-geometry-by-wall-type/node.png" class="node-thumb" alt="Separate Geometry by Wall Type preview">
 
 *Description to be written.*
 

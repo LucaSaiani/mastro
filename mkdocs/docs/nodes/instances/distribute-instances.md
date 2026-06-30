@@ -1,9 +1,8 @@
-<img src="../../nodes/images/distribute-instances/node.png" class="node-icon" alt="Distribute Instances icon">
-
 # Distribute Instances
 
 <div class="node-body">
-<img src="../../nodes/images/distribute-instances/node.png" class="node-thumb" alt="Distribute Instances preview">
+<img src="../../../nodes/images/distribute-instances/node.png" class="node-icon" alt="Distribute Instances icon">
+<img src="../../../nodes/images/distribute-instances/node.png" class="node-thumb" alt="Distribute Instances preview">
 
 *Description to be written.*
 

@@ -1,9 +1,8 @@
-<img src="../../nodes/images/camera-culling/node.png" class="node-icon" alt="Camera Culling icon">
-
 # Camera Culling
 
 <div class="node-body">
-<img src="../../nodes/images/camera-culling/node.png" class="node-thumb" alt="Camera Culling preview">
+<img src="../../../nodes/images/camera-culling/node.png" class="node-icon" alt="Camera Culling icon">
+<img src="../../../nodes/images/camera-culling/node.png" class="node-thumb" alt="Camera Culling preview">
 
 *Description to be written.*
 

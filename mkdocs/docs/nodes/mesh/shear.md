@@ -1,9 +1,8 @@
-<img src="../../nodes/images/shear/node.png" class="node-icon" alt="Shear icon">
-
 # Shear
 
 <div class="node-body">
-<img src="../../nodes/images/shear/node.png" class="node-thumb" alt="Shear preview">
+<img src="../../../nodes/images/shear/node.png" class="node-icon" alt="Shear icon">
+<img src="../../../nodes/images/shear/node.png" class="node-thumb" alt="Shear preview">
 
 *Description to be written.*
 

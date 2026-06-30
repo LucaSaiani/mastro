@@ -1,9 +1,8 @@
-<img src="../../nodes/images/filter-by-block-side/node.png" class="node-icon" alt="Filter by Block Side icon">
-
 # Filter by Block Side
 
 <div class="node-body">
-<img src="../../nodes/images/filter-by-block-side/node.png" class="node-thumb" alt="Filter by Block Side preview">
+<img src="../../../nodes/images/filter-by-block-side/node.png" class="node-icon" alt="Filter by Block Side icon">
+<img src="../../../nodes/images/filter-by-block-side/node.png" class="node-thumb" alt="Filter by Block Side preview">
 
 *Description to be written.*
 

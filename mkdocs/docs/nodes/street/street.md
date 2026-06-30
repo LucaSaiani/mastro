@@ -1,9 +1,8 @@
-<img src="../../nodes/images/street/node.png" class="node-icon" alt="Street icon">
-
 # Street
 
 <div class="node-body">
-<img src="../../nodes/images/street/node.png" class="node-thumb" alt="Street preview">
+<img src="../../../nodes/images/street/node.png" class="node-icon" alt="Street icon">
+<img src="../../../nodes/images/street/node.png" class="node-thumb" alt="Street preview">
 
 *Description to be written.*
 

@@ -1,9 +1,8 @@
-<img src="../../nodes/images/fix-normals/node.png" class="node-icon" alt="Fix Normals icon">
-
 # Fix Normals
 
 <div class="node-body">
-<img src="../../nodes/images/fix-normals/node.png" class="node-thumb" alt="Fix Normals preview">
+<img src="../../../nodes/images/fix-normals/node.png" class="node-icon" alt="Fix Normals icon">
+<img src="../../../nodes/images/fix-normals/node.png" class="node-thumb" alt="Fix Normals preview">
 
 *Description to be written.*
 

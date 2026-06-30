@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/visbility-study/node.png" class="node-icon" alt="Visbility Study icon">
-
 # Visbility Study
 
 <div class="node-body">
-<img src="../../../nodes/images/visbility-study/node.png" class="node-thumb" alt="Visbility Study preview">
+<img src="../../../../nodes/images/visbility-study/node.png" class="node-icon" alt="Visbility Study icon">
+<img src="../../../../nodes/images/visbility-study/node.png" class="node-thumb" alt="Visbility Study preview">
 
 *Description to be written.*
 

@@ -1,9 +1,8 @@
-<img src="../../nodes/images/contour-mesh/node.png" class="node-icon" alt="Contour Mesh icon">
-
 # Contour Mesh
 
 <div class="node-body">
-<img src="../../nodes/images/contour-mesh/node.png" class="node-thumb" alt="Contour Mesh preview">
+<img src="../../../nodes/images/contour-mesh/node.png" class="node-icon" alt="Contour Mesh icon">
+<img src="../../../nodes/images/contour-mesh/node.png" class="node-thumb" alt="Contour Mesh preview">
 
 *Description to be written.*
 

@@ -1,9 +1,8 @@
-<img src="../../nodes/images/stretch-edge/node.png" class="node-icon" alt="Stretch Edge icon">
-
 # Stretch Edge
 
 <div class="node-body">
-<img src="../../nodes/images/stretch-edge/node.png" class="node-thumb" alt="Stretch Edge preview">
+<img src="../../../nodes/images/stretch-edge/node.png" class="node-icon" alt="Stretch Edge icon">
+<img src="../../../nodes/images/stretch-edge/node.png" class="node-thumb" alt="Stretch Edge preview">
 
 *Description to be written.*
 

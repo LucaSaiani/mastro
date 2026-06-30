@@ -1,9 +1,8 @@
-<img src="../../nodes/images/offset-indices/node.png" class="node-icon" alt="Offset Indices icon">
-
 # Offset Indices
 
 <div class="node-body">
-<img src="../../nodes/images/offset-indices/node.png" class="node-thumb" alt="Offset Indices preview">
+<img src="../../../nodes/images/offset-indices/node.png" class="node-icon" alt="Offset Indices icon">
+<img src="../../../nodes/images/offset-indices/node.png" class="node-thumb" alt="Offset Indices preview">
 
 *Description to be written.*
 

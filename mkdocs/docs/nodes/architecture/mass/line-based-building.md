@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/line-based-building/node.png" class="node-icon" alt="Line Based Building icon">
-
 # Line Based Building
 
 <div class="node-body">
-<img src="../../../nodes/images/line-based-building/node.png" class="node-thumb" alt="Line Based Building preview">
+<img src="../../../../nodes/images/line-based-building/node.png" class="node-icon" alt="Line Based Building icon">
+<img src="../../../../nodes/images/line-based-building/node.png" class="node-thumb" alt="Line Based Building preview">
 
 *Description to be written.*
 

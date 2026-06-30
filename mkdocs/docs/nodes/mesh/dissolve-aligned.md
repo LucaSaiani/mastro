@@ -1,9 +1,8 @@
-<img src="../../nodes/images/dissolve-aligned/node.png" class="node-icon" alt="Dissolve Aligned icon">
-
 # Dissolve Aligned
 
 <div class="node-body">
-<img src="../../nodes/images/dissolve-aligned/node.png" class="node-thumb" alt="Dissolve Aligned preview">
+<img src="../../../nodes/images/dissolve-aligned/node.png" class="node-icon" alt="Dissolve Aligned icon">
+<img src="../../../nodes/images/dissolve-aligned/node.png" class="node-thumb" alt="Dissolve Aligned preview">
 
 *Description to be written.*
 

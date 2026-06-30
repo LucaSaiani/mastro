@@ -1,9 +1,8 @@
-<img src="../../nodes/images/shuffle-indices/node.png" class="node-icon" alt="Shuffle Indices icon">
-
 # Shuffle Indices
 
 <div class="node-body">
-<img src="../../nodes/images/shuffle-indices/node.png" class="node-thumb" alt="Shuffle Indices preview">
+<img src="../../../nodes/images/shuffle-indices/node.png" class="node-icon" alt="Shuffle Indices icon">
+<img src="../../../nodes/images/shuffle-indices/node.png" class="node-thumb" alt="Shuffle Indices preview">
 
 *Description to be written.*
 

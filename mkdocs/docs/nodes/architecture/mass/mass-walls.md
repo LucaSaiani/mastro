@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/mass-walls/node.png" class="node-icon" alt="Mass Walls icon">
-
 # Mass Walls
 
 <div class="node-body">
-<img src="../../../nodes/images/mass-walls/node.png" class="node-thumb" alt="Mass Walls preview">
+<img src="../../../../nodes/images/mass-walls/node.png" class="node-icon" alt="Mass Walls icon">
+<img src="../../../../nodes/images/mass-walls/node.png" class="node-thumb" alt="Mass Walls preview">
 
 *Description to be written.*
 

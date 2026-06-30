@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/line-based-sum-height/node.png" class="node-icon" alt="Line Based Sum Height icon">
-
 # Line Based Sum Height
 
 <div class="node-body">
-<img src="../../../nodes/images/line-based-sum-height/node.png" class="node-thumb" alt="Line Based Sum Height preview">
+<img src="../../../../nodes/images/line-based-sum-height/node.png" class="node-icon" alt="Line Based Sum Height icon">
+<img src="../../../../nodes/images/line-based-sum-height/node.png" class="node-thumb" alt="Line Based Sum Height preview">
 
 *Description to be written.*
 

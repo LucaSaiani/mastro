@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/floor-grid/node.png" class="node-icon" alt="Floor Grid icon">
-
 # Floor Grid
 
 <div class="node-body">
-<img src="../../../nodes/images/floor-grid/node.png" class="node-thumb" alt="Floor Grid preview">
+<img src="../../../../nodes/images/floor-grid/node.png" class="node-icon" alt="Floor Grid icon">
+<img src="../../../../nodes/images/floor-grid/node.png" class="node-thumb" alt="Floor Grid preview">
 
 *Description to be written.*
 

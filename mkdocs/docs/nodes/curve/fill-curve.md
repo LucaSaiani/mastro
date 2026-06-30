@@ -1,9 +1,8 @@
-<img src="../../nodes/images/fill-curve/node.png" class="node-icon" alt="Fill Curve icon">
-
 # Fill Curve
 
 <div class="node-body">
-<img src="../../nodes/images/fill-curve/node.png" class="node-thumb" alt="Fill Curve preview">
+<img src="../../../nodes/images/fill-curve/node.png" class="node-icon" alt="Fill Curve icon">
+<img src="../../../nodes/images/fill-curve/node.png" class="node-thumb" alt="Fill Curve preview">
 
 *Description to be written.*
 

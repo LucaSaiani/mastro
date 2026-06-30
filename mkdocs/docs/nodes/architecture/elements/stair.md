@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/stair/node.png" class="node-icon" alt="Stair icon">
-
 # Stair
 
 <div class="node-body">
-<img src="../../../nodes/images/stair/node.png" class="node-thumb" alt="Stair preview">
+<img src="../../../../nodes/images/stair/node.png" class="node-icon" alt="Stair icon">
+<img src="../../../../nodes/images/stair/node.png" class="node-thumb" alt="Stair preview">
 
 *Description to be written.*
 

@@ -1,9 +1,8 @@
-<img src="../../nodes/images/hexagonal-grid/node.png" class="node-icon" alt="Hexagonal Grid icon">
-
 # Hexagonal Grid
 
 <div class="node-body">
-<img src="../../nodes/images/hexagonal-grid/node.png" class="node-thumb" alt="Hexagonal Grid preview">
+<img src="../../../nodes/images/hexagonal-grid/node.png" class="node-icon" alt="Hexagonal Grid icon">
+<img src="../../../nodes/images/hexagonal-grid/node.png" class="node-thumb" alt="Hexagonal Grid preview">
 
 *Description to be written.*
 

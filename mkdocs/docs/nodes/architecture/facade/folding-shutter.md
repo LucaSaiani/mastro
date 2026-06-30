@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/folding-shutter/node.png" class="node-icon" alt="Folding Shutter icon">
-
 # Folding Shutter
 
 <div class="node-body">
-<img src="../../../nodes/images/folding-shutter/node.png" class="node-thumb" alt="Folding Shutter preview">
+<img src="../../../../nodes/images/folding-shutter/node.png" class="node-icon" alt="Folding Shutter icon">
+<img src="../../../../nodes/images/folding-shutter/node.png" class="node-thumb" alt="Folding Shutter preview">
 
 *Description to be written.*
 

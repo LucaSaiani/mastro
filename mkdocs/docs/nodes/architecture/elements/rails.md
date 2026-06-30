@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/rails/node.png" class="node-icon" alt="Rails icon">
-
 # Rails
 
 <div class="node-body">
-<img src="../../../nodes/images/rails/node.png" class="node-thumb" alt="Rails preview">
+<img src="../../../../nodes/images/rails/node.png" class="node-icon" alt="Rails icon">
+<img src="../../../../nodes/images/rails/node.png" class="node-thumb" alt="Rails preview">
 
 *Description to be written.*
 

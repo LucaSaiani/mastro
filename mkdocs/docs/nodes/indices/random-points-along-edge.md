@@ -1,9 +1,8 @@
-<img src="../../nodes/images/random-points-along-edge/node.png" class="node-icon" alt="Random Points along Edge icon">
-
 # Random Points along Edge
 
 <div class="node-body">
-<img src="../../nodes/images/random-points-along-edge/node.png" class="node-thumb" alt="Random Points along Edge preview">
+<img src="../../../nodes/images/random-points-along-edge/node.png" class="node-icon" alt="Random Points along Edge icon">
+<img src="../../../nodes/images/random-points-along-edge/node.png" class="node-thumb" alt="Random Points along Edge preview">
 
 *Description to be written.*
 

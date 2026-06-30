@@ -1,9 +1,8 @@
-<img src="../../nodes/images/flip-indices/node.png" class="node-icon" alt="Flip Indices icon">
-
 # Flip Indices
 
 <div class="node-body">
-<img src="../../nodes/images/flip-indices/node.png" class="node-thumb" alt="Flip Indices preview">
+<img src="../../../nodes/images/flip-indices/node.png" class="node-icon" alt="Flip Indices icon">
+<img src="../../../nodes/images/flip-indices/node.png" class="node-thumb" alt="Flip Indices preview">
 
 *Description to be written.*
 

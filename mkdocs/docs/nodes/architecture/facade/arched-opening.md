@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/arched-opening/node.png" class="node-icon" alt="Arched Opening icon">
-
 # Arched Opening
 
 <div class="node-body">
-<img src="../../../nodes/images/arched-opening/node.png" class="node-thumb" alt="Arched Opening preview">
+<img src="../../../../nodes/images/arched-opening/node.png" class="node-icon" alt="Arched Opening icon">
+<img src="../../../../nodes/images/arched-opening/node.png" class="node-thumb" alt="Arched Opening preview">
 
 *Description to be written.*
 

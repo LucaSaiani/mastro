@@ -1,9 +1,8 @@
-<img src="../../nodes/images/bevel-2d/node.png" class="node-icon" alt="Bevel 2D icon">
-
 # Bevel 2D
 
 <div class="node-body">
-<img src="../../nodes/images/bevel-2d/node.png" class="node-thumb" alt="Bevel 2D preview">
+<img src="../../../nodes/images/bevel-2d/node.png" class="node-icon" alt="Bevel 2D icon">
+<img src="../../../nodes/images/bevel-2d/node.png" class="node-thumb" alt="Bevel 2D preview">
 
 *Description to be written.*
 

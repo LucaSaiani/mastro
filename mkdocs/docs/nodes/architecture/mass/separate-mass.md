@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/separate-mass/node.png" class="node-icon" alt="Separate Mass icon">
-
 # Separate Mass
 
 <div class="node-body">
-<img src="../../../nodes/images/separate-mass/node.png" class="node-thumb" alt="Separate Mass preview">
+<img src="../../../../nodes/images/separate-mass/node.png" class="node-icon" alt="Separate Mass icon">
+<img src="../../../../nodes/images/separate-mass/node.png" class="node-thumb" alt="Separate Mass preview">
 
 *Description to be written.*
 

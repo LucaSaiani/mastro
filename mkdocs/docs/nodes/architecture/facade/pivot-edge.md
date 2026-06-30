@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/pivot-edge/node.png" class="node-icon" alt="Pivot Edge icon">
-
 # Pivot Edge
 
 <div class="node-body">
-<img src="../../../nodes/images/pivot-edge/node.png" class="node-thumb" alt="Pivot Edge preview">
+<img src="../../../../nodes/images/pivot-edge/node.png" class="node-icon" alt="Pivot Edge icon">
+<img src="../../../../nodes/images/pivot-edge/node.png" class="node-thumb" alt="Pivot Edge preview">
 
 *Description to be written.*
 

@@ -1,9 +1,8 @@
-<img src="../../nodes/images/vector/node.png" class="node-icon" alt="Vector icon">
-
 # Vector
 
 <div class="node-body">
-<img src="../../nodes/images/vector/node.png" class="node-thumb" alt="Vector preview">
+<img src="../../../nodes/images/vector/node.png" class="node-icon" alt="Vector icon">
+<img src="../../../nodes/images/vector/node.png" class="node-thumb" alt="Vector preview">
 
 *Description to be written.*
 

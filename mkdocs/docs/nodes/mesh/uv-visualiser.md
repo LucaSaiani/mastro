@@ -1,9 +1,8 @@
-<img src="../../nodes/images/uv-visualiser/node.png" class="node-icon" alt="UV Visualiser icon">
-
 # UV Visualiser
 
 <div class="node-body">
-<img src="../../nodes/images/uv-visualiser/node.png" class="node-thumb" alt="UV Visualiser preview">
+<img src="../../../nodes/images/uv-visualiser/node.png" class="node-icon" alt="UV Visualiser icon">
+<img src="../../../nodes/images/uv-visualiser/node.png" class="node-thumb" alt="UV Visualiser preview">
 
 *Description to be written.*
 

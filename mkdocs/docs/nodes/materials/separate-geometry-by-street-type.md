@@ -1,9 +1,8 @@
-<img src="../../nodes/images/separate-geometry-by-street-type/node.png" class="node-icon" alt="Separate Geometry by Street Type icon">
-
 # Separate Geometry by Street Type
 
 <div class="node-body">
-<img src="../../nodes/images/separate-geometry-by-street-type/node.png" class="node-thumb" alt="Separate Geometry by Street Type preview">
+<img src="../../../nodes/images/separate-geometry-by-street-type/node.png" class="node-icon" alt="Separate Geometry by Street Type icon">
+<img src="../../../nodes/images/separate-geometry-by-street-type/node.png" class="node-thumb" alt="Separate Geometry by Street Type preview">
 
 *Description to be written.*
 

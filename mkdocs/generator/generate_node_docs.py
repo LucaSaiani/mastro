@@ -104,12 +104,17 @@ def page_is_locked(out_path):
 def write_node_page(short_name, ng, category, subcategory, docs_root):
     slug = slugify(short_name)
 
+    # mkdocs serves pages with "pretty URLs" by default (use_directory_urls):
+    # a page at nodes/x/y/slug.md is served at /nodes/x/y/slug/, one URL
+    # segment deeper than the file's path under docs/. So a relative image
+    # link needs one extra "../" beyond what the file's on-disk depth would
+    # suggest -- this depth is in *served URL* terms, not filesystem terms.
     if subcategory:
         rel_path = f"nodes/{category}/{subcategory}/{slug}.md"
-        depth = 3
+        depth = 4
     else:
         rel_path = f"nodes/{category}/{slug}.md"
-        depth = 2
+        depth = 3
 
     out_path = os.path.join(docs_root, rel_path)
 
@@ -126,17 +131,14 @@ def write_node_page(short_name, ng, category, subcategory, docs_root):
 
     lines = []
 
-    # Icon (top-right)
-    if has_image:
-        icon_path = rel_image_path(depth, f"{img_dir_rel}/{icon_name}")
-        lines.append(f'<img src="{icon_path}" class="node-icon" alt="{short_name} icon">\n')
-
     lines.append(f"# {short_name}\n")
 
-    # Open node-body wrapper (contains thumbnail float + text + sockets)
+    # Open node-body wrapper (contains icon + thumbnail float + text + sockets)
     if has_image:
+        icon_path = rel_image_path(depth, f"{img_dir_rel}/{icon_name}")
         thumb_path = rel_image_path(depth, f"{img_dir_rel}/{thumb_name}")
         lines.append(f'<div class="node-body">')
+        lines.append(f'<img src="{icon_path}" class="node-icon" alt="{short_name} icon">')
         lines.append(f'<img src="{thumb_path}" class="node-thumb" alt="{short_name} preview">\n')
 
     lines.append(f"{PLACEHOLDER}\n")

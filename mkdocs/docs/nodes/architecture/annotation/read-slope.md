@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/read-slope/icon.png" class="node-icon" alt="Read Slope icon">
-
 # Read Slope
 
 <div class="node-body">
-<img src="../../../nodes/images/read-slope/thumbnail.png" class="node-thumb" alt="Read Slope preview">
+<img src="../../../../nodes/images/read-slope/icon.png" class="node-icon" alt="Read Slope icon">
+<img src="../../../../nodes/images/read-slope/thumbnail.png" class="node-thumb" alt="Read Slope preview">
 
 *Description to be written.*
 

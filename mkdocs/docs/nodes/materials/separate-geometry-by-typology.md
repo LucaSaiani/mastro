@@ -1,9 +1,8 @@
-<img src="../../nodes/images/separate-geometry-by-typology/node.png" class="node-icon" alt="Separate Geometry by Typology icon">
-
 # Separate Geometry by Typology
 
 <div class="node-body">
-<img src="../../nodes/images/separate-geometry-by-typology/node.png" class="node-thumb" alt="Separate Geometry by Typology preview">
+<img src="../../../nodes/images/separate-geometry-by-typology/node.png" class="node-icon" alt="Separate Geometry by Typology icon">
+<img src="../../../nodes/images/separate-geometry-by-typology/node.png" class="node-thumb" alt="Separate Geometry by Typology preview">
 
 *Description to be written.*
 

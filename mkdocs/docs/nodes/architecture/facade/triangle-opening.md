@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/triangle-opening/node.png" class="node-icon" alt="Triangle Opening icon">
-
 # Triangle Opening
 
 <div class="node-body">
-<img src="../../../nodes/images/triangle-opening/node.png" class="node-thumb" alt="Triangle Opening preview">
+<img src="../../../../nodes/images/triangle-opening/node.png" class="node-icon" alt="Triangle Opening icon">
+<img src="../../../../nodes/images/triangle-opening/node.png" class="node-thumb" alt="Triangle Opening preview">
 
 *Description to be written.*
 

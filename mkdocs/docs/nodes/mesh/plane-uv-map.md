@@ -1,9 +1,8 @@
-<img src="../../nodes/images/plane-uv-map/node.png" class="node-icon" alt="Plane UV Map icon">
-
 # Plane UV Map
 
 <div class="node-body">
-<img src="../../nodes/images/plane-uv-map/node.png" class="node-thumb" alt="Plane UV Map preview">
+<img src="../../../nodes/images/plane-uv-map/node.png" class="node-icon" alt="Plane UV Map icon">
+<img src="../../../nodes/images/plane-uv-map/node.png" class="node-thumb" alt="Plane UV Map preview">
 
 *Description to be written.*
 

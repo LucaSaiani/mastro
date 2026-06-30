@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/triangular-grid/node.png" class="node-icon" alt="Triangular Grid icon">
-
 # Triangular Grid
 
 <div class="node-body">
-<img src="../../../nodes/images/triangular-grid/node.png" class="node-thumb" alt="Triangular Grid preview">
+<img src="../../../../nodes/images/triangular-grid/node.png" class="node-icon" alt="Triangular Grid icon">
+<img src="../../../../nodes/images/triangular-grid/node.png" class="node-thumb" alt="Triangular Grid preview">
 
 *Description to be written.*
 

@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/footprint/node.png" class="node-icon" alt="Footprint icon">
-
 # Footprint
 
 <div class="node-body">
-<img src="../../../nodes/images/footprint/node.png" class="node-thumb" alt="Footprint preview">
+<img src="../../../../nodes/images/footprint/node.png" class="node-icon" alt="Footprint icon">
+<img src="../../../../nodes/images/footprint/node.png" class="node-thumb" alt="Footprint preview">
 
 *Description to be written.*
 

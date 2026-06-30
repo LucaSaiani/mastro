@@ -1,9 +1,8 @@
-<img src="../../nodes/images/custom-corners/node.png" class="node-icon" alt="Custom Corners icon">
-
 # Custom Corners
 
 <div class="node-body">
-<img src="../../nodes/images/custom-corners/node.png" class="node-thumb" alt="Custom Corners preview">
+<img src="../../../nodes/images/custom-corners/node.png" class="node-icon" alt="Custom Corners icon">
+<img src="../../../nodes/images/custom-corners/node.png" class="node-thumb" alt="Custom Corners preview">
 
 *Description to be written.*
 

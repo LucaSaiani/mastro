@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/perimeter/node.png" class="node-icon" alt="Perimeter icon">
-
 # Perimeter
 
 <div class="node-body">
-<img src="../../../nodes/images/perimeter/node.png" class="node-thumb" alt="Perimeter preview">
+<img src="../../../../nodes/images/perimeter/node.png" class="node-icon" alt="Perimeter icon">
+<img src="../../../../nodes/images/perimeter/node.png" class="node-thumb" alt="Perimeter preview">
 
 *Description to be written.*
 

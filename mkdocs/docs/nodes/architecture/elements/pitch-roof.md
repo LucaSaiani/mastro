@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/pitch-roof/node.png" class="node-icon" alt="Pitch Roof icon">
-
 # Pitch Roof
 
 <div class="node-body">
-<img src="../../../nodes/images/pitch-roof/node.png" class="node-thumb" alt="Pitch Roof preview">
+<img src="../../../../nodes/images/pitch-roof/node.png" class="node-icon" alt="Pitch Roof icon">
+<img src="../../../../nodes/images/pitch-roof/node.png" class="node-thumb" alt="Pitch Roof preview">
 
 *Description to be written.*
 

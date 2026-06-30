@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/attribute-visualiser/node.png" class="node-icon" alt="Attribute Visualiser icon">
-
 # Attribute Visualiser
 
 <div class="node-body">
-<img src="../../../nodes/images/attribute-visualiser/node.png" class="node-thumb" alt="Attribute Visualiser preview">
+<img src="../../../../nodes/images/attribute-visualiser/node.png" class="node-icon" alt="Attribute Visualiser icon">
+<img src="../../../../nodes/images/attribute-visualiser/node.png" class="node-thumb" alt="Attribute Visualiser preview">
 
 *Description to be written.*
 

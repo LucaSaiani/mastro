@@ -1,9 +1,8 @@
-<img src="../../nodes/images/point-siblings/node.png" class="node-icon" alt="Point Siblings icon">
-
 # Point Siblings
 
 <div class="node-body">
-<img src="../../nodes/images/point-siblings/node.png" class="node-thumb" alt="Point Siblings preview">
+<img src="../../../nodes/images/point-siblings/node.png" class="node-icon" alt="Point Siblings icon">
+<img src="../../../nodes/images/point-siblings/node.png" class="node-thumb" alt="Point Siblings preview">
 
 *Description to be written.*
 

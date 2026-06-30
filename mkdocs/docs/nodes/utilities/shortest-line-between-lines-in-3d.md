@@ -1,9 +1,8 @@
-<img src="../../nodes/images/shortest-line-between-lines-in-3d/node.png" class="node-icon" alt="Shortest Line Between Lines in 3D icon">
-
 # Shortest Line Between Lines in 3D
 
 <div class="node-body">
-<img src="../../nodes/images/shortest-line-between-lines-in-3d/node.png" class="node-thumb" alt="Shortest Line Between Lines in 3D preview">
+<img src="../../../nodes/images/shortest-line-between-lines-in-3d/node.png" class="node-icon" alt="Shortest Line Between Lines in 3D icon">
+<img src="../../../nodes/images/shortest-line-between-lines-in-3d/node.png" class="node-thumb" alt="Shortest Line Between Lines in 3D preview">
 
 *Description to be written.*
 

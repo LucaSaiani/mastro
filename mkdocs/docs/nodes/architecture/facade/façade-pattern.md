@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/façade-pattern/node.png" class="node-icon" alt="Façade Pattern icon">
-
 # Façade Pattern
 
 <div class="node-body">
-<img src="../../../nodes/images/façade-pattern/node.png" class="node-thumb" alt="Façade Pattern preview">
+<img src="../../../../nodes/images/façade-pattern/node.png" class="node-icon" alt="Façade Pattern icon">
+<img src="../../../../nodes/images/façade-pattern/node.png" class="node-thumb" alt="Façade Pattern preview">
 
 *Description to be written.*
 

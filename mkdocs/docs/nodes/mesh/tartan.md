@@ -1,9 +1,8 @@
-<img src="../../nodes/images/tartan/node.png" class="node-icon" alt="Tartan icon">
-
 # Tartan
 
 <div class="node-body">
-<img src="../../nodes/images/tartan/node.png" class="node-thumb" alt="Tartan preview">
+<img src="../../../nodes/images/tartan/node.png" class="node-icon" alt="Tartan icon">
+<img src="../../../nodes/images/tartan/node.png" class="node-thumb" alt="Tartan preview">
 
 *Description to be written.*
 

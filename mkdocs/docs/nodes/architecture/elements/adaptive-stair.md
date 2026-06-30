@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/adaptive-stair/node.png" class="node-icon" alt="Adaptive Stair icon">
-
 # Adaptive Stair
 
 <div class="node-body">
-<img src="../../../nodes/images/adaptive-stair/node.png" class="node-thumb" alt="Adaptive Stair preview">
+<img src="../../../../nodes/images/adaptive-stair/node.png" class="node-icon" alt="Adaptive Stair icon">
+<img src="../../../../nodes/images/adaptive-stair/node.png" class="node-thumb" alt="Adaptive Stair preview">
 
 *Description to be written.*
 

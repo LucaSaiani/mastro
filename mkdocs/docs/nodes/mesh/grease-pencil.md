@@ -1,9 +1,8 @@
-<img src="../../nodes/images/grease-pencil/node.png" class="node-icon" alt="Grease Pencil icon">
-
 # Grease Pencil
 
 <div class="node-body">
-<img src="../../nodes/images/grease-pencil/node.png" class="node-thumb" alt="Grease Pencil preview">
+<img src="../../../nodes/images/grease-pencil/node.png" class="node-icon" alt="Grease Pencil icon">
+<img src="../../../nodes/images/grease-pencil/node.png" class="node-thumb" alt="Grease Pencil preview">
 
 *Description to be written.*
 

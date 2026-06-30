@@ -1,9 +1,8 @@
-<img src="../../nodes/images/highestlowest-boolean/node.png" class="node-icon" alt="Highest/Lowest Boolean icon">
-
 # Highest/Lowest Boolean
 
 <div class="node-body">
-<img src="../../nodes/images/highestlowest-boolean/node.png" class="node-thumb" alt="Highest/Lowest Boolean preview">
+<img src="../../../nodes/images/highestlowest-boolean/node.png" class="node-icon" alt="Highest/Lowest Boolean icon">
+<img src="../../../nodes/images/highestlowest-boolean/node.png" class="node-thumb" alt="Highest/Lowest Boolean preview">
 
 *Description to be written.*
 

@@ -1,9 +1,8 @@
-<img src="../../nodes/images/uv-mapping/node.png" class="node-icon" alt="UV Mapping icon">
-
 # UV Mapping
 
 <div class="node-body">
-<img src="../../nodes/images/uv-mapping/node.png" class="node-thumb" alt="UV Mapping preview">
+<img src="../../../nodes/images/uv-mapping/node.png" class="node-icon" alt="UV Mapping icon">
+<img src="../../../nodes/images/uv-mapping/node.png" class="node-thumb" alt="UV Mapping preview">
 
 *Description to be written.*
 

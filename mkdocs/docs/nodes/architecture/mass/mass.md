@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/mass/node.png" class="node-icon" alt="Mass icon">
-
 # Mass
 
 <div class="node-body">
-<img src="../../../nodes/images/mass/node.png" class="node-thumb" alt="Mass preview">
+<img src="../../../../nodes/images/mass/node.png" class="node-icon" alt="Mass icon">
+<img src="../../../../nodes/images/mass/node.png" class="node-thumb" alt="Mass preview">
 
 *Description to be written.*
 

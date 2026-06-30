@@ -1,9 +1,8 @@
-<img src="../../nodes/images/solidify/node.png" class="node-icon" alt="Solidify icon">
-
 # Solidify
 
 <div class="node-body">
-<img src="../../nodes/images/solidify/node.png" class="node-thumb" alt="Solidify preview">
+<img src="../../../nodes/images/solidify/node.png" class="node-icon" alt="Solidify icon">
+<img src="../../../nodes/images/solidify/node.png" class="node-thumb" alt="Solidify preview">
 
 *Description to be written.*
 

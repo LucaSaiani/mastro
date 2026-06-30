@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/elements---pergola/node.png" class="node-icon" alt="Elements - Pergola icon">
-
 # Elements - Pergola
 
 <div class="node-body">
-<img src="../../../nodes/images/elements---pergola/node.png" class="node-thumb" alt="Elements - Pergola preview">
+<img src="../../../../nodes/images/elements---pergola/node.png" class="node-icon" alt="Elements - Pergola icon">
+<img src="../../../../nodes/images/elements---pergola/node.png" class="node-thumb" alt="Elements - Pergola preview">
 
 *Description to be written.*
 

@@ -1,9 +1,8 @@
-<img src="../../nodes/images/split-to-instances/node.png" class="node-icon" alt="Split to Instances icon">
-
 # Split to Instances
 
 <div class="node-body">
-<img src="../../nodes/images/split-to-instances/node.png" class="node-thumb" alt="Split to Instances preview">
+<img src="../../../nodes/images/split-to-instances/node.png" class="node-icon" alt="Split to Instances icon">
+<img src="../../../nodes/images/split-to-instances/node.png" class="node-thumb" alt="Split to Instances preview">
 
 *Description to be written.*
 

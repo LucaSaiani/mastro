@@ -1,9 +1,8 @@
-<img src="../../nodes/images/random-value/node.png" class="node-icon" alt="Random Value icon">
-
 # Random Value
 
 <div class="node-body">
-<img src="../../nodes/images/random-value/node.png" class="node-thumb" alt="Random Value preview">
+<img src="../../../nodes/images/random-value/node.png" class="node-icon" alt="Random Value icon">
+<img src="../../../nodes/images/random-value/node.png" class="node-thumb" alt="Random Value preview">
 
 *Description to be written.*
 

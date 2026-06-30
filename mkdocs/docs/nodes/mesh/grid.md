@@ -1,9 +1,8 @@
-<img src="../../nodes/images/grid/node.png" class="node-icon" alt="Grid icon">
-
 # Grid
 
 <div class="node-body">
-<img src="../../nodes/images/grid/node.png" class="node-thumb" alt="Grid preview">
+<img src="../../../nodes/images/grid/node.png" class="node-icon" alt="Grid icon">
+<img src="../../../nodes/images/grid/node.png" class="node-thumb" alt="Grid preview">
 
 *Description to be written.*
 

@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/facade-line-based/node.png" class="node-icon" alt="Facade Line Based icon">
-
 # Facade Line Based
 
 <div class="node-body">
-<img src="../../../nodes/images/facade-line-based/node.png" class="node-thumb" alt="Facade Line Based preview">
+<img src="../../../../nodes/images/facade-line-based/node.png" class="node-icon" alt="Facade Line Based icon">
+<img src="../../../../nodes/images/facade-line-based/node.png" class="node-thumb" alt="Facade Line Based preview">
 
 *Description to be written.*
 

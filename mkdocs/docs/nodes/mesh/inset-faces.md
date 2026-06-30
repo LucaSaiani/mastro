@@ -1,9 +1,8 @@
-<img src="../../nodes/images/inset-faces/node.png" class="node-icon" alt="Inset Faces icon">
-
 # Inset Faces
 
 <div class="node-body">
-<img src="../../nodes/images/inset-faces/node.png" class="node-thumb" alt="Inset Faces preview">
+<img src="../../../nodes/images/inset-faces/node.png" class="node-icon" alt="Inset Faces icon">
+<img src="../../../nodes/images/inset-faces/node.png" class="node-thumb" alt="Inset Faces preview">
 
 *Description to be written.*
 

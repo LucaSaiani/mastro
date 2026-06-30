@@ -1,9 +1,8 @@
-<img src="../../nodes/images/ellipse/node.png" class="node-icon" alt="Ellipse icon">
-
 # Ellipse
 
 <div class="node-body">
-<img src="../../nodes/images/ellipse/node.png" class="node-thumb" alt="Ellipse preview">
+<img src="../../../nodes/images/ellipse/node.png" class="node-icon" alt="Ellipse icon">
+<img src="../../../nodes/images/ellipse/node.png" class="node-thumb" alt="Ellipse preview">
 
 *Description to be written.*
 

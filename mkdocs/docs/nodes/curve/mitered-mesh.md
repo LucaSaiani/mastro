@@ -1,9 +1,8 @@
-<img src="../../nodes/images/mitered-mesh/node.png" class="node-icon" alt="Mitered Mesh icon">
-
 # Mitered Mesh
 
 <div class="node-body">
-<img src="../../nodes/images/mitered-mesh/node.png" class="node-thumb" alt="Mitered Mesh preview">
+<img src="../../../nodes/images/mitered-mesh/node.png" class="node-icon" alt="Mitered Mesh icon">
+<img src="../../../nodes/images/mitered-mesh/node.png" class="node-thumb" alt="Mitered Mesh preview">
 
 *Description to be written.*
 

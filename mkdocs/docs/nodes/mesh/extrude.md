@@ -1,9 +1,8 @@
-<img src="../../nodes/images/extrude/node.png" class="node-icon" alt="Extrude icon">
-
 # Extrude
 
 <div class="node-body">
-<img src="../../nodes/images/extrude/node.png" class="node-thumb" alt="Extrude preview">
+<img src="../../../nodes/images/extrude/node.png" class="node-icon" alt="Extrude icon">
+<img src="../../../nodes/images/extrude/node.png" class="node-thumb" alt="Extrude preview">
 
 *Description to be written.*
 

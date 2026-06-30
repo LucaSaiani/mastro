@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/steel-profile/node.png" class="node-icon" alt="Steel Profile icon">
-
 # Steel Profile
 
 <div class="node-body">
-<img src="../../../nodes/images/steel-profile/node.png" class="node-thumb" alt="Steel Profile preview">
+<img src="../../../../nodes/images/steel-profile/node.png" class="node-icon" alt="Steel Profile icon">
+<img src="../../../../nodes/images/steel-profile/node.png" class="node-thumb" alt="Steel Profile preview">
 
 *Description to be written.*
 

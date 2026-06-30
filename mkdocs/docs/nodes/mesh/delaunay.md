@@ -1,9 +1,8 @@
-<img src="../../nodes/images/delaunay/node.png" class="node-icon" alt="Delaunay icon">
-
 # Delaunay
 
 <div class="node-body">
-<img src="../../nodes/images/delaunay/node.png" class="node-thumb" alt="Delaunay preview">
+<img src="../../../nodes/images/delaunay/node.png" class="node-icon" alt="Delaunay icon">
+<img src="../../../nodes/images/delaunay/node.png" class="node-thumb" alt="Delaunay preview">
 
 *Description to be written.*
 

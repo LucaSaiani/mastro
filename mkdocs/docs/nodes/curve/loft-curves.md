@@ -1,9 +1,8 @@
-<img src="../../nodes/images/loft-curves/node.png" class="node-icon" alt="Loft Curves icon">
-
 # Loft Curves
 
 <div class="node-body">
-<img src="../../nodes/images/loft-curves/node.png" class="node-thumb" alt="Loft Curves preview">
+<img src="../../../nodes/images/loft-curves/node.png" class="node-icon" alt="Loft Curves icon">
+<img src="../../../nodes/images/loft-curves/node.png" class="node-thumb" alt="Loft Curves preview">
 
 *Description to be written.*
 

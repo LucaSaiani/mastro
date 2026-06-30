@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/building-shadow/node.png" class="node-icon" alt="Building Shadow icon">
-
 # Building Shadow
 
 <div class="node-body">
-<img src="../../../nodes/images/building-shadow/node.png" class="node-thumb" alt="Building Shadow preview">
+<img src="../../../../nodes/images/building-shadow/node.png" class="node-icon" alt="Building Shadow icon">
+<img src="../../../../nodes/images/building-shadow/node.png" class="node-thumb" alt="Building Shadow preview">
 
 *Description to be written.*
 

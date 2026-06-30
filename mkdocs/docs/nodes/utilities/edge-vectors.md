@@ -1,9 +1,8 @@
-<img src="../../nodes/images/edge-vectors/node.png" class="node-icon" alt="Edge Vectors icon">
-
 # Edge Vectors
 
 <div class="node-body">
-<img src="../../nodes/images/edge-vectors/node.png" class="node-thumb" alt="Edge Vectors preview">
+<img src="../../../nodes/images/edge-vectors/node.png" class="node-icon" alt="Edge Vectors icon">
+<img src="../../../nodes/images/edge-vectors/node.png" class="node-thumb" alt="Edge Vectors preview">
 
 *Description to be written.*
 

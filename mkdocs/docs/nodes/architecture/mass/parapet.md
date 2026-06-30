@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/parapet/node.png" class="node-icon" alt="Parapet icon">
-
 # Parapet
 
 <div class="node-body">
-<img src="../../../nodes/images/parapet/node.png" class="node-thumb" alt="Parapet preview">
+<img src="../../../../nodes/images/parapet/node.png" class="node-icon" alt="Parapet icon">
+<img src="../../../../nodes/images/parapet/node.png" class="node-thumb" alt="Parapet preview">
 
 *Description to be written.*
 

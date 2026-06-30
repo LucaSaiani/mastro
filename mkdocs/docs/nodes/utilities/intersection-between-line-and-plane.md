@@ -1,9 +1,8 @@
-<img src="../../nodes/images/intersection-between-line-and-plane/node.png" class="node-icon" alt="Intersection Between Line and Plane icon">
-
 # Intersection Between Line and Plane
 
 <div class="node-body">
-<img src="../../nodes/images/intersection-between-line-and-plane/node.png" class="node-thumb" alt="Intersection Between Line and Plane preview">
+<img src="../../../nodes/images/intersection-between-line-and-plane/node.png" class="node-icon" alt="Intersection Between Line and Plane icon">
+<img src="../../../nodes/images/intersection-between-line-and-plane/node.png" class="node-thumb" alt="Intersection Between Line and Plane preview">
 
 *Description to be written.*
 

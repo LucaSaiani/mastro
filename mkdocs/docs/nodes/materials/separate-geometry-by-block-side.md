@@ -1,9 +1,8 @@
-<img src="../../nodes/images/separate-geometry-by-block-side/node.png" class="node-icon" alt="Separate Geometry by Block Side icon">
-
 # Separate Geometry by Block Side
 
 <div class="node-body">
-<img src="../../nodes/images/separate-geometry-by-block-side/node.png" class="node-thumb" alt="Separate Geometry by Block Side preview">
+<img src="../../../nodes/images/separate-geometry-by-block-side/node.png" class="node-icon" alt="Separate Geometry by Block Side icon">
+<img src="../../../nodes/images/separate-geometry-by-block-side/node.png" class="node-thumb" alt="Separate Geometry by Block Side preview">
 
 *Description to be written.*
 

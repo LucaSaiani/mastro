@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/brick-dimension/node.png" class="node-icon" alt="Brick Dimension icon">
-
 # Brick Dimension
 
 <div class="node-body">
-<img src="../../../nodes/images/brick-dimension/node.png" class="node-thumb" alt="Brick Dimension preview">
+<img src="../../../../nodes/images/brick-dimension/node.png" class="node-icon" alt="Brick Dimension icon">
+<img src="../../../../nodes/images/brick-dimension/node.png" class="node-thumb" alt="Brick Dimension preview">
 
 *Description to be written.*
 

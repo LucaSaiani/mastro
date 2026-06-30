@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/ruler/node.png" class="node-icon" alt="Ruler icon">
-
 # Ruler
 
 <div class="node-body">
-<img src="../../../nodes/images/ruler/node.png" class="node-thumb" alt="Ruler preview">
+<img src="../../../../nodes/images/ruler/node.png" class="node-icon" alt="Ruler icon">
+<img src="../../../../nodes/images/ruler/node.png" class="node-thumb" alt="Ruler preview">
 
 *Description to be written.*
 

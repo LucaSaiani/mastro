@@ -1,9 +1,8 @@
-<img src="../../../nodes/images/window/node.png" class="node-icon" alt="Window icon">
-
 # Window
 
 <div class="node-body">
-<img src="../../../nodes/images/window/node.png" class="node-thumb" alt="Window preview">
+<img src="../../../../nodes/images/window/node.png" class="node-icon" alt="Window icon">
+<img src="../../../../nodes/images/window/node.png" class="node-thumb" alt="Window preview">
 
 *Description to be written.*
 

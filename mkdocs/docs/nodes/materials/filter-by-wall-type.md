@@ -1,9 +1,8 @@
-<img src="../../nodes/images/filter-by-wall-type/node.png" class="node-icon" alt="Filter by Wall Type icon">
-
 # Filter by Wall Type
 
 <div class="node-body">
-<img src="../../nodes/images/filter-by-wall-type/node.png" class="node-thumb" alt="Filter by Wall Type preview">
+<img src="../../../nodes/images/filter-by-wall-type/node.png" class="node-icon" alt="Filter by Wall Type icon">
+<img src="../../../nodes/images/filter-by-wall-type/node.png" class="node-thumb" alt="Filter by Wall Type preview">
 
 *Description to be written.*
 
