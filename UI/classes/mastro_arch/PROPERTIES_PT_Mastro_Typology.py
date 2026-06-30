@@ -57,8 +57,9 @@ class PROPERTIES_PT_Mastro_Typology(Panel):
         # use editor        
         row = layout.row(align=True)
         subIndex = context.scene.mastro_typology_uses_name_list_index
-        subName = context.scene.mastro_typology_uses_name_list[subIndex].name
-        index = context.scene.mastro_use_name_list.find(subName)
+        subId = context.scene.mastro_typology_uses_name_list[subIndex].id
+        use_name_list = context.scene.mastro_use_name_list
+        index = next((i for i, use in enumerate(use_name_list) if use.id == subId), 0)
         col = layout.column(align=True)
         
         row = col.row(align=True)

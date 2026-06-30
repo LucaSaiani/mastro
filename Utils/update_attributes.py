@@ -59,12 +59,13 @@ def update_typology_uses_list(context):
 # with the name selected in the drop down menu in the Typology Uses UI
 def update_typology_uses_name_label(self, context):
     scene = context.scene
-    name = scene.mastro_typology_uses_name
+    # the enum identifier is "id_<id>" (see get_names_from_list), not the use's name
+    selected_id = int(scene.mastro_typology_uses_name.removeprefix("id_"))
     # index is -1 when the list is empty (e.g. a just-created typology); skip update
     if scene.mastro_typology_uses_name_list_index > -1:
-        scene.mastro_typology_uses_name_list[scene.mastro_typology_uses_name_list_index].name = name
         for n in scene.mastro_use_name_list:
-            if n.name == name:
+            if n.id == selected_id:
+                scene.mastro_typology_uses_name_list[scene.mastro_typology_uses_name_list_index].name = n.name
                 scene.mastro_typology_uses_name_list[scene.mastro_typology_uses_name_list_index].id = n.id
                 update_typology_uses_list(context)
                 return None
