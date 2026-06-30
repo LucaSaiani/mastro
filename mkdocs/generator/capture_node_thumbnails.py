@@ -335,6 +335,14 @@ def update_node_categories(target_names):
         print('Fill in their "category" (and "subcategory" if needed) by hand.')
 
 
+def expand_all_panels(node):
+    """Open every collapsible panel (e.g. "Text", "Dimension Line") on the
+    node so the thumbnail shows every socket, not just the ones outside
+    panels or in whichever panels happened to default open/closed."""
+    for panel_state in node.panel_states:
+        panel_state.is_collapsed = False
+
+
 def main():
     profile = TREE_TYPE_PROFILES[TREE_TYPE]
 
@@ -372,6 +380,7 @@ def main():
         node.location = (0, 0)
         node.select = True
         tree.nodes.active = node
+        expand_all_panels(node)
 
         bpy.context.view_layer.update()
         force_redraw(window, area, region)
