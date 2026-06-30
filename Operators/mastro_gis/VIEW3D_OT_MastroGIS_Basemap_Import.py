@@ -312,7 +312,6 @@ class BaseMap(GeoScene):
 		except IndexError:
 			self.bkg = bpy.data.objects.new(self.name, None) #None will create an empty
 			self.bkg.empty_display_type = 'IMAGE'
-			self.bkg.empty_image_depth = 'BACK'
 			self.bkg.data = self.img
 			self.scn.collection.objects.link(self.bkg)
 		else:
