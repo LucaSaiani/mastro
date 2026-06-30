@@ -5,6 +5,7 @@ from ...Utils.mastro_arch.read_write_bmesh_storey_attribute import read_bmesh_st
 from ...Utils.get_names_from_list import get_names_from_list
 from .mastro_arch.block_extrusion import _handle_block_extrusion
 from .mastro_street.street_extrusion import _handle_street_extrusion
+from .mastro_street.street_sectors import _handle_street_sectors
 
 
 # Rebuild the VIEW3D use/storey UIList to reflect the active face or edge's attributes.
@@ -178,3 +179,4 @@ def update_view3D_panels(scene):
         bm.edges.ensure_lookup_table()
         bm.verts.ensure_lookup_table()
         _handle_street_extrusion(scene, obj, bm)
+        _handle_street_sectors(scene, obj, bm)

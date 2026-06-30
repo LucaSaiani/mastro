@@ -35,22 +35,28 @@ class VIEW3D_PT_Mastro_Street(Panel):
                     
             elif mode == "EDIT":
                 scene = context.scene
-                
-                layout = self.layout
-                layout.use_property_split = True    
-                layout.use_property_decorate = False  # No animation.
-                
-                if tuple(bpy.context.scene.tool_settings.mesh_select_mode)[1] == True: #we are selecting edges
-                    layout.enabled = True
-                else:
-                    layout.enabled = False
-                
-                row = layout.row(align=True)
 
-                row.prop(context.scene, "mastro_street_names", text="Street Type")
-                # row.prop(context.scene, "mastro_street_names", icon="NODE_TEXTURE", icon_only=True, text="Street Type")
-                # if len(scene.mastro_street_name_list) >0:
-                #     row.label(text = scene.mastro_street_name_current[0].name)
-                #     # streetId = scene.mastro_street_name_current[0].id
-                # else:
-                #     row.label(text = "")
+                layout = self.layout
+                layout.use_property_split = True
+                layout.use_property_decorate = False  # No animation.
+
+                select_mode = tuple(bpy.context.scene.tool_settings.mesh_select_mode)
+
+                if select_mode[1] == True: #we are selecting edges
+                    row = layout.row(align=True)
+                    row.prop(context.scene, "mastro_street_names", text="Street Type")
+                    # row.prop(context.scene, "mastro_street_names", icon="NODE_TEXTURE", icon_only=True, text="Street Type")
+                    # if len(scene.mastro_street_name_list) >0:
+                    #     row.label(text = scene.mastro_street_name_current[0].name)
+                    #     # streetId = scene.mastro_street_name_current[0].id
+                    # else:
+                    #     row.label(text = "")
+
+                if select_mode[0] == True: #we are selecting vertices
+                    branch_count = scene.mastro_street_active_branch_count
+                    if branch_count > 0:
+                        col = layout.column()
+                        col.use_property_split = True
+                        col.use_property_decorate = False
+                        col.prop(scene, "mastro_street_active_branch", text="Edge Id")
+                        col.row().prop(scene, "mastro_street_active_branch_type", text="Junction", expand=True)

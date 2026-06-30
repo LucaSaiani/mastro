@@ -12,6 +12,7 @@ from ...Utils.mastro_preferences.get_preferences  import get_prefs
 from .mastro_arch.overlay_block import show_block_overlay
 from .mastro_arch.overlay_wall import show_wall_overlay
 from .mastro_street.overlay_street import show_street_overlay
+from .mastro_street.overlay_street_sectors import show_street_sector_overlay
 
 
 class VIEW_3D_OT_show_mastro_attributes(Operator):
@@ -127,6 +128,7 @@ def draw_selection_overlay(context):
                 show_block_overlay(obj)
             elif "MaStro street" in obj.data:
                 show_street_overlay(obj)
+                show_street_sector_overlay(obj)
 
 def draw_main_show_attributes_2D(context):
     """Draw text labels (typology, storeys, normals) at each edge/face centre in pixel-space."""
