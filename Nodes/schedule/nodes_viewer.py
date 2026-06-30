@@ -382,40 +382,82 @@ class MaStroScheduleViewerNode(MaStroScheduleTreeNode, Node):
             cell.value = _cell_text(inputs[0])
             return []
 
-        # Column rows have a non-id data key that's the upstream node's
-        # own node.name, not a readable name - relabeled here using that
-        # node's `column_label` (mirrors Evaluate Attribute/Math's
-        # `column_label` property - not `label`, which collides with
-        # bpy.types.Node's own native `label` attribute), the same way
-        # Data's columns are already named by their own dict keys.
+        # Column rows have one or more non-id data keys that are each
+        # some upstream node's own node.name, not a readable name -
+        # relabeled here using that SAME node's own `column_label`
+        # (mirrors Evaluate Attribute/Math's `column_label` property -
+        # not `label`, which collides with bpy.types.Node's own native
+        # `label` attribute), the same way Data's columns are already
+        # named by their own dict keys.
         rows = inputs[0] or []
         if from_node is not None and from_socket.bl_idname == 'MaStroScheduleColumnSocketType':
-            # No "or from_node.name" fallback - the user's explicit
-            # call: an intentionally empty label (e.g. Rename Header
-            # with nothing typed into String) should show as empty,
-            # never fall back to showing the node's own internal name
-            # ("Rename Header", "Rename Header.001", ...) instead.
-            label = getattr(from_node, "column_label", "")
-            relabeled = []
+            data_keys = set()
             for row in rows:
-                new_row = {}
-                for key, value in row.items():
-                    # The data key is whichever key doesn't start with
-                    # "_" (same elimination rule as Math/Header's
-                    # _data_key) - NOT from_node.name: a pass-through
-                    # node like Header (which renames a Column's label
-                    # without touching its rows/data key at all) means
-                    # from_node is Header, but the actual key in the row
-                    # is still whatever upstream node originally
-                    # produced the Column (e.g. Evaluate Attribute) -
-                    # confirmed live: the Viewer kept showing that
-                    # original node's name as the header even when a
-                    # Header node further downstream had renamed the
-                    # Column, because this used to compare against
-                    # from_node.name instead.
-                    new_row[label if not key.startswith("_") else key] = value
-                relabeled.append(new_row)
-            rows = relabeled
+                for key in row.keys():
+                    if not key.startswith("_"):
+                        data_keys.add(key)
+
+            if len(data_keys) <= 1:
+                # Exactly one data key (the overwhelmingly common case)
+                # - same single-column_label behavior as before this
+                # was extended for multiple keys: relabel using
+                # from_node's own column_label, NOT from_node.name - a
+                # pass-through node like Header (which renames a
+                # Column's label without touching its rows/data key at
+                # all) means from_node is Header, but the actual key in
+                # the row is still whatever upstream node originally
+                # produced the Column (e.g. Evaluate Attribute) -
+                # confirmed live: the Viewer kept showing that original
+                # node's name as the header even when a Header node
+                # further downstream had renamed the Column, because
+                # this used to compare against from_node.name instead.
+                # No "or from_node.name" fallback either - the user's
+                # explicit call: an intentionally empty label (e.g.
+                # Rename Header with nothing typed into String) should
+                # show as empty, never fall back to showing the node's
+                # own internal name ("Rename Header", "Rename
+                # Header.001", ...) instead.
+                label = getattr(from_node, "column_label", "")
+                relabeled = []
+                for row in rows:
+                    new_row = {}
+                    for key, value in row.items():
+                        new_row[label if not key.startswith("_") else key] = value
+                    relabeled.append(new_row)
+                rows = relabeled
+            else:
+                # More than one data key at once (e.g. Merge List
+                # combining several Evaluate Attribute branches - see
+                # nodes_merge_list.py) - confirmed live as a real bug
+                # with the single-label version above applied
+                # unconditionally: EVERY data key got relabeled to the
+                # SAME from_node.column_label (Item from List/whatever
+                # else sits downstream of the merge has only ever had
+                # one column_label of its own), so two distinct
+                # attributes (Area, Use) both became e.g. "area" and
+                # silently overwrote each other in the same dict key -
+                # confirmed live, the Viewer showed only one column
+                # with the WRONG node's own values bleeding into it.
+                # Each data key IS itself some node's own node.name
+                # (see nodes_evaluate.py's own evaluate(), "key =
+                # self.name") - looked up directly in this tree by that
+                # name and relabeled using THAT node's own column_label
+                # instead, so each of several merged attributes keeps
+                # its own distinct, correct label rather than colliding
+                # on one borrowed from an unrelated downstream node.
+                tree = self.id_data
+                relabeled = []
+                for row in rows:
+                    new_row = {}
+                    for key, value in row.items():
+                        if key.startswith("_"):
+                            new_row[key] = value
+                            continue
+                        source_node = tree.nodes.get(key)
+                        key_label = getattr(source_node, "column_label", "") if source_node else key
+                        new_row[key_label or key] = value
+                    relabeled.append(new_row)
+                rows = relabeled
 
         # _Object and the element-index column (_Face/_Edge/_Vertex - a
         # row only ever has one of these, never more than one, since

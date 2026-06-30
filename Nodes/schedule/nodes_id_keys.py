@@ -34,13 +34,25 @@ def _id_keys_for_socket(node, socket):
     own linked_table, which only ever reads link[0]): a multi-input
     socket (e.g. Merge List's own "List", nodes_merge_list.py) only had
     its FIRST connected List's own keys considered, silently missing
-    whatever the others carried."""
+    whatever the others carried.
+
+    Handles BOTH a Column socket (rows are plain {key: value, ...}
+    dicts, id keys read directly off each one) and a List socket (rows
+    are {"key": ..., "rows": [...]} groups - see Group Into List/Merge
+    List's own docstrings for that shape - the real id-keyed rows are
+    nested one level down, inside each group's own "rows") - confirmed
+    live as a real, separate bug otherwise: Merge List's own "List"
+    input was always read as if it carried plain Column rows, so
+    _id_keys found nothing (a List group's own top-level keys are just
+    "key"/"rows", neither starting with "_") even when the List's own
+    inner rows had real id keys to offer."""
     from .tree import resolve_through_reroutes
     from .execution import get_node_table
 
     keys = []
     if not socket.is_linked:
         return keys
+    is_list_socket = socket.bl_idname == 'MaStroScheduleListSocketType'
     for link in socket.links:
         if link.is_muted:
             continue
@@ -54,7 +66,11 @@ def _id_keys_for_socket(node, socket):
             output_index = list(from_node.outputs).index(from_socket)
         except ValueError:
             continue
-        rows = table[output_index] or []
+        value = table[output_index] or []
+        if is_list_socket:
+            rows = [row for group in value for row in group.get("rows", [])]
+        else:
+            rows = value
         for row in rows:
             for key in _id_keys(row):
                 if key not in keys:
@@ -63,13 +79,13 @@ def _id_keys_for_socket(node, socket):
 
 
 def available_id_keys(get_id_keys_node):
-    """The id keys available to pick from this Get Id Keys node's own
+    """The id keys available to pick from this Id Keys node's own
     output, found by walking FORWARD to whatever real node(s) consume
     it (downstream_main_inputs, tree.py) and reading each one's own
     main data input - NOT a Column this node carries itself (removed -
     see this module's own docstring for why a second, independently-
     wired input was a real, silent mismatch risk). If more than one
-    consumer is wired (the same Get Id Keys feeding e.g. both Group
+    consumer is wired (the same Id Keys feeding e.g. both Group
     Into List AND Merge List's own Match Key), only keys common to
     EVERY consumer's own data are offered - a key that isn't actually
     present everywhere this picker's result will be used isn't a safe
@@ -139,7 +155,7 @@ class MASTRO_OT_Schedule_Pick_Id_Key(Operator):
         return {'FINISHED'}
 
 
-# Mirrors Get Attribute Names (nodes_attribute.py) exactly, one level
+# Mirrors Named Attribute (nodes_attribute.py) exactly, one level
 # down: that node lists attribute NAMES available on the objects feeding
 # Data (read dynamically, not hardcoded), to be picked and fed to
 # Evaluate Attribute; this one lists ID KEYS available on the rows of a
@@ -168,7 +184,7 @@ class MaStroScheduleGetIdKeysNode(MaStroScheduleTreeNode, Node):
     Aggregate/Flatten Key/Group Into List/Merge List/Accumulate's own
     Id Key input"""
     bl_idname = 'MaStroScheduleGetIdKeys'
-    bl_label = 'Get Id Keys'
+    bl_label = 'Id Keys'
 
     # key_value is a plain StringProperty written by
     # MASTRO_OT_Schedule_Pick_Id_Key's search popup, not a dynamic

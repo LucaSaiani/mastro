@@ -67,11 +67,11 @@ def _object_attribute_names(obj, field):
 
 def available_attribute_names(get_attribute_names_node):
     """List the logical attribute names common to EVERY object feeding
-    EVERY real consumer of this Get Attribute Names node's own output
+    EVERY real consumer of this Named Attribute node's own output
     (typically Evaluate Attribute) - found by walking FORWARD
     (downstream_main_inputs, tree.py) to each consumer and reading
     THEIR OWN Data input, not a Data input this node carries itself
-    (removed - same reasoning as Get Id Keys' own redesign,
+    (removed - same reasoning as Id Keys' own redesign,
     nodes_id_keys.py: a second, independently-wired Data input here
     was a real, silent mismatch risk - nothing stopped wiring it to a
     DIFFERENT upstream Data than the one actually feeding the real
@@ -87,7 +87,7 @@ def available_attribute_names(get_attribute_names_node):
     as a safety net for cases that slip through this anyway, e.g. an
     attribute removed after this list was built).
 
-    Same KNOWN LIMITATION as Get Id Keys' own available_id_keys
+    Same KNOWN LIMITATION as Id Keys' own available_id_keys
     (nodes_id_keys.py): only reads one level upstream of each consumer -
     if a consumer's own Data input is itself fed by another node that
     needs something from this node to produce anything, that chain
@@ -144,7 +144,7 @@ def _pick_attribute_name_items(operator_self, context):
     return [(name, name, "") for name in names] or [("", "(no attributes)", "")]
 
 
-# Search popup for Get Attribute Names' Name field, instead of a permanent
+# Search popup for Named Attribute's Name field, instead of a permanent
 # dynamic EnumProperty on the node itself. The node's `name_value` is a
 # plain StringProperty - this operator computes the choices once when the
 # popup opens and writes the result there, rather than the node owning a
@@ -181,7 +181,7 @@ class MASTRO_OT_Schedule_Pick_Attribute_Name(Operator):
 
 
 def _on_field_changed(node, context):
-    """update= callback for Get Attribute Names' Field - a module-level
+    """update= callback for Named Attribute's Field - a module-level
     function, matching the rest of the codebase's convention for
     update=/items= callbacks (e.g. nodes_viewer.py's
     _on_show_table_changed), not a method on the node class.
@@ -205,7 +205,7 @@ class MaStroScheduleGetAttributeNamesNode(MaStroScheduleTreeNode, Node):
     button to feed it to an Evaluate Attribute node, which reads the
     actual values"""
     bl_idname = 'MaStroScheduleGetAttributeNames'
-    bl_label = 'Get Attribute Names'
+    bl_label = 'Named Attribute'
 
     # field's items are a fixed, static list - this one is safe as a
     # normal EnumProperty (no items callback, nothing reads upstream link
@@ -238,7 +238,7 @@ class MaStroScheduleGetAttributeNamesNode(MaStroScheduleTreeNode, Node):
     def draw_buttons(self, context, layout):
         layout.prop(self, "field")
         # Always shown, no "connect something first" placeholder text -
-        # mirrors Get Id Keys' own draw_buttons (nodes_id_keys.py),
+        # mirrors Id Keys' own draw_buttons (nodes_id_keys.py),
         # which never had one either; the popup itself already says
         # "(no attributes)" when available_attribute_names finds
         # nothing (_pick_attribute_name_items' own fallback below) -

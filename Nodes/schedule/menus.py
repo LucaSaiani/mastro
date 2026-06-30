@@ -165,8 +165,8 @@ class NODE_MT_mastro_schedule_attribute(bpy.types.Menu):
 
     def draw(self, context):
         _add_node(self.layout, "MaStroScheduleEvaluateAttribute", "Evaluate Attribute")
-        _add_node(self.layout, "MaStroScheduleGetAttributeNames", "Get Attribute Names")
-        _add_node(self.layout, "MaStroScheduleGetIdKeys", "Get Id Keys")
+        _add_node(self.layout, "MaStroScheduleGetIdKeys", "Id Keys")
+        _add_node(self.layout, "MaStroScheduleGetAttributeNames", "Named Attribute")
 
 
 class NODE_MT_mastro_schedule_utilities_list(bpy.types.Menu):
