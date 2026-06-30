@@ -800,7 +800,24 @@ def _draw_node_table(node, is_active=True):
     for col_idx, name in enumerate(columns):
         header_color = id_header_color if is_id_column[col_idx] else data_header_color
         corners = cell_corners(0, col_idx)
-        fill_cell(corners, header_color, _header_text(name))
+        header_text = _header_text(name)
+        if is_id_column[col_idx]:
+            # Every real id column (Object/Face/Level/... - the ones
+            # show_id_columns can collapse away, columns[:id_column_count])
+            # gets a key glyph next to its own header, always, not just
+            # the ones that happen to ALSO have a duplicate-as-attribute
+            # column elsewhere in this same table (nodes_aggregate_
+            # column.py's own group-by-position duplication) - the
+            # user's own explicit call: the glyph marks "this is a real
+            # id column" as a category, not "this id also has a
+            # duplicate". Confirmed against the candidate glyph set
+            # live (debug overlay test, /tmp/debug_script.py) - U+1F511
+            # (key emoji) was the one that actually rendered as a key
+            # on this system's own font, not a missing-glyph
+            # placeholder box, unlike the other two candidates tried
+            # (U+26B7, U+1F5DD).
+            header_text = "\U0001F511 " + header_text
+        fill_cell(corners, header_color, header_text)
         all_corners.append(corners)
 
     # visible_rows == 0 means "no cap, show every row" - slicing with

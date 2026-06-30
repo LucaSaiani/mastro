@@ -39,6 +39,7 @@ class MaStroScheduleGroupByColumnNode(MaStroScheduleTreeNode, Node):
     different key)"""
     bl_idname = 'MaStroScheduleGroupByColumn'
     bl_label = 'Group Column by Key'
+    bl_width_default = 180
 
     def init(self, context):
         self.inputs.new('MaStroScheduleColumnSocketType', "Column")

@@ -107,6 +107,7 @@ class NODE_MT_mastro_schedule_primitives_operations_column(bpy.types.Menu):
         _add_node(self.layout, "MaStroScheduleAggregateColumn", "Aggregate")
         _add_node(self.layout, "MaStroScheduleConvertColumnToTable", "Column to Table")
         _add_node(self.layout, "MaStroScheduleGroupByColumn", "Group Column by Key")
+        _add_node(self.layout, "MaStroScheduleMergeColumn", "Merge Column")
 
 
 class NODE_MT_mastro_schedule_primitives_operations_sheet(bpy.types.Menu):

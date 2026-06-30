@@ -85,6 +85,7 @@ from .nodes_groupby_column import (
     MaStroScheduleListLengthNode,
 )
 from .nodes_merge_list import MaStroScheduleMergeListNode
+from .nodes_merge_column import MaStroScheduleMergeColumnNode
 from .nodes_accumulate import MaStroScheduleAccumulateNode
 from .nodes_viewer import (
     MaStroScheduleViewerNode,
@@ -182,6 +183,7 @@ classes = (
     MaStroScheduleItemFromListNode,
     MaStroScheduleListLengthNode,
     MaStroScheduleMergeListNode,
+    MaStroScheduleMergeColumnNode,
     MaStroScheduleAccumulateNode,
     MaStroScheduleForEachNode,
     MaStroScheduleViewerNode,

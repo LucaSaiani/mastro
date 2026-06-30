@@ -159,6 +159,7 @@ class MaStroScheduleAggregateColumnNode(MaStroScheduleTreeNode, Node):
     together, one result row per combination actually present"""
     bl_idname = 'MaStroScheduleAggregateColumn'
     bl_label = 'Aggregate'
+    bl_width_default = 180
 
     operation: EnumProperty(name="Operation", items=OPERATION_ITEMS, default='SUM', update=update_node)
 
@@ -344,12 +345,12 @@ class MaStroScheduleAggregateColumnNode(MaStroScheduleTreeNode, Node):
             if item.kind == 'KEY':
                 value = id_key_by_link.get(item.link_key)
                 if value:
-                    plan.append(('KEY', value))
+                    plan.append(('KEY', value, item.label))
             else:
                 value = attribute_by_link.get(item.link_key)
                 name = value[0].get("Name") if value else None
                 if name:
-                    plan.append(('ATTRIBUTE', _resolve_data_key(tree, rows[0], name)))
+                    plan.append(('ATTRIBUTE', _resolve_data_key(tree, rows[0], name), None))
 
         if not plan:
             return [rows]
@@ -378,15 +379,40 @@ class MaStroScheduleAggregateColumnNode(MaStroScheduleTreeNode, Node):
         groups = {}
         order = []
         for row in rows:
-            group_values = tuple(row.get(value) for _kind, value in plan)
+            group_values = tuple(row.get(value) for _kind, value, _label in plan)
             if group_values not in groups:
                 groups[group_values] = []
                 order.append(group_values)
             groups[group_values].append(row.get(data_key))
 
+        # Each KEY entry in plan keeps writing the REAL id key (e.g.
+        # "_Object") so the Viewer's own id-column handling (always
+        # first, collapsible via show_id_columns - see nodes_viewer.py's
+        # own id_column_count) is completely unaffected. Additionally,
+        # for KEY entries only, the SAME value is also written under
+        # its own readable label (e.g. "Object_id") as an ordinary DATA
+        # key - the user's own explicit design call: an Id Key used as
+        # a group-by dimension is, in that role, conceptually also an
+        # attribute of the result (its own column, freely positionable
+        # alongside Use/Floor in group_by_items' own order) - without
+        # this, an Id Key used for grouping could never actually
+        # appear at the position the user chose in group_by_items, only
+        # ever pinned to the Viewer's own fixed "id columns always
+        # first" slot regardless of where it sits in the list. The two
+        # columns read identically (same label, same value) wherever
+        # they both show up in the same Viewer - nodes_viewer.py's own
+        # key-glyph marking (added alongside this) ended up applying to
+        # every real id column unconditionally rather than singling out
+        # ones with a duplicate, so there's nothing further to look up
+        # here to tell them apart visually; this comment block is the
+        # only place that explains why both columns exist at all.
         result = []
         for group_values in order:
-            group_row = {value: group_values[i] for i, (_kind, value) in enumerate(plan)}
+            group_row = {}
+            for i, (kind, value, label) in enumerate(plan):
+                group_row[value] = group_values[i]
+                if kind == 'KEY':
+                    group_row[label] = group_values[i]
             group_row[data_key] = self._aggregate(groups[group_values])
             result.append(group_row)
         return [result]
