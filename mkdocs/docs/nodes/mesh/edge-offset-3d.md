@@ -1,4 +1,9 @@
+<img src="../../nodes/images/edge-offset-3d/node.png" class="node-icon" alt="Edge Offset 3D icon">
+
 # Edge Offset 3D
+
+<div class="node-body">
+<img src="../../nodes/images/edge-offset-3d/node.png" class="node-thumb" alt="Edge Offset 3D preview">
 
 *Description to be written.*
 
@@ -19,3 +24,6 @@
 <dt><span class="socket-dot sock-bool"></span>Is Inset Face</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-bool"></span>Is Inset Boundary</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

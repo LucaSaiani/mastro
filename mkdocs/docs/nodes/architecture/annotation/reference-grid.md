@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/reference-grid/node.png" class="node-icon" alt="Reference Grid icon">
+
 # Reference Grid
+
+<div class="node-body">
+<img src="../../../nodes/images/reference-grid/node.png" class="node-thumb" alt="Reference Grid preview">
 
 *Description to be written.*
 
@@ -26,3 +31,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Grid</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

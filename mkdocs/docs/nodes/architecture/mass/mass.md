@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/mass/node.png" class="node-icon" alt="Mass icon">
+
 # Mass
+
+<div class="node-body">
+<img src="../../../nodes/images/mass/node.png" class="node-thumb" alt="Mass preview">
 
 *Description to be written.*
 
@@ -39,3 +44,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Geometry</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

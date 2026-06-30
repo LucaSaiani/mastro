@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/arched-opening/node.png" class="node-icon" alt="Arched Opening icon">
+
 # Arched Opening
+
+<div class="node-body">
+<img src="../../../nodes/images/arched-opening/node.png" class="node-thumb" alt="Arched Opening preview">
 
 *Description to be written.*
 
@@ -24,3 +29,6 @@
 <dt><span class="socket-dot sock-geometry"></span>Door</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-float"></span>Fanlight Center Height</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

@@ -1,4 +1,9 @@
+<img src="../../nodes/images/set-edge-id/node.png" class="node-icon" alt="Set Edge ID icon">
+
 # Set Edge ID
+
+<div class="node-body">
+<img src="../../nodes/images/set-edge-id/node.png" class="node-thumb" alt="Set Edge ID preview">
 
 *Description to be written.*
 
@@ -14,3 +19,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Geometry</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

@@ -1,4 +1,9 @@
+<img src="../../nodes/images/custom-corners/node.png" class="node-icon" alt="Custom Corners icon">
+
 # Custom Corners
+
+<div class="node-body">
+<img src="../../nodes/images/custom-corners/node.png" class="node-thumb" alt="Custom Corners preview">
 
 *Description to be written.*
 
@@ -17,3 +22,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Geometry</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

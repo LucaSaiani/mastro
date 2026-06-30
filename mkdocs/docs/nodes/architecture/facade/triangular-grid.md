@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/triangular-grid/node.png" class="node-icon" alt="Triangular Grid icon">
+
 # Triangular Grid
+
+<div class="node-body">
+<img src="../../../nodes/images/triangular-grid/node.png" class="node-thumb" alt="Triangular Grid preview">
 
 *Description to be written.*
 
@@ -23,3 +28,6 @@
 <dt><span class="socket-dot sock-geometry"></span>A</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-geometry"></span>B</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

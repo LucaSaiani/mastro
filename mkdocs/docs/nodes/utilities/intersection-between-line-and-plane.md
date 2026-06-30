@@ -1,4 +1,9 @@
+<img src="../../nodes/images/intersection-between-line-and-plane/node.png" class="node-icon" alt="Intersection Between Line and Plane icon">
+
 # Intersection Between Line and Plane
+
+<div class="node-body">
+<img src="../../nodes/images/intersection-between-line-and-plane/node.png" class="node-thumb" alt="Intersection Between Line and Plane preview">
 
 *Description to be written.*
 
@@ -17,3 +22,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-vector"></span>Position</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

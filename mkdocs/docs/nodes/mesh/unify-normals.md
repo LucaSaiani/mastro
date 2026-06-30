@@ -1,4 +1,9 @@
+<img src="../../nodes/images/unify-normals/node.png" class="node-icon" alt="Unify Normals icon">
+
 # Unify Normals
+
+<div class="node-body">
+<img src="../../nodes/images/unify-normals/node.png" class="node-thumb" alt="Unify Normals preview">
 
 *Description to be written.*
 
@@ -17,3 +22,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Mesh</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

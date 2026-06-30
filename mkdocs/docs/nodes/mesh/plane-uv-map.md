@@ -1,4 +1,9 @@
+<img src="../../nodes/images/plane-uv-map/node.png" class="node-icon" alt="Plane UV Map icon">
+
 # Plane UV Map
+
+<div class="node-body">
+<img src="../../nodes/images/plane-uv-map/node.png" class="node-thumb" alt="Plane UV Map preview">
 
 *Description to be written.*
 
@@ -19,3 +24,6 @@
 <dt><span class="socket-dot sock-geometry"></span>Geometry</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-vector"></span>UV</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

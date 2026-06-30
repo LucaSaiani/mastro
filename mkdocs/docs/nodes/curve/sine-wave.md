@@ -1,4 +1,9 @@
+<img src="../../nodes/images/sine-wave/node.png" class="node-icon" alt="Sine Wave icon">
+
 # Sine Wave
+
+<div class="node-body">
+<img src="../../nodes/images/sine-wave/node.png" class="node-thumb" alt="Sine Wave preview">
 
 *Description to be written.*
 
@@ -19,3 +24,6 @@
 <dt><span class="socket-dot sock-geometry"></span>Curve</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-float"></span>Sin</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

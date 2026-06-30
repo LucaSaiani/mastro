@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/facade-line-based/node.png" class="node-icon" alt="Facade Line Based icon">
+
 # Facade Line Based
+
+<div class="node-body">
+<img src="../../../nodes/images/facade-line-based/node.png" class="node-thumb" alt="Facade Line Based preview">
 
 *Description to be written.*
 
@@ -24,3 +29,6 @@
 <dt><span class="socket-dot sock-float"></span>Floor to Floor Height</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-int"></span>ID</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

@@ -1,4 +1,9 @@
+<img src="../../nodes/images/instance-packer/node.png" class="node-icon" alt="Instance Packer icon">
+
 # Instance Packer
+
+<div class="node-body">
+<img src="../../nodes/images/instance-packer/node.png" class="node-thumb" alt="Instance Packer preview">
 
 *Description to be written.*
 
@@ -30,3 +35,6 @@
 <dt><span class="socket-dot sock-vector"></span>Min</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-vector"></span>Max</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

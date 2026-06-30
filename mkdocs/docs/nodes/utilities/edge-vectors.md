@@ -1,4 +1,9 @@
+<img src="../../nodes/images/edge-vectors/node.png" class="node-icon" alt="Edge Vectors icon">
+
 # Edge Vectors
+
+<div class="node-body">
+<img src="../../nodes/images/edge-vectors/node.png" class="node-thumb" alt="Edge Vectors preview">
 
 *Description to be written.*
 
@@ -31,3 +36,6 @@
 <dt><span class="socket-dot sock-vector"></span>Normal</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-vector"></span>Scaled</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

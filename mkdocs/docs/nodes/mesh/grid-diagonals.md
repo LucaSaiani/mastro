@@ -1,4 +1,9 @@
+<img src="../../nodes/images/grid-diagonals/node.png" class="node-icon" alt="Grid Diagonals icon">
+
 # Grid Diagonals
+
+<div class="node-body">
+<img src="../../nodes/images/grid-diagonals/node.png" class="node-thumb" alt="Grid Diagonals preview">
 
 *Description to be written.*
 
@@ -17,3 +22,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Mesh</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

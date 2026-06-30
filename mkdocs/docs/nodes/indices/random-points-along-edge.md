@@ -1,4 +1,9 @@
+<img src="../../nodes/images/random-points-along-edge/node.png" class="node-icon" alt="Random Points along Edge icon">
+
 # Random Points along Edge
+
+<div class="node-body">
+<img src="../../nodes/images/random-points-along-edge/node.png" class="node-thumb" alt="Random Points along Edge preview">
 
 *Description to be written.*
 
@@ -22,3 +27,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Output</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

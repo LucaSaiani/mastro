@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/vault/node.png" class="node-icon" alt="Vault icon">
+
 # Vault
+
+<div class="node-body">
+<img src="../../../nodes/images/vault/node.png" class="node-thumb" alt="Vault preview">
 
 *Description to be written.*
 
@@ -22,3 +27,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Geometry</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

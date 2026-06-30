@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/façade/node.png" class="node-icon" alt="Façade icon">
+
 # Façade
+
+<div class="node-body">
+<img src="../../../nodes/images/façade/node.png" class="node-thumb" alt="Façade preview">
 
 *Description to be written.*
 
@@ -35,3 +40,6 @@
 <dt><span class="socket-dot sock-geometry"></span>Normals</dt><dd>Show arrows representing the normals</dd>
 <dt><span class="socket-dot sock-geometry"></span>Viewer</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

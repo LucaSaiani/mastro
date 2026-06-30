@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/folding-shutter/node.png" class="node-icon" alt="Folding Shutter icon">
+
 # Folding Shutter
+
+<div class="node-body">
+<img src="../../../nodes/images/folding-shutter/node.png" class="node-thumb" alt="Folding Shutter preview">
 
 *Description to be written.*
 
@@ -20,3 +25,6 @@
 <dt><span class="socket-dot sock-geometry"></span>Geometry</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-float"></span>Thickness</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

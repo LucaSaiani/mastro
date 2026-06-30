@@ -1,4 +1,9 @@
+<img src="../../nodes/images/grid/node.png" class="node-icon" alt="Grid icon">
+
 # Grid
+
+<div class="node-body">
+<img src="../../nodes/images/grid/node.png" class="node-thumb" alt="Grid preview">
 
 *Description to be written.*
 
@@ -21,3 +26,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Geometry</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

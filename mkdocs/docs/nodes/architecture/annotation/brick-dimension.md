@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/brick-dimension/node.png" class="node-icon" alt="Brick Dimension icon">
+
 # Brick Dimension
+
+<div class="node-body">
+<img src="../../../nodes/images/brick-dimension/node.png" class="node-thumb" alt="Brick Dimension preview">
 
 *Description to be written.*
 
@@ -24,3 +29,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-float"></span>Length</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

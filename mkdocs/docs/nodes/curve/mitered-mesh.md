@@ -1,4 +1,9 @@
+<img src="../../nodes/images/mitered-mesh/node.png" class="node-icon" alt="Mitered Mesh icon">
+
 # Mitered Mesh
+
+<div class="node-body">
+<img src="../../nodes/images/mitered-mesh/node.png" class="node-thumb" alt="Mitered Mesh preview">
 
 *Description to be written.*
 
@@ -21,3 +26,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Geometry</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

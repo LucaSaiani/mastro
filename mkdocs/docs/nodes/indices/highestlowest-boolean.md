@@ -1,4 +1,9 @@
+<img src="../../nodes/images/highestlowest-boolean/node.png" class="node-icon" alt="Highest/Lowest Boolean icon">
+
 # Highest/Lowest Boolean
+
+<div class="node-body">
+<img src="../../nodes/images/highestlowest-boolean/node.png" class="node-thumb" alt="Highest/Lowest Boolean preview">
 
 *Description to be written.*
 
@@ -16,3 +21,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-bool"></span>Result</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

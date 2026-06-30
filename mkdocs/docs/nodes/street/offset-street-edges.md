@@ -1,4 +1,9 @@
+<img src="../../nodes/images/offset-street-edges/node.png" class="node-icon" alt="Offset Street Edges icon">
+
 # Offset Street Edges
+
+<div class="node-body">
+<img src="../../nodes/images/offset-street-edges/node.png" class="node-thumb" alt="Offset Street Edges preview">
 
 *Description to be written.*
 
@@ -17,3 +22,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Edge</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

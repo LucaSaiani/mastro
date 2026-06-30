@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/stair/node.png" class="node-icon" alt="Stair icon">
+
 # Stair
+
+<div class="node-body">
+<img src="../../../nodes/images/stair/node.png" class="node-thumb" alt="Stair preview">
 
 *Description to be written.*
 
@@ -18,3 +23,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Geometry</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

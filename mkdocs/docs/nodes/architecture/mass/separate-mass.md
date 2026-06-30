@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/separate-mass/node.png" class="node-icon" alt="Separate Mass icon">
+
 # Separate Mass
+
+<div class="node-body">
+<img src="../../../nodes/images/separate-mass/node.png" class="node-thumb" alt="Separate Mass preview">
 
 *Description to be written.*
 
@@ -23,3 +28,6 @@
 <dt><span class="socket-dot sock-geometry"></span>Ceiling</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-float"></span>Floor to Floor Height</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

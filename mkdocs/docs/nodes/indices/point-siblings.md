@@ -1,4 +1,9 @@
+<img src="../../nodes/images/point-siblings/node.png" class="node-icon" alt="Point Siblings icon">
+
 # Point Siblings
+
+<div class="node-body">
+<img src="../../nodes/images/point-siblings/node.png" class="node-thumb" alt="Point Siblings preview">
 
 *Description to be written.*
 
@@ -20,3 +25,6 @@
 <dt><span class="socket-dot sock-int"></span>OB Index</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-bool"></span>Is Convex</dt><dd>True when angle is Convex</dd>
 </dl>
+
+</div>
+

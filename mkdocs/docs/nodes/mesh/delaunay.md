@@ -1,4 +1,9 @@
+<img src="../../nodes/images/delaunay/node.png" class="node-icon" alt="Delaunay icon">
+
 # Delaunay
+
+<div class="node-body">
+<img src="../../nodes/images/delaunay/node.png" class="node-thumb" alt="Delaunay preview">
 
 *Description to be written.*
 
@@ -18,3 +23,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Mesh</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

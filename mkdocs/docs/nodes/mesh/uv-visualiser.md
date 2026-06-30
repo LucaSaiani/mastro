@@ -1,4 +1,9 @@
+<img src="../../nodes/images/uv-visualiser/node.png" class="node-icon" alt="UV Visualiser icon">
+
 # UV Visualiser
+
+<div class="node-body">
+<img src="../../nodes/images/uv-visualiser/node.png" class="node-thumb" alt="UV Visualiser preview">
 
 *Description to be written.*
 
@@ -17,3 +22,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Geometry</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

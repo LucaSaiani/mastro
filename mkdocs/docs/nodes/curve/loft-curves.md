@@ -1,4 +1,9 @@
+<img src="../../nodes/images/loft-curves/node.png" class="node-icon" alt="Loft Curves icon">
+
 # Loft Curves
+
+<div class="node-body">
+<img src="../../nodes/images/loft-curves/node.png" class="node-thumb" alt="Loft Curves preview">
 
 *Description to be written.*
 
@@ -30,3 +35,6 @@
 <dt><span class="socket-dot sock-geometry"></span>Mesh</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-vector"></span>UV Map</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

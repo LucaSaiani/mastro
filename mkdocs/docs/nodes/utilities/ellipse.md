@@ -1,4 +1,9 @@
+<img src="../../nodes/images/ellipse/node.png" class="node-icon" alt="Ellipse icon">
+
 # Ellipse
+
+<div class="node-body">
+<img src="../../nodes/images/ellipse/node.png" class="node-thumb" alt="Ellipse preview">
 
 *Description to be written.*
 
@@ -32,3 +37,6 @@
 <dt><span class="socket-dot sock-float"></span>Width</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-float"></span>Height</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

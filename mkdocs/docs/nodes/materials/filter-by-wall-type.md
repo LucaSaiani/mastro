@@ -1,4 +1,9 @@
+<img src="../../nodes/images/filter-by-wall-type/node.png" class="node-icon" alt="Filter by Wall Type icon">
+
 # Filter by Wall Type
+
+<div class="node-body">
+<img src="../../nodes/images/filter-by-wall-type/node.png" class="node-thumb" alt="Filter by Wall Type preview">
 
 *Description to be written.*
 
@@ -12,3 +17,6 @@
 <dt><span class="socket-dot sock-bool"></span>30</dt><dd>id: 3 - 30</dd>
 <dt><span class="socket-dot sock-bool"></span>20</dt><dd>id: 4 - 20</dd>
 </dl>
+
+</div>
+

@@ -1,4 +1,9 @@
+<img src="../../nodes/images/tangent-tangent-center/node.png" class="node-icon" alt="Tangent Tangent Center icon">
+
 # Tangent Tangent Center
+
+<div class="node-body">
+<img src="../../nodes/images/tangent-tangent-center/node.png" class="node-thumb" alt="Tangent Tangent Center preview">
 
 *Description to be written.*
 
@@ -19,3 +24,6 @@
 <dt><span class="socket-dot sock-vector"></span>BH</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-vector"></span>Fillet center</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

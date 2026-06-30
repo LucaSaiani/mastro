@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/ruler/node.png" class="node-icon" alt="Ruler icon">
+
 # Ruler
+
+<div class="node-body">
+<img src="../../../nodes/images/ruler/node.png" class="node-thumb" alt="Ruler preview">
 
 *Description to be written.*
 
@@ -30,3 +35,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Geometry</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

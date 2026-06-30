@@ -1,4 +1,9 @@
+<img src="../../nodes/images/loft-profiles/node.png" class="node-icon" alt="Loft Profiles icon">
+
 # Loft Profiles
+
+<div class="node-body">
+<img src="../../nodes/images/loft-profiles/node.png" class="node-thumb" alt="Loft Profiles preview">
 
 *Description to be written.*
 
@@ -31,3 +36,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Mesh</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

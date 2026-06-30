@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/triangle-opening/node.png" class="node-icon" alt="Triangle Opening icon">
+
 # Triangle Opening
+
+<div class="node-body">
+<img src="../../../nodes/images/triangle-opening/node.png" class="node-thumb" alt="Triangle Opening preview">
 
 *Description to be written.*
 
@@ -31,3 +36,6 @@
 <dt><span class="socket-dot sock-geometry"></span>B</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-geometry"></span>Base</dt><dd>Mesh whose edges to split</dd>
 </dl>
+
+</div>
+

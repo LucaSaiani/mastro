@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/opening/node.png" class="node-icon" alt="Opening icon">
+
 # Opening
+
+<div class="node-body">
+<img src="../../../nodes/images/opening/node.png" class="node-thumb" alt="Opening preview">
 
 *Description to be written.*
 
@@ -35,3 +40,6 @@
 <dt><span class="socket-dot sock-float"></span>Opening Height</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-float"></span>Opening Width</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

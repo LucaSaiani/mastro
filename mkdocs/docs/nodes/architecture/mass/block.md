@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/block/node.png" class="node-icon" alt="Block icon">
+
 # Block
+
+<div class="node-body">
+<img src="../../../nodes/images/block/node.png" class="node-thumb" alt="Block preview">
 
 *Description to be written.*
 
@@ -15,3 +20,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Geometry</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

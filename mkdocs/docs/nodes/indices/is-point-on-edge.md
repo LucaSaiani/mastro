@@ -1,4 +1,9 @@
+<img src="../../nodes/images/is-point-on-edge/node.png" class="node-icon" alt="Is Point on Edge icon">
+
 # Is Point on Edge
+
+<div class="node-body">
+<img src="../../nodes/images/is-point-on-edge/node.png" class="node-thumb" alt="Is Point on Edge preview">
 
 *Description to be written.*
 
@@ -16,3 +21,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-bool"></span>Is On Edge</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

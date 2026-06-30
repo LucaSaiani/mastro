@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/rails/node.png" class="node-icon" alt="Rails icon">
+
 # Rails
+
+<div class="node-body">
+<img src="../../../nodes/images/rails/node.png" class="node-thumb" alt="Rails preview">
 
 *Description to be written.*
 
@@ -28,3 +33,6 @@
 <dt><span class="socket-dot sock-geometry"></span>Curve A</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-geometry"></span>Curve B</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

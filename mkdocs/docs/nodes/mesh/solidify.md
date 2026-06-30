@@ -1,4 +1,9 @@
+<img src="../../nodes/images/solidify/node.png" class="node-icon" alt="Solidify icon">
+
 # Solidify
+
+<div class="node-body">
+<img src="../../nodes/images/solidify/node.png" class="node-thumb" alt="Solidify preview">
 
 *Description to be written.*
 
@@ -28,3 +33,6 @@
 <dt><span class="socket-dot sock-bool"></span>Side</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-bool"></span>Bottom</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

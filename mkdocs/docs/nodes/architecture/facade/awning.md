@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/awning/node.png" class="node-icon" alt="Awning icon">
+
 # Awning
+
+<div class="node-body">
+<img src="../../../nodes/images/awning/node.png" class="node-thumb" alt="Awning preview">
 
 *Description to be written.*
 
@@ -23,3 +28,6 @@
 <dt><span class="socket-dot sock-geometry"></span>Fabric</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-geometry"></span>End</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

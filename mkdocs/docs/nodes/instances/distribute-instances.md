@@ -1,4 +1,9 @@
+<img src="../../nodes/images/distribute-instances/node.png" class="node-icon" alt="Distribute Instances icon">
+
 # Distribute Instances
+
+<div class="node-body">
+<img src="../../nodes/images/distribute-instances/node.png" class="node-thumb" alt="Distribute Instances preview">
 
 *Description to be written.*
 
@@ -52,3 +57,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Geometry</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

@@ -1,4 +1,9 @@
+<img src="../../nodes/images/dissolve-aligned/node.png" class="node-icon" alt="Dissolve Aligned icon">
+
 # Dissolve Aligned
+
+<div class="node-body">
+<img src="../../nodes/images/dissolve-aligned/node.png" class="node-thumb" alt="Dissolve Aligned preview">
 
 *Description to be written.*
 
@@ -18,3 +23,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Geometry</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

@@ -1,4 +1,9 @@
+<img src="../../nodes/images/tartan/node.png" class="node-icon" alt="Tartan icon">
+
 # Tartan
+
+<div class="node-body">
+<img src="../../nodes/images/tartan/node.png" class="node-thumb" alt="Tartan preview">
 
 *Description to be written.*
 
@@ -22,3 +27,6 @@
 <dt><span class="socket-dot sock-geometry"></span>Outer Columns</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-geometry"></span>Inner Columns</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

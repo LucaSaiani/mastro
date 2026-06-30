@@ -1,4 +1,9 @@
+<img src="../../nodes/images/separate-geometry-by-factor001/node.png" class="node-icon" alt="Separate Geometry by Factor.001 icon">
+
 # Separate Geometry by Factor.001
+
+<div class="node-body">
+<img src="../../nodes/images/separate-geometry-by-factor001/node.png" class="node-thumb" alt="Separate Geometry by Factor.001 preview">
 
 *Description to be written.*
 
@@ -20,3 +25,6 @@
 <dt><span class="socket-dot sock-geometry"></span>Selection 1</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-geometry"></span>Remaining</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

@@ -1,4 +1,9 @@
+<img src="../../nodes/images/move-points-along-curve/node.png" class="node-icon" alt="Move Points along Curve icon">
+
 # Move Points along Curve
+
+<div class="node-body">
+<img src="../../nodes/images/move-points-along-curve/node.png" class="node-thumb" alt="Move Points along Curve preview">
 
 *Description to be written.*
 
@@ -22,3 +27,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Curve</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

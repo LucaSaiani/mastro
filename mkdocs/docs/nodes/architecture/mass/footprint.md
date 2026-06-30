@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/footprint/node.png" class="node-icon" alt="Footprint icon">
+
 # Footprint
+
+<div class="node-body">
+<img src="../../../nodes/images/footprint/node.png" class="node-thumb" alt="Footprint preview">
 
 *Description to be written.*
 
@@ -16,3 +21,6 @@
 <dt><span class="socket-dot sock-geometry"></span>Mesh</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-int"></span>ID</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/window/node.png" class="node-icon" alt="Window icon">
+
 # Window
+
+<div class="node-body">
+<img src="../../../nodes/images/window/node.png" class="node-thumb" alt="Window preview">
 
 *Description to be written.*
 
@@ -31,3 +36,6 @@
 <dt><span class="socket-dot sock-geometry"></span>Glass</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-float"></span>Glass Height</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

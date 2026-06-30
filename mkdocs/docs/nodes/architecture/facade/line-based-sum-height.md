@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/line-based-sum-height/node.png" class="node-icon" alt="Line Based Sum Height icon">
+
 # Line Based Sum Height
+
+<div class="node-body">
+<img src="../../../nodes/images/line-based-sum-height/node.png" class="node-thumb" alt="Line Based Sum Height preview">
 
 *Description to be written.*
 
@@ -20,3 +25,6 @@
 <dt><span class="socket-dot sock-float"></span>Floor to Floor Sum Height</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-int"></span>ID</dt><dd>The values from the "id" attribute on points, or the index if that attribute does not exist</dd>
 </dl>
+
+</div>
+

@@ -1,4 +1,9 @@
+<img src="../../nodes/images/grease-pencil/node.png" class="node-icon" alt="Grease Pencil icon">
+
 # Grease Pencil
+
+<div class="node-body">
+<img src="../../nodes/images/grease-pencil/node.png" class="node-thumb" alt="Grease Pencil preview">
 
 *Description to be written.*
 
@@ -14,3 +19,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Grease Pencil</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

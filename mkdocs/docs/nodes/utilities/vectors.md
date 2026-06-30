@@ -1,4 +1,9 @@
+<img src="../../nodes/images/vectors/node.png" class="node-icon" alt="Vectors icon">
+
 # Vectors
+
+<div class="node-body">
+<img src="../../nodes/images/vectors/node.png" class="node-thumb" alt="Vectors preview">
 
 *Description to be written.*
 
@@ -21,3 +26,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Vectors</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

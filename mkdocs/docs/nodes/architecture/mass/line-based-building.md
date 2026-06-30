@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/line-based-building/node.png" class="node-icon" alt="Line Based Building icon">
+
 # Line Based Building
+
+<div class="node-body">
+<img src="../../../nodes/images/line-based-building/node.png" class="node-thumb" alt="Line Based Building preview">
 
 *Description to be written.*
 
@@ -31,3 +36,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Geometry</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

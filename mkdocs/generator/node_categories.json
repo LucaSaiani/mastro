@@ -1,0 +1,534 @@
+{
+  "Dimension": {
+    "category": "architecture",
+    "subcategory": "annotation"
+  },
+  "Read Slope": {
+    "category": "architecture",
+    "subcategory": "annotation"
+  },
+  "Attribute Visualiser": {
+    "category": "architecture",
+    "subcategory": "annotation"
+  },
+  "Ruler": {
+    "category": "architecture",
+    "subcategory": "annotation"
+  },
+  "Reference Grid": {
+    "category": "architecture",
+    "subcategory": "annotation"
+  },
+  "Brick Dimension": {
+    "category": "architecture",
+    "subcategory": "annotation"
+  },
+  "Façade": {
+    "category": "architecture",
+    "subcategory": "facade"
+  },
+  "Façade Corner": {
+    "category": "architecture",
+    "subcategory": "facade"
+  },
+  "Façade Pattern": {
+    "category": "architecture",
+    "subcategory": "facade"
+  },
+  "Facade Line Based": {
+    "category": "architecture",
+    "subcategory": "facade"
+  },
+  "Line Based Sum Height": {
+    "category": "architecture",
+    "subcategory": "facade"
+  },
+  "Opening": {
+    "category": "architecture",
+    "subcategory": "facade"
+  },
+  "Opening.002": {
+    "category": "architecture",
+    "subcategory": "facade"
+  },
+  "Arched Opening": {
+    "category": "architecture",
+    "subcategory": "facade"
+  },
+  "Triangle Opening": {
+    "category": "architecture",
+    "subcategory": "facade"
+  },
+  "Triangular Grid": {
+    "category": "architecture",
+    "subcategory": "facade"
+  },
+  "Window": {
+    "category": "architecture",
+    "subcategory": "facade"
+  },
+  "Awning": {
+    "category": "architecture",
+    "subcategory": "facade"
+  },
+  "Folding Shutter": {
+    "category": "architecture",
+    "subcategory": "facade"
+  },
+  "Pivot Edge": {
+    "category": "architecture",
+    "subcategory": "facade"
+  },
+  "Mass": {
+    "category": "architecture",
+    "subcategory": "mass"
+  },
+  "Mass Walls": {
+    "category": "architecture",
+    "subcategory": "mass"
+  },
+  "Block": {
+    "category": "architecture",
+    "subcategory": "mass"
+  },
+  "Generate Floors": {
+    "category": "architecture",
+    "subcategory": "mass"
+  },
+  "Generate Topology": {
+    "category": "architecture",
+    "subcategory": "mass"
+  },
+  "Separate Mass": {
+    "category": "architecture",
+    "subcategory": "mass"
+  },
+  "Convert Mass to Floor Lines": {
+    "category": "architecture",
+    "subcategory": "mass"
+  },
+  "Line Based Building": {
+    "category": "architecture",
+    "subcategory": "mass"
+  },
+  "Footprint": {
+    "category": "architecture",
+    "subcategory": "mass"
+  },
+  "Parapet": {
+    "category": "architecture",
+    "subcategory": "mass"
+  },
+  "Floor Grid": {
+    "category": "architecture",
+    "subcategory": "mass"
+  },
+  "Perimeter": {
+    "category": "architecture",
+    "subcategory": "mass"
+  },
+  "Rooms": {
+    "category": "architecture",
+    "subcategory": "mass"
+  },
+  "Adaptive Stair": {
+    "category": "architecture",
+    "subcategory": "elements"
+  },
+  "Stair": {
+    "category": "architecture",
+    "subcategory": "elements"
+  },
+  "Pitch Roof": {
+    "category": "architecture",
+    "subcategory": "elements"
+  },
+  "Nave": {
+    "category": "architecture",
+    "subcategory": "elements"
+  },
+  "Vault": {
+    "category": "architecture",
+    "subcategory": "elements"
+  },
+  "Catenary": {
+    "category": "architecture",
+    "subcategory": "elements"
+  },
+  "Elements - Flag": {
+    "category": "architecture",
+    "subcategory": "elements"
+  },
+  "Elements - Pergola": {
+    "category": "architecture",
+    "subcategory": "elements"
+  },
+  "Rails": {
+    "category": "architecture",
+    "subcategory": "elements"
+  },
+  "Steel Profile": {
+    "category": "architecture",
+    "subcategory": "elements"
+  },
+  "Building Shadow": {
+    "category": "architecture",
+    "subcategory": "elements"
+  },
+  "Visbility Study": {
+    "category": "architecture",
+    "subcategory": "elements"
+  },
+  "Curve Noise": {
+    "category": "curve",
+    "subcategory": null
+  },
+  "Fill Curve": {
+    "category": "curve",
+    "subcategory": null
+  },
+  "Move Points along Curve": {
+    "category": "curve",
+    "subcategory": null
+  },
+  "Sine Wave": {
+    "category": "curve",
+    "subcategory": null
+  },
+  "Instances Along Curve": {
+    "category": "curve",
+    "subcategory": null
+  },
+  "Stretch Edge": {
+    "category": "curve",
+    "subcategory": null
+  },
+  "Loft Curves": {
+    "category": "curve",
+    "subcategory": null
+  },
+  "Loft Profiles": {
+    "category": "curve",
+    "subcategory": null
+  },
+  "Mitered Mesh": {
+    "category": "curve",
+    "subcategory": null
+  },
+  "Bevel 2D": {
+    "category": "curve",
+    "subcategory": null
+  },
+  "Bevel 3D": {
+    "category": "curve",
+    "subcategory": null
+  },
+  "Flip Indices": {
+    "category": "indices",
+    "subcategory": null
+  },
+  "Offset Indices": {
+    "category": "indices",
+    "subcategory": null
+  },
+  "Highest/Lowest Edge Index": {
+    "category": "indices",
+    "subcategory": null
+  },
+  "Highest/Lowest Boolean": {
+    "category": "indices",
+    "subcategory": null
+  },
+  "Shuffle Indices": {
+    "category": "indices",
+    "subcategory": null
+  },
+  "Sort Elements": {
+    "category": "indices",
+    "subcategory": null
+  },
+  "Point Siblings": {
+    "category": "indices",
+    "subcategory": null
+  },
+  "Is Edge Cyclic": {
+    "category": "indices",
+    "subcategory": null
+  },
+  "Is Point on Edge": {
+    "category": "indices",
+    "subcategory": null
+  },
+  "Random Points along Edge": {
+    "category": "indices",
+    "subcategory": null
+  },
+  "Set Edge ID": {
+    "category": "indices",
+    "subcategory": null
+  },
+  "Instance Packer": {
+    "category": "indices",
+    "subcategory": null
+  },
+  "Distribute Instances": {
+    "category": "instances",
+    "subcategory": null
+  },
+  "Split to Instances": {
+    "category": "instances",
+    "subcategory": null
+  },
+  "Collection info +": {
+    "category": "instances",
+    "subcategory": null
+  },
+  "Filter by Block Side": {
+    "category": "materials",
+    "subcategory": null
+  },
+  "Filter by Street Type": {
+    "category": "materials",
+    "subcategory": null
+  },
+  "Filter by Typology": {
+    "category": "materials",
+    "subcategory": null
+  },
+  "Filter by Use": {
+    "category": "materials",
+    "subcategory": null
+  },
+  "Filter by Wall Type": {
+    "category": "materials",
+    "subcategory": null
+  },
+  "Separate Geometry by Block Side": {
+    "category": "materials",
+    "subcategory": null
+  },
+  "Separate Geometry by Street Type": {
+    "category": "materials",
+    "subcategory": null
+  },
+  "Separate Geometry by Typology": {
+    "category": "materials",
+    "subcategory": null
+  },
+  "Separate Geometry by Use": {
+    "category": "materials",
+    "subcategory": null
+  },
+  "Separate Geometry by Wall Type": {
+    "category": "materials",
+    "subcategory": null
+  },
+  "Separate Geometry by Factor.001": {
+    "category": "materials",
+    "subcategory": null
+  },
+  "Grid": {
+    "category": "mesh",
+    "subcategory": null
+  },
+  "Grid Diagonals": {
+    "category": "mesh",
+    "subcategory": null
+  },
+  "Hexagonal Grid": {
+    "category": "mesh",
+    "subcategory": null
+  },
+  "Delaunay": {
+    "category": "mesh",
+    "subcategory": null
+  },
+  "Tartan": {
+    "category": "mesh",
+    "subcategory": null
+  },
+  "UV Mapping": {
+    "category": "mesh",
+    "subcategory": null
+  },
+  "Face UV Map": {
+    "category": "mesh",
+    "subcategory": null
+  },
+  "Plane UV Map": {
+    "category": "mesh",
+    "subcategory": null
+  },
+  "UV Visualiser": {
+    "category": "mesh",
+    "subcategory": null
+  },
+  "Inset Faces": {
+    "category": "mesh",
+    "subcategory": null
+  },
+  "Solidify": {
+    "category": "mesh",
+    "subcategory": null
+  },
+  "Extrude": {
+    "category": "mesh",
+    "subcategory": null
+  },
+  "Edge Offset 2D": {
+    "category": "mesh",
+    "subcategory": null
+  },
+  "Edge Offset 3D": {
+    "category": "mesh",
+    "subcategory": null
+  },
+  "Shear": {
+    "category": "mesh",
+    "subcategory": null
+  },
+  "Mirror": {
+    "category": "mesh",
+    "subcategory": null
+  },
+  "Fix Normals": {
+    "category": "mesh",
+    "subcategory": null
+  },
+  "Dissolve Aligned": {
+    "category": "mesh",
+    "subcategory": null
+  },
+  "Unify Normals": {
+    "category": "mesh",
+    "subcategory": null
+  },
+  "Contour Mesh": {
+    "category": "mesh",
+    "subcategory": null
+  },
+  "Flat Projection": {
+    "category": "mesh",
+    "subcategory": null
+  },
+  "Grease Pencil": {
+    "category": "mesh",
+    "subcategory": null
+  },
+  "Grease Pencil to Landscape": {
+    "category": "mesh",
+    "subcategory": null
+  },
+  "Set Edge Position": {
+    "category": "mesh",
+    "subcategory": null
+  },
+  "Set Position": {
+    "category": "mesh",
+    "subcategory": null
+  },
+  "Custom Corners": {
+    "category": "mesh",
+    "subcategory": null
+  },
+  "Street": {
+    "category": "street",
+    "subcategory": null
+  },
+  "Street Elements": {
+    "category": "street",
+    "subcategory": null
+  },
+  "Offset Street Edges": {
+    "category": "street",
+    "subcategory": null
+  },
+  "Angle between Edges": {
+    "category": "utilities",
+    "subcategory": null
+  },
+  "Edge Vectors": {
+    "category": "utilities",
+    "subcategory": null
+  },
+  "Ellipse": {
+    "category": "utilities",
+    "subcategory": null
+  },
+  "Intersection 2D": {
+    "category": "utilities",
+    "subcategory": null
+  },
+  "Intersection Between Line and Plane": {
+    "category": "utilities",
+    "subcategory": null
+  },
+  "Shortest Line Between Lines in 3D": {
+    "category": "utilities",
+    "subcategory": null
+  },
+  "Perpendicular Point on a Line": {
+    "category": "utilities",
+    "subcategory": null
+  },
+  "Tangent Tangent Center": {
+    "category": "utilities",
+    "subcategory": null
+  },
+  "Random Value": {
+    "category": "utilities",
+    "subcategory": null
+  },
+  "Round Value": {
+    "category": "utilities",
+    "subcategory": null
+  },
+  "Camera Culling": {
+    "category": "utilities",
+    "subcategory": null
+  },
+  "Vector": {
+    "category": "utilities",
+    "subcategory": null
+  },
+  "Vectors": {
+    "category": "utilities",
+    "subcategory": null
+  },
+  "Demo is curve clockwise": {
+    "category": "",
+    "subcategory": null
+  },
+  "Drawing": {
+    "category": "",
+    "subcategory": null
+  },
+  "Main Axis": {
+    "category": "",
+    "subcategory": null
+  },
+  "Plan": {
+    "category": "",
+    "subcategory": null
+  },
+  "Random Façade Openings": {
+    "category": "",
+    "subcategory": null
+  },
+  "Rounded Corners": {
+    "category": "",
+    "subcategory": null
+  },
+  "Shed Roof": {
+    "category": "",
+    "subcategory": null
+  },
+  "Tensor": {
+    "category": "",
+    "subcategory": null
+  },
+  "is Curve Clockwise": {
+    "category": "",
+    "subcategory": null
+  }
+}

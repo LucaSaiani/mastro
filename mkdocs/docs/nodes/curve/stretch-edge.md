@@ -1,4 +1,9 @@
+<img src="../../nodes/images/stretch-edge/node.png" class="node-icon" alt="Stretch Edge icon">
+
 # Stretch Edge
+
+<div class="node-body">
+<img src="../../nodes/images/stretch-edge/node.png" class="node-thumb" alt="Stretch Edge preview">
 
 *Description to be written.*
 
@@ -16,3 +21,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Geometry</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

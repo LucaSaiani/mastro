@@ -1,4 +1,9 @@
+<img src="../../nodes/images/bevel-2d/node.png" class="node-icon" alt="Bevel 2D icon">
+
 # Bevel 2D
+
+<div class="node-body">
+<img src="../../nodes/images/bevel-2d/node.png" class="node-thumb" alt="Bevel 2D preview">
 
 *Description to be written.*
 
@@ -18,3 +23,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Output</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

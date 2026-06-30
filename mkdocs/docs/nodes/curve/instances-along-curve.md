@@ -1,4 +1,9 @@
+<img src="../../nodes/images/instances-along-curve/node.png" class="node-icon" alt="Instances Along Curve icon">
+
 # Instances Along Curve
+
+<div class="node-body">
+<img src="../../nodes/images/instances-along-curve/node.png" class="node-thumb" alt="Instances Along Curve preview">
 
 *Description to be written.*
 
@@ -25,3 +30,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Geometry</dt><dd>If not deformed, the geometry is a set of instances</dd>
 </dl>
+
+</div>
+

@@ -1,4 +1,9 @@
+<img src="../../nodes/images/shortest-line-between-lines-in-3d/node.png" class="node-icon" alt="Shortest Line Between Lines in 3D icon">
+
 # Shortest Line Between Lines in 3D
+
+<div class="node-body">
+<img src="../../nodes/images/shortest-line-between-lines-in-3d/node.png" class="node-thumb" alt="Shortest Line Between Lines in 3D preview">
 
 *Description to be written.*
 
@@ -25,3 +30,6 @@
 <dt><span class="socket-dot sock-float"></span>P1 P2 Distance</dt><dd>P1 P2 Distance</dd>
 <dt><span class="socket-dot sock-float"></span>Value</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

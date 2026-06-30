@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/façade-corner/node.png" class="node-icon" alt="Façade Corner icon">
+
 # Façade Corner
+
+<div class="node-body">
+<img src="../../../nodes/images/façade-corner/node.png" class="node-thumb" alt="Façade Corner preview">
 
 *Description to be written.*
 
@@ -25,3 +30,6 @@
 <dt><span class="socket-dot sock-bool"></span>Is Short Side</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-bool"></span>Is Opposite Side</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

@@ -1,4 +1,9 @@
+<img src="../../nodes/images/uv-mapping/node.png" class="node-icon" alt="UV Mapping icon">
+
 # UV Mapping
+
+<div class="node-body">
+<img src="../../nodes/images/uv-mapping/node.png" class="node-thumb" alt="UV Mapping preview">
 
 *Description to be written.*
 
@@ -25,3 +30,6 @@
 <dt><span class="socket-dot sock-geometry"></span>Geometry</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-geometry"></span>Unwrapped Geometry</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

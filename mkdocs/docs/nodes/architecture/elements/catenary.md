@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/catenary/node.png" class="node-icon" alt="Catenary icon">
+
 # Catenary
+
+<div class="node-body">
+<img src="../../../nodes/images/catenary/node.png" class="node-thumb" alt="Catenary preview">
 
 *Description to be written.*
 
@@ -20,3 +25,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Curve</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

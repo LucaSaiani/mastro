@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/façade-pattern/node.png" class="node-icon" alt="Façade Pattern icon">
+
 # Façade Pattern
+
+<div class="node-body">
+<img src="../../../nodes/images/façade-pattern/node.png" class="node-thumb" alt="Façade Pattern preview">
 
 *Description to be written.*
 
@@ -23,3 +28,6 @@
 <dt><span class="socket-dot sock-geometry"></span>Geometry</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-float"></span>Floor to Floor Height</dt><dd>0 means unaffected</dd>
 </dl>
+
+</div>
+

@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/parapet/node.png" class="node-icon" alt="Parapet icon">
+
 # Parapet
+
+<div class="node-body">
+<img src="../../../nodes/images/parapet/node.png" class="node-thumb" alt="Parapet preview">
 
 *Description to be written.*
 
@@ -20,3 +25,6 @@
 <dt><span class="socket-dot sock-bool"></span>Internal Top Edge</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-bool"></span>Internal Bottom Edge</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

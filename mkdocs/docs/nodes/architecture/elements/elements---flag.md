@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/elements---flag/node.png" class="node-icon" alt="Elements - Flag icon">
+
 # Elements - Flag
+
+<div class="node-body">
+<img src="../../../nodes/images/elements---flag/node.png" class="node-thumb" alt="Elements - Flag preview">
 
 *Description to be written.*
 
@@ -32,3 +37,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Geometry</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

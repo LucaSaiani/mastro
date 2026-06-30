@@ -1,4 +1,9 @@
+<img src="../../nodes/images/set-position/node.png" class="node-icon" alt="Set Position icon">
+
 # Set Position
+
+<div class="node-body">
+<img src="../../nodes/images/set-position/node.png" class="node-thumb" alt="Set Position preview">
 
 *Description to be written.*
 
@@ -32,3 +37,6 @@
 <div class="socket-panel">Offset B</div>
 <dt><span class="socket-dot sock-float"></span>Value</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

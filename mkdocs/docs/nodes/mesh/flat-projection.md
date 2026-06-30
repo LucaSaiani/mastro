@@ -1,4 +1,9 @@
+<img src="../../nodes/images/flat-projection/node.png" class="node-icon" alt="Flat Projection icon">
+
 # Flat Projection
+
+<div class="node-body">
+<img src="../../nodes/images/flat-projection/node.png" class="node-thumb" alt="Flat Projection preview">
 
 *Description to be written.*
 
@@ -23,3 +28,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Geometry</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

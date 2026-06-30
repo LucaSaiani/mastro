@@ -1,4 +1,9 @@
+<img src="../../nodes/images/split-to-instances/node.png" class="node-icon" alt="Split to Instances icon">
+
 # Split to Instances
+
+<div class="node-body">
+<img src="../../nodes/images/split-to-instances/node.png" class="node-thumb" alt="Split to Instances preview">
 
 *Description to be written.*
 
@@ -17,3 +22,6 @@
 <dt><span class="socket-dot sock-geometry"></span>Instances</dt><dd>*Description to be written.*</dd>
 <dt><span class="socket-dot sock-int"></span>Group ID</dt><dd>The group ID of each group instance</dd>
 </dl>
+
+</div>
+

@@ -47,8 +47,8 @@ The **Dimension** node generates linear dimensions from the input geometry. Dime
 
 ### Read Slope
 
-![Read Slope node icon](images/read_slope/icon.png)
-![Read Slope node preview](images/read_slope/thumbnail.png)
+![Read Slope node icon](images/read-slope/icon.png)
+![Read Slope node preview](images/read-slope/thumbnail.png)
 
 The **Read Slope** node analyses the inclination of a surface and outputs its slope as numeric values and visual indicators.
 

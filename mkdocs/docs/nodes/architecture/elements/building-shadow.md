@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/building-shadow/node.png" class="node-icon" alt="Building Shadow icon">
+
 # Building Shadow
+
+<div class="node-body">
+<img src="../../../nodes/images/building-shadow/node.png" class="node-thumb" alt="Building Shadow preview">
 
 *Description to be written.*
 
@@ -25,3 +30,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Geometry</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+

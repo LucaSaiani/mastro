@@ -1,4 +1,9 @@
+<img src="../../../nodes/images/elements---pergola/node.png" class="node-icon" alt="Elements - Pergola icon">
+
 # Elements - Pergola
+
+<div class="node-body">
+<img src="../../../nodes/images/elements---pergola/node.png" class="node-thumb" alt="Elements - Pergola preview">
 
 *Description to be written.*
 
@@ -23,3 +28,6 @@
 <dl class="node-sockets">
 <dt><span class="socket-dot sock-geometry"></span>Geometry</dt><dd>*Description to be written.*</dd>
 </dl>
+
+</div>
+
