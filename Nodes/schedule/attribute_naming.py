@@ -37,6 +37,22 @@ ATTRIBUTE_GROUPS = {
 # mesh.attributes
 RAW_TO_GROUP = {raw: logical for logical, raws in ATTRIBUTE_GROUPS.items() for raw in raws}
 
+# Logical names that exist (decodable via RAW_TO_GROUP/to_logical_name,
+# same as any other ATTRIBUTE_GROUPS entry) but are never offered to the
+# user by Get Attribute Names' own picker - internal-only encoding the
+# user has no real use for as-is. "storey" specifically: the raw
+# mastro_list_storey_A/B digit-pair encodes how the CURRENT typology's
+# total floor count is split across its own uses (e.g. "2 floors of
+# shops, then 4 of offices, then 4 residential" - see
+# read_write_bmesh_storey_attribute.py's own read_bmesh_storey_attribute
+# for the encoding/decoding logic), used internally to resolve "use" per
+# level - not a number meaningful on its own once decoded raw, confirmed
+# by the user: "questa cosa non serve, la nasconderei" (after both of us
+# worked out what it actually was, an earlier reply in this same
+# conversation wrongly conflated it with mastro_number_of_storeys before
+# checking the code).
+HIDDEN_NAMES = {"storey"}
+
 # Names that aren't backed by a single stored mesh.attribute at all -
 # "area" comes from BMFace.calc_area(), not a layer; "floor" is the
 # CURRENT level index itself (0, 1, 2, ... - the same number each row

@@ -1,9 +1,8 @@
 import bpy
 from bpy.types import Node
-from bpy.props import FloatProperty, PointerProperty
+from bpy.props import PointerProperty
 
 from .tree import MaStroScheduleTreeNode, resolve_through_reroutes
-from .execution import update_node
 from .nodes_group import MaStroScheduleGroupTree
 
 
@@ -20,18 +19,33 @@ from .nodes_group import MaStroScheduleGroupTree
 # NodeCustomGroup's own external sockets are expected to mirror its
 # body's own interface 1:1 (exactly what nodes_group.py's own
 # _sync_group_node_sockets enforces for a plain Group) - For Each's own
-# external sockets (a List, Start, Step) are NOT a 1:1 mirror of its
-# body's own interface (a single Column + Counter per iteration, plus
-# an optional accumulator pair) - fighting that built-in assumption
-# would cost more than building this node's own external shape from
-# scratch.
+# external sockets (just a List) are NOT a 1:1 mirror of its body's own
+# interface (a Column + Index per iteration) - fighting that built-in
+# assumption would cost more than building this node's own external
+# shape from scratch.
 #
 # The body's own interface is FIXED and built automatically at
-# creation time (Column + Counter on the Group Input side, Result +
-# Accumulator In/Out on the Group Output side) - unlike a plain Group
-# (whose interface grows from whatever the user links via "Group
-# Selected"), the user never builds this interface by hand, only the
-# loop body logic that reads from/writes to it.
+# creation time (Column + Index on the Group Input side, Column on the
+# Group Output side) - unlike a plain Group (whose interface grows
+# from whatever the user links via "Group Selected"), the user never
+# builds this interface by hand, only the loop body logic that reads
+# from/writes to it.
+#
+# No Start/Step/Accumulator - confirmed against Geometry Nodes' own
+# Repeat Zone (source/blender/nodes/geometry/nodes/node_geo_repeat.cc):
+# it exposes a single zero-based "Iteration" inside the loop body and
+# nothing else: any offset/scale/running total the user actually wants
+# is built INSIDE the body with ordinary Math nodes against that one
+# raw index, not pre-baked into the loop node's own interface. Start/
+# Step/Accumulator were removed for the same reason, after the user's
+# own observation that GN doesn't have them either - they also meant 5
+# sockets all sharing the same Column socket type/color at once (the
+# user's own separate, concrete complaint: impossible to tell apart at
+# a glance) for something a single Math node downstream of Index
+# already covers. Accumulator specifically (carrying a value forward
+# from one iteration to the next) can come back if a real use case
+# needs it - removed here as speculative, not because the underlying
+# idea is wrong.
 class MaStroScheduleForEachNode(MaStroScheduleTreeNode, Node):
     """Run a Group's own nodes once per element of a List, collecting
     each iteration's own result into a new List"""
@@ -59,28 +73,9 @@ class MaStroScheduleForEachNode(MaStroScheduleTreeNode, Node):
         type=bpy.types.NodeTree,
         poll=lambda self, tree: tree.bl_idname == 'MaStroScheduleGroupTreeType',
     )
-    # Counter = start + index*step, the per-iteration position value
-    # fed into the body's own Group Input alongside the current
-    # element - NOT something the user wires in from outside (every
-    # other input here is a List/Column), set directly on this node
-    # the same way Math's own A/B constants are - default 0/1 makes it
-    # behave like a plain position index in the common case, but
-    # configurable for real counters too (e.g. starting at 100,
-    # incrementing by 10).
-    start: FloatProperty(name="Start", default=0.0, update=update_node)
-    step: FloatProperty(name="Step", default=1.0, update=update_node)
-
     def init(self, context):
         self.inputs.new('MaStroScheduleListSocketType', "List")
-        # Optional - read by the loop body via the body's own second
-        # Group Input/Output pair (see _build_body below) only if the
-        # user actually wires something into it; left unlinked, the
-        # accumulator simply keeps emitting this same starting value
-        # back out unchanged every iteration (nothing for the body to
-        # carry forward), and the node behaves like a plain map.
-        self.inputs.new('MaStroScheduleColumnSocketType', "Accumulator")
         self.outputs.new('MaStroScheduleListSocketType', "List")
-        self.outputs.new('MaStroScheduleColumnSocketType', "Accumulator")
         self.body_tree = _build_body(self)
 
     @property
@@ -98,35 +93,26 @@ class MaStroScheduleForEachNode(MaStroScheduleTreeNode, Node):
         from .tree import upstream_attr
         return upstream_attr(self.inputs["List"], "column_label")
 
-    def draw_buttons(self, context, layout):
-        layout.prop(self, "start")
-        layout.prop(self, "step")
-
     def evaluate(self, inputs):
-        from .execution import is_socket_active
-
         elements = inputs[0] or []
-        accumulator_in = inputs[1]
         if not self.body_tree or not elements:
-            return [[], accumulator_in if is_socket_active(self.inputs["Accumulator"]) else None]
+            return [[]]
 
-        accumulator = accumulator_in if is_socket_active(self.inputs["Accumulator"]) else None
         result_elements = []
         for index, element in enumerate(elements):
-            counter = [{"Counter": self.start + index * self.step}]
-            outputs = _evaluate_body(self.body_tree, element.get("rows"), counter, accumulator)
+            index_rows = [{"Index": index}]
+            outputs = _evaluate_body(self.body_tree, element.get("rows"), index_rows)
             result_elements.append({"key": element.get("key"), "rows": outputs[0]})
-            if outputs[1] is not None:
-                accumulator = outputs[1]
 
-        return [result_elements, accumulator]
+        return [result_elements]
 
 
 def _build_body(for_each_node):
     """Creates a brand new MaStroScheduleGroupTree with the loop's own
     FIXED interface already in place - Column (the current element's
-    own rows) and Counter on the Group Input side, Result and
-    Accumulator In/Out on the Group Output side. Mirrors
+    own rows) and Index (a plain zero-based iteration counter, mirrors
+    Geometry Nodes' own Repeat Zone "Iteration" output) on the Group
+    Input side, Column on the Group Output side. Mirrors
     nodes_group.py's own "Group Selected" in spirit (same node tree
     type, same "building" guard against MaStroScheduleGroupTree.update()
     firing mid-construction - see that module's own comments for why),
@@ -142,28 +128,24 @@ def _build_body(for_each_node):
         output_node.location = (300, 0)
 
         body_tree.interface.new_socket("Column", in_out='INPUT', socket_type='MaStroScheduleColumnSocketType')
-        body_tree.interface.new_socket("Counter", in_out='INPUT', socket_type='MaStroScheduleColumnSocketType')
-        body_tree.interface.new_socket(
-            "Accumulator In", in_out='INPUT', socket_type='MaStroScheduleColumnSocketType',
-        )
-        body_tree.interface.new_socket("Result", in_out='OUTPUT', socket_type='MaStroScheduleColumnSocketType')
-        body_tree.interface.new_socket(
-            "Accumulator Out", in_out='OUTPUT', socket_type='MaStroScheduleColumnSocketType',
-        )
+        body_tree.interface.new_socket("Index", in_out='INPUT', socket_type='MaStroScheduleColumnSocketType')
+        # "Column" again on the output side, matching Group Input's own
+        # "Column" name (and MaStroScheduleColumnSocketType's own
+        # bl_label, per audit_socket_label_consistency.py's own rule) -
+        # both ends carry the loop's own per-iteration value, just
+        # before/after whatever the user builds in between.
+        body_tree.interface.new_socket("Column", in_out='OUTPUT', socket_type='MaStroScheduleColumnSocketType')
 
         # Default wiring, not an empty body - the user's own observation:
         # an unwired Group Input/Output left every iteration producing
-        # nothing at all, an unhelpful starting point. Column straight
-        # to Result (the identity/no-op case - the loop simply passes
-        # each element's own rows through unchanged until the user
-        # builds real logic in between) and Accumulator In straight to
-        # Accumulator Out (carries it forward unmodified by default,
-        # the correct behavior for a user who never intends to touch it
-        # at all). Counter is left unwired - no single "obvious" default
-        # destination for it (unlike Column/Accumulator, nothing already
+        # nothing at all, an unhelpful starting point. Group Input's
+        # own Column straight to Group Output's own Column (the
+        # identity/no-op case - the loop simply passes each element's
+        # own rows through unchanged until the user builds real logic
+        # in between). Index is left unwired - no single "obvious"
+        # default destination for it (unlike Column, nothing already
         # existing on Group Output expects to receive it specifically).
-        body_tree.links.new(output_node.inputs["Result"], input_node.outputs["Column"])
-        body_tree.links.new(output_node.inputs["Accumulator Out"], input_node.outputs["Accumulator In"])
+        body_tree.links.new(output_node.inputs["Column"], input_node.outputs["Column"])
     finally:
         del body_tree["building"]
     return body_tree
@@ -184,7 +166,7 @@ def _evaluate_subtree(tree, cache, eval_node):
         eval_node(node)
 
 
-def _evaluate_body(body_tree, column_rows, counter_rows, accumulator_rows):
+def _evaluate_body(body_tree, column_rows, index_rows):
     """Runs body_tree's own nodes exactly once, with a fresh cache (so
     a second call - the next loop iteration - never sees a previous
     iteration's own cached results) and the current iteration's own
@@ -228,7 +210,7 @@ def _evaluate_body(body_tree, column_rows, counter_rows, accumulator_rows):
             return cache[node.name]
 
         if node.bl_idname == 'NodeGroupInput':
-            cache[node.name] = [column_rows, counter_rows, accumulator_rows]
+            cache[node.name] = [column_rows, index_rows]
             return cache[node.name]
 
         input_values = []
@@ -280,11 +262,10 @@ def _evaluate_body(body_tree, column_rows, counter_rows, accumulator_rows):
 
     output_node = next((n for n in body_tree.nodes if n.bl_idname == 'NodeGroupOutput'), None)
     if output_node is None:
-        return [None, None]
+        return [None]
     values = eval_node(output_node)
     result = values[0] if len(values) > 0 else None
-    accumulator_out = values[1] if len(values) > 1 else None
-    return [result, accumulator_out]
+    return [result]
 
 
 classes = (

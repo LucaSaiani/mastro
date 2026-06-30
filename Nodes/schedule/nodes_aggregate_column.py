@@ -62,9 +62,26 @@ class MaStroScheduleAggregateColumnNode(MaStroScheduleTreeNode, Node):
 
     operation: EnumProperty(name="Operation", items=OPERATION_ITEMS, default='SUM', update=update_node)
 
+    # Same MaStroScheduleAttributeRefSocketType Named Attribute itself
+    # outputs (nodes_attribute.py) - optional, left unwired in the
+    # common case (a Column with exactly one data key, found by
+    # exclusion via _data_key as always). Added once a Column with
+    # MORE than one data key at once became possible (Merge List,
+    # nodes_merge_list.py) and confirmed live as a real, silent bug:
+    # _data_key always picked the SAME first key by exclusion
+    # regardless of which one the user actually wanted, with no way to
+    # choose - two separate Aggregate nodes meant to total Area and
+    # Use respectively both silently aggregated the same one. Named
+    # Attribute's own available_attribute_names (nodes_attribute.py)
+    # was extended to recognize this node as a second kind of
+    # consumer (reading the Column's own already-present data keys,
+    # not a MaStro object's mesh attributes) - one shared picker node
+    # covers both cases, the user's own explicit design call, rather
+    # than a second dedicated node for this one.
     def init(self, context):
         self.inputs.new('MaStroScheduleColumnSocketType', "Column")
         self.inputs.new('MaStroScheduleIdKeySocketType', "Id Key")
+        self.inputs.new('MaStroScheduleAttributeRefSocketType', "Attribute Name")
         self.outputs.new('MaStroScheduleColumnSocketType', "Column")
 
     @property
@@ -80,10 +97,24 @@ class MaStroScheduleAggregateColumnNode(MaStroScheduleTreeNode, Node):
     def evaluate(self, inputs):
         rows = inputs[0] or []
         group_key = inputs[1]
+        attribute_ref = inputs[2] or []
         if not group_key or not rows:
             return [rows]
 
-        data_key = _data_key(rows[0])
+        # Attribute (the optional explicit choice) wins when wired and
+        # actually present in this Column's own rows - falls back to
+        # the old by-exclusion behavior otherwise, covering both "left
+        # unwired entirely" (the common single-data-key case) and "the
+        # chosen name doesn't match anything here" (e.g. picked against
+        # a different upstream Column before this one was rewired) -
+        # the same "don't silently produce nothing, fall back to
+        # something reasonable" spirit Math/Header's own
+        # _data_key-style fallbacks already follow.
+        chosen_name = attribute_ref[0].get("Name") if attribute_ref else None
+        if chosen_name and chosen_name in rows[0]:
+            data_key = chosen_name
+        else:
+            data_key = _data_key(rows[0])
         groups = {}
         order = []
         for row in rows:
