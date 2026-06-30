@@ -230,6 +230,16 @@ class MaStroScheduleMathNode(MaStroScheduleTreeNode, Node):
                 return key
         return None
 
+    def _data_keys(self, row):
+        """Every distinct non-id key on `row`, not just the first - a
+        Column can carry more than one data key at once since Merge
+        Column (nodes_merge_column.py) and Aggregate's own multi-key
+        group-by (nodes_aggregate_column.py). The user's own explicit
+        call: Math should apply its own operation to EVERY attribute
+        a row carries, not silently leave every attribute past the
+        first one untouched."""
+        return [key for key in row.keys() if not key.startswith("_")]
+
     def _compute(self, a, b):
         op = self.operation
         if op == 'ADD':
@@ -353,16 +363,22 @@ class MaStroScheduleMathNode(MaStroScheduleTreeNode, Node):
             # id keys to carry through - dict(row) below still does the
             # right thing for it, same as for a real Column's row.
             new_row = dict(row)
-            key = self._data_key(row)
-            if key is not None:
+            # B is resolved ONCE per row (not per A's own data key) -
+            # the user's own explicit call: when A carries several
+            # attributes (Area, Use, ...), the SAME single B value
+            # (whether a typed-in constant, a broadcast one-row Column,
+            # or B's own matching row) applies to every one of them,
+            # rather than trying to pair B's own attributes to A's by
+            # name (a more complex case, not what was asked for).
+            if unary:
+                b = 0.0
+            else:
+                b_row = rows_b[0] if broadcast else rows_b[i] if rows_b else {}
+                b_key = self._data_key(b_row) if b_row else None
+                b = float(b_row.get(b_key, 0)) if b_key else 0.0
+            for key in self._data_keys(row):
                 try:
                     a = float(row.get(key, 0))
-                    if unary:
-                        b = 0.0
-                    else:
-                        b_row = rows_b[0] if broadcast else rows_b[i] if rows_b else {}
-                        b_key = self._data_key(b_row) if b_row else None
-                        b = float(b_row.get(b_key, 0)) if b_key else 0.0
                     new_row[key] = self._compute(a, b)
                 except (TypeError, ValueError):
                     new_row[key] = 0.0

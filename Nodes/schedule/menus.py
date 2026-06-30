@@ -108,6 +108,7 @@ class NODE_MT_mastro_schedule_primitives_operations_column(bpy.types.Menu):
         _add_node(self.layout, "MaStroScheduleConvertColumnToTable", "Column to Table")
         _add_node(self.layout, "MaStroScheduleGroupByColumn", "Group Column by Key")
         _add_node(self.layout, "MaStroScheduleMergeColumn", "Merge Column")
+        _add_node(self.layout, "MaStroScheduleColumnSeparate", "Separate Columns")
 
 
 class NODE_MT_mastro_schedule_primitives_operations_sheet(bpy.types.Menu):
@@ -117,6 +118,7 @@ class NODE_MT_mastro_schedule_primitives_operations_sheet(bpy.types.Menu):
     def draw(self, context):
         _add_node(self.layout, "MaStroScheduleSheetMove", "Move Sheet")
         _add_node(self.layout, "MaStroScheduleSheetPlace", "Join Sheets")
+        _add_node(self.layout, "MaStroScheduleSheetRemoveRow", "Remove Row")
         _add_node(self.layout, "MaStroScheduleSheetBackground", "Sheet Background")
         _add_node(self.layout, "MaStroScheduleSheetGrid", "Sheet Grid")
 

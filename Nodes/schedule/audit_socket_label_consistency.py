@@ -53,6 +53,13 @@ LABEL_EXEMPT = {
     ("nodes_column_primitive.py", "MaStroScheduleColumnPrimitiveNode", "Rows"),
     ("nodes_column_primitive.py", "MaStroScheduleColumnPrimitiveNode", "Title"),
     ("nodes_groupby_column.py", "MaStroScheduleItemFromListNode", "Index"),
+    # Separate Columns' own Selection/Inverted (nodes_column_separate.py):
+    # mirrors Geometry Nodes' own Separate Geometry naming - two
+    # DIFFERENT Column outputs (the chosen attribute alone vs every
+    # other one), "Column" twice on the same node would say nothing
+    # about which is which.
+    ("nodes_column_separate.py", "MaStroScheduleColumnSeparateNode", "Selection"),
+    ("nodes_column_separate.py", "MaStroScheduleColumnSeparateNode", "Inverted"),
     # Aggregate's own Attribute to Group/Attribute Name
     # (nodes_aggregate_column.py): two DIFFERENT
     # MaStroScheduleAttributeRefSocketType inputs on the same node -
@@ -81,6 +88,7 @@ LABEL_EXEMPT = {
     ("nodes_sheet_primitive.py", "MaStroScheduleSheetPrimitiveNode", "Rows"),
     ("nodes_sheet_primitive.py", "MaStroScheduleSheetPrimitiveNode", "Background Colour"),
     ("nodes_sheet_primitive.py", "MaStroScheduleSheetPrimitiveNode", "Text Colour"),
+    ("nodes_sheet_remove_row.py", "MaStroScheduleSheetRemoveRowNode", "Row Index"),
     ("nodes_table_align.py", "MaStroScheduleTableAlignNode", "Start Column Index"),
     ("nodes_table_align.py", "MaStroScheduleTableAlignNode", "End Column Index"),
     ("nodes_table_case.py", "MaStroScheduleTableCaseNode", "Start Column Index"),

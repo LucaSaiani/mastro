@@ -63,6 +63,7 @@ from .nodes_table_convert import MaStroScheduleConvertColumnToTableNode
 from .nodes_table_join import MaStroScheduleTableJoinNode
 from .nodes_table_sheet import MaStroScheduleTableSheetNode
 from .nodes_sheet_move import MaStroScheduleSheetMoveNode
+from .nodes_sheet_remove_row import MaStroScheduleSheetRemoveRowNode
 from .nodes_sheet_place import MaStroScheduleSheetPlaceNode
 from .nodes_sheet_background import MaStroScheduleSheetBackgroundNode
 from .nodes_sheet_grid import MaStroScheduleSheetGridNode
@@ -86,6 +87,7 @@ from .nodes_groupby_column import (
 )
 from .nodes_merge_list import MaStroScheduleMergeListNode
 from .nodes_merge_column import MaStroScheduleMergeColumnNode
+from .nodes_column_separate import MaStroScheduleColumnSeparateNode
 from .nodes_accumulate import MaStroScheduleAccumulateNode
 from .nodes_viewer import (
     MaStroScheduleViewerNode,
@@ -162,6 +164,7 @@ classes = (
     MaStroScheduleTableJoinNode,
     MaStroScheduleTableSheetNode,
     MaStroScheduleSheetMoveNode,
+    MaStroScheduleSheetRemoveRowNode,
     MaStroScheduleSheetPlaceNode,
     MaStroScheduleSheetBackgroundNode,
     MaStroScheduleSheetGridNode,
@@ -184,6 +187,7 @@ classes = (
     MaStroScheduleListLengthNode,
     MaStroScheduleMergeListNode,
     MaStroScheduleMergeColumnNode,
+    MaStroScheduleColumnSeparateNode,
     MaStroScheduleAccumulateNode,
     MaStroScheduleForEachNode,
     MaStroScheduleViewerNode,
