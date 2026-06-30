@@ -6,16 +6,20 @@ from .mastro_arch.read_write_bmesh_use_attribute import write_bmesh_use_attribut
 from .mastro_arch.write_bmesh_overlay_uses import overlay_bmesh_uses
 
 point_only_attributes = [("mastro_side_angle",      "FLOAT",    ("MaStro block",)),
-                        ("mastro_custom_vertex",      "FLOAT",    ("MaStro mass", "MaStro block"))]
-    
+                        # mastro_custom_vertex/edge/face also exist on MaStro street meshes
+                        # (see add_attributes_street.py) - "MaStro street" must be listed here
+                        # too, otherwise get_attribute_mastro_mesh's mastro_type check below
+                        # silently rejects street objects and always returns 0.
+                        ("mastro_custom_vertex",      "FLOAT",    ("MaStro mass", "MaStro block", "MaStro street"))]
+
 edge_only_attributes = [("mastro_block_depth",      "FLOAT",    ("MaStro block",)),
                         ("mastro_inverted_normal",  "BOOL",     ("MaStro mass", "MaStro block")),
-                        ("mastro_custom_edge",      "FLOAT",    ("MaStro mass", "MaStro block")),
+                        ("mastro_custom_edge",      "FLOAT",    ("MaStro mass", "MaStro block", "MaStro street")),
                         ("mastro_wall_id",          "INT",      ("MaStro mass", )),
                         ("mastro_wall_thickness",   "FLOAT",    ("MaStro mass", "MaStro block")),
                         ("mastro_wall_offset",      "FLOAT",    ("MaStro mass", "MaStro block"))]
-    
-face_only_attributes = [("mastro_custom_face",      "FLOAT",    ("MaStro mass", "MaStro block")),
+
+face_only_attributes = [("mastro_custom_face",      "FLOAT",    ("MaStro mass", "MaStro block", "MaStro street")),
                         ("mastro_floor_id",         "INT",      ("MaStro mass",))]
 
 
@@ -35,10 +39,14 @@ layer_map = {
     "mastro_block_depth": ("edges", "FLOAT", ("MaStro block",)),
     "mastro_side_angle": ("verts", "FLOAT", ("MaStro block",)),
     "mastro_floor_id": ("faces", "INT", ("MaStro mass",)),
-    "mastro_custom_vertex": ("verts", "FLOAT", ("MaStro mass", "MaStro block")),
-    "mastro_custom_edge": ("edges", "FLOAT", ("MaStro mass", "MaStro block")),
-    "mastro_custom_face": ("faces", "FLOAT", ("MaStro mass", "MaStro block")),
-}   
+    # mastro_custom_vertex/edge/face also exist on MaStro street meshes (see
+    # add_attributes_street.py) - "MaStro street" must be listed here too, otherwise
+    # set_attribute_mastro_generic silently skips street objects (the mastro_types
+    # filter below excludes them) and writes are dropped without error.
+    "mastro_custom_vertex": ("verts", "FLOAT", ("MaStro mass", "MaStro block", "MaStro street")),
+    "mastro_custom_edge": ("edges", "FLOAT", ("MaStro mass", "MaStro block", "MaStro street")),
+    "mastro_custom_face": ("faces", "FLOAT", ("MaStro mass", "MaStro block", "MaStro street")),
+}
 
 # set the number of storeys for both masses and blocks
 def set_attribute_mastro_mesh_storeys(self, value):
@@ -339,20 +347,21 @@ def set_attribute_mastro_generic(value, bm_layer):
             
             
         
-# read attributes for both masses and blocks at mesh level          
+# read attributes for masses, blocks, and streets at mesh level
 def get_attribute_mastro_mesh(self, bm_layer):
     obj = bpy.context.view_layer.objects.active
-    
+
     if obj is None:
         return 0
-    
-    if not (obj.type == "MESH" and 
-            obj.mode == "EDIT" and 
+
+    if not (obj.type == "MESH" and
+            obj.mode == "EDIT" and
             "MaStro object" in obj.data):
         return 0
-    
-    if not ("MaStro mass" in obj.data or 
-            "MaStro block" in obj.data):
+
+    if not ("MaStro mass" in obj.data or
+            "MaStro block" in obj.data or
+            "MaStro street" in obj.data):
         return 0
         
     mesh = obj.data
