@@ -43,7 +43,7 @@ window_manager_props = [
     # Overlay Toggles
     # ------------------------------
     ("mastro_toggle_show_overlays", BoolProperty(
-        default=False, 
+        default=True, 
         update=update_show_attributes
     )),
     ("mastro_toggle_show_data_edit_mode", BoolProperty(
