@@ -3,6 +3,7 @@ from bpy.props import (IntProperty,
                        FloatProperty,
                        EnumProperty,
                        CollectionProperty,
+                       BoolProperty,
 )
 
 from ...Utils.get_names_from_list import get_names_from_list
@@ -10,38 +11,46 @@ from ...Utils.update_attributes import update_attributes_street
 from .property_classes_street import mastro_CL_street_name_list
 
 
-def update_street_active_branch(self, context):
-    """Branch index changed (cycling) - resync the type enum to that branch's
-    current value, without writing anything (read-only resync, no operator call)."""
-    import bmesh
-    from ...Handlers.utils.mastro_street.street_sectors import _handle_street_sectors
+def _make_sector_flag_update(suffix, side):
+    def update(self, context):
+        from ...Handlers.utils.mastro_street import street_sectors
+        if street_sectors._resyncing_sector_type:
+            return
+        scene = context.scene
+        bpy.ops.object.set_street_sector_type(
+            edge_index=scene.mastro_street_active_edge,
+            suffix=suffix,
+            side=side,
+            value=getattr(scene, f"mastro_street_sector_{suffix}_{side}"),
+        )
+    return update
 
-    obj = context.active_object
-    if not (obj and obj.type == "MESH" and obj.mode == 'EDIT' and "MaStro street" in obj.data):
-        return
-    try:
-        bm = bmesh.from_edit_mesh(obj.data)
-    except ValueError:
-        return
-    _handle_street_sectors(context.scene, obj, bm)
+
+def _make_sector_enum_update(suffix):
+    """Translate the 3-button enum (Left/Both/Right) into two bool flags."""
+    def update(self, context):
+        from ...Handlers.utils.mastro_street import street_sectors
+        if street_sectors._resyncing_sector_type:
+            return
+        scene = context.scene
+        val = getattr(scene, f"mastro_street_sector_enum_{suffix}")
+        left  = val in ('LEFT',  'BOTH')
+        right = val in ('RIGHT', 'BOTH')
+        # Write both flags via operator (each triggers its own propagation).
+        bpy.ops.object.set_street_sector_type(
+            edge_index=scene.mastro_street_active_edge,
+            suffix=suffix, side='left',  value=left)
+        bpy.ops.object.set_street_sector_type(
+            edge_index=scene.mastro_street_active_edge,
+            suffix=suffix, side='right', value=right)
+    return update
 
 
-def update_street_active_branch_type(self, context):
-    """User picked a sector type for the current branch - write it to the edge.
-
-    Skipped while street_sectors.py is resyncing this enum to reflect a branch the
-    user just cycled to (not an actual choice) - see its _resyncing_branch_type."""
-    from ...Handlers.utils.mastro_street import street_sectors
-    if street_sectors._resyncing_branch_type:
-        return
-
-    scene = context.scene
-    bpy.ops.object.set_street_sector_type(
-        vertex_index=scene.mastro_street_active_branch_vertex,
-        edge_index=scene.mastro_street_active_branch_edge,
-        sector_type=int(scene.mastro_street_active_branch_type),
-    )
-
+_SECTOR_ENUM_ITEMS = [
+    ('LEFT',  "Left",  "Fillet on the left side only",  'ALIGN_LEFT',   0),
+    ('BOTH',  "Both",  "Fillet on both sides",          'ALIGN_CENTER', 1),
+    ('RIGHT', "Right", "Fillet on the right side only", 'ALIGN_RIGHT',  2),
+]
 
 # =============================================================================
 # Scene Properties - Street
@@ -63,30 +72,21 @@ scene_props_street = [
         update=update_attributes_street
     )),
 
-    # Cycling index into the active vertex's branches (edges), ordered by polar
-    # angle - rebuilt/clamped by the selection-reactive handler whenever the active
-    # vertex changes (see Handlers/utils/mastro_street/street_sectors.py).
-    ("mastro_street_active_branch", IntProperty(
-        name="Branch", description="Index of the branch (edge) to configure, cycling around the active vertex",
-        default=0, min=0,
-        update=update_street_active_branch
-    )),
-    # Transient, read-only display of how many branches the active vertex has -
-    # used by the panel to clamp/wrap the cycling index.
-    ("mastro_street_active_branch_count", IntProperty(name="Branch Count", default=0)),
-    # The edge/vertex pair the current branch index resolves to - set by the
-    # selection-reactive handler, read by update_street_active_branch_type below.
-    ("mastro_street_active_branch_vertex", IntProperty(name="Branch Vertex Index", default=0)),
-    ("mastro_street_active_branch_edge", IntProperty(name="Branch Edge Index", default=0)),
+    ("mastro_street_active_edge", IntProperty(name="Active Edge Index", default=0)),
 
-    ("mastro_street_active_branch_type", EnumProperty(
-        name="Sector Type", description="How the current branch's end is treated at the intersection",
-        items=[
-            ('1', "A", "Fillet on one side, offset on the other", 'ALIGN_LEFT', 1),
-            ('0', "Both", "Symmetric fillet on both sides", 'ALIGN_CENTER', 0),
-            ('2', "B", "Fillet on the other side, offset on this one", 'ALIGN_RIGHT', 2),
-        ],
-        default='0',
-        update=update_street_active_branch_type
+    # Four raw bool flags — source of truth, resynced from mesh by the handler.
+    ("mastro_street_sector_A_left",  BoolProperty(name="A Left",  default=True, update=_make_sector_flag_update('A', 'left'))),
+    ("mastro_street_sector_A_right", BoolProperty(name="A Right", default=True, update=_make_sector_flag_update('A', 'right'))),
+    ("mastro_street_sector_B_left",  BoolProperty(name="B Left",  default=True, update=_make_sector_flag_update('B', 'left'))),
+    ("mastro_street_sector_B_right", BoolProperty(name="B Right", default=True, update=_make_sector_flag_update('B', 'right'))),
+
+    # Derived 3-button enums for the UI — resynced from the bool flags by the handler.
+    ("mastro_street_sector_enum_A", EnumProperty(
+        name="Junction A", items=_SECTOR_ENUM_ITEMS, default='BOTH',
+        update=_make_sector_enum_update('A'),
+    )),
+    ("mastro_street_sector_enum_B", EnumProperty(
+        name="Junction B", items=_SECTOR_ENUM_ITEMS, default='BOTH',
+        update=_make_sector_enum_update('B'),
     )),
 ]

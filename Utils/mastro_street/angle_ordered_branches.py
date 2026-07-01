@@ -2,7 +2,7 @@
 
 Used purely for the UI's circular selection (cycling through branches around the
 active vertex in a stable, predictable visual order) - the sector type itself is
-stored per-edge (mastro_street_sector_type_A/B, see read_write_sector_type.py), not
+stored per-edge (mastro_street_sector_A/B_left/right, see read_write_sector_type.py), not
 indexed by this ordering, so there's no need for it to match anything GN computes.
 """
 

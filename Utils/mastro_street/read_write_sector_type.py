@@ -1,17 +1,35 @@
-"""Per-edge intersection-sector type for MaStro street, at each of the edge's two ends.
+"""Per-edge fillet flags for MaStro street intersection sectors.
 
-mastro_street_sector_type_A/B are plain EDGE-domain INT attributes (0/1/2): A is the
-type at the edge's first vertex (index 0), B at its second (index 1) - the edge's own
-native, stable vertex order. No digit-packing needed since an edge always has exactly
-two ends.
+Four BOOL EDGE-domain attributes, one per (endpoint, side):
+  mastro_street_sector_A_left   — fillet on the left  (PREV polar) side at verts[0]
+  mastro_street_sector_A_right  — fillet on the right (NEXT polar) side at verts[0]
+  mastro_street_sector_B_left   — fillet on the left  (PREV polar) side at verts[1]
+  mastro_street_sector_B_right  — fillet on the right (NEXT polar) side at verts[1]
+
+Propagation is a simple mirror: changing left of edge X mirrors to right of its PREV
+neighbor at that vertex; changing right mirrors to left of its NEXT neighbor.
 """
 
+SECTOR_ATTRS = {
+    'A': {'left': 'mastro_street_sector_A_left', 'right': 'mastro_street_sector_A_right'},
+    'B': {'left': 'mastro_street_sector_B_left', 'right': 'mastro_street_sector_B_right'},
+}
 
-def sector_suffix_for_bmesh_edge(edge, vert_index):
-    """Return "A" or "B" for a BMEdge `edge`, given the index of one of its two verts."""
-    return "A" if edge.verts[0].index == vert_index else "B"
+
+def endpoint_suffix(edge, vert_index):
+    """Return 'A' if vert_index is edge.verts[0], else 'B'."""
+    return 'A' if edge.verts[0].index == vert_index else 'B'
 
 
-def sector_suffix_for_mesh_edge(edge, vert_index):
-    """Return "A" or "B" for a mesh.edges item `edge`, given one of its `vertices[]`."""
-    return "A" if edge.vertices[0] == vert_index else "B"
+def endpoint_suffix_mesh(edge, vert_index):
+    """Same as endpoint_suffix but for a mesh.edges item (uses .vertices[])."""
+    return 'A' if edge.vertices[0] == vert_index else 'B'
+
+
+def get_sector_layers(bm):
+    """Return a dict {attr_name: layer} for all four sector BOOL layers, or raise KeyError."""
+    layers = {}
+    for suffix, sides in SECTOR_ATTRS.items():
+        for side, attr in sides.items():
+            layers[attr] = bm.edges.layers.bool[attr]
+    return layers

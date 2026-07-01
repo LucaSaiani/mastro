@@ -1,4 +1,5 @@
-import bpy 
+import bpy
+import bmesh
 from bpy.types import Panel
 
 class VIEW3D_PT_Mastro_Street(Panel):
@@ -7,32 +8,31 @@ class VIEW3D_PT_Mastro_Street(Panel):
     bl_category = "MaStro"
     bl_label = "Street"
     bl_order = 0
-    
+
     @classmethod
     def poll(cls, context):
         return (context.object is not None and
-                # context.selected_objects != [] and 
-                context.object.type == "MESH" and 
+                # context.selected_objects != [] and
+                context.object.type == "MESH" and
                 "MaStro object" in context.object.data and
                 "MaStro street" in context.object.data)
-    
+
     def draw(self, context):
         obj = context.object
         if obj is not None and obj.type == "MESH":
             mode = obj.mode
             if mode == "OBJECT":
                 scene = context.scene
-                
+
                 layout = self.layout
-                layout.use_property_split = True    
+                layout.use_property_split = True
                 layout.use_property_decorate = False  # No animation.
-                
-                # row = layout.row()
+
                 row = layout.row(align=True)
-                
+
                 # layout.prop(obj.mastro_props, "mastro_option_attribute", text="Option")
                 # layout.prop(obj.mastro_props, "mastro_phase_attribute", text="Phase")
-                    
+
             elif mode == "EDIT":
                 scene = context.scene
 
@@ -45,18 +45,23 @@ class VIEW3D_PT_Mastro_Street(Panel):
                 if select_mode[1] == True: #we are selecting edges
                     row = layout.row(align=True)
                     row.prop(context.scene, "mastro_street_names", text="Street Type")
-                    # row.prop(context.scene, "mastro_street_names", icon="NODE_TEXTURE", icon_only=True, text="Street Type")
-                    # if len(scene.mastro_street_name_list) >0:
-                    #     row.label(text = scene.mastro_street_name_current[0].name)
-                    #     # streetId = scene.mastro_street_name_current[0].id
-                    # else:
-                    #     row.label(text = "")
 
-                if select_mode[0] == True: #we are selecting vertices
-                    branch_count = scene.mastro_street_active_branch_count
-                    if branch_count > 0:
+                    active = _active_edge(context)
+                    if active is not None:
                         col = layout.column()
                         col.use_property_split = True
                         col.use_property_decorate = False
-                        col.prop(scene, "mastro_street_active_branch", text="Edge Id")
-                        col.row().prop(scene, "mastro_street_active_branch_type", text="Junction", expand=True)
+                        col.row().prop(scene, "mastro_street_sector_enum_A", text="Junction A", expand=True)
+                        col.row().prop(scene, "mastro_street_sector_enum_B", text="Junction B", expand=True)
+
+
+def _active_edge(context):
+    obj = context.active_object
+    if not (obj and obj.type == "MESH" and obj.mode == 'EDIT'):
+        return None
+    try:
+        bm = bmesh.from_edit_mesh(obj.data)
+    except Exception:
+        return None
+    active = bm.select_history.active
+    return active if isinstance(active, bmesh.types.BMEdge) else None

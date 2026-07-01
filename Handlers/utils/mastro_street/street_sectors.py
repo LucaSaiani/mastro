@@ -1,65 +1,110 @@
 import bpy
 import bmesh
 
-from ....Utils.mastro_street.angle_ordered_branches import angle_ordered_branches
-from ....Utils.mastro_street.read_write_sector_type import sector_suffix_for_bmesh_edge
+from ....Utils.mastro_street.read_write_sector_type import endpoint_suffix, SECTOR_ATTRS, get_sector_layers
 
-# Guards mastro_street_active_branch_type's update= callback from firing (and
-# writing back to the mesh) when we're only resyncing the enum to reflect the
-# branch the user just cycled to, not an actual user choice - same pattern as
-# MESH_OT_EditCircle.py's _arc_prop_updating.
-_resyncing_branch_type = False
+# Guards the sector flag update= callbacks from firing (and writing back to the
+# mesh) when the handler is resyncing the UI to reflect the newly active edge —
+# not an actual user choice. Same pattern as MESH_OT_EditCircle._arc_prop_updating.
+_resyncing_sector_type = False
 
+
+def _polar_neighbors(obj, edge, vert):
+    """Return (prev, next) edges around `vert` in polar order (atan2 on world XY),
+    excluding `edge` itself. Returns (None, None) if vert has no other edges."""
+    import math
+    mw = obj.matrix_world
+    origin = mw @ vert.co
+
+    others = [e for e in vert.link_edges if e != edge]
+    if not others:
+        return None, None
+
+    def angle_for(e):
+        p = mw @ e.other_vert(vert).co
+        return math.atan2(p.y - origin.y, p.x - origin.x)
+
+    ref_angle = angle_for(edge)
+    # Sort by CCW delta from edge's own angle; largest delta = prev, smallest = next.
+    deltas = sorted(others, key=lambda e: (angle_for(e) - ref_angle) % (2 * math.pi))
+    return deltas[-1], deltas[0]  # prev, next
+
+
+def _get_flag(edge, vert, side, layers):
+    """Read the 'left' or 'right' fillet flag for `edge` at `vert`."""
+    suffix = endpoint_suffix(edge, vert.index)
+    return edge[layers[SECTOR_ATTRS[suffix][side]]]
+
+
+def _set_flag(edge, vert, side, value, layers):
+    """Write the 'left' or 'right' fillet flag for `edge` at `vert`."""
+    suffix = endpoint_suffix(edge, vert.index)
+    edge[layers[SECTOR_ATTRS[suffix][side]]] = value
+
+
+def _propagate(obj, bm, edge, vert, side, value, layers):
+    """Mirror a single fillet flag change to the neighbor that shares that sector.
+
+    Each sector (gap between two consecutive edges in polar order around a vertex)
+    has exactly two 'faces': the right side of the CCW-previous edge and the left
+    side of the CCW-next edge. They must always agree, so changing one mirrors to
+    the other:
+      - changing 'left'  of edge X  →  mirror to 'right' of PREV neighbor
+      - changing 'right' of edge X  →  mirror to 'left'  of NEXT neighbor
+    """
+    prev_edge, next_edge = _polar_neighbors(obj, edge, vert)
+
+    if side == 'left' and prev_edge is not None:
+        _set_flag(prev_edge, vert, 'right', value, layers)
+    elif side == 'right' and next_edge is not None:
+        _set_flag(next_edge, vert, 'left', value, layers)
 
 
 def _handle_street_sectors(scene, obj, bm):
-    """Resync the active-branch cycling state to the active vertex's branches.
+    """Resync the sector UI props to the active edge's stored flag values.
 
     Called from update_view3D_panels on every selection change while editing a
-    MaStro street with vertex-select active. Clamps mastro_street_active_branch to
-    the valid range for however many branches the active vertex has, resolves
-    that branch to an (edge, vertex) pair, and resyncs the type enum to the
-    branch's current stored value - without triggering its update= (the user
-    hasn't chosen anything yet, this is just reflecting mesh state in the UI).
+    MaStro street with edge-select active. Reads the four BOOL attributes from the
+    active edge and pushes them into the scene properties (both the raw bool props
+    and the derived 3-button enum) without triggering their update= callbacks.
     """
-    global _resyncing_branch_type
+    global _resyncing_sector_type
 
-    if not bpy.context.scene.tool_settings.mesh_select_mode[0]:
-        scene.mastro_street_active_branch_count = 0
+    if not bpy.context.scene.tool_settings.mesh_select_mode[1]:
         return
-    if not isinstance(bm.select_history.active, bmesh.types.BMVert):
-        scene.mastro_street_active_branch_count = 0
+    if not isinstance(bm.select_history.active, bmesh.types.BMEdge):
         return
 
-    active_vert = bm.select_history.active
-    if not active_vert.is_valid:
-        scene.mastro_street_active_branch_count = 0
+    active_edge = bm.select_history.active
+    if not active_edge.is_valid:
         return
-
-    branches = angle_ordered_branches(obj, active_vert)
-    scene.mastro_street_active_branch_count = len(branches)
-    if not branches:
-        return
-
-    index = scene.mastro_street_active_branch % len(branches)
-    if scene.mastro_street_active_branch != index:
-        scene.mastro_street_active_branch = index
-
-    edge = branches[index]
-    scene.mastro_street_active_branch_vertex = active_vert.index
-    scene.mastro_street_active_branch_edge = edge.index
 
     try:
-        bm_sector_a = bm.edges.layers.int["mastro_street_sector_type_A"]
-        bm_sector_b = bm.edges.layers.int["mastro_street_sector_type_B"]
+        layers = get_sector_layers(bm)
     except KeyError:
         return
 
-    suffix = sector_suffix_for_bmesh_edge(edge, active_vert.index)
-    layer = bm_sector_a if suffix == "A" else bm_sector_b
+    scene.mastro_street_active_edge = active_edge.index
 
-    _resyncing_branch_type = True
+    al = _get_flag(active_edge, active_edge.verts[0], 'left',  layers)
+    ar = _get_flag(active_edge, active_edge.verts[0], 'right', layers)
+    bl = _get_flag(active_edge, active_edge.verts[1], 'left',  layers)
+    br = _get_flag(active_edge, active_edge.verts[1], 'right', layers)
+
+    def to_enum(left, right):
+        # Translate two bool flags to the 3-button enum shown in the panel.
+        if left and right: return 'BOTH'
+        if left:           return 'LEFT'
+        if right:          return 'RIGHT'
+        return 'BOTH'  # both False: degenerate state, default to Both in the UI
+
+    _resyncing_sector_type = True
     try:
-        scene.mastro_street_active_branch_type = str(edge[layer])
+        scene.mastro_street_sector_A_left  = al
+        scene.mastro_street_sector_A_right = ar
+        scene.mastro_street_sector_B_left  = bl
+        scene.mastro_street_sector_B_right = br
+        scene.mastro_street_sector_enum_A  = to_enum(al, ar)
+        scene.mastro_street_sector_enum_B  = to_enum(bl, br)
     finally:
-        _resyncing_branch_type = False
+        _resyncing_sector_type = False

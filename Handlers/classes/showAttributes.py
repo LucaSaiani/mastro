@@ -12,7 +12,7 @@ from ...Utils.mastro_preferences.get_preferences  import get_prefs
 from .mastro_arch.overlay_block import show_block_overlay
 from .mastro_arch.overlay_wall import show_wall_overlay
 from .mastro_street.overlay_street import show_street_overlay
-from .mastro_street.overlay_street_sectors import show_street_sector_overlay
+from .mastro_street.overlay_street_sectors import show_street_sector_overlay, show_street_sector_labels
 
 
 class VIEW_3D_OT_show_mastro_attributes(Operator):
@@ -139,6 +139,10 @@ def draw_main_show_attributes_2D(context):
         return
     if "MaStro object" not in obj.data:
         return
+    if "MaStro street" in obj.data:
+        show_street_sector_labels(obj)
+        return
+
     has_mass = "MaStro mass" in obj.data
     has_block = "MaStro block" in obj.data
     if not has_mass and not has_block:
