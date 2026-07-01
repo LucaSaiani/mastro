@@ -4,10 +4,10 @@ import gpu
 import math
 
 from gpu_extras.batch import batch_for_shader
+from mathutils import Vector
 
 from ....Utils.mastro_street.angle_ordered_branches import angle_ordered_branches
 from ....Utils.mastro_cad.cad.circle_utils import circle_ttr, arc_points_3d
-from ....Utils.mastro_cad.cad.cad_utils import compute_plane
 
 ARC_SEGMENTS = 24
 
@@ -53,14 +53,9 @@ def _arc_segments_for_pair(active_world, other_a_world, other_b_world, radius, x
     return [(arc_pts[i], arc_pts[i + 1]) for i in range(len(arc_pts) - 1)]
 
 
-def _edge_color(edge, bm_street_id):
-    """Return the overlay RGBA for this edge, same as show_street_overlay."""
-    street_id = edge[bm_street_id]
-    streets = bpy.context.scene.mastro_street_name_list
-    index = next((i for i, s in enumerate(streets) if s.id == street_id), None)
-    if index is None or not (0 <= street_id < len(streets)):
-        return (1.0, 1.0, 1.0, 1.0)
-    r, g, b = streets[index].streetEdgeColor
+def _active_object_color():
+    """Return the theme color used for the active mesh element (same as overlay_street.py)."""
+    r, g, b, a = bpy.context.preferences.themes[0].view_3d.editmesh_active
     return (r, g, b, 1.0)
 
 
@@ -109,20 +104,35 @@ def show_street_sector_overlay(obj):
 
     try:
         bm_radius = bm.edges.layers.float["mastro_street_radius"]
-        bm_street_id = bm.edges.layers.int["mastro_street_id"]
     except KeyError:
         return
+
+    color = _active_object_color()
 
     active_world = obj.matrix_world @ active.co
     this_other = obj.matrix_world @ edge.other_vert(active).co
     prev_other = obj.matrix_world @ prev_edge.other_vert(active).co
     next_other = obj.matrix_world @ next_edge.other_vert(active).co
 
-    x_axis, y_axis, normal = compute_plane([active_world, this_other, prev_other, next_other], bpy.context, obj)
+    # Highlight the active branch edge itself.
+    _draw_lines([(active_world, this_other)], color)
+
+    # Build the local plane from the actual 3D positions of the three points
+    # involved (active vertex + the two neighboring branch endpoints), so the
+    # fillet arc is correct even for streets that are not flat in world XY.
+    v1 = (this_other - active_world).normalized()
+    v2 = (prev_other - active_world).normalized()
+    normal = v1.cross(v2)
+    if normal.length < 1e-6:
+        v2 = (next_other - active_world).normalized()
+        normal = v1.cross(v2)
+    if normal.length < 1e-6:
+        normal = active_world.normalized() if active_world.length > 1e-6 else Vector((0, 0, 1))
+    normal = normal.normalized()
+    x_axis = v1
+    y_axis = normal.cross(x_axis).normalized()
 
     sector_type = scene.mastro_street_active_branch_type
-    # '0' double fillet: both sides filleted. '1'/'2': only one side is filleted,
-    # the other is a straight offset (no arc - nothing drawn there).
     prev_is_fillet = sector_type in ('0', '1')
     next_is_fillet = sector_type in ('0', '2')
 
@@ -130,10 +140,10 @@ def show_street_sector_overlay(obj):
         radius = (edge[bm_radius] + prev_edge[bm_radius]) / 2
         if radius > 0:
             segs = _arc_segments_for_pair(active_world, this_other, prev_other, radius, x_axis, y_axis, normal)
-            _draw_lines(segs, _edge_color(edge, bm_street_id))
+            _draw_lines(segs, color)
 
     if next_is_fillet:
         radius = (edge[bm_radius] + next_edge[bm_radius]) / 2
         if radius > 0:
             segs = _arc_segments_for_pair(active_world, this_other, next_other, radius, x_axis, y_axis, normal)
-            _draw_lines(segs, _edge_color(edge, bm_street_id))
+            _draw_lines(segs, color)

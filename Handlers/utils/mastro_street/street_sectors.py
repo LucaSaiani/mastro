@@ -11,6 +11,7 @@ from ....Utils.mastro_street.read_write_sector_type import sector_suffix_for_bme
 _resyncing_branch_type = False
 
 
+
 def _handle_street_sectors(scene, obj, bm):
     """Resync the active-branch cycling state to the active vertex's branches.
 

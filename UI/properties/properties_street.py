@@ -3,7 +3,6 @@ from bpy.props import (IntProperty,
                        FloatProperty,
                        EnumProperty,
                        CollectionProperty,
-                       BoolProperty,
 )
 
 from ...Utils.get_names_from_list import get_names_from_list
@@ -79,13 +78,6 @@ scene_props_street = [
     # selection-reactive handler, read by update_street_active_branch_type below.
     ("mastro_street_active_branch_vertex", IntProperty(name="Branch Vertex Index", default=0)),
     ("mastro_street_active_branch_edge", IntProperty(name="Branch Edge Index", default=0)),
-
-    # Whether each side of the active branch can produce a real fillet arc
-    # (False when the two branches are nearly parallel — circle_ttr returns None).
-    # Set by the selection-reactive handler, read by the panel draw() to disable
-    # the corresponding enum buttons without any geometry computation in draw().
-    ("mastro_street_branch_prev_valid", BoolProperty(name="Prev Side Valid", default=True)),
-    ("mastro_street_branch_next_valid", BoolProperty(name="Next Side Valid", default=True)),
 
     ("mastro_street_active_branch_type", EnumProperty(
         name="Sector Type", description="How the current branch's end is treated at the intersection",
